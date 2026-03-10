@@ -9,9 +9,9 @@ void ui_view2d_init() {
 	ui_view2d_pipe->fragment_shader = sys_get_shader("layer_view.frag");
 	gpu_vertex_structure_t *vs      = GC_ALLOC_INIT(gpu_vertex_structure_t, {0});
 	gpu_vertex_struct_add(vs, "pos", GPU_VERTEX_DATA_F32_2X);
-	ui_view2d_pipe->input_layout                            = vs;
-	ui_view2d_pipe->blend_source                            = GPU_BLEND_ONE;
-	ui_view2d_pipe->blend_destination                       = GPU_BLEND_ZERO;
+	ui_view2d_pipe->input_layout              = vs;
+	ui_view2d_pipe->blend_source              = GPU_BLEND_ONE;
+	ui_view2d_pipe->blend_destination         = GPU_BLEND_ZERO;
 	ui_view2d_pipe->color_write_mask_alpha[0] = false;
 	gpu_pipeline_compile(ui_view2d_pipe);
 	pipes_offset = 0;
@@ -28,22 +28,22 @@ void ui_view2d_draw_image(gpu_texture_t *image, f32 dx, f32 dy, f32 dw, f32 dh, 
 	draw_scaled_image(image, dx, dy, dw, dh);
 }
 
-void ui_view2d_render_color_pick(void * _) {
+void ui_view2d_render_color_pick(void *_) {
 	render_target_t *rt              = any_map_get(render_path_render_targets, "texpaint_picker");
 	gpu_texture_t   *texpaint_picker = rt->_image;
 	draw_begin(texpaint_picker, false, 0);
 	draw_scaled_image(_ui_view2d_render_tex, -_ui_view2d_render_x, -_ui_view2d_render_y, _ui_view2d_render_tw, _ui_view2d_render_th);
 	draw_end();
 	buffer_t *a = gpu_get_texture_pixels(texpaint_picker);
-	#ifdef IRON_BGRA
+#ifdef IRON_BGRA
 	i32 i0 = 2;
 	i32 i1 = 1;
 	i32 i2 = 0;
-	#else
+#else
 	i32 i0 = 0;
 	i32 i1 = 1;
 	i32 i2 = 2;
-	#endif
+#endif
 
 	context_raw->picked_color->base = color_set_rb(context_raw->picked_color->base, buffer_get_u8(a, i0));
 	context_raw->picked_color->base = color_set_gb(context_raw->picked_color->base, buffer_get_u8(a, i1));
@@ -55,7 +55,7 @@ void ui_view2d_render_color_pick(void * _) {
 	}
 }
 
-void ui_view2d_render(void * _) {
+void ui_view2d_render(void *_) {
 	ui_view2d_ww = config_raw->layout->buffer[LAYOUT_SIZE_NODES_W];
 	ui_view2d_wx = math_floor(sys_w()) + ui_toolbar_w(true);
 	ui_view2d_wy = 0;
@@ -123,7 +123,7 @@ void ui_view2d_render(void * _) {
 
 		if (!config_raw->touch_ui) {
 			bool expand = !base_view3d_show && !ui_nodes_show && config_raw->layout->buffer[LAYOUT_SIZE_SIDEBAR_W] == 0;
-			ui_tab(ui_view2d_htab, expand ? string_join(tr("2D View", NULL), "          ") : tr("2D View", NULL), false, -1, !base_view3d_show);
+			ui_tab(ui_view2d_htab, expand ? string("%s          ", tr("2D View", NULL)) : tr("2D View", NULL), false, -1, !base_view3d_show);
 			if (ui_tab(ui_view2d_htab, tr("+", NULL), false, -1, false)) {
 				ui_view2d_htab->i = 0;
 			}
@@ -266,7 +266,7 @@ void ui_view2d_render(void * _) {
 
 		// Editable layer name
 		ui_handle_t *h    = ui_handle(__ID__);
-		char    *text = ui_view2d_type == VIEW_2D_TYPE_NODE ? context_raw->node_preview_name : h->text;
+		char        *text = ui_view2d_type == VIEW_2D_TYPE_NODE ? context_raw->node_preview_name : h->text;
 
 		ui->_w = math_floor(math_min(draw_string_width(ui->ops->font, ui->font_size, text) + 15 * UI_SCALE(), 100 * UI_SCALE()));
 
@@ -357,17 +357,17 @@ void ui_view2d_render(void * _) {
 
 		bool full = true;
 
-		#ifdef IRON_IOS
+#ifdef IRON_IOS
 		if (config_is_iphone()) {
 			full = false;
 		}
-		#endif
+#endif
 
 		if (full) {
 			if (tex != NULL) {
 				ui->_w            = math_floor(ew * 0.5 + 3);
 				i32 scale_percent = math_round((tw / (float)tex->width) * 100);
-				if (ui_text(string_join(i32_to_string(scale_percent), "%"), UI_ALIGN_LEFT, 0x00000000) == UI_STATE_STARTED) {
+				if (ui_text(string("%d%%", scale_percent), UI_ALIGN_LEFT, 0x00000000) == UI_STATE_STARTED) {
 					ui_view2d_pan_scale = tex->width / (float)(ui_view2d_ww * 0.95);
 				}
 				ui->_x += ew * 0.5 + 3;
@@ -378,16 +378,16 @@ void ui_view2d_render(void * _) {
 
 			if ((ui_view2d_type == VIEW_2D_TYPE_ASSET || ui_view2d_type == VIEW_2D_TYPE_NODE) && tex != NULL) { // Texture resolution
 				ui->_w = math_floor(ew * 0.7 + 3);
-				ui_text(string_join(string_join(i32_to_string(tex->width), "x"), i32_to_string(tex->height)), UI_ALIGN_LEFT, 0x00000000);
+				ui_text(string("%dx%d", tex->width, tex->height), UI_ALIGN_LEFT, 0x00000000);
 				ui->_x += ew * 0.7 + 3;
 				ui->_y = 2 + start_y;
 			}
 
 			char *view_type = ui_view2d_type == VIEW_2D_TYPE_ASSET  ? "Asset"
-			                      : ui_view2d_type == VIEW_2D_TYPE_NODE ? "Node"
-			                      : ui_view2d_type == VIEW_2D_TYPE_FONT ? "Font"
-			                                                            : "Layer";
-			ui->_w              = math_floor(ew * 0.5 + 3);
+			                  : ui_view2d_type == VIEW_2D_TYPE_NODE ? "Node"
+			                  : ui_view2d_type == VIEW_2D_TYPE_FONT ? "Font"
+			                                                        : "Layer";
+			ui->_w          = math_floor(ew * 0.5 + 3);
 			ui_text(view_type, UI_ALIGN_LEFT, 0x00000000);
 			ui->_x += ew * 0.5 + 3;
 			ui->_y = 2 + start_y;
@@ -406,7 +406,7 @@ void ui_view2d_render(void * _) {
 	ui_end();
 }
 
-void ui_view2d_update(void * _) {
+void ui_view2d_update(void *_) {
 	f32 headerh = UI_ELEMENT_H() * 1.4;
 
 	context_raw->paint2d = false;
@@ -448,8 +448,7 @@ void ui_view2d_update(void * _) {
 	bool decal_mask = context_is_decal_mask_paint();
 	bool set_clone_source =
 	    context_raw->tool == TOOL_TYPE_CLONE &&
-	    operator_shortcut(string_join(string_join(any_map_get(config_keymap, "set_clone_source"), "+"), any_map_get(config_keymap, "action_paint")),
-	                      SHORTCUT_TYPE_DOWN);
+	    operator_shortcut(string("%s+%s", any_map_get(config_keymap, "set_clone_source"), any_map_get(config_keymap, "action_paint")), SHORTCUT_TYPE_DOWN);
 	bool bake = context_raw->tool == TOOL_TYPE_BAKE;
 
 	if (!ui->input_down) {
@@ -458,8 +457,7 @@ void ui_view2d_update(void * _) {
 
 	if (ui_view2d_type == VIEW_2D_TYPE_LAYER && !ui_view2d_text_input_hover && !bake &&
 	    (operator_shortcut(any_map_get(config_keymap, "action_paint"), SHORTCUT_TYPE_DOWN) ||
-	     operator_shortcut(string_join(string_join(any_map_get(config_keymap, "brush_ruler"), "+"), any_map_get(config_keymap, "action_paint")),
-	                       SHORTCUT_TYPE_DOWN) ||
+	     operator_shortcut(string("%s+%s", any_map_get(config_keymap, "brush_ruler"), any_map_get(config_keymap, "action_paint")), SHORTCUT_TYPE_DOWN) ||
 	     decal_mask || set_clone_source || config_raw->brush_live)) {
 
 		if (config_raw->touch_ui) {

@@ -15,7 +15,7 @@ void render_path_raytrace_commands(bool use_live_layer) {
 			ext = "forge_";
 		}
 		char *mode = config_raw->pathtrace_mode == PATHTRACE_MODE_FAST ? "core" : "full";
-		render_path_raytrace_raytrace_init(string_join(string_join(string_join("raytrace_brute_", ext), mode), render_path_raytrace_ext), true);
+		render_path_raytrace_raytrace_init(string("raytrace_brute_%s%s%s", ext, mode, render_path_raytrace_ext), true);
 		gc_unroot(render_path_raytrace_last_envmap);
 		render_path_raytrace_last_envmap = NULL;
 	}
@@ -38,7 +38,7 @@ void render_path_raytrace_commands(bool use_live_layer) {
 		gpu_texture_t *bnoise_scramble = any_map_get(scene_embedded, "bnoise_scramble.k");
 		gpu_texture_t *bnoise_rank     = any_map_get(scene_embedded, "bnoise_rank.k");
 
-		slot_layer_t  *l               = layers_flatten(true, NULL);
+		slot_layer_t *l = layers_flatten(true, NULL);
 		gpu_raytrace_set_textures(l->texpaint, l->texpaint_nor, l->texpaint_pack, saved_envmap, bnoise_sobol, bnoise_scramble, bnoise_rank);
 	}
 	////
@@ -56,13 +56,13 @@ void render_path_raytrace_commands(bool use_live_layer) {
 	render_path_raytrace_f32a->buffer[1] = transform_world_y(ct);
 	render_path_raytrace_f32a->buffer[2] = transform_world_z(ct);
 	render_path_raytrace_f32a->buffer[3] = render_path_raytrace_frame;
-	#ifdef IRON_METAL
+#ifdef IRON_METAL
 	// render_path_raytrace_frame = (render_path_raytrace_frame % (16)) + 1; // _PAINT
 	render_path_raytrace_frame = render_path_raytrace_frame + 1; // _RENDER
-	#else
+#else
 	render_path_raytrace_frame = (render_path_raytrace_frame % 4) + 1; // _PAINT
-	// render_path_raytrace_frame = render_path_raytrace_frame + 1; // _RENDER
-	#endif
+// render_path_raytrace_frame = render_path_raytrace_frame + 1; // _RENDER
+#endif
 	render_path_raytrace_f32a->buffer[4]  = render_path_raytrace_help_mat.m00;
 	render_path_raytrace_f32a->buffer[5]  = render_path_raytrace_help_mat.m01;
 	render_path_raytrace_f32a->buffer[6]  = render_path_raytrace_help_mat.m02;
@@ -94,11 +94,11 @@ void render_path_raytrace_commands(bool use_live_layer) {
 	_gpu_raytrace_dispatch_rays(framebuffer->_image, render_path_raytrace_f32a);
 
 	if (context_raw->ddirty == 1 || context_raw->pdirty == 1) {
-		#ifdef IRON_METAL
+#ifdef IRON_METAL
 		context_raw->rdirty = 128;
-		#else
+#else
 		context_raw->rdirty = 4;
-		#endif
+#endif
 	}
 	context_raw->ddirty--;
 	context_raw->pdirty--;
@@ -183,13 +183,13 @@ void render_path_raytrace_draw(bool use_live_layer) {
 		render_path_raytrace_frame = 0;
 	}
 
-	#ifdef IRON_METAL
+#ifdef IRON_METAL
 	// Delay path tracing additional samples while painting
 	bool down = mouse_down("left") || pen_down("tip");
 	if (context_in_3d_view() && down) {
 		render_path_raytrace_frame = 0;
 	}
-	#endif
+#endif
 
 	render_path_raytrace_commands(use_live_layer);
 	render_path_set_target("buf", NULL, NULL, GPU_CLEAR_NONE, 0, 0.0);

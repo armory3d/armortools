@@ -94,8 +94,8 @@ void viewport_update_camera_type(i32 camera_type) {
 }
 
 void viewport_capture_screenshot() {
-	render_target_t *rt         = any_map_get(render_path_render_targets, "last");
-	gpu_texture_t   *tex        = rt->_image;
+	render_target_t *rt  = any_map_get(render_path_render_targets, "last");
+	gpu_texture_t   *tex = rt->_image;
 
 	// let screenshot: gpu_texture_t = gpu_create_render_target(512, 512);
 	// let r: f32                    = sys_w() / sys_h();
@@ -103,7 +103,7 @@ void viewport_capture_screenshot() {
 	// draw_scaled_image(tex, -(512 * r - 512) / 2, 0, 512 * r, 512);
 	// draw_end();
 
-	gpu_texture_t   *screenshot = gpu_create_render_target(tex->width, tex->height, GPU_TEXTURE_FORMAT_RGBA32);
+	gpu_texture_t *screenshot = gpu_create_render_target(tex->width, tex->height, GPU_TEXTURE_FORMAT_RGBA32);
 	draw_begin(screenshot, false, 0);
 	draw_image(tex, 0, 0);
 	draw_end();
@@ -111,14 +111,14 @@ void viewport_capture_screenshot() {
 		project_raw->packed_assets = any_array_create_from_raw((void *[]){}, 0);
 	}
 
-	i32       num = 0;
+	i32   num = 0;
 	char *abs = "/packed/screenshot0.png";
 	for (i32 i = 0; i < project_raw->packed_assets->length; ++i) {
 		packed_asset_t *pa = project_raw->packed_assets->buffer[i];
 		if (string_equals(pa->name, abs)) {
 			i = 0;
 			num++;
-			abs = string_join(string_join("/packed/screenshot", i32_to_string(num)), ".png");
+			abs = string("/packed/screenshot%d.png", num);
 		}
 	}
 	packed_asset_t *pa =

@@ -92,20 +92,20 @@ bool render_path_raytrace_bake_commands(void (*parse_paint_material)(bool)) {
 		gc_root(render_path_raytrace_bake_last_layer);
 		render_path_raytrace_bake_last_bake_type2 = context_raw->bake_type;
 
-		gpu_texture_t   *bnoise_sobol             = any_map_get(scene_embedded, "bnoise_sobol.k");
-		gpu_texture_t   *bnoise_scramble          = any_map_get(scene_embedded, "bnoise_scramble.k");
-		gpu_texture_t   *bnoise_rank              = any_map_get(scene_embedded, "bnoise_rank.k");
+		gpu_texture_t *bnoise_sobol    = any_map_get(scene_embedded, "bnoise_sobol.k");
+		gpu_texture_t *bnoise_scramble = any_map_get(scene_embedded, "bnoise_scramble.k");
+		gpu_texture_t *bnoise_rank     = any_map_get(scene_embedded, "bnoise_rank.k");
 
-		render_target_t *baketex0                 = any_map_get(render_path_render_targets, "baketex0");
-		render_target_t *baketex1                 = any_map_get(render_path_render_targets, "baketex1");
+		render_target_t *baketex0 = any_map_get(render_path_render_targets, "baketex0");
+		render_target_t *baketex1 = any_map_get(render_path_render_targets, "baketex1");
 
-		gpu_texture_t   *tex2                     = NULL;
+		gpu_texture_t *tex2 = NULL;
 		if (context_raw->bake_type == BAKE_TYPE_LIGHTMAP) {
 			slot_layer_t *flat = layers_flatten(true, NULL);
 			tex2               = flat->texpaint;
 		}
 		else {
-			render_target_t *texpaint_undo = any_map_get(render_path_render_targets, string_join("texpaint_undo", i32_to_string(history_undo_i)));
+			render_target_t *texpaint_undo = any_map_get(render_path_render_targets, string("texpaint_undo%d", history_undo_i));
 			tex2                           = texpaint_undo->_image;
 		}
 
@@ -118,29 +118,29 @@ bool render_path_raytrace_bake_commands(void (*parse_paint_material)(bool)) {
 	}
 
 	if (context_raw->pdirty > 0) {
-		f32_array_t *f32a            = render_path_raytrace_f32a;
-		f32a->buffer[0]              = render_path_raytrace_frame++;
-		f32a->buffer[1]              = context_raw->bake_ao_strength;
-		f32a->buffer[2]              = context_raw->bake_ao_radius;
-		f32a->buffer[3]              = context_raw->bake_ao_offset;
-		f32a->buffer[4]              = scene_world->strength;
-		f32a->buffer[5]              = context_raw->bake_up_axis;
-		f32a->buffer[6]              = context_raw->envmap_angle;
+		f32_array_t *f32a = render_path_raytrace_f32a;
+		f32a->buffer[0]   = render_path_raytrace_frame++;
+		f32a->buffer[1]   = context_raw->bake_ao_strength;
+		f32a->buffer[2]   = context_raw->bake_ao_radius;
+		f32a->buffer[3]   = context_raw->bake_ao_offset;
+		f32a->buffer[4]   = scene_world->strength;
+		f32a->buffer[5]   = context_raw->bake_up_axis;
+		f32a->buffer[6]   = context_raw->envmap_angle;
 
 		render_target_t *framebuffer = any_map_get(render_path_render_targets, "baketex2");
 		_gpu_raytrace_dispatch_rays(framebuffer->_image, f32a);
 
-		i32       id          = context_raw->layer->id;
-		char *texpaint_id = string_join("texpaint", i32_to_string(id));
+		i32   id          = context_raw->layer->id;
+		char *texpaint_id = string("texpaint%d", id);
 		render_path_set_target(texpaint_id, NULL, NULL, GPU_CLEAR_NONE, 0, 0.0);
 		render_path_bind_target("baketex2", "tex");
 		render_path_draw_shader("Scene/copy_pass/copy_pass");
 
-		#ifdef IRON_METAL
-		i32 samples_per_frame              = 4;
-		#else
-		i32 samples_per_frame              = 64;
-		#endif
+#ifdef IRON_METAL
+		i32 samples_per_frame = 4;
+#else
+		i32 samples_per_frame = 64;
+#endif
 
 		render_path_raytrace_bake_rays_pix = render_path_raytrace_frame * samples_per_frame;
 		render_path_raytrace_bake_rays_counter += samples_per_frame;
@@ -164,8 +164,8 @@ bool render_path_raytrace_bake_commands(void (*parse_paint_material)(bool)) {
 }
 
 char *render_path_raytrace_bake_get_bake_shader_name() {
-	return context_raw->bake_type == BAKE_TYPE_AO            ? string_join("raytrace_bake_ao", render_path_raytrace_ext)
-	       : context_raw->bake_type == BAKE_TYPE_LIGHTMAP    ? string_join("raytrace_bake_light", render_path_raytrace_ext)
-	       : context_raw->bake_type == BAKE_TYPE_BENT_NORMAL ? string_join("raytrace_bake_bent", render_path_raytrace_ext)
-	                                                         : string_join("raytrace_bake_thick", render_path_raytrace_ext);
+	return context_raw->bake_type == BAKE_TYPE_AO            ? string("raytrace_bake_ao%s", render_path_raytrace_ext)
+	       : context_raw->bake_type == BAKE_TYPE_LIGHTMAP    ? string("raytrace_bake_light%s", render_path_raytrace_ext)
+	       : context_raw->bake_type == BAKE_TYPE_BENT_NORMAL ? string("raytrace_bake_bent%s", render_path_raytrace_ext)
+	                                                         : string("raytrace_bake_thick%s", render_path_raytrace_ext);
 }

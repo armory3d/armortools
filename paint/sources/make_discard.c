@@ -2,7 +2,7 @@
 #include "global.h"
 
 void make_discard_color_id(node_shader_t *kong) {
-	node_shader_add_texture(kong, "texpaint_colorid", NULL); // 1x1 picker
+	node_shader_add_texture(kong, "texpaint_colorid", NULL);    // 1x1 picker
 	node_shader_add_texture(kong, "texcolorid", "_texcolorid"); // color map
 	// node_shader_write_frag(kong, "var colorid_c1: float3 = texpaint_colorid[uint2(0, 0)].rgb;");
 	node_shader_write_frag(kong, "var colorid_c14: float4 = texpaint_colorid[uint2(uint(0), uint(0))];");
@@ -42,6 +42,6 @@ void make_discard_material_id(node_shader_t *kong) {
 	node_shader_write_frag(kong, "picker_sample_tc.y = 1.0 - picker_sample_tc.y;");
 	node_shader_add_texture(kong, "texpaint_nor_undo", "_texpaint_nor_undo");
 	i32 matid = context_raw->materialid_picked / (float)255;
-	node_shader_write_frag(kong, string_join(string_join("if (", i32_to_string(matid)),
-	                                         " != sample_lod(texpaint_nor_undo, sampler_linear, picker_sample_tc, 0.0).a) { discard; }"));
+	node_shader_write_frag(kong,
+	                       string("if (%s != sample_lod(texpaint_nor_undo, sampler_linear, picker_sample_tc, 0.0).a) { discard; }", i32_to_string(matid)));
 }

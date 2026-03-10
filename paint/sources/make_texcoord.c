@@ -25,10 +25,9 @@ void make_texcoord_run(node_shader_t *kong) {
 			kong->frag_n = true;
 			node_shader_add_constant(kong, "decal_layer_nor: float3", "_decal_layer_nor");
 			f32 dot_angle = context_raw->brush_angle_reject_dot;
-			node_shader_write_frag(kong,
-			                       string_join(string_join("if (abs(dot(n, constants.decal_layer_nor) - 1.0) > ", f32_to_string(dot_angle)), ") { discard; }"));
+			node_shader_write_frag(kong, string("if (abs(dot(n, constants.decal_layer_nor) - 1.0) > %s) { discard; }", f32_to_string(dot_angle)));
 
-								   kong->frag_wposition = true;
+			kong->frag_wposition = true;
 			node_shader_add_constant(kong, "decal_layer_loc: float3", "_decal_layer_loc");
 			node_shader_add_constant(kong, "decal_layer_dim: float", "_decal_layer_dim");
 			node_shader_write_attrib_frag(

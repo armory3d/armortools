@@ -28,14 +28,14 @@ void tab_swatches_draw_16719() {
 		context_set_swatch(project_clone_swatch(context_raw->swatch));
 		any_array_push(project_raw->swatches, context_raw->swatch);
 	}
-	#if defined(IRON_WINDOWS) || defined(IRON_LINUX) || defined(IRON_MACOS)
+#if defined(IRON_WINDOWS) || defined(IRON_LINUX) || defined(IRON_MACOS)
 	else if (ui_menu_button(tr("Copy Hex Code", NULL), "", ICON_HASH)) {
 		i32 color = context_raw->swatch->base;
 		color     = color_set_ab(color, context_raw->swatch->opacity * 255);
 		u32 val   = color;
 		iron_copy_to_clipboard(i32_to_string(val));
 	}
-	#endif
+#endif
 	else if (project_raw->swatches->length > 1 && ui_menu_button(tr("Delete", NULL), "delete", ICON_DELETE)) {
 		tab_swatches_delete_swatch(project_raw->swatches->buffer[i]);
 	}
@@ -239,7 +239,7 @@ void tab_swatches_draw(ui_handle_t *htab) {
 					i32 color = project_raw->swatches->buffer[i]->base;
 					color     = color_set_ab(color, project_raw->swatches->buffer[i]->opacity * 255);
 					u32 val   = color;
-					ui_tooltip(string_join("#", i32_to_string_hex(val)));
+					ui_tooltip(string("#%s", i32_to_string_hex(val)));
 				}
 			}
 		}

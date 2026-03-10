@@ -390,7 +390,7 @@ void tab_meshes_append_shape(char *mesh_name) {
 		raw              = import_mesh_raw_mesh(mesh);
 	}
 	else {
-		buffer_t *b = iron_load_blob(string_join(string_join(string_join(data_path(), "meshes/"), mesh_name), ".arm"));
+		buffer_t *b = iron_load_blob(string("%smeshes/%s.arm", data_path(), mesh_name));
 		scene_raw   = armpack_decode(b);
 		raw         = scene_raw->mesh_datas->buffer[0];
 	}
@@ -443,7 +443,7 @@ void tab_scene_sort() {
 	array_sort(scene->children, &tab_scene_sort_compare);
 }
 
-void tab_scene_import_mesh_done_on_next_frame(void * _) {
+void tab_scene_import_mesh_done_on_next_frame(void *_) {
 	util_mesh_merge(NULL);
 	tab_scene_select_object(context_raw->selected_object->ext);
 	tab_scene_sort();

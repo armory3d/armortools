@@ -64,8 +64,8 @@ char *parser_logic_safe_src(char *s) {
 
 char *parser_logic_node_name(ui_node_t *node) {
 	char *safe = parser_logic_safe_src(node->name);
-	i32       nid  = node->id;
-	char *s    = string_join(safe, i32_to_string(nid));
+	i32   nid  = node->id;
+	char *s    = string("%s%s", safe, i32_to_string(nid));
 	return s;
 }
 
@@ -114,10 +114,10 @@ char *parser_logic_build_node(ui_node_t *node) {
 	for (i32 i = 0; i < node->inputs->length; ++i) {
 		ui_node_socket_t *inp = node->inputs->buffer[i];
 		// Is linked - find node
-		ui_node_link_t   *l   = parser_logic_get_input_link(inp);
+		ui_node_link_t *l = parser_logic_get_input_link(inp);
 		if (l != NULL) {
 			ui_node_t *n = parser_logic_get_node(l->from_id);
-			char  *s = parser_logic_build_node(n);
+			char      *s = parser_logic_build_node(n);
 			inp_node     = any_map_get(parser_logic_node_map, s);
 			inp_from     = l->from_socket;
 		}
@@ -139,7 +139,7 @@ char *parser_logic_build_node(ui_node_t *node) {
 			for (i32 i = 0; i < ls->length; ++i) {
 				ui_node_link_t *l        = ls->buffer[i];
 				ui_node_t      *n        = parser_logic_get_node(l->to_id);
-				char       *out_name = parser_logic_build_node(n);
+				char           *out_name = parser_logic_build_node(n);
 				any_array_push(out_nodes, any_map_get(parser_logic_node_map, out_name));
 			}
 		}

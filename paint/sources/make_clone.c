@@ -17,13 +17,13 @@ void make_clone_run(node_shader_t *kong) {
 	char *nortan = "sample_lod(texpaint_nor_undo, sampler_linear, tex_coord_inp, 0.0).rgb";
 	char *height = "0.0";
 	char *opac   = "1.0";
-	node_shader_write_frag(kong, string_join(string_join("var basecol: float3 = ", base), ";"));
-	node_shader_write_frag(kong, string_join(string_join("var roughness: float = ", rough), ";"));
-	node_shader_write_frag(kong, string_join(string_join("var metallic: float = ", met), ";"));
-	node_shader_write_frag(kong, string_join(string_join("var occlusion: float = ", occ), ";"));
-	node_shader_write_frag(kong, string_join(string_join("var nortan: float3 = ", nortan), ";"));
-	node_shader_write_frag(kong, string_join(string_join("var height: float = ", height), ";"));
-	node_shader_write_frag(kong, string_join(string_join("var mat_opacity: float = ", opac), ";"));
+	node_shader_write_frag(kong, string("var basecol: float3 = %s;", base));
+	node_shader_write_frag(kong, string("var roughness: float = %s;", rough));
+	node_shader_write_frag(kong, string("var metallic: float = %s;", met));
+	node_shader_write_frag(kong, string("var occlusion: float = %s;", occ));
+	node_shader_write_frag(kong, string("var nortan: float3 = %s;", nortan));
+	node_shader_write_frag(kong, string("var height: float = %s;", height));
+	node_shader_write_frag(kong, string("var mat_opacity: float = %s;", opac));
 	node_shader_write_frag(kong, "var opacity: float = mat_opacity * constants.brush_opacity;");
 	if (context_raw->material->paint_emis) {
 		node_shader_write_frag(kong, "var emis: float = 0.0;");

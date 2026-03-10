@@ -20,7 +20,7 @@ void sculpt_import_mesh_pack_to_texture(mesh_data_t *mesh, slot_layer_t *l) {
 }
 
 node_shader_context_t *sculpt_make_sculpt_run(material_t *data, material_context_t *matcon) {
-	char              *context_id = "paint";
+	char                  *context_id = "paint";
 	shader_context_t      *props      = GC_ALLOC_INIT(shader_context_t, {.name            = context_id,
 	                                                                     .depth_write     = false,
 	                                                                     .compare_mode    = "always",
@@ -119,8 +119,8 @@ node_shader_context_t *sculpt_make_sculpt_run(material_t *data, material_context
 	parser_material_parse_height            = true;
 	parser_material_parse_height_as_channel = true;
 	shader_out_t *sout                      = parser_material_parse(context_raw->material->canvas, con_paint, kong, matcon);
-	char     *height                    = sout->out_height;
-	node_shader_write_frag(kong, string_join(string_join("var height: float = ", height), ";"));
+	char         *height                    = sout->out_height;
+	node_shader_write_frag(kong, string("var height: float = %s;", height));
 
 	if (kong->frag_bposition) {
 		kong->frag_bposition = false;
@@ -155,8 +155,8 @@ node_shader_context_t *sculpt_make_sculpt_run(material_t *data, material_context
 void sculpt_make_mesh_run(node_shader_t *kong, slot_layer_t *l) {
 	node_shader_add_constant(kong, "WVP: float4x4", "_world_view_proj_matrix");
 	i32 lid = l->id;
-	node_shader_add_texture(kong, "texpaint_sculpt", string_join("_texpaint_sculpt", i32_to_string(lid)));
-	node_shader_add_constant(kong, "texpaint_sculpt_size: float2", string_join(string_join("_size(_texpaint_sculpt", i32_to_string(lid)), ")"));
+	node_shader_add_texture(kong, "texpaint_sculpt", string("_texpaint_sculpt%s", i32_to_string(lid)));
+	node_shader_add_constant(kong, "texpaint_sculpt_size: float2", string("_size(_texpaint_sculpt%s)", i32_to_string(lid)));
 	// node_shader_write_vert(kong, "var meshpos: float3 = sample_lod(texpaint_sculpt, sampler_linear, uint2(vertex_id() % constants.texpaint_sculpt_size.x,
 	// vertex_id() / constants.texpaint_sculpt_size.y), 0.0).xyz;");
 	node_shader_write_vert(kong, "var meshpos: float4 = texpaint_sculpt[uint2(uint(float(vertex_id()) % constants.texpaint_sculpt_size.x), "
@@ -191,7 +191,7 @@ void sculpt_layers_create_sculpt_layer() {
 
 	{
 		render_target_t *t = render_target_create();
-		t->name            = string_join("texpaint_sculpt", i32_to_string(id));
+		t->name            = string("texpaint_sculpt%s", i32_to_string(id));
 		t->width           = config_get_texture_res_x();
 		t->height          = config_get_texture_res_y();
 		t->format          = "RGBA128";
@@ -263,12 +263,12 @@ void sculpt_layers_create_sculpt_layer() {
 	render_path_load_shader("Scene/copy_pass/copyR32_pass");
 
 	for (i32 i = 0; i < history_undo_layers->length; ++i) {
-		char     *ext = string_join("_undo", i32_to_string(i));
+		char         *ext = string("_undo%s", i32_to_string(i));
 		slot_layer_t *l   = history_undo_layers->buffer[i];
 
 		{
 			render_target_t *t = render_target_create();
-			t->name            = string_join("texpaint_sculpt", ext);
+			t->name            = string("texpaint_sculpt%s", ext);
 			t->width           = config_get_texture_res_x();
 			t->height          = config_get_texture_res_y();
 			t->format          = "RGBA128";
@@ -282,8 +282,8 @@ void render_path_sculpt_commands() {
 		return;
 	}
 
-	i32       tid             = context_raw->layer->id;
-	char *texpaint_sculpt = string_join("texpaint_sculpt", i32_to_string(tid));
+	i32   tid             = context_raw->layer->id;
+	char *texpaint_sculpt = string("texpaint_sculpt%s", i32_to_string(tid));
 	render_path_set_target("texpaint_blend1", NULL, NULL, GPU_CLEAR_NONE, 0, 0.0);
 	render_path_bind_target("texpaint_blend0", "tex");
 	render_path_draw_shader("Scene/copy_pass/copyR8_pass");

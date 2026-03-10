@@ -163,7 +163,7 @@ void render_path_base_draw_bloom(char *source, char *target) {
 		f32 prev_scale = 1.0;
 		for (i32 i = 0; i < 10; ++i) {
 			render_target_t *t = render_target_create();
-			t->name            = string_join("bloom_mip_", i32_to_string(i));
+			t->name            = string("bloom_mip_%d", i);
 			t->width           = 0;
 			t->height          = 0;
 			prev_scale *= 0.5;
@@ -200,8 +200,8 @@ void render_path_base_draw_bloom(char *source, char *target) {
 
 void render_path_base_draw_split(void (*draw_commands)(void)) {
 	if (context_raw->split_view && !context_raw->paint2d_view) {
-		context_raw->ddirty     = 2;
-		camera_object_t *cam    = scene_camera;
+		context_raw->ddirty  = 2;
+		camera_object_t *cam = scene_camera;
 
 		context_raw->view_index = context_raw->view_index == 0 ? 1 : 0;
 		transform_set_matrix(cam->base->transform, camera_views->buffer[context_raw->view_index]->v);
@@ -221,11 +221,11 @@ void render_path_base_draw_split(void (*draw_commands)(void)) {
 }
 
 void render_path_base_init_ssao() {
-	#if defined(IRON_MACOS) || defined(IRON_IOS) || defined(IRON_ANDROID)
+#if defined(IRON_MACOS) || defined(IRON_IOS) || defined(IRON_ANDROID)
 	f32 scale = 0.5;
-	#else
+#else
 	f32 scale = 1.0;
-	#endif
+#endif
 
 	{
 		render_target_t *t = render_target_create();
@@ -364,22 +364,22 @@ void render_path_base_draw_gbuffer() {
 			char *ping = i % 2 == 1 ? "_copy" : "";
 			char *pong = i % 2 == 1 ? "" : "_copy";
 			if (i == make_mesh_layer_pass_count - 1) {
-				render_path_set_target(string_join("gbuffer2", ping), NULL, NULL, GPU_CLEAR_COLOR, 0xff000000, 0.0);
+				render_path_set_target(string("gbuffer2%s", ping), NULL, NULL, GPU_CLEAR_COLOR, 0xff000000, 0.0);
 			}
-			char         *g1ping     = string_join("gbuffer1", ping);
-			char         *g2ping     = string_join("gbuffer2", ping);
+			char             *g1ping     = string("gbuffer1%s", ping);
+			char             *g2ping     = string("gbuffer2%s", ping);
 			string_t_array_t *additional = any_array_create_from_raw(
 			    (void *[]){
 			        g1ping,
 			        g2ping,
 			    },
 			    2);
-			render_path_set_target(string_join("gbuffer0", ping), additional, "main", GPU_CLEAR_NONE, 0, 0.0);
-			render_path_bind_target(string_join("gbuffer0", pong), "gbuffer0");
-			render_path_bind_target(string_join("gbuffer1", pong), "gbuffer1");
-			render_path_bind_target(string_join("gbuffer2", pong), "gbuffer2");
+			render_path_set_target(string("gbuffer0%s", ping), additional, "main", GPU_CLEAR_NONE, 0, 0.0);
+			render_path_bind_target(string("gbuffer0%s", pong), "gbuffer0");
+			render_path_bind_target(string("gbuffer1%s", pong), "gbuffer1");
+			render_path_bind_target(string("gbuffer2%s", pong), "gbuffer2");
 			render_path_paint_bind_layers();
-			render_path_draw_meshes(string_join("mesh", i32_to_string(i)));
+			render_path_draw_meshes(string("mesh%d", i));
 			render_path_paint_unbind_layers();
 		}
 		if (make_mesh_layer_pass_count % 2 == 0) {

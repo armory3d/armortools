@@ -14,13 +14,13 @@ void util_render_make_material_preview() {
 	    },
 	    1);
 	gc_root(scene_meshes);
-	mesh_object_t *painto                = context_raw->paint_object;
-	context_raw->paint_object            = sphere;
+	mesh_object_t *painto     = context_raw->paint_object;
+	context_raw->paint_object = sphere;
 
 	sphere->material                     = project_materials->buffer[0]->data;
 	context_raw->material->preview_ready = true;
 
-	context_raw->saved_camera            = mat4_clone(scene_camera->base->transform->local);
+	context_raw->saved_camera = mat4_clone(scene_camera->base->transform->local);
 	mat4_t m = mat4_create(0.9146286343879498, -0.0032648027153306235, 0.404281837254303, 0.4659988049397712, 0.404295023959927, 0.007367569133732468,
 	                       -0.9145989516155143, -1.0687517188018691, 0.000007410128652369705, 0.9999675337275382, 0.008058532943908717, 0.015935682577325486, 0,
 	                       0, 0, 1);
@@ -39,11 +39,11 @@ void util_render_make_material_preview() {
 	f32 _brush_nodes_scale         = context_raw->brush_nodes_scale;
 	context_raw->brush_nodes_scale = 1.0;
 
-	gpu_texture_t *_envmap         = scene_world->_->envmap;
-	scene_world->_->envmap         = context_raw->preview_envmap;
+	gpu_texture_t *_envmap = scene_world->_->envmap;
+	scene_world->_->envmap = context_raw->preview_envmap;
 	// No resize
-	_render_path_last_w            = util_render_material_preview_size;
-	_render_path_last_h            = util_render_material_preview_size;
+	_render_path_last_w = util_render_material_preview_size;
+	_render_path_last_h = util_render_material_preview_size;
 	camera_object_build_proj(scene_camera, -1.0);
 	camera_object_build_mat(scene_camera);
 
@@ -62,7 +62,7 @@ void util_render_make_material_preview() {
 	_render_path_last_h           = sys_h();
 
 	// Restore
-	sphere->base->visible         = false;
+	sphere->base->visible = false;
 	gc_unroot(scene_meshes);
 	scene_meshes = meshes;
 	gc_root(scene_meshes);
@@ -88,7 +88,7 @@ void util_render_make_decal_preview() {
 	if (context_raw->decal_image == NULL) {
 		context_raw->decal_image = gpu_create_render_target(util_render_decal_preview_size, util_render_decal_preview_size, GPU_TEXTURE_FORMAT_RGBA64);
 	}
-	context_raw->decal_preview    = true;
+	context_raw->decal_preview = true;
 
 	mesh_object_t *plane          = scene_get_child(".Plane")->ext;
 	plane->base->transform->scale = vec4_create(1, 1, 1, 1.0);
@@ -117,8 +117,8 @@ void util_render_make_decal_preview() {
 	scene_world->_->envmap = context_raw->preview_envmap;
 
 	// No resize
-	_render_path_last_w    = util_render_decal_preview_size;
-	_render_path_last_h    = util_render_decal_preview_size;
+	_render_path_last_w = util_render_decal_preview_size;
+	_render_path_last_h = util_render_decal_preview_size;
 	camera_object_build_proj(scene_camera, -1.0);
 	camera_object_build_mat(scene_camera);
 
@@ -137,7 +137,7 @@ void util_render_make_decal_preview() {
 	_render_path_last_h        = sys_h();
 
 	// Restore
-	plane->base->visible       = false;
+	plane->base->visible = false;
 	gc_unroot(scene_meshes);
 	scene_meshes = meshes;
 	gc_root(scene_meshes);
@@ -161,7 +161,7 @@ void util_render_make_text_preview() {
 	if (in_use)
 		draw_end();
 
-	char    *text      = context_raw->text_tool_text;
+	char        *text      = context_raw->text_tool_text;
 	draw_font_t *font      = context_raw->font->font;
 	i32          font_size = util_render_font_preview_size;
 	i32          text_w    = math_floor(draw_string_width(font, font_size, text));
@@ -193,7 +193,7 @@ void util_render_make_font_preview() {
 	if (in_use)
 		draw_end();
 
-	char    *text      = "Abg";
+	char        *text      = "Abg";
 	draw_font_t *font      = context_raw->font->font;
 	i32          font_size = util_render_font_preview_size;
 	i32          text_w    = math_floor(draw_string_width(font, font_size, text)) + 8;
@@ -213,7 +213,7 @@ void util_render_make_font_preview() {
 		draw_begin(current, false, 0);
 }
 
-void util_render_make_brush_preview_parse_paint_material(void * _) {
+void util_render_make_brush_preview_parse_paint_material(void *_) {
 	make_material_parse_paint_material(false);
 }
 
@@ -244,18 +244,18 @@ void util_render_make_brush_preview() {
 		context_raw->brush->image_icon = gpu_create_render_target(50, 50, GPU_TEXTURE_FORMAT_RGBA32);
 	}
 
-	slot_material_t *_material          = context_raw->material;
-	context_raw->material               = slot_material_create(NULL, NULL);
+	slot_material_t *_material = context_raw->material;
+	context_raw->material      = slot_material_create(NULL, NULL);
 
 	// Prevent grid jump
 	context_raw->material->nodes->pan_x = context_raw->brush->nodes->pan_x;
 	context_raw->material->nodes->pan_y = context_raw->brush->nodes->pan_y;
 	context_raw->material->nodes->zoom  = context_raw->brush->nodes->zoom;
 
-	tool_type_t _tool                   = context_raw->tool;
-	context_raw->tool                   = TOOL_TYPE_BRUSH;
+	tool_type_t _tool = context_raw->tool;
+	context_raw->tool = TOOL_TYPE_BRUSH;
 
-	slot_layer_t *_layer                = context_raw->layer;
+	slot_layer_t *_layer = context_raw->layer;
 	if (slot_layer_is_mask(context_raw->layer)) {
 		context_raw->layer = context_raw->layer->parent;
 	}
@@ -267,7 +267,7 @@ void util_render_make_brush_preview() {
 	make_material_parse_paint_material(false);
 
 	i32 hid = history_undo_i - 1 < 0 ? config_raw->undo_steps - 1 : history_undo_i - 1;
-	any_map_set(render_path_render_targets, string_join("texpaint_undo", i32_to_string(hid)), any_map_get(render_path_render_targets, "empty_black"));
+	any_map_set(render_path_render_targets, string("texpaint_undo%d", hid), any_map_get(render_path_render_targets, "empty_black"));
 
 	// Set plane mesh
 	mesh_object_t *painto   = context_raw->paint_object;
@@ -293,11 +293,11 @@ void util_render_make_brush_preview() {
 	cam->data->fov = 0.92;
 	camera_object_build_proj(cam, -1.0);
 	camera_object_build_mat(cam);
-	m                              = mat4_inv(scene_camera->vp);
+	m = mat4_inv(scene_camera->vp);
 
-	mesh_object_t *planeo          = scene_get_child(".Plane")->ext;
-	planeo->base->visible          = true;
-	context_raw->paint_object      = planeo;
+	mesh_object_t *planeo     = scene_get_child(".Plane")->ext;
+	planeo->base->visible     = true;
+	context_raw->paint_object = planeo;
 
 	vec4_t v                       = vec4_create(0.0, 0.0, 0.0, 1.0);
 	v                              = vec4_create(m.m00, m.m01, m.m02, 1.0);
@@ -324,20 +324,20 @@ void util_render_make_brush_preview() {
 	i32 _pdirty                 = context_raw->pdirty;
 	context_raw->pdirty         = 2;
 
-	f32_array_t *points_x       = f32_array_create_from_raw(
-        (f32[]){
-            0.2,
-            0.2,
-            0.35,
-            0.5,
-            0.5,
-            0.5,
-            0.65,
-            0.8,
-            0.8,
-            0.8,
-        },
-        10);
+	f32_array_t *points_x = f32_array_create_from_raw(
+	    (f32[]){
+	        0.2,
+	        0.2,
+	        0.35,
+	        0.5,
+	        0.5,
+	        0.5,
+	        0.65,
+	        0.8,
+	        0.8,
+	        0.8,
+	    },
+	    10);
 	f32_array_t *points_y = f32_array_create_from_raw(
 	    (f32[]){
 	        0.5,

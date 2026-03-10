@@ -900,7 +900,7 @@ void ui_nodes_render(void *_) {
 
 		if (!config_raw->touch_ui) {
 			bool expand = !base_view3d_show && config_raw->layout->buffer[LAYOUT_SIZE_SIDEBAR_W] == 0;
-			ui_tab(ui_nodes_htab, expand ? string_join(tr("Nodes", NULL), "          ") : tr("Nodes", NULL), false, -1, !base_view3d_show);
+			ui_tab(ui_nodes_htab, expand ? string("%s          ", tr("Nodes", NULL)) : tr("Nodes", NULL), false, -1, !base_view3d_show);
 
 			// Additional tabs
 			if (ui_nodes_canvas_type == CANVAS_TYPE_MATERIAL) {
@@ -1099,7 +1099,7 @@ void ui_nodes_render(void *_) {
 				    },
 				    2);
 				ui_row(row);
-				if (ui_button(string_join(config_button_spacing, g->canvas->name), UI_ALIGN_LEFT, "")) {
+				if (ui_button(string("%s%s", config_button_spacing, g->canvas->name), UI_ALIGN_LEFT, "")) {
 					ui_nodes_push_undo(NULL);
 					ui_node_canvas_t *canvas = ui_nodes_get_canvas(true);
 					ui_nodes_t       *nodes  = ui_nodes_get_nodes();
@@ -1287,7 +1287,7 @@ void ui_nodes_draw_menubar() {
 		}
 	}
 	if (ui->is_hovered) {
-		ui_tooltip(string_join(string_join(string_join(tr("Search for nodes", NULL), " ("), any_map_get(config_keymap, "node_search")), ")"));
+		ui_tooltip(string("%s (%s)", tr("Search for nodes", NULL), any_map_get(config_keymap, "node_search")));
 	}
 	ui->_x += ui->_w + 3;
 	ui->_y                     = 2 + start_y;
@@ -1592,7 +1592,7 @@ void ui_nodes_capture_output() {
 		if (string_equals(pa->name, abs)) {
 			i = 0;
 			num++;
-			abs = string_join(string_join("/packed/node_preview", i32_to_string(num)), ".png");
+			abs = string("/packed/node_preview%d.png", num);
 		}
 	}
 

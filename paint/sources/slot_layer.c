@@ -34,23 +34,23 @@ slot_layer_t *slot_layer_create(char *ext, layer_slot_type_t type, slot_layer_t 
 				raw->id = l->id + 1;
 			}
 		}
-		ext = string_join(i32_to_string(raw->id), "");
+		ext = string("%d", raw->id);
 	}
 	raw->ext    = string_copy(ext);
 	raw->parent = parent;
 
 	if (type == LAYER_SLOT_TYPE_GROUP) {
 		i32 id    = (raw->id + 1);
-		raw->name = string_join("Group ", i32_to_string(id));
+		raw->name = string("Group %d", id);
 	}
 	else if (type == LAYER_SLOT_TYPE_LAYER) {
-		i32 id           = (raw->id + 1);
-		raw->name        = string_join("Layer ", i32_to_string(id));
+		i32 id       = (raw->id + 1);
+		raw->name    = string("Layer %d", id);
 		char *format = base_bits_handle->i == TEXTURE_BITS_BITS8 ? "RGBA32" : base_bits_handle->i == TEXTURE_BITS_BITS16 ? "RGBA64" : "RGBA128";
 
 		{
 			render_target_t *t = render_target_create();
-			t->name            = string_join("texpaint", ext);
+			t->name            = string("texpaint%s", ext);
 			t->width           = config_get_texture_res_x();
 			t->height          = config_get_texture_res_y();
 			t->format          = string_copy(format);
@@ -59,7 +59,7 @@ slot_layer_t *slot_layer_create(char *ext, layer_slot_type_t type, slot_layer_t 
 
 		{
 			render_target_t *t = render_target_create();
-			t->name            = string_join("texpaint_nor", ext);
+			t->name            = string("texpaint_nor%s", ext);
 			t->width           = config_get_texture_res_x();
 			t->height          = config_get_texture_res_y();
 			t->format          = string_copy(format);
@@ -67,7 +67,7 @@ slot_layer_t *slot_layer_create(char *ext, layer_slot_type_t type, slot_layer_t 
 		}
 		{
 			render_target_t *t = render_target_create();
-			t->name            = string_join("texpaint_pack", ext);
+			t->name            = string("texpaint_pack%s", ext);
 			t->width           = config_get_texture_res_x();
 			t->height          = config_get_texture_res_y();
 			t->format          = string_copy(format);
@@ -78,14 +78,14 @@ slot_layer_t *slot_layer_create(char *ext, layer_slot_type_t type, slot_layer_t 
 	}
 
 	else { // Mask
-		i32 id           = (raw->id + 1);
-		raw->name        = string_join("Mask ", i32_to_string(id));
-		char *format = "RGBA32"; // Full bits for undo support, R8 is used
-		raw->blending    = BLEND_TYPE_ADD;
+		i32 id        = (raw->id + 1);
+		raw->name     = string("Mask %d", id);
+		char *format  = "RGBA32"; // Full bits for undo support, R8 is used
+		raw->blending = BLEND_TYPE_ADD;
 
 		{
 			render_target_t *t = render_target_create();
-			t->name            = string_join("texpaint", ext);
+			t->name            = string("texpaint%s", ext);
 			t->width           = config_get_texture_res_x();
 			t->height          = config_get_texture_res_y();
 			t->format          = string_copy(format);
@@ -158,22 +158,22 @@ void slot_layer_unload(slot_layer_t *raw) {
 		gpu_delete_texture(_texpaint_preview);
 	}
 
-	map_delete(render_path_render_targets, string_join("texpaint", raw->ext));
+	map_delete(render_path_render_targets, string("texpaint%s", raw->ext));
 	if (slot_layer_is_layer(raw)) {
-		map_delete(render_path_render_targets, string_join("texpaint_nor", raw->ext));
-		map_delete(render_path_render_targets, string_join("texpaint_pack", raw->ext));
+		map_delete(render_path_render_targets, string("texpaint_nor%s", raw->ext));
+		map_delete(render_path_render_targets, string("texpaint_pack%s", raw->ext));
 	}
 }
 
 void slot_layer_swap(slot_layer_t *raw, slot_layer_t *other) {
 	if ((slot_layer_is_layer(raw) || slot_layer_is_mask(raw)) && (slot_layer_is_layer(other) || slot_layer_is_mask(other))) {
-		render_target_t *rt0             = any_map_get(render_path_render_targets, string_join("texpaint", raw->ext));
-		render_target_t *rt1             = any_map_get(render_path_render_targets, string_join("texpaint", other->ext));
-		rt0->_image                      = other->texpaint;
-		rt1->_image                      = raw->texpaint;
-		gpu_texture_t *_texpaint         = raw->texpaint;
-		raw->texpaint                    = other->texpaint;
-		other->texpaint                  = _texpaint;
+		render_target_t *rt0     = any_map_get(render_path_render_targets, string("texpaint%s", raw->ext));
+		render_target_t *rt1     = any_map_get(render_path_render_targets, string("texpaint%s", other->ext));
+		rt0->_image              = other->texpaint;
+		rt1->_image              = raw->texpaint;
+		gpu_texture_t *_texpaint = raw->texpaint;
+		raw->texpaint            = other->texpaint;
+		other->texpaint          = _texpaint;
 
 		gpu_texture_t *_texpaint_preview = raw->texpaint_preview;
 		raw->texpaint_preview            = other->texpaint_preview;
@@ -181,13 +181,13 @@ void slot_layer_swap(slot_layer_t *raw, slot_layer_t *other) {
 	}
 
 	if (slot_layer_is_layer(raw) && slot_layer_is_layer(other)) {
-		render_target_t *nor0         = any_map_get(render_path_render_targets, string_join("texpaint_nor", raw->ext));
+		render_target_t *nor0         = any_map_get(render_path_render_targets, string("texpaint_nor%s", raw->ext));
 		nor0->_image                  = other->texpaint_nor;
-		render_target_t *pack0        = any_map_get(render_path_render_targets, string_join("texpaint_pack", raw->ext));
+		render_target_t *pack0        = any_map_get(render_path_render_targets, string("texpaint_pack%s", raw->ext));
 		pack0->_image                 = other->texpaint_pack;
-		render_target_t *nor1         = any_map_get(render_path_render_targets, string_join("texpaint_nor", other->ext));
+		render_target_t *nor1         = any_map_get(render_path_render_targets, string("texpaint_nor%s", other->ext));
 		nor1->_image                  = raw->texpaint_nor;
-		render_target_t *pack1        = any_map_get(render_path_render_targets, string_join("texpaint_pack", other->ext));
+		render_target_t *pack1        = any_map_get(render_path_render_targets, string("texpaint_pack%s", other->ext));
 		pack1->_image                 = raw->texpaint_pack;
 		gpu_texture_t *_texpaint_nor  = raw->texpaint_nor;
 		gpu_texture_t *_texpaint_pack = raw->texpaint_pack;
@@ -230,7 +230,7 @@ void slot_layer_invert_mask(slot_layer_t *raw) {
 	draw_end();
 	gpu_texture_t *_texpaint = raw->texpaint;
 	gpu_delete_texture(_texpaint);
-	render_target_t *rt = any_map_get(render_path_render_targets, string_join("texpaint", i32_to_string(raw->id)));
+	render_target_t *rt = any_map_get(render_path_render_targets, string("texpaint%d", raw->id));
 	raw->texpaint = rt->_image       = inverted;
 	context_raw->layer_preview_dirty = true;
 	context_raw->ddirty              = 3;
@@ -330,14 +330,14 @@ void slot_layer_resize_and_set_bits(slot_layer_t *raw) {
 	any_map_t *rts   = render_path_render_targets;
 
 	if (slot_layer_is_layer(raw)) {
-		gpu_texture_format_t format    = base_bits_handle->i == TEXTURE_BITS_BITS8    ? GPU_TEXTURE_FORMAT_RGBA32
-		                                 : base_bits_handle->i == TEXTURE_BITS_BITS16 ? GPU_TEXTURE_FORMAT_RGBA64
-		                                                                              : GPU_TEXTURE_FORMAT_RGBA128;
+		gpu_texture_format_t format = base_bits_handle->i == TEXTURE_BITS_BITS8    ? GPU_TEXTURE_FORMAT_RGBA32
+		                              : base_bits_handle->i == TEXTURE_BITS_BITS16 ? GPU_TEXTURE_FORMAT_RGBA64
+		                                                                           : GPU_TEXTURE_FORMAT_RGBA128;
 
-		gpu_pipeline_t      *pipe      = format == GPU_TEXTURE_FORMAT_RGBA32 ? pipes_copy : format == GPU_TEXTURE_FORMAT_RGBA64 ? pipes_copy64 : pipes_copy128;
+		gpu_pipeline_t *pipe = format == GPU_TEXTURE_FORMAT_RGBA32 ? pipes_copy : format == GPU_TEXTURE_FORMAT_RGBA64 ? pipes_copy64 : pipes_copy128;
 
-		gpu_texture_t       *_texpaint = raw->texpaint;
-		raw->texpaint                  = gpu_create_render_target(res_x, res_y, format);
+		gpu_texture_t *_texpaint = raw->texpaint;
+		raw->texpaint            = gpu_create_render_target(res_x, res_y, format);
 		draw_begin(raw->texpaint, false, 0);
 		draw_set_pipeline(pipe);
 		draw_scaled_image(_texpaint, 0, 0, res_x, res_y);
@@ -372,16 +372,16 @@ void slot_layer_resize_and_set_bits(slot_layer_t *raw) {
 			gpu_delete_texture(_texpaint_pack);
 		}
 
-		render_target_t *rt = any_map_get(rts, string_join("texpaint", raw->ext));
+		render_target_t *rt = any_map_get(rts, string("texpaint%s", raw->ext));
 		rt->_image          = raw->texpaint;
 
 		if (raw->texpaint_nor != NULL) {
-			render_target_t *rt_nor = any_map_get(rts, string_join("texpaint_nor", raw->ext));
+			render_target_t *rt_nor = any_map_get(rts, string("texpaint_nor%s", raw->ext));
 			rt_nor->_image          = raw->texpaint_nor;
 		}
 
 		if (raw->texpaint_pack != NULL) {
-			render_target_t *rt_pack = any_map_get(rts, string_join("texpaint_pack", raw->ext));
+			render_target_t *rt_pack = any_map_get(rts, string("texpaint_pack%s", raw->ext));
 			rt_pack->_image          = raw->texpaint_pack;
 		}
 	}
@@ -397,12 +397,12 @@ void slot_layer_resize_and_set_bits(slot_layer_t *raw) {
 
 		gpu_delete_texture(_texpaint);
 
-		render_target_t *rt = any_map_get(rts, string_join("texpaint", raw->ext));
+		render_target_t *rt = any_map_get(rts, string("texpaint%s", raw->ext));
 		rt->_image          = raw->texpaint;
 	}
 }
 
-void slot_layer_to_fill_layer_on_next_frame(void * _) {
+void slot_layer_to_fill_layer_on_next_frame(void *_) {
 	make_material_parse_paint_material(true);
 	context_raw->layer_preview_dirty                  = true;
 	ui_base_hwnds->buffer[TAB_AREA_SIDEBAR0]->redraws = 2;
@@ -756,25 +756,25 @@ void layers_resize() {
 		slot_layer_resize_and_set_bits(l);
 	}
 
-	any_map_t       *rts              = render_path_render_targets;
+	any_map_t *rts = render_path_render_targets;
 
 	render_target_t *blend0           = any_map_get(rts, "texpaint_blend0");
 	gpu_texture_t   *_texpaint_blend0 = blend0->_image;
 	gpu_delete_texture(_texpaint_blend0);
-	blend0->width                     = config_get_texture_res_x();
-	blend0->height                    = config_get_texture_res_y();
-	blend0->_image                    = gpu_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), GPU_TEXTURE_FORMAT_R8);
+	blend0->width  = config_get_texture_res_x();
+	blend0->height = config_get_texture_res_y();
+	blend0->_image = gpu_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), GPU_TEXTURE_FORMAT_R8);
 
 	render_target_t *blend1           = any_map_get(rts, "texpaint_blend1");
 	gpu_texture_t   *_texpaint_blend1 = blend1->_image;
 	gpu_delete_texture(_texpaint_blend1);
-	blend1->width                  = config_get_texture_res_x();
-	blend1->height                 = config_get_texture_res_y();
-	blend1->_image                 = gpu_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), GPU_TEXTURE_FORMAT_R8);
+	blend1->width  = config_get_texture_res_x();
+	blend1->height = config_get_texture_res_y();
+	blend1->_image = gpu_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), GPU_TEXTURE_FORMAT_R8);
 
 	context_raw->brush_blend_dirty = true;
 
-	render_target_t *blur          = any_map_get(rts, "texpaint_blur");
+	render_target_t *blur = any_map_get(rts, "texpaint_blur");
 	if (blur != NULL) {
 		gpu_texture_t *_texpaint_blur = blur->_image;
 		gpu_delete_texture(_texpaint_blur);
@@ -815,7 +815,7 @@ void layers_make_temp_img() {
 	}
 
 	if (layers_temp_image == NULL) {
-		char        *format = base_bits_handle->i == TEXTURE_BITS_BITS8 ? "RGBA32" : base_bits_handle->i == TEXTURE_BITS_BITS16 ? "RGBA64" : "RGBA128";
+		char            *format = base_bits_handle->i == TEXTURE_BITS_BITS8 ? "RGBA32" : base_bits_handle->i == TEXTURE_BITS_BITS16 ? "RGBA64" : "RGBA128";
 		render_target_t *t      = render_target_create();
 		t->name                 = "temptex0";
 		t->width                = l->texpaint->width;
@@ -1120,7 +1120,7 @@ void layers_set_object_mask() {
 		mesh_object_t *o = project_paint_objects->buffer[0];
 		for (i32 i = 0; i < project_paint_objects->length; ++i) {
 			mesh_object_t *p         = project_paint_objects->buffer[i];
-			char      *mask_name = ar->buffer[mask];
+			char          *mask_name = ar->buffer[mask];
 			if (string_equals(p->base->name, mask_name)) {
 				o = p;
 				break;
@@ -1210,7 +1210,7 @@ slot_layer_t *layers_new_group() {
 	return l;
 }
 
-void layers_create_fill_layer_on_next_frame(void * _) {
+void layers_create_fill_layer_on_next_frame(void *_) {
 	slot_layer_t *l = layers_new_layer(false, _layers_position);
 	history_new_layer();
 	l->uv_type = _layers_uv_type;
@@ -1245,7 +1245,7 @@ void layers_create_image_mask(asset_t *asset) {
 	context_raw->layer_preview_dirty = true;
 }
 
-void layers_create_color_layer_on_next_frame(void * _) {
+void layers_create_color_layer_on_next_frame(void *_) {
 	slot_layer_t *l = layers_new_layer(false, _layers_position);
 	history_new_layer();
 	l->uv_type     = UV_TYPE_UVMAP;
@@ -1650,7 +1650,7 @@ slot_layer_t *layers_flatten(bool height_to_normal, slot_layer_t_array_t *layers
 	return l0;
 }
 
-void layers_on_resized_on_next_frame(void * _) {
+void layers_on_resized_on_next_frame(void *_) {
 	layers_resize();
 	slot_layer_t    *_layer    = context_raw->layer;
 	slot_material_t *_material = context_raw->material;

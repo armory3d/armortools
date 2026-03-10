@@ -1,11 +1,11 @@
 
 #include "global.h"
 
-void tab_textures_draw_set_as_envmap(void * _) {
+void tab_textures_draw_set_as_envmap(void *_) {
 	import_envmap_run(_tab_textures_draw_asset->file, _tab_textures_draw_img);
 }
 
-void tab_textures_draw_to_mask(void * _) {
+void tab_textures_draw_to_mask(void *_) {
 	layers_create_image_mask(_tab_textures_draw_asset);
 }
 
@@ -16,14 +16,14 @@ void tab_textures_draw_export_on_next_frame2(gpu_texture_t *target) {
 		f = string_copy(tr("untitled", NULL));
 	}
 	if (!ends_with(f, ".png")) {
-		f = string_join(f, ".png");
+		f = string("%s.png", f);
 	}
 	buffer_t *buf = gpu_get_texture_pixels(target);
-	iron_write_png(string_join(string_join(path, PATH_SEP), f), buf, target->width, target->height, 0);
+	iron_write_png(string("%s%s%s", path, PATH_SEP, f), buf, target->width, target->height, 0);
 	gpu_delete_texture(target);
 }
 
-void tab_textures_draw_export_on_next_frame(void * _) {
+void tab_textures_draw_export_on_next_frame(void *_) {
 	gpu_texture_t *img    = _tab_textures_draw_img;
 	gpu_texture_t *target = gpu_create_render_target(img->width, img->height, GPU_TEXTURE_FORMAT_RGBA32);
 	draw_begin(target, false, 0);
@@ -97,7 +97,7 @@ void tab_textures_draw(ui_handle_t *htab) {
 			ui_files_show(string_array_join(path_texture_formats(), ","), false, true, &tab_textures_draw_import);
 		}
 		if (ui->is_hovered) {
-			ui_tooltip(string_join(string_join(string_join(tr("Import texture file", NULL), " ("), any_map_get(config_keymap, "file_import_assets")), ")"));
+			ui_tooltip(string("%s (%s)", tr("Import texture file", NULL), (char *)any_map_get(config_keymap, "file_import_assets")));
 		}
 		if (ui_icon_button(tr("2D View", NULL), ICON_WINDOW, UI_ALIGN_CENTER)) {
 			ui_base_show_2d_view(VIEW_2D_TYPE_ASSET);
@@ -181,7 +181,7 @@ void tab_textures_draw(ui_handle_t *htab) {
 					if (ui->is_hovered) {
 						ui_tooltip_image(img, 256);
 						if (is_packed) {
-							ui_tooltip(string_join(string_join(asset->name, " "), tr("(packed)", NULL)));
+							ui_tooltip(string("%s %s", asset->name, tr("(packed)", NULL)));
 						}
 						else {
 							ui_tooltip(asset->name);
@@ -249,7 +249,7 @@ void tab_textures_update_texture_pointers(ui_node_t_array_t *nodes, i32 index) {
 	}
 }
 
-void tab_textures_delete_texture_on_next_frame(void * _) {
+void tab_textures_delete_texture_on_next_frame(void *_) {
 	make_material_parse_paint_material(true);
 	util_render_make_material_preview();
 	ui_base_hwnds->buffer[TAB_AREA_SIDEBAR1]->redraws = 2;

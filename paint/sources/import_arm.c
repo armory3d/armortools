@@ -93,7 +93,7 @@ void import_arm_run_project(char *path) {
 
 	char *base = path_base_dir(path);
 	if (project_raw->envmap != NULL) {
-		project_raw->envmap = data_is_abs(project_raw->envmap) ? project_raw->envmap : string_join(base, project_raw->envmap);
+		project_raw->envmap = data_is_abs(project_raw->envmap) ? project_raw->envmap : string("%s%s", base, project_raw->envmap);
 #ifdef IRON_WINDOWS
 		project_raw->envmap = string_copy(string_replace_all(project_raw->envmap, "/", "\\"));
 #else
@@ -118,7 +118,7 @@ void import_arm_run_project(char *path) {
 		file = string_copy(string_replace_all(file, "\\", "/"));
 #endif
 		// Convert image path from relative to absolute
-		char *abs = data_is_abs(file) ? file : string_join(base, file);
+		char *abs = data_is_abs(file) ? file : string("%s%s", base, file);
 		if (project->packed_assets != NULL) {
 			abs = string_copy(path_normalize(abs));
 			import_arm_unpack_asset(project, abs, file, false);
@@ -139,7 +139,7 @@ void import_arm_run_project(char *path) {
 			file = string_copy(string_replace_all(file, "\\", "/"));
 #endif
 			// Convert font path from relative to absolute
-			char *abs = data_is_abs(file) ? file : string_join(base, file);
+			char *abs = data_is_abs(file) ? file : string("%s%s", base, file);
 			if (iron_file_exists(abs)) {
 				import_font_run(abs);
 			}
@@ -171,7 +171,7 @@ void import_arm_run_project(char *path) {
 
 	if (project->mesh_assets != NULL && project->mesh_assets->length > 0) {
 		char *file = project->mesh_assets->buffer[0];
-		char *abs  = data_is_abs(file) ? file : string_join(base, file);
+		char *abs  = data_is_abs(file) ? file : string("%s%s", base, file);
 		gc_unroot(project_mesh_assets);
 		project_mesh_assets = any_array_create_from_raw(
 		    (void *[]){
@@ -460,7 +460,7 @@ void import_arm_run_material_from_project(project_format_t *project, char *path)
 		file = string_copy(string_replace_all(file, "\\", "/"));
 #endif
 		// Convert image path from relative to absolute
-		char *abs = data_is_abs(file) ? file : string_join(base, file);
+		char *abs = data_is_abs(file) ? file : string("%s%s", base, file);
 		if (project->packed_assets != NULL) {
 			abs = string_copy(path_normalize(abs));
 			import_arm_unpack_asset(project, abs, file, true);
@@ -524,19 +524,19 @@ void import_arm_rename_group(char *name, slot_material_t_array_t *materials, ui_
 		for (i32 i = 0; i < m->canvas->nodes->length; ++i) {
 			ui_node_t *n = m->canvas->nodes->buffer[i];
 			if (string_equals(n->type, "GROUP") && string_equals(n->name, name)) {
-				n->name = string_join(n->name, ".1");
+				n->name = string("%s.1", n->name);
 			}
 		}
 	}
 	for (i32 i = 0; i < groups->length; ++i) {
 		ui_node_canvas_t *c = groups->buffer[i];
 		if (string_equals(c->name, name)) {
-			c->name = string_join(c->name, ".1");
+			c->name = string("%s.1", c->name);
 		}
 		for (i32 i = 0; i < c->nodes->length; ++i) {
 			ui_node_t *n = c->nodes->buffer[i];
 			if (string_equals(n->type, "GROUP") && string_equals(n->name, name)) {
-				n->name = string_join(n->name, ".1");
+				n->name = string("%s.1", n->name);
 			}
 		}
 	}
@@ -571,7 +571,7 @@ void import_arm_run_brush_from_project(project_format_t *project, char *path) {
 		file = string_copy(string_replace_all(file, "\\", "/"));
 #endif
 		// Convert image path from relative to absolute
-		char *abs = data_is_abs(file) ? file : string_join(base, file);
+		char *abs = data_is_abs(file) ? file : string("%s%s", base, file);
 		if (project->packed_assets != NULL) {
 			abs = string_copy(path_normalize(abs));
 			import_arm_unpack_asset(project, abs, file, true);
@@ -627,7 +627,7 @@ void import_arm_run_swatches_from_project(project_format_t *project, char *path,
 }
 
 void import_arm_make_pink(char *abs) {
-	console_error(string_join(string_join(strings_could_not_locate_texture(), " "), abs));
+	console_error(string("%s %s", strings_could_not_locate_texture(), abs));
 	u8_array_t *b       = u8_array_create(4);
 	b->buffer[0]        = 255;
 	b->buffer[1]        = 0;

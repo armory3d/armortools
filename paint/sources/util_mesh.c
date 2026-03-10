@@ -110,7 +110,7 @@ void util_mesh_merge(mesh_object_t_array_t *paint_objects) {
 	util_mesh_remove_merged();
 	mesh_data_t *md                           = mesh_data_create(raw);
 	context_raw->merged_object                = mesh_object_create(md, context_raw->paint_object->material);
-	context_raw->merged_object->base->name    = string_join(context_raw->paint_object->base->name, "_merged");
+	context_raw->merged_object->base->name    = string("%s_merged", context_raw->paint_object->base->name);
 	context_raw->merged_object->force_context = "paint";
 	object_set_parent(context_raw->merged_object->base, context_main_object()->base);
 	render_path_raytrace_ready = false;
@@ -127,7 +127,7 @@ void util_mesh_remove_merged() {
 void util_mesh_swap_axis(i32 a, i32 b) {
 	mesh_object_t_array_t *objects = project_paint_objects;
 	for (i32 i = 0; i < objects->length; ++i) {
-		mesh_object_t          *o   = objects->buffer[i];
+		mesh_object_t *o = objects->buffer[i];
 		// Remapping vertices, buckle up
 		// 0 - x, 1 - y, 2 - z
 		vertex_array_t_array_t *vas = o->data->vertex_arrays;
@@ -483,7 +483,7 @@ void util_mesh_decimate(f32 strength) {
 	}
 	i32 box_size = math_max(max_x - min_x, math_max(max_y - min_y, max_z - min_z));
 
-	f32 cells    = 200.0 * (1.0 - strength);
+	f32 cells = 200.0 * (1.0 - strength);
 	if (cells < 2.0)
 		cells = 2.0;
 	i32 cell_size = math_floor(box_size / (float)cells);
@@ -562,17 +562,17 @@ void util_mesh_decimate(f32 strength) {
 		}
 	}
 
-	mesh_data_t *raw      = GC_ALLOC_INIT(mesh_data_t, {.name          = string_join(o->base->name, "_decimated"),
-	                                                    .vertex_arrays = any_array_create_from_raw(
-                                                       (void *[]){
-                                                           GC_ALLOC_INIT(vertex_array_t, {.values = new_va0, .attrib = "pos", .data = "short4norm"}),
-                                                           GC_ALLOC_INIT(vertex_array_t, {.values = new_va1, .attrib = "nor", .data = "short2norm"}),
-                                                           GC_ALLOC_INIT(vertex_array_t, {.values = new_va2, .attrib = "tex", .data = "short2norm"}),
-                                                       },
-                                                       3),
-	                                                    .index_array = u32_array_create_from_array(new_inda),
-	                                                    .scale_pos   = o->data->scale_pos,
-	                                                    .scale_tex   = 1.0});
+	mesh_data_t *raw = GC_ALLOC_INIT(mesh_data_t, {.name          = string("%s_decimated", o->base->name),
+	                                               .vertex_arrays = any_array_create_from_raw(
+	                                                   (void *[]){
+	                                                       GC_ALLOC_INIT(vertex_array_t, {.values = new_va0, .attrib = "pos", .data = "short4norm"}),
+	                                                       GC_ALLOC_INIT(vertex_array_t, {.values = new_va1, .attrib = "nor", .data = "short2norm"}),
+	                                                       GC_ALLOC_INIT(vertex_array_t, {.values = new_va2, .attrib = "tex", .data = "short2norm"}),
+	                                                   },
+	                                                   3),
+	                                               .index_array = u32_array_create_from_array(new_inda),
+	                                               .scale_pos   = o->data->scale_pos,
+	                                               .scale_tex   = 1.0});
 
 	mesh_data_t *new_data = mesh_data_create(raw);
 	o->data               = new_data;

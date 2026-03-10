@@ -31,7 +31,7 @@ void ui_header_render_ui() {
 	}
 }
 
-void ui_header_draw_tool_properties_layer_preview_dirty(void * _) {
+void ui_header_draw_tool_properties_layer_preview_dirty(void *_) {
 	context_raw->layer_preview_dirty = true;
 }
 
@@ -174,7 +174,7 @@ void ui_header_draw_tool_properties() {
 			ui_menu_draw(&ui_header_draw_tool_properties_color_picker_normal, -1, -1);
 		}
 		ui_text(tr("Normal", NULL), UI_ALIGN_LEFT, 0x00000000);
-		ui->_w                               = _w;
+		ui->_w = _w;
 
 		ui_handle_t *hocc                    = ui_handle(__ID__);
 		hocc->f                              = context_raw->picked_color->occlusion;
@@ -184,19 +184,19 @@ void ui_header_draw_tool_properties() {
 		hrough->f                            = context_raw->picked_color->roughness;
 		context_raw->picked_color->roughness = ui_slider(hrough, tr("Roughness", NULL), 0.0, 1.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
 
-		ui_handle_t *hmet                    = ui_handle(__ID__);
-		hmet->f                              = context_raw->picked_color->metallic;
-		context_raw->picked_color->metallic  = ui_slider(hmet, tr("Metallic", NULL), 0.0, 1.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
+		ui_handle_t *hmet                   = ui_handle(__ID__);
+		hmet->f                             = context_raw->picked_color->metallic;
+		context_raw->picked_color->metallic = ui_slider(hmet, tr("Metallic", NULL), 0.0, 1.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
 
-		ui_handle_t *hheight                 = ui_handle(__ID__);
-		hheight->f                           = context_raw->picked_color->height;
-		context_raw->picked_color->height    = ui_slider(hheight, tr("Height", NULL), 0.0, 1.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
+		ui_handle_t *hheight              = ui_handle(__ID__);
+		hheight->f                        = context_raw->picked_color->height;
+		context_raw->picked_color->height = ui_slider(hheight, tr("Height", NULL), 0.0, 1.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
 
-		ui_handle_t *hopac                   = ui_handle(__ID__);
-		hopac->f                             = context_raw->picked_color->opacity;
-		context_raw->picked_color->opacity   = ui_slider(hopac, tr("Opacity", NULL), 0.0, 1.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
+		ui_handle_t *hopac                 = ui_handle(__ID__);
+		hopac->f                           = context_raw->picked_color->opacity;
+		context_raw->picked_color->opacity = ui_slider(hopac, tr("Opacity", NULL), 0.0, 1.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
 
-		ui_handle_t *h_select_mat            = ui_handle(__ID__);
+		ui_handle_t *h_select_mat = ui_handle(__ID__);
 		if (h_select_mat->init) {
 			h_select_mat->b = context_raw->picker_select_material;
 		}
@@ -214,7 +214,7 @@ void ui_header_draw_tool_properties() {
 		}
 	}
 	else if (context_raw->tool == TOOL_TYPE_BAKE) {
-		ui->changed  = false;
+		ui->changed = false;
 
 		bool baking  = context_raw->pdirty > 0;
 		bool rt_bake = render_path_paint_is_rt_bake();
@@ -333,9 +333,9 @@ void ui_header_draw_tool_properties() {
 			draw_set_color(ui->ops->theme->HIGHLIGHT_COL);
 			ui_draw_rect(true, ui->_x + 1, ui->_y, (ui->_w - 2) * progress, UI_ELEMENT_H());
 			draw_set_color(0xffffffff);
-			ui_text(string_join(string_join(tr("Samples", NULL), ": "), i32_to_string(render_path_raytrace_bake_current_sample)), UI_ALIGN_LEFT, 0x00000000);
-			ui_text(string_join(string_join(tr("Rays/pixel", NULL), ": "), i32_to_string(render_path_raytrace_bake_rays_pix)), UI_ALIGN_LEFT, 0x00000000);
-			ui_text(string_join(string_join(tr("Rays/second", NULL), ": "), i32_to_string(render_path_raytrace_bake_rays_sec)), UI_ALIGN_LEFT, 0x00000000);
+			ui_text(string("%s: %d", tr("Samples", NULL), render_path_raytrace_bake_current_sample), UI_ALIGN_LEFT, 0x00000000);
+			ui_text(string("%s: %d", tr("Rays/pixel", NULL), render_path_raytrace_bake_rays_pix), UI_ALIGN_LEFT, 0x00000000);
+			ui_text(string("%s: %d", tr("Rays/second", NULL), render_path_raytrace_bake_rays_sec), UI_ALIGN_LEFT, 0x00000000);
 		}
 
 		if (context_raw->bake_type == BAKE_TYPE_CURVATURE) {
@@ -557,7 +557,7 @@ void ui_header_draw_tool_properties() {
 			if (touch_header) {
 				ui->_x -= 4 * sc;
 			}
-			ui->_w                   = math_floor((touch_header ? 54 : 60) * sc);
+			ui->_w = math_floor((touch_header ? 54 : 60) * sc);
 
 			ui_handle_t *xray_handle = ui_handle(__ID__);
 			if (xray_handle->init) {
@@ -592,11 +592,11 @@ void ui_header_draw_tool_properties() {
 					ui->_x -= 4 * sc;
 					context_raw->sym_z = ui_check(sym_z_handle, "", "");
 					ui->_x -= 4 * sc;
-					ui->_w      = math_floor(40 * sc);
+					ui->_w  = math_floor(40 * sc);
 					char *x = tr("X", NULL);
 					char *y = tr("Y", NULL);
 					char *z = tr("Z", NULL);
-					ui_text(string_join(string_join(x, y), z), UI_ALIGN_LEFT, 0x00000000);
+					ui_text(string("%s%s%s", x, y, z), UI_ALIGN_LEFT, 0x00000000);
 				}
 				else {
 					ui->_w = math_floor(56 * sc);
@@ -611,9 +611,9 @@ void ui_header_draw_tool_properties() {
 			else {
 				// Popup
 				ui->_w             = _w;
-				context_raw->sym_x = ui_check(sym_x_handle, string_join(string_join(tr("Symmetry", NULL), " "), tr("X", NULL)), "");
-				context_raw->sym_y = ui_check(sym_y_handle, string_join(string_join(tr("Symmetry", NULL), " "), tr("Y", NULL)), "");
-				context_raw->sym_z = ui_check(sym_z_handle, string_join(string_join(tr("Symmetry", NULL), " "), tr("Z", NULL)), "");
+				context_raw->sym_x = ui_check(sym_x_handle, string("%s %s", tr("Symmetry", NULL), tr("X", NULL)), "");
+				context_raw->sym_y = ui_check(sym_y_handle, string("%s %s", tr("Symmetry", NULL), tr("Y", NULL)), "");
+				context_raw->sym_z = ui_check(sym_z_handle, string("%s %s", tr("Symmetry", NULL), tr("Z", NULL)), "");
 			}
 
 			if (sym_x_handle->changed || sym_y_handle->changed || sym_z_handle->changed) {

@@ -29,8 +29,8 @@ char *tr(char *id, any_map_t *vars) {
 	if (vars != NULL) {
 		string_t_array_t *keys = map_keys(vars);
 		for (i32 i = 0; i < keys->length; ++i) {
-			char *search = string_join(string_join("{", keys->buffer[i]), "}");
-			translation      = string_copy(string_replace_all(translation, search, any_map_get(vars, keys->buffer[i])));
+			char *search = string("{%s}", keys->buffer[i]);
+			translation  = string_copy(string_replace_all(translation, search, any_map_get(vars, keys->buffer[i])));
 		}
 	}
 
@@ -93,7 +93,7 @@ void translator_load_translations(char *new_locale) {
 
 	if (!string_equals(config_raw->locale, "en")) {
 		// Load the translation file
-		char *translation_json = sys_buffer_to_string(iron_load_blob(string_join(string_join("data/locale/", config_raw->locale), ".json")));
+		char *translation_json = sys_buffer_to_string(iron_load_blob(string("data/locale/%s.json", config_raw->locale)));
 		gc_unroot(translator_translations);
 		translator_translations = json_parse_to_map(translation_json);
 		gc_root(translator_translations);
@@ -135,14 +135,14 @@ void translator_load_translations(char *new_locale) {
 			_translator_load_translations_cjk_font_path = "";
 			gc_root(_translator_load_translations_cjk_font_path);
 			gc_unroot(_translator_load_translations_cjk_font_disk_path);
-			_translator_load_translations_cjk_font_disk_path = string_join(path_data(), PATH_SEP);
+			_translator_load_translations_cjk_font_disk_path = string("%s%s", path_data(), PATH_SEP);
 			gc_root(_translator_load_translations_cjk_font_disk_path);
 		}
 		gc_unroot(_translator_load_translations_cjk_font_path);
-		_translator_load_translations_cjk_font_path = string_join(_translator_load_translations_cjk_font_path, "font_cjk.ttc");
+		_translator_load_translations_cjk_font_path = string("%sfont_cjk.ttc", _translator_load_translations_cjk_font_path);
 		gc_root(_translator_load_translations_cjk_font_path);
 		gc_unroot(_translator_load_translations_cjk_font_disk_path);
-		_translator_load_translations_cjk_font_disk_path = string_join(_translator_load_translations_cjk_font_disk_path, "font_cjk.ttc");
+		_translator_load_translations_cjk_font_disk_path = string("%sfont_cjk.ttc", _translator_load_translations_cjk_font_disk_path);
 		gc_root(_translator_load_translations_cjk_font_disk_path);
 
 		if (!iron_file_exists(_translator_load_translations_cjk_font_disk_path)) {
@@ -158,12 +158,12 @@ void translator_load_translations(char *new_locale) {
 	}
 }
 
-void translator_init_font_on_next_frame(void * _) {
-	bool         cjk        = _translator_init_font_cjk;
-	char    *font_path  = _translator_init_font_font_path;
-	f32          font_scale = _translator_init_font_font_scale;
+void translator_init_font_on_next_frame(void *_) {
+	bool  cjk        = _translator_init_font_cjk;
+	char *font_path  = _translator_init_font_font_path;
+	f32   font_scale = _translator_init_font_font_scale;
 
-	draw_font_t *f          = data_get_font(font_path);
+	draw_font_t *f = data_get_font(font_path);
 	if (cjk) {
 		i32 font_index = i32_map_get(translator_cjk_font_indices, config_raw->locale) != -1 ? i32_map_get(translator_cjk_font_indices, config_raw->locale) : 0;
 		f->index       = font_index;
@@ -214,7 +214,7 @@ string_t_array_t *translator_get_supported_locales() {
 	        "en",
 	    },
 	    2);
-	string_t_array_t *files = file_read_directory(string_join(string_join(path_data(), PATH_SEP), "locale"));
+	string_t_array_t *files = file_read_directory(string("%s%slocale", path_data(), PATH_SEP));
 	for (i32 i = 0; i < files->length; ++i) {
 		char *locale_filename = files->buffer[i];
 		// Trim the ".json" file extension from file names

@@ -21,9 +21,9 @@ void sim_update() {
 		object_t_array_t *objects = map_keys(sim_object_script_map);
 		for (i32 i = 0; i < objects->length; ++i) {
 			object_t *o    = objects->buffer[i];
-			char *s    = any_map_get(sim_object_script_map, o);
-			char *addr = i64_to_string((i64)(o->transform));
-			s              = string_join(string_join(string_join(string_join("{let transform=", addr), ";"), s), "}");
+			char     *s    = any_map_get(sim_object_script_map, o);
+			char     *addr = i64_to_string((i64)(o->transform));
+			s              = string("{let transform=%s;%s}", addr, s);
 			js_eval(s);
 		}
 
@@ -35,9 +35,9 @@ void sim_update() {
 		if (sim_record) {
 			render_target_t *rt     = any_map_get(render_path_render_targets, "last");
 			buffer_t        *pixels = gpu_get_texture_pixels(rt->_image);
-			#ifdef IRON_BGRA
+#ifdef IRON_BGRA
 			export_arm_bgra_swap(pixels);
-			#endif
+#endif
 			// iron_mp4_encode(pixels);
 		}
 	}
@@ -52,7 +52,7 @@ void sim_play() {
 			sim_record = false;
 			return;
 		}
-		char        *path = string_join(path_base_dir(project_filepath), "/output.mp4");
+		char            *path = string("%s/output.mp4", path_base_dir(project_filepath));
 		render_target_t *rt   = any_map_get(render_path_render_targets, "last");
 		// iron_mp4_begin(path, rt._image.width, rt._image.height);
 	}
@@ -103,7 +103,7 @@ void sim_duplicate() {
 	mesh_object_t *dup = scene_add_mesh_object(so->data, so->material, so->base->parent);
 	transform_set_matrix(dup->base->transform, so->base->transform->local);
 	any_array_push(project_paint_objects, dup);
-	dup->base->name    = so->base->name;
+	dup->base->name = so->base->name;
 
 	// Physics
 	physics_body_t *pb = any_imap_get(physics_body_object_map, so->base->uid);

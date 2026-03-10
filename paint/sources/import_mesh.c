@@ -15,7 +15,7 @@ void import_mesh_run(char *path, bool _clear_layers, bool replace_existing) {
 	gc_unroot(import_mesh_meshes_to_unwrap);
 	import_mesh_meshes_to_unwrap = NULL;
 
-	char *p                  = to_lower_case(path);
+	char *p = to_lower_case(path);
 	if (ends_with(p, ".obj")) {
 		import_obj_run(path, replace_existing);
 	}
@@ -23,8 +23,8 @@ void import_mesh_run(char *path, bool _clear_layers, bool replace_existing) {
 		import_blend_mesh_run(path, replace_existing);
 	}
 	else {
-		char   *ext      = substring(path, string_last_index_of(path, ".") + 1, string_length(path));
-		void *         importer = any_map_get(import_mesh_importers, ext); // JSValue -> (s: string)=>raw_mesh_t
+		char       *ext      = substring(path, string_last_index_of(path, ".") + 1, string_length(path));
+		void       *importer = any_map_get(import_mesh_importers, ext); // JSValue -> (s: string)=>raw_mesh_t
 		raw_mesh_t *mesh     = js_pcall_str(importer, path);
 		if (string_equals(mesh->name, "")) {
 			mesh->name = string_copy(path_base_name(path));
@@ -51,9 +51,9 @@ void import_mesh_run(char *path, bool _clear_layers, bool replace_existing) {
 	    1);
 	gc_root(project_mesh_assets);
 
-	#if defined(IRON_ANDROID) || defined(IRON_IOS)
+#if defined(IRON_ANDROID) || defined(IRON_IOS)
 	sys_title_set(substring(path, string_last_index_of(path, PATH_SEP) + 1, string_last_index_of(path, ".")));
-	#endif
+#endif
 }
 
 i32 import_mesh_finish_import_sort(void **pa, void **pb) {
@@ -100,16 +100,16 @@ void import_mesh_finish_import() {
 	context_raw->paint_body    = NULL;
 }
 
-void _import_mesh_make_mesh_finish_import(void * _) {
+void _import_mesh_make_mesh_finish_import(void *_) {
 	import_mesh_finish_import();
 }
 
-void _import_mesh_make_mesh_clear_layers(void * _) {
+void _import_mesh_make_mesh_clear_layers(void *_) {
 	layers_init();
 }
 
 void _import_mesh_make_mesh(raw_mesh_t *mesh) {
-	mesh_data_t *raw          = import_mesh_raw_mesh(mesh);
+	mesh_data_t *raw = import_mesh_raw_mesh(mesh);
 
 	mesh_data_t *md           = mesh_data_create(raw);
 	context_raw->paint_object = context_main_object();
@@ -144,7 +144,7 @@ void _import_mesh_make_mesh(raw_mesh_t *mesh) {
 	md->_->handle = string_copy(raw->name);
 	any_map_set(data_cached_meshes, md->_->handle, md);
 
-	context_raw->ddirty                               = 4;
+	context_raw->ddirty = 4;
 
 	ui_base_hwnds->buffer[TAB_AREA_SIDEBAR0]->redraws = 2;
 	ui_base_hwnds->buffer[TAB_AREA_SIDEBAR1]->redraws = 2;
@@ -205,12 +205,12 @@ bool _import_mesh_is_unique_name(char *s) {
 
 char *_import_mesh_number_ext(i32 i) {
 	if (i < 10) {
-		return string_join(".00", i32_to_string(i));
+		return string(".00%s", i32_to_string(i));
 	}
 	if (i < 100) {
-		return string_join(".0", i32_to_string(i));
+		return string(".0%s", i32_to_string(i));
 	}
-	return string_join(".", i32_to_string(i));
+	return string(".%s", i32_to_string(i));
 }
 
 void _import_mesh_add_mesh(raw_mesh_t *mesh) {
@@ -220,27 +220,27 @@ void _import_mesh_add_mesh(raw_mesh_t *mesh) {
 		util_mesh_pack_uvs(mesh->texa);
 	}
 
-	mesh_data_t   *md     = mesh_data_create(raw);
+	mesh_data_t *md = mesh_data_create(raw);
 
 	mesh_object_t *object = scene_add_mesh_object(md, context_raw->paint_object->material, context_raw->paint_object->base);
 	object->base->name    = mesh->name;
 	object->skip_context  = "paint";
 
 	// Ensure unique names
-	char *oname       = object->base->name;
-	char *ext         = "";
-	i32       i           = 0;
-	while (!_import_mesh_is_unique_name(string_join(oname, ext))) {
+	char *oname = object->base->name;
+	char *ext   = "";
+	i32   i     = 0;
+	while (!_import_mesh_is_unique_name(string("%s%s", oname, ext))) {
 		ext = string_copy(_import_mesh_number_ext(++i));
 	}
-	object->base->name = string_join(object->base->name, ext);
-	raw->name          = string_join(raw->name, ext);
+	object->base->name = string("%s%s", object->base->name, ext);
+	raw->name          = string("%s%s", raw->name, ext);
 
 	any_array_push(project_paint_objects, object);
 	md->_->handle = string_copy(raw->name);
 	any_map_set(data_cached_meshes, md->_->handle, md);
 
-	context_raw->ddirty                               = 4;
+	context_raw->ddirty = 4;
 
 	ui_base_hwnds->buffer[TAB_AREA_SIDEBAR0]->redraws = 2;
 	util_uv_uvmap_cached                              = false;

@@ -3,7 +3,7 @@
 
 node_shader_context_t *make_node_preview_run(material_t *data, material_context_t *matcon, ui_node_t *node, ui_node_canvas_t *group,
                                              ui_node_t_array_t *parents) {
-	char              *context_id = "mesh";
+	char                  *context_id = "mesh";
 	shader_context_t      *props      = GC_ALLOC_INIT(shader_context_t, {.name            = context_id,
 	                                                                     .depth_write     = false,
 	                                                                     .compare_mode    = "always",
@@ -23,9 +23,9 @@ node_shader_context_t *make_node_preview_run(material_t *data, material_context_
                                                                    1)});
 	node_shader_context_t *con_mesh   = node_shader_context_create(data, props);
 
-	con_mesh->allow_vcols             = true;
+	con_mesh->allow_vcols = true;
 
-	node_shader_t *kong               = node_shader_context_make_kong(con_mesh);
+	node_shader_t *kong = node_shader_context_make_kong(con_mesh);
 
 	node_shader_write_attrib_vert(kong, "output.pos = float4(input.pos.xy * 3.0, 0.0, 1.0);");
 	node_shader_write_attrib_vert(kong, "var madd: float2 = float2(0.5, 0.5);");
@@ -72,16 +72,16 @@ node_shader_context_t *make_node_preview_run(material_t *data, material_context_
 	gc_root(parser_material_matcon);
 
 	parser_material_transform_color_space = false;
-	char *res                         = parser_material_write_result(link);
+	char *res                             = parser_material_write_result(link);
 	parser_material_transform_color_space = true;
-	char *st                          = node->outputs->buffer[link->from_socket]->type;
+	char *st                              = node->outputs->buffer[link->from_socket]->type;
 	if (!string_equals(st, "RGB") && !string_equals(st, "RGBA") && !string_equals(st, "VECTOR")) {
 		res = string_copy(parser_material_to_vec3(res));
 	}
 	array_remove(links, link);
 
 	kong->frag_out = "float4";
-	node_shader_write_frag(kong, string_join(string_join("var basecol: float3 = ", res), ";"));
+	node_shader_write_frag(kong, string("var basecol: float3 = %s;", res));
 	node_shader_write_frag(kong, "output = float4(basecol.rgb, 1.0);");
 
 	parser_material_finalize(con_mesh);

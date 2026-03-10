@@ -23,11 +23,11 @@ i32 ui_menu_panel_x() {
 }
 
 i32 ui_menu_top_y() {
-	#ifdef IRON_IOS
+#ifdef IRON_IOS
 	if (config_is_iphone()) {
 		return UI_ELEMENT_H() + UI_ELEMENT_OFFSET();
 	}
-	#endif
+#endif
 
 	if (config_raw->touch_ui) {
 		return 0;
@@ -37,11 +37,11 @@ i32 ui_menu_top_y() {
 }
 
 i32 ui_menu_panel_y() {
-	#ifdef IRON_IOS
+#ifdef IRON_IOS
 	if (config_is_iphone()) {
 		return ui_header_h;
 	}
-	#endif
+#endif
 
 	i32 panel_y = 0;
 	if (config_raw->layout->buffer[LAYOUT_SIZE_HEADER] == 0) { // Floating
@@ -50,12 +50,12 @@ i32 ui_menu_panel_y() {
 	return panel_y;
 }
 
-void ui_menubar_render_ui_save_project_on_next_frame(void * _) {
+void ui_menubar_render_ui_save_project_on_next_frame(void *_) {
 	project_save(false);
 	box_projects_show();
 }
 
-void ui_menubar_render_ui_save_project(void * _) {
+void ui_menubar_render_ui_save_project(void *_) {
 	sys_notify_on_end_frame(&ui_menubar_render_ui_save_project_on_next_frame, NULL);
 }
 
@@ -118,11 +118,11 @@ void ui_menubar_render_ui() {
 			}
 
 			bool full = true;
-			#ifdef IRON_IOS
+#ifdef IRON_IOS
 			if (config_is_iphone()) {
 				full = false;
 			}
-			#endif
+#endif
 
 			if (full && ui_menubar_icon_button(ICON_HELP)) {
 				ui_menubar_show_menu(MENUBAR_CATEGORY_HELP);
@@ -223,13 +223,13 @@ void ui_menubar_draw_category_items_about_box() {
 
 	ui_row3();
 
-	#if defined(IRON_WINDOWS) || defined(IRON_LINUX) || defined(IRON_MACOS)
+#if defined(IRON_WINDOWS) || defined(IRON_LINUX) || defined(IRON_MACOS)
 	if (ui_icon_button(tr("Copy", NULL), ICON_COPY, UI_ALIGN_CENTER)) {
 		iron_copy_to_clipboard(_ui_menu_render_msg);
 	}
-	#else
+#else
 	ui_end_element();
-	#endif
+#endif
 
 	if (ui_icon_button(tr("Contributors", NULL), ICON_LINK, UI_ALIGN_CENTER)) {
 		iron_load_url("https://github.com/armory3d/armortools/graphs/contributors");
@@ -245,9 +245,9 @@ void ui_menubar_draw_category_items_on_check_for_updates_downloaded(char *url, b
 		update_info_t *update         = json_parse(sys_buffer_to_string(buffer));
 		i32            update_version = math_floor(update->version);
 		if (update_version > 0) {
-			char *date = config_get_date(); // 2019 -> 19
-			date           = string_copy(substring(date, 2, string_length(date)));
-			i32 date_int   = parse_int(string_replace_all(date, "-", ""));
+			char *date   = config_get_date(); // 2019 -> 19
+			date         = string_copy(substring(date, 2, string_length(date)));
+			i32 date_int = parse_int(string_replace_all(date, "-", ""));
 			if (update_version > date_int) {
 				any_map_t *vars = any_map_create();
 				any_map_set(vars, "url", manifest_url);
@@ -265,7 +265,7 @@ void ui_menubar_draw_category_items_on_check_for_updates_downloaded(char *url, b
 	}
 }
 
-void ui_menubar_draw_category_items_capture_screenshot(void * _) {
+void ui_menubar_draw_category_items_capture_screenshot(void *_) {
 	viewport_capture_screenshot();
 }
 
@@ -385,11 +385,11 @@ void ui_menubar_draw_category_items() {
 			ui->is_hovered = false;
 		}
 
-		#if defined(IRON_WINDOWS) || defined(IRON_LINUX) || defined(IRON_MACOS) || defined(IRON_WASM)
+#if defined(IRON_WINDOWS) || defined(IRON_LINUX) || defined(IRON_MACOS) || defined(IRON_WASM)
 		if (ui_menu_button(tr("Toggle Fullscreen", NULL), "alt+enter", ICON_FULLSCREEN)) {
 			base_toggle_fullscreen();
 		}
-		#endif
+#endif
 
 		ui->changed = false;
 
@@ -426,7 +426,7 @@ void ui_menubar_draw_category_items() {
 		if (split_view_handle->init) {
 			split_view_handle->b = context_raw->split_view;
 		}
-		context_raw->split_view = ui_check(split_view_handle, string_join(" ", tr("Split View", NULL)), "");
+		context_raw->split_view = ui_check(split_view_handle, string(" %s", tr("Split View", NULL)), "");
 		if (split_view_handle->changed) {
 			base_resize();
 		}
@@ -435,7 +435,7 @@ void ui_menubar_draw_category_items() {
 		if (cull_handle->init) {
 			cull_handle->b = context_raw->cull_backfaces;
 		}
-		context_raw->cull_backfaces = ui_check(cull_handle, string_join(" ", tr("Cull Backfaces", NULL)), "");
+		context_raw->cull_backfaces = ui_check(cull_handle, string(" %s", tr("Cull Backfaces", NULL)), "");
 		if (cull_handle->changed) {
 			make_material_parse_mesh_material();
 		}
@@ -444,12 +444,12 @@ void ui_menubar_draw_category_items() {
 		if (filter_handle->init) {
 			filter_handle->b = context_raw->texture_filter;
 		}
-		context_raw->texture_filter = ui_check(filter_handle, string_join(" ", tr("Filter Textures", NULL)), "");
+		context_raw->texture_filter = ui_check(filter_handle, string(" %s", tr("Filter Textures", NULL)), "");
 		if (filter_handle->changed) {
 			gpu_use_linear_sampling(context_raw->texture_filter);
 		}
 
-		context_raw->draw_wireframe = ui_check(context_raw->wireframe_handle, string_join(" ", tr("Wireframe", NULL)), "");
+		context_raw->draw_wireframe = ui_check(context_raw->wireframe_handle, string(" %s", tr("Wireframe", NULL)), "");
 		if (context_raw->wireframe_handle->changed) {
 			gpu_texture_t *current = _draw_current;
 			draw_end();
@@ -458,7 +458,7 @@ void ui_menubar_draw_category_items() {
 			make_material_parse_mesh_material();
 		}
 
-		context_raw->draw_texels = ui_check(context_raw->texels_handle, string_join(" ", tr("Texels", NULL)), "");
+		context_raw->draw_texels = ui_check(context_raw->texels_handle, string(" %s", tr("Texels", NULL)), "");
 		if (context_raw->texels_handle->changed) {
 			make_material_parse_mesh_material();
 		}
@@ -467,20 +467,20 @@ void ui_menubar_draw_category_items() {
 		if (compass_handle->init) {
 			compass_handle->b = context_raw->show_compass;
 		}
-		context_raw->show_compass = ui_check(compass_handle, string_join(" ", tr("Compass", NULL)), "");
+		context_raw->show_compass = ui_check(compass_handle, string(" %s", tr("Compass", NULL)), "");
 		if (compass_handle->changed) {
 			context_raw->ddirty = 2;
 		}
 
 		context_raw->show_envmap_handle->b = context_raw->show_envmap;
-		context_raw->show_envmap           = ui_check(context_raw->show_envmap_handle, string_join(" ", tr("Envmap", NULL)), "");
+		context_raw->show_envmap           = ui_check(context_raw->show_envmap_handle, string(" %s", tr("Envmap", NULL)), "");
 		if (context_raw->show_envmap_handle->changed) {
 			context_load_envmap();
 			context_raw->ddirty = 2;
 		}
 
 		context_raw->show_envmap_blur_handle->b = context_raw->show_envmap_blur;
-		context_raw->show_envmap_blur           = ui_check(context_raw->show_envmap_blur_handle, string_join(" ", tr("Blur Envmap", NULL)), "");
+		context_raw->show_envmap_blur           = ui_check(context_raw->show_envmap_blur_handle, string(" %s", tr("Blur Envmap", NULL)), "");
 		if (context_raw->show_envmap_blur_handle->changed) {
 			context_raw->ddirty = 2;
 		}
@@ -548,7 +548,7 @@ void ui_menubar_draw_category_items() {
 		}
 
 		for (i32 i = 0; i < modes->length; ++i) {
-			char *shortcut = config_raw->touch_ui ? "" : string_join(string_join(any_map_get(config_keymap, "viewport_mode"), ", "), shortcuts->buffer[i]);
+			char *shortcut = config_raw->touch_ui ? "" : string("%s, %s", any_map_get(config_keymap, "viewport_mode"), shortcuts->buffer[i]);
 			ui_radio(mode_handle, i, modes->buffer[i], shortcut);
 		}
 
@@ -566,11 +566,11 @@ void ui_menubar_draw_category_items() {
 
 		bool full = true;
 
-		#ifdef IRON_IOS
+#ifdef IRON_IOS
 		if (config_is_iphone()) {
 			full = false;
 		}
-		#endif
+#endif
 
 		if (full) {
 
@@ -667,14 +667,14 @@ void ui_menubar_draw_category_items() {
 		any_map_set(vars, "zoom_shortcut", any_map_get(config_keymap, "action_zoom"));
 		any_map_set(vars, "pan_shortcut", any_map_get(config_keymap, "action_pan"));
 		char *orbit_and_rotate_tooltip = tr("Orbit and Rotate mode:\n{rotate_shortcut} or move right mouse button to rotate.\n{zoom_shortcut} or scroll to "
-		                                        "zoom.\n{pan_shortcut} or move middle mouse to pan.",
-		                                        vars);
+		                                    "zoom.\n{pan_shortcut} or move middle mouse to pan.",
+		                                    vars);
 		char *fly_tooltip = tr("Fly mode:\nHold the right mouse button and one of the following commands:\nmove mouse to rotate.\nw, up or scroll up to "
-		                           "move forward.\ns, down or scroll down to move backward.\na or left to move left.\nd or right to move right.\ne to move "
-		                           "up.\nq to move down.\nHold shift to move faster or alt to move slower.",
-		                           NULL);
+		                       "move forward.\ns, down or scroll down to move backward.\na or left to move left.\nd or right to move right.\ne to move "
+		                       "up.\nq to move down.\nHold shift to move faster or alt to move slower.",
+		                       NULL);
 		if (ui->is_hovered) {
-			ui_tooltip(string_join(string_join(orbit_and_rotate_tooltip, "\n\n"), fly_tooltip));
+			ui_tooltip(string("%s\n\n%s", orbit_and_rotate_tooltip, fly_tooltip));
 		}
 
 		ui_menu_separator();
@@ -698,97 +698,58 @@ void ui_menubar_draw_category_items() {
 	}
 	else if (ui_menubar_category == MENUBAR_CATEGORY_HELP) {
 		if (ui_menu_button(tr("Manual", NULL), "", ICON_HELP)) {
-			iron_load_url(string_join(manifest_url, "/manual"));
+			iron_load_url(string("%s/manual", manifest_url));
 		}
 		if (ui_menu_button(tr("How To", NULL), "", ICON_HELP)) {
-			iron_load_url(string_join(manifest_url, "/howto"));
+			iron_load_url(string("%s/howto", manifest_url));
 		}
 		if (ui_menu_button(tr("What's New", NULL), "", ICON_LINK)) {
-			iron_load_url(string_join(manifest_url, "/notes"));
+			iron_load_url(string("%s/notes", manifest_url));
 		}
 		if (ui_menu_button(tr("Issue Tracker", NULL), "", ICON_LINK)) {
 			iron_load_url("https://github.com/armory3d/armortools/issues");
 		}
 		if (ui_menu_button(tr("Report Bug", NULL), "", ICON_LINK)) {
-			#if defined(IRON_MACOS) || defined(IRON_IOS) // Limited url length
-			iron_load_url(string_join(
-			    string_join(
-			        string_join(
-			            string_join(
-			                string_join(string_join(string_join("https://github.com/armory3d/armortools/issues/new?labels=bug&template=bug_report.md&body=*",
-			                                                    manifest_title),
-			                                        "%20"),
-			                            manifest_version),
-			                "-"),
-			            config_get_sha()),
-			        ",%20"),
-			    iron_system_id()));
-			#else
-			iron_load_url(
-			    string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join("https://github.com/armory3d/armortools/issues/"
-			                                                                                                    "new?labels=bug&template=bug_report.md&body=*",
-			                                                                                                    manifest_title),
-			                                                                                        "%20"),
-			                                                                            manifest_version),
-			                                                                "-"),
-			                                                    config_get_sha()),
-			                                        ",%20"),
-			                            iron_system_id()),
-			                "*%0A%0A**Issue description:**%0A%0A**Steps to reproduce:**%0A%0A"));
-			#endif
+#if defined(IRON_MACOS) || defined(IRON_IOS) // Limited url length
+			iron_load_url(string("https://github.com/armory3d/armortools/issues/new?labels=bug&template=bug_report.md&body=*%s%%20%s-%s,%%20%s", manifest_title,
+			                     manifest_version, config_get_sha(), iron_system_id()));
+#else
+			iron_load_url(string("https://github.com/armory3d/armortools/issues/new?labels=bug&template=bug_report.md&body=*%s%%20%s-%s,%%20%s*%%0A%%0A**Issue "
+			                     "description:**%%0A%%0A**Steps to reproduce:**%%0A%%0A",
+			                     manifest_title, manifest_version, config_get_sha(), iron_system_id()));
+#endif
 		}
 		if (ui_menu_button(tr("Request Feature", NULL), "", ICON_LINK)) {
-			#if defined(IRON_MACOS) || defined(IRON_IOS) // Limited url length
-			iron_load_url(string_join(
-			    string_join(string_join(string_join(string_join(string_join(string_join("https://github.com/armory3d/armortools/issues/"
-			                                                                            "new?labels=feature%20request&template=feature_request.md&body=*",
-			                                                                            manifest_title),
-			                                                                "%20"),
-			                                                    manifest_version),
-			                                        "-"),
-			                            config_get_sha()),
-			                ",%20"),
-			    iron_system_id()));
-			#else
-			iron_load_url(string_join(
-			    string_join(
-			        string_join(string_join(string_join(string_join(string_join(string_join("https://github.com/armory3d/armortools/issues/"
-			                                                                                "new?labels=feature%20request&template=feature_request.md&body=*",
-			                                                                                manifest_title),
-			                                                                    "%20"),
-			                                                        manifest_version),
-			                                            "-"),
-			                                config_get_sha()),
-			                    ",%20"),
-			        iron_system_id()),
-			    "*%0A%0A**Feature description:**%0A%0A"));
-			#endif
+#if defined(IRON_MACOS) || defined(IRON_IOS) // Limited url length
+			iron_load_url(
+			    string("https://github.com/armory3d/armortools/issues/new?labels=feature%%20request&template=feature_request.md&body=*%s%%20%s-%s,%%20%s",
+			           manifest_title, manifest_version, config_get_sha(), iron_system_id()));
+#else
+			iron_load_url(string("https://github.com/armory3d/armortools/issues/"
+			                     "new?labels=feature%%20request&template=feature_request.md&body=*%s%%20%s-%s,%%20%s*%%0A%%0A**Feature description:**%%0A%%0A",
+			                     manifest_title, manifest_version, config_get_sha(), iron_system_id()));
+#endif
 		}
 		ui_menu_separator();
 
 		if (ui_menu_button(tr("Check for Updates...", NULL), "", ICON_NONE)) {
-			#ifdef IRON_ANDROID
+#ifdef IRON_ANDROID
 			iron_load_url(manifest_url_android);
-			#elif defined(IRON_IOS)
+#elif defined(IRON_IOS)
 			iron_load_url(manifest_url_ios);
-			#else
+#else
 			// Retrieve latest version number
 			iron_file_download("https://check-for-updates.armory3d.workers.dev", &ui_menubar_draw_category_items_on_check_for_updates_downloaded, 0, NULL);
-			#endif
+#endif
 		}
 
 		if (ui_menu_button(tr("About...", NULL), "", ICON_INFO)) {
 
-			char *msg =
-			    string_join(string_join(string_join(string_join(string_join(string_join(string_join(manifest_title, ".org - v"), manifest_version), " ("),
-			                                                    config_get_date()),
-			                                        ") - "),
-			                            config_get_sha()),
-			                "\n");
-			msg = string_join(msg, string_join(string_join(iron_system_id(), " - "), strings_graphics_api()));
+			char *msg = string("%s.org - v%s (%s) - %s\n", manifest_title, manifest_version, config_get_date(), config_get_sha());
+			msg       = string("%s%s - %s", msg, iron_system_id(), strings_graphics_api());
 
 			char *gpu = gpu_device_name();
-			msg           = string_join(msg, string_join("\n", gpu));
+			msg       = string("%s\n%s", msg, gpu);
 
 			gc_unroot(_ui_menu_render_msg);
 			_ui_menu_render_msg = string_copy(msg);

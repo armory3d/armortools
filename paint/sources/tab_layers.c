@@ -57,7 +57,7 @@ void tab_layers_button_2d_view() {
 		ui_base_show_2d_view(VIEW_2D_TYPE_LAYER);
 	}
 	else if (ui->is_hovered) {
-		ui_tooltip(string_join(string_join(string_join(tr("Show 2D View", NULL), " ("), any_map_get(config_keymap, "toggle_2d_view")), ")"));
+		ui_tooltip(string("%s (%s)", tr("Show 2D View", NULL), (char *)any_map_get(config_keymap, "toggle_2d_view")));
 	}
 }
 
@@ -90,7 +90,7 @@ void tab_layers_button_new_layer_clear(slot_layer_t *m) {
 	slot_layer_clear(m, 0xffffffff, NULL, 1.0, layers_default_rough, 0.0);
 }
 
-void tab_layers_button_new_update_fill_layers(void * _) {
+void tab_layers_button_new_update_fill_layers(void *_) {
 	layers_update_fill_layers();
 }
 
@@ -98,7 +98,7 @@ void tab_layers_button_new_black_mask(slot_layer_t *m) {
 	slot_layer_clear(m, 0x00000000, NULL, 1.0, layers_default_rough, 0.0);
 }
 
-void tab_layers_button_new_sculpt_layer(void * _) {
+void tab_layers_button_new_sculpt_layer(void *_) {
 	sculpt_layers_create_sculpt_layer();
 }
 
@@ -125,7 +125,7 @@ void tab_layers_button_new_menu() {
 		if (slot_layer_is_mask(l)) {
 			context_set_layer(l->parent);
 		}
-		l               = context_raw->layer;
+		l = context_raw->layer;
 
 		slot_layer_t *m = layers_new_mask(false, l, -1);
 		sys_notify_on_next_frame(&tab_layers_button_new_black_mask, m);
@@ -137,7 +137,7 @@ void tab_layers_button_new_menu() {
 		if (slot_layer_is_mask(l)) {
 			context_set_layer(l->parent);
 		}
-		l               = context_raw->layer;
+		l = context_raw->layer;
 
 		slot_layer_t *m = layers_new_mask(false, l, -1);
 		sys_notify_on_next_frame(&tab_layers_button_new_layer_clear, m);
@@ -149,7 +149,7 @@ void tab_layers_button_new_menu() {
 		if (slot_layer_is_mask(l)) {
 			context_set_layer(l->parent);
 		}
-		l               = context_raw->layer;
+		l = context_raw->layer;
 
 		slot_layer_t *m = layers_new_mask(false, l, -1);
 		sys_notify_on_next_frame(&tab_layers_button_new_to_fill_layer, m);
@@ -212,7 +212,7 @@ void tab_layers_combo_filter() {
 	if (filter_handle->changed) {
 		for (i32 i = 0; i < project_paint_objects->length; ++i) {
 			mesh_object_t *p           = project_paint_objects->buffer[i];
-			char      *filter_name = ar->buffer[context_raw->layer_filter];
+			char          *filter_name = ar->buffer[context_raw->layer_filter];
 			p->base->visible           = context_raw->layer_filter == 0 || string_equals(p->base->name, filter_name) || project_is_atlas_object(p);
 		}
 		if (context_raw->layer_filter == 0 && context_raw->merged_object_is_atlas) { // All
@@ -290,7 +290,7 @@ void tab_layers_draw_layer_slot(slot_layer_t *l, i32 i, bool mini) {
 	f32 checkw = (ui->_window_w / (float)100 * 8) / (float)UI_SCALE();
 
 	// Highlight drag destination
-	f32 absy   = ui->_window_y + ui->_y;
+	f32 absy = ui->_window_y + ui->_y;
 	if (base_is_dragging && base_drag_layer != NULL && context_in_layers()) {
 		if (mouse_y > absy + step && mouse_y < absy + step * 3) {
 			bool down                          = array_index_of(project_layers, base_drag_layer) >= i;
@@ -345,25 +345,25 @@ void tab_layers_draw_layer_slot_mini(slot_layer_t *l, i32 i) {
 	ui->_y = uiy + ui->ops->theme->ELEMENT_H * 2 * UI_SCALE();
 }
 
-void tab_layers_draw_layer_slot_full_delete_layer(void * _) {
+void tab_layers_draw_layer_slot_full_delete_layer(void *_) {
 	tab_layers_delete_layer(context_raw->layer);
 }
 
 void tab_layers_draw_layer_slot_full(slot_layer_t *l, i32 i) {
-	i32          step         = ui->ops->theme->ELEMENT_H;
-	f32          center       = (step / (float)2) * UI_SCALE();
-	f32          uiw          = ui->_w;
-	f32          uix          = ui->_x;
-	f32          uiy          = ui->_y;
+	i32 step   = ui->ops->theme->ELEMENT_H;
+	f32 center = (step / (float)2) * UI_SCALE();
+	f32 uiw    = ui->_w;
+	f32 uix    = ui->_x;
+	f32 uiy    = ui->_y;
 
-	bool         has_children = slot_layer_is_group(l) || (slot_layer_is_layer(l) && slot_layer_get_masks(l, false) != NULL);
+	bool has_children = slot_layer_is_group(l) || (slot_layer_is_layer(l) && slot_layer_get_masks(l, false) != NULL);
 
 	// Draw eye icon
-	f32_array_t *row          = f32_array_create_from_raw(
-        (f32[]){
-            0.08,
-        },
-        1);
+	f32_array_t *row = f32_array_create_from_raw(
+	    (f32[]){
+	        0.08,
+	    },
+	    1);
 	ui_row(row);
 	gpu_texture_t *icons = resource_get("icons.k");
 	rect_t        *r     = resource_tile18(icons, l->visible ? ICON18_EYE_ON : ICON18_EYE_OFF);
@@ -586,9 +586,7 @@ void tab_layers_handle_layer_icon_state(slot_layer_t *l, i32 i, ui_state_t state
 		}
 		if (i < 9) {
 			i32 i1 = (i + 1);
-			ui_tooltip(string_join(string_join(string_join(string_join(string_join(l->name, " - ("), any_map_get(config_keymap, "select_layer")), " "),
-			                                   i32_to_string(i1)),
-			                       ")"));
+			ui_tooltip(string("%s - (%s %d)", l->name, (char *)any_map_get(config_keymap, "select_layer"), i1));
 		}
 		else {
 			ui_tooltip(l->name);
@@ -676,8 +674,8 @@ ui_state_t tab_layers_draw_layer_icon(slot_layer_t *l, i32 i, f32 uix, f32 uiy, 
 		if (!is_typing) {
 			if (i < 9 && operator_shortcut(any_map_get(config_keymap, "select_layer"), SHORTCUT_TYPE_DOWN)) {
 				char *number = i32_to_string(i + 1);
-				i32       width  = draw_string_width(ui->ops->font, ui->font_size, number) + 10;
-				i32       height = draw_font_height(ui->ops->font, ui->font_size);
+				i32   width  = draw_string_width(ui->ops->font, ui->font_size, number) + 10;
+				i32   height = draw_font_height(ui->ops->font, ui->font_size);
 				draw_set_color(ui->ops->theme->TEXT_COL);
 				draw_filled_rect(uix, uiy, width, height);
 				draw_set_color(ui->ops->theme->BUTTON_COL);
@@ -716,22 +714,22 @@ bool tab_layers_can_merge_down(slot_layer_t *l) {
 	return true;
 }
 
-void tab_layers_draw_layer_context_menu_update_fill_layers(void * _) {
+void tab_layers_draw_layer_context_menu_update_fill_layers(void *_) {
 	layers_update_fill_layers();
 }
 
-void tab_layers_draw_layer_context_menu_set_bits(void * _) {
+void tab_layers_draw_layer_context_menu_set_bits(void *_) {
 	layers_set_bits();
 }
 
-void tab_layers_draw_layer_context_menu_duplicate(void * _) {
+void tab_layers_draw_layer_context_menu_duplicate(void *_) {
 	slot_layer_t *l = tab_layers_l;
 	context_set_layer(l);
 	history_duplicate_layer();
 	layers_duplicate_layer(l);
 }
 
-void tab_layers_draw_layer_context_menu_merge_down(void * _) {
+void tab_layers_draw_layer_context_menu_merge_down(void *_) {
 	slot_layer_t *l = tab_layers_l;
 	context_set_layer(l);
 	history_merge_layers();
@@ -740,12 +738,12 @@ void tab_layers_draw_layer_context_menu_merge_down(void * _) {
 		slot_layer_to_paint_layer(context_raw->layer);
 }
 
-void tab_layers_draw_layer_context_menu_merge_group(void * _) {
+void tab_layers_draw_layer_context_menu_merge_group(void *_) {
 	slot_layer_t *l = tab_layers_l;
 	layers_merge_group(l);
 }
 
-void tab_layers_draw_layer_context_menu_apply(void * _) {
+void tab_layers_draw_layer_context_menu_apply(void *_) {
 	slot_layer_t *l    = tab_layers_l;
 	context_raw->layer = l;
 	history_apply_mask();
@@ -755,14 +753,14 @@ void tab_layers_draw_layer_context_menu_apply(void * _) {
 	context_raw->layers_preview_dirty = true;
 }
 
-void tab_layers_draw_layer_context_menu_invert(void * _) {
+void tab_layers_draw_layer_context_menu_invert(void *_) {
 	slot_layer_t *l = tab_layers_l;
 	context_set_layer(l);
 	history_invert_mask();
 	slot_layer_invert_mask(l);
 }
 
-void tab_layers_draw_layer_context_menu_clear(void * _) {
+void tab_layers_draw_layer_context_menu_clear(void *_) {
 	slot_layer_t *l = tab_layers_l;
 	if (!slot_layer_is_group(l)) {
 		history_clear_layer();
@@ -780,17 +778,17 @@ void tab_layers_draw_layer_context_menu_clear(void * _) {
 	}
 }
 
-void tab_layers_draw_layer_context_menu_delete(void * _) {
+void tab_layers_draw_layer_context_menu_delete(void *_) {
 	tab_layers_delete_layer(context_raw->layer);
 }
 
-void tab_layers_draw_layer_context_menu_to_paint_layer(void * _) {
+void tab_layers_draw_layer_context_menu_to_paint_layer(void *_) {
 	slot_layer_t *l = tab_layers_l;
 	slot_layer_is_layer(l) ? history_to_paint_layer() : history_to_paint_mask();
 	slot_layer_to_paint_layer(l);
 }
 
-void tab_layers_draw_layer_context_menu_to_fill_layer(void * _) {
+void tab_layers_draw_layer_context_menu_to_fill_layer(void *_) {
 	slot_layer_t *l = tab_layers_l;
 	slot_layer_is_layer(l) ? history_to_fill_layer() : history_to_fill_mask();
 	slot_layer_to_fill_layer(l);
@@ -798,14 +796,14 @@ void tab_layers_draw_layer_context_menu_to_fill_layer(void * _) {
 
 void tab_layers_draw_layer_context_menu_export_on_file_picked(char *path) {
 	slot_layer_t *l = tab_layers_l;
-	char     *f = ui_files_filename;
+	char         *f = ui_files_filename;
 	if (string_equals(f, "")) {
 		f = string_copy(tr("untitled", NULL));
 	}
 	if (!ends_with(f, ".png")) {
-		f = string_join(f, ".png");
+		f = string("%s.png", f);
 	}
-	iron_write_png(string_join(string_join(path, PATH_SEP), f), gpu_get_texture_pixels(l->texpaint), l->texpaint->width, l->texpaint->height, 3); // RRR1
+	iron_write_png(string("%s%s%s", path, PATH_SEP, f), gpu_get_texture_pixels(l->texpaint), l->texpaint->width, l->texpaint->height, 3); // RRR1
 }
 
 void tab_layers_draw_layer_context_menu_draw() {
@@ -900,7 +898,7 @@ void tab_layers_draw_layer_context_menu_draw() {
 
 	if (!slot_layer_is_group(l)) {
 		ui_menu_align();
-		#if defined(IRON_ANDROID) || defined(IRON_IOS)
+#if defined(IRON_ANDROID) || defined(IRON_IOS)
 		string_t_array_t *ar = any_array_create_from_raw(
 		    (void *[]){
 		        "128",
@@ -911,7 +909,7 @@ void tab_layers_draw_layer_context_menu_draw() {
 		        "4096",
 		    },
 		    6);
-		#else
+#else
 		string_t_array_t *ar = any_array_create_from_raw(
 		    (void *[]){
 		        "128",
@@ -924,7 +922,7 @@ void tab_layers_draw_layer_context_menu_draw() {
 		        "16384",
 		    },
 		    8);
-		#endif
+#endif
 		ui_handle_t *h            = ui_handle(__ID__);
 		bool         changed_last = h->changed;
 		h->i                      = base_res_handle->i;
@@ -955,10 +953,10 @@ void tab_layers_draw_layer_context_menu_draw() {
 			ui_menu_keep_open = true;
 		}
 
-		#if defined(IRON_ANDROID) || defined(IRON_IOS)
-		// let bits_items: string[] = ["8"];
-		// ui_inline_radio(base_bits_handle, bits_items, ui_align_t.LEFT);
-		#else
+#if defined(IRON_ANDROID) || defined(IRON_IOS)
+// let bits_items: string[] = ["8"];
+// ui_inline_radio(base_bits_handle, bits_items, ui_align_t.LEFT);
+#else
 		ui_menu_separator();
 		ui_menu_align();
 		ui_menu_label(tr("Bits", NULL), NULL);
@@ -971,7 +969,7 @@ void tab_layers_draw_layer_context_menu_draw() {
 		    },
 		    3);
 		ui_inline_radio(base_bits_handle, bits_items, UI_ALIGN_LEFT);
-		#endif
+#endif
 		if (base_bits_handle->changed) {
 			sys_notify_on_next_frame(&tab_layers_draw_layer_context_menu_set_bits, NULL);
 			make_material_parse_paint_material(true);
@@ -1083,7 +1081,7 @@ void tab_layers_draw_layer_context_menu(slot_layer_t *l, bool mini) {
 	ui_menu_draw(&tab_layers_draw_layer_context_menu_draw, -1, -1);
 }
 
-void tab_layers_make_mask_preview_rgba32_on_next_frame(void * _) {
+void tab_layers_make_mask_preview_rgba32_on_next_frame(void *_) {
 	slot_layer_t *l = tab_layers_l;
 	draw_begin(context_raw->mask_preview_rgba32, false, 0);
 	draw_set_pipeline(ui_view2d_pipe);

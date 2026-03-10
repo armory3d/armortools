@@ -7,9 +7,9 @@ void tab_scripts_draw_export(char *path) {
 	if (string_equals(f, "")) {
 		f = string_copy(tr("untitled", NULL));
 	}
-	path = string_join(string_join(path, PATH_SEP), f);
+	path = string("%s%s%s", path, PATH_SEP, f);
 	if (!ends_with(path, ".js")) {
-		path = string_join(path, ".js");
+		path = string("%s.js", path);
 	}
 	iron_file_save_bytes(path, sys_string_to_buffer(str), 0);
 }

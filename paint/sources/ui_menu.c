@@ -2,7 +2,7 @@
 #include "global.h"
 
 void ui_menu_render() {
-	i32 menu_w                     = ui_menu_commands != NULL ? math_floor(base_default_element_w * UI_SCALE() * 2.3) : math_floor(UI_ELEMENT_W() * 2.3);
+	i32 menu_w = ui_menu_commands != NULL ? math_floor(base_default_element_w * UI_SCALE() * 2.3) : math_floor(UI_ELEMENT_W() * 2.3);
 
 	i32 _FILL_BUTTON_BG            = ui->ops->theme->FILL_BUTTON_BG;
 	ui->ops->theme->FILL_BUTTON_BG = false;
@@ -33,7 +33,7 @@ void ui_menu_render() {
 
 	ui_menu_hide_flag = ui->combo_selected_handle == NULL && !ui_menu_keep_open && !ui_menu_show_first &&
 	                    (ui->changed || ui->input_released || ui->input_released_r || ui->is_escape_down);
-	ui_menu_keep_open              = false;
+	ui_menu_keep_open = false;
 
 	ui->ops->theme->FILL_BUTTON_BG = _FILL_BUTTON_BG;
 	ui->ops->theme->ELEMENT_OFFSET = _ELEMENT_OFFSET;
@@ -114,7 +114,7 @@ bool ui_menu_button(char *text, char *label, icon_t icon) {
 	}
 	i32  _x_left = ui->_x;
 	i32  _y_top  = ui->_y;
-	bool result  = ui_button(string_join(config_button_spacing, text), config_button_align, label);
+	bool result  = ui_button(string("%s%s", config_button_spacing, text), config_button_align, label);
 	if (string_equals(label, ">") && result) {
 		ui_menu_keep_open = true;
 	}
@@ -147,12 +147,12 @@ bool ui_icon_button(char *text, icon_t icon, ui_align_t align) {
 	i32 _y_top  = ui->_y;
 	i32 _w      = ui->_w;
 	if (!string_equals(text, "")) {
-		text = align == UI_ALIGN_LEFT ? string_join("        ", text) : string_join("      ", text);
+		text = align == UI_ALIGN_LEFT ? string("        %s", text) : string("      %s", text);
 	}
 
 	char *tooltip = "";
-	i32       textw   = draw_string_width(ui->ops->font, ui->font_size, text);
-	f32       wmax    = config_raw->touch_ui ? 0.9 : 0.8;
+	i32   textw   = draw_string_width(ui->ops->font, ui->font_size, text);
+	f32   wmax    = config_raw->touch_ui ? 0.9 : 0.8;
 	if (textw > _w * wmax) {
 		tooltip = string_copy(text);
 		text    = "";
@@ -190,8 +190,8 @@ bool ui_icon_button(char *text, icon_t icon, ui_align_t align) {
 		             rect->w / (float)2, rect->h / (float)2);
 		ui->image_scroll_align = true;
 
-		ui->_x                 = _x_right;
-		ui->_y                 = _y_bottom;
+		ui->_x = _x_right;
+		ui->_y = _y_bottom;
 	}
 	return result;
 }

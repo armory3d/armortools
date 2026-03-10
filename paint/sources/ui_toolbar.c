@@ -3,7 +3,7 @@
 
 void ui_toolbar_init() {}
 
-void ui_toolbar_draw_tool_select_tool(void * _) {
+void ui_toolbar_draw_tool_select_tool(void *_) {
 	context_select_tool(_ui_toolbar_i);
 }
 
@@ -12,13 +12,13 @@ void ui_toolbar_draw_tool(i32 tool, gpu_texture_t *img, i32 icon_accent) {
 	if (context_raw->tool == tool) {
 		ui_toolbar_draw_highlight();
 	}
-	i32     tile_y  = math_floor(tool / (float)12);
-	i32     tile_x  = tile_y % 2 == 0 ? tool % 12 : (11 - (tool % 12));
-	i32     tile_i  = tile_y * 12 + tile_x;
-	rect_t *rect    = resource_tile50(img, tile_i);
-	i32     _y      = ui->_y;
+	i32     tile_y = math_floor(tool / (float)12);
+	i32     tile_x = tile_y % 2 == 0 ? tool % 12 : (11 - (tool % 12));
+	i32     tile_i = tile_y * 12 + tile_x;
+	rect_t *rect   = resource_tile50(img, tile_i);
+	i32     _y     = ui->_y;
 
-	bool    visible = true;
+	bool visible = true;
 	if (context_is_floating_toolbar()) {
 		i32 statush = config_raw->layout->buffer[LAYOUT_SIZE_STATUS_H];
 		i32 statusy = iron_window_height() - statush;
@@ -44,13 +44,13 @@ void ui_toolbar_draw_tool(i32 tool, gpu_texture_t *img, i32 icon_accent) {
 
 	if (ui->is_hovered) {
 		char *tooltip = tr(ui_toolbar_tool_names->buffer[tool], NULL);
-		char *key     = any_map_get(config_keymap, string_join("tool_", to_lower_case(ui_toolbar_tool_names->buffer[tool])));
+		char *key     = any_map_get(config_keymap, string("tool_%s", to_lower_case(ui_toolbar_tool_names->buffer[tool])));
 		if (!string_equals(key, "")) {
-			tooltip = string_join(tooltip, string_join(string_join(" (", key), ")"));
+			tooltip = string("%s (%s)", tooltip, key);
 		}
 		char *extra = ui_toolbar_tooltip_extras->buffer[tool];
 		if (!string_equals(extra, "")) {
-			tooltip = string_join(tooltip, string_join(" - ", tr(extra, config_keymap)));
+			tooltip = string("%s - %s", tooltip, tr(extra, config_keymap));
 		}
 		ui_tooltip(tooltip);
 	}
@@ -83,7 +83,7 @@ void ui_toolbar_draw_show_3d_view() {
 		i32 toolbar_w      = ui_toolbar_default_w * UI_SCALE() + 14 * UI_SCALE();
 		i32 _WINDOW_BG_COL = ui->ops->theme->WINDOW_BG_COL;
 		// ui.ops.theme.WINDOW_BG_COL = ui.ops.theme.SEPARATOR_COL;
-		i32 y              = ui_header_h + 8 * UI_SCALE();
+		i32 y = ui_header_h + 8 * UI_SCALE();
 
 		if ((ui_view2d_show || ui_nodes_show) && !config_raw->touch_ui) {
 			y += toolbar_w;
@@ -142,11 +142,11 @@ void ui_toolbar_render_ui() {
 			y += ui_toolbar_w(false);
 		}
 
-		#ifdef IRON_IOS
+#ifdef IRON_IOS
 		if (config_is_iphone()) {
 			y += ui_toolbar_w(false);
 		}
-		#endif
+#endif
 	}
 
 	if (ui_window(ui_toolbar_handle, x, y, ui_toolbar_w(false), h, false)) {
@@ -233,11 +233,11 @@ void ui_toolbar_tool_properties_menu() {
 		y += ui_toolbar_w(false);
 	}
 
-	#ifdef IRON_IOS
+#ifdef IRON_IOS
 	if (config_is_iphone() && base_view3d_show) {
 		y += ui_toolbar_w(false);
 	}
-	#endif
+#endif
 
 	ui_menu_draw(&ui_toolbar_tool_properties_menu_draw, ui->_x + ui->_w + 6 * UI_SCALE(), y);
 }

@@ -2,9 +2,9 @@
 #include "global.h"
 
 void import_blend_mesh_ui_blender_folder_picked(char *path) {
-	#ifdef IRON_WINDOWS
-	path                = string_copy(string_replace_all(path, "\\", "/"));
-	#endif
+#ifdef IRON_WINDOWS
+	path = string_copy(string_replace_all(path, "\\", "/"));
+#endif
 	config_raw->blender = string_copy(path);
 	config_save();
 }
@@ -41,22 +41,18 @@ void import_blend_mesh_run(char *path, bool replace_existing) {
 	char *save       = "tmp.obj";
 	char *bpy_folder = "data/";
 	if (path_is_protected()) {
-		save       = string_join(iron_internal_save_path(), save);
+		save       = string("%s%s", iron_internal_save_path(), save);
 		bpy_folder = "";
 	}
 
 	// Have to use ; instead of \n on windows
-	char *py = string_join(string_join(string_join("\
-import bpy;\
-bpy.ops.wm.obj_export(filepath='",
-	                                                   bpy_folder),
-	                                       string_replace_all(save, "\\", "/")),
-	                           "',export_triangulated_mesh=True,export_materials=False,check_existing=False)");
-	#ifdef IRON_WINDOWS
-	char *bl = string_join(string_join("\"", string_replace_all(config_raw->blender, "/", "\\")), "\"");
-	#else
+	char *py = string("import bpy;bpy.ops.wm.obj_export(filepath='%s%s',export_triangulated_mesh=True,export_materials=False,check_existing=False)", bpy_folder,
+	                  string_replace_all(save, "\\", "/"));
+#ifdef IRON_WINDOWS
+	char *bl = string("\"%s\"", string_replace_all(config_raw->blender, "/", "\\"));
+#else
 	char *bl = string_replace_all(config_raw->blender, " ", "\\ ");
-	#endif
-	iron_sys_command(string_join(string_join(string_join(string_join(string_join(bl, " \""), path), "\" -b --python-expr \""), py), "\""));
+#endif
+	iron_sys_command(string("%s \"%s\" -b --python-expr \"%s\"", bl, path, py));
 	import_obj_run(save, replace_existing);
 }

@@ -2,14 +2,14 @@
 #include "global.h"
 
 node_shader_t *node_shader_create(node_shader_context_t *context) {
-	node_shader_t *raw     = GC_ALLOC_INIT(node_shader_t, {0});
-	raw->context           = context;
-	raw->ins               = any_array_create_from_raw((void *[]){}, 0);
-	raw->outs              = any_array_create_from_raw((void *[]){}, 0);
-	raw->frag_out          = "float4";
-	raw->consts            = any_array_create_from_raw((void *[]){}, 0);
-	raw->textures          = any_array_create_from_raw((void *[]){}, 0);
-	raw->functions         = any_map_create();
+	node_shader_t *raw = GC_ALLOC_INIT(node_shader_t, {0});
+	raw->context       = context;
+	raw->ins           = any_array_create_from_raw((void *[]){}, 0);
+	raw->outs          = any_array_create_from_raw((void *[]){}, 0);
+	raw->frag_out      = "float4";
+	raw->consts        = any_array_create_from_raw((void *[]){}, 0);
+	raw->textures      = any_array_create_from_raw((void *[]){}, 0);
+	raw->functions     = any_map_create();
 
 	raw->vert              = "";
 	raw->vert_end          = "";
@@ -38,8 +38,8 @@ void node_shader_add_constant(node_shader_t *raw, char *s, char *link) {
 	// inp: float4
 	if (char_ptr_array_index_of(raw->consts, s) == -1) {
 		string_t_array_t *ar    = string_split(s, ": ");
-		char         *uname = ar->buffer[0];
-		char         *utype = ar->buffer[1];
+		char             *uname = ar->buffer[0];
+		char             *utype = ar->buffer[1];
 
 		////
 		if (string_equals(utype, "float2"))
@@ -76,32 +76,32 @@ void node_shader_add_function(node_shader_t *raw, char *s) {
 
 void node_shader_write_vert(node_shader_t *raw, char *s) {
 	if (raw->vert_write_normal > 0) {
-		raw->vert_normal = string_join(raw->vert_normal, string_join(s, "\n"));
+		raw->vert_normal = string("%s%s\n", raw->vert_normal, s);
 	}
 	else {
-		raw->vert = string_join(raw->vert, string_join(s, "\n"));
+		raw->vert = string("%s%s\n", raw->vert, s);
 	}
 }
 
 void node_shader_write_end_vert(node_shader_t *raw, char *s) {
-	raw->vert_end = string_join(raw->vert_end, string_join(s, "\n"));
+	raw->vert_end = string("%s%s\n", raw->vert_end, s);
 }
 
 void node_shader_write_attrib_vert(node_shader_t *raw, char *s) {
-	raw->vert_attribs = string_join(raw->vert_attribs, string_join(s, "\n"));
+	raw->vert_attribs = string("%s%s\n", raw->vert_attribs, s);
 }
 
 void node_shader_write_frag(node_shader_t *raw, char *s) {
 	if (raw->frag_write_normal > 0) {
-		raw->frag_normal = string_join(raw->frag_normal, string_join(s, "\n"));
+		raw->frag_normal = string("%s%s\n", raw->frag_normal, s);
 	}
 	else {
-		raw->frag = string_join(raw->frag, string_join(s, "\n"));
+		raw->frag = string("%s%s\n", raw->frag, s);
 	}
 }
 
 void node_shader_write_attrib_frag(node_shader_t *raw, char *s) {
-	raw->frag_attribs = string_join(raw->frag_attribs, string_join(s, "\n"));
+	raw->frag_attribs = string("%s%s\n", raw->frag_attribs, s);
 }
 
 char *node_shader_data_size(node_shader_t *raw, char *data) {
@@ -123,7 +123,7 @@ void node_shader_vstruct_to_vsin(node_shader_t *raw) {
 	vertex_element_t_array_t *vs = raw->context->data->vertex_elements;
 	for (i32 i = 0; i < vs->length; ++i) {
 		vertex_element_t *e = vs->buffer[i];
-		node_shader_add_in(raw, string_join(string_join(string_join(string_join("", e->name), ": "), "float"), node_shader_data_size(raw, e->data)));
+		node_shader_add_in(raw, string("%s: float%s", e->name, node_shader_data_size(raw, e->data)));
 	}
 }
 
@@ -132,86 +132,86 @@ char *node_shader_get(node_shader_t *raw) {
 
 	char *s = "";
 
-	s           = string_join(s, "struct vert_in {\n");
+	s = string("%sstruct vert_in {\n", s);
 	for (i32 i = 0; i < raw->ins->length; ++i) {
 		char *a = raw->ins->buffer[i];
-		s           = string_join(s, string_join(string_join("\t", a), ";\n"));
+		s       = string("%s\t%s;\n", s, a);
 	}
-	s = string_join(s, "}\n\n");
+	s = string("%s}\n\n", s);
 
-	s = string_join(s, "struct vert_out {\n");
-	s = string_join(s, "\tpos: float4;\n");
+	s = string("%sstruct vert_out {\n", s);
+	s = string("%s\tpos: float4;\n", s);
 	for (i32 i = 0; i < raw->outs->length; ++i) {
 		char *a = raw->outs->buffer[i];
-		s           = string_join(s, string_join(string_join("\t", a), ";\n"));
+		s       = string("%s\t%s;\n", s, a);
 	}
 	if (raw->consts->length == 0) {
-		s = string_join(s, "\tempty: float4;\n");
+		s = string("%s\tempty: float4;\n", s);
 	}
-	s = string_join(s, "}\n\n");
+	s = string("%s}\n\n", s);
 
-	s = string_join(s, "#[set(everything)]\n");
-	s = string_join(s, "const constants: {\n");
+	s = string("%s#[set(everything)]\n", s);
+	s = string("%sconst constants: {\n", s);
 	for (i32 i = 0; i < raw->consts->length; ++i) {
 		char *a = raw->consts->buffer[i];
-		s           = string_join(s, string_join(string_join("\t", a), ";\n"));
+		s       = string("%s\t%s;\n", s, a);
 	}
 	if (raw->consts->length == 0) {
-		s = string_join(s, "\tempty: float4;\n");
+		s = string("%s\tempty: float4;\n", s);
 	}
-	s = string_join(s, "};\n\n");
+	s = string("%s};\n\n", s);
 
 	if (raw->textures->length > 0) {
-		s = string_join(s, "#[set(everything)]\n");
-		s = string_join(s, "const sampler_linear: sampler;\n\n");
+		s = string("%s#[set(everything)]\n", s);
+		s = string("%sconst sampler_linear: sampler;\n\n", s);
 	}
 
 	for (i32 i = 0; i < raw->textures->length; ++i) {
 		char *a = raw->textures->buffer[i];
-		s           = string_join(s, "#[set(everything)]\n");
-		s           = string_join(s, string_join(string_join("const ", a), ": tex2d;\n"));
+		s       = string("%s#[set(everything)]\n", s);
+		s       = string("%sconst %s: tex2d;\n", s, a);
 	}
 
 	string_t_array_t *keys = map_keys(raw->functions);
 	for (i32 i = 0; i < keys->length; ++i) {
 		char *f = any_map_get(raw->functions, keys->buffer[i]);
-		s           = string_join(s, string_join(f, "\n"));
+		s       = string("%s%s\n", s, f);
 	}
-	s = string_join(s, "\n");
+	s = string("%s\n", s);
 
-	s = string_join(s, "fun kong_vert(input: vert_in): vert_out {\n");
-	s = string_join(s, "\tvar output: vert_out;\n\n");
-	s = string_join(s, raw->vert_attribs);
-	s = string_join(s, raw->vert_normal);
-	s = string_join(s, raw->vert);
-	s = string_join(s, raw->vert_end);
+	s = string("%sfun kong_vert(input: vert_in): vert_out {\n", s);
+	s = string("%s\tvar output: vert_out;\n\n", s);
+	s = string("%s%s", s, raw->vert_attribs);
+	s = string("%s%s", s, raw->vert_normal);
+	s = string("%s%s", s, raw->vert);
+	s = string("%s%s", s, raw->vert_end);
 	if (raw->consts->length == 0) {
-		s = string_join(s, "\toutput.empty = constants.empty;\n");
+		s = string("%s\toutput.empty = constants.empty;\n", s);
 	}
-	s = string_join(s, "\n\treturn output;\n");
-	s = string_join(s, "}\n\n");
+	s = string("%s\n\treturn output;\n", s);
+	s = string("%s}\n\n", s);
 
-	s = string_join(s, string_join(string_join("fun kong_frag(input: vert_out): ", raw->frag_out), " {\n"));
-	s = string_join(s, string_join(string_join("\tvar output: ", raw->frag_out), ";\n\n"));
-	s = string_join(s, raw->frag_attribs);
-	s = string_join(s, raw->frag_normal);
-	s = string_join(s, raw->frag);
-	s = string_join(s, raw->frag_end);
-	s = string_join(s, "\n\treturn output;\n");
-	s = string_join(s, "}\n\n");
+	s = string("%sfun kong_frag(input: vert_out): %s {\n", s, raw->frag_out);
+	s = string("%s\tvar output: %s;\n\n", s, raw->frag_out);
+	s = string("%s%s", s, raw->frag_attribs);
+	s = string("%s%s", s, raw->frag_normal);
+	s = string("%s%s", s, raw->frag);
+	s = string("%s%s", s, raw->frag_end);
+	s = string("%s\n\treturn output;\n", s);
+	s = string("%s}\n\n", s);
 
-	s = string_join(s, "#[pipe]\n");
-	s = string_join(s, "struct pipe {\n");
-	s = string_join(s, "\tvertex = kong_vert;\n");
-	s = string_join(s, "\tfragment = kong_frag;\n");
-	s = string_join(s, "}\n");
+	s = string("%s#[pipe]\n", s);
+	s = string("%sstruct pipe {\n", s);
+	s = string("%s\tvertex = kong_vert;\n", s);
+	s = string("%s\tfragment = kong_frag;\n", s);
+	s = string("%s}\n", s);
 
 	return s;
 }
 
 node_shader_context_t *node_shader_context_create(material_t *material, shader_context_t *props) {
-	node_shader_context_t *raw                        = GC_ALLOC_INIT(node_shader_context_t, {0});
-	raw->material                                     = material;
+	node_shader_context_t *raw = GC_ALLOC_INIT(node_shader_context_t, {0});
+	raw->material              = material;
 
 	vertex_element_t_array_t *vertex_elements_default = any_array_create_from_raw(
 	    (void *[]){
@@ -220,19 +220,19 @@ node_shader_context_t *node_shader_context_create(material_t *material, shader_c
 	    },
 	    2);
 
-	raw->data            = GC_ALLOC_INIT(shader_context_t, {.name                    = props->name,
-	                                                        .depth_write             = props->depth_write,
-	                                                        .compare_mode            = props->compare_mode,
-	                                                        .cull_mode               = props->cull_mode,
-	                                                        .blend_source            = props->blend_source,
-	                                                        .blend_destination       = props->blend_destination,
-	                                                        .alpha_blend_source      = props->alpha_blend_source,
-	                                                        .alpha_blend_destination = props->alpha_blend_destination,
-	                                                        .fragment_shader         = "",
-	                                                        .vertex_shader           = "",
-	                                                        .vertex_elements         = props->vertex_elements != NULL ? props->vertex_elements : vertex_elements_default,
-	                                                        .color_attachments       = props->color_attachments,
-	                                                        .depth_attachment        = props->depth_attachment});
+	raw->data = GC_ALLOC_INIT(shader_context_t, {.name                    = props->name,
+	                                             .depth_write             = props->depth_write,
+	                                             .compare_mode            = props->compare_mode,
+	                                             .cull_mode               = props->cull_mode,
+	                                             .blend_source            = props->blend_source,
+	                                             .blend_destination       = props->blend_destination,
+	                                             .alpha_blend_source      = props->alpha_blend_source,
+	                                             .alpha_blend_destination = props->alpha_blend_destination,
+	                                             .fragment_shader         = "",
+	                                             .vertex_shader           = "",
+	                                             .vertex_elements         = props->vertex_elements != NULL ? props->vertex_elements : vertex_elements_default,
+	                                             .color_attachments       = props->color_attachments,
+	                                             .depth_attachment        = props->depth_attachment});
 
 	shader_context_t *rw = raw->data;
 	rw->_                = GC_ALLOC_INIT(shader_context_runtime_t, {0});
@@ -315,8 +315,8 @@ void node_shader_context_add_texture_unit(node_shader_context_t *raw, char *name
 }
 
 node_shader_t *node_shader_context_make_kong(node_shader_context_t *raw) {
-	raw->data->vertex_shader   = string_join(string_join(string_join(raw->material->name, "_"), raw->data->name), ".vert");
-	raw->data->fragment_shader = string_join(string_join(string_join(raw->material->name, "_"), raw->data->name), ".frag");
+	raw->data->vertex_shader   = string("%s_%s.vert", raw->material->name, raw->data->name);
+	raw->data->fragment_shader = string("%s_%s.frag", raw->material->name, raw->data->name);
 	raw->kong                  = node_shader_create(raw);
 	return raw->kong;
 }

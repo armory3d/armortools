@@ -253,7 +253,7 @@ char *parser_material_parse_group(ui_node_t *node, ui_node_socket_t *socket) {
 	}
 	i32               index     = parser_material_socket_index(node, socket);
 	ui_node_socket_t *inp       = output_node->inputs->buffer[index];
-	char         *out_group = parser_material_parse_input(inp);
+	char             *out_group = parser_material_parse_input(inp);
 	array_pop(parser_material_parents);
 	parser_material_pop_group();
 	return out_group;
@@ -264,7 +264,7 @@ char *parser_material_parse_group_input(ui_node_t *node, ui_node_socket_t *socke
 	parser_material_pop_group();
 	i32               index = parser_material_socket_index(node, socket);
 	ui_node_socket_t *inp   = parent->inputs->buffer[index];
-	char         *res   = parser_material_parse_input(inp);
+	char             *res   = parser_material_parse_input(inp);
 	any_array_push(parser_material_parents, parent); // Return to group
 	parser_material_push_group(parser_material_get_group(parent->name));
 	return res;
@@ -323,11 +323,11 @@ shader_out_t *parser_material_parse_shader(ui_node_t *node, ui_node_socket_t *so
 			sout->out_basecol                 = string_copy(parser_material_parse_vector_input(node->inputs->buffer[0]));
 			parser_material_parsing_basecolor = false;
 			// Occlusion
-			sout->out_occlusion               = string_copy(parser_material_parse_value_input(node->inputs->buffer[2], false));
+			sout->out_occlusion = string_copy(parser_material_parse_value_input(node->inputs->buffer[2], false));
 			// Roughness
-			sout->out_roughness               = string_copy(parser_material_parse_value_input(node->inputs->buffer[3], false));
+			sout->out_roughness = string_copy(parser_material_parse_value_input(node->inputs->buffer[3], false));
 			// Metallic
-			sout->out_metallic                = string_copy(parser_material_parse_value_input(node->inputs->buffer[4], false));
+			sout->out_metallic = string_copy(parser_material_parse_value_input(node->inputs->buffer[4], false));
 			// Emission
 			if (parser_material_parse_emission) {
 				sout->out_emission = string_copy(parser_material_parse_value_input(node->inputs->buffer[6], false));
@@ -392,7 +392,7 @@ char *parser_material_parse_vector(ui_node_t *node, ui_node_socket_t *socket) {
 		return parser_material_parse_group_input(node, socket);
 	}
 	else if (any_map_get(parser_material_custom_nodes, node->type) != NULL) {
-		void * cb = any_map_get(parser_material_custom_nodes, node->type); // JSValue -> (n: ui_node_t, s: string)=>string
+		void *cb = any_map_get(parser_material_custom_nodes, node->type); // JSValue -> (n: ui_node_t, s: string)=>string
 		return js_call_ptr_str(cb, node, socket->name);
 	}
 	return "float3(0.0, 0.0, 0.0)";
@@ -406,7 +406,7 @@ void parse_normal_map_color_input(ui_node_socket_t *inp) {
 	bool _parser_material_is_frag = parser_material_is_frag;
 	parser_material_is_frag       = true;
 	if (!parser_material_arm_export_tangents) {
-		parser_material_write(parser_material_kong, string_join(string_join("var texn: float3 = (", parser_material_out_normaltan), ") * 2.0 - 1.0;"));
+		parser_material_write(parser_material_kong, string("var texn: float3 = (%s) * 2.0 - 1.0;", parser_material_out_normaltan));
 		parser_material_write(parser_material_kong, "texn.y = -texn.y;");
 		if (!parser_material_cotangent_frame_written) {
 			parser_material_cotangent_frame_written = true;
@@ -428,10 +428,10 @@ char *parser_material_parse_value_input(ui_node_socket_t *inp, bool vector_as_gr
 		char *st      = from_node->outputs->buffer[l->from_socket]->type;
 		if (string_equals(st, "RGB") || string_equals(st, "RGBA") || string_equals(st, "VECTOR")) {
 			if (vector_as_grayscale) {
-				return string_join(string_join("dot(", res_var), ".rbg, float3(0.299, 0.587, 0.114))");
+				return string("dot(%s.rbg, float3(0.299, 0.587, 0.114))", res_var);
 			}
 			else {
-				return string_join(res_var, ".x");
+				return string("%s.x", res_var);
 			}
 		}
 		else { // VALUE
@@ -452,7 +452,7 @@ char *parser_material_parse_value(ui_node_t *node, ui_node_socket_t *socket) {
 		return parser_material_parse_group_input(node, socket);
 	}
 	else if (any_map_get(parser_material_custom_nodes, node->type) != NULL) {
-		void * cb = any_map_get(parser_material_custom_nodes, node->type);
+		void *cb = any_map_get(parser_material_custom_nodes, node->type);
 		return js_call_ptr_str(cb, node, socket->name);
 	}
 	return "0.0";
@@ -469,14 +469,14 @@ char *parser_material_get_coord(ui_node_t *node) {
 }
 
 char *parser_material_res_var_name(ui_node_t *node, ui_node_socket_t *socket) {
-	return string_join(string_join(string_join(parser_material_node_name(node, NULL), "_"), parser_material_safesrc(socket->name)), "_res");
+	return string("%s_%s_res", parser_material_node_name(node, NULL), parser_material_safesrc(socket->name));
 }
 
 char *parser_material_write_result(ui_node_link_t *l) {
 	ui_node_t        *from_node   = parser_material_get_node(l->from_id);
 	ui_node_socket_t *from_socket = from_node->outputs->buffer[l->from_socket];
-	char         *res_var     = parser_material_res_var_name(from_node, from_socket);
-	char         *st          = from_socket->type;
+	char             *res_var     = parser_material_res_var_name(from_node, from_socket);
+	char             *st          = from_socket->type;
 	if (char_ptr_array_index_of(parser_material_parsed, res_var) < 0) {
 		any_array_push(parser_material_parsed, res_var);
 		if (string_equals(st, "RGB") || string_equals(st, "RGBA") || string_equals(st, "VECTOR")) {
@@ -485,7 +485,7 @@ char *parser_material_write_result(ui_node_link_t *l) {
 				return NULL;
 			}
 			any_map_set(parser_material_parsed_map, res_var, res);
-			parser_material_write(parser_material_kong, string_join(string_join(string_join(string_join("var ", res_var), ": float3 = "), res), ";"));
+			parser_material_write(parser_material_kong, string("var %s: float3 = %s;", res_var, res));
 		}
 		else if (string_equals(st, "VALUE")) {
 			char *res = parser_material_parse_value(from_node, from_socket);
@@ -493,14 +493,14 @@ char *parser_material_write_result(ui_node_link_t *l) {
 				return NULL;
 			}
 			any_map_set(parser_material_parsed_map, res_var, res);
-			parser_material_write(parser_material_kong, string_join(string_join(string_join(string_join("var ", res_var), ": float = "), res), ";"));
+			parser_material_write(parser_material_kong, string("var %s: float = %s;", res_var, res));
 		}
 	}
 	return res_var;
 }
 
 char *parser_material_store_var_name(ui_node_t *node) {
-	return string_join(parser_material_node_name(node, NULL), "_store");
+	return string("%s_store", parser_material_node_name(node, NULL));
 }
 
 char *parser_material_vec1(f32 v) {
@@ -516,12 +516,12 @@ char *parser_material_vec3(f32_array_t *v) {
 	char *v0 = f32_to_string_with_zeros(v->buffer[0]);
 	char *v1 = f32_to_string_with_zeros(v->buffer[1]);
 	char *v2 = f32_to_string_with_zeros(v->buffer[2]);
-	return string_join(string_join(string_join(string_join(string_join(string_join("float3(", v0), ", "), v1), ", "), v2), ")");
+	return string("float3(%s, %s, %s)", v0, v1, v2);
 }
 
 char *parser_material_to_vec3(char *s) {
 	// return "float3(" + s + ")";
-	return string_join(string_join(string_join(string_join(string_join(string_join("float3(", s), ", "), s), ", "), s), ")");
+	return string("float3(%s, %s, %s)", s, s, s);
 }
 
 ui_node_t *parser_material_node_by_type(ui_node_t_array_t *nodes, char *ntype) {
@@ -550,11 +550,11 @@ char *parser_material_node_name(ui_node_t *node, ui_node_t_array_t *_parents) {
 	char *s = node->name;
 	for (i32 i = 0; i < _parents->length; ++i) {
 		ui_node_t *p = _parents->buffer[i];
-		s            = string_join(string_join(string_join(p->name, i32_to_string(p->id)), "_"), s);
+		s            = string("%s%s_%s", p->name, i32_to_string(p->id), s);
 	}
 	s       = string_copy(parser_material_safesrc(s));
 	i32 nid = node->id;
-	s       = string_join(s, i32_to_string(nid));
+	s       = string("%s%s", s, i32_to_string(nid));
 	return s;
 }
 
@@ -567,7 +567,7 @@ char *parser_material_safesrc(char *s) {
 			s = string_copy(string_replace_all(s, char_at(s, i), "_"));
 		}
 		if (i == 0 && digit) {
-			s = string_join("_", s);
+			s = string("_%s", s);
 		}
 	}
 	return s;
@@ -589,7 +589,7 @@ bind_tex_t *parser_material_make_bind_tex(char *tex_name, char *file) {
 }
 
 char *u8_array_string_at(u8_array_t *a, i32 i) {
-	char         *s  = u8_array_to_string(a);
+	char             *s  = u8_array_to_string(a);
 	string_t_array_t *ss = string_split(s, "\n");
 	return ss->buffer[i];
 }

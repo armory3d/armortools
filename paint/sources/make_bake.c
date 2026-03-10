@@ -3,26 +3,22 @@
 
 void make_bake_run(node_shader_context_t *con, node_shader_t *kong) {
 	if (context_raw->bake_type == BAKE_TYPE_CURVATURE) {
-		bool      pass     = parser_material_bake_passthrough;
-		char *strength = pass ? parser_material_bake_passthrough_strength : string_join(f32_to_string(context_raw->bake_curv_strength), "");
-		char *radius   = pass ? parser_material_bake_passthrough_radius : string_join(f32_to_string(context_raw->bake_curv_radius), "");
-		char *offset   = pass ? parser_material_bake_passthrough_offset : string_join(f32_to_string(context_raw->bake_curv_offset), "");
-		strength           = string_join(string_join("float(", strength), ")");
-		radius             = string_join(string_join("float(", radius), ")");
-		offset             = string_join(string_join("float(", offset), ")");
-		kong->frag_n       = true;
+		bool  pass     = parser_material_bake_passthrough;
+		char *strength = pass ? parser_material_bake_passthrough_strength : f32_to_string(context_raw->bake_curv_strength);
+		char *radius   = pass ? parser_material_bake_passthrough_radius : f32_to_string(context_raw->bake_curv_radius);
+		char *offset   = pass ? parser_material_bake_passthrough_offset : f32_to_string(context_raw->bake_curv_offset);
+		strength       = string("float(%s)", strength);
+		radius         = string("float(%s)", radius);
+		offset         = string("float(%s)", offset);
+		kong->frag_n   = true;
 		node_shader_write_frag(kong, "var dx: float3 = ddx3(n);");
 		node_shader_write_frag(kong, "var dy: float3 = ddy3(n);");
 		node_shader_write_frag(kong, "var curvature: float = max(dot(dx, dx), dot(dy, dy));");
-		node_shader_write_frag(
-		    kong, string_join(string_join(string_join(string_join(string_join(string_join("curvature = clamp(pow(curvature, (1.0 / ", radius), ") * 0.25) * "),
-		                                                          strength),
-		                                              " * 2.0 + "),
-		                                  offset),
-		                      " / 10.0, 0.0, 1.0);"));
+		node_shader_write_frag(kong,
+		                       string("curvature = clamp(pow(curvature, (1.0 / %s) * 0.25) * %s * 2.0 + %s / 10.0, 0.0, 1.0);", radius, strength, offset));
 		if (context_raw->bake_axis != BAKE_AXIS_XYZ) {
 			char *axis = make_bake_axis_string(context_raw->bake_axis);
-			node_shader_write_frag(kong, string_join(string_join("curvature *= dot(n, ", axis), ");"));
+			node_shader_write_frag(kong, string("curvature *= dot(n, %s);", axis));
 		}
 		node_shader_write_frag(kong, "output[0] = float4(curvature, curvature, curvature, 1.0);");
 	}

@@ -49,11 +49,11 @@ void tab_materials_button_nodes() {
 		ui_base_show_material_nodes();
 	}
 	else if (ui->is_hovered) {
-		ui_tooltip(string_join(string_join(string_join(tr("Show Node Editor", NULL), " ("), any_map_get(config_keymap, "toggle_node_editor")), ")"));
+		ui_tooltip(string("%s (%s)", tr("Show Node Editor", NULL), (char *)any_map_get(config_keymap, "toggle_node_editor")));
 	}
 }
 
-void tab_materials_draw_slots_duplicate(void * _) {
+void tab_materials_draw_slots_duplicate(void *_) {
 	i32 i                 = _tab_materials_draw_slots;
 	context_raw->material = slot_material_create(project_materials->buffer[0]->data, NULL);
 	any_array_push(project_materials, context_raw->material);
@@ -159,7 +159,7 @@ void tab_materials_draw_slots_menu() {
 	}
 }
 
-void tab_materials_draw_slots_update_fill_layers(void * _) {
+void tab_materials_draw_slots_update_fill_layers(void *_) {
 	layers_update_fill_layers();
 }
 
@@ -214,20 +214,20 @@ void tab_materials_draw_slots(bool mini) {
 			}
 
 			// Draw material icon
-			f32        uix       = ui->_x;
-			f32        uiy       = ui->_y;
-			i32        tile      = UI_SCALE() > 1 ? 100 : 50;
-			f32        imgh      = mini ? ui_sidebar_default_w_mini * 0.85 * UI_SCALE() : 50 * UI_SCALE();
-			ui_state_t state     = project_materials->buffer[i]->preview_ready ? ui_image(img, 0xffffffff, imgh)
-			                                                                   : ui_sub_image(resource_get("icons.k"), 0xffffffff, -1.0, tile, tile, tile, tile);
+			f32        uix   = ui->_x;
+			f32        uiy   = ui->_y;
+			i32        tile  = UI_SCALE() > 1 ? 100 : 50;
+			f32        imgh  = mini ? ui_sidebar_default_w_mini * 0.85 * UI_SCALE() : 50 * UI_SCALE();
+			ui_state_t state = project_materials->buffer[i]->preview_ready ? ui_image(img, 0xffffffff, imgh)
+			                                                               : ui_sub_image(resource_get("icons.k"), 0xffffffff, -1.0, tile, tile, tile, tile);
 
 			// Draw material numbers when selecting a material via keyboard shortcut
-			bool       is_typing = ui->is_typing;
+			bool is_typing = ui->is_typing;
 			if (!is_typing) {
 				if (i < 9 && operator_shortcut(any_map_get(config_keymap, "select_material"), SHORTCUT_TYPE_DOWN)) {
 					char *number = i32_to_string(i + 1);
-					i32       width  = draw_string_width(ui->ops->font, ui->font_size, number) + 10;
-					i32       height = draw_font_height(ui->ops->font, ui->font_size);
+					i32   width  = draw_string_width(ui->ops->font, ui->font_size, number) + 10;
+					i32   height = draw_font_height(ui->ops->font, ui->font_size);
 					draw_set_color(ui->ops->theme->TEXT_COL);
 					draw_filled_rect(uix, uiy, width, height);
 					draw_set_color(ui->ops->theme->BUTTON_COL);
@@ -268,11 +268,7 @@ void tab_materials_draw_slots(bool mini) {
 				ui_tooltip_image(img_full, 0);
 				if (i < 9) {
 					i32 i1 = i + 1;
-					ui_tooltip(string_join(string_join(string_join(string_join(string_join(project_materials->buffer[i]->canvas->name, " - ("),
-					                                                           any_map_get(config_keymap, "select_material")),
-					                                               " "),
-					                                   i32_to_string(i1)),
-					                       ")"));
+					ui_tooltip(string("%s - (%s %d)", project_materials->buffer[i]->canvas->name, (char *)any_map_get(config_keymap, "select_material"), i1));
 				}
 				else {
 					ui_tooltip(project_materials->buffer[i]->canvas->name);
@@ -285,11 +281,8 @@ void tab_materials_draw_slots(bool mini) {
 				if (ui->is_hovered) {
 					if (i < 9) {
 						i32 i1 = i + 1;
-						ui_tooltip(string_join(string_join(string_join(string_join(string_join(project_materials->buffer[i]->canvas->name, " - ("),
-						                                                           any_map_get(config_keymap, "select_material")),
-						                                               " "),
-						                                   i32_to_string(i1)),
-						                       ")"));
+						ui_tooltip(
+						    string("%s - (%s %d)", project_materials->buffer[i]->canvas->name, (char *)any_map_get(config_keymap, "select_material"), i1));
 					}
 					else {
 						ui_tooltip(project_materials->buffer[i]->canvas->name);
@@ -313,7 +306,7 @@ void tab_materials_draw_slots(bool mini) {
 	}
 }
 
-void tab_materials_button_new_on_next_frame(void * _) {
+void tab_materials_button_new_on_next_frame(void *_) {
 	context_raw->material = slot_material_create(project_materials->buffer[0]->data, NULL);
 	any_array_push(project_materials, context_raw->material);
 	tab_materials_update_material();

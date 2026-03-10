@@ -9,12 +9,12 @@ plugin_t *plugin_create() {
 }
 
 void plugin_start(char *plugin) {
-	buffer_t *blob = data_get_blob(string_join("plugins/", plugin));
+	buffer_t *blob = data_get_blob(string("plugins/%s", plugin));
 	gc_unroot(_plugin_name);
 	_plugin_name = string_copy(plugin);
 	gc_root(_plugin_name);
-	js_eval(string_join(string_join("(1, eval)(`", sys_buffer_to_string(blob)), "`)"));
-	data_delete_blob(string_join("plugins/", plugin));
+	js_eval(string("(1, eval)(`%s`)", sys_buffer_to_string(blob)));
+	data_delete_blob(string("plugins/%s", plugin));
 }
 
 void plugin_stop(char *plugin) {
@@ -25,14 +25,14 @@ void plugin_stop(char *plugin) {
 	map_delete(plugin_map, plugin);
 }
 
-void plugin_notify_on_ui(plugin_t *plugin, void * f) {
+void plugin_notify_on_ui(plugin_t *plugin, void *f) {
 	plugin->on_ui = f;
 }
 
-void plugin_notify_on_update(plugin_t *plugin, void * f) {
+void plugin_notify_on_update(plugin_t *plugin, void *f) {
 	plugin->on_update = f;
 }
 
-void plugin_notify_on_delete(plugin_t *plugin, void * f) {
+void plugin_notify_on_delete(plugin_t *plugin, void *f) {
 	plugin->on_delete = f;
 }

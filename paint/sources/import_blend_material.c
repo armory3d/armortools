@@ -30,7 +30,7 @@ void import_blend_material_run(char *path) {
 	ui_box_show_custom(&import_blend_material_run_box, 400, 200, NULL, true, "");
 }
 
-void _import_blend_material_on_next_frame(void * _) {
+void _import_blend_material_on_next_frame(void *_) {
 	char *save;
 	if (path_is_protected()) {
 		save = string_copy(iron_internal_save_path());
@@ -38,10 +38,10 @@ void _import_blend_material_on_next_frame(void * _) {
 	else {
 		save = string_copy(path_data());
 	}
-	save = string_join(save, "blender");
+	save = string("%s%s", save, "blender");
 	iron_create_directory(save);
 
-	char *py = string_join(string_join(string_join(string_join(string_join(string_join("\
+	char *py = string("\
 import bpy;\n\
 bpy.context.scene.render.engine = 'CYCLES'\n\
 bpy.context.scene.cycles.samples = 4\n\
@@ -57,27 +57,19 @@ for mat in bpy.data.materials:\n\
     node.image = img\n\
     mat.node_tree.nodes.active = node\n\
     bpy.ops.object.bake(type='DIFFUSE')\n\
-    img.filepath_raw = '",
-	                                                                                       save),
-	                                                                           "/blender_base.jpg'\n\
+    img.filepath_raw = '%s/blender_base.jpg'\n\
     img.save()\n\
     bpy.ops.object.bake(type='ROUGHNESS')\n\
-    img.filepath_raw = '"),
-	                                                               save),
-	                                                   "/blender_rough.jpg'\n\
+    img.filepath_raw = '%s/blender_rough.jpg'\n\
     img.save()\n\
     bpy.ops.object.bake(type='NORMAL')\n\
-    img.filepath_raw = '"),
-	                                       save),
-	                           "/blender_nor.jpg'\n\
+    img.filepath_raw = '%s/blender_nor.jpg'\n\
     img.save()\n\
     break\n\
-");
+",
+	                  save, save, save);
 
-	iron_sys_command(string_join(string_join(string_join(string_join(string_join(string_join("\"", config_raw->blender), "\" \""), _import_blend_material_path),
-	                                                     "\" -b --python-expr \""),
-	                                         py),
-	                             "\""));
+	iron_sys_command(string("\"%s\" \"%s\" -b --python-expr \"%s\"", config_raw->blender, _import_blend_material_path, py));
 	import_folder_run(save);
 }
 

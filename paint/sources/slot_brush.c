@@ -21,11 +21,11 @@ slot_brush_t *slot_brush_create(ui_node_canvas_t *c) {
 			slot_brush_default_canvas = b;
 			gc_root(slot_brush_default_canvas);
 		}
-		raw->canvas       = armpack_decode(slot_brush_default_canvas);
-		raw->canvas       = util_clone_canvas(raw->canvas); // Clone to create GC references
+		raw->canvas = armpack_decode(slot_brush_default_canvas);
+		raw->canvas = util_clone_canvas(raw->canvas); // Clone to create GC references
 
 		i32 id            = (raw->id + 1);
-		raw->canvas->name = string_join("Brush ", i32_to_string(id));
+		raw->canvas->name = string("Brush %d", id);
 	}
 	else {
 		raw->canvas = util_clone_canvas(c);

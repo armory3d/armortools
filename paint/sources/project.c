@@ -34,11 +34,11 @@ void project_save(bool save_and_quit) {
 		char *document_directory = iron_save_dialog("", "");
 		document_directory       = string_copy(substring(document_directory, 0, string_length(document_directory) - 8)); // Strip /"untitled"
 		gc_unroot(project_filepath);
-		project_filepath = string_join(string_join(string_join(document_directory, "/"), sys_title()), ".arm");
+		project_filepath = string("%s/%s.arm", document_directory, sys_title());
 		gc_root(project_filepath);
 #elif defined(IRON_ANDROID)
 		gc_unroot(project_filepath);
-		project_filepath = string_join(string_join(string_join(iron_internal_save_path(), "/"), sys_title()), ".arm");
+		project_filepath = string("%s/%s.arm", iron_internal_save_path(), sys_title());
 		gc_root(project_filepath);
 #else
 		project_save_as(save_and_quit);
@@ -48,7 +48,7 @@ void project_save(bool save_and_quit) {
 
 #if defined(IRON_WINDOWS) || defined(IRON_LINUX) || defined(IRON_MACOS)
 	char *filename = substring(project_filepath, string_last_index_of(project_filepath, PATH_SEP) + 1, string_length(project_filepath) - 4);
-	sys_title_set(string_join(string_join(filename, " - "), manifest_title));
+	sys_title_set(string("%s - %s", filename, manifest_title));
 #endif
 
 	_project_save_and_quit = save_and_quit;
@@ -62,11 +62,11 @@ void project_save_as_on_file_picked(char *path) {
 		f = string_copy(tr("untitled", NULL));
 	}
 	gc_unroot(project_filepath);
-	project_filepath = string_join(string_join(path, PATH_SEP), f);
+	project_filepath = string("%s%s%s", path, PATH_SEP, f);
 	gc_root(project_filepath);
 	if (!ends_with(project_filepath, ".arm")) {
 		gc_unroot(project_filepath);
-		project_filepath = string_join(project_filepath, ".arm");
+		project_filepath = string("%s.arm", project_filepath);
 		gc_root(project_filepath);
 	}
 	project_save(_project_save_and_quit);
@@ -80,7 +80,7 @@ void project_save_as(bool save_and_quit) {
 void project_fetch_default_meshes() {
 	if (project_mesh_list == NULL) {
 		gc_unroot(project_mesh_list);
-		project_mesh_list = file_read_directory(string_join(string_join(path_data(), PATH_SEP), "meshes"));
+		project_mesh_list = file_read_directory(string("%s%smeshes", path_data(), PATH_SEP));
 		gc_root(project_mesh_list);
 		for (i32 i = 0; i < project_mesh_list->length; ++i) {
 			char *s                      = project_mesh_list->buffer[i];
@@ -215,7 +215,7 @@ void project_new(bool reset_layers) {
 		// viewport_set_view(0, 0, 0.75, 0, 0, 0); // Top
 	}
 	else {
-		buffer_t *b = data_get_blob(string_join(string_join("meshes/", mesh_name), ".arm"));
+		buffer_t *b = data_get_blob(string("meshes/%s.arm", mesh_name));
 		gc_unroot(_project_scene_mesh_gc);
 		_project_scene_mesh_gc = armpack_decode(b);
 		gc_root(_project_scene_mesh_gc);
@@ -406,7 +406,7 @@ void project_import_brush_on_file_picked(char *path) {
 
 void project_import_brush() {
 	char *formats = string_array_join(path_texture_formats(), ",");
-	ui_files_show(string_join("arm,", formats), false, true, &project_import_brush_on_file_picked);
+	ui_files_show(string("arm,%s", formats), false, true, &project_import_brush_on_file_picked);
 }
 
 void project_import_mesh_on_file_picked(char *path) {
@@ -421,13 +421,13 @@ void project_import_mesh(bool replace_existing, void (*done)(void)) {
 	char *formats = string_array_join(path_mesh_formats(), ",");
 	if (string_index_of(formats, "fbx") == -1) {
 		// Show .fbx in the file picker even when fbx plugin is not yet enabled
-		formats = string_join(formats, ",fbx");
+		formats = string("%s,fbx", formats);
 	}
 	if (string_index_of(formats, "gltf") == -1) {
-		formats = string_join(formats, ",gltf");
+		formats = string("%s,gltf", formats);
 	}
 	if (string_index_of(formats, "glb") == -1) {
-		formats = string_join(formats, ",glb");
+		formats = string("%s,glb", formats);
 	}
 	ui_files_show(formats, false, false, &project_import_mesh_on_file_picked);
 }
@@ -575,7 +575,7 @@ void project_unwrap_mesh(raw_mesh_t *mesh, void (*done)(raw_mesh_t *)) {
 		char *f = unwrap_plugins->buffer[_project_unwrap_by];
 		if (char_ptr_array_index_of(config_raw->plugins, f) == -1) {
 			config_enable_plugin(f);
-			console_info(string_join(string_join(f, " "), tr("plugin enabled", NULL)));
+			console_info(string("%s %s", f, tr("plugin enabled", NULL)));
 		}
 		void *cb = any_map_get(util_mesh_unwrappers, f); // JSValue * -> (a: raw_mesh_t)=>void
 		js_call_ptr(cb, mesh);
@@ -589,7 +589,7 @@ void project_import_asset_on_file_picked(char *path) {
 
 void project_import_asset(char *filters, bool hdr_as_envmap) {
 	if (filters == NULL) {
-		filters = string_join(string_join(string_array_join(path_texture_formats(), ","), ","), string_array_join(path_mesh_formats(), ","));
+		filters = string("%s,%s", string_array_join(path_texture_formats(), ","), string_array_join(path_mesh_formats(), ","));
 	}
 
 	_project_import_asset_hdr_as_envmap = hdr_as_envmap;
@@ -732,7 +732,7 @@ void project_export_swatches_on_file_picked(char *path) {
 		// export_gpl_run(path + PATH_SEP + f, substring(f, 0, string_last_index_of(f, ".")), project_raw.swatches);
 	}
 	else {
-		export_arm_run_swatches(string_join(string_join(path, PATH_SEP), f));
+		export_arm_run_swatches(string("%s%s%s", path, PATH_SEP, f));
 	}
 }
 

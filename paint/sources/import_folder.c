@@ -2,16 +2,16 @@
 #include "global.h"
 
 void import_folder_run(char *path) {
-	string_t_array_t *files         = file_read_directory(path);
-	char         *mapbase       = "";
-	char         *mapopac       = "";
-	char         *mapnor        = "";
-	char         *mapocc        = "";
-	char         *maprough      = "";
-	char         *mapmet        = "";
-	char         *mapheight     = "";
+	string_t_array_t *files     = file_read_directory(path);
+	char             *mapbase   = "";
+	char             *mapopac   = "";
+	char             *mapnor    = "";
+	char             *mapocc    = "";
+	char             *maprough  = "";
+	char             *mapmet    = "";
+	char             *mapheight = "";
 
-	bool              found_texture = false;
+	bool found_texture = false;
 	// Import maps
 	for (i32 i = 0; i < files->length; ++i) {
 		char *f = files->buffer[i];
@@ -22,7 +22,7 @@ void import_folder_run(char *path) {
 		// TODO: handle -albedo
 
 		char *base  = to_lower_case(substring(f, 0, string_last_index_of(f, ".")));
-		bool      valid = false;
+		bool  valid = false;
 		if (string_equals(mapbase, "") && path_is_base_color_tex(base)) {
 			mapbase = string_copy(f);
 			valid   = true;
@@ -53,7 +53,7 @@ void import_folder_run(char *path) {
 		}
 
 		if (valid) {
-			import_texture_run(string_join(string_join(path, PATH_SEP), f), false);
+			import_texture_run(string("%s%s%s", path, PATH_SEP, f), false);
 			found_texture = true;
 		}
 	}

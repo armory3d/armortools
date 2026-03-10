@@ -34,11 +34,10 @@ i32 uniforms_ext_i32_link(object_t *object, material_data_t *mat, char *link) {
 
 f32 uniforms_ext_f32_link(object_t *object, material_data_t *mat, char *link) {
 	if (string_equals(link, "_brush_radius")) {
-		bool decal = context_is_decal();
-		bool decal_mask =
-		    decal && operator_shortcut(string_join(string_join(any_map_get(config_keymap, "decal_mask"), "+"), any_map_get(config_keymap, "action_paint")),
-		                               SHORTCUT_TYPE_DOWN);
-		f32 brush_decal_mask_radius = context_raw->brush_decal_mask_radius;
+		bool decal      = context_is_decal();
+		bool decal_mask = decal && operator_shortcut(string("%s+%s", any_map_get(config_keymap, "decal_mask"), any_map_get(config_keymap, "action_paint")),
+		                                             SHORTCUT_TYPE_DOWN);
+		f32  brush_decal_mask_radius = context_raw->brush_decal_mask_radius;
 		brush_decal_mask_radius *= context_raw->paint2d ? 0.55 * ui_view2d_pan_scale : 2.0;
 		f32 radius = decal_mask ? brush_decal_mask_radius : context_raw->brush_radius;
 		f32 val    = (radius * context_raw->brush_nodes_radius) / (float)15.0;
@@ -149,7 +148,7 @@ f32 uniforms_ext_f32_link(object_t *object, material_data_t *mat, char *link) {
 		for (i32 i = 0; i < keys->length; ++i) {
 			char *key    = keys->buffer[i];
 			char *script = any_map_get(parser_material_script_links, key);
-			f32       result = NAN;
+			f32   result = NAN;
 			if (!string_equals(script, "")) {
 				result = js_eval(script);
 			}
@@ -185,7 +184,7 @@ vec2_t uniforms_ext_vec2_link(object_t *object, material_data_t *mat, char *link
 vec4_t uniforms_ext_vec3_link(object_t *object, material_data_t *mat, char *link) {
 	vec4_t v = vec4_nan();
 	if (string_equals(link, "_brush_direction")) {
-		v                = _uniforms_vec;
+		v = _uniforms_vec;
 		// Discard first paint for directional brush
 		bool allow_paint = context_raw->prev_paint_vec_x != context_raw->last_paint_vec_x && context_raw->prev_paint_vec_y != context_raw->last_paint_vec_y &&
 		                   context_raw->prev_paint_vec_x > 0 && context_raw->prev_paint_vec_y > 0;
@@ -309,37 +308,37 @@ mat4_t uniforms_ext_mat4_link(object_t *object, material_data_t *mat, char *link
 	return mat4_nan();
 }
 
-void uniforms_ext_cache_uv_island_map(void * _) {
+void uniforms_ext_cache_uv_island_map(void *_) {
 	util_uv_cache_uv_island_map();
 }
 
-void uniforms_ext_cache_triangle_map(void * _) {
+void uniforms_ext_cache_triangle_map(void *_) {
 	util_uv_cache_triangle_map();
 }
 
-void uniforms_ext_cache_uv_map(void * _) {
+void uniforms_ext_cache_uv_map(void *_) {
 	util_uv_cache_uv_map();
 }
 
 gpu_texture_t *uniforms_ext_tex_link(object_t *object, material_data_t *mat, char *link) {
 	if (string_equals(link, "_texpaint_undo")) {
 		i32              i  = history_undo_i - 1 < 0 ? config_raw->undo_steps - 1 : history_undo_i - 1;
-		render_target_t *rt = any_map_get(render_path_render_targets, string_join("texpaint_undo", i32_to_string(i)));
+		render_target_t *rt = any_map_get(render_path_render_targets, string("texpaint_undo%d", i));
 		return rt->_image;
 	}
 	else if (string_equals(link, "_texpaint_nor_undo")) {
 		i32              i  = history_undo_i - 1 < 0 ? config_raw->undo_steps - 1 : history_undo_i - 1;
-		render_target_t *rt = any_map_get(render_path_render_targets, string_join("texpaint_nor_undo", i32_to_string(i)));
+		render_target_t *rt = any_map_get(render_path_render_targets, string("texpaint_nor_undo%d", i));
 		return rt->_image;
 	}
 	else if (string_equals(link, "_texpaint_pack_undo")) {
 		i32              i  = history_undo_i - 1 < 0 ? config_raw->undo_steps - 1 : history_undo_i - 1;
-		render_target_t *rt = any_map_get(render_path_render_targets, string_join("texpaint_pack_undo", i32_to_string(i)));
+		render_target_t *rt = any_map_get(render_path_render_targets, string("texpaint_pack_undo%d", i));
 		return rt->_image;
 	}
 	else if (string_equals(link, "_texpaint_sculpt_undo")) {
 		i32              i  = history_undo_i - 1 < 0 ? config_raw->undo_steps - 1 : history_undo_i - 1;
-		render_target_t *rt = any_map_get(render_path_render_targets, string_join("texpaint_sculpt_undo", i32_to_string(i)));
+		render_target_t *rt = any_map_get(render_path_render_targets, string("texpaint_sculpt_undo%d", i));
 		return rt->_image;
 	}
 	else if (string_equals(link, "_texcolorid")) {
@@ -390,8 +389,8 @@ gpu_texture_t *uniforms_ext_tex_link(object_t *object, material_data_t *mat, cha
 		return util_uv_dilatemap;
 	}
 	if (starts_with(link, "_texpaint_pack_vert")) {
-		char        *tid = substring(link, string_length(link) - 1, string_length(link));
-		render_target_t *rt  = any_map_get(render_path_render_targets, string_join("texpaint_pack", tid));
+		char            *tid = substring(link, string_length(link) - 1, string_length(link));
+		render_target_t *rt  = any_map_get(render_path_render_targets, string("texpaint_pack%s", tid));
 		return rt->_image;
 	}
 	if (starts_with(link, "_texpaint_vert")) {

@@ -2,15 +2,15 @@
 #include "global.h"
 
 void import_obj_run(char *path, bool replace_existing) {
-	split_type_t i          = context_raw->split_by;
-	bool         is_udim    = i == SPLIT_TYPE_UDIM;
-	i32          split_code = (i == SPLIT_TYPE_OBJECT || is_udim) ? char_code_at("o", 0) : i == SPLIT_TYPE_GROUP ? char_code_at("g", 0) : char_code_at("u", 0); // usemtl
+	split_type_t i       = context_raw->split_by;
+	bool         is_udim = i == SPLIT_TYPE_UDIM;
+	i32 split_code = (i == SPLIT_TYPE_OBJECT || is_udim) ? char_code_at("o", 0) : i == SPLIT_TYPE_GROUP ? char_code_at("g", 0) : char_code_at("u", 0); // usemtl
 
-	buffer_t    *b          = data_get_blob(path);
+	buffer_t *b = data_get_blob(path);
 
 	if (is_udim) {
 		raw_mesh_t *part = obj_parse(b, split_code, 0, is_udim);
-		char   *name = part->name;
+		char       *name = part->name;
 		for (i32 i = 0; i < part->udims->length; ++i) {
 			u32_array_t *a = part->udims->buffer[i];
 			if (a->length == 0) {
@@ -19,7 +19,7 @@ void import_obj_run(char *path, bool replace_existing) {
 			i32 u      = i % part->udims_u;
 			i32 v      = math_floor(i / (float)part->udims_u);
 			i32 id     = (1000 + v * 10 + u + 1);
-			part->name = string_join(string_join(name, "."), i32_to_string(id));
+			part->name = string("%s.%s", name, i32_to_string(id));
 			part->inda = a;
 			if (i == 0) {
 				if (replace_existing) {
@@ -62,15 +62,15 @@ void import_obj_run(char *path, bool replace_existing) {
 					char *iname = parts->buffer[i]->name;
 					char *jname = parts->buffer[j]->name;
 					if (string_equals(iname, jname)) {
-						posa0               = parts->buffer[i]->posa;
-						posa1               = parts->buffer[j]->posa;
-						nora0               = parts->buffer[i]->nora;
-						nora1               = parts->buffer[j]->nora;
-						texa0               = parts->buffer[i]->texa != NULL ? parts->buffer[i]->texa : NULL;
-						texa1               = parts->buffer[j]->texa != NULL ? parts->buffer[j]->texa : NULL;
-						inda0               = parts->buffer[i]->inda;
-						inda1               = parts->buffer[j]->inda;
-						i32          voff   = math_floor(posa0->length / (float)4);
+						posa0    = parts->buffer[i]->posa;
+						posa1    = parts->buffer[j]->posa;
+						nora0    = parts->buffer[i]->nora;
+						nora1    = parts->buffer[j]->nora;
+						texa0    = parts->buffer[i]->texa != NULL ? parts->buffer[i]->texa : NULL;
+						texa1    = parts->buffer[j]->texa != NULL ? parts->buffer[j]->texa : NULL;
+						inda0    = parts->buffer[i]->inda;
+						inda1    = parts->buffer[j]->inda;
+						i32 voff = math_floor(posa0->length / (float)4);
 						// Repack merged positions
 						f32_array_t *posa32 = f32_array_create(math_floor(posa0->length / (float)4) * 3 + math_floor(posa1->length / (float)4) * 3);
 						for (i32 k = 0; k < math_floor(posa0->length / (float)4); ++k) {
