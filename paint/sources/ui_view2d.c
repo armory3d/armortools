@@ -323,14 +323,23 @@ void ui_view2d_render(void *_) {
 				string_t_array_t *tex_type_combo = any_array_create_from_raw(
 				    (void *[]){
 				        tr("Base Color", NULL),
+						tr("Opacity", NULL),
 				        tr("Normal Map", NULL),
 				        tr("Occlusion", NULL),
 				        tr("Roughness", NULL),
 				        tr("Metallic", NULL),
-				        tr("Opacity", NULL),
 				        tr("Height", NULL),
 				    },
 				    7);
+
+				if (config_raw->workflow == WORKFLOW_BASE) {
+					array_splice(tex_type_combo, 6, 1);
+					array_splice(tex_type_combo, 5, 1);
+					array_splice(tex_type_combo, 4, 1);
+					array_splice(tex_type_combo, 3, 1);
+					array_splice(tex_type_combo, 2, 1);
+				}
+
 				ui_view2d_tex_type = ui_combo(h_tex_type, tex_type_combo, tr("Texture", NULL), false, UI_ALIGN_LEFT, true);
 				ui->_x += ew + 3;
 				ui->_y = 2 + start_y;

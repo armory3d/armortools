@@ -72,7 +72,9 @@ typedef enum {
 typedef enum {
 	WORKSPACE_PAINT_3D = 0,
 	WORKSPACE_PAINT_2D = 1,
-	WORKSPACE_SCULPT   = 2,
+	WORKSPACE_NODES    = 2,
+	WORKSPACE_SCRIPT   = 3,
+	WORKSPACE_SCULPT   = 4,
 } workspace_t;
 
 typedef enum {
@@ -218,11 +220,11 @@ typedef enum {
 
 typedef enum {
 	PAINT_TEX_BASE      = 0,
-	PAINT_TEX_NORMAL    = 1,
-	PAINT_TEX_OCCLUSION = 2,
-	PAINT_TEX_ROUGHNESS = 3,
-	PAINT_TEX_METALLIC  = 4,
-	PAINT_TEX_OPACITY   = 5,
+	PAINT_TEX_OPACITY   = 1,
+	PAINT_TEX_NORMAL    = 2,
+	PAINT_TEX_OCCLUSION = 3,
+	PAINT_TEX_ROUGHNESS = 4,
+	PAINT_TEX_METALLIC  = 5,
 	PAINT_TEX_HEIGHT    = 6,
 } paint_tex_t;
 

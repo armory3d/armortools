@@ -104,6 +104,13 @@ void base_init() {
 
 	args_run();
 
+	if (config_raw->workspace != WORKSPACE_PAINT_3D) {
+		base_update_workspace();
+	}
+	if (config_raw->workflow != WORKFLOW_PBR) {
+		base_update_workflow();
+	}
+
 	bool has_projects = config_raw->recent_projects->length > 0;
 	if (config_raw->splash_screen && has_projects) {
 		box_projects_show();
@@ -2100,7 +2107,36 @@ void ui_base_set_viewport_col(i32 col) {
 }
 
 void base_update_workspace() {
+	if (config_raw->workspace == WORKSPACE_PAINT_3D || config_raw->workspace == WORKSPACE_SCULPT) {
+		base_view3d_show  = true;
+		ui_menubar_tab->i = 0;
+		ui_view2d_show    = false;
+		ui_nodes_show     = false;
+		ui_sidebar_show(true);
+	}
+	else if (config_raw->workspace == WORKSPACE_PAINT_2D) {
+		base_view3d_show  = false;
+		ui_menubar_tab->i = -1;
+		ui_view2d_show    = true;
+		ui_nodes_show     = false;
+		ui_sidebar_show(true);
+	}
+	else if (config_raw->workspace == WORKSPACE_NODES) {
+		base_view3d_show  = false;
+		ui_menubar_tab->i = -1;
+		ui_view2d_show    = false;
+		ui_nodes_show     = true;
+		ui_sidebar_show(false);
+	}
+	else if (config_raw->workspace == WORKSPACE_SCRIPT) {
+		base_view3d_show  = false;
+		ui_menubar_tab->i = -1;
+		ui_view2d_show    = false;
+		ui_nodes_show     = false;
+		ui_sidebar_show(false);
+	}
 
+	base_resize();
 }
 
 void base_update_workflow() {

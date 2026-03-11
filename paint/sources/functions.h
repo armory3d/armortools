@@ -1,9 +1,9 @@
 
 #pragma once
 
-#include <iron.h>
 #include "enums.h"
 #include "types.h"
+#include <iron.h>
 
 f32                   ui_MENUBAR_H(ui_t *ui);
 f32                   ui_nodes_INPUT_Y(ui_node_canvas_t *canvas, ui_node_t *node, i32 pos);
@@ -177,6 +177,8 @@ void                      base_on_resize();
 void                      base_save_window_rect();
 void                      base_resize();
 void                      base_update(void *_);
+void                      base_update_workspace();
+void                      base_update_workflow();
 void                      base_material_dropped();
 void                      base_handle_drop_paths();
 rect_t                   *base_get_drag_background();
@@ -742,6 +744,7 @@ raw_mesh_t                  *geom_make_plane(f32 size_x, f32 size_y, i32 verts_x
 raw_mesh_t                  *geom_make_uv_sphere(f32 radius, i32 width_segments, i32 height_segments, bool stretch_uv, f32 uv_scale);
 node_shader_context_t       *make_mesh_run(material_t *data, i32 layer_pass);
 void                         ui_sidebar_render_ui();
+void                         ui_sidebar_show(bool b);
 void                         console_draw_toast(char *s);
 void                         console_toast(char *s);
 void                         console_draw_progress(void *_);

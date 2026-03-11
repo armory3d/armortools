@@ -17,9 +17,7 @@ void ui_sidebar_render_ui() {
 			ui->ops->theme->TEXT_COL   = ui->ops->theme->HOVER_COL;
 
 			if (ui_button("<", UI_ALIGN_CENTER, "")) {
-				config_raw->layout->buffer[LAYOUT_SIZE_SIDEBAR_W] = context_raw->maximized_sidebar_width != 0
-				                                                        ? context_raw->maximized_sidebar_width
-				                                                        : math_floor(ui_sidebar_default_w * config_raw->window_scale);
+				ui_sidebar_show(true);
 			}
 			ui->ops->theme->BUTTON_H   = _BUTTON_H;
 			ui->ops->theme->BUTTON_COL = _BUTTON_COL;
@@ -33,14 +31,14 @@ void ui_sidebar_render_ui() {
 	i32  expand_button_offset = config_raw->touch_ui ? math_floor(UI_ELEMENT_H() + UI_ELEMENT_OFFSET()) : 0;
 	ui_sidebar_tabx           = iron_window_width() - config_raw->layout->buffer[LAYOUT_SIZE_SIDEBAR_W];
 
-	i32 _SCROLL_W             = ui->ops->theme->SCROLL_W;
+	i32 _SCROLL_W = ui->ops->theme->SCROLL_W;
 	if (mini) {
 		ui->ops->theme->SCROLL_W = ui->ops->theme->SCROLL_MINI_W;
 	}
 
 	i32 sidebar_y = 0;
 
-	#ifdef IRON_IOS
+#ifdef IRON_IOS
 	if (config_is_iphone()) {
 		sidebar_y += UI_ELEMENT_H() + UI_ELEMENT_OFFSET();
 		ui_end();
@@ -50,7 +48,7 @@ void ui_sidebar_render_ui() {
 		draw_end();
 		ui_begin(ui);
 	}
-	#endif
+#endif
 
 	if (ui_window(ui_base_hwnds->buffer[TAB_AREA_SIDEBAR0], ui_sidebar_tabx, sidebar_y, config_raw->layout->buffer[LAYOUT_SIZE_SIDEBAR_W],
 	              config_raw->layout->buffer[LAYOUT_SIZE_SIDEBAR_H0] - sidebar_y, false)) {
@@ -65,10 +63,7 @@ void ui_sidebar_render_ui() {
 
 		if (!config_raw->touch_ui && !mini) {
 			if (ui_tab(ui_base_htabs->buffer[TAB_AREA_SIDEBAR0], ">", false, -2, false)) {
-				ui_base_htabs->buffer[TAB_AREA_SIDEBAR0]->i        = ui_sidebar_last_tab;
-				config_raw->layout_tabs->buffer[TAB_AREA_SIDEBAR0] = ui_sidebar_last_tab;
-				context_raw->maximized_sidebar_width               = config_raw->layout->buffer[LAYOUT_SIZE_SIDEBAR_W];
-				config_raw->layout->buffer[LAYOUT_SIZE_SIDEBAR_W]  = 0;
+				ui_sidebar_show(false);
 			}
 		}
 	}
@@ -100,5 +95,18 @@ void ui_sidebar_render_ui() {
 			ui->ops->theme->BUTTON_H   = _BUTTON_H;
 			ui->ops->theme->BUTTON_COL = _BUTTON_COL;
 		}
+	}
+}
+
+void ui_sidebar_show(bool b) {
+	if (b) {
+		config_raw->layout->buffer[LAYOUT_SIZE_SIDEBAR_W] =
+		    context_raw->maximized_sidebar_width != 0 ? context_raw->maximized_sidebar_width : math_floor(ui_sidebar_default_w * config_raw->window_scale);
+	}
+	else {
+		ui_base_htabs->buffer[TAB_AREA_SIDEBAR0]->i        = ui_sidebar_last_tab;
+		config_raw->layout_tabs->buffer[TAB_AREA_SIDEBAR0] = ui_sidebar_last_tab;
+		context_raw->maximized_sidebar_width               = config_raw->layout->buffer[LAYOUT_SIZE_SIDEBAR_W];
+		config_raw->layout->buffer[LAYOUT_SIZE_SIDEBAR_W]  = 0;
 	}
 }
