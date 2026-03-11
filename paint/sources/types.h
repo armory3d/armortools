@@ -1,3 +1,8 @@
+
+#pragma once
+
+#include "enums.h"
+
 typedef struct mat4_box {
 	mat4_t v;
 } mat4_box_t;
@@ -722,21 +727,25 @@ typedef struct node_group_t_array {
 	int            length;
 	int            capacity;
 } node_group_t_array_t;
+
 typedef struct neural_node_model_t_array {
 	neural_node_model_t **buffer;
 	int                   length;
 	int                   capacity;
 } neural_node_model_t_array_t;
+
 typedef struct material_data_t_array {
 	material_data_t **buffer;
 	int               length;
 	int               capacity;
 } material_data_t_array_t;
+
 typedef struct world_data_t_array {
 	world_data_t **buffer;
 	int            length;
 	int            capacity;
 } world_data_t_array_t;
+
 typedef struct buffer_t_array {
 	buffer_t **buffer;
 	int        length;
@@ -747,66 +756,79 @@ typedef struct slot_material_t_array {
 	int               length;
 	int               capacity;
 } slot_material_t_array_t;
+
 typedef struct mesh_object_t_array {
 	mesh_object_t **buffer;
 	int             length;
 	int             capacity;
 } mesh_object_t_array_t;
+
 typedef struct ui_handle_t_array {
 	ui_handle_t **buffer;
 	int           length;
 	int           capacity;
 } ui_handle_t_array_t;
+
 typedef struct ui_node_canvas_t_array {
 	ui_node_canvas_t **buffer;
 	int                length;
 	int                capacity;
 } ui_node_canvas_t_array_t;
+
 typedef struct node_list_t_array {
 	node_list_t **buffer;
 	int           length;
 	int           capacity;
 } node_list_t_array_t;
+
 typedef struct mat4_box_t_array {
 	mat4_box_t **buffer;
 	int          length;
 	int          capacity;
 } mat4_box_t_array_t;
+
 typedef struct slot_brush_t_array {
 	slot_brush_t **buffer;
 	int            length;
 	int            capacity;
 } slot_brush_t_array_t;
+
 typedef struct asset_t_array {
 	asset_t **buffer;
 	int       length;
 	int       capacity;
 } asset_t_array_t;
+
 typedef struct slot_font_t_array {
 	slot_font_t **buffer;
 	int           length;
 	int           capacity;
 } slot_font_t_array_t;
+
 typedef struct string_t_array {
 	char **buffer;
 	int        length;
 	int        capacity;
 } string_t_array_t;
+
 typedef struct ui_coloring_t_array {
 	ui_coloring_t **buffer;
 	int             length;
 	int             capacity;
 } ui_coloring_t_array_t;
+
 typedef struct slot_layer_t_array {
 	slot_layer_t **buffer;
 	int            length;
 	int            capacity;
 } slot_layer_t_array_t;
+
 typedef struct swatch_color_t_array {
 	swatch_color_t **buffer;
 	int              length;
 	int              capacity;
 } swatch_color_t_array_t;
+
 typedef struct gpu_texture_t_array {
 	gpu_texture_t **buffer;
 	int             length;
@@ -830,121 +852,145 @@ typedef struct ui_node_socket_t_array {
 	int                length;
 	int                capacity;
 } ui_node_socket_t_array_t;
+
 typedef struct logic_node_t_array {
 	logic_node_t **buffer;
 	int            length;
 	int            capacity;
 } logic_node_t_array_t;
+
 typedef struct transform_t_array {
 	transform_t **buffer;
 	int           length;
 	int           capacity;
 } transform_t_array_t;
+
 typedef struct ui_node_button_t_array {
 	ui_node_button_t **buffer;
 	int                length;
 	int                capacity;
 } ui_node_button_t_array_t;
+
 typedef struct tilesheet_action_t_array {
 	tilesheet_action_t **buffer;
 	int                  length;
 	int                  capacity;
 } tilesheet_action_t_array_t;
+
 typedef struct logic_node_input_t_array {
 	logic_node_input_t **buffer;
 	int                  length;
 	int                  capacity;
 } logic_node_input_t_array_t;
+
 typedef struct history_step_t_array {
 	history_step_t **buffer;
 	int              length;
 	int              capacity;
 } history_step_t_array_t;
+
 typedef struct vec4_box_t_array {
 	vec4_box_t **buffer;
 	int          length;
 	int          capacity;
 } vec4_box_t_array_t;
+
 typedef struct u32_array_t_array {
 	u32_array_t **buffer;
 	int           length;
 	int           capacity;
 } u32_array_t_array_t;
+
 typedef struct tab_draw_array_t_array {
 	tab_draw_array_t **buffer;
 	int                length;
 	int                capacity;
 } tab_draw_array_t_array_t;
+
 typedef struct tab_draw_t_array {
 	tab_draw_t **buffer;
 	int          length;
 	int          capacity;
 } tab_draw_t_array_t;
+
 typedef struct object_t_array {
 	object_t **buffer;
 	int        length;
 	int        capacity;
 } object_t_array_t;
+
 typedef struct render_target_t_array {
 	render_target_t **buffer;
 	int               length;
 	int               capacity;
 } render_target_t_array_t;
+
 typedef struct camera_data_t_array {
 	camera_data_t **buffer;
 	int             length;
 	int             capacity;
 } camera_data_t_array_t;
+
 typedef struct ui_node_link_t_array {
 	ui_node_link_t **buffer;
 	int              length;
 	int              capacity;
 } ui_node_link_t_array_t;
+
 typedef struct mesh_data_t_array {
 	mesh_data_t **buffer;
 	int           length;
 	int           capacity;
 } mesh_data_t_array_t;
+
 typedef struct shader_context_t_array {
 	shader_context_t **buffer;
 	int                length;
 	int                capacity;
 } shader_context_t_array_t;
+
 typedef struct raw_mesh_t_array {
 	raw_mesh_t **buffer;
 	int          length;
 	int          capacity;
 } raw_mesh_t_array_t;
+
 typedef struct export_preset_texture_t_array {
 	export_preset_texture_t **buffer;
 	int                       length;
 	int                       capacity;
 } export_preset_texture_t_array_t;
+
 typedef struct camera_object_t_array {
 	camera_object_t **buffer;
 	int               length;
 	int               capacity;
 } camera_object_t_array_t;
+
 typedef struct frustum_plane_t_array {
 	frustum_plane_t **buffer;
 	int               length;
 	int               capacity;
 } frustum_plane_t_array_t;
+
 typedef struct layer_data_t_array {
 	layer_data_t **buffer;
 	int            length;
 	int            capacity;
 } layer_data_t_array_t;
+
 typedef struct tilesheet_data_t_array {
 	tilesheet_data_t **buffer;
 	int                length;
 	int                capacity;
 } tilesheet_data_t_array_t;
+
 typedef struct ui_node_t_array {
 	ui_node_t **buffer;
 	int         length;
 	int         capacity;
 } ui_node_t_array_t;
+
 typedef struct packed_asset_t_array {
 	packed_asset_t **buffer;
 	int              length;

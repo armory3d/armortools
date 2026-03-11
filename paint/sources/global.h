@@ -2,7 +2,7 @@
 #pragma once
 
 #include <iron.h>
-#include "enums.c"
-#include "types.c"
-#include "globals.c"
-#include "functions.c"
+#include "enums.h"
+#include "types.h"
+#include "globals.h"
+#include "functions.h"

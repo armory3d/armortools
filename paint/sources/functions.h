@@ -1,5 +1,9 @@
 
-#include "global.h"
+#pragma once
+
+#include <iron.h>
+#include "enums.h"
+#include "types.h"
 
 f32                   ui_MENUBAR_H(ui_t *ui);
 f32                   ui_nodes_INPUT_Y(ui_node_canvas_t *canvas, ui_node_t *node, i32 pos);
@@ -1130,5 +1134,3 @@ brush_output_node_t *brush_output_node_create(ui_node_t *raw, f32_array_t *args)
 void                 brush_output_node_parse_inputs(brush_output_node_t *self);
 void                 brush_output_node_run(brush_output_node_t *self, i32 from);
 void                 brush_output_paint(brush_output_node_t *self);
-
-void _main();

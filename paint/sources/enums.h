@@ -1,4 +1,6 @@
 
+#pragma once
+
 typedef enum {
 	SHORTCUT_TYPE_STARTED,
 	SHORTCUT_TYPE_REPEAT,
