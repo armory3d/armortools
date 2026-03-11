@@ -29,10 +29,6 @@ if (platform == "wasm") {
 let project = new Project(flags.name);
 project.add_project("../base");
 project.add_cfiles("sources/main.c");
-// project.add_cfiles("sources");
-// project.add_cfiles("sources/material_nodes");
-// project.add_cfiles("sources/neural_nodes");
-// project.add_cfiles("sources/brush_nodes");
 project.add_shaders("shaders/*.kong");
 project.add_assets("assets/*", {destination : "data/{name}"});
 project.add_assets("assets/export_presets/*", {destination : "data/export_presets/{name}"});
@@ -43,5 +39,4 @@ project.add_assets("assets/meshes/*", {destination : "data/meshes/{name}", noemb
 project.add_assets("assets/meshes/default/*", {destination : "data/meshes/{name}"}); // embed default mesh
 project.add_assets("assets/locale/*", {destination : "data/locale/{name}"});
 project.add_assets("assets/readme/readme.txt", {destination : "{name}"});
-project.flatten();
 return project;
