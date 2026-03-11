@@ -655,6 +655,7 @@ void base_toggle_fullscreen() {
 		iron_window_resize(config_raw->window_w, config_raw->window_h);
 		iron_window_move(config_raw->window_x, config_raw->window_y);
 	}
+	context_raw->ddirty = 3;
 }
 
 bool base_is_decal_layer() {
