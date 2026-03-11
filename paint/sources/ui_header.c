@@ -162,35 +162,39 @@ void ui_header_draw_tool_properties() {
 			ui_tooltip(tr("Add picked color to swatches", NULL));
 		}
 
-		i32 _w = ui->_w;
-		ui->_w /= 2;
-		ui_handle_t *h_normal = ui_handle(__ID__);
-		h_normal->color       = context_raw->picked_color->normal;
-		ui_text("", 0, h_normal->color);
-		if (ui->is_hovered && ui->input_released) {
-			gc_unroot(_ui_header_draw_tool_properties_h);
-			_ui_header_draw_tool_properties_h = h_normal;
-			gc_root(_ui_header_draw_tool_properties_h);
-			ui_menu_draw(&ui_header_draw_tool_properties_color_picker_normal, -1, -1);
+		if (config_raw->workflow == WORKFLOW_PBR) {
+
+			i32 _w = ui->_w;
+			ui->_w /= 2;
+
+			ui_handle_t *h_normal = ui_handle(__ID__);
+			h_normal->color       = context_raw->picked_color->normal;
+			ui_text("", 0, h_normal->color);
+			if (ui->is_hovered && ui->input_released) {
+				gc_unroot(_ui_header_draw_tool_properties_h);
+				_ui_header_draw_tool_properties_h = h_normal;
+				gc_root(_ui_header_draw_tool_properties_h);
+				ui_menu_draw(&ui_header_draw_tool_properties_color_picker_normal, -1, -1);
+			}
+			ui_text(tr("Normal", NULL), UI_ALIGN_LEFT, 0x00000000);
+			ui->_w = _w;
+
+			ui_handle_t *hocc                    = ui_handle(__ID__);
+			hocc->f                              = context_raw->picked_color->occlusion;
+			context_raw->picked_color->occlusion = ui_slider(hocc, tr("Occlusion", NULL), 0.0, 1.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
+
+			ui_handle_t *hrough                  = ui_handle(__ID__);
+			hrough->f                            = context_raw->picked_color->roughness;
+			context_raw->picked_color->roughness = ui_slider(hrough, tr("Roughness", NULL), 0.0, 1.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
+
+			ui_handle_t *hmet                   = ui_handle(__ID__);
+			hmet->f                             = context_raw->picked_color->metallic;
+			context_raw->picked_color->metallic = ui_slider(hmet, tr("Metallic", NULL), 0.0, 1.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
+
+			ui_handle_t *hheight              = ui_handle(__ID__);
+			hheight->f                        = context_raw->picked_color->height;
+			context_raw->picked_color->height = ui_slider(hheight, tr("Height", NULL), 0.0, 1.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
 		}
-		ui_text(tr("Normal", NULL), UI_ALIGN_LEFT, 0x00000000);
-		ui->_w = _w;
-
-		ui_handle_t *hocc                    = ui_handle(__ID__);
-		hocc->f                              = context_raw->picked_color->occlusion;
-		context_raw->picked_color->occlusion = ui_slider(hocc, tr("Occlusion", NULL), 0.0, 1.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
-
-		ui_handle_t *hrough                  = ui_handle(__ID__);
-		hrough->f                            = context_raw->picked_color->roughness;
-		context_raw->picked_color->roughness = ui_slider(hrough, tr("Roughness", NULL), 0.0, 1.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
-
-		ui_handle_t *hmet                   = ui_handle(__ID__);
-		hmet->f                             = context_raw->picked_color->metallic;
-		context_raw->picked_color->metallic = ui_slider(hmet, tr("Metallic", NULL), 0.0, 1.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
-
-		ui_handle_t *hheight              = ui_handle(__ID__);
-		hheight->f                        = context_raw->picked_color->height;
-		context_raw->picked_color->height = ui_slider(hheight, tr("Height", NULL), 0.0, 1.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
 
 		ui_handle_t *hopac                 = ui_handle(__ID__);
 		hopac->f                           = context_raw->picked_color->opacity;

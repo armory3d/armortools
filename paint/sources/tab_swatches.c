@@ -71,18 +71,21 @@ void tab_swatches_draw_edit_menu() {
 	ui_handle_t *hopacity          = ui_handle(__ID__);
 	hopacity->f                    = context_raw->swatch->opacity;
 	context_raw->swatch->opacity   = ui_slider(hopacity, "Opacity", 0, 1, true, 100.0, true, UI_ALIGN_RIGHT, true);
-	ui_handle_t *hocclusion        = ui_handle(__ID__);
-	hocclusion->f                  = context_raw->swatch->occlusion;
-	context_raw->swatch->occlusion = ui_slider(hocclusion, "Occlusion", 0, 1, true, 100.0, true, UI_ALIGN_RIGHT, true);
-	ui_handle_t *hroughness        = ui_handle(__ID__);
-	hroughness->f                  = context_raw->swatch->roughness;
-	context_raw->swatch->roughness = ui_slider(hroughness, "Roughness", 0, 1, true, 100.0, true, UI_ALIGN_RIGHT, true);
-	ui_handle_t *hmetallic         = ui_handle(__ID__);
-	hmetallic->f                   = context_raw->swatch->metallic;
-	context_raw->swatch->metallic  = ui_slider(hmetallic, "Metallic", 0, 1, true, 100.0, true, UI_ALIGN_RIGHT, true);
-	ui_handle_t *hheight           = ui_handle(__ID__);
-	hheight->f                     = context_raw->swatch->height;
-	context_raw->swatch->height    = ui_slider(hheight, "Height", 0, 1, true, 100.0, true, UI_ALIGN_RIGHT, true);
+
+	if (config_raw->workflow == WORKFLOW_PBR) {
+		ui_handle_t *hocclusion        = ui_handle(__ID__);
+		hocclusion->f                  = context_raw->swatch->occlusion;
+		context_raw->swatch->occlusion = ui_slider(hocclusion, "Occlusion", 0, 1, true, 100.0, true, UI_ALIGN_RIGHT, true);
+		ui_handle_t *hroughness        = ui_handle(__ID__);
+		hroughness->f                  = context_raw->swatch->roughness;
+		context_raw->swatch->roughness = ui_slider(hroughness, "Roughness", 0, 1, true, 100.0, true, UI_ALIGN_RIGHT, true);
+		ui_handle_t *hmetallic         = ui_handle(__ID__);
+		hmetallic->f                   = context_raw->swatch->metallic;
+		context_raw->swatch->metallic  = ui_slider(hmetallic, "Metallic", 0, 1, true, 100.0, true, UI_ALIGN_RIGHT, true);
+		ui_handle_t *hheight           = ui_handle(__ID__);
+		hheight->f                     = context_raw->swatch->height;
+		context_raw->swatch->height    = ui_slider(hheight, "Height", 0, 1, true, 100.0, true, UI_ALIGN_RIGHT, true);
+	}
 
 	if (ui->changed || ui->is_typing) {
 		ui_menu_keep_open = true;

@@ -142,16 +142,20 @@ void tab_materials_draw_slots_menu() {
 	ui_row2();
 	m->paint_base = ui_check(base_handle, tr("Base Color", NULL), "");
 	m->paint_opac = ui_check(opac_handle, tr("Opacity", NULL), "");
-	ui_row2();
-	m->paint_nor    = ui_check(nor_handle, tr("Normal", NULL), "");
-	m->paint_height = ui_check(height_handle, tr("Height", NULL), "");
-	ui_row2();
-	m->paint_rough = ui_check(rough_handle, tr("Roughness", NULL), "");
-	m->paint_met   = ui_check(met_handle, tr("Metallic", NULL), "");
-	ui_row2();
-	m->paint_emis = ui_check(emis_handle, tr("Emission", NULL), "");
-	m->paint_subs = ui_check(subs_handle, tr("Subsurface", NULL), "");
-	m->paint_occ  = ui_check(occ_handle, tr("Occlusion", NULL), "");
+
+	if (config_raw->workflow == WORKFLOW_PBR) {
+		ui_row2();
+		m->paint_nor    = ui_check(nor_handle, tr("Normal", NULL), "");
+		m->paint_height = ui_check(height_handle, tr("Height", NULL), "");
+		ui_row2();
+		m->paint_rough = ui_check(rough_handle, tr("Roughness", NULL), "");
+		m->paint_met   = ui_check(met_handle, tr("Metallic", NULL), "");
+		ui_row2();
+		m->paint_emis = ui_check(emis_handle, tr("Emission", NULL), "");
+		m->paint_subs = ui_check(subs_handle, tr("Subsurface", NULL), "");
+		m->paint_occ  = ui_check(occ_handle, tr("Occlusion", NULL), "");
+	}
+
 	if (base_handle->changed || opac_handle->changed || nor_handle->changed || occ_handle->changed || rough_handle->changed || met_handle->changed ||
 	    height_handle->changed || emis_handle->changed || subs_handle->changed) {
 		make_material_parse_paint_material(true);

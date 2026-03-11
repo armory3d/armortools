@@ -1051,21 +1051,25 @@ void tab_layers_draw_layer_context_menu_draw() {
 		ui_row2();
 		l->paint_base = ui_check(base_handle, tr("Base Color", NULL), "");
 		l->paint_opac = ui_check(opac_handle, tr("Opacity", NULL), "");
-		ui_row2();
-		l->paint_nor       = ui_check(nor_handle, tr("Normal", NULL), "");
-		l->paint_nor_blend = ui_check(nor_blend_handle, tr("Normal Blend", NULL), "");
-		ui_row2();
-		l->paint_rough = ui_check(rough_handle, tr("Roughness", NULL), "");
-		l->paint_met   = ui_check(met_handle, tr("Metallic", NULL), "");
-		ui_row2();
-		l->paint_height       = ui_check(height_handle, tr("Height", NULL), "");
-		l->paint_height_blend = ui_check(height_blend_handle, tr("Height Blend", NULL), "");
-		ui_row2();
-		l->paint_emis = ui_check(emis_handle, tr("Emission", NULL), "");
-		l->paint_subs = ui_check(subs_handle, tr("Subsurface", NULL), "");
-		l->paint_occ  = ui_check(occ_handle, tr("Occlusion", NULL), "");
+
+		if (config_raw->workflow == WORKFLOW_PBR) {
+			ui_row2();
+			l->paint_nor       = ui_check(nor_handle, tr("Normal", NULL), "");
+			l->paint_nor_blend = ui_check(nor_blend_handle, tr("Normal Blend", NULL), "");
+			ui_row2();
+			l->paint_rough = ui_check(rough_handle, tr("Roughness", NULL), "");
+			l->paint_met   = ui_check(met_handle, tr("Metallic", NULL), "");
+			ui_row2();
+			l->paint_height       = ui_check(height_handle, tr("Height", NULL), "");
+			l->paint_height_blend = ui_check(height_blend_handle, tr("Height Blend", NULL), "");
+			ui_row2();
+			l->paint_emis = ui_check(emis_handle, tr("Emission", NULL), "");
+			l->paint_subs = ui_check(subs_handle, tr("Subsurface", NULL), "");
+			l->paint_occ  = ui_check(occ_handle, tr("Occlusion", NULL), "");
+		}
+
 		if (base_handle->changed || opac_handle->changed || nor_handle->changed || nor_blend_handle->changed || occ_handle->changed || rough_handle->changed ||
-		    met_handle->changed || height_handle->changed || height_blend_handle->changed || emis_handle->changed || subs_handle->changed) {
+			met_handle->changed || height_handle->changed || height_blend_handle->changed || emis_handle->changed || subs_handle->changed) {
 			make_material_parse_mesh_material();
 			ui_menu_keep_open = true;
 		}

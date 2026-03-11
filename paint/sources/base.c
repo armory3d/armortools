@@ -2098,3 +2098,19 @@ void ui_base_set_viewport_col(i32 col) {
 		scene_world->_->envmap = context_raw->empty_envmap;
 	}
 }
+
+void base_update_workspace() {
+
+}
+
+void base_update_workflow() {
+	// Update Material Output nodes
+	for (i32 i = 0; i < project_materials->length; ++i) {
+		ui_node_array_t *nodes = project_materials->buffer[i]->canvas->nodes;
+		for (i32 j = 0; j < nodes->length; ++j) {
+			if (string_equals(nodes->buffer[j]->type, "OUTPUT_MATERIAL_PBR")) {
+				nodes->buffer[j]->inputs->length = config_raw->workflow == WORKFLOW_BASE ? 2 : 9;
+			}
+		}
+	}
+}

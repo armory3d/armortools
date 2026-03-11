@@ -117,6 +117,7 @@ void config_save() {
 	json_encode_i32("neural_backend", config_raw->neural_backend);
 	json_encode_i32("render_mode", config_raw->render_mode);
 	json_encode_i32("workspace", config_raw->workspace);
+	json_encode_i32("workflow", config_raw->workflow);
 	char *config_json = json_encode_end();
 
 	buffer_t *buffer = sys_string_to_buffer(config_json);
@@ -242,6 +243,7 @@ void config_init() {
 		config_raw->render_mode = RENDER_MODE_DEFERRED;
 #endif
 		config_raw->workspace = WORKSPACE_PAINT_3D;
+		config_raw->workflow  = WORKFLOW_PBR;
 	}
 	else {
 		// Discard old config

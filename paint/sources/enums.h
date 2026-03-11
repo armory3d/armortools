@@ -76,6 +76,11 @@ typedef enum {
 } workspace_t;
 
 typedef enum {
+	WORKFLOW_PBR  = 0,
+	WORKFLOW_BASE = 1,
+} workflow_t;
+
+typedef enum {
 	CHANNEL_TYPE_BASE_COLOR = 0,
 	CHANNEL_TYPE_OCCLUSION  = 1,
 	CHANNEL_TYPE_ROUGHNESS  = 2,
