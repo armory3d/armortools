@@ -21,68 +21,76 @@
 
 typedef struct object object_t;
 
-typedef struct _obj_t_array {
+typedef struct obj_t_array {
 	struct obj **buffer;
 	int          length;
 	int          capacity;
-} _obj_t_array_t;
-typedef struct _vertex_array_t_array {
+} obj_t_array_t;
+
+typedef struct vertex_array_t_array {
 	struct vertex_array **buffer;
 	int                   length;
 	int                   capacity;
-} _vertex_array_t_array_t;
-typedef struct _shader_data_t_array {
+} vertex_array_t_array_t;
+
+typedef struct shader_data_t_array {
 	struct shader_data **buffer;
 	int                  length;
 	int                  capacity;
-} _shader_data_t_array_t;
-typedef struct _tex_unit_t_array {
+} shader_data_t_array_t;
+
+typedef struct tex_unit_t_array {
 	struct tex_unit **buffer;
 	int               length;
 	int               capacity;
-} _tex_unit_t_array_t;
-typedef struct _shader_const_t_array {
+} tex_unit_t_array_t;
+
+typedef struct shader_const_t_array {
 	struct shader_const **buffer;
 	int                   length;
 	int                   capacity;
-} _shader_const_t_array_t;
-typedef struct _vertex_element_t_array {
+} shader_const_t_array_t;
+
+typedef struct vertex_element_t_array {
 	struct vertex_element **buffer;
 	int                     length;
 	int                     capacity;
-} _vertex_element_t_array_t;
-typedef struct _bind_const_t_array {
+} vertex_element_t_array_t;
+
+typedef struct bind_const_t_array {
 	struct bind_const **buffer;
 	int                 length;
 	int                 capacity;
-} _bind_const_t_array_t;
-typedef struct _bind_tex_t_array {
+} bind_const_t_array_t;
+
+typedef struct bind_tex_t_array {
 	struct bind_tex **buffer;
 	int               length;
 	int               capacity;
-} _bind_tex_t_array_t;
-typedef struct _material_context_t_array {
+} bind_tex_t_array_t;
+
+typedef struct material_context_t_array {
 	struct material_context **buffer;
 	int                       length;
 	int                       capacity;
-} _material_context_t_array_t;
+} material_context_t_array_t;
 
 typedef struct obj_runtime {
 	void *_gc; // Link to armpack_decode result
 } obj_runtime_t;
 
 typedef struct obj {
-	char           *name;
-	char           *type; // object, mesh_object, camera_object
-	char           *data_ref;
-	f32_array_t    *transform;
-	f32_array_t    *dimensions;
-	bool            visible;
-	bool            spawn; // Auto add object when creating scene
-	void           *anim;  // TODO: deprecated
-	char           *material_ref;
-	_obj_t_array_t *children;
-	obj_runtime_t  *_;
+	char          *name;
+	char          *type; // object, mesh_object, camera_object
+	char          *data_ref;
+	f32_array_t   *transform;
+	f32_array_t   *dimensions;
+	bool           visible;
+	bool           spawn; // Auto add object when creating scene
+	void          *anim;  // TODO: deprecated
+	char          *material_ref;
+	obj_t_array_t *children;
+	obj_runtime_t *_;
 } obj_t;
 
 typedef struct vertex_array {
@@ -99,12 +107,12 @@ typedef struct mesh_data_runtime {
 } mesh_data_runtime_t;
 
 typedef struct mesh_data {
-	char                    *name;
-	float                    scale_pos;
-	float                    scale_tex;
-	_vertex_array_t_array_t *vertex_arrays;
-	u32_array_t             *index_array;
-	mesh_data_runtime_t     *_;
+	char                   *name;
+	float                   scale_pos;
+	float                   scale_tex;
+	vertex_array_t_array_t *vertex_arrays;
+	u32_array_t            *index_array;
+	mesh_data_runtime_t    *_;
 } mesh_data_t;
 
 typedef struct camera_data {
@@ -201,27 +209,27 @@ typedef struct tex_unit {
 } tex_unit_t;
 
 typedef struct shader_context {
-	char                      *name;
-	bool                       depth_write;
-	char                      *compare_mode;
-	char                      *cull_mode;
-	char                      *vertex_shader;
-	char                      *fragment_shader;
-	bool                       shader_from_source;
-	char                      *blend_source;
-	char                      *blend_destination;
-	char                      *alpha_blend_source;
-	char                      *alpha_blend_destination;
-	u8_array_t                *color_writes_red; // Per target masks
-	u8_array_t                *color_writes_green;
-	u8_array_t                *color_writes_blue;
-	u8_array_t                *color_writes_alpha;
-	char_ptr_array_t          *color_attachments; // RGBA32, RGBA64, R8
-	char                      *depth_attachment;  // D32
-	_vertex_element_t_array_t *vertex_elements;   // vertex_element_t[]
-	_shader_const_t_array_t   *constants;         // shader_const_t[]
-	_tex_unit_t_array_t       *texture_units;     // tex_unit_t[]
-	shader_context_runtime_t  *_;
+	char                     *name;
+	bool                      depth_write;
+	char                     *compare_mode;
+	char                     *cull_mode;
+	char                     *vertex_shader;
+	char                     *fragment_shader;
+	bool                      shader_from_source;
+	char                     *blend_source;
+	char                     *blend_destination;
+	char                     *alpha_blend_source;
+	char                     *alpha_blend_destination;
+	u8_array_t               *color_writes_red; // Per target masks
+	u8_array_t               *color_writes_green;
+	u8_array_t               *color_writes_blue;
+	u8_array_t               *color_writes_alpha;
+	char_ptr_array_t         *color_attachments; // RGBA32, RGBA64, R8
+	char                     *depth_attachment;  // D32
+	vertex_element_t_array_t *vertex_elements;   // vertex_element_t[]
+	shader_const_t_array_t   *constants;         // shader_const_t[]
+	tex_unit_t_array_t       *texture_units;     // tex_unit_t[]
+	shader_context_runtime_t *_;
 } shader_context_t;
 
 typedef struct shader_data {
@@ -245,8 +253,8 @@ typedef struct material_context_runtime {
 
 typedef struct material_context {
 	char                       *name;
-	_bind_const_t_array_t      *bind_constants; // bind_const_t[]
-	_bind_tex_t_array_t        *bind_textures;  // bind_tex_t[]
+	bind_const_t_array_t       *bind_constants; // bind_const_t[]
+	bind_tex_t_array_t         *bind_textures;  // bind_tex_t[]
 	material_context_runtime_t *_;
 } material_context_t;
 
@@ -256,10 +264,10 @@ typedef struct material_data_runtime {
 } material_data_runtime_t;
 
 typedef struct material_data {
-	char                        *name;
-	char                        *shader;
-	_material_context_t_array_t *contexts; // material_context_t[]
-	material_data_runtime_t     *_;
+	char                       *name;
+	char                       *shader;
+	material_context_t_array_t *contexts; // material_context_t[]
+	material_data_runtime_t    *_;
 } material_data_t;
 
 typedef struct render_target {
@@ -439,7 +447,7 @@ void                material_context_load(material_context_t *raw);
 shader_data_t       *shader_data_create(shader_data_t *raw);
 char                *shader_data_ext();
 shader_data_t       *shader_data_parse(char *file, char *name);
-shader_data_t       *shader_data_get_raw_by_name(_shader_data_t_array_t *datas, char *name);
+shader_data_t       *shader_data_get_raw_by_name(shader_data_t_array_t *datas, char *name);
 void                 shader_data_delete(shader_data_t *raw);
 shader_context_t    *shader_data_get_context(shader_data_t *raw, char *name);
 void                 shader_context_load(shader_context_t *raw);

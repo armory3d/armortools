@@ -747,26 +747,11 @@ typedef struct slot_material_t_array {
 	int               length;
 	int               capacity;
 } slot_material_t_array_t;
-typedef struct vertex_array_t_array {
-	vertex_array_t **buffer;
-	int              length;
-	int              capacity;
-} vertex_array_t_array_t;
-typedef struct bind_tex_t_array {
-	bind_tex_t **buffer;
-	int          length;
-	int          capacity;
-} bind_tex_t_array_t;
 typedef struct mesh_object_t_array {
 	mesh_object_t **buffer;
 	int             length;
 	int             capacity;
 } mesh_object_t_array_t;
-typedef struct bind_const_t_array {
-	bind_const_t **buffer;
-	int            length;
-	int            capacity;
-} bind_const_t_array_t;
 typedef struct ui_handle_t_array {
 	ui_handle_t **buffer;
 	int           length;
@@ -807,21 +792,11 @@ typedef struct string_t_array {
 	int        length;
 	int        capacity;
 } string_t_array_t;
-typedef struct vertex_element_t_array {
-	vertex_element_t **buffer;
-	int                length;
-	int                capacity;
-} vertex_element_t_array_t;
 typedef struct ui_coloring_t_array {
 	ui_coloring_t **buffer;
 	int             length;
 	int             capacity;
 } ui_coloring_t_array_t;
-typedef struct shader_const_t_array {
-	shader_const_t **buffer;
-	int              length;
-	int              capacity;
-} shader_const_t_array_t;
 typedef struct slot_layer_t_array {
 	slot_layer_t **buffer;
 	int            length;
@@ -875,11 +850,6 @@ typedef struct tilesheet_action_t_array {
 	int                  length;
 	int                  capacity;
 } tilesheet_action_t_array_t;
-typedef struct obj_t_array {
-	obj_t **buffer;
-	int     length;
-	int     capacity;
-} obj_t_array_t;
 typedef struct logic_node_input_t_array {
 	logic_node_input_t **buffer;
 	int                  length;
@@ -915,11 +885,6 @@ typedef struct object_t_array {
 	int        length;
 	int        capacity;
 } object_t_array_t;
-typedef struct tex_unit_t_array {
-	tex_unit_t **buffer;
-	int          length;
-	int          capacity;
-} tex_unit_t_array_t;
 typedef struct render_target_t_array {
 	render_target_t **buffer;
 	int               length;
@@ -955,11 +920,6 @@ typedef struct export_preset_texture_t_array {
 	int                       length;
 	int                       capacity;
 } export_preset_texture_t_array_t;
-typedef struct material_context_t_array {
-	material_context_t **buffer;
-	int                  length;
-	int                  capacity;
-} material_context_t_array_t;
 typedef struct camera_object_t_array {
 	camera_object_t **buffer;
 	int               length;
@@ -990,8 +950,3 @@ typedef struct packed_asset_t_array {
 	int              length;
 	int              capacity;
 } packed_asset_t_array_t;
-typedef struct shader_data_t_array {
-	shader_data_t **buffer;
-	int             length;
-	int             capacity;
-} shader_data_t_array_t;

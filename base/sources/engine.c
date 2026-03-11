@@ -478,7 +478,7 @@ shader_data_t *shader_data_parse(char *file, char *name) {
 	return shader_data_create(raw);
 }
 
-shader_data_t *shader_data_get_raw_by_name(_shader_data_t_array_t *datas, char *name) {
+shader_data_t *shader_data_get_raw_by_name(shader_data_t_array_t *datas, char *name) {
 	if (strcmp(name, "") == 0) {
 		return (shader_data_t *)datas->buffer[0];
 	}
@@ -2317,8 +2317,8 @@ i32 scene_get_objects_count(any_array_t *objects) {
 }
 
 object_t *_scene_spawn_object_tree(obj_t *obj, object_t *parent, bool spawn_children) {
-	object_t       *object       = scene_create_object(obj, _scene_raw, parent);
-	_obj_t_array_t *obj_children = obj->children;
+	object_t      *object       = scene_create_object(obj, _scene_raw, parent);
+	obj_t_array_t *obj_children = obj->children;
 	if (spawn_children && obj_children != NULL) {
 		for (i32 i = 0; i < obj_children->length; ++i) {
 			obj_t *child = (obj_t *)obj_children->buffer[i];
