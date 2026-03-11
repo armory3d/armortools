@@ -395,7 +395,7 @@ void tab_layers_draw_layer_slot_full(slot_layer_t *l, i32 i) {
 	tab_layers_handle_layer_icon_state(l, i, state, uix, uiy);
 
 	// Draw layer name
-	ui->_x = uix + uiw * 0.24 + 2 + offx;
+	ui->_x = uix + uiw * 0.25 + 2 * UI_SCALE() + offx;
 	ui->_y = uiy + center;
 	ui->_w = uiw * 0.36;
 	if (config_raw->touch_ui) {
