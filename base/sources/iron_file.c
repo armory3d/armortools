@@ -45,14 +45,14 @@ void iron_internal_set_files_location(char *dir) {
 
 char *iron_internal_files_location(void) {
 #ifdef IRON_MACOS
-	char path[1024];
+	static char path[1024];
 	strcpy(path, iron_get_resource_path());
 	strcat(path, "/");
 	strcat(path, IRON_OUTDIR);
 	strcat(path, "/");
 	return path;
 #elif defined(IRON_IOS)
-	char path[1024];
+	static char path[1024];
 	strcpy(path, iron_get_resource_path());
 	strcat(path, "/");
 	strcat(path, IRON_OUTDIR);
