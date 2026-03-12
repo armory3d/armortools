@@ -43,7 +43,7 @@ void iron_set_gamepad_button_callback(void (*callback)(int, int, float));
 
 any_map_t *_sys_shaders      = NULL;
 f32        _sys_start_time   = 0.0f;
-char      *_sys_window_title = NULL;
+char       _sys_window_title[1024];
 
 any_array_t *_sys_foreground_listeners = NULL;
 any_array_t *_sys_resume_listeners     = NULL;
@@ -347,7 +347,7 @@ char *sys_title(void) {
 
 void sys_title_set(char *value) {
 	iron_window_set_title(value);
-	_sys_window_title = value;
+	strcpy(_sys_window_title, value);
 }
 
 i32 sys_display_primary_id(void) {

@@ -9,7 +9,6 @@
 
 extern any_map_t *_sys_shaders;
 extern f32        _sys_start_time;
-extern char      *_sys_window_title;
 
 extern any_array_t *_sys_on_next_frames;
 extern any_array_t *_sys_on_end_frames;
