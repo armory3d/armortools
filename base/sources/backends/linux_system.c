@@ -511,7 +511,9 @@ static int xk_to_iron(KeySym symbol) {
 	if (symbol == XK_Alt_R)
 		return KEY_CODE_ALT;
 	if (symbol == XK_ISO_Prev_Group)
-		return KEY_CODE_ALT; // XK_ISO_Prev_Group received instead of XK_Alt_L?
+		return KEY_CODE_ALT; // XK_ISO_Prev_Group received instead of XK_Alt_L
+	if (symbol == XK_ISO_Next_Group)
+		return KEY_CODE_ALT; // XK_ISO_Next_Group received instead of XK_Alt_R
 	if (symbol == XK_Delete)
 		return KEY_CODE_DELETE;
 	if (symbol == XK_comma)
