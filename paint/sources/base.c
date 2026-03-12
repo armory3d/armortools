@@ -2144,8 +2144,8 @@ void base_update_workspace() {
 		ui_base_htabs->buffer[TAB_AREA_SIDEBAR0]->i        = 2; // Script
 		config_raw->layout_tabs->buffer[TAB_AREA_SIDEBAR0] = 2;
 
-		config_raw->layout->buffer[LAYOUT_SIZE_STATUS_H]   = iron_window_height() * 0.3 * config_raw->window_scale;
-		config_raw->layout->buffer[LAYOUT_SIZE_SIDEBAR_W]  = iron_window_width() * 0.52 * config_raw->window_scale;
+		config_raw->layout->buffer[LAYOUT_SIZE_STATUS_H]   = iron_window_height() * 0.3;
+		config_raw->layout->buffer[LAYOUT_SIZE_SIDEBAR_W]  = iron_window_width() * 0.52;
 		float h = UI_ELEMENT_H() + UI_ELEMENT_OFFSET() + 2;
 		config_raw->layout->buffer[LAYOUT_SIZE_SIDEBAR_H0] = iron_window_height() - h;
 		config_raw->layout->buffer[LAYOUT_SIZE_SIDEBAR_H1] = h;
