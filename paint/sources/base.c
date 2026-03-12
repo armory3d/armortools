@@ -187,6 +187,7 @@ i32 base_h() {
 	}
 
 	i32 res = iron_window_height();
+
 	if (config_raw->layout == NULL) {
 		res -= ui_header_default_h * 2 + ui_statusbar_default_h;
 #if defined(IRON_ANDROID) || defined(IRON_IOS)
@@ -199,6 +200,9 @@ i32 base_h() {
 
 		if (config_raw->layout->buffer[LAYOUT_SIZE_HEADER] == 0) {
 			res += ui_header_h * 2;
+		}
+		if (!base_view3d_show) {
+			res += ui_header_h * 4;
 		}
 	}
 
@@ -724,14 +728,14 @@ tab_draw_array_t_array_t *ui_base_init_hwnd_tabs() {
 	    (void *[]){
 	        _draw_callback_create(tab_layers_draw),
 	        _draw_callback_create(tab_history_draw),
-	        _draw_callback_create(tab_plugins_draw),
+	        _draw_callback_create(tab_scripts_draw),
 	    },
 	    3);
 	tab_draw_array_t *a1 = any_array_create_from_raw(
 	    (void *[]){
 	        _draw_callback_create(tab_materials_draw),
 	        _draw_callback_create(tab_brushes_draw),
-	        _draw_callback_create(tab_scripts_draw),
+	        _draw_callback_create(tab_plugins_draw),
 	    },
 	    3);
 	tab_draw_array_t *a2 = any_array_create_from_raw(
@@ -2107,33 +2111,44 @@ void ui_base_set_viewport_col(i32 col) {
 }
 
 void base_update_workspace() {
+	config_init_layout();
+
 	if (config_raw->workspace == WORKSPACE_PAINT_3D || config_raw->workspace == WORKSPACE_SCULPT) {
 		base_view3d_show  = true;
 		ui_menubar_tab->i = 0;
 		ui_view2d_show    = false;
 		ui_nodes_show     = false;
-		ui_sidebar_show(true);
 	}
 	else if (config_raw->workspace == WORKSPACE_PAINT_2D) {
 		base_view3d_show  = false;
 		ui_menubar_tab->i = -1;
 		ui_view2d_show    = true;
 		ui_nodes_show     = false;
-		ui_sidebar_show(true);
 	}
 	else if (config_raw->workspace == WORKSPACE_NODES) {
 		base_view3d_show  = false;
 		ui_menubar_tab->i = -1;
 		ui_view2d_show    = false;
 		ui_nodes_show     = true;
+
 		ui_sidebar_show(false);
 	}
 	else if (config_raw->workspace == WORKSPACE_SCRIPT) {
-		base_view3d_show  = false;
-		ui_menubar_tab->i = -1;
+		base_view3d_show  = true;
+		ui_menubar_tab->i = 0;
 		ui_view2d_show    = false;
 		ui_nodes_show     = false;
-		ui_sidebar_show(false);
+
+		ui_base_htabs->buffer[TAB_AREA_STATUS]->i          = 5; // Console
+		config_raw->layout_tabs->buffer[TAB_AREA_STATUS]   = 5;
+		ui_base_htabs->buffer[TAB_AREA_SIDEBAR0]->i        = 2; // Script
+		config_raw->layout_tabs->buffer[TAB_AREA_SIDEBAR0] = 2;
+
+		config_raw->layout->buffer[LAYOUT_SIZE_STATUS_H]   = iron_window_height() * 0.3 * config_raw->window_scale;
+		config_raw->layout->buffer[LAYOUT_SIZE_SIDEBAR_W]  = iron_window_width() * 0.52 * config_raw->window_scale;
+		float h = UI_ELEMENT_H() + UI_ELEMENT_OFFSET() + 2;
+		config_raw->layout->buffer[LAYOUT_SIZE_SIDEBAR_H0] = iron_window_height() - h;
+		config_raw->layout->buffer[LAYOUT_SIZE_SIDEBAR_H1] = h;
 	}
 
 	base_resize();

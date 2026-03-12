@@ -751,7 +751,7 @@ void render_path_paint_set_plane_mesh() {
 	cam->data->fov = 0.69;
 	camera_object_build_proj(cam, -1.0);
 	camera_object_build_mat(cam);
-	f32 tw    = 0.95 * ui_view2d_pan_scale;
+	f32 tw    = 0.9 * ui_view2d_pan_scale * (fmin(ui_view2d_ww, ui_view2d_wh) / ui_view2d_ww);
 	f32 tx    = ui_view2d_pan_x / (float)ui_view2d_ww;
 	f32 ty    = ui_view2d_pan_y / (float)sys_h();
 	m         = mat4_identity();
@@ -828,9 +828,8 @@ void render_path_paint_set_plane_mesh() {
 	render_path_paint_planeo->base->visible = true;
 	context_raw->paint_object               = render_path_paint_planeo;
 
-	vec4_t v                                         = vec4_create(0.0, 0.0, 0.0, 1.0);
-	v                                                = vec4_create(m.m00, m.m01, m.m02, 1.0);
-	f32 sx                                           = vec4_len(v);
+	vec4_t v                                         = vec4_create(m.m00, m.m01, m.m02, 1.0);
+	f32    sx                                        = vec4_len(v);
 	render_path_paint_planeo->base->transform->rot   = quat_from_euler(-math_pi() / (float)2, 0, 0);
 	render_path_paint_planeo->base->transform->scale = vec4_create(sx, 1.0, sx, 1.0);
 	render_path_paint_planeo->base->transform->scale.z *= config_get_texture_res_y() / (float)config_get_texture_res_x();

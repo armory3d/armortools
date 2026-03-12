@@ -97,6 +97,8 @@ void ui_view2d_render(void *_) {
 		util_render_make_font_preview();
 	}
 
+	ui->input_enabled = base_ui_enabled;
+
 	ui_begin(ui);
 
 	i32 headerh = config_raw->layout->buffer[LAYOUT_SIZE_HEADER] == 1 ? ui_header_h * 2 : ui_header_h;
@@ -144,9 +146,10 @@ void ui_view2d_render(void *_) {
 		slot_layer_t  *l       = context_raw->layer;
 		i32            channel = 0;
 
-		i32 tw = ui_view2d_ww * 0.95 * ui_view2d_pan_scale;
-		i32 tx = ui_view2d_ww / (float)2 - tw / (float)2 + ui_view2d_pan_x;
-		i32 ty = apph / (float)2 - tw / (float)2 + ui_view2d_pan_y;
+		i32 wm = fmin(ui_view2d_ww, ui_view2d_wh);
+		i32 tw = wm * 0.9 * ui_view2d_pan_scale;
+		i32 tx = ui_view2d_ww / 2.0 - tw / 2.0 + ui_view2d_pan_x;
+		i32 ty = apph / 2.0 - tw / 2.0 + ui_view2d_pan_y;
 
 		if (ui_view2d_type == VIEW_2D_TYPE_ASSET) {
 			tex = project_get_image(context_raw->texture);
@@ -413,6 +416,8 @@ void ui_view2d_render(void *_) {
 		}
 	}
 	ui_end();
+
+	ui->input_enabled = true;
 }
 
 void ui_view2d_update(void *_) {
@@ -474,7 +479,8 @@ void ui_view2d_update(void *_) {
 			slot_layer_t  *layer   = context_raw->layer;
 			gpu_texture_t *tex     = layer->texpaint;
 			f32            ratio   = tex->height / (float)tex->width;
-			f32            tw      = ui_view2d_ww * 0.95 * ui_view2d_pan_scale;
+			f32            wm      = fmin(ui_view2d_ww, ui_view2d_wh);
+			f32            tw      = wm * 0.9 * ui_view2d_pan_scale;
 			f32            th      = tw * ratio;
 			f32            tx      = ui_view2d_ww / (float)2 - tw / (float)2 + ui_view2d_pan_x;
 			i32            headerh = config_raw->layout->buffer[LAYOUT_SIZE_HEADER] == 1 ? ui_header_h * 2 : ui_header_h;
@@ -518,7 +524,8 @@ void ui_view2d_update(void *_) {
 
 	// Limit panning to keep texture in viewport
 	i32 border = 32;
-	f32 tw     = ui_view2d_ww * 0.95 * ui_view2d_pan_scale;
+	f32 wm     = fmin(ui_view2d_ww, ui_view2d_wh);
+	f32 tw     = ui_view2d_ww * 0.9 * ui_view2d_pan_scale;
 	f32 tx     = ui_view2d_ww / (float)2 - tw / (float)2 + ui_view2d_pan_x;
 	f32 hh     = sys_h();
 	f32 ty     = hh / (float)2 - tw / (float)2 + ui_view2d_pan_y;
