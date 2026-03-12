@@ -699,6 +699,8 @@ char *iron_save_dialog(char *filter_list, char *default_path) {
 
 #include "backends/android_file_dialog.h"
 
+extern char temp_string[1024 * 128];
+
 char_ptr_array_t *iron_open_dialog(char *filter_list, char *default_path, bool open_multiple) {
 	AndroidFileDialogOpen();
 	return NULL;
@@ -714,6 +716,8 @@ char *iron_save_dialog(char *filter_list, char *default_path) {
 
 #include "backends/ios_file_dialog.h"
 #include <wchar.h>
+
+extern char temp_string[1024 * 128];
 
 char_ptr_array_t *iron_open_dialog(char *filter_list, char *default_path, bool open_multiple) {
 	// Once finished drop_files callback is called
