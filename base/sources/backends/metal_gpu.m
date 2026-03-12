@@ -309,12 +309,13 @@ void gpu_viewport(int x, int y, int width, int height) {
 }
 
 void gpu_scissor(int x, int y, int width, int height) {
+	if (width < 0 || height < 0) {
+		return;
+	}
 	current_scissor.x      = x;
 	current_scissor.y      = y;
-	int target_w           = current_render_targets[0]->width;
-	int target_h           = current_render_targets[0]->height;
-	current_scissor.width  = (x + width <= target_w) ? width : target_w - x;
-	current_scissor.height = (y + height <= target_h) ? height : target_h - y;
+	current_scissor.width  = width;
+	current_scissor.height = height;
 	[command_encoder setScissorRect:current_scissor];
 }
 

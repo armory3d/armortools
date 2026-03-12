@@ -414,6 +414,9 @@ void gpu_viewport(int x, int y, int width, int height) {
 }
 
 void gpu_scissor(int x, int y, int width, int height) {
+	if (width < 0 || height < 0) {
+		return;
+	}
 	wgpuRenderPassEncoderSetScissorRect(render_pass_encoder, (uint32_t)x, (uint32_t)y, (uint32_t)width, (uint32_t)height);
 }
 

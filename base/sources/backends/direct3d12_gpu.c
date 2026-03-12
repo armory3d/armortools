@@ -546,6 +546,9 @@ void gpu_viewport(int x, int y, int width, int height) {
 }
 
 void gpu_scissor(int x, int y, int width, int height) {
+	if (width < 0 || height < 0) {
+		return;
+	}
 	current_scissor = (D3D12_RECT){
 	    .left   = x,
 	    .top    = y,
