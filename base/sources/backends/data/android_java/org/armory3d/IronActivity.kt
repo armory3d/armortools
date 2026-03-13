@@ -35,6 +35,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import kotlin.math.log
 import android.app.AlertDialog
+import android.database.Cursor
+import android.provider.OpenableColumns
 
 class ErrorActivity: Activity() {
 	override fun onCreate(savedInstanceState: Bundle?) {
@@ -219,57 +221,47 @@ class IronActivity: NativeActivity(), KeyEvent.Callback {
 
 	private fun importFile(pickedFile: Uri) {
 		val resolver: ContentResolver = applicationContext.contentResolver
-		val inps: InputStream = resolver.openInputStream(pickedFile)!!
+		val inputStream: InputStream = resolver.openInputStream(pickedFile)
+			?: run {
+				return
+			}
+		val bis = BufferedInputStream(inputStream)
 		try {
-			val bis: BufferedInputStream = BufferedInputStream(inps)
-			val dir: File = File(filesDir.absolutePath + "/" + getMobileTitle())
+			val dir = File(filesDir.absolutePath + "/" + getMobileTitle())
 			dir.mkdirs()
-			var path: List<String> = pickedFile.path!!.split("/")
-
-			// Samsung files app removes extension from fileName
-			val filePath: Array<String> = arrayOf(android.provider.MediaStore.Images.Media.DATA)
-			val cursor: android.database.Cursor = contentResolver.query(pickedFile, filePath, null, null, null)!!
-			cursor.moveToFirst()
-			val pickedPath: String? = cursor.getStringOrNull(cursor.getColumnIndex(filePath[0]))
-			if (pickedPath != null) {
-				path = pickedPath.split("/")
-			}
-			cursor.close()
-
-			var fileName: String = path[path.size - 1]
-
-			// Extension still unknown
-			if (!fileName.contains(".")) {
-				var ext: String = MimeTypeMap.getSingleton().getExtensionFromMimeType(contentResolver.getType(pickedFile))!!
-				// Note: for obj/fbx file, the extension returned is bin..
-				if (ext == "bin") {
-					bis.mark(0)
-					val header: StringBuilder = StringBuilder()
-					for (i in 0..17) {
-						val c: Int = bis.read()
-						if (c == -1) break
-						header.append(c.toChar())
+			var fileName = "imported_file.unknown"
+			resolver.query(
+				pickedFile,
+				arrayOf(OpenableColumns.DISPLAY_NAME),
+				null,
+				null,
+				null
+			)?.use { cursor: Cursor ->
+				if (cursor.moveToFirst()) {
+					val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+					if (nameIndex != -1) {
+						cursor.getString(nameIndex)?.let { name ->
+							fileName = name
+						}
 					}
-					ext = if (header.toString() == "Kaydara FBX Binary") "fbx" else "obj"
-					bis.reset()
 				}
-				fileName += "." + ext
 			}
 
-			val dst: String = filesDir.absolutePath + "/" + getMobileTitle() + "/" + fileName
-			val os: OutputStream = FileOutputStream(dst)
-			try {
+			val dst = "${filesDir.absolutePath}/${getMobileTitle()}/$fileName"
+			FileOutputStream(dst).use { os ->
 				val buf = ByteArray(1024)
-				var len = bis.read(buf)
-				while (len > 0) {
+				var len: Int
+				while (bis.read(buf).also { len = it } > 0) {
 					os.write(buf, 0, len)
-					len = bis.read(buf)
 				}
 				onAndroidFilePicked(dst)
 			}
-			catch (e: IOException) {}
+		} catch (e: IOException) {
+		} catch (e: Exception) {
+		} finally {
+			try {
+				bis.close()
+			} catch (e: IOException) {}
 		}
-		catch (e: FileNotFoundException) {}
-		catch (e: IOException) {}
 	}
 }
