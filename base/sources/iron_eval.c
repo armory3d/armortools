@@ -10,6 +10,7 @@ JSContext *js_ctx;
 #ifdef WITH_PLUGINS
 void plugin_api_init();
 #endif
+void console_trace(char *s);
 
 extern int    _argc;
 extern char **_argv;
@@ -34,8 +35,20 @@ float js_eval(const char *js) {
 	}
 	JSValue ret = JS_Eval(js_ctx, js, strlen(js), "iron", JS_EVAL_TYPE_GLOBAL);
 	if (JS_IsException(ret)) {
-		js_std_dump_error(js_ctx);
+		JSValue     exc       = JS_GetException(js_ctx);
+		const char *error_msg = JS_ToCString(js_ctx, exc);
+		console_trace(error_msg);
+		JS_FreeCString(js_ctx, error_msg);
+		if (JS_IsError(exc)) {
+			JSValue     stack     = JS_GetPropertyStr(js_ctx, exc, "stack");
+			const char *stack_msg = JS_ToCString(js_ctx, stack);
+			console_trace(stack_msg);
+			JS_FreeCString(js_ctx, stack_msg);
+			JS_FreeValue(js_ctx, stack);
+		}
+		JS_FreeValue(js_ctx, exc);
 		JS_ResetUncatchableError(js_ctx);
+		return 0.0;
 	}
 	double d;
 	JS_ToFloat64(js_ctx, &d, ret);
