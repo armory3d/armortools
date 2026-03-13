@@ -27,7 +27,7 @@ void console_toast(char *s) {
 		draw_begin(current, false, 0);
 }
 
-void console_draw_progress(void * _) {
+void console_draw_progress(void *_) {
 	console_draw_toast(console_progress_text);
 }
 
@@ -81,8 +81,8 @@ void console_log(char *s) {
 void console_trace(char *s) {
 	iron_log(s);
 	base_redraw_console();
-	array_insert(console_last_traces, 0, s);
+	char_ptr_array_push(console_last_traces, string_copy(s));
 	if (console_last_traces->length > 100) {
-		array_pop(console_last_traces);
+		array_shift(console_last_traces);
 	}
 }

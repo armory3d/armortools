@@ -339,11 +339,7 @@ void _kickstart() {
 	gc_root(ui_sidebar_hminimized);
 	ui_sidebar_w_mini = ui_sidebar_default_w_mini;
 	gc_unroot(console_last_traces);
-	console_last_traces = any_array_create_from_raw(
-	    (void *[]){
-	        "",
-	    },
-	    1);
+	console_last_traces = any_array_create(0);
 	gc_root(console_last_traces);
 	camera_dir = vec4_create(0.0, 0.0, 0.0, 1.0);
 	gc_unroot(box_preferences_htab);

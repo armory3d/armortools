@@ -39,10 +39,13 @@ void tab_console_draw(ui_handle_t *htab) {
 #endif
 		ui_row(row);
 
+		ui_handle_t *h_input = ui_handle(__ID__);
+
 		if (ui_icon_button(tr("Clear", NULL), ICON_ERASE, UI_ALIGN_CENTER)) {
 			gc_unroot(console_last_traces);
 			console_last_traces = any_array_create_from_raw((void *[]){}, 0);
 			gc_root(console_last_traces);
+			h_input->text = "";
 		}
 		if (ui_icon_button(tr("Export", NULL), ICON_EXPORT, UI_ALIGN_CENTER)) {
 			ui_files_show("txt", true, false, &tab_console_draw_export_on_file_picked);
@@ -65,7 +68,23 @@ void tab_console_draw(ui_handle_t *htab) {
 			char *t = console_last_traces->buffer[i];
 			ui_text(t, UI_ALIGN_LEFT, 0x00000000);
 		}
+
+		row = f32_array_create_from_raw(
+		    (f32[]){
+		        0.9,
+		        0.1,
+		    },
+		    2);
+		ui_row(row);
+
+		ui_text_input(h_input, "", UI_ALIGN_LEFT, true, false);
+
 		ui_set_font(ui, _font);
 		ui->font_size = _font_size;
+
+		if (ui_icon_button(tr("Run", NULL), ICON_PLAY, UI_ALIGN_CENTER)) {
+			js_eval(h_input->text);
+			h_input->text = "";
+		}
 	}
 }
