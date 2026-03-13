@@ -2480,7 +2480,7 @@ void ui_key_down(ui_t *ui, int key_code) {
 	case KEY_CODE_SPACE:
 		ui->key_char = ' ';
 		break;
-#ifdef UI_ANDROID_RMB // Detect right mouse button on Android..
+#ifdef IRON_ANDROID // Detect right mouse button on Android..
 	case KEY_CODE_BACK:
 		if (!ui->input_down_r)
 			ui_mouse_down(ui, 1, ui->input_x, ui->input_y);
@@ -2524,7 +2524,7 @@ void ui_key_up(ui_t *ui, int key_code) {
 	case KEY_CODE_A:
 		ui->is_a_down = false;
 		break;
-#ifdef UI_ANDROID_RMB
+#ifdef IRON_ANDROID
 	case KEY_CODE_BACK:
 		ui_mouse_down(ui, 1, ui->input_x, ui->input_y);
 		break;

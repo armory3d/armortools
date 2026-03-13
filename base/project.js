@@ -101,7 +101,6 @@ else if (platform == "android") {
 	project.add_define("IRON_ANDROID");
 	project.add_define("IRON_VULKAN");
 	project.add_define("VK_USE_PLATFORM_ANDROID_KHR");
-	project.add_define("arm_android_rmb");
 	project.add_lib("vulkan");
 	project.add_lib("log");
 	project.add_lib("android");

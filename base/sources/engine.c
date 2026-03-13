@@ -1873,7 +1873,7 @@ void  iron_a1_sound_destroy(void *sound);
 #endif
 
 char *data_path(void) {
-#ifdef arm_android
+#ifdef IRON_ANDROID
 	return "data" PATH_SEP;
 #else
 	return "." PATH_SEP "data" PATH_SEP;
