@@ -1,6 +1,3 @@
-#ifndef NDEBUG
-#define VALIDATE
-#endif
 
 #include "vulkan_gpu.h"
 #include <iron_gpu.h>
@@ -44,7 +41,7 @@ static VkPhysicalDevice gpu;
 static VkDevice         device;
 static VkCommandPool    cmd_pool;
 static VkQueue          queue;
-#ifdef VALIDATE
+#ifndef NDEBUG
 static bool                     validation_found;
 static VkDebugUtilsMessengerEXT debug_messenger;
 #endif
@@ -649,7 +646,7 @@ void gpu_init_internal(int depth_buffer_bits, bool vsync) {
 		VkLayerProperties *instance_layers = (VkLayerProperties *)malloc(sizeof(VkLayerProperties) * instance_layer_count);
 		vkEnumerateInstanceLayerProperties(&instance_layer_count, instance_layers);
 
-#ifdef VALIDATE
+#ifndef NDEBUG
 		validation_found = find_layer(instance_layers, instance_layer_count, "VK_LAYER_KHRONOS_validation");
 		if (validation_found) {
 			iron_log("Running with Vulkan validation layers enabled.");
@@ -677,7 +674,7 @@ void gpu_init_internal(int depth_buffer_bits, bool vsync) {
 		iron_error("");
 	}
 
-#ifdef VALIDATE
+#ifndef NDEBUG
 	// this extension should be provided by the validation layers
 	if (validation_found) {
 		wanted_instance_extensions[wanted_instance_extension_count++] = VK_EXT_DEBUG_UTILS_EXTENSION_NAME;
@@ -696,7 +693,7 @@ void gpu_init_internal(int depth_buffer_bits, bool vsync) {
 	VkInstanceCreateInfo info = {0};
 	info.sType                = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
 	info.pApplicationInfo     = &app;
-#ifdef VALIDATE
+#ifndef NDEBUG
 	if (validation_found) {
 		info.enabledLayerCount   = wanted_instance_layer_count;
 		info.ppEnabledLayerNames = (const char *const *)wanted_instance_layers;
@@ -796,7 +793,7 @@ void gpu_init_internal(int depth_buffer_bits, bool vsync) {
 		VkLayerProperties *device_layers = (VkLayerProperties *)malloc(sizeof(VkLayerProperties) * device_layer_count);
 		vkEnumerateDeviceLayerProperties(gpu, &device_layer_count, device_layers);
 
-#ifdef VALIDATE
+#ifndef NDEBUG
 		validation_found = find_layer(device_layers, device_layer_count, "VK_LAYER_KHRONOS_validation");
 		if (validation_found) {
 			wanted_device_layers[wanted_device_layer_count++] = "VK_LAYER_KHRONOS_validation";
@@ -831,7 +828,7 @@ void gpu_init_internal(int depth_buffer_bits, bool vsync) {
 		exit(1);
 	}
 
-#ifdef VALIDATE
+#ifndef NDEBUG
 	if (validation_found) {
 		VkDebugUtilsMessengerCreateInfoEXT create_info = {
 		    .sType           = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT,
