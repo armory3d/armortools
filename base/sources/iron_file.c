@@ -514,6 +514,7 @@ any_array_t *file_read_directory(char *path) {
 		buffer_t *blob = data_get_blob("data_list.json");
 		char     *s    = sys_buffer_to_string(blob);
 		file_internal  = json_parse_to_map(s);
+		gc_root(file_internal);
 	}
 	if (any_map_get(file_internal, path) != NULL) {
 		return string_split(any_map_get(file_internal, path), ",");
