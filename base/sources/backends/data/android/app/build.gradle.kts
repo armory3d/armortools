@@ -6,6 +6,7 @@ plugins {
 android {
     namespace = "{package}"
     compileSdk = {compileSdkVersion}
+    ndkVersion = "29.0.14206865"
 
     defaultConfig {
         applicationId = "{package}"
