@@ -12,8 +12,8 @@
 bool path_is_protected_linux = false;
 #endif
 
-static char_ptr_array_t *_path_mesh_formats     = NULL;
-static char_ptr_array_t *_path_texture_formats  = NULL;
+char_ptr_array_t *_path_mesh_formats     = NULL;
+char_ptr_array_t *_path_texture_formats  = NULL;
 static char_ptr_array_t *_path_base_color_ext   = NULL;
 static char_ptr_array_t *_path_opacity_ext      = NULL;
 static char_ptr_array_t *_path_normal_map_ext   = NULL;
