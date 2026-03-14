@@ -1982,9 +1982,9 @@ class AndroidExporter extends Exporter {
 			installLocation : "internalOnly",
 			versionCode : 1,
 			versionName : "1.0",
-			compileSdkVersion : 33,
-			minSdkVersion : 24,
-			targetSdkVersion : 33,
+			compileSdkVersion : 36,
+			minSdkVersion : 35, // android 15
+			targetSdkVersion : 36,
 			screenOrientation : "sensor",
 			permissions : [],
 			disableStickyImmersiveMode : false,

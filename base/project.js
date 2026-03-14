@@ -107,12 +107,10 @@ else if (platform == "android") {
 	if (flags.with_audio) {
 		project.add_lib("OpenSLES");
 	}
-	project.target_options.android.package           = flags.package;
-	project.target_options.android.permissions       = [ "android.permission.READ_MEDIA_IMAGES", "android.permission.INTERNET" ];
-	project.target_options.android.minSdkVersion     = 35; // android 15
-	project.target_options.android.targetSdkVersion  = 36;
-	project.target_options.android.versionCode       = get_version_code();
-	project.target_options.android.versionName       = "1.0 alpha";
+	project.target_options.android.package     = flags.package;
+	project.target_options.android.permissions = [ "android.permission.READ_MEDIA_IMAGES", "android.permission.INTERNET" ];
+	project.target_options.android.versionCode = get_version_code();
+	project.target_options.android.versionName = "1.0 alpha";
 }
 else if (platform == "wasm") {
 	project.add_cfiles("sources/backends/wasm_system.*");
