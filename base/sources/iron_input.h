@@ -17,7 +17,7 @@ void input_register(void);
 
 // Mouse
 
-extern char_ptr_array_t *_mouse_buttons;
+extern string_array_t *_mouse_buttons;
 extern u8_array_t       *_mouse_buttons_down;
 extern u8_array_t       *_mouse_buttons_started;
 extern u8_array_t       *_mouse_buttons_released;
@@ -58,7 +58,7 @@ f32 mouse_view_y(void);
 
 // Pen
 
-extern char_ptr_array_t *pen_buttons;
+extern string_array_t *pen_buttons;
 extern u8_array_t       *pen_buttons_down;
 extern u8_array_t       *pen_buttons_started;
 extern u8_array_t       *pen_buttons_released;
@@ -87,11 +87,11 @@ f32  pen_view_y(void);
 
 // Keyboard
 
-extern char_ptr_array_t *keyboard_keys;
+extern string_array_t *keyboard_keys;
 extern i32_map_t        *keyboard_keys_down;
 extern i32_map_t        *keyboard_keys_started;
 extern i32_map_t        *keyboard_keys_released;
-extern char_ptr_array_t *keyboard_keys_frame;
+extern string_array_t *keyboard_keys_frame;
 extern bool              keyboard_repeat_key;
 extern f32               keyboard_repeat_time;
 
@@ -129,9 +129,9 @@ typedef struct gamepad {
 	gamepad_stick_t *right_stick;
 } gamepad_t;
 
-extern char_ptr_array_t *gamepad_buttons_ps;
-extern char_ptr_array_t *gamepad_buttons_xbox;
-extern char_ptr_array_t *gamepad_buttons;
+extern string_array_t *gamepad_buttons_ps;
+extern string_array_t *gamepad_buttons_xbox;
+extern string_array_t *gamepad_buttons;
 extern any_array_t      *gamepad_raws;
 
 void             gamepad_end_frame(void);

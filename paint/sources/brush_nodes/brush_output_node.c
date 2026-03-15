@@ -37,7 +37,7 @@ void brush_output_node_parse_inputs(brush_output_node_t *self) {
 		context_raw->brush_mask_image_is_alpha = ends_with(opac->_str, ".a");
 		opac->_str                             = string_copy(substring(opac->_str, 0, string_last_index_of(opac->_str, ".")));
 		context_raw->brush_nodes_opacity       = 1.0;
-		i32 index                              = char_ptr_array_index_of(project_asset_names, opac->_str);
+		i32 index                              = string_array_index_of(project_asset_names, opac->_str);
 		if (index != -1) {
 			asset_t *asset                = project_assets->buffer[index];
 			context_raw->brush_mask_image = project_get_image(asset);
@@ -57,7 +57,7 @@ void brush_output_node_parse_inputs(brush_output_node_t *self) {
 	if (stencil->_str != NULL) { // string
 		context_raw->brush_stencil_image_is_alpha = ends_with(stencil->_str, ".a");
 		stencil->_str                             = string_copy(substring(stencil->_str, 0, string_last_index_of(stencil->_str, ".")));
-		i32 index                                 = char_ptr_array_index_of(project_asset_names, stencil->_str);
+		i32 index                                 = string_array_index_of(project_asset_names, stencil->_str);
 		if (index != -1) {
 			asset_t *asset                   = project_assets->buffer[index];
 			context_raw->brush_stencil_image = project_get_image(asset);

@@ -4,17 +4,17 @@
 #include <stdint.h>
 
 typedef struct i32_map {
-	char_ptr_array_t *keys;
+	string_array_t *keys;
 	i32_array_t      *values;
 } i32_map_t;
 
 typedef struct f32_map {
-	char_ptr_array_t *keys;
+	string_array_t *keys;
 	f32_array_t      *values;
 } f32_map_t;
 
 typedef struct any_map {
-	char_ptr_array_t *keys;
+	string_array_t *keys;
 	any_array_t      *values;
 } any_map_t;
 

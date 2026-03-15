@@ -84,7 +84,7 @@ bind_tex_t *parser_material_make_texture(ui_node_t *image_node, char *tex_name) 
 
 char *image_texture_node_vector(ui_node_t *node, ui_node_socket_t *socket) {
 	// Already fetched
-	if (char_ptr_array_index_of(parser_material_parsed, parser_material_res_var_name(node, node->outputs->buffer[1])) >= 0) { // TODO: node.outputs[0]
+	if (string_array_index_of(parser_material_parsed, parser_material_res_var_name(node, node->outputs->buffer[1])) >= 0) { // TODO: node.outputs[0]
 		char *varname = parser_material_store_var_name(node);
 		return string("%s.rgb", varname);
 	}
@@ -104,7 +104,7 @@ char *image_texture_node_vector(ui_node_t *node, ui_node_socket_t *socket) {
 
 char *image_texture_node_value(ui_node_t *node, ui_node_socket_t *socket) {
 	// Already fetched
-	if (char_ptr_array_index_of(parser_material_parsed, parser_material_res_var_name(node, node->outputs->buffer[0])) >= 0) { // TODO: node.outputs[1]
+	if (string_array_index_of(parser_material_parsed, parser_material_res_var_name(node, node->outputs->buffer[0])) >= 0) { // TODO: node.outputs[1]
 		char *varname = parser_material_store_var_name(node);
 		return string("%s.a", varname);
 	}

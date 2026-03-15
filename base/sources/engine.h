@@ -180,7 +180,7 @@ typedef struct scene {
 	any_array_t      *world_datas;    // world_data_t[]
 	char             *world_ref;
 	any_array_t      *speaker_datas;  // TODO: deprecated
-	char_ptr_array_t *embedded_datas; // Preload for this scene, images only for now
+	string_array_t *embedded_datas; // Preload for this scene, images only for now
 } scene_t;
 
 typedef struct shader_context_runtime {
@@ -224,7 +224,7 @@ typedef struct shader_context {
 	u8_array_t               *color_writes_green;
 	u8_array_t               *color_writes_blue;
 	u8_array_t               *color_writes_alpha;
-	char_ptr_array_t         *color_attachments; // RGBA32, RGBA64, R8
+	string_array_t         *color_attachments; // RGBA32, RGBA64, R8
 	char                     *depth_attachment;  // D32
 	vertex_element_t_array_t *vertex_elements;   // vertex_element_t[]
 	shader_const_t_array_t   *constants;         // shader_const_t[]
@@ -498,7 +498,7 @@ void                   mesh_object_set_data(mesh_object_t *raw, mesh_data_t *dat
 void                   mesh_object_remove(mesh_object_t *raw);
 bool                   mesh_object_cull_material(mesh_object_t *raw, char *context);
 bool                   mesh_object_cull_mesh(mesh_object_t *raw, char *context, camera_object_t *camera);
-void                   mesh_object_render(mesh_object_t *raw, char *context, char_ptr_array_t *bind_params);
+void                   mesh_object_render(mesh_object_t *raw, char *context, string_array_t *bind_params);
 bool                   mesh_object_valid_context(mesh_object_t *raw, material_data_t *mat, char *context);
 
 extern mat4_t _uniforms_mat;
@@ -525,7 +525,7 @@ extern i32 (*uniforms_i32_links)(object_t *o, material_data_t *md, char *s);
 // ╚██████╔╝██║ ╚████║██║██║     ╚██████╔╝██║  ██║██║ ╚═╝ ██║███████║
 //  ╚═════╝ ╚═╝  ╚═══╝╚═╝╚═╝      ╚═════╝ ╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝
 
-void             uniforms_set_context_consts(shader_context_t *context, char_ptr_array_t *bind_params);
+void             uniforms_set_context_consts(shader_context_t *context, string_array_t *bind_params);
 void             uniforms_set_obj_consts(shader_context_t *context, object_t *object);
 void             uniforms_bind_render_target(render_target_t *rt, shader_context_t *context, char *sampler_id);
 bool             uniforms_set_context_const(i32 location, shader_const_t *c);
@@ -627,7 +627,7 @@ object_t        *scene_create_mesh_object(obj_t *o, scene_t *format, object_t *p
 object_t        *scene_return_mesh_object(char *object_file, char *data_ref, material_data_t *material, object_t *parent, obj_t *o);
 object_t        *scene_return_object(object_t *object, obj_t *o);
 void             scene_gen_transform(obj_t *object, transform_t *transform);
-void             scene_load_embedded_data(char_ptr_array_t *datas);
+void             scene_load_embedded_data(string_array_t *datas);
 void             scene_embed_data(char *file);
 
 // ██████╗ ███████╗███╗   ██╗██████╗ ███████╗██████╗     ██████╗  █████╗ ████████╗██╗  ██╗
@@ -648,14 +648,14 @@ extern gpu_texture_t    *_render_path_current_image;
 extern bool              _render_path_paused;
 extern i32               _render_path_last_w;
 extern i32               _render_path_last_h;
-extern char_ptr_array_t *_render_path_bind_params;
+extern string_array_t *_render_path_bind_params;
 extern f32               _render_path_last_frame_time;
 extern i32               _render_path_loading;
 extern any_map_t        *_render_path_cached_shader_contexts;
 
 bool                 render_path_ready(void);
 void                 render_path_render_frame(void);
-void                 render_path_set_target(char *target, char_ptr_array_t *additional, char *depth_buffer, gpu_clear_t flags, i32 color, f32 depth);
+void                 render_path_set_target(char *target, string_array_t *additional, char *depth_buffer, gpu_clear_t flags, i32 color, f32 depth);
 void                 render_path_end(void);
 void                 render_path_draw_meshes(char *context);
 void                 render_path_submit_draw(char *context);

@@ -968,7 +968,7 @@ void ui_nodes_render(void *_) {
 			i32 i = 0;
 			while (i++ < c->nodes->length) {
 				ui_node_t *canvas_node = c->nodes->buffer[i - 1];
-				if (char_ptr_array_index_of(ui_nodes_exclude_remove, canvas_node->type) >= 0) {
+				if (string_array_index_of(ui_nodes_exclude_remove, canvas_node->type) >= 0) {
 					continue;
 				}
 				bool found = false;

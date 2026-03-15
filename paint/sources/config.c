@@ -487,7 +487,7 @@ void config_enable_plugin(char *f) {
 }
 
 void config_disable_plugin(char *f) {
-	char_ptr_array_remove(config_raw->plugins, f);
+	string_array_remove(config_raw->plugins, f);
 	plugin_stop(f);
 }
 

@@ -215,8 +215,8 @@ FN(util_mesh_unwrappers_delete) {
 }
 
 extern any_map_t        *import_mesh_importers;
-extern char_ptr_array_t *_path_mesh_formats;
-char_ptr_array_t        *path_mesh_formats(void);
+extern string_array_t *_path_mesh_formats;
+string_array_t        *path_mesh_formats(void);
 FN(path_mesh_importers_set) {
 	char    *format_name = (char *)JS_ToCString(ctx, argv[0]);
 	JSValue *p           = malloc(sizeof(JSValue));
@@ -232,13 +232,13 @@ FN(path_mesh_importers_delete) {
 	char *format_name = (char *)JS_ToCString(ctx, argv[0]);
 	map_delete(import_mesh_importers, format_name);
 	path_mesh_formats(); // Init array
-	array_splice(_path_mesh_formats, char_ptr_array_index_of(_path_mesh_formats, format_name), 1);
+	array_splice(_path_mesh_formats, string_array_index_of(_path_mesh_formats, format_name), 1);
 	return JS_UNDEFINED;
 }
 
 extern any_map_t        *import_texture_importers;
-extern char_ptr_array_t *_path_texture_formats;
-char_ptr_array_t        *path_texture_formats(void);
+extern string_array_t *_path_texture_formats;
+string_array_t        *path_texture_formats(void);
 FN(path_texture_importers_set) {
 	char    *format_name = (char *)JS_ToCString(ctx, argv[0]);
 	JSValue *p           = malloc(sizeof(JSValue));
@@ -254,7 +254,7 @@ FN(path_texture_importers_delete) {
 	char *format_name = (char *)JS_ToCString(ctx, argv[0]);
 	map_delete(import_texture_importers, format_name);
 	path_texture_formats(); // Init array
-	array_splice(_path_texture_formats, char_ptr_array_index_of(_path_texture_formats, format_name), 1);
+	array_splice(_path_texture_formats, string_array_index_of(_path_texture_formats, format_name), 1);
 	return JS_UNDEFINED;
 }
 

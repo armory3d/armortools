@@ -31,7 +31,7 @@ static size_t index_set(any_map_t *m, char *k) {
 	return i;
 }
 
-static size_t index_get(char_ptr_array_t *keys, char *k) {
+static size_t index_get(string_array_t *keys, char *k) {
 	if (k == NULL || keys->capacity == 0) {
 		return -1;
 	}
@@ -144,11 +144,11 @@ void map_delete(any_map_t *m, char *k) {
 }
 
 any_array_t *map_keys(any_map_t *m) {
-	char_ptr_array_t *keys = gc_alloc(sizeof(char_ptr_array_t));
-	char_ptr_array_resize(keys, m->keys->length);
+	string_array_t *keys = gc_alloc(sizeof(string_array_t));
+	string_array_resize(keys, m->keys->length);
 	for (int i = 0; i < m->keys->capacity; ++i) {
 		if (m->keys->buffer[i] != NULL) {
-			char_ptr_array_push(keys, m->keys->buffer[i]);
+			string_array_push(keys, m->keys->buffer[i]);
 		}
 	}
 	return keys;
@@ -156,14 +156,14 @@ any_array_t *map_keys(any_map_t *m) {
 
 i32_map_t *i32_map_create() {
 	i32_map_t *r = gc_alloc(sizeof(i32_map_t));
-	r->keys      = gc_alloc(sizeof(char_ptr_array_t));
+	r->keys      = gc_alloc(sizeof(string_array_t));
 	r->values    = gc_alloc(sizeof(i32_array_t));
 	return r;
 }
 
 any_map_t *any_map_create() {
 	any_map_t *r = gc_alloc(sizeof(any_map_t));
-	r->keys      = gc_alloc(sizeof(char_ptr_array_t));
+	r->keys      = gc_alloc(sizeof(string_array_t));
 	r->values    = gc_alloc(sizeof(any_array_t));
 	return r;
 }

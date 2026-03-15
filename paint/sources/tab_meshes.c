@@ -86,7 +86,7 @@ void tab_meshes_draw_edit() {
 
 	if (ui_menu_button(tr("UV Unwrap", NULL), "", ICON_NONE)) {
 		char *f = "uv_unwrap.js";
-		if (char_ptr_array_index_of(config_raw->plugins, f) == -1) {
+		if (string_array_index_of(config_raw->plugins, f) == -1) {
 			config_enable_plugin(f);
 		}
 		plugin_uv_unwrap_button();

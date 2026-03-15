@@ -36,7 +36,7 @@ void node_shader_add_out(node_shader_t *raw, char *s) {
 
 void node_shader_add_constant(node_shader_t *raw, char *s, char *link) {
 	// inp: float4
-	if (char_ptr_array_index_of(raw->consts, s) == -1) {
+	if (string_array_index_of(raw->consts, s) == -1) {
 		string_t_array_t *ar    = string_split(s, ": ");
 		char             *uname = ar->buffer[0];
 		char             *utype = ar->buffer[1];
@@ -60,7 +60,7 @@ void node_shader_add_constant(node_shader_t *raw, char *s, char *link) {
 }
 
 void node_shader_add_texture(node_shader_t *raw, char *name, char *link) {
-	if (char_ptr_array_index_of(raw->textures, name) == -1) {
+	if (string_array_index_of(raw->textures, name) == -1) {
 		any_array_push(raw->textures, name);
 		node_shader_context_add_texture_unit(raw->context, name, link);
 	}

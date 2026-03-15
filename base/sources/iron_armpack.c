@@ -543,7 +543,7 @@ void armpack_encode_array_u8(u8_array_t *u8a) {
 	}
 }
 
-void armpack_encode_array_string(char_ptr_array_t *strings) {
+void armpack_encode_array_string(string_array_t *strings) {
 	if (strings == NULL) {
 		armpack_write_u8(0xc0); // NULL
 		return;
@@ -719,7 +719,7 @@ any_map_t *_armpack_decode_to_map() {
 			}
 			else if (element_flag == 0xdb) { // string
 				ei--;
-				char_ptr_array_t *array = char_ptr_array_create(array_count);
+				string_array_t *array = string_array_create(array_count);
 				for (uint32_t j = 0; j < array_count; j++) {
 					read_u8(); // flag
 					array->buffer[j] = read_string_alloc();

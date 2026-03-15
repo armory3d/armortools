@@ -345,7 +345,7 @@ void json_encode_string(char *k, char *v) {
 	json_encode_string_value(v);
 }
 
-void json_encode_string_array(char *k, char_ptr_array_t *a) {
+void json_encode_string_array(char *k, string_array_t *a) {
 	json_encode_begin_array(k);
 	for (uint32_t i = 0; i < a->length; ++i) {
 		if (i > 0) {

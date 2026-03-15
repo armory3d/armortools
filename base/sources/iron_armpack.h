@@ -19,7 +19,7 @@ void armpack_encode_array_f32(f32_array_t *f32a);
 void armpack_encode_array_i32(i32_array_t *i32a);
 void armpack_encode_array_i16(i16_array_t *i16a);
 void armpack_encode_array_u8(u8_array_t *u8a);
-void armpack_encode_array_string(char_ptr_array_t *strings);
+void armpack_encode_array_string(string_array_t *strings);
 void armpack_encode_string(char *str);
 void armpack_encode_i32(int32_t i);
 void armpack_encode_f32(float f);

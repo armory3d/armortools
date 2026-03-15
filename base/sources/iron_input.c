@@ -17,7 +17,7 @@ bool _input_registered = false;
 
 // Mouse
 
-char_ptr_array_t *_mouse_buttons          = NULL;
+string_array_t *_mouse_buttons          = NULL;
 u8_array_t       *_mouse_buttons_down     = NULL;
 u8_array_t       *_mouse_buttons_started  = NULL;
 u8_array_t       *_mouse_buttons_released = NULL;
@@ -38,7 +38,7 @@ f32 mouse_pinch_smooth = 0.0f;
 
 // Pen
 
-char_ptr_array_t *pen_buttons          = NULL;
+string_array_t *pen_buttons          = NULL;
 u8_array_t       *pen_buttons_down     = NULL;
 u8_array_t       *pen_buttons_started  = NULL;
 u8_array_t       *pen_buttons_released = NULL;
@@ -55,11 +55,11 @@ f32               pen_last_y           = -1.0f;
 
 // Keyboard
 
-char_ptr_array_t *keyboard_keys          = NULL;
+string_array_t *keyboard_keys          = NULL;
 i32_map_t        *keyboard_keys_down     = NULL;
 i32_map_t        *keyboard_keys_started  = NULL;
 i32_map_t        *keyboard_keys_released = NULL;
-char_ptr_array_t *keyboard_keys_frame    = NULL;
+string_array_t *keyboard_keys_frame    = NULL;
 bool              keyboard_repeat_key    = false;
 f32               keyboard_repeat_time   = 0.0f;
 
@@ -67,9 +67,9 @@ f32               keyboard_repeat_time   = 0.0f;
 
 // Gamepad
 
-char_ptr_array_t *gamepad_buttons_ps   = NULL;
-char_ptr_array_t *gamepad_buttons_xbox = NULL;
-char_ptr_array_t *gamepad_buttons      = NULL;
+string_array_t *gamepad_buttons_ps   = NULL;
+string_array_t *gamepad_buttons_xbox = NULL;
+string_array_t *gamepad_buttons      = NULL;
 any_array_t      *gamepad_raws         = NULL;
 
 #endif
@@ -104,13 +104,13 @@ void input_register(void) {
 
 	_input_occupied = false;
 
-	_mouse_buttons = char_ptr_array_create(0);
+	_mouse_buttons = string_array_create(0);
 	gc_root(_mouse_buttons);
-	char_ptr_array_push(_mouse_buttons, "left");
-	char_ptr_array_push(_mouse_buttons, "right");
-	char_ptr_array_push(_mouse_buttons, "middle");
-	char_ptr_array_push(_mouse_buttons, "side1");
-	char_ptr_array_push(_mouse_buttons, "side2");
+	string_array_push(_mouse_buttons, "left");
+	string_array_push(_mouse_buttons, "right");
+	string_array_push(_mouse_buttons, "middle");
+	string_array_push(_mouse_buttons, "side1");
+	string_array_push(_mouse_buttons, "side2");
 
 	_mouse_buttons_down = u8_array_create(0);
 	gc_root(_mouse_buttons_down);
@@ -139,9 +139,9 @@ void input_register(void) {
 	mouse_pinch_smooth = 0.0f;
 #endif
 
-	pen_buttons = char_ptr_array_create(0);
+	pen_buttons = string_array_create(0);
 	gc_root(pen_buttons);
-	char_ptr_array_push(pen_buttons, "tip");
+	string_array_push(pen_buttons, "tip");
 
 	pen_buttons_down = u8_array_create(0);
 	gc_root(pen_buttons_down);
@@ -164,101 +164,101 @@ void input_register(void) {
 	pen_last_x     = -1.0f;
 	pen_last_y     = -1.0f;
 
-	keyboard_keys = char_ptr_array_create(0);
+	keyboard_keys = string_array_create(0);
 	gc_root(keyboard_keys);
-	char_ptr_array_push(keyboard_keys, "a");
-	char_ptr_array_push(keyboard_keys, "b");
-	char_ptr_array_push(keyboard_keys, "c");
-	char_ptr_array_push(keyboard_keys, "d");
-	char_ptr_array_push(keyboard_keys, "e");
-	char_ptr_array_push(keyboard_keys, "f");
-	char_ptr_array_push(keyboard_keys, "g");
-	char_ptr_array_push(keyboard_keys, "h");
-	char_ptr_array_push(keyboard_keys, "i");
-	char_ptr_array_push(keyboard_keys, "j");
-	char_ptr_array_push(keyboard_keys, "k");
-	char_ptr_array_push(keyboard_keys, "l");
-	char_ptr_array_push(keyboard_keys, "m");
-	char_ptr_array_push(keyboard_keys, "n");
-	char_ptr_array_push(keyboard_keys, "o");
-	char_ptr_array_push(keyboard_keys, "p");
-	char_ptr_array_push(keyboard_keys, "q");
-	char_ptr_array_push(keyboard_keys, "r");
-	char_ptr_array_push(keyboard_keys, "s");
-	char_ptr_array_push(keyboard_keys, "t");
-	char_ptr_array_push(keyboard_keys, "u");
-	char_ptr_array_push(keyboard_keys, "v");
-	char_ptr_array_push(keyboard_keys, "w");
-	char_ptr_array_push(keyboard_keys, "x");
-	char_ptr_array_push(keyboard_keys, "y");
-	char_ptr_array_push(keyboard_keys, "z");
-	char_ptr_array_push(keyboard_keys, "0");
-	char_ptr_array_push(keyboard_keys, "1");
-	char_ptr_array_push(keyboard_keys, "2");
-	char_ptr_array_push(keyboard_keys, "3");
-	char_ptr_array_push(keyboard_keys, "4");
-	char_ptr_array_push(keyboard_keys, "5");
-	char_ptr_array_push(keyboard_keys, "6");
-	char_ptr_array_push(keyboard_keys, "7");
-	char_ptr_array_push(keyboard_keys, "8");
-	char_ptr_array_push(keyboard_keys, "9");
-	char_ptr_array_push(keyboard_keys, "space");
-	char_ptr_array_push(keyboard_keys, "backspace");
-	char_ptr_array_push(keyboard_keys, "tab");
-	char_ptr_array_push(keyboard_keys, "enter");
-	char_ptr_array_push(keyboard_keys, "shift");
-	char_ptr_array_push(keyboard_keys, "control");
-	char_ptr_array_push(keyboard_keys, "alt");
-	char_ptr_array_push(keyboard_keys, "win");
-	char_ptr_array_push(keyboard_keys, "escape");
-	char_ptr_array_push(keyboard_keys, "delete");
-	char_ptr_array_push(keyboard_keys, "up");
-	char_ptr_array_push(keyboard_keys, "down");
-	char_ptr_array_push(keyboard_keys, "left");
-	char_ptr_array_push(keyboard_keys, "right");
-	char_ptr_array_push(keyboard_keys, "back");
-	char_ptr_array_push(keyboard_keys, ",");
-	char_ptr_array_push(keyboard_keys, ".");
-	char_ptr_array_push(keyboard_keys, ":");
-	char_ptr_array_push(keyboard_keys, ";");
-	char_ptr_array_push(keyboard_keys, "<");
-	char_ptr_array_push(keyboard_keys, "=");
-	char_ptr_array_push(keyboard_keys, ">");
-	char_ptr_array_push(keyboard_keys, "?");
-	char_ptr_array_push(keyboard_keys, "!");
-	char_ptr_array_push(keyboard_keys, "\"");
-	char_ptr_array_push(keyboard_keys, "#");
-	char_ptr_array_push(keyboard_keys, "$");
-	char_ptr_array_push(keyboard_keys, "%");
-	char_ptr_array_push(keyboard_keys, "&");
-	char_ptr_array_push(keyboard_keys, "_");
-	char_ptr_array_push(keyboard_keys, "(");
-	char_ptr_array_push(keyboard_keys, ")");
-	char_ptr_array_push(keyboard_keys, "*");
-	char_ptr_array_push(keyboard_keys, "|");
-	char_ptr_array_push(keyboard_keys, "{");
-	char_ptr_array_push(keyboard_keys, "}");
-	char_ptr_array_push(keyboard_keys, "[");
-	char_ptr_array_push(keyboard_keys, "]");
-	char_ptr_array_push(keyboard_keys, "~");
-	char_ptr_array_push(keyboard_keys, "`");
-	char_ptr_array_push(keyboard_keys, "/");
-	char_ptr_array_push(keyboard_keys, "\\");
-	char_ptr_array_push(keyboard_keys, "@");
-	char_ptr_array_push(keyboard_keys, "+");
-	char_ptr_array_push(keyboard_keys, "-");
-	char_ptr_array_push(keyboard_keys, "f1");
-	char_ptr_array_push(keyboard_keys, "f2");
-	char_ptr_array_push(keyboard_keys, "f3");
-	char_ptr_array_push(keyboard_keys, "f4");
-	char_ptr_array_push(keyboard_keys, "f5");
-	char_ptr_array_push(keyboard_keys, "f6");
-	char_ptr_array_push(keyboard_keys, "f7");
-	char_ptr_array_push(keyboard_keys, "f8");
-	char_ptr_array_push(keyboard_keys, "f9");
-	char_ptr_array_push(keyboard_keys, "f10");
-	char_ptr_array_push(keyboard_keys, "f11");
-	char_ptr_array_push(keyboard_keys, "f12");
+	string_array_push(keyboard_keys, "a");
+	string_array_push(keyboard_keys, "b");
+	string_array_push(keyboard_keys, "c");
+	string_array_push(keyboard_keys, "d");
+	string_array_push(keyboard_keys, "e");
+	string_array_push(keyboard_keys, "f");
+	string_array_push(keyboard_keys, "g");
+	string_array_push(keyboard_keys, "h");
+	string_array_push(keyboard_keys, "i");
+	string_array_push(keyboard_keys, "j");
+	string_array_push(keyboard_keys, "k");
+	string_array_push(keyboard_keys, "l");
+	string_array_push(keyboard_keys, "m");
+	string_array_push(keyboard_keys, "n");
+	string_array_push(keyboard_keys, "o");
+	string_array_push(keyboard_keys, "p");
+	string_array_push(keyboard_keys, "q");
+	string_array_push(keyboard_keys, "r");
+	string_array_push(keyboard_keys, "s");
+	string_array_push(keyboard_keys, "t");
+	string_array_push(keyboard_keys, "u");
+	string_array_push(keyboard_keys, "v");
+	string_array_push(keyboard_keys, "w");
+	string_array_push(keyboard_keys, "x");
+	string_array_push(keyboard_keys, "y");
+	string_array_push(keyboard_keys, "z");
+	string_array_push(keyboard_keys, "0");
+	string_array_push(keyboard_keys, "1");
+	string_array_push(keyboard_keys, "2");
+	string_array_push(keyboard_keys, "3");
+	string_array_push(keyboard_keys, "4");
+	string_array_push(keyboard_keys, "5");
+	string_array_push(keyboard_keys, "6");
+	string_array_push(keyboard_keys, "7");
+	string_array_push(keyboard_keys, "8");
+	string_array_push(keyboard_keys, "9");
+	string_array_push(keyboard_keys, "space");
+	string_array_push(keyboard_keys, "backspace");
+	string_array_push(keyboard_keys, "tab");
+	string_array_push(keyboard_keys, "enter");
+	string_array_push(keyboard_keys, "shift");
+	string_array_push(keyboard_keys, "control");
+	string_array_push(keyboard_keys, "alt");
+	string_array_push(keyboard_keys, "win");
+	string_array_push(keyboard_keys, "escape");
+	string_array_push(keyboard_keys, "delete");
+	string_array_push(keyboard_keys, "up");
+	string_array_push(keyboard_keys, "down");
+	string_array_push(keyboard_keys, "left");
+	string_array_push(keyboard_keys, "right");
+	string_array_push(keyboard_keys, "back");
+	string_array_push(keyboard_keys, ",");
+	string_array_push(keyboard_keys, ".");
+	string_array_push(keyboard_keys, ":");
+	string_array_push(keyboard_keys, ";");
+	string_array_push(keyboard_keys, "<");
+	string_array_push(keyboard_keys, "=");
+	string_array_push(keyboard_keys, ">");
+	string_array_push(keyboard_keys, "?");
+	string_array_push(keyboard_keys, "!");
+	string_array_push(keyboard_keys, "\"");
+	string_array_push(keyboard_keys, "#");
+	string_array_push(keyboard_keys, "$");
+	string_array_push(keyboard_keys, "%");
+	string_array_push(keyboard_keys, "&");
+	string_array_push(keyboard_keys, "_");
+	string_array_push(keyboard_keys, "(");
+	string_array_push(keyboard_keys, ")");
+	string_array_push(keyboard_keys, "*");
+	string_array_push(keyboard_keys, "|");
+	string_array_push(keyboard_keys, "{");
+	string_array_push(keyboard_keys, "}");
+	string_array_push(keyboard_keys, "[");
+	string_array_push(keyboard_keys, "]");
+	string_array_push(keyboard_keys, "~");
+	string_array_push(keyboard_keys, "`");
+	string_array_push(keyboard_keys, "/");
+	string_array_push(keyboard_keys, "\\");
+	string_array_push(keyboard_keys, "@");
+	string_array_push(keyboard_keys, "+");
+	string_array_push(keyboard_keys, "-");
+	string_array_push(keyboard_keys, "f1");
+	string_array_push(keyboard_keys, "f2");
+	string_array_push(keyboard_keys, "f3");
+	string_array_push(keyboard_keys, "f4");
+	string_array_push(keyboard_keys, "f5");
+	string_array_push(keyboard_keys, "f6");
+	string_array_push(keyboard_keys, "f7");
+	string_array_push(keyboard_keys, "f8");
+	string_array_push(keyboard_keys, "f9");
+	string_array_push(keyboard_keys, "f10");
+	string_array_push(keyboard_keys, "f11");
+	string_array_push(keyboard_keys, "f12");
 
 	keyboard_keys_down = i32_map_create();
 	gc_root(keyboard_keys_down);
@@ -267,54 +267,54 @@ void input_register(void) {
 	keyboard_keys_released = i32_map_create();
 	gc_root(keyboard_keys_released);
 
-	keyboard_keys_frame = char_ptr_array_create(0);
+	keyboard_keys_frame = string_array_create(0);
 	gc_root(keyboard_keys_frame);
 
 	keyboard_repeat_key  = false;
 	keyboard_repeat_time = 0.0f;
 
 #ifdef WITH_GAMEPAD
-	gamepad_buttons_ps = char_ptr_array_create(0);
+	gamepad_buttons_ps = string_array_create(0);
 	gc_root(gamepad_buttons_ps);
-	char_ptr_array_push(gamepad_buttons_ps, "cross");
-	char_ptr_array_push(gamepad_buttons_ps, "circle");
-	char_ptr_array_push(gamepad_buttons_ps, "square");
-	char_ptr_array_push(gamepad_buttons_ps, "triangle");
-	char_ptr_array_push(gamepad_buttons_ps, "l1");
-	char_ptr_array_push(gamepad_buttons_ps, "r1");
-	char_ptr_array_push(gamepad_buttons_ps, "l2");
-	char_ptr_array_push(gamepad_buttons_ps, "r2");
-	char_ptr_array_push(gamepad_buttons_ps, "share");
-	char_ptr_array_push(gamepad_buttons_ps, "options");
-	char_ptr_array_push(gamepad_buttons_ps, "l3");
-	char_ptr_array_push(gamepad_buttons_ps, "r3");
-	char_ptr_array_push(gamepad_buttons_ps, "up");
-	char_ptr_array_push(gamepad_buttons_ps, "down");
-	char_ptr_array_push(gamepad_buttons_ps, "left");
-	char_ptr_array_push(gamepad_buttons_ps, "right");
-	char_ptr_array_push(gamepad_buttons_ps, "home");
-	char_ptr_array_push(gamepad_buttons_ps, "touchpad");
+	string_array_push(gamepad_buttons_ps, "cross");
+	string_array_push(gamepad_buttons_ps, "circle");
+	string_array_push(gamepad_buttons_ps, "square");
+	string_array_push(gamepad_buttons_ps, "triangle");
+	string_array_push(gamepad_buttons_ps, "l1");
+	string_array_push(gamepad_buttons_ps, "r1");
+	string_array_push(gamepad_buttons_ps, "l2");
+	string_array_push(gamepad_buttons_ps, "r2");
+	string_array_push(gamepad_buttons_ps, "share");
+	string_array_push(gamepad_buttons_ps, "options");
+	string_array_push(gamepad_buttons_ps, "l3");
+	string_array_push(gamepad_buttons_ps, "r3");
+	string_array_push(gamepad_buttons_ps, "up");
+	string_array_push(gamepad_buttons_ps, "down");
+	string_array_push(gamepad_buttons_ps, "left");
+	string_array_push(gamepad_buttons_ps, "right");
+	string_array_push(gamepad_buttons_ps, "home");
+	string_array_push(gamepad_buttons_ps, "touchpad");
 
-	gamepad_buttons_xbox = char_ptr_array_create(0);
+	gamepad_buttons_xbox = string_array_create(0);
 	gc_root(gamepad_buttons_xbox);
-	char_ptr_array_push(gamepad_buttons_xbox, "a");
-	char_ptr_array_push(gamepad_buttons_xbox, "b");
-	char_ptr_array_push(gamepad_buttons_xbox, "x");
-	char_ptr_array_push(gamepad_buttons_xbox, "y");
-	char_ptr_array_push(gamepad_buttons_xbox, "l1");
-	char_ptr_array_push(gamepad_buttons_xbox, "r1");
-	char_ptr_array_push(gamepad_buttons_xbox, "l2");
-	char_ptr_array_push(gamepad_buttons_xbox, "r2");
-	char_ptr_array_push(gamepad_buttons_xbox, "share");
-	char_ptr_array_push(gamepad_buttons_xbox, "options");
-	char_ptr_array_push(gamepad_buttons_xbox, "l3");
-	char_ptr_array_push(gamepad_buttons_xbox, "r3");
-	char_ptr_array_push(gamepad_buttons_xbox, "up");
-	char_ptr_array_push(gamepad_buttons_xbox, "down");
-	char_ptr_array_push(gamepad_buttons_xbox, "left");
-	char_ptr_array_push(gamepad_buttons_xbox, "right");
-	char_ptr_array_push(gamepad_buttons_xbox, "home");
-	char_ptr_array_push(gamepad_buttons_xbox, "touchpad");
+	string_array_push(gamepad_buttons_xbox, "a");
+	string_array_push(gamepad_buttons_xbox, "b");
+	string_array_push(gamepad_buttons_xbox, "x");
+	string_array_push(gamepad_buttons_xbox, "y");
+	string_array_push(gamepad_buttons_xbox, "l1");
+	string_array_push(gamepad_buttons_xbox, "r1");
+	string_array_push(gamepad_buttons_xbox, "l2");
+	string_array_push(gamepad_buttons_xbox, "r2");
+	string_array_push(gamepad_buttons_xbox, "share");
+	string_array_push(gamepad_buttons_xbox, "options");
+	string_array_push(gamepad_buttons_xbox, "l3");
+	string_array_push(gamepad_buttons_xbox, "r3");
+	string_array_push(gamepad_buttons_xbox, "up");
+	string_array_push(gamepad_buttons_xbox, "down");
+	string_array_push(gamepad_buttons_xbox, "left");
+	string_array_push(gamepad_buttons_xbox, "right");
+	string_array_push(gamepad_buttons_xbox, "home");
+	string_array_push(gamepad_buttons_xbox, "touchpad");
 
 	gamepad_buttons = gamepad_buttons_ps;
 
@@ -858,7 +858,7 @@ char *keyboard_key_code(i32 key) {
 
 void keyboard_down_listener(i32 code) {
 	char *s = keyboard_key_code(code);
-	char_ptr_array_push(keyboard_keys_frame, s);
+	string_array_push(keyboard_keys_frame, s);
 	i32_map_set(keyboard_keys_started, s, true);
 	i32_map_set(keyboard_keys_down, s, true);
 	keyboard_repeat_time = sys_time() + 0.4f;
@@ -874,7 +874,7 @@ void keyboard_down_listener(i32 code) {
 
 void keyboard_up_listener(i32 code) {
 	char *s = keyboard_key_code(code);
-	char_ptr_array_push(keyboard_keys_frame, s);
+	string_array_push(keyboard_keys_frame, s);
 	i32_map_set(keyboard_keys_released, s, true);
 	i32_map_set(keyboard_keys_down, s, false);
 

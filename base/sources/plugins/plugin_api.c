@@ -532,7 +532,7 @@ FN(ui_combo) {
 	JSValue val_len = JS_GetPropertyStr(ctx, argv[1], "length");
 	int     len;
 	JS_ToInt32(ctx, &len, val_len);
-	char_ptr_array_t *texts = any_array_create(len);
+	string_array_t *texts = any_array_create(len);
 	for (int i = 0; i < len; ++i) {
 		JSValue val      = JS_GetPropertyUint32(ctx, argv[1], i);
 		char   *s        = (char *)JS_ToCString(ctx, val);

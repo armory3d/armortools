@@ -81,7 +81,7 @@ void console_log(char *s) {
 void console_trace(char *s) {
 	iron_log(s);
 	base_redraw_console();
-	char_ptr_array_push(console_last_traces, string_copy(s));
+	string_array_push(console_last_traces, string_copy(s));
 	if (console_last_traces->length > 100) {
 		array_shift(console_last_traces);
 	}

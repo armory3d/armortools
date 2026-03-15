@@ -79,7 +79,7 @@ void any_array_push(any_array_t *a, void *e) {
 	a->buffer[a->length++] = e;
 }
 
-void char_ptr_array_push(char_ptr_array_t *a, void *e) {
+void string_array_push(string_array_t *a, void *e) {
 	array_alloc(a, sizeof(uintptr_t));
 	a->buffer[a->length++] = e;
 }
@@ -131,7 +131,7 @@ void any_array_resize(any_array_t *a, uint32_t size) {
 	a->buffer   = gc_realloc(a->buffer, a->capacity * sizeof(void *));
 }
 
-void char_ptr_array_resize(char_ptr_array_t *a, uint32_t size) {
+void string_array_resize(string_array_t *a, uint32_t size) {
 	a->capacity = size;
 	a->buffer   = gc_realloc(a->buffer, a->capacity * sizeof(void *));
 }
@@ -246,8 +246,8 @@ void array_remove(any_array_t *ar, void *e) {
 	}
 }
 
-void char_ptr_array_remove(char_ptr_array_t *ar, char *e) {
-	int32_t i = char_ptr_array_index_of(ar, e);
+void string_array_remove(string_array_t *ar, char *e) {
+	int32_t i = string_array_index_of(ar, e);
 	if (i > -1) {
 		array_splice(ar, i, 1);
 	}
@@ -269,7 +269,7 @@ int32_t array_index_of(any_array_t *ar, void *e) {
 	return -1;
 }
 
-int32_t char_ptr_array_index_of(char_ptr_array_t *ar, char *e) {
+int32_t string_array_index_of(string_array_t *ar, char *e) {
 	for (uint32_t i = 0; i < ar->length; ++i) {
 		if (string_equals(ar->buffer[i], e)) {
 			return i;
@@ -636,10 +636,10 @@ any_array_t *any_array_create_from_raw(void **raw, uint32_t length) {
 	return a;
 }
 
-char_ptr_array_t *char_ptr_array_create(uint32_t length) {
-	char_ptr_array_t *a = gc_alloc(sizeof(char_ptr_array_t));
+string_array_t *string_array_create(uint32_t length) {
+	string_array_t *a = gc_alloc(sizeof(string_array_t));
 	if (length > 0) {
-		char_ptr_array_resize(a, length);
+		string_array_resize(a, length);
 		a->length = length;
 	}
 	return a;

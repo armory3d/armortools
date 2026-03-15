@@ -50,11 +50,11 @@ typedef struct any_array {
 	uint32_t capacity;
 } any_array_t;
 
-typedef struct char_ptr_array {
+typedef struct string_array {
 	char   **buffer;
 	uint32_t length;
 	uint32_t capacity;
-} char_ptr_array_t;
+} string_array_t;
 
 typedef u8_array_t buffer_t;
 
@@ -67,7 +67,7 @@ void i32_array_push(i32_array_t *a, int32_t e);
 void u32_array_push(u32_array_t *a, uint32_t e);
 void f32_array_push(f32_array_t *a, float e);
 void any_array_push(any_array_t *a, void *e);
-void char_ptr_array_push(char_ptr_array_t *a, void *e);
+void string_array_push(string_array_t *a, void *e);
 
 void i8_array_resize(i8_array_t *a, uint32_t size);
 void u8_array_resize(u8_array_t *a, uint32_t size);
@@ -77,7 +77,7 @@ void i32_array_resize(i32_array_t *a, uint32_t size);
 void u32_array_resize(u32_array_t *a, uint32_t size);
 void f32_array_resize(f32_array_t *a, uint32_t size);
 void any_array_resize(any_array_t *a, uint32_t size);
-void char_ptr_array_resize(char_ptr_array_t *a, uint32_t size);
+void string_array_resize(string_array_t *a, uint32_t size);
 void buffer_resize(buffer_t *b, uint32_t size);
 
 void         array_sort(any_array_t *ar, int (*compare)(const void *, const void *));
@@ -91,10 +91,10 @@ any_array_t *array_concat(any_array_t *a, any_array_t *b);
 any_array_t *array_slice(any_array_t *a, uint32_t begin, uint32_t end);
 void         array_insert(any_array_t *a, uint32_t at, void *e);
 void         array_remove(any_array_t *ar, void *e);
-void         char_ptr_array_remove(char_ptr_array_t *ar, char *e);
+void         string_array_remove(string_array_t *ar, char *e);
 void         i32_array_remove(i32_array_t *ar, int e);
 int32_t      array_index_of(any_array_t *ar, void *e);
-int32_t      char_ptr_array_index_of(char_ptr_array_t *ar, char *e);
+int32_t      string_array_index_of(string_array_t *ar, char *e);
 int32_t      i32_array_index_of(i32_array_t *ar, int e);
 void         array_reverse(any_array_t *ar);
 
@@ -148,6 +148,6 @@ i8_array_t       *i8_array_create(uint32_t length);
 i8_array_t       *i8_array_create_from_raw(int8_t *raw, uint32_t length);
 any_array_t      *any_array_create(uint32_t length);
 any_array_t      *any_array_create_from_raw(void **raw, uint32_t length);
-char_ptr_array_t *char_ptr_array_create(uint32_t length);
+string_array_t *string_array_create(uint32_t length);
 uint16_t          float_to_half_fast(float value);
 uint8_t           half_to_u8_fast(uint16_t h);

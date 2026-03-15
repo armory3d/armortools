@@ -477,7 +477,7 @@ char *parser_material_write_result(ui_node_link_t *l) {
 	ui_node_socket_t *from_socket = from_node->outputs->buffer[l->from_socket];
 	char             *res_var     = parser_material_res_var_name(from_node, from_socket);
 	char             *st          = from_socket->type;
-	if (char_ptr_array_index_of(parser_material_parsed, res_var) < 0) {
+	if (string_array_index_of(parser_material_parsed, res_var) < 0) {
 		any_array_push(parser_material_parsed, res_var);
 		if (string_equals(st, "RGB") || string_equals(st, "RGBA") || string_equals(st, "VECTOR")) {
 			char *res = parser_material_parse_vector(from_node, from_socket);

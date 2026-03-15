@@ -71,7 +71,7 @@ void translator_load_translations(char *new_locale) {
 	}
 
 	// Check whether the requested or detected locale is available
-	if (!string_equals(config_raw->locale, "en") && char_ptr_array_index_of(translator_get_supported_locales(), config_raw->locale) == -1) {
+	if (!string_equals(config_raw->locale, "en") && string_array_index_of(translator_get_supported_locales(), config_raw->locale) == -1) {
 		// Fall back to English
 		config_raw->locale = "en";
 	}

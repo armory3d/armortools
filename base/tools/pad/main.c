@@ -201,7 +201,7 @@ void list_folder(char *path) {
 		char *f           = files->buffer[i];
 		char *abs         = string("%s/%s", path, f);
 		bool  is_file     = string_index_of(f, ".") >= 0;
-		bool  is_expanded = char_ptr_array_index_of(storage->expanded, abs) >= 0;
+		bool  is_expanded = string_array_index_of(storage->expanded, abs) >= 0;
 
 		// Active file
 		if (string_equals(abs, storage->file)) {
@@ -230,11 +230,11 @@ void list_folder(char *path) {
 			}
 			// Expand folder
 			else {
-				if (char_ptr_array_index_of(storage->expanded, abs) == -1) {
+				if (string_array_index_of(storage->expanded, abs) == -1) {
 					any_array_push(storage->expanded, abs);
 				}
 				else {
-					char_ptr_array_remove(storage->expanded, abs);
+					string_array_remove(storage->expanded, abs);
 				}
 			}
 		}

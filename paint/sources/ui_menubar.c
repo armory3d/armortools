@@ -637,7 +637,7 @@ void ui_menubar_draw_category_items() {
 			array_splice(shortcuts, 4, 1);
 			array_splice(shortcuts, 3, 1);
 			array_splice(shortcuts, 2, 1);
-			mode_handle->i = char_ptr_array_index_of(modes, ui_menubar_viewport_mode_to_string(mode_handle->i));
+			mode_handle->i = string_array_index_of(modes, ui_menubar_viewport_mode_to_string(mode_handle->i));
 		}
 
 		for (i32 i = 0; i < modes->length; ++i) {

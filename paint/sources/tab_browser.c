@@ -10,7 +10,7 @@ void tab_browser_show_directory(char *directory) {
 
 void tab_browser_draw_bookmark_menu() {
 	if (ui_menu_button(tr("Delete", NULL), "", ICON_DELETE)) {
-		char_ptr_array_remove(config_raw->bookmarks, _tab_browser_draw_b);
+		string_array_remove(config_raw->bookmarks, _tab_browser_draw_b);
 		config_save();
 	}
 }

@@ -649,7 +649,7 @@ string_t_array_t *base_enum_texts(char *node_type) {
 }
 
 i32 base_get_asset_index(char *file_name) {
-	i32 i = char_ptr_array_index_of(project_asset_names, file_name);
+	i32 i = string_array_index_of(project_asset_names, file_name);
 	return i >= 0 ? i : 0;
 }
 
@@ -901,7 +901,7 @@ void ui_base_menu_draw_viewport_mode() {
 		ui_radio(mode_handle, i, modes->buffer[i], shortcuts->buffer[i]);
 	}
 
-	i32 index = char_ptr_array_index_of(shortcuts, keyboard_key_code(ui->key_code));
+	i32 index = string_array_index_of(shortcuts, keyboard_key_code(ui->key_code));
 	if (ui->is_key_pressed && index != -1) {
 		mode_handle->i = index;
 		ui->changed    = true;

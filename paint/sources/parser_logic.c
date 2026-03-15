@@ -98,7 +98,7 @@ char *parser_logic_build_node(ui_node_t *node) {
 	char *name = parser_logic_node_name(node);
 
 	// Check if node already exists
-	if (char_ptr_array_index_of(parser_logic_parsed_nodes, name) != -1) {
+	if (string_array_index_of(parser_logic_parsed_nodes, name) != -1) {
 		return name;
 	}
 

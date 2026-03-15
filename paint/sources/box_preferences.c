@@ -58,7 +58,7 @@ void box_preferences_interface_tab() {
 	}
 
 	ui_handle_t *h_locale = ui_handle(__ID__);
-	h_locale->i           = char_ptr_array_index_of(box_preferences_locales, config_raw->locale);
+	h_locale->i           = string_array_index_of(box_preferences_locales, config_raw->locale);
 	ui_combo(h_locale, box_preferences_locales, tr("Language", NULL), true, UI_ALIGN_LEFT, true);
 	if (h_locale->changed) {
 		char *locale_code  = box_preferences_locales->buffer[h_locale->i];
@@ -853,11 +853,11 @@ void box_preferences_plugins_tab_plugin_menu() {
 		ui_files_show("js", true, false, &box_preferences_plugins_tab_plugin_menu_export);
 	}
 	if (ui_menu_button(tr("Delete", NULL), "", ICON_DELETE)) {
-		if (char_ptr_array_index_of(config_raw->plugins, _box_preferences_f) >= 0) {
-			char_ptr_array_remove(config_raw->plugins, _box_preferences_f);
+		if (string_array_index_of(config_raw->plugins, _box_preferences_f) >= 0) {
+			string_array_remove(config_raw->plugins, _box_preferences_f);
 			plugin_stop(_box_preferences_f);
 		}
-		char_ptr_array_remove(box_preferences_files_plugin, _box_preferences_f);
+		string_array_remove(box_preferences_files_plugin, _box_preferences_f);
 		iron_delete_file(path);
 	}
 }
@@ -931,7 +931,7 @@ void box_preferences_plugins_tab() {
 		if (!is_js) {
 			continue;
 		}
-		bool enabled = char_ptr_array_index_of(config_raw->plugins, f) >= 0;
+		bool enabled = string_array_index_of(config_raw->plugins, f) >= 0;
 		h->b         = enabled;
 		char *tag    = is_js ? string_split(f, ".")->buffer[0] : f;
 		ui_check(h, tag, "");
@@ -1021,11 +1021,11 @@ void box_preferences_fetch_plugins() {
 }
 
 i32 box_preferences_get_theme_index() {
-	return char_ptr_array_index_of(box_preferences_themes, substring(config_raw->theme, 0, string_length(config_raw->theme) - 5)); // Strip .json
+	return string_array_index_of(box_preferences_themes, substring(config_raw->theme, 0, string_length(config_raw->theme) - 5)); // Strip .json
 }
 
 i32 box_preferences_get_preset_index() {
-	return char_ptr_array_index_of(box_preferences_files_keymap, substring(config_raw->keymap, 0, string_length(config_raw->keymap) - 5)); // Strip .json
+	return string_array_index_of(box_preferences_files_keymap, substring(config_raw->keymap, 0, string_length(config_raw->keymap) - 5)); // Strip .json
 }
 
 void box_preferences_set_scale() {

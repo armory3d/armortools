@@ -277,7 +277,7 @@ void ui_view2d_render(void *_) {
 			asset_t *asset = context_raw->texture;
 			if (asset != NULL) {
 				string_t_array_t *asset_names = project_asset_names;
-				i32               i           = char_ptr_array_index_of(asset_names, asset->name);
+				i32               i           = string_array_index_of(asset_names, asset->name);
 				h->text                       = string_copy(asset->name);
 				asset->name                   = string_copy(ui_text_input(h, "", UI_ALIGN_LEFT, true, false));
 				asset_names->buffer[i]        = asset->name;

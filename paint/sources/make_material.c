@@ -199,7 +199,7 @@ void make_material_bake_node_previews() {
 	string_t_array_t *keys = map_keys(context_raw->node_previews);
 	for (i32 i = 0; i < keys->length; ++i) {
 		char *key = keys->buffer[i];
-		if (char_ptr_array_index_of(context_raw->node_previews_used, key) == -1) {
+		if (string_array_index_of(context_raw->node_previews_used, key) == -1) {
 			gpu_texture_t *image = any_map_get(context_raw->node_previews, key);
 			gpu_delete_texture(image);
 			map_delete(context_raw->node_previews, key);

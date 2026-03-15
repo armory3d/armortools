@@ -4,7 +4,7 @@
 void box_export_show_textures_box() {
 	if (box_export_files == NULL) {
 		box_export_fetch_presets();
-		box_export_hpreset->i = char_ptr_array_index_of(box_export_files, "generic");
+		box_export_hpreset->i = string_array_index_of(box_export_files, "generic");
 	}
 	if (box_export_preset == NULL) {
 		box_export_parse_preset();
@@ -27,7 +27,7 @@ void box_export_show_textures() {
 void box_export_show_bake_material_box() {
 	if (box_export_files == NULL) {
 		box_export_fetch_presets();
-		box_export_hpreset->i = char_ptr_array_index_of(box_export_files, "generic");
+		box_export_hpreset->i = string_array_index_of(box_export_files, "generic");
 	}
 	if (box_export_preset == NULL) {
 		box_export_parse_preset();
@@ -228,7 +228,7 @@ void box_export_tab_presets_import(char *path) {
 		box_export_fetch_presets();
 		gc_unroot(box_export_preset);
 		box_export_preset     = NULL;
-		box_export_hpreset->i = char_ptr_array_index_of(box_export_files, substring(filename, 0, string_length(filename) - 5)); // Strip .json
+		box_export_hpreset->i = string_array_index_of(box_export_files, substring(filename, 0, string_length(filename) - 5)); // Strip .json
 		console_info(string("%s %s", tr("Preset imported:", NULL), filename));
 	}
 	else {
@@ -250,7 +250,7 @@ void box_export_tab_presets_new_box() {
 			box_export_fetch_presets();
 			gc_unroot(box_export_preset);
 			box_export_preset     = NULL;
-			box_export_hpreset->i = char_ptr_array_index_of(box_export_files, preset_name);
+			box_export_hpreset->i = string_array_index_of(box_export_files, preset_name);
 			ui_box_hide();
 			box_export_htab->i = 1; // Presets
 			box_export_show_textures();
@@ -315,13 +315,13 @@ void box_export_tab_presets() {
 			}
 
 			ui_handle_t *hr = ui_nest(htex, 0);
-			hr->i           = char_ptr_array_index_of(box_export_channels, t->channels->buffer[0]);
+			hr->i           = string_array_index_of(box_export_channels, t->channels->buffer[0]);
 			ui_handle_t *hg = ui_nest(htex, 1);
-			hg->i           = char_ptr_array_index_of(box_export_channels, t->channels->buffer[1]);
+			hg->i           = string_array_index_of(box_export_channels, t->channels->buffer[1]);
 			ui_handle_t *hb = ui_nest(htex, 2);
-			hb->i           = char_ptr_array_index_of(box_export_channels, t->channels->buffer[2]);
+			hb->i           = string_array_index_of(box_export_channels, t->channels->buffer[2]);
 			ui_handle_t *ha = ui_nest(htex, 3);
-			ha->i           = char_ptr_array_index_of(box_export_channels, t->channels->buffer[3]);
+			ha->i           = string_array_index_of(box_export_channels, t->channels->buffer[3]);
 
 			ui_combo(hr, box_export_channels, tr("R", NULL), false, UI_ALIGN_LEFT, true);
 			if (hr->changed) {
@@ -341,7 +341,7 @@ void box_export_tab_presets() {
 			}
 
 			ui_handle_t *hspace = ui_nest(htex, 4);
-			hspace->i           = char_ptr_array_index_of(box_export_color_spaces, t->color_space);
+			hspace->i           = string_array_index_of(box_export_color_spaces, t->color_space);
 			ui_combo(hspace, box_export_color_spaces, tr("Color Space", NULL), false, UI_ALIGN_LEFT, true);
 			if (hspace->changed) {
 				t->color_space = string_copy(box_export_color_spaces->buffer[hspace->i]);

@@ -25,9 +25,9 @@ static int           ui_node_id      = -1;
 static ui_node_t    *node_resize     = NULL;
 
 char             *ui_clipboard                           = "";
-char_ptr_array_t *ui_nodes_exclude_remove                = NULL; // No removal for listed node types
+string_array_t *ui_nodes_exclude_remove                = NULL; // No removal for listed node types
 bool              ui_nodes_socket_released               = false;
-char_ptr_array_t *(*ui_nodes_enum_texts)(char *)         = NULL; // Retrieve combo items for buttons of type ENUM
+string_array_t *(*ui_nodes_enum_texts)(char *)         = NULL; // Retrieve combo items for buttons of type ENUM
 gpu_texture_t *(*ui_nodes_preview_image)(ui_node_t *)    = NULL; // Retrieve preview image
 void (*ui_nodes_on_custom_button)(int, char *)           = NULL; // Call external function
 ui_canvas_control_t *(*ui_nodes_on_canvas_control)(void) = NULL;
@@ -396,12 +396,12 @@ static float ui_nodes_snap(float f) {
 	return roundf(f / w) * w;
 }
 
-static char_ptr_array_t enum_ar;
+static string_array_t enum_ar;
 static char             enum_label[64];
 static char             enum_texts_data[64][64];
 static char            *enum_texts[64];
 
-static char_ptr_array_t temp_ar;
+static string_array_t temp_ar;
 static char             temp_label[64];
 static char             temp_texts_data[64][64];
 static char            *temp_texts[64];
@@ -537,7 +537,7 @@ void ui_node_draw_body(ui_node_t *node, ui_node_canvas_t *canvas, float nx, floa
 			char *label             = combo_select ? temp_label : enum_label;
 			char(*texts_data)[64]   = combo_select ? temp_texts_data : enum_texts_data;
 			char            **texts = combo_select ? temp_texts : enum_texts;
-			char_ptr_array_t *ar    = combo_select ? &temp_ar : &enum_ar;
+			string_array_t *ar    = combo_select ? &temp_ar : &enum_ar;
 
 			int texts_count = 0;
 			if (but->data != NULL && but->data->length > 1) {
@@ -845,7 +845,7 @@ void ui_node_canvas(ui_nodes_t *nodes, ui_node_canvas_t *canvas) {
 		draw_begin(current, false, 0);
 	}
 	if (ui_nodes_exclude_remove == NULL) {
-		ui_nodes_exclude_remove = gc_alloc(sizeof(char_ptr_array_t));
+		ui_nodes_exclude_remove = gc_alloc(sizeof(string_array_t));
 		gc_root(ui_nodes_exclude_remove);
 	}
 

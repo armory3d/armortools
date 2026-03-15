@@ -12,133 +12,133 @@
 bool path_is_protected_linux = false;
 #endif
 
-char_ptr_array_t *_path_mesh_formats     = NULL;
-char_ptr_array_t *_path_texture_formats  = NULL;
-static char_ptr_array_t *_path_base_color_ext   = NULL;
-static char_ptr_array_t *_path_opacity_ext      = NULL;
-static char_ptr_array_t *_path_normal_map_ext   = NULL;
-static char_ptr_array_t *_path_occlusion_ext    = NULL;
-static char_ptr_array_t *_path_roughness_ext    = NULL;
-static char_ptr_array_t *_path_metallic_ext     = NULL;
-static char_ptr_array_t *_path_displacement_ext = NULL;
+string_array_t *_path_mesh_formats     = NULL;
+string_array_t *_path_texture_formats  = NULL;
+static string_array_t *_path_base_color_ext   = NULL;
+static string_array_t *_path_opacity_ext      = NULL;
+static string_array_t *_path_normal_map_ext   = NULL;
+static string_array_t *_path_occlusion_ext    = NULL;
+static string_array_t *_path_roughness_ext    = NULL;
+static string_array_t *_path_metallic_ext     = NULL;
+static string_array_t *_path_displacement_ext = NULL;
 
-char_ptr_array_t *path_mesh_formats(void) {
+string_array_t *path_mesh_formats(void) {
 	if (_path_mesh_formats == NULL) {
-		_path_mesh_formats = char_ptr_array_create(0);
+		_path_mesh_formats = string_array_create(0);
 		gc_root(_path_mesh_formats);
-		char_ptr_array_push(_path_mesh_formats, "obj");
-		char_ptr_array_push(_path_mesh_formats, "blend");
+		string_array_push(_path_mesh_formats, "obj");
+		string_array_push(_path_mesh_formats, "blend");
 	}
 	return _path_mesh_formats;
 }
 
-char_ptr_array_t *path_texture_formats(void) {
+string_array_t *path_texture_formats(void) {
 	if (_path_texture_formats == NULL) {
-		_path_texture_formats = char_ptr_array_create(0);
+		_path_texture_formats = string_array_create(0);
 		gc_root(_path_texture_formats);
-		char_ptr_array_push(_path_texture_formats, "jpg");
-		char_ptr_array_push(_path_texture_formats, "jpeg");
-		char_ptr_array_push(_path_texture_formats, "png");
-		char_ptr_array_push(_path_texture_formats, "tga");
-		char_ptr_array_push(_path_texture_formats, "bmp");
-		char_ptr_array_push(_path_texture_formats, "psd");
-		char_ptr_array_push(_path_texture_formats, "gif");
-		char_ptr_array_push(_path_texture_formats, "hdr");
-		char_ptr_array_push(_path_texture_formats, "k");
+		string_array_push(_path_texture_formats, "jpg");
+		string_array_push(_path_texture_formats, "jpeg");
+		string_array_push(_path_texture_formats, "png");
+		string_array_push(_path_texture_formats, "tga");
+		string_array_push(_path_texture_formats, "bmp");
+		string_array_push(_path_texture_formats, "psd");
+		string_array_push(_path_texture_formats, "gif");
+		string_array_push(_path_texture_formats, "hdr");
+		string_array_push(_path_texture_formats, "k");
 	}
 	return _path_texture_formats;
 }
 
-char_ptr_array_t *path_base_color_ext(void) {
+string_array_t *path_base_color_ext(void) {
 	if (_path_base_color_ext == NULL) {
-		_path_base_color_ext = char_ptr_array_create(0);
+		_path_base_color_ext = string_array_create(0);
 		gc_root(_path_base_color_ext);
-		char_ptr_array_push(_path_base_color_ext, "albedo");
-		char_ptr_array_push(_path_base_color_ext, "alb");
-		char_ptr_array_push(_path_base_color_ext, "basecol");
-		char_ptr_array_push(_path_base_color_ext, "basecolor");
-		char_ptr_array_push(_path_base_color_ext, "diffuse");
-		char_ptr_array_push(_path_base_color_ext, "diff");
-		char_ptr_array_push(_path_base_color_ext, "base");
-		char_ptr_array_push(_path_base_color_ext, "bc");
-		char_ptr_array_push(_path_base_color_ext, "d");
-		char_ptr_array_push(_path_base_color_ext, "color");
-		char_ptr_array_push(_path_base_color_ext, "col");
+		string_array_push(_path_base_color_ext, "albedo");
+		string_array_push(_path_base_color_ext, "alb");
+		string_array_push(_path_base_color_ext, "basecol");
+		string_array_push(_path_base_color_ext, "basecolor");
+		string_array_push(_path_base_color_ext, "diffuse");
+		string_array_push(_path_base_color_ext, "diff");
+		string_array_push(_path_base_color_ext, "base");
+		string_array_push(_path_base_color_ext, "bc");
+		string_array_push(_path_base_color_ext, "d");
+		string_array_push(_path_base_color_ext, "color");
+		string_array_push(_path_base_color_ext, "col");
 	}
 	return _path_base_color_ext;
 }
 
-char_ptr_array_t *path_opacity_ext(void) {
+string_array_t *path_opacity_ext(void) {
 	if (_path_opacity_ext == NULL) {
-		_path_opacity_ext = char_ptr_array_create(0);
+		_path_opacity_ext = string_array_create(0);
 		gc_root(_path_opacity_ext);
-		char_ptr_array_push(_path_opacity_ext, "opac");
-		char_ptr_array_push(_path_opacity_ext, "opacity");
-		char_ptr_array_push(_path_opacity_ext, "alpha");
+		string_array_push(_path_opacity_ext, "opac");
+		string_array_push(_path_opacity_ext, "opacity");
+		string_array_push(_path_opacity_ext, "alpha");
 	}
 	return _path_opacity_ext;
 }
 
-char_ptr_array_t *path_normal_map_ext(void) {
+string_array_t *path_normal_map_ext(void) {
 	if (_path_normal_map_ext == NULL) {
-		_path_normal_map_ext = char_ptr_array_create(0);
+		_path_normal_map_ext = string_array_create(0);
 		gc_root(_path_normal_map_ext);
-		char_ptr_array_push(_path_normal_map_ext, "normal");
-		char_ptr_array_push(_path_normal_map_ext, "normals");
-		char_ptr_array_push(_path_normal_map_ext, "nor");
-		char_ptr_array_push(_path_normal_map_ext, "n");
-		char_ptr_array_push(_path_normal_map_ext, "nrm");
-		char_ptr_array_push(_path_normal_map_ext, "normalgl");
+		string_array_push(_path_normal_map_ext, "normal");
+		string_array_push(_path_normal_map_ext, "normals");
+		string_array_push(_path_normal_map_ext, "nor");
+		string_array_push(_path_normal_map_ext, "n");
+		string_array_push(_path_normal_map_ext, "nrm");
+		string_array_push(_path_normal_map_ext, "normalgl");
 	}
 	return _path_normal_map_ext;
 }
 
-char_ptr_array_t *path_occlusion_ext(void) {
+string_array_t *path_occlusion_ext(void) {
 	if (_path_occlusion_ext == NULL) {
-		_path_occlusion_ext = char_ptr_array_create(0);
+		_path_occlusion_ext = string_array_create(0);
 		gc_root(_path_occlusion_ext);
-		char_ptr_array_push(_path_occlusion_ext, "ao");
-		char_ptr_array_push(_path_occlusion_ext, "occlusion");
-		char_ptr_array_push(_path_occlusion_ext, "ambientOcclusion");
-		char_ptr_array_push(_path_occlusion_ext, "o");
-		char_ptr_array_push(_path_occlusion_ext, "occ");
+		string_array_push(_path_occlusion_ext, "ao");
+		string_array_push(_path_occlusion_ext, "occlusion");
+		string_array_push(_path_occlusion_ext, "ambientOcclusion");
+		string_array_push(_path_occlusion_ext, "o");
+		string_array_push(_path_occlusion_ext, "occ");
 	}
 	return _path_occlusion_ext;
 }
 
-char_ptr_array_t *path_roughness_ext(void) {
+string_array_t *path_roughness_ext(void) {
 	if (_path_roughness_ext == NULL) {
-		_path_roughness_ext = char_ptr_array_create(0);
+		_path_roughness_ext = string_array_create(0);
 		gc_root(_path_roughness_ext);
-		char_ptr_array_push(_path_roughness_ext, "roughness");
-		char_ptr_array_push(_path_roughness_ext, "rough");
-		char_ptr_array_push(_path_roughness_ext, "r");
-		char_ptr_array_push(_path_roughness_ext, "rgh");
+		string_array_push(_path_roughness_ext, "roughness");
+		string_array_push(_path_roughness_ext, "rough");
+		string_array_push(_path_roughness_ext, "r");
+		string_array_push(_path_roughness_ext, "rgh");
 	}
 	return _path_roughness_ext;
 }
 
-char_ptr_array_t *path_metallic_ext(void) {
+string_array_t *path_metallic_ext(void) {
 	if (_path_metallic_ext == NULL) {
-		_path_metallic_ext = char_ptr_array_create(0);
+		_path_metallic_ext = string_array_create(0);
 		gc_root(_path_metallic_ext);
-		char_ptr_array_push(_path_metallic_ext, "metallic");
-		char_ptr_array_push(_path_metallic_ext, "metal");
-		char_ptr_array_push(_path_metallic_ext, "metalness");
-		char_ptr_array_push(_path_metallic_ext, "m");
-		char_ptr_array_push(_path_metallic_ext, "met");
+		string_array_push(_path_metallic_ext, "metallic");
+		string_array_push(_path_metallic_ext, "metal");
+		string_array_push(_path_metallic_ext, "metalness");
+		string_array_push(_path_metallic_ext, "m");
+		string_array_push(_path_metallic_ext, "met");
 	}
 	return _path_metallic_ext;
 }
 
-char_ptr_array_t *path_displacement_ext(void) {
+string_array_t *path_displacement_ext(void) {
 	if (_path_displacement_ext == NULL) {
-		_path_displacement_ext = char_ptr_array_create(0);
+		_path_displacement_ext = string_array_create(0);
 		gc_root(_path_displacement_ext);
-		char_ptr_array_push(_path_displacement_ext, "displacement");
-		char_ptr_array_push(_path_displacement_ext, "height");
-		char_ptr_array_push(_path_displacement_ext, "h");
-		char_ptr_array_push(_path_displacement_ext, "disp");
+		string_array_push(_path_displacement_ext, "displacement");
+		string_array_push(_path_displacement_ext, "height");
+		string_array_push(_path_displacement_ext, "h");
+		string_array_push(_path_displacement_ext, "disp");
 	}
 	return _path_displacement_ext;
 }
@@ -216,7 +216,7 @@ char *path_base_name(char *path) {
 
 bool path_is_mesh(char *path) {
 	char             *p       = to_lower_case(path);
-	char_ptr_array_t *formats = path_mesh_formats();
+	string_array_t *formats = path_mesh_formats();
 	for (uint32_t i = 0; i < formats->length; ++i) {
 		char *s   = formats->buffer[i];
 		char *ext = string(".%s", s);
@@ -229,7 +229,7 @@ bool path_is_mesh(char *path) {
 
 bool path_is_texture(char *path) {
 	char             *p       = to_lower_case(path);
-	char_ptr_array_t *formats = path_texture_formats();
+	string_array_t *formats = path_texture_formats();
 	for (uint32_t i = 0; i < formats->length; ++i) {
 		char *s   = formats->buffer[i];
 		char *ext = string(".%s", s);
@@ -280,7 +280,7 @@ bool path_is_known(char *path) {
 	       path_is_gimp_color_palette(path) || path_is_ext_format(path);
 }
 
-bool path_check_ext(char *p, char_ptr_array_t *exts) {
+bool path_check_ext(char *p, string_array_t *exts) {
 	p = string_replace_all(p, "-", "_");
 	for (uint32_t i = 0; i < exts->length; ++i) {
 		char *ext            = exts->buffer[i];

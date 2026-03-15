@@ -118,7 +118,7 @@ typedef struct ui_text_extract {
 
 typedef struct ui_coloring {
 	uint32_t          color;
-	char_ptr_array_t *start;
+	string_array_t *start;
 	char             *end;
 	bool              separated;
 } ui_coloring_t;
@@ -245,7 +245,7 @@ typedef struct ui {
 	ui_handle_t      *combo_selected_handle;
 	ui_handle_t      *combo_selected_window;
 	int               combo_selected_align;
-	char_ptr_array_t *combo_selected_texts;
+	string_array_t *combo_selected_texts;
 	char             *combo_selected_label;
 	int               combo_selected_x;
 	int               combo_selected_y;
@@ -298,7 +298,7 @@ int   ui_image(gpu_texture_t *image, uint32_t tint, int h);
 char *ui_text_input(ui_handle_t *handle, char *label, int align, bool editable, bool live_update);
 bool  ui_check(ui_handle_t *handle, char *text, char *label);
 bool  ui_radio(ui_handle_t *handle, int position, char *text, char *label);
-int   ui_combo(ui_handle_t *handle, char_ptr_array_t *texts, char *label, bool show_label, int align, bool search_bar);
+int   ui_combo(ui_handle_t *handle, string_array_t *texts, char *label, bool show_label, int align, bool search_bar);
 float ui_slider(ui_handle_t *handle, char *text, float from, float to, bool filled, float precision, bool display_value, int align, bool text_edit);
 void  ui_row(f32_array_t *ratios);
 void  ui_row2();
@@ -389,7 +389,7 @@ extern const char *ui_theme_keys[];
 extern int         ui_theme_keys_count;
 
 float ui_float_input(ui_handle_t *handle, char *label, int align, float precision);
-int   ui_inline_radio(ui_handle_t *handle, char_ptr_array_t *texts, int align);
+int   ui_inline_radio(ui_handle_t *handle, string_array_t *texts, int align);
 int   ui_color_wheel(ui_handle_t *handle, bool alpha, float w, float h, bool color_preview, void (*picker)(void *), void *data);
 char *ui_text_area(ui_handle_t *handle, int align, bool editable, char *label, bool word_wrap);
 void  ui_begin_menu();

@@ -657,14 +657,14 @@ i32 iron_sys_command(char *cmd) {
 
 #include <nfd.h>
 
-char_ptr_array_t *iron_open_dialog(char *filter_list, char *default_path, bool open_multiple) {
+string_array_t *iron_open_dialog(char *filter_list, char *default_path, bool open_multiple) {
 	nfdpathset_t out_paths;
 	nfdchar_t   *out_path;
 	nfdresult_t  result = open_multiple ? NFD_OpenDialogMultiple(filter_list, default_path, &out_paths) : NFD_OpenDialog(filter_list, default_path, &out_path);
 
 	if (result == NFD_OKAY) {
 		int               path_count = open_multiple ? (int)NFD_PathSet_GetCount(&out_paths) : 1;
-		char_ptr_array_t *result     = any_array_create(path_count);
+		string_array_t *result     = any_array_create(path_count);
 
 		if (open_multiple) {
 			for (int i = 0; i < path_count; ++i) {
@@ -701,7 +701,7 @@ char *iron_save_dialog(char *filter_list, char *default_path) {
 
 extern char temp_string[1024 * 128];
 
-char_ptr_array_t *iron_open_dialog(char *filter_list, char *default_path, bool open_multiple) {
+string_array_t *iron_open_dialog(char *filter_list, char *default_path, bool open_multiple) {
 	AndroidFileDialogOpen();
 	return NULL;
 }
@@ -719,7 +719,7 @@ char *iron_save_dialog(char *filter_list, char *default_path) {
 
 extern char temp_string[1024 * 128];
 
-char_ptr_array_t *iron_open_dialog(char *filter_list, char *default_path, bool open_multiple) {
+string_array_t *iron_open_dialog(char *filter_list, char *default_path, bool open_multiple) {
 	// Once finished drop_files callback is called
 	IOSFileDialogOpen();
 	return NULL;
@@ -737,7 +737,7 @@ char *iron_save_dialog(char *filter_list, char *default_path) {
 __attribute__((import_module("imports"), import_name("js_open_dialog"))) void js_open_dialog();
 __attribute__((import_module("imports"), import_name("js_save_dialog"))) char *js_save_dialog();
 
-char_ptr_array_t *iron_open_dialog(char *filter_list, char *default_path, bool open_multiple) {
+string_array_t *iron_open_dialog(char *filter_list, char *default_path, bool open_multiple) {
 	js_open_dialog();
 	return NULL;
 }

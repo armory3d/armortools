@@ -573,7 +573,7 @@ void project_unwrap_mesh(raw_mesh_t *mesh, void (*done)(raw_mesh_t *)) {
 	}
 	else {
 		char *f = unwrap_plugins->buffer[_project_unwrap_by];
-		if (char_ptr_array_index_of(config_raw->plugins, f) == -1) {
+		if (string_array_index_of(config_raw->plugins, f) == -1) {
 			config_enable_plugin(f);
 			console_info(string("%s %s", f, tr("plugin enabled", NULL)));
 		}
@@ -692,7 +692,7 @@ bool project_is_atlas_object(mesh_object_t *p) {
 		return false;
 	}
 	char *atlas_name = project_get_used_atlases()->buffer[context_raw->layer_filter - project_paint_objects->length - 1];
-	i32   atlas_i    = char_ptr_array_index_of(project_atlas_names, atlas_name);
+	i32   atlas_i    = string_array_index_of(project_atlas_names, atlas_name);
 	return atlas_i == project_atlas_objects->buffer[array_index_of(project_paint_objects, p)];
 }
 
@@ -703,7 +703,7 @@ mesh_object_t_array_t *project_get_atlas_objects(i32 object_mask) {
 		return project_paint_objects;
 	}
 	char                  *atlas_name = atlases->buffer[i];
-	i32                    atlas_i    = char_ptr_array_index_of(project_atlas_names, atlas_name);
+	i32                    atlas_i    = string_array_index_of(project_atlas_names, atlas_name);
 	mesh_object_t_array_t *visibles   = any_array_create_from_raw((void *[]){}, 0);
 	for (i32 i = 0; i < project_paint_objects->length; ++i) {
 		if (project_atlas_objects->buffer[i] == atlas_i) {

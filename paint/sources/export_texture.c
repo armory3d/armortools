@@ -33,7 +33,7 @@ void export_texture_run(char *path, bool bake_material) {
 			slot_layer_t *l = project_layers->buffer[i];
 			if (slot_layer_get_object_mask(l) > 0) {
 				char *name = project_paint_objects->buffer[slot_layer_get_object_mask(l) - 1]->base->name;
-				if (char_ptr_array_index_of(object_names, name) == -1) {
+				if (string_array_index_of(object_names, name) == -1) {
 					any_array_push(object_names, name);
 				}
 			}

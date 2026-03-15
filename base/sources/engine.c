@@ -982,7 +982,7 @@ bool mesh_object_cull_mesh(mesh_object_t *raw, char *context, camera_object_t *c
 	return false;
 }
 
-void mesh_object_render(mesh_object_t *raw, char *context, char_ptr_array_t *bind_params) {
+void mesh_object_render(mesh_object_t *raw, char *context, string_array_t *bind_params) {
 	if (!raw->base->visible) {
 		return; // Skip render if object is hidden
 	}
@@ -1249,7 +1249,7 @@ f32 (*uniforms_f32_links)(object_t *o, material_data_t *md, char *s)            
 f32_array_t *(*uniforms_f32_array_links)(object_t *o, material_data_t *md, char *s) = NULL;
 i32 (*uniforms_i32_links)(object_t *o, material_data_t *md, char *s)                = NULL;
 
-void uniforms_set_context_consts(shader_context_t *context, char_ptr_array_t *bind_params) {
+void uniforms_set_context_consts(shader_context_t *context, string_array_t *bind_params) {
 	// On shader compile error, _.constants.length will be 0
 	if (context->constants != NULL && context->constants->length == context->_->constants->length) {
 		for (i32 i = 0; i < context->constants->length; ++i) {
@@ -2422,7 +2422,7 @@ void scene_gen_transform(obj_t *object, transform_t *transform) {
 	}
 }
 
-void scene_load_embedded_data(char_ptr_array_t *datas) {
+void scene_load_embedded_data(string_array_t *datas) {
 	if (datas == NULL) {
 		return;
 	}
@@ -2462,7 +2462,7 @@ gpu_texture_t    *_render_path_current_image          = NULL;
 bool              _render_path_paused                 = false;
 i32               _render_path_last_w                 = 0;
 i32               _render_path_last_h                 = 0;
-char_ptr_array_t *_render_path_bind_params            = NULL;
+string_array_t *_render_path_bind_params            = NULL;
 f32               _render_path_last_frame_time        = 0.0;
 i32               _render_path_loading                = 0;
 any_map_t        *_render_path_cached_shader_contexts = NULL;
@@ -2488,7 +2488,7 @@ void render_path_render_frame(void) {
 	_render_path_frame++;
 }
 
-void render_path_set_target(char *target, char_ptr_array_t *additional, char *depth_buffer, gpu_clear_t flags, i32 color, f32 depth) {
+void render_path_set_target(char *target, string_array_t *additional, char *depth_buffer, gpu_clear_t flags, i32 color, f32 depth) {
 	if (_render_path_current_image != NULL) {
 		render_path_end();
 	}
@@ -2557,11 +2557,11 @@ void render_path_draw_skydome(char *handle) {
 
 void render_path_bind_target(char *target, char *uniform) {
 	if (_render_path_bind_params != NULL) {
-		char_ptr_array_push(_render_path_bind_params, target);
-		char_ptr_array_push(_render_path_bind_params, uniform);
+		string_array_push(_render_path_bind_params, target);
+		string_array_push(_render_path_bind_params, uniform);
 	}
 	else {
-		_render_path_bind_params            = char_ptr_array_create(2);
+		_render_path_bind_params            = string_array_create(2);
 		_render_path_bind_params->buffer[0] = target;
 		_render_path_bind_params->buffer[1] = uniform;
 		_render_path_bind_params->length    = 2;
