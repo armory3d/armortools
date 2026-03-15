@@ -59,7 +59,7 @@ void import_folder_run(char *path) {
 	}
 
 	if (!found_texture) {
-		console_info(tr("Folder does not contain textures", NULL));
+		console_info(tr("Folder does not contain textures"));
 		return;
 	}
 

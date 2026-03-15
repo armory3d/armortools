@@ -59,7 +59,7 @@ void project_save(bool save_and_quit) {
 void project_save_as_on_file_picked(char *path) {
 	char *f = ui_files_filename;
 	if (string_equals(f, "")) {
-		f = string_copy(tr("untitled", NULL));
+		f = string_copy(tr("untitled"));
 	}
 	gc_unroot(project_filepath);
 	project_filepath = string("%s%s%s", path, PATH_SEP, f);
@@ -98,7 +98,7 @@ void project_new_box_draw() {
 	if (h_project_type->init) {
 		h_project_type->i = context_raw->project_type;
 	}
-	context_raw->project_type           = ui_combo(h_project_type, project_mesh_list, tr("Template", NULL), true, UI_ALIGN_LEFT, true);
+	context_raw->project_type           = ui_combo(h_project_type, project_mesh_list, tr("Template"), true, UI_ALIGN_LEFT, true);
 	ui_handle_t *h_project_aspect_ratio = ui_handle(__ID__);
 	if (h_project_aspect_ratio->init) {
 		h_project_aspect_ratio->i = context_raw->project_aspect_ratio;
@@ -110,20 +110,20 @@ void project_new_box_draw() {
 	        "1:2",
 	    },
 	    3);
-	context_raw->project_aspect_ratio = ui_combo(h_project_aspect_ratio, project_aspect_ratio_combo, tr("Aspect Ratio", NULL), true, UI_ALIGN_LEFT, true);
+	context_raw->project_aspect_ratio = ui_combo(h_project_aspect_ratio, project_aspect_ratio_combo, tr("Aspect Ratio"), true, UI_ALIGN_LEFT, true);
 	ui_end_element();
 	ui_row2();
-	if (ui_icon_button(tr("Cancel", NULL), ICON_CLOSE, UI_ALIGN_CENTER)) {
+	if (ui_icon_button(tr("Cancel"), ICON_CLOSE, UI_ALIGN_CENTER)) {
 		ui_box_hide();
 	}
-	if (ui_icon_button(tr("OK", NULL), ICON_CHECK, UI_ALIGN_CENTER) || ui->is_return_down) {
+	if (ui_icon_button(tr("OK"), ICON_CHECK, UI_ALIGN_CENTER) || ui->is_return_down) {
 		project_new(true);
 		ui_box_hide();
 	}
 }
 
 void project_new_box() {
-	ui_box_show_custom(&project_new_box_draw, 400, 200, NULL, true, tr("New Project", NULL));
+	ui_box_show_custom(&project_new_box_draw, 400, 200, NULL, true, tr("New Project"));
 }
 
 void project_cleanup() {
@@ -445,15 +445,15 @@ void project_import_mesh_box_draw() {
 	if (ends_with(to_lower_case(path), ".obj")) {
 		string_t_array_t *split_by_combo = any_array_create_from_raw(
 		    (void *[]){
-		        tr("Object", NULL),
-		        tr("Group", NULL),
-		        tr("Material", NULL),
-		        tr("UDIM Tile", NULL),
+		        tr("Object"),
+		        tr("Group"),
+		        tr("Material"),
+		        tr("UDIM Tile"),
 		    },
 		    4);
-		context_raw->split_by = ui_combo(ui_handle(__ID__), split_by_combo, tr("Split By", NULL), true, UI_ALIGN_LEFT, true);
+		context_raw->split_by = ui_combo(ui_handle(__ID__), split_by_combo, tr("Split By"), true, UI_ALIGN_LEFT, true);
 		if (ui->is_hovered) {
-			ui_tooltip(tr("Split .obj mesh into objects", NULL));
+			ui_tooltip(tr("Split .obj mesh into objects"));
 		}
 	}
 
@@ -470,14 +470,14 @@ void project_import_mesh_box_draw() {
 	    3);
 
 	ui_row(row);
-	if (ui_icon_button(tr("Cancel", NULL), ICON_CLOSE, UI_ALIGN_CENTER)) {
+	if (ui_icon_button(tr("Cancel"), ICON_CLOSE, UI_ALIGN_CENTER)) {
 		ui_box_hide();
 	}
-	if (ui_icon_button(tr("Import", NULL), ICON_CHECK, UI_ALIGN_CENTER) || ui->is_return_down) {
+	if (ui_icon_button(tr("Import"), ICON_CHECK, UI_ALIGN_CENTER) || ui->is_return_down) {
 		ui_box_hide();
 
 #if defined(IRON_ANDROID) || defined(IRON_IOS)
-		console_toast(tr("Importing mesh", NULL));
+		console_toast(tr("Importing mesh"));
 #endif
 
 		import_mesh_run(path, clear_layers, replace_existing);
@@ -485,7 +485,7 @@ void project_import_mesh_box_draw() {
 			done();
 		}
 	}
-	if (ui_button(tr("?", NULL), UI_ALIGN_CENTER, "")) {
+	if (ui_button(tr("?"), UI_ALIGN_CENTER, "")) {
 		iron_load_url("https://github.com/armory3d/armorpaint_web/blob/main/manual.md#faq");
 	}
 }
@@ -499,7 +499,7 @@ void project_import_mesh_box(char *path, bool replace_existing, bool clear_layer
 	gc_unroot(_project_import_mesh_box_done);
 	_project_import_mesh_box_done = done;
 	gc_root(_project_import_mesh_box_done);
-	ui_box_show_custom(&project_import_mesh_box_draw, 400, 200, NULL, true, tr("Import Mesh", NULL));
+	ui_box_show_custom(&project_import_mesh_box_draw, 400, 200, NULL, true, tr("Import Mesh"));
 	ui_box_click_to_hide = false; // Prevent closing when going back to window from file browser
 }
 
@@ -532,17 +532,17 @@ void project_unwrap_mesh_box_draw() {
 	void (*done)(raw_mesh_t *) = _project_unwrap_mesh_box_done;
 
 	string_t_array_t *unwrap_plugins = project_get_unwrap_plugins();
-	_project_unwrap_by               = ui_combo(ui_handle(__ID__), unwrap_plugins, tr("Plugin", NULL), true, UI_ALIGN_LEFT, true);
+	_project_unwrap_by               = ui_combo(ui_handle(__ID__), unwrap_plugins, tr("Plugin"), true, UI_ALIGN_LEFT, true);
 
 	ui_row2();
-	if (ui_icon_button(tr("Cancel", NULL), ICON_CLOSE, UI_ALIGN_CENTER)) {
+	if (ui_icon_button(tr("Cancel"), ICON_CLOSE, UI_ALIGN_CENTER)) {
 		ui_box_hide();
 	}
-	if (ui_icon_button(tr("Unwrap", NULL), ICON_CHECK, UI_ALIGN_CENTER) || ui->is_return_down) {
+	if (ui_icon_button(tr("Unwrap"), ICON_CHECK, UI_ALIGN_CENTER) || ui->is_return_down) {
 		ui_box_hide();
 
 #if defined(IRON_ANDROID) || defined(IRON_IOS)
-		console_toast(tr("Unwrapping mesh", NULL));
+		console_toast(tr("Unwrapping mesh"));
 #endif
 
 		project_unwrap_mesh(mesh, done);
@@ -562,7 +562,7 @@ void project_unwrap_mesh_box(raw_mesh_t *mesh, void (*done)(raw_mesh_t *), bool 
 		return;
 	}
 
-	ui_box_show_custom(&project_unwrap_mesh_box_draw, 400, 200, NULL, true, tr("Unwrap Mesh", NULL));
+	ui_box_show_custom(&project_unwrap_mesh_box_draw, 400, 200, NULL, true, tr("Unwrap Mesh"));
 }
 
 void project_unwrap_mesh(raw_mesh_t *mesh, void (*done)(raw_mesh_t *)) {
@@ -575,7 +575,7 @@ void project_unwrap_mesh(raw_mesh_t *mesh, void (*done)(raw_mesh_t *)) {
 		char *f = unwrap_plugins->buffer[_project_unwrap_by];
 		if (string_array_index_of(config_raw->plugins, f) == -1) {
 			config_enable_plugin(f);
-			console_info(string("%s %s", f, tr("plugin enabled", NULL)));
+			console_info(string("%s %s", f, tr("plugin enabled")));
 		}
 		void *cb = any_map_get(util_mesh_unwrappers, f); // JSValue * -> (a: raw_mesh_t)=>void
 		js_call_ptr(cb, mesh);
@@ -726,7 +726,7 @@ bool project_packed_asset_exists(packed_asset_t_array_t *packed_assets, char *na
 void project_export_swatches_on_file_picked(char *path) {
 	char *f = ui_files_filename;
 	if (string_equals(f, "")) {
-		f = string_copy(tr("untitled", NULL));
+		f = string_copy(tr("untitled"));
 	}
 	if (path_is_gimp_color_palette(f)) {
 		// export_gpl_run(path + PATH_SEP + f, substring(f, 0, string_last_index_of(f, ".")), project_raw.swatches);

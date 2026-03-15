@@ -30,7 +30,7 @@ void import_font_run(char *path) {
 		draw_font_t      *f    = GC_ALLOC_INIT(draw_font_t, {.buf = font->buf, .index = font->index});
 		draw_font_init(f);
 		if (!draw_set_font(f, util_render_font_preview_size)) {
-			console_error(tr("Error: Failed to read font data", NULL));
+			console_error(tr("Error: Failed to read font data"));
 			continue;
 		}
 

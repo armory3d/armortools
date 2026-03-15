@@ -24,25 +24,25 @@ gpu_texture_t *tab_swatches_empty_get() {
 void tab_swatches_draw_16719() {
 	i32 i = _tab_swatches_draw_i;
 
-	if (ui_menu_button(tr("Duplicate", NULL), "", ICON_DUPLICATE)) {
+	if (ui_menu_button(tr("Duplicate"), "", ICON_DUPLICATE)) {
 		context_set_swatch(project_clone_swatch(context_raw->swatch));
 		any_array_push(project_raw->swatches, context_raw->swatch);
 	}
 #if defined(IRON_WINDOWS) || defined(IRON_LINUX) || defined(IRON_MACOS)
-	else if (ui_menu_button(tr("Copy Hex Code", NULL), "", ICON_HASH)) {
+	else if (ui_menu_button(tr("Copy Hex Code"), "", ICON_HASH)) {
 		i32 color = context_raw->swatch->base;
 		color     = color_set_ab(color, context_raw->swatch->opacity * 255);
 		u32 val   = color;
 		iron_copy_to_clipboard(i32_to_string(val));
 	}
 #endif
-	else if (project_raw->swatches->length > 1 && ui_menu_button(tr("Delete", NULL), "delete", ICON_DELETE)) {
+	else if (project_raw->swatches->length > 1 && ui_menu_button(tr("Delete"), "delete", ICON_DELETE)) {
 		tab_swatches_delete_swatch(project_raw->swatches->buffer[i]);
 	}
-	else if (ui_menu_button(tr("Create Material", NULL), "", ICON_SPHERE)) {
+	else if (ui_menu_button(tr("Create Material"), "", ICON_SPHERE)) {
 		tab_materials_accept_swatch_drop(project_raw->swatches->buffer[i]);
 	}
-	else if (ui_menu_button(tr("Create Color Layer", NULL), "", ICON_LAYERS)) {
+	else if (ui_menu_button(tr("Create Color Layer"), "", ICON_LAYERS)) {
 		i32 color = project_raw->swatches->buffer[i]->base;
 		color     = color_set_ab(color, project_raw->swatches->buffer[i]->opacity * 255);
 		layers_create_color_layer(color, project_raw->swatches->buffer[i]->occlusion, project_raw->swatches->buffer[i]->roughness,
@@ -98,17 +98,17 @@ void tab_swatches_draw_edit_menu() {
 }
 
 void tab_swatches_draw_import() {
-	if (ui_menu_button(tr("Replace Existing", NULL), "", ICON_NONE)) {
+	if (ui_menu_button(tr("Replace Existing"), "", ICON_NONE)) {
 		project_import_swatches(true);
 		context_set_swatch(project_raw->swatches->buffer[0]);
 	}
-	if (ui_menu_button(tr("Append", NULL), "", ICON_NONE)) {
+	if (ui_menu_button(tr("Append"), "", ICON_NONE)) {
 		project_import_swatches(false);
 	}
 }
 
 void tab_swatches_draw(ui_handle_t *htab) {
-	if (ui_tab(htab, tr("Swatches", NULL), false, -1, false) && ui->_window_h > ui_statusbar_default_h * UI_SCALE()) {
+	if (ui_tab(htab, tr("Swatches"), false, -1, false) && ui->_window_h > ui_statusbar_default_h * UI_SCALE()) {
 
 		ui_begin_sticky();
 		f32_array_t *row = f32_array_create_from_raw(
@@ -122,29 +122,29 @@ void tab_swatches_draw(ui_handle_t *htab) {
 		    5);
 		ui_row(row);
 
-		if (ui_icon_button(tr("New", NULL), ICON_PLUS, UI_ALIGN_CENTER)) {
+		if (ui_icon_button(tr("New"), ICON_PLUS, UI_ALIGN_CENTER)) {
 			context_set_swatch(project_make_swatch(0xffffffff));
 			any_array_push(project_raw->swatches, context_raw->swatch);
 		}
 		if (ui->is_hovered) {
-			ui_tooltip(tr("Add new swatch", NULL));
+			ui_tooltip(tr("Add new swatch"));
 		}
 
-		if (ui_icon_button(tr("Import", NULL), ICON_IMPORT, UI_ALIGN_CENTER)) {
+		if (ui_icon_button(tr("Import"), ICON_IMPORT, UI_ALIGN_CENTER)) {
 			ui_menu_draw(&tab_swatches_draw_import, -1, -1);
 		}
 		if (ui->is_hovered) {
-			ui_tooltip(tr("Import swatches", NULL));
+			ui_tooltip(tr("Import swatches"));
 		}
 
-		if (ui_icon_button(tr("Export", NULL), ICON_EXPORT, UI_ALIGN_CENTER)) {
+		if (ui_icon_button(tr("Export"), ICON_EXPORT, UI_ALIGN_CENTER)) {
 			project_export_swatches();
 		}
 		if (ui->is_hovered) {
-			ui_tooltip(tr("Export swatches", NULL));
+			ui_tooltip(tr("Export swatches"));
 		}
 
-		if (ui_icon_button(tr("Clear", NULL), ICON_ERASE, UI_ALIGN_CENTER)) {
+		if (ui_icon_button(tr("Clear"), ICON_ERASE, UI_ALIGN_CENTER)) {
 			context_set_swatch(project_make_swatch(0xffffffff));
 			project_raw->swatches = any_array_create_from_raw(
 			    (void *[]){
@@ -153,12 +153,12 @@ void tab_swatches_draw(ui_handle_t *htab) {
 			    1);
 		}
 
-		if (ui_icon_button(tr("Restore", NULL), ICON_REPLAY, UI_ALIGN_CENTER)) {
+		if (ui_icon_button(tr("Restore"), ICON_REPLAY, UI_ALIGN_CENTER)) {
 			project_set_default_swatches();
 			context_set_swatch(project_raw->swatches->buffer[0]);
 		}
 		if (ui->is_hovered) {
-			ui_tooltip(tr("Restore default swatches", NULL));
+			ui_tooltip(tr("Restore default swatches"));
 		}
 
 		ui_end_sticky();

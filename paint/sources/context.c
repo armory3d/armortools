@@ -370,12 +370,12 @@ bool context_in_paint_area() {
 
 bool context_in_layers() {
 	char *tab = ui_hovered_tab_name();
-	return string_equals(tab, tr("Layers", NULL));
+	return string_equals(tab, tr("Layers"));
 }
 
 bool context_in_materials() {
 	char *tab = ui_hovered_tab_name();
-	return string_equals(tab, tr("Materials", NULL));
+	return string_equals(tab, tr("Materials"));
 }
 
 bool context_in_2d_view(view_2d_type_t type) {
@@ -389,12 +389,12 @@ bool context_in_nodes() {
 
 bool context_in_swatches() {
 	char *tab = ui_hovered_tab_name();
-	return string_equals(tab, tr("Swatches", NULL));
+	return string_equals(tab, tr("Swatches"));
 }
 
 bool context_in_browser() {
 	char *tab = ui_hovered_tab_name();
-	return string_equals(tab, tr("Browser", NULL));
+	return string_equals(tab, tr("Browser"));
 }
 
 bool context_is_picker() {
@@ -525,7 +525,7 @@ bool context_enable_import_plugin(char *file) {
 		char *f = box_preferences_files_plugin->buffer[i];
 		if (starts_with(f, "import_") && string_index_of(f, ext) >= 0) {
 			config_enable_plugin(f);
-			console_info(string("%s %s", f, tr("plugin enabled", NULL)));
+			console_info(string("%s %s", f, tr("plugin enabled")));
 			return true;
 		}
 	}

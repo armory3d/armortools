@@ -14,7 +14,7 @@ void import_blend_mesh_ui() {
 		config_raw->blender = "";
 	}
 
-	ui_text(tr("Blender Executable", NULL), UI_ALIGN_LEFT, 0x00000000);
+	ui_text(tr("Blender Executable"), UI_ALIGN_LEFT, 0x00000000);
 
 	f32_array_t *ar = f32_array_create_from_raw(
 	    (f32[]){
@@ -34,7 +34,7 @@ void import_blend_mesh_ui() {
 
 void import_blend_mesh_run(char *path, bool replace_existing) {
 	if (config_raw->blender == NULL || string_equals(config_raw->blender, "")) {
-		console_error(tr("Blender executable path not set", NULL));
+		console_error(tr("Blender executable path not set"));
 		return;
 	}
 

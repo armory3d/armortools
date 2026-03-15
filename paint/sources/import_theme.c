@@ -14,5 +14,5 @@ void import_theme_run(char *path) {
 	config_raw->theme          = string_copy(filename);
 	box_preferences_h_theme->i = box_preferences_get_theme_index();
 	config_load_theme(config_raw->theme, true);
-	console_info(string("%s %s", tr("Theme imported:", NULL), filename));
+	console_info(string("%s %s", tr("Theme imported:"), filename));
 }

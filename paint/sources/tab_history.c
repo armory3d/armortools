@@ -2,7 +2,7 @@
 #include "global.h"
 
 void tab_history_draw(ui_handle_t *htab) {
-	if (ui_tab(htab, tr("History", NULL), false, -1, false)) {
+	if (ui_tab(htab, tr("History"), false, -1, false)) {
 		for (i32 i = 0; i < history_steps->length; ++i) {
 			i32 active = history_steps->length - 1 - history_redos;
 			if (i == active) {

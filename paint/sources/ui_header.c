@@ -92,20 +92,20 @@ void ui_header_draw_tool_properties_import(char *path) {
 
 void ui_header_draw_tool_properties() {
 	if (context_raw->tool == TOOL_TYPE_COLORID) {
-		ui_text(tr("Picked Color", NULL), UI_ALIGN_LEFT, 0x00000000);
+		ui_text(tr("Picked Color"), UI_ALIGN_LEFT, 0x00000000);
 		if (context_raw->colorid_picked) {
 			render_target_t *rt = any_map_get(render_path_render_targets, "texpaint_colorid");
 			ui_image(rt->_image, 0xffffffff, 64);
 		}
 		ui->enabled = context_raw->colorid_picked;
-		if (ui_button(tr("Clear", NULL), UI_ALIGN_CENTER, "")) {
+		if (ui_button(tr("Clear"), UI_ALIGN_CENTER, "")) {
 			context_raw->colorid_picked = false;
 			ui_toolbar_handle->redraws  = 1;
 		}
 		ui->enabled = true;
-		ui_text(tr("Color ID Map", NULL), UI_ALIGN_LEFT, 0x00000000);
+		ui_text(tr("Color ID Map"), UI_ALIGN_LEFT, 0x00000000);
 		if (project_asset_names->length > 0) {
-			i32 cid = ui_combo(context_raw->colorid_handle, base_enum_texts("TEX_IMAGE"), tr("Color ID", NULL), false, UI_ALIGN_LEFT, true);
+			i32 cid = ui_combo(context_raw->colorid_handle, base_enum_texts("TEX_IMAGE"), tr("Color ID"), false, UI_ALIGN_LEFT, true);
 			if (context_raw->colorid_handle->changed) {
 				context_raw->ddirty         = 2;
 				context_raw->colorid_picked = false;
@@ -116,11 +116,11 @@ void ui_header_draw_tool_properties() {
 				ui_tooltip_image(project_get_image(project_assets->buffer[cid]), 256);
 			}
 		}
-		if (ui_button(tr("Import", NULL), UI_ALIGN_CENTER, "")) {
+		if (ui_button(tr("Import"), UI_ALIGN_CENTER, "")) {
 			ui_files_show(string_array_join(path_texture_formats(), ","), false, true, &ui_header_draw_tool_properties_import);
 		}
 		ui->enabled = context_raw->colorid_picked;
-		if (ui_button(tr("To Mask", NULL), UI_ALIGN_CENTER, "")) {
+		if (ui_button(tr("To Mask"), UI_ALIGN_CENTER, "")) {
 			if (slot_layer_is_mask(context_raw->layer)) {
 				context_set_layer(context_raw->layer->parent);
 			}
@@ -144,7 +144,7 @@ void ui_header_draw_tool_properties() {
 			gc_root(base_drag_swatch);
 		}
 		if (ui->is_hovered) {
-			ui_tooltip(tr("Drag and drop picked color to swatches, materials, layers or to the node editor", NULL));
+			ui_tooltip(tr("Drag and drop picked color to swatches, materials, layers or to the node editor"));
 		}
 		if (ui->is_hovered && ui->input_released) {
 			gc_unroot(_ui_header_draw_tool_properties_h);
@@ -152,14 +152,14 @@ void ui_header_draw_tool_properties() {
 			gc_root(_ui_header_draw_tool_properties_h);
 			ui_menu_draw(&ui_header_draw_tool_properties_color_picker_base, -1, -1);
 		}
-		if (ui_button(tr("Add Swatch", NULL), UI_ALIGN_CENTER, "")) {
+		if (ui_button(tr("Add Swatch"), UI_ALIGN_CENTER, "")) {
 			swatch_color_t *new_swatch = project_clone_swatch(context_raw->picked_color);
 			context_set_swatch(new_swatch);
 			any_array_push(project_raw->swatches, new_swatch);
 			ui_base_hwnds->buffer[2]->redraws = 1;
 		}
 		if (ui->is_hovered) {
-			ui_tooltip(tr("Add picked color to swatches", NULL));
+			ui_tooltip(tr("Add picked color to swatches"));
 		}
 
 		if (config_raw->workflow == WORKFLOW_PBR) {
@@ -176,43 +176,43 @@ void ui_header_draw_tool_properties() {
 				gc_root(_ui_header_draw_tool_properties_h);
 				ui_menu_draw(&ui_header_draw_tool_properties_color_picker_normal, -1, -1);
 			}
-			ui_text(tr("Normal", NULL), UI_ALIGN_LEFT, 0x00000000);
+			ui_text(tr("Normal"), UI_ALIGN_LEFT, 0x00000000);
 			ui->_w = _w;
 
 			ui_handle_t *hocc                    = ui_handle(__ID__);
 			hocc->f                              = context_raw->picked_color->occlusion;
-			context_raw->picked_color->occlusion = ui_slider(hocc, tr("Occlusion", NULL), 0.0, 1.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
+			context_raw->picked_color->occlusion = ui_slider(hocc, tr("Occlusion"), 0.0, 1.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
 
 			ui_handle_t *hrough                  = ui_handle(__ID__);
 			hrough->f                            = context_raw->picked_color->roughness;
-			context_raw->picked_color->roughness = ui_slider(hrough, tr("Roughness", NULL), 0.0, 1.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
+			context_raw->picked_color->roughness = ui_slider(hrough, tr("Roughness"), 0.0, 1.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
 
 			ui_handle_t *hmet                   = ui_handle(__ID__);
 			hmet->f                             = context_raw->picked_color->metallic;
-			context_raw->picked_color->metallic = ui_slider(hmet, tr("Metallic", NULL), 0.0, 1.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
+			context_raw->picked_color->metallic = ui_slider(hmet, tr("Metallic"), 0.0, 1.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
 
 			ui_handle_t *hheight              = ui_handle(__ID__);
 			hheight->f                        = context_raw->picked_color->height;
-			context_raw->picked_color->height = ui_slider(hheight, tr("Height", NULL), 0.0, 1.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
+			context_raw->picked_color->height = ui_slider(hheight, tr("Height"), 0.0, 1.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
 		}
 
 		ui_handle_t *hopac                 = ui_handle(__ID__);
 		hopac->f                           = context_raw->picked_color->opacity;
-		context_raw->picked_color->opacity = ui_slider(hopac, tr("Opacity", NULL), 0.0, 1.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
+		context_raw->picked_color->opacity = ui_slider(hopac, tr("Opacity"), 0.0, 1.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
 
 		ui_handle_t *h_select_mat = ui_handle(__ID__);
 		if (h_select_mat->init) {
 			h_select_mat->b = context_raw->picker_select_material;
 		}
-		context_raw->picker_select_material = ui_check(h_select_mat, tr("Select Material", NULL), "");
+		context_raw->picker_select_material = ui_check(h_select_mat, tr("Select Material"), "");
 
 		string_t_array_t *picker_mask_combo = any_array_create_from_raw(
 		    (void *[]){
-		        tr("None", NULL),
-		        tr("Material", NULL),
+		        tr("None"),
+		        tr("Material"),
 		    },
 		    2);
-		ui_combo(context_raw->picker_mask_handle, picker_mask_combo, tr("Mask", NULL), true, UI_ALIGN_LEFT, true);
+		ui_combo(context_raw->picker_mask_handle, picker_mask_combo, tr("Mask"), true, UI_ALIGN_LEFT, true);
 		if (context_raw->picker_mask_handle->changed) {
 			make_material_parse_paint_material(true);
 		}
@@ -222,12 +222,12 @@ void ui_header_draw_tool_properties() {
 
 		bool baking  = context_raw->pdirty > 0;
 		bool rt_bake = render_path_paint_is_rt_bake();
-		if (baking && ui_button(tr("Stop", NULL), UI_ALIGN_CENTER, "")) {
+		if (baking && ui_button(tr("Stop"), UI_ALIGN_CENTER, "")) {
 			context_raw->pdirty = 0;
 			context_raw->rdirty = 2;
 		}
 
-		if (!baking && ui_button(tr("Bake", NULL), UI_ALIGN_CENTER, "")) {
+		if (!baking && ui_button(tr("Bake"), UI_ALIGN_CENTER, "")) {
 			context_raw->pdirty = rt_bake ? context_raw->bake_samples : 1;
 			context_raw->rdirty = 3;
 			sys_notify_on_next_frame(&ui_header_draw_tool_properties_layer_preview_dirty, NULL);
@@ -242,26 +242,26 @@ void ui_header_draw_tool_properties() {
 		}
 		string_t_array_t *bakes = any_array_create_from_raw(
 		    (void *[]){
-		        tr("Curvature", NULL),
-		        tr("Normal", NULL),
-		        tr("Object Normal", NULL),
-		        tr("Height", NULL),
-		        tr("Derivative", NULL),
-		        tr("Position", NULL),
-		        tr("TexCoord", NULL),
-		        tr("Material ID", NULL),
-		        tr("Object ID", NULL),
-		        tr("Vertex Color", NULL),
+		        tr("Curvature"),
+		        tr("Normal"),
+		        tr("Object Normal"),
+		        tr("Height"),
+		        tr("Derivative"),
+		        tr("Position"),
+		        tr("TexCoord"),
+		        tr("Material ID"),
+		        tr("Object ID"),
+		        tr("Vertex Color"),
 		    },
 		    10);
 		if (gpu_raytrace_supported()) {
-			any_array_push(bakes, tr("AO", NULL));
-			any_array_push(bakes, tr("Lightmap", NULL));
-			any_array_push(bakes, tr("Bent Normal", NULL));
-			any_array_push(bakes, tr("Thickness", NULL));
+			any_array_push(bakes, tr("AO"));
+			any_array_push(bakes, tr("Lightmap"));
+			any_array_push(bakes, tr("Bent Normal"));
+			any_array_push(bakes, tr("Thickness"));
 		}
 
-		context_raw->bake_type = ui_combo(bake_handle, bakes, tr("Bake", NULL), false, UI_ALIGN_LEFT, true);
+		context_raw->bake_type = ui_combo(bake_handle, bakes, tr("Bake"), false, UI_ALIGN_LEFT, true);
 
 		if (bake_handle->changed && ui_menu_show) {
 			ui_menu_nested = true; // Update menu height
@@ -272,7 +272,7 @@ void ui_header_draw_tool_properties() {
 			if (samples_handle->init) {
 				samples_handle->f = context_raw->bake_samples;
 			}
-			context_raw->bake_samples = math_floor(ui_slider(samples_handle, tr("Samples", NULL), 1, 512, true, 1, true, UI_ALIGN_RIGHT, true));
+			context_raw->bake_samples = math_floor(ui_slider(samples_handle, tr("Samples"), 1, 512, true, 1, true, UI_ALIGN_RIGHT, true));
 		}
 
 		if (context_raw->bake_type == BAKE_TYPE_NORMAL_OBJECT || context_raw->bake_type == BAKE_TYPE_POSITION ||
@@ -283,11 +283,11 @@ void ui_header_draw_tool_properties() {
 			}
 			string_t_array_t *bake_up_axis_combo = any_array_create_from_raw(
 			    (void *[]){
-			        tr("Z", NULL),
-			        tr("Y", NULL),
+			        tr("Z"),
+			        tr("Y"),
 			    },
 			    2);
-			context_raw->bake_up_axis = ui_combo(bake_up_axis_handle, bake_up_axis_combo, tr("Up Axis", NULL), true, UI_ALIGN_LEFT, true);
+			context_raw->bake_up_axis = ui_combo(bake_up_axis_handle, bake_up_axis_combo, tr("Up Axis"), true, UI_ALIGN_LEFT, true);
 		}
 
 		if (context_raw->bake_type == BAKE_TYPE_AO || context_raw->bake_type == BAKE_TYPE_CURVATURE) {
@@ -297,16 +297,16 @@ void ui_header_draw_tool_properties() {
 			}
 			string_t_array_t *bake_axis_combo = any_array_create_from_raw(
 			    (void *[]){
-			        tr("XYZ", NULL),
-			        tr("X", NULL),
-			        tr("Y", NULL),
-			        tr("Z", NULL),
-			        tr("-X", NULL),
-			        tr("-Y", NULL),
-			        tr("-Z", NULL),
+			        tr("XYZ"),
+			        tr("X"),
+			        tr("Y"),
+			        tr("Z"),
+			        tr("-X"),
+			        tr("-Y"),
+			        tr("-Z"),
 			    },
 			    7);
-			context_raw->bake_axis = ui_combo(bake_axis_handle, bake_axis_combo, tr("Axis", NULL), true, UI_ALIGN_LEFT, true);
+			context_raw->bake_axis = ui_combo(bake_axis_handle, bake_axis_combo, tr("Axis"), true, UI_ALIGN_LEFT, true);
 		}
 
 		if (context_raw->bake_type == BAKE_TYPE_AO) {
@@ -314,17 +314,17 @@ void ui_header_draw_tool_properties() {
 			if (strength_handle->init) {
 				strength_handle->f = context_raw->bake_ao_strength;
 			}
-			context_raw->bake_ao_strength = ui_slider(strength_handle, tr("Strength", NULL), 0.0, 2.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
+			context_raw->bake_ao_strength = ui_slider(strength_handle, tr("Strength"), 0.0, 2.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
 			ui_handle_t *radius_handle    = ui_handle(__ID__);
 			if (radius_handle->init) {
 				radius_handle->f = context_raw->bake_ao_radius;
 			}
-			context_raw->bake_ao_radius = ui_slider(radius_handle, tr("Radius", NULL), 0.0, 2.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
+			context_raw->bake_ao_radius = ui_slider(radius_handle, tr("Radius"), 0.0, 2.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
 			ui_handle_t *offset_handle  = ui_handle(__ID__);
 			if (offset_handle->init) {
 				offset_handle->f = context_raw->bake_ao_offset;
 			}
-			context_raw->bake_ao_offset = ui_slider(offset_handle, tr("Offset", NULL), 0.0, 2.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
+			context_raw->bake_ao_offset = ui_slider(offset_handle, tr("Offset"), 0.0, 2.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
 		}
 
 		if (rt_bake) {
@@ -337,9 +337,9 @@ void ui_header_draw_tool_properties() {
 			draw_set_color(ui->ops->theme->HIGHLIGHT_COL);
 			ui_draw_rect(true, ui->_x + 1, ui->_y, (ui->_w - 2) * progress, UI_ELEMENT_H());
 			draw_set_color(0xffffffff);
-			ui_text(string("%s: %d", tr("Samples", NULL), render_path_raytrace_bake_current_sample), UI_ALIGN_LEFT, 0x00000000);
-			ui_text(string("%s: %d", tr("Rays/pixel", NULL), render_path_raytrace_bake_rays_pix), UI_ALIGN_LEFT, 0x00000000);
-			ui_text(string("%s: %d", tr("Rays/second", NULL), render_path_raytrace_bake_rays_sec), UI_ALIGN_LEFT, 0x00000000);
+			ui_text(string("%s: %d", tr("Samples"), render_path_raytrace_bake_current_sample), UI_ALIGN_LEFT, 0x00000000);
+			ui_text(string("%s: %d", tr("Rays/pixel"), render_path_raytrace_bake_rays_pix), UI_ALIGN_LEFT, 0x00000000);
+			ui_text(string("%s: %d", tr("Rays/second"), render_path_raytrace_bake_rays_sec), UI_ALIGN_LEFT, 0x00000000);
 		}
 
 		if (context_raw->bake_type == BAKE_TYPE_CURVATURE) {
@@ -347,22 +347,22 @@ void ui_header_draw_tool_properties() {
 			if (strength_handle->init) {
 				strength_handle->f = context_raw->bake_curv_strength;
 			}
-			context_raw->bake_curv_strength = ui_slider(strength_handle, tr("Strength", NULL), 0.0, 2.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
+			context_raw->bake_curv_strength = ui_slider(strength_handle, tr("Strength"), 0.0, 2.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
 			ui_handle_t *radius_handle      = ui_handle(__ID__);
 			if (radius_handle->init) {
 				radius_handle->f = context_raw->bake_curv_radius;
 			}
-			context_raw->bake_curv_radius = ui_slider(radius_handle, tr("Radius", NULL), 0.0, 2.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
+			context_raw->bake_curv_radius = ui_slider(radius_handle, tr("Radius"), 0.0, 2.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
 			ui_handle_t *offset_handle    = ui_handle(__ID__);
 			if (offset_handle->init) {
 				offset_handle->f = context_raw->bake_curv_offset;
 			}
-			context_raw->bake_curv_offset = ui_slider(offset_handle, tr("Offset", NULL), -2.0, 2.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
+			context_raw->bake_curv_offset = ui_slider(offset_handle, tr("Offset"), -2.0, 2.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
 			ui_handle_t *smooth_handle    = ui_handle(__ID__);
 			if (smooth_handle->init) {
 				smooth_handle->f = context_raw->bake_curv_smooth;
 			}
-			context_raw->bake_curv_smooth = math_floor(ui_slider(smooth_handle, tr("Smooth", NULL), 0, 5, false, 1, true, UI_ALIGN_RIGHT, true));
+			context_raw->bake_curv_smooth = math_floor(ui_slider(smooth_handle, tr("Smooth"), 0, 5, false, 1, true, UI_ALIGN_RIGHT, true));
 		}
 
 		if (context_raw->bake_type == BAKE_TYPE_NORMAL || context_raw->bake_type == BAKE_TYPE_HEIGHT || context_raw->bake_type == BAKE_TYPE_DERIVATIVE) {
@@ -375,7 +375,7 @@ void ui_header_draw_tool_properties() {
 			if (poly_handle->init) {
 				poly_handle->i = context_raw->bake_high_poly;
 			}
-			context_raw->bake_high_poly = ui_combo(poly_handle, ar, tr("High Poly", NULL), false, UI_ALIGN_LEFT, true);
+			context_raw->bake_high_poly = ui_combo(poly_handle, ar, tr("High Poly"), false, UI_ALIGN_LEFT, true);
 		}
 
 		if (ui->changed) {
@@ -389,25 +389,25 @@ void ui_header_draw_tool_properties() {
 		if (context_raw->tool != TOOL_TYPE_FILL) {
 			if (decal_mask) {
 				context_raw->brush_decal_mask_radius =
-				    ui_slider(context_raw->brush_decal_mask_radius_handle, tr("Radius", NULL), 0.01, 2.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
+				    ui_slider(context_raw->brush_decal_mask_radius_handle, tr("Radius"), 0.01, 2.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
 				if (ui->is_hovered) {
 					any_map_t *vars = any_map_create();
 					any_map_set(vars, "brush_radius", any_map_get(config_keymap, "brush_radius"));
 					any_map_set(vars, "brush_radius_decrease", any_map_get(config_keymap, "brush_radius_decrease"));
 					any_map_set(vars, "brush_radius_increase", any_map_get(config_keymap, "brush_radius_increase"));
-					ui_tooltip(tr("Hold {brush_radius} and move mouse to the left or press {brush_radius_decrease} to decrease the radius\nHold {brush_radius} "
+					ui_tooltip(vtr("Hold {brush_radius} and move mouse to the left or press {brush_radius_decrease} to decrease the radius\nHold {brush_radius} "
 					              "and move mouse to the right or press {brush_radius_increase} to increase the radius",
 					              vars));
 				}
 			}
 			else {
-				context_raw->brush_radius = ui_slider(context_raw->brush_radius_handle, tr("Radius", NULL), 0.01, 2.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
+				context_raw->brush_radius = ui_slider(context_raw->brush_radius_handle, tr("Radius"), 0.01, 2.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
 				if (ui->is_hovered) {
 					any_map_t *vars = any_map_create();
 					any_map_set(vars, "brush_radius", any_map_get(config_keymap, "brush_radius"));
 					any_map_set(vars, "brush_radius_decrease", any_map_get(config_keymap, "brush_radius_decrease"));
 					any_map_set(vars, "brush_radius_increase", any_map_get(config_keymap, "brush_radius_increase"));
-					ui_tooltip(tr("Hold {brush_radius} and move mouse to the left or press {brush_radius_decrease} to decrease the radius\nHold {brush_radius} "
+					ui_tooltip(vtr("Hold {brush_radius} and move mouse to the left or press {brush_radius_decrease} to decrease the radius\nHold {brush_radius} "
 					              "and move mouse to the right or press {brush_radius_increase} to increase the radius",
 					              vars));
 				}
@@ -415,7 +415,7 @@ void ui_header_draw_tool_properties() {
 		}
 
 		if (context_raw->tool == TOOL_TYPE_DECAL || context_raw->tool == TOOL_TYPE_TEXT) {
-			context_raw->brush_scale_x = ui_slider(context_raw->brush_scale_x_handle, tr("Scale X", NULL), 0.01, 2.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
+			context_raw->brush_scale_x = ui_slider(context_raw->brush_scale_x_handle, tr("Scale X"), 0.01, 2.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
 		}
 
 		if (context_raw->tool == TOOL_TYPE_BRUSH || context_raw->tool == TOOL_TYPE_FILL || context_raw->tool == TOOL_TYPE_DECAL ||
@@ -424,7 +424,7 @@ void ui_header_draw_tool_properties() {
 			if (brush_scale_handle->init) {
 				brush_scale_handle->f = context_raw->brush_scale;
 			}
-			context_raw->brush_scale = ui_slider(brush_scale_handle, tr("UV Scale", NULL), 0.01, 5.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
+			context_raw->brush_scale = ui_slider(brush_scale_handle, tr("UV Scale"), 0.01, 5.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
 			if (brush_scale_handle->changed) {
 				if (context_raw->tool == TOOL_TYPE_DECAL || context_raw->tool == TOOL_TYPE_TEXT) {
 					gpu_texture_t *current = _draw_current;
@@ -434,11 +434,11 @@ void ui_header_draw_tool_properties() {
 				}
 			}
 
-			context_raw->brush_angle = ui_slider(context_raw->brush_angle_handle, tr("Angle", NULL), 0.0, 360.0, true, 1, true, UI_ALIGN_RIGHT, true);
+			context_raw->brush_angle = ui_slider(context_raw->brush_angle_handle, tr("Angle"), 0.0, 360.0, true, 1, true, UI_ALIGN_RIGHT, true);
 			if (ui->is_hovered) {
 				any_map_t *vars = any_map_create();
 				any_map_set(vars, "brush_angle", any_map_get(config_keymap, "brush_angle"));
-				ui_tooltip(tr(
+				ui_tooltip(vtr(
 				    "Hold {brush_angle} and move mouse to the left to decrease the angle\nHold {brush_angle} and move mouse to the right to increase the angle",
 				    vars));
 			}
@@ -448,11 +448,11 @@ void ui_header_draw_tool_properties() {
 			}
 		}
 
-		context_raw->brush_opacity = ui_slider(context_raw->brush_opacity_handle, tr("Opacity", NULL), 0.0, 1.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
+		context_raw->brush_opacity = ui_slider(context_raw->brush_opacity_handle, tr("Opacity"), 0.0, 1.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
 		if (ui->is_hovered) {
 			any_map_t *vars = any_map_create();
 			any_map_set(vars, "brush_opacity", any_map_get(config_keymap, "brush_opacity"));
-			ui_tooltip(tr("Hold {brush_opacity} and move mouse to the left to decrease the opacity\nHold {brush_opacity} and move mouse to the right to "
+			ui_tooltip(vtr("Hold {brush_opacity} and move mouse to the left to decrease the opacity\nHold {brush_opacity} and move mouse to the right to "
 			              "increase the opacity",
 			              vars));
 		}
@@ -462,7 +462,7 @@ void ui_header_draw_tool_properties() {
 			if (h->init) {
 				h->f = context_raw->brush_hardness;
 			}
-			context_raw->brush_hardness = ui_slider(h, tr("Hardness", NULL), 0.0, 1.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
+			context_raw->brush_hardness = ui_slider(h, tr("Hardness"), 0.0, 1.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
 		}
 
 		if (context_raw->tool != TOOL_TYPE_ERASER) {
@@ -472,27 +472,27 @@ void ui_header_draw_tool_properties() {
 			}
 			string_t_array_t *brush_blending_combo = any_array_create_from_raw(
 			    (void *[]){
-			        tr("Mix", NULL),
-			        tr("Darken", NULL),
-			        tr("Multiply", NULL),
-			        tr("Burn", NULL),
-			        tr("Lighten", NULL),
-			        tr("Screen", NULL),
-			        tr("Dodge", NULL),
-			        tr("Add", NULL),
-			        tr("Overlay", NULL),
-			        tr("Soft Light", NULL),
-			        tr("Linear Light", NULL),
-			        tr("Difference", NULL),
-			        tr("Subtract", NULL),
-			        tr("Divide", NULL),
-			        tr("Hue", NULL),
-			        tr("Saturation", NULL),
-			        tr("Color", NULL),
-			        tr("Value", NULL),
+			        tr("Mix"),
+			        tr("Darken"),
+			        tr("Multiply"),
+			        tr("Burn"),
+			        tr("Lighten"),
+			        tr("Screen"),
+			        tr("Dodge"),
+			        tr("Add"),
+			        tr("Overlay"),
+			        tr("Soft Light"),
+			        tr("Linear Light"),
+			        tr("Difference"),
+			        tr("Subtract"),
+			        tr("Divide"),
+			        tr("Hue"),
+			        tr("Saturation"),
+			        tr("Color"),
+			        tr("Value"),
 			    },
 			    18);
-			context_raw->brush_blending = ui_combo(brush_blending_handle, brush_blending_combo, tr("Blending", NULL), false, UI_ALIGN_LEFT, true);
+			context_raw->brush_blending = ui_combo(brush_blending_handle, brush_blending_combo, tr("Blending"), false, UI_ALIGN_LEFT, true);
 			if (brush_blending_handle->changed) {
 				make_material_parse_paint_material(true);
 			}
@@ -502,12 +502,12 @@ void ui_header_draw_tool_properties() {
 			ui_handle_t      *paint_handle   = ui_handle(__ID__);
 			string_t_array_t *texcoord_combo = any_array_create_from_raw(
 			    (void *[]){
-			        tr("UV Map", NULL),
-			        tr("Triplanar", NULL),
-			        tr("Project", NULL),
+			        tr("UV Map"),
+			        tr("Triplanar"),
+			        tr("Project"),
 			    },
 			    3);
-			context_raw->brush_paint = ui_combo(paint_handle, texcoord_combo, tr("TexCoord", NULL), false, UI_ALIGN_LEFT, true);
+			context_raw->brush_paint = ui_combo(paint_handle, texcoord_combo, tr("TexCoord"), false, UI_ALIGN_LEFT, true);
 			if (paint_handle->changed) {
 				make_material_parse_paint_material(true);
 			}
@@ -534,13 +534,13 @@ void ui_header_draw_tool_properties() {
 		if (context_raw->tool == TOOL_TYPE_FILL) {
 			string_t_array_t *fill_mode_combo = any_array_create_from_raw(
 			    (void *[]){
-			        tr("Object", NULL),
-			        tr("Face", NULL),
-			        tr("Angle", NULL),
-			        tr("UV Island", NULL),
+			        tr("Object"),
+			        tr("Face"),
+			        tr("Angle"),
+			        tr("UV Island"),
 			    },
 			    4);
-			ui_combo(context_raw->fill_type_handle, fill_mode_combo, tr("Fill Mode", NULL), false, UI_ALIGN_LEFT, true);
+			ui_combo(context_raw->fill_type_handle, fill_mode_combo, tr("Fill Mode"), false, UI_ALIGN_LEFT, true);
 			if (context_raw->fill_type_handle->changed) {
 				if (context_raw->fill_type_handle->i == FILL_TYPE_FACE) {
 					gpu_texture_t *current = _draw_current;
@@ -567,7 +567,7 @@ void ui_header_draw_tool_properties() {
 			if (xray_handle->init) {
 				xray_handle->b = context_raw->xray;
 			}
-			context_raw->xray = ui_check(xray_handle, tr("X-Ray", NULL), "");
+			context_raw->xray = ui_check(xray_handle, tr("X-Ray"), "");
 			if (xray_handle->changed) {
 				make_material_parse_paint_material(true);
 			}
@@ -597,27 +597,27 @@ void ui_header_draw_tool_properties() {
 					context_raw->sym_z = ui_check(sym_z_handle, "", "");
 					ui->_x -= 4 * sc;
 					ui->_w  = math_floor(40 * sc);
-					char *x = tr("X", NULL);
-					char *y = tr("Y", NULL);
-					char *z = tr("Z", NULL);
+					char *x = tr("X");
+					char *y = tr("Y");
+					char *z = tr("Z");
 					ui_text(string("%s%s%s", x, y, z), UI_ALIGN_LEFT, 0x00000000);
 				}
 				else {
 					ui->_w = math_floor(56 * sc);
-					ui_text(tr("Symmetry", NULL), UI_ALIGN_LEFT, 0x00000000);
+					ui_text(tr("Symmetry"), UI_ALIGN_LEFT, 0x00000000);
 					ui->_w             = math_floor(25 * sc);
-					context_raw->sym_x = ui_check(sym_x_handle, tr("X", NULL), "");
-					context_raw->sym_y = ui_check(sym_y_handle, tr("Y", NULL), "");
-					context_raw->sym_z = ui_check(sym_z_handle, tr("Z", NULL), "");
+					context_raw->sym_x = ui_check(sym_x_handle, tr("X"), "");
+					context_raw->sym_y = ui_check(sym_y_handle, tr("Y"), "");
+					context_raw->sym_z = ui_check(sym_z_handle, tr("Z"), "");
 				}
 				ui->_w = _w;
 			}
 			else {
 				// Popup
 				ui->_w             = _w;
-				context_raw->sym_x = ui_check(sym_x_handle, string("%s %s", tr("Symmetry", NULL), tr("X", NULL)), "");
-				context_raw->sym_y = ui_check(sym_y_handle, string("%s %s", tr("Symmetry", NULL), tr("Y", NULL)), "");
-				context_raw->sym_z = ui_check(sym_z_handle, string("%s %s", tr("Symmetry", NULL), tr("Z", NULL)), "");
+				context_raw->sym_x = ui_check(sym_x_handle, string("%s %s", tr("Symmetry"), tr("X")), "");
+				context_raw->sym_y = ui_check(sym_y_handle, string("%s %s", tr("Symmetry"), tr("Y")), "");
+				context_raw->sym_z = ui_check(sym_z_handle, string("%s %s", tr("Symmetry"), tr("Z")), "");
 			}
 
 			if (sym_x_handle->changed || sym_y_handle->changed || sym_z_handle->changed) {

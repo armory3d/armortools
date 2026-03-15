@@ -2,7 +2,7 @@
 #include "global.h"
 
 void tab_plugins_draw(ui_handle_t *htab) {
-	if (ui_tab(htab, tr("Plugins", NULL), false, -1, false)) {
+	if (ui_tab(htab, tr("Plugins"), false, -1, false)) {
 
 		ui_begin_sticky();
 
@@ -13,7 +13,7 @@ void tab_plugins_draw(ui_handle_t *htab) {
 		    1);
 		ui_row(row);
 
-		if (ui_icon_button(tr("Preferences", NULL), ICON_COG, UI_ALIGN_CENTER)) {
+		if (ui_icon_button(tr("Preferences"), ICON_COG, UI_ALIGN_CENTER)) {
 			box_preferences_htab->i = PREFERENCE_TAB_PLUGINS;
 			box_preferences_show();
 		}

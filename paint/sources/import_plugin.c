@@ -12,5 +12,5 @@ void import_plugin_run(char *path) {
 	file_copy(path, dst_path); // Copy to plugin folder
 	gc_unroot(box_preferences_files_plugin);
 	box_preferences_files_plugin = NULL; // Refresh file list
-	console_info(string("%s %s", tr("Plugin imported:", NULL), filename));
+	console_info(string("%s %s", tr("Plugin imported:"), filename));
 }

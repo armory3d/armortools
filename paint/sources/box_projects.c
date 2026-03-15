@@ -46,7 +46,7 @@ void box_projects_tab_menu_on_next_frame(void *_) {
 
 void box_projects_tab_menu() {
 	// if (ui_menu_button(tr("Duplicate"), "", icon_t.DUPLICATE)) {}
-	if (ui_menu_button(tr("Delete", NULL), "", ICON_DELETE)) {
+	if (ui_menu_button(tr("Delete"), "", ICON_DELETE)) {
 		sys_notify_on_next_frame(&box_projects_tab_menu_on_next_frame, NULL);
 	}
 }
@@ -57,27 +57,27 @@ void box_projects_tab_on_next_frame(char *path) {
 }
 
 void box_projects_tab() {
-	if (ui_tab(box_projects_htab, tr("Projects", NULL), true, -1, false)) {
+	if (ui_tab(box_projects_htab, tr("Projects"), true, -1, false)) {
 		ui_begin_sticky();
 
 		ui_separator(UI_ELEMENT_H(), false);
 
 		box_projects_draw_badge();
 
-		if (ui_icon_button(tr("New", NULL), ICON_PLUS, UI_ALIGN_CENTER)) {
+		if (ui_icon_button(tr("New"), ICON_PLUS, UI_ALIGN_CENTER)) {
 			project_new(true);
 			ui_box_hide();
 			// Pick unique name
 			i32   i     = 0;
 			i32   j     = 0;
-			char *title = string("%s%s", tr("untitled", NULL), i32_to_string(i));
+			char *title = string("%s%s", tr("untitled"), i32_to_string(i));
 			while (j < config_raw->recent_projects->length) {
 				char *base = config_raw->recent_projects->buffer[j];
 				base       = string_copy(substring(base, string_last_index_of(base, PATH_SEP) + 1, string_last_index_of(base, ".")));
 				j++;
 				if (string_equals(title, base)) {
 					i++;
-					title = string("%s%s", tr("untitled", NULL), i32_to_string(i));
+					title = string("%s%s", tr("untitled"), i32_to_string(i));
 					j     = 0;
 				}
 			}
@@ -151,7 +151,7 @@ void box_projects_tab() {
 						ui_fill(0, 0, 128, 128, 0x66000000);
 						ui->_x = _uix;
 #if defined(IRON_ANDROID) || defined(IRON_IOS)
-						console_toast(tr("Opening project", NULL));
+						console_toast(tr("Opening project"));
 #endif
 						sys_notify_on_next_frame(&box_projects_tab_on_next_frame, path);
 					}
@@ -196,12 +196,12 @@ void box_projects_tab() {
 }
 
 void box_projects_recent_tab() {
-	if (ui_tab(box_projects_htab, tr("Recent", NULL), true, -1, false)) {
+	if (ui_tab(box_projects_htab, tr("Recent"), true, -1, false)) {
 
 		box_projects_draw_badge();
 
 		ui->enabled                = config_raw->recent_projects->length > 0;
-		box_projects_hsearch->text = string_copy(ui_text_input(box_projects_hsearch, tr("Search", NULL), UI_ALIGN_LEFT, true, true));
+		box_projects_hsearch->text = string_copy(ui_text_input(box_projects_hsearch, tr("Search"), UI_ALIGN_LEFT, true, true));
 		ui->enabled                = true;
 		for (i32 i = 0; i < config_raw->recent_projects->length; ++i) {
 			char *path = config_raw->recent_projects->buffer[i];
@@ -233,17 +233,17 @@ void box_projects_recent_tab() {
 		}
 
 		ui->enabled = config_raw->recent_projects->length > 0;
-		if (ui_icon_button(tr("Clear", NULL), ICON_ERASE, UI_ALIGN_LEFT)) {
+		if (ui_icon_button(tr("Clear"), ICON_ERASE, UI_ALIGN_LEFT)) {
 			config_raw->recent_projects = any_array_create_from_raw((void *[]){}, 0);
 			config_save();
 		}
 		ui->enabled = true;
 
 		ui_end_element();
-		if (ui_icon_button(tr("New Project...", NULL), ICON_FILE_NEW, UI_ALIGN_LEFT)) {
+		if (ui_icon_button(tr("New Project..."), ICON_FILE_NEW, UI_ALIGN_LEFT)) {
 			project_new_box();
 		}
-		if (ui_icon_button(tr("Open...", NULL), ICON_FOLDER_OPEN, UI_ALIGN_LEFT)) {
+		if (ui_icon_button(tr("Open..."), ICON_FOLDER_OPEN, UI_ALIGN_LEFT)) {
 			project_open();
 		}
 	}
@@ -256,17 +256,17 @@ void box_projects_draw_badge() {
 }
 
 void box_projects_get_started_tab() {
-	if (ui_tab(box_projects_htab, tr("Get Started", NULL), true, -1, false)) {
+	if (ui_tab(box_projects_htab, tr("Get Started"), true, -1, false)) {
 
 		ui_separator(UI_ELEMENT_H(), false);
 
-		if (ui_icon_button(tr("Manual", NULL), ICON_HELP, UI_ALIGN_CENTER)) {
+		if (ui_icon_button(tr("Manual"), ICON_HELP, UI_ALIGN_CENTER)) {
 			iron_load_url(string("%s/manual", manifest_url));
 		}
-		if (ui_icon_button(tr("How To", NULL), ICON_HELP, UI_ALIGN_CENTER)) {
+		if (ui_icon_button(tr("How To"), ICON_HELP, UI_ALIGN_CENTER)) {
 			iron_load_url(string("%s/howto", manifest_url));
 		}
-		if (ui_icon_button(tr("What's New", NULL), ICON_LINK, UI_ALIGN_CENTER)) {
+		if (ui_icon_button(tr("What's New"), ICON_LINK, UI_ALIGN_CENTER)) {
 			iron_load_url(string("%s/notes", manifest_url));
 		}
 	}

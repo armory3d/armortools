@@ -453,7 +453,7 @@ char      *strings_check_internet_connection() {
 }
 void  console_error(char *s) {}
 void  console_info(char *s) {}
-char *tr(char *id, any_map_t *vars) {
+char *tr(char *id) {
 	return id;
 }
 i32 pipes_get_constant_location(char *s) {

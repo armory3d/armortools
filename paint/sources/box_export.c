@@ -11,7 +11,7 @@ void box_export_show_textures_box() {
 		box_export_hpreset->children = NULL;
 	}
 
-	box_export_tab_export_textures(tr("Export Textures", NULL), false);
+	box_export_tab_export_textures(tr("Export Textures"), false);
 	box_export_tab_presets();
 
 	box_export_tab_atlases();
@@ -21,7 +21,7 @@ void box_export_show_textures_box() {
 }
 
 void box_export_show_textures() {
-	ui_box_show_custom(&box_export_show_textures_box, 600, 400, NULL, true, tr("Export", NULL));
+	ui_box_show_custom(&box_export_show_textures_box, 600, 400, NULL, true, tr("Export"));
 }
 
 void box_export_show_bake_material_box() {
@@ -34,12 +34,12 @@ void box_export_show_bake_material_box() {
 		box_export_hpreset->children = NULL;
 	}
 
-	box_export_tab_export_textures(tr("Bake to Textures", NULL), true);
+	box_export_tab_export_textures(tr("Bake to Textures"), true);
 	box_export_tab_presets();
 }
 
 void box_export_show_bake_material() {
-	ui_box_show_custom(&box_export_show_bake_material_box, 600, 400, NULL, true, tr("Export", NULL));
+	ui_box_show_custom(&box_export_show_bake_material_box, 600, 400, NULL, true, tr("Export"));
 }
 
 void box_export_tab_export_textures_run(void *_) {
@@ -49,7 +49,7 @@ void box_export_tab_export_textures_run(void *_) {
 void box_export_tab_export_textures_path_picked(char *path) {
 	context_raw->texture_export_path = string_copy(path);
 #if defined(IRON_ANDROID) || defined(IRON_IOS)
-	console_toast(tr("Exporting textures", NULL));
+	console_toast(tr("Exporting textures"));
 #endif
 	sys_notify_on_next_frame(&box_export_tab_export_textures_run, NULL);
 }
@@ -90,7 +90,7 @@ void box_export_tab_export_textures(char *title, bool bake_material) {
 		    8);
 #endif
 
-		ui_combo(base_res_handle, base_res_combo, tr("Resolution", NULL), true, UI_ALIGN_LEFT, true);
+		ui_combo(base_res_handle, base_res_combo, tr("Resolution"), true, UI_ALIGN_LEFT, true);
 		if (base_res_handle->changed) {
 			layers_on_resized();
 		}
@@ -111,7 +111,7 @@ void box_export_tab_export_textures(char *title, bool bake_material) {
 		    3);
 #endif
 
-		ui_combo(base_bits_handle, base_bits_combo, tr("Color", NULL), true, UI_ALIGN_LEFT, true);
+		ui_combo(base_bits_handle, base_bits_combo, tr("Color"), true, UI_ALIGN_LEFT, true);
 		if (base_bits_handle->changed) {
 			sys_notify_on_next_frame(&box_export_tab_export_textures_on_next_frame, NULL);
 		}
@@ -128,7 +128,7 @@ void box_export_tab_export_textures(char *title, bool bake_material) {
 			        "jpg",
 			    },
 			    2);
-			context_raw->format_type = ui_combo(h, format_combo, tr("Format", NULL), true, UI_ALIGN_LEFT, true);
+			context_raw->format_type = ui_combo(h, format_combo, tr("Format"), true, UI_ALIGN_LEFT, true);
 		}
 		else {
 			ui_handle_t *h = ui_handle(__ID__);
@@ -140,7 +140,7 @@ void box_export_tab_export_textures(char *title, bool bake_material) {
 			        "exr",
 			    },
 			    1);
-			context_raw->format_type = ui_combo(h, format_combo, tr("Format", NULL), true, UI_ALIGN_LEFT, true);
+			context_raw->format_type = ui_combo(h, format_combo, tr("Format"), true, UI_ALIGN_LEFT, true);
 		}
 
 		ui->enabled = context_raw->format_type == TEXTURE_LDR_FORMAT_JPG && base_bits_handle->i == TEXTURE_BITS_BITS8;
@@ -149,7 +149,7 @@ void box_export_tab_export_textures(char *title, bool bake_material) {
 		if (h_quality->init) {
 			h_quality->f = context_raw->format_quality;
 		}
-		context_raw->format_quality = ui_slider(h_quality, tr("Quality", NULL), 0.0, 100.0, true, 1, true, UI_ALIGN_RIGHT, true);
+		context_raw->format_quality = ui_slider(h_quality, tr("Quality"), 0.0, 100.0, true, 1, true, UI_ALIGN_RIGHT, true);
 
 		ui->enabled = true;
 
@@ -159,16 +159,16 @@ void box_export_tab_export_textures(char *title, bool bake_material) {
 		layers_export_handle->i               = context_raw->layers_export;
 		string_t_array_t *layers_export_combo = any_array_create_from_raw(
 		    (void *[]){
-		        tr("Visible", NULL),
-		        tr("Selected", NULL),
-		        tr("Per Object", NULL),
-		        tr("Per Udim Tile", NULL),
+		        tr("Visible"),
+		        tr("Selected"),
+		        tr("Per Object"),
+		        tr("Per Udim Tile"),
 		    },
 		    4);
-		context_raw->layers_export = ui_combo(layers_export_handle, layers_export_combo, tr("Layers", NULL), true, UI_ALIGN_LEFT, true);
+		context_raw->layers_export = ui_combo(layers_export_handle, layers_export_combo, tr("Layers"), true, UI_ALIGN_LEFT, true);
 		ui->enabled                = true;
 
-		ui_combo(box_export_hpreset, box_export_files, tr("Preset", NULL), true, UI_ALIGN_LEFT, true);
+		ui_combo(box_export_hpreset, box_export_files, tr("Preset"), true, UI_ALIGN_LEFT, true);
 		if (box_export_hpreset->changed) {
 			gc_unroot(box_export_preset);
 			box_export_preset = NULL;
@@ -179,19 +179,19 @@ void box_export_tab_export_textures(char *title, bool bake_material) {
 
 		string_t_array_t *layers_destination_combo = any_array_create_from_raw(
 		    (void *[]){
-		        tr("Disk", NULL),
-		        tr("Pack into Project", NULL),
+		        tr("Disk"),
+		        tr("Pack into Project"),
 		    },
 		    2);
-		context_raw->layers_destination = ui_combo(layers_destination_handle, layers_destination_combo, tr("Destination", NULL), true, UI_ALIGN_LEFT, true);
+		context_raw->layers_destination = ui_combo(layers_destination_handle, layers_destination_combo, tr("Destination"), true, UI_ALIGN_LEFT, true);
 
 		ui_end_element();
 
 		ui_row2();
-		if (ui_icon_button(tr("Cancel", NULL), ICON_CLOSE, UI_ALIGN_CENTER)) {
+		if (ui_icon_button(tr("Cancel"), ICON_CLOSE, UI_ALIGN_CENTER)) {
 			ui_box_hide();
 		}
-		if (ui_icon_button(tr("Export", NULL), ICON_CHECK, UI_ALIGN_CENTER)) {
+		if (ui_icon_button(tr("Export"), ICON_CHECK, UI_ALIGN_CENTER)) {
 			ui_box_hide();
 			if (context_raw->layers_destination == EXPORT_DESTINATION_PACK_INTO_PROJECT) {
 				_box_export_bake_material        = bake_material;
@@ -206,14 +206,14 @@ void box_export_tab_export_textures(char *title, bool bake_material) {
 		}
 		if (ui->is_hovered) {
 			char *key = any_map_get(config_keymap, "file_export_textures");
-			char *tip = string("%s (%s)", tr("Export texture files", NULL), key);
+			char *tip = string("%s (%s)", tr("Export texture files"), key);
 			ui_tooltip(tip);
 		}
 	}
 }
 
 void box_export_tab_presets_menu_draw() {
-	if (ui_menu_button(tr("Delete", NULL), "", ICON_DELETE)) {
+	if (ui_menu_button(tr("Delete"), "", ICON_DELETE)) {
 		array_remove(box_export_preset->textures, _box_export_t);
 		box_export_save_preset();
 	}
@@ -229,7 +229,7 @@ void box_export_tab_presets_import(char *path) {
 		gc_unroot(box_export_preset);
 		box_export_preset     = NULL;
 		box_export_hpreset->i = string_array_index_of(box_export_files, substring(filename, 0, string_length(filename) - 5)); // Strip .json
-		console_info(string("%s %s", tr("Preset imported:", NULL), filename));
+		console_info(string("%s %s", tr("Preset imported:"), filename));
 	}
 	else {
 		console_error(strings_unknown_asset_format());
@@ -238,14 +238,14 @@ void box_export_tab_presets_import(char *path) {
 
 void box_export_tab_presets_new_box() {
 	bool tab_vertical = config_raw->touch_ui;
-	if (ui_tab(ui_handle(__ID__), tr("New Preset", NULL), tab_vertical, -1, false)) {
+	if (ui_tab(ui_handle(__ID__), tr("New Preset"), tab_vertical, -1, false)) {
 		ui_row2();
 		ui_handle_t *h_preset = ui_handle(__ID__);
 		if (h_preset->init) {
 			h_preset->text = "new_preset";
 		}
-		char *preset_name = ui_text_input(h_preset, tr("Name", NULL), UI_ALIGN_LEFT, true, false);
-		if (ui_icon_button(tr("OK", NULL), ICON_CHECK, UI_ALIGN_CENTER) || ui->is_return_down) {
+		char *preset_name = ui_text_input(h_preset, tr("Name"), UI_ALIGN_LEFT, true, false);
+		if (ui_icon_button(tr("OK"), ICON_CHECK, UI_ALIGN_CENTER) || ui->is_return_down) {
 			box_export_new_preset(preset_name);
 			box_export_fetch_presets();
 			gc_unroot(box_export_preset);
@@ -260,7 +260,7 @@ void box_export_tab_presets_new_box() {
 
 void box_export_tab_presets() {
 	bool tab_vertical = config_raw->touch_ui;
-	if (ui_tab(box_export_htab, tr("Presets", NULL), tab_vertical, -1, false)) {
+	if (ui_tab(box_export_htab, tr("Presets"), tab_vertical, -1, false)) {
 
 		f32_array_t *row = f32_array_create_from_raw(
 		    (f32[]){
@@ -271,17 +271,17 @@ void box_export_tab_presets() {
 		    3);
 		ui_row(row);
 
-		ui_combo(box_export_hpreset, box_export_files, tr("Preset", NULL), false, UI_ALIGN_LEFT, true);
+		ui_combo(box_export_hpreset, box_export_files, tr("Preset"), false, UI_ALIGN_LEFT, true);
 		if (box_export_hpreset->changed) {
 			gc_unroot(box_export_preset);
 			box_export_preset = NULL;
 		}
 
-		if (ui_icon_button(tr("New", NULL), ICON_PLUS, UI_ALIGN_CENTER)) {
+		if (ui_icon_button(tr("New"), ICON_PLUS, UI_ALIGN_CENTER)) {
 			ui_box_show_custom(&box_export_tab_presets_new_box, 400, 200, NULL, true, "");
 		}
 
-		if (ui_icon_button(tr("Import", NULL), ICON_IMPORT, UI_ALIGN_CENTER)) {
+		if (ui_icon_button(tr("Import"), ICON_IMPORT, UI_ALIGN_CENTER)) {
 			ui_files_show("json", false, false, &box_export_tab_presets_import);
 		}
 
@@ -293,12 +293,12 @@ void box_export_tab_presets() {
 		// Texture list
 		ui_separator(10, false);
 		ui_row6();
-		ui_text(tr("Texture", NULL), UI_ALIGN_LEFT, 0x00000000);
-		ui_text(tr("R", NULL), UI_ALIGN_LEFT, 0x00000000);
-		ui_text(tr("G", NULL), UI_ALIGN_LEFT, 0x00000000);
-		ui_text(tr("B", NULL), UI_ALIGN_LEFT, 0x00000000);
-		ui_text(tr("A", NULL), UI_ALIGN_LEFT, 0x00000000);
-		ui_text(tr("Color Space", NULL), UI_ALIGN_LEFT, 0x00000000);
+		ui_text(tr("Texture"), UI_ALIGN_LEFT, 0x00000000);
+		ui_text(tr("R"), UI_ALIGN_LEFT, 0x00000000);
+		ui_text(tr("G"), UI_ALIGN_LEFT, 0x00000000);
+		ui_text(tr("B"), UI_ALIGN_LEFT, 0x00000000);
+		ui_text(tr("A"), UI_ALIGN_LEFT, 0x00000000);
+		ui_text(tr("Color Space"), UI_ALIGN_LEFT, 0x00000000);
 		ui->changed = false;
 		for (i32 i = 0; i < box_export_preset->textures->length; ++i) {
 			export_preset_texture_t *t = box_export_preset->textures->buffer[i];
@@ -323,26 +323,26 @@ void box_export_tab_presets() {
 			ui_handle_t *ha = ui_nest(htex, 3);
 			ha->i           = string_array_index_of(box_export_channels, t->channels->buffer[3]);
 
-			ui_combo(hr, box_export_channels, tr("R", NULL), false, UI_ALIGN_LEFT, true);
+			ui_combo(hr, box_export_channels, tr("R"), false, UI_ALIGN_LEFT, true);
 			if (hr->changed) {
 				t->channels->buffer[0] = box_export_channels->buffer[hr->i];
 			}
-			ui_combo(hg, box_export_channels, tr("G", NULL), false, UI_ALIGN_LEFT, true);
+			ui_combo(hg, box_export_channels, tr("G"), false, UI_ALIGN_LEFT, true);
 			if (hg->changed) {
 				t->channels->buffer[1] = box_export_channels->buffer[hg->i];
 			}
-			ui_combo(hb, box_export_channels, tr("B", NULL), false, UI_ALIGN_LEFT, true);
+			ui_combo(hb, box_export_channels, tr("B"), false, UI_ALIGN_LEFT, true);
 			if (hb->changed) {
 				t->channels->buffer[2] = box_export_channels->buffer[hb->i];
 			}
-			ui_combo(ha, box_export_channels, tr("A", NULL), false, UI_ALIGN_LEFT, true);
+			ui_combo(ha, box_export_channels, tr("A"), false, UI_ALIGN_LEFT, true);
 			if (ha->changed) {
 				t->channels->buffer[3] = box_export_channels->buffer[ha->i];
 			}
 
 			ui_handle_t *hspace = ui_nest(htex, 4);
 			hspace->i           = string_array_index_of(box_export_color_spaces, t->color_space);
-			ui_combo(hspace, box_export_color_spaces, tr("Color Space", NULL), false, UI_ALIGN_LEFT, true);
+			ui_combo(hspace, box_export_color_spaces, tr("Color Space"), false, UI_ALIGN_LEFT, true);
 			if (hspace->changed) {
 				t->color_space = string_copy(box_export_color_spaces->buffer[hspace->i]);
 			}
@@ -358,7 +358,7 @@ void box_export_tab_presets() {
 		    },
 		    1);
 		ui_row(row);
-		if (ui_icon_button(tr("Add", NULL), ICON_PLUS, UI_ALIGN_CENTER)) {
+		if (ui_icon_button(tr("Add"), ICON_PLUS, UI_ALIGN_CENTER)) {
 			export_preset_texture_t *tex = GC_ALLOC_INIT(export_preset_texture_t, {.name     = "base",
 			                                                                       .channels = any_array_create_from_raw(
 			                                                                           (void *[]){
@@ -378,7 +378,7 @@ void box_export_tab_presets() {
 
 void box_export_tab_atlases() {
 	bool tab_vertical = config_raw->touch_ui;
-	if (ui_tab(box_export_htab, tr("Atlases", NULL), tab_vertical, -1, false)) {
+	if (ui_tab(box_export_htab, tr("Atlases"), tab_vertical, -1, false)) {
 		if (project_atlas_objects == NULL || project_atlas_objects->length != project_paint_objects->length) {
 			gc_unroot(project_atlas_objects);
 			project_atlas_objects = i32_array_create_from_raw((i32[]){}, 0);
@@ -389,7 +389,7 @@ void box_export_tab_atlases() {
 			for (i32 i = 0; i < project_paint_objects->length; ++i) {
 				i32_array_push(project_atlas_objects, 0);
 				i32 i1 = i + 1;
-				any_array_push(project_atlas_names, string("%s %s", tr("Atlas", NULL), i32_to_string(i1)));
+				any_array_push(project_atlas_names, string("%s %s", tr("Atlas"), i32_to_string(i1)));
 			}
 		}
 		for (i32 i = 0; i < project_paint_objects->length; ++i) {
@@ -397,7 +397,7 @@ void box_export_tab_atlases() {
 			ui_text(project_paint_objects->buffer[i]->base->name, UI_ALIGN_LEFT, 0x00000000);
 			ui_handle_t *hatlas              = ui_nest(ui_handle(__ID__), i);
 			hatlas->i                        = project_atlas_objects->buffer[i];
-			project_atlas_objects->buffer[i] = ui_combo(hatlas, project_atlas_names, tr("Atlas", NULL), false, UI_ALIGN_LEFT, true);
+			project_atlas_objects->buffer[i] = ui_combo(hatlas, project_atlas_names, tr("Atlas"), false, UI_ALIGN_LEFT, true);
 		}
 	}
 }
@@ -409,7 +409,7 @@ void box_export_show_mesh_box() {
 
 void box_export_show_mesh() {
 	box_export_mesh_handle->i = context_raw->export_mesh_index;
-	ui_box_show_custom(&box_export_show_mesh_box, 420, 260, NULL, true, tr("Export", NULL));
+	ui_box_show_custom(&box_export_show_mesh_box, 420, 260, NULL, true, tr("Export"));
 }
 
 void box_export_tab_export_mesh_path_picked(char *path) {
@@ -419,10 +419,10 @@ void box_export_tab_export_mesh_path_picked(char *path) {
 	char *f = ui_files_filename;
 #endif
 	if (string_equals(f, "")) {
-		f = string_copy(tr("untitled", NULL));
+		f = string_copy(tr("untitled"));
 	}
 #if defined(IRON_ANDROID) || defined(IRON_IOS)
-	console_toast(tr("Exporting mesh", NULL));
+	console_toast(tr("Exporting mesh"));
 #endif
 
 	mesh_object_t_array_t *paint_objects;
@@ -442,7 +442,7 @@ void box_export_tab_export_mesh_path_picked(char *path) {
 
 void box_export_tab_export_mesh(ui_handle_t *htab) {
 	bool tab_vertical = config_raw->touch_ui;
-	if (ui_tab(htab, tr("Export Mesh", NULL), tab_vertical, -1, false)) {
+	if (ui_tab(htab, tr("Export Mesh"), tab_vertical, -1, false)) {
 
 		ui_row2();
 
@@ -456,26 +456,26 @@ void box_export_tab_export_mesh(ui_handle_t *htab) {
 		        "arm",
 		    },
 		    2);
-		context_raw->export_mesh_format = ui_combo(h_export_mesh_format, export_mesh_format_combo, tr("Format", NULL), true, UI_ALIGN_LEFT, true);
+		context_raw->export_mesh_format = ui_combo(h_export_mesh_format, export_mesh_format_combo, tr("Format"), true, UI_ALIGN_LEFT, true);
 
 		string_t_array_t *ar = any_array_create_from_raw(
 		    (void *[]){
-		        tr("All", NULL),
+		        tr("All"),
 		    },
 		    1);
 		for (i32 i = 0; i < project_paint_objects->length; ++i) {
 			mesh_object_t *p = project_paint_objects->buffer[i];
 			any_array_push(ar, p->base->name);
 		}
-		ui_combo(box_export_mesh_handle, ar, tr("Meshes", NULL), true, UI_ALIGN_LEFT, true);
+		ui_combo(box_export_mesh_handle, ar, tr("Meshes"), true, UI_ALIGN_LEFT, true);
 
-		bool apply_displacement = ui_check(ui_handle(__ID__), tr("Apply Displacement", NULL), "");
+		bool apply_displacement = ui_check(ui_handle(__ID__), tr("Apply Displacement"), "");
 
 		ui_handle_t *hmerge = ui_handle(__ID__);
 		if (hmerge->init) {
 			hmerge->b = true;
 		}
-		bool merge_vertices = ui_check(hmerge, tr("Merge Shared Vertices", NULL), "");
+		bool merge_vertices = ui_check(hmerge, tr("Merge Shared Vertices"), "");
 
 		i32                    tris = 0;
 		i32                    pos  = box_export_mesh_handle->i;
@@ -495,13 +495,13 @@ void box_export_tab_export_mesh(ui_handle_t *htab) {
 			mesh_object_t *po = paint_objects->buffer[i];
 			tris += math_floor(po->data->index_array->length / (float)3);
 		}
-		ui_text(string("%s %s", i32_to_string(tris), tr("triangles", NULL)), UI_ALIGN_LEFT, 0x00000000);
+		ui_text(string("%s %s", i32_to_string(tris), tr("triangles")), UI_ALIGN_LEFT, 0x00000000);
 
 		ui_row2();
-		if (ui_icon_button(tr("Cancel", NULL), ICON_CLOSE, UI_ALIGN_CENTER)) {
+		if (ui_icon_button(tr("Cancel"), ICON_CLOSE, UI_ALIGN_CENTER)) {
 			ui_box_hide();
 		}
-		if (ui_icon_button(tr("Export", NULL), ICON_CHECK, UI_ALIGN_CENTER)) {
+		if (ui_icon_button(tr("Export"), ICON_CHECK, UI_ALIGN_CENTER)) {
 			ui_box_hide();
 			_box_export_apply_displacement = apply_displacement;
 			_box_export_merge_vertices     = merge_vertices;
@@ -517,7 +517,7 @@ void box_export_show_material_export_on_next_frame(char *path) {
 void box_export_show_material_export(char *path) {
 	char *f = ui_files_filename;
 	if (string_equals(f, "")) {
-		f = string_copy(tr("untitled", NULL));
+		f = string_copy(tr("untitled"));
 	}
 	sys_notify_on_next_frame(&box_export_show_material_export_on_next_frame, string("%s%s%s", path, PATH_SEP, f));
 }
@@ -525,18 +525,18 @@ void box_export_show_material_export(char *path) {
 void box_export_show_material_box() {
 	ui_handle_t *htab         = ui_handle(__ID__);
 	bool         tab_vertical = config_raw->touch_ui;
-	if (ui_tab(htab, tr("Export Material", NULL), tab_vertical, -1, false)) {
+	if (ui_tab(htab, tr("Export Material"), tab_vertical, -1, false)) {
 		ui_handle_t *h1                    = ui_handle(__ID__);
 		ui_handle_t *h2                    = ui_handle(__ID__);
 		h1->b                              = context_raw->pack_assets_on_export;
 		h2->b                              = context_raw->write_icon_on_export;
-		context_raw->pack_assets_on_export = ui_check(h1, tr("Pack Assets", NULL), "");
-		context_raw->write_icon_on_export  = ui_check(h2, tr("Export Icon", NULL), "");
+		context_raw->pack_assets_on_export = ui_check(h1, tr("Pack Assets"), "");
+		context_raw->write_icon_on_export  = ui_check(h2, tr("Export Icon"), "");
 		ui_row2();
-		if (ui_icon_button(tr("Cancel", NULL), ICON_CLOSE, UI_ALIGN_CENTER)) {
+		if (ui_icon_button(tr("Cancel"), ICON_CLOSE, UI_ALIGN_CENTER)) {
 			ui_box_hide();
 		}
-		if (ui_icon_button(tr("Export", NULL), ICON_CHECK, UI_ALIGN_CENTER)) {
+		if (ui_icon_button(tr("Export"), ICON_CHECK, UI_ALIGN_CENTER)) {
 			ui_box_hide();
 			ui_files_show("arm", true, false, &box_export_show_material_export);
 		}
@@ -554,25 +554,25 @@ void box_export_show_brush_export_on_next_frame(char *path) {
 void box_export_show_brush_export(char *path) {
 	char *f = ui_files_filename;
 	if (string_equals(f, ""))
-		f = string_copy(tr("untitled", NULL));
+		f = string_copy(tr("untitled"));
 	sys_notify_on_next_frame(&box_export_show_brush_export_on_next_frame, string("%s%s%s", path, PATH_SEP, f));
 }
 
 void box_export_show_brush_box() {
 	ui_handle_t *htab         = ui_handle(__ID__);
 	bool         tab_vertical = config_raw->touch_ui;
-	if (ui_tab(htab, tr("Export Brush", NULL), tab_vertical, -1, false)) {
+	if (ui_tab(htab, tr("Export Brush"), tab_vertical, -1, false)) {
 		ui_handle_t *h1                    = ui_handle(__ID__);
 		ui_handle_t *h2                    = ui_handle(__ID__);
 		h1->b                              = context_raw->pack_assets_on_export;
 		h2->b                              = context_raw->write_icon_on_export;
-		context_raw->pack_assets_on_export = ui_check(h1, tr("Pack Assets", NULL), "");
-		context_raw->write_icon_on_export  = ui_check(h2, tr("Export Icon", NULL), "");
+		context_raw->pack_assets_on_export = ui_check(h1, tr("Pack Assets"), "");
+		context_raw->write_icon_on_export  = ui_check(h2, tr("Export Icon"), "");
 		ui_row2();
-		if (ui_icon_button(tr("Cancel", NULL), ICON_CLOSE, UI_ALIGN_CENTER)) {
+		if (ui_icon_button(tr("Cancel"), ICON_CLOSE, UI_ALIGN_CENTER)) {
 			ui_box_hide();
 		}
-		if (ui_icon_button(tr("Export", NULL), ICON_CHECK, UI_ALIGN_CENTER)) {
+		if (ui_icon_button(tr("Export"), ICON_CHECK, UI_ALIGN_CENTER)) {
 			ui_box_hide();
 			ui_files_show("arm", true, false, &box_export_show_brush_export);
 		}

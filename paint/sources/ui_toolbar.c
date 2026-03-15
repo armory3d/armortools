@@ -43,14 +43,14 @@ void ui_toolbar_draw_tool(i32 tool, gpu_texture_t *img, i32 icon_accent) {
 	}
 
 	if (ui->is_hovered) {
-		char *tooltip = tr(ui_toolbar_tool_names->buffer[tool], NULL);
+		char *tooltip = tr(ui_toolbar_tool_names->buffer[tool]);
 		char *key     = any_map_get(config_keymap, string("tool_%s", to_lower_case(ui_toolbar_tool_names->buffer[tool])));
 		if (!string_equals(key, "")) {
 			tooltip = string("%s (%s)", tooltip, key);
 		}
 		char *extra = ui_toolbar_tooltip_extras->buffer[tool];
 		if (!string_equals(extra, "")) {
-			tooltip = string("%s - %s", tooltip, tr(extra, config_keymap));
+			tooltip = string("%s - %s", tooltip, vtr(extra, config_keymap));
 		}
 		ui_tooltip(tooltip);
 	}
@@ -189,7 +189,7 @@ void ui_toolbar_render_ui() {
 			ui->font_offset_y          = _fontOffsetY;
 		}
 		if (ui->is_hovered) {
-			ui_tooltip(tr("Toggle header", NULL));
+			ui_tooltip(tr("Toggle header"));
 		}
 		ui->_y -= 4 * UI_SCALE();
 
@@ -219,10 +219,10 @@ void ui_toolbar_tool_properties_menu_draw() {
 	if (ui->changed || ui->is_typing) {
 		ui_menu_keep_open = true;
 	}
-	if (base_view3d_show && ui_button(tr("Pin to Header", NULL), UI_ALIGN_LEFT, "")) {
+	if (base_view3d_show && ui_button(tr("Pin to Header"), UI_ALIGN_LEFT, "")) {
 		config_raw->layout->buffer[LAYOUT_SIZE_HEADER] = 1;
 	}
-	if (base_view3d_show && ui_button(tr("Hide 3D View", NULL), UI_ALIGN_LEFT, "")) {
+	if (base_view3d_show && ui_button(tr("Hide 3D View"), UI_ALIGN_LEFT, "")) {
 		ui_base_show_3d_view();
 	}
 }

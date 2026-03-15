@@ -51,15 +51,15 @@ bool neural_node_button(ui_node_t *node, char *model) {
 		if (node != neural_node_current) {
 			ui->enabled = false;
 		}
-		ui_button(tr("Processing...", NULL), UI_ALIGN_CENTER, "");
+		ui_button(tr("Processing..."), UI_ALIGN_CENTER, "");
 		if (node != neural_node_current) {
 			ui->enabled = true;
 		}
 	}
-	else if (!found && ui_button(tr("Setup", NULL), UI_ALIGN_CENTER, "")) {
+	else if (!found && ui_button(tr("Setup"), UI_ALIGN_CENTER, "")) {
 		sys_notify_on_next_frame(&neural_node_button_on_next_frame, NULL);
 	}
-	else if (found && ui_button(tr("Run", NULL), UI_ALIGN_CENTER, "")) {
+	else if (found && ui_button(tr("Run"), UI_ALIGN_CENTER, "")) {
 		return true;
 	}
 	return false;
@@ -122,7 +122,7 @@ void neural_node_download_done_untar(void *_) {
 
 void neural_node_download_done(char *url) {
 	neural_node_downloading--;
-	console_log(string("%s %s", tr("Downloaded file from", NULL), url));
+	console_log(string("%s %s", tr("Downloaded file from"), url));
 
 #ifdef IRON_LINUX
 	// todo
@@ -138,7 +138,7 @@ void neural_node_download_done(char *url) {
 
 #ifdef WITH_COMPRESS
 	if (ends_with(url, "Hunyuan3D_win64.tar")) {
-		console_toast(tr("Unpacking Hunyuan3D_win64.tar", NULL));
+		console_toast(tr("Unpacking Hunyuan3D_win64.tar"));
 		sys_notify_on_next_frame(&neural_node_download_done_untar, NULL);
 	}
 #endif

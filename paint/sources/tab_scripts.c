@@ -5,7 +5,7 @@ void tab_scripts_draw_export(char *path) {
 	char *str = tab_scripts_hscript->text;
 	char *f   = ui_files_filename;
 	if (string_equals(f, "")) {
-		f = string_copy(tr("untitled", NULL));
+		f = string_copy(tr("untitled"));
 	}
 	path = string("%s%s%s", path, PATH_SEP, f);
 	if (!ends_with(path, ".js")) {
@@ -21,19 +21,19 @@ void tab_scripts_draw_import(char *path) {
 }
 
 void tab_scripts_draw_edit() {
-	if (ui_menu_button(tr("Clear", NULL), "", ICON_ERASE)) {
+	if (ui_menu_button(tr("Clear"), "", ICON_ERASE)) {
 		tab_scripts_hscript->text = "";
 	}
-	if (ui_menu_button(tr("Import", NULL), "", ICON_IMPORT)) {
+	if (ui_menu_button(tr("Import"), "", ICON_IMPORT)) {
 		ui_files_show("js", false, false, &tab_scripts_draw_import);
 	}
-	if (ui_menu_button(tr("Export", NULL), "", ICON_EXPORT)) {
+	if (ui_menu_button(tr("Export"), "", ICON_EXPORT)) {
 		ui_files_show("js", true, false, &tab_scripts_draw_export);
 	}
 }
 
 void tab_scripts_draw(ui_handle_t *htab) {
-	if (ui_tab(htab, tr("Scripts", NULL), false, -1, false)) {
+	if (ui_tab(htab, tr("Scripts"), false, -1, false)) {
 
 		ui_begin_sticky();
 		f32_array_t *row = f32_array_create_from_raw(
@@ -45,11 +45,11 @@ void tab_scripts_draw(ui_handle_t *htab) {
 		    3);
 		ui_row(row);
 
-		if (ui_icon_button(tr("Run", NULL), ICON_PLAY, UI_ALIGN_CENTER)) {
+		if (ui_icon_button(tr("Run"), ICON_PLAY, UI_ALIGN_CENTER)) {
 			js_eval(tab_scripts_hscript->text);
 		}
 
-		if (ui_icon_button(tr("Edit", NULL), ICON_EDIT, UI_ALIGN_CENTER)) {
+		if (ui_icon_button(tr("Edit"), ICON_EDIT, UI_ALIGN_CENTER)) {
 			ui_menu_draw(&tab_scripts_draw_edit, -1, -1);
 		}
 
@@ -59,7 +59,7 @@ void tab_scripts_draw(ui_handle_t *htab) {
 		    },
 		    1);
 		ui_handle_t *file_handle = ui_handle(__ID__);
-		ui_combo(file_handle, ar, tr("File", NULL), false, UI_ALIGN_LEFT, true);
+		ui_combo(file_handle, ar, tr("File"), false, UI_ALIGN_LEFT, true);
 
 		ui_end_sticky();
 

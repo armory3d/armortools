@@ -12,5 +12,5 @@ void import_keymap_run(char *path) {
 	file_copy(path, dst_path);       // Copy to preset folder
 	box_preferences_fetch_keymaps(); // Refresh file list
 	box_preferences_h_preset->i = box_preferences_get_preset_index();
-	console_info(string("%s %s", tr("Keymap imported:", NULL), filename));
+	console_info(string("%s %s", tr("Keymap imported:"), filename));
 }

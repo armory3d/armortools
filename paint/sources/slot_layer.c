@@ -1101,7 +1101,7 @@ void layers_update_fill_layer(bool parse_paint) {
 void layers_set_object_mask() {
 	string_t_array_t *ar = any_array_create_from_raw(
 	    (void *[]){
-	        tr("None", NULL),
+	        tr("None"),
 	    },
 	    1);
 	for (i32 i = 0; i < project_paint_objects->length; ++i) {

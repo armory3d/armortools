@@ -2,7 +2,7 @@
 #include "global.h"
 
 void box_preferences_interface_tab_reset_layout_menu() {
-	if (ui_menu_button(tr("Confirm", NULL), "", ICON_CHECK)) {
+	if (ui_menu_button(tr("Confirm"), "", ICON_CHECK)) {
 		config_init_layout();
 		config_save();
 	}
@@ -42,10 +42,10 @@ void box_preferences_interface_tab_restore_menu_confirm(void *_) {
 }
 
 void box_preferences_interface_tab_restore_menu() {
-	if (ui_menu_button(tr("Confirm", NULL), "", ICON_CHECK)) {
+	if (ui_menu_button(tr("Confirm"), "", ICON_CHECK)) {
 		sys_notify_on_next_frame(&box_preferences_interface_tab_restore_menu_confirm, NULL);
 	}
-	if (ui_menu_button(tr("Import...", NULL), "", ICON_IMPORT)) {
+	if (ui_menu_button(tr("Import..."), "", ICON_IMPORT)) {
 		ui_files_show("json", false, false, &box_preferences_interface_tab_restore_menu_import);
 	}
 }
@@ -59,7 +59,7 @@ void box_preferences_interface_tab() {
 
 	ui_handle_t *h_locale = ui_handle(__ID__);
 	h_locale->i           = string_array_index_of(box_preferences_locales, config_raw->locale);
-	ui_combo(h_locale, box_preferences_locales, tr("Language", NULL), true, UI_ALIGN_LEFT, true);
+	ui_combo(h_locale, box_preferences_locales, tr("Language"), true, UI_ALIGN_LEFT, true);
 	if (h_locale->changed) {
 		char *locale_code  = box_preferences_locales->buffer[h_locale->i];
 		config_raw->locale = string_copy(locale_code);
@@ -71,7 +71,7 @@ void box_preferences_interface_tab() {
 	if (h_scale->init) {
 		h_scale->f = config_raw->window_scale;
 	}
-	ui_slider(h_scale, tr("UI Scale", NULL), 1.0, 4.0, true, 10, true, UI_ALIGN_RIGHT, true);
+	ui_slider(h_scale, tr("UI Scale"), 1.0, 4.0, true, 10, true, UI_ALIGN_RIGHT, true);
 	if (context_raw->hscale_was_changed && !ui->input_down) {
 		context_raw->hscale_was_changed = false;
 		if (h_scale->f == 0.0) {
@@ -86,7 +86,7 @@ void box_preferences_interface_tab() {
 
 	ui_handle_t *h_node_previews = ui_handle(__ID__);
 	h_node_previews->b           = config_raw->node_previews;
-	config_raw->node_previews    = ui_check(h_node_previews, tr("Node Previews", NULL), "");
+	config_raw->node_previews    = ui_check(h_node_previews, tr("Node Previews"), "");
 	if (h_node_previews->changed) {
 		for (i32 i = 0; i < project_materials->length; ++i) {
 			ui_node_canvas_t *c = project_materials->buffer[i]->canvas;
@@ -103,20 +103,20 @@ void box_preferences_interface_tab() {
 		ui_nodes_hwnd->redraws = 2;
 	}
 	if (ui->is_hovered) {
-		ui_tooltip(tr("Show node preview on each node by default", NULL));
+		ui_tooltip(tr("Show node preview on each node by default"));
 	}
 
 	ui_handle_t *h_wrap_mouse = ui_handle(__ID__);
 	h_wrap_mouse->b           = config_raw->wrap_mouse;
-	config_raw->wrap_mouse    = ui_check(h_wrap_mouse, tr("Wrap Mouse", NULL), "");
+	config_raw->wrap_mouse    = ui_check(h_wrap_mouse, tr("Wrap Mouse"), "");
 	if (ui->is_hovered) {
-		ui_tooltip(tr("Wrap mouse around view boundaries during camera control", NULL));
+		ui_tooltip(tr("Wrap mouse around view boundaries during camera control"));
 	}
 
 	ui->changed                     = false;
 	ui_handle_t *h_show_asset_names = ui_handle(__ID__);
 	h_show_asset_names->b           = config_raw->show_asset_names;
-	config_raw->show_asset_names    = ui_check(h_show_asset_names, tr("Show Asset Names", NULL), "");
+	config_raw->show_asset_names    = ui_check(h_show_asset_names, tr("Show Asset Names"), "");
 	if (ui->changed) {
 		base_redraw_ui();
 	}
@@ -124,7 +124,7 @@ void box_preferences_interface_tab() {
 	ui->changed             = false;
 	ui_handle_t *h_touch_ui = ui_handle(__ID__);
 	h_touch_ui->b           = config_raw->touch_ui;
-	config_raw->touch_ui    = ui_check(h_touch_ui, tr("Touch UI", NULL), "");
+	config_raw->touch_ui    = ui_check(h_touch_ui, tr("Touch UI"), "");
 	if (ui->changed) {
 		ui_touch_control = config_raw->touch_ui;
 		config_load_theme(config_raw->theme, true);
@@ -135,24 +135,24 @@ void box_preferences_interface_tab() {
 
 	ui_handle_t *h_splash_screen = ui_handle(__ID__);
 	h_splash_screen->b           = config_raw->splash_screen;
-	config_raw->splash_screen    = ui_check(h_splash_screen, tr("Splash Screen", NULL), "");
+	config_raw->splash_screen    = ui_check(h_splash_screen, tr("Splash Screen"), "");
 
 	ui_handle_t *h_grid_snap = ui_handle(__ID__);
 	h_grid_snap->b           = config_raw->grid_snap;
-	config_raw->grid_snap    = ui_check(h_grid_snap, tr("Grid Snap", NULL), "");
+	config_raw->grid_snap    = ui_check(h_grid_snap, tr("Grid Snap"), "");
 	ui_nodes_grid_snap       = config_raw->grid_snap;
 
 	ui_handle_t *h_experimental = ui_handle(__ID__);
 	h_experimental->b           = config_raw->experimental;
-	config_raw->experimental    = ui_check(h_experimental, tr("Experimental Features", NULL), "");
+	config_raw->experimental    = ui_check(h_experimental, tr("Experimental Features"), "");
 
 	ui_end_element();
 
 	ui_row2();
-	if (ui_icon_button(tr("Restore", NULL), ICON_REPLAY, UI_ALIGN_CENTER) && !ui_menu_show) {
+	if (ui_icon_button(tr("Restore"), ICON_REPLAY, UI_ALIGN_CENTER) && !ui_menu_show) {
 		ui_menu_draw(&box_preferences_interface_tab_restore_menu, -1, -1);
 	}
-	if (ui_button(tr("Reset Layout", NULL), UI_ALIGN_CENTER, "") && !ui_menu_show) {
+	if (ui_button(tr("Reset Layout"), UI_ALIGN_CENTER, "") && !ui_menu_show) {
 		ui_menu_draw(&box_preferences_interface_tab_reset_layout_menu, -1, -1);
 	}
 }
@@ -185,8 +185,8 @@ void box_preferences_theme_tab_new_box() {
 	if (h->init) {
 		h->text = "new_theme";
 	}
-	char *theme_name = ui_text_input(h, tr("Name", NULL), UI_ALIGN_LEFT, true, false);
-	if (ui_icon_button(tr("OK", NULL), ICON_CHECK, UI_ALIGN_CENTER) || ui->is_return_down) {
+	char *theme_name = ui_text_input(h, tr("Name"), UI_ALIGN_LEFT, true, false);
+	if (ui_icon_button(tr("OK"), ICON_CHECK, UI_ALIGN_CENTER) || ui->is_return_down) {
 		char *template = box_preferences_theme_to_json(base_theme);
 		if (!ends_with(theme_name, ".json")) {
 			theme_name = string("%s.json", theme_name);
@@ -214,21 +214,21 @@ void box_preferences_theme_tab() {
 	box_preferences_h_theme = ui_handle(__ID__);
 	gc_root(box_preferences_h_theme);
 	box_preferences_h_theme->i = box_preferences_get_theme_index();
-	ui_combo(box_preferences_h_theme, box_preferences_themes, tr("Theme", NULL), false, UI_ALIGN_LEFT, true);
+	ui_combo(box_preferences_h_theme, box_preferences_themes, tr("Theme"), false, UI_ALIGN_LEFT, true);
 	if (box_preferences_h_theme->changed) {
 		config_raw->theme = string("%s.json", box_preferences_themes->buffer[box_preferences_h_theme->i]);
 		config_load_theme(config_raw->theme, true);
 	}
 
-	if (ui_icon_button(tr("New", NULL), ICON_PLUS, UI_ALIGN_CENTER)) {
-		ui_box_show_custom(&box_preferences_theme_tab_new_box, 400, 200, NULL, true, tr("New Theme", NULL));
+	if (ui_icon_button(tr("New"), ICON_PLUS, UI_ALIGN_CENTER)) {
+		ui_box_show_custom(&box_preferences_theme_tab_new_box, 400, 200, NULL, true, tr("New Theme"));
 	}
 
-	if (ui_icon_button(tr("Import", NULL), ICON_IMPORT, UI_ALIGN_CENTER)) {
+	if (ui_icon_button(tr("Import"), ICON_IMPORT, UI_ALIGN_CENTER)) {
 		ui_files_show("json", false, false, &box_preferences_theme_tab_import);
 	}
 
-	if (ui_icon_button(tr("Export", NULL), ICON_EXPORT, UI_ALIGN_CENTER)) {
+	if (ui_icon_button(tr("Export"), ICON_EXPORT, UI_ALIGN_CENTER)) {
 		ui_files_show("json", true, false, &box_preferences_theme_tab_export);
 	}
 
@@ -278,8 +278,8 @@ void box_preferences_theme_tab() {
 		else if (string_equals(key, "LINK_STYLE")) {
 			string_t_array_t *styles = any_array_create_from_raw(
 			    (void *[]){
-			        tr("Straight", NULL),
-			        tr("Curved", NULL),
+			        tr("Straight"),
+			        tr("Curved"),
 			    },
 			    2);
 			h->i             = val;
@@ -306,7 +306,7 @@ void box_preferences_theme_tab() {
 void box_preferences_usage_tab() {
 	ui_handle_t *h_undo    = ui_handle(__ID__);
 	h_undo->f              = config_raw->undo_steps;
-	config_raw->undo_steps = ui_slider(h_undo, tr("Undo Steps", NULL), 1, 64, false, 1, true, UI_ALIGN_RIGHT, true);
+	config_raw->undo_steps = ui_slider(h_undo, tr("Undo Steps"), 1, 64, false, 1, true, UI_ALIGN_RIGHT, true);
 	if (config_raw->undo_steps < 1) {
 		config_raw->undo_steps = h_undo->f = 1;
 	}
@@ -332,55 +332,55 @@ void box_preferences_usage_tab() {
 
 	ui_handle_t *h_dilate_radius = ui_handle(__ID__);
 	h_dilate_radius->f           = config_raw->dilate_radius;
-	config_raw->dilate_radius    = ui_slider(h_dilate_radius, tr("Dilate Radius", NULL), 0.0, 16.0, true, 1, true, UI_ALIGN_RIGHT, true);
+	config_raw->dilate_radius    = ui_slider(h_dilate_radius, tr("Dilate Radius"), 0.0, 16.0, true, 1, true, UI_ALIGN_RIGHT, true);
 	if (ui->is_hovered) {
-		ui_tooltip(tr("Dilate painted textures to prevent seams", NULL));
+		ui_tooltip(tr("Dilate painted textures to prevent seams"));
 	}
 
 	ui_handle_t *h_camera_controls          = ui_handle(__ID__);
 	h_camera_controls->i                    = config_raw->camera_controls;
 	string_t_array_t *camera_controls_combo = any_array_create_from_raw(
 	    (void *[]){
-	        tr("Orbit", NULL),
-	        tr("Rotate", NULL),
-	        tr("Fly", NULL),
+	        tr("Orbit"),
+	        tr("Rotate"),
+	        tr("Fly"),
 	    },
 	    3);
-	config_raw->camera_controls = ui_combo(h_camera_controls, camera_controls_combo, tr("Default Camera Controls", NULL), true, UI_ALIGN_LEFT, true);
+	config_raw->camera_controls = ui_combo(h_camera_controls, camera_controls_combo, tr("Default Camera Controls"), true, UI_ALIGN_LEFT, true);
 
 	ui_handle_t *h_fov     = ui_handle(__ID__);
 	h_fov->f               = config_raw->camera_fov;
-	config_raw->camera_fov = ui_slider(h_fov, tr("Default Camera FoV", NULL), 0.3, 1.4, true, 100.0, true, UI_ALIGN_RIGHT, true);
+	config_raw->camera_fov = ui_slider(h_fov, tr("Default Camera FoV"), 0.3, 1.4, true, 100.0, true, UI_ALIGN_RIGHT, true);
 
 	ui_handle_t *h_speed          = ui_handle(__ID__);
 	h_speed->f                    = config_raw->camera_zoom_speed;
-	config_raw->camera_zoom_speed = ui_slider(h_speed, tr("Camera Zoom Speed", NULL), 0.1, 4.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
+	config_raw->camera_zoom_speed = ui_slider(h_speed, tr("Camera Zoom Speed"), 0.1, 4.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
 
 	h_speed                           = ui_handle(__ID__);
 	h_speed->f                        = config_raw->camera_rotation_speed;
-	config_raw->camera_rotation_speed = ui_slider(h_speed, tr("Camera Rotation Speed", NULL), 0.1, 4.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
+	config_raw->camera_rotation_speed = ui_slider(h_speed, tr("Camera Rotation Speed"), 0.1, 4.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
 
 	h_speed                      = ui_handle(__ID__);
 	h_speed->f                   = config_raw->camera_pan_speed;
-	config_raw->camera_pan_speed = ui_slider(h_speed, tr("Camera Pan Speed", NULL), 0.1, 4.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
+	config_raw->camera_pan_speed = ui_slider(h_speed, tr("Camera Pan Speed"), 0.1, 4.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
 
 	ui_handle_t *h_upside_down     = ui_handle(__ID__);
 	h_upside_down->b               = config_raw->camera_upside_down;
-	config_raw->camera_upside_down = ui_check(h_upside_down, tr("Allow Upside Down Camera", NULL), "");
+	config_raw->camera_upside_down = ui_check(h_upside_down, tr("Allow Upside Down Camera"), "");
 
 	ui_handle_t *h_zoom_direction          = ui_handle(__ID__);
 	h_zoom_direction->i                    = config_raw->zoom_direction;
 	string_t_array_t *zoom_direction_combo = any_array_create_from_raw(
 	    (void *[]){
-	        tr("Vertical", NULL),
-	        tr("Vertical Inverted", NULL),
-	        tr("Horizontal", NULL),
-	        tr("Horizontal Inverted", NULL),
-	        tr("Vertical and Horizontal", NULL),
-	        tr("Vertical and Horizontal Inverted", NULL),
+	        tr("Vertical"),
+	        tr("Vertical Inverted"),
+	        tr("Horizontal"),
+	        tr("Horizontal Inverted"),
+	        tr("Vertical and Horizontal"),
+	        tr("Vertical and Horizontal Inverted"),
 	    },
 	    6);
-	config_raw->zoom_direction = ui_combo(h_zoom_direction, zoom_direction_combo, tr("Direction to Zoom", NULL), true, UI_ALIGN_LEFT, true);
+	config_raw->zoom_direction = ui_combo(h_zoom_direction, zoom_direction_combo, tr("Direction to Zoom"), true, UI_ALIGN_LEFT, true);
 
 	ui_handle_t *h_layer_res = ui_handle(__ID__);
 	h_layer_res->i           = config_raw->layer_res;
@@ -409,28 +409,28 @@ void box_preferences_usage_tab() {
 	    },
 	    8);
 #endif
-	config_raw->layer_res = ui_combo(h_layer_res, res_combo, tr("Default Layer Resolution", NULL), true, UI_ALIGN_LEFT, true);
+	config_raw->layer_res = ui_combo(h_layer_res, res_combo, tr("Default Layer Resolution"), true, UI_ALIGN_LEFT, true);
 
 	ui_handle_t *h_scene_atlas_res = ui_handle(__ID__);
 	h_scene_atlas_res->i           = config_raw->scene_atlas_res;
-	config_raw->scene_atlas_res    = ui_combo(h_scene_atlas_res, res_combo, tr("Scene Atlas Resolution", NULL), true, UI_ALIGN_LEFT, true);
+	config_raw->scene_atlas_res    = ui_combo(h_scene_atlas_res, res_combo, tr("Scene Atlas Resolution"), true, UI_ALIGN_LEFT, true);
 
 	ui_handle_t *h_server = ui_handle(__ID__);
 	h_server->text        = string_copy(config_raw->server);
-	config_raw->server    = string_copy(ui_text_input(h_server, tr("Cloud Server", NULL), UI_ALIGN_LEFT, true, false));
+	config_raw->server    = string_copy(ui_text_input(h_server, tr("Cloud Server"), UI_ALIGN_LEFT, true, false));
 
 	ui_handle_t *h_material_live = ui_handle(__ID__);
 	h_material_live->b           = config_raw->material_live;
-	config_raw->material_live    = ui_check(h_material_live, tr("Live Material Preview", NULL), "");
+	config_raw->material_live    = ui_check(h_material_live, tr("Live Material Preview"), "");
 	if (ui->is_hovered) {
-		ui_tooltip(tr("Instantly update material preview on node change", NULL));
+		ui_tooltip(tr("Instantly update material preview on node change"));
 	}
 
 	ui_handle_t *h_brush_live = ui_handle(__ID__);
 	h_brush_live->b           = config_raw->brush_live;
-	config_raw->brush_live    = ui_check(h_brush_live, tr("Live Brush Preview", NULL), "");
+	config_raw->brush_live    = ui_check(h_brush_live, tr("Live Brush Preview"), "");
 	if (ui->is_hovered) {
-		ui_tooltip(tr("Draw live brush preview in viewport", NULL));
+		ui_tooltip(tr("Draw live brush preview in viewport"));
 	}
 	if (h_brush_live->changed) {
 		context_raw->ddirty = 2;
@@ -438,7 +438,7 @@ void box_preferences_usage_tab() {
 
 	ui_handle_t *h_brush_depth_reject = ui_handle(__ID__);
 	h_brush_depth_reject->b           = config_raw->brush_depth_reject;
-	config_raw->brush_depth_reject    = ui_check(h_brush_depth_reject, tr("Depth Reject", NULL), "");
+	config_raw->brush_depth_reject    = ui_check(h_brush_depth_reject, tr("Depth Reject"), "");
 	if (h_brush_depth_reject->changed) {
 		make_material_parse_paint_material(true);
 	}
@@ -447,7 +447,7 @@ void box_preferences_usage_tab() {
 
 	ui_handle_t *h_brush_angle_reject = ui_handle(__ID__);
 	h_brush_angle_reject->b           = config_raw->brush_angle_reject;
-	config_raw->brush_angle_reject    = ui_check(h_brush_angle_reject, tr("Angle Reject", NULL), "");
+	config_raw->brush_angle_reject    = ui_check(h_brush_angle_reject, tr("Angle Reject"), "");
 	if (h_brush_angle_reject->changed) {
 		make_material_parse_paint_material(true);
 	}
@@ -458,7 +458,7 @@ void box_preferences_usage_tab() {
 
 	ui_handle_t *h_angle_dot            = ui_handle(__ID__);
 	h_angle_dot->f                      = context_raw->brush_angle_reject_dot;
-	context_raw->brush_angle_reject_dot = ui_slider(h_angle_dot, tr("Angle", NULL), 0.0, 1.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
+	context_raw->brush_angle_reject_dot = ui_slider(h_angle_dot, tr("Angle"), 0.0, 1.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
 	if (h_angle_dot->changed) {
 		make_material_parse_paint_material(true);
 	}
@@ -467,33 +467,33 @@ void box_preferences_usage_tab() {
 
 	ui_handle_t *h_alpha_discard    = ui_handle(__ID__);
 	h_alpha_discard->f              = config_raw->brush_alpha_discard;
-	config_raw->brush_alpha_discard = ui_slider(h_alpha_discard, tr("Alpha Discard", NULL), 0.0, 1.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
+	config_raw->brush_alpha_discard = ui_slider(h_alpha_discard, tr("Alpha Discard"), 0.0, 1.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
 	if (h_alpha_discard->changed) {
 		make_material_parse_paint_material(true);
 	}
 }
 
 void box_preferences_pen_tab() {
-	ui_text(tr("Pressure controls", NULL), UI_ALIGN_LEFT, 0x00000000);
+	ui_text(tr("Pressure controls"), UI_ALIGN_LEFT, 0x00000000);
 	ui_handle_t *h_pressure_radius = ui_handle(__ID__);
 	h_pressure_radius->b           = config_raw->pressure_radius;
-	config_raw->pressure_radius    = ui_check(h_pressure_radius, tr("Brush Radius", NULL), "");
+	config_raw->pressure_radius    = ui_check(h_pressure_radius, tr("Brush Radius"), "");
 
 	ui_handle_t *h_pressure_sensitivity = ui_handle(__ID__);
 	h_pressure_sensitivity->f           = config_raw->pressure_sensitivity;
-	config_raw->pressure_sensitivity    = ui_slider(h_pressure_sensitivity, tr("Sensitivity", NULL), 0.0, 10.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
+	config_raw->pressure_sensitivity    = ui_slider(h_pressure_sensitivity, tr("Sensitivity"), 0.0, 10.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
 
 	ui_handle_t *h_pressure_hardness = ui_handle(__ID__);
 	h_pressure_hardness->b           = config_raw->pressure_hardness;
-	config_raw->pressure_hardness    = ui_check(h_pressure_hardness, tr("Brush Hardness", NULL), "");
+	config_raw->pressure_hardness    = ui_check(h_pressure_hardness, tr("Brush Hardness"), "");
 
 	ui_handle_t *h_pressure_opacity = ui_handle(__ID__);
 	h_pressure_opacity->b           = config_raw->pressure_opacity;
-	config_raw->pressure_opacity    = ui_check(h_pressure_opacity, tr("Brush Opacity", NULL), "");
+	config_raw->pressure_opacity    = ui_check(h_pressure_opacity, tr("Brush Opacity"), "");
 
 	ui_handle_t *h_pressure_angle = ui_handle(__ID__);
 	h_pressure_angle->b           = config_raw->pressure_angle;
-	config_raw->pressure_angle    = ui_check(h_pressure_angle, tr("Brush Angle", NULL), "");
+	config_raw->pressure_angle    = ui_check(h_pressure_angle, tr("Brush Angle"), "");
 
 	ui_end_element();
 	f32_array_t *row = f32_array_create_from_raw(
@@ -502,7 +502,7 @@ void box_preferences_pen_tab() {
 	    },
 	    1);
 	ui_row(row);
-	if (ui_icon_button(tr("Help", NULL), ICON_LINK, UI_ALIGN_CENTER)) {
+	if (ui_icon_button(tr("Help"), ICON_LINK, UI_ALIGN_CENTER)) {
 		char *url  = "https://github.com/armory3d/";
 		char *name = to_lower_case(manifest_title);
 		url        = string("%s%s_docs#pen", url, name);
@@ -515,11 +515,11 @@ void box_preferences_viewport_tab() {
 	h_mode->i                    = config_raw->viewport_mode;
 	string_t_array_t *mode_combo = any_array_create_from_raw(
 	    (void *[]){
-	        tr("Lit", NULL),
-	        tr("Path Traced", NULL),
+	        tr("Lit"),
+	        tr("Path Traced"),
 	    },
 	    2);
-	ui_combo(h_mode, mode_combo, tr("Default Mode", NULL), true, UI_ALIGN_LEFT, true);
+	ui_combo(h_mode, mode_combo, tr("Default Mode"), true, UI_ALIGN_LEFT, true);
 	if (h_mode->changed) {
 		config_raw->viewport_mode = h_mode->i;
 	}
@@ -528,11 +528,11 @@ void box_preferences_viewport_tab() {
 	h_pathtrace_mode->i                    = config_raw->pathtrace_mode;
 	string_t_array_t *pathtrace_mode_combo = any_array_create_from_raw(
 	    (void *[]){
-	        tr("Fast", NULL),
-	        tr("Quality", NULL),
+	        tr("Fast"),
+	        tr("Quality"),
 	    },
 	    2);
-	config_raw->pathtrace_mode = ui_combo(h_pathtrace_mode, pathtrace_mode_combo, tr("Path Tracer", NULL), true, UI_ALIGN_LEFT, true);
+	config_raw->pathtrace_mode = ui_combo(h_pathtrace_mode, pathtrace_mode_combo, tr("Path Tracer"), true, UI_ALIGN_LEFT, true);
 	if (h_pathtrace_mode->changed) {
 		render_path_raytrace_ready       = false;
 		render_path_raytrace_init_shader = true;
@@ -543,11 +543,11 @@ void box_preferences_viewport_tab() {
 	h_render_mode->i                    = config_raw->render_mode;
 	string_t_array_t *render_mode_combo = any_array_create_from_raw(
 	    (void *[]){
-	        tr("Desktop", NULL),
-	        tr("Mobile", NULL),
+	        tr("Desktop"),
+	        tr("Mobile"),
 	    },
 	    2);
-	config_raw->render_mode = ui_combo(h_render_mode, render_mode_combo, tr("Renderer", NULL), true, UI_ALIGN_LEFT, true);
+	config_raw->render_mode = ui_combo(h_render_mode, render_mode_combo, tr("Renderer"), true, UI_ALIGN_LEFT, true);
 	if (h_render_mode->changed) {
 		context_set_render_path();
 	}
@@ -564,7 +564,7 @@ void box_preferences_viewport_tab() {
 	        "4.0x",
 	    },
 	    6);
-	ui_combo(h_supersample, supersample_combo, tr("Super Sample", NULL), true, UI_ALIGN_LEFT, true);
+	ui_combo(h_supersample, supersample_combo, tr("Super Sample"), true, UI_ALIGN_LEFT, true);
 	if (h_supersample->changed) {
 		config_raw->rp_supersample = config_get_super_sample_size(h_supersample->i);
 		config_apply();
@@ -573,14 +573,14 @@ void box_preferences_viewport_tab() {
 	if (config_raw->render_mode == RENDER_MODE_DEFERRED) {
 		ui_handle_t *h_ssao = ui_handle(__ID__);
 		h_ssao->b           = config_raw->rp_ssao;
-		config_raw->rp_ssao = ui_check(h_ssao, tr("SSAO", NULL), "");
+		config_raw->rp_ssao = ui_check(h_ssao, tr("SSAO"), "");
 		if (h_ssao->changed) {
 			config_apply();
 		}
 
 		ui_handle_t *h_bloom = ui_handle(__ID__);
 		h_bloom->b           = config_raw->rp_bloom;
-		config_raw->rp_bloom = ui_check(h_bloom, tr("Bloom", NULL), "");
+		config_raw->rp_bloom = ui_check(h_bloom, tr("Bloom"), "");
 		if (h_bloom->changed) {
 			config_apply();
 		}
@@ -588,14 +588,14 @@ void box_preferences_viewport_tab() {
 
 	ui_handle_t *h_vignette = ui_handle(__ID__);
 	h_vignette->f           = config_raw->rp_vignette;
-	config_raw->rp_vignette = ui_slider(h_vignette, tr("Vignette", NULL), 0.0, 1.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
+	config_raw->rp_vignette = ui_slider(h_vignette, tr("Vignette"), 0.0, 1.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
 	if (h_vignette->changed) {
 		context_raw->ddirty = 2;
 	}
 
 	ui_handle_t *h_noise_grain = ui_handle(__ID__);
 	h_noise_grain->f           = config_raw->rp_grain;
-	config_raw->rp_grain       = ui_slider(h_noise_grain, tr("Noise Grain", NULL), 0.0, 1.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
+	config_raw->rp_grain       = ui_slider(h_noise_grain, tr("Noise Grain"), 0.0, 1.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
 	if (h_noise_grain->changed) {
 		context_raw->ddirty = 2;
 	}
@@ -606,15 +606,15 @@ void box_preferences_viewport_tab() {
 	ui_handle_t     *h_far   = ui_handle(__ID__);
 	h_near->f                = math_floor(cam_raw->near_plane * 1000) / (float)1000;
 	h_far->f                 = math_floor(cam_raw->far_plane * 100) / (float)100;
-	cam_raw->near_plane      = ui_slider(h_near, tr("Clip Start", NULL), 0.001, 1.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
-	cam_raw->far_plane       = ui_slider(h_far, tr("Clip End", NULL), 50.0, 100.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
+	cam_raw->near_plane      = ui_slider(h_near, tr("Clip Start"), 0.001, 1.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
+	cam_raw->far_plane       = ui_slider(h_far, tr("Clip End"), 50.0, 100.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
 	if (h_near->changed || h_far->changed) {
 		camera_object_build_proj(cam, -1.0);
 	}
 
 	ui_handle_t *h_disp           = ui_handle(__ID__);
 	h_disp->f                     = config_raw->displace_strength;
-	config_raw->displace_strength = ui_slider(h_disp, tr("Displacement Strength", NULL), 0.0, 10.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
+	config_raw->displace_strength = ui_slider(h_disp, tr("Displacement Strength"), 0.0, 10.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
 	if (h_disp->changed) {
 		context_raw->ddirty = 2;
 		make_material_parse_mesh_material();
@@ -641,8 +641,8 @@ void box_preferences_keymap_tab_new_box() {
 	if (h->init) {
 		h->text = "new_keymap";
 	}
-	char *keymap_name = ui_text_input(h, tr("Name", NULL), UI_ALIGN_LEFT, true, false);
-	if (ui_icon_button(tr("OK", NULL), ICON_CHECK, UI_ALIGN_CENTER) || ui->is_return_down) {
+	char *keymap_name = ui_text_input(h, tr("Name"), UI_ALIGN_LEFT, true, false);
+	if (ui_icon_button(tr("OK"), ICON_CHECK, UI_ALIGN_CENTER) || ui->is_return_down) {
 		char *template = keymap_to_json(keymap_get_default());
 		if (!ends_with(keymap_name, ".json")) {
 			keymap_name = string("%s.json", keymap_name);
@@ -670,22 +670,22 @@ void box_preferences_keymap_tab() {
 	box_preferences_h_preset = ui_handle(__ID__);
 	gc_root(box_preferences_h_preset);
 	box_preferences_h_preset->i = box_preferences_get_preset_index();
-	ui_combo(box_preferences_h_preset, box_preferences_files_keymap, tr("Preset", NULL), false, UI_ALIGN_LEFT, true);
+	ui_combo(box_preferences_h_preset, box_preferences_files_keymap, tr("Preset"), false, UI_ALIGN_LEFT, true);
 	if (box_preferences_h_preset->changed) {
 		config_raw->keymap = string("%s.json", box_preferences_files_keymap->buffer[box_preferences_h_preset->i]);
 		config_apply();
 		keymap_load();
 	}
 
-	if (ui_icon_button(tr("New", NULL), ICON_PLUS, UI_ALIGN_CENTER)) {
-		ui_box_show_custom(&box_preferences_keymap_tab_new_box, 400, 200, NULL, true, tr("New Keymap", NULL));
+	if (ui_icon_button(tr("New"), ICON_PLUS, UI_ALIGN_CENTER)) {
+		ui_box_show_custom(&box_preferences_keymap_tab_new_box, 400, 200, NULL, true, tr("New Keymap"));
 	}
 
-	if (ui_icon_button(tr("Import", NULL), ICON_IMPORT, UI_ALIGN_CENTER)) {
+	if (ui_icon_button(tr("Import"), ICON_IMPORT, UI_ALIGN_CENTER)) {
 		ui_files_show("json", false, false, &box_preferences_keymap_tab_import);
 	}
 
-	if (ui_icon_button(tr("Export", NULL), ICON_EXPORT, UI_ALIGN_CENTER)) {
+	if (ui_icon_button(tr("Export"), ICON_EXPORT, UI_ALIGN_CENTER)) {
 		ui_files_show("json", true, false, &box_preferences_keymap_tab_export);
 	}
 
@@ -711,7 +711,7 @@ void box_preferences_keymap_tab() {
 }
 
 void box_preferences_neural_tab() {
-	ui_text(tr("All processing is done locally on device", NULL), UI_ALIGN_LEFT, 0x00000000);
+	ui_text(tr("All processing is done locally on device"), UI_ALIGN_LEFT, 0x00000000);
 	ui_handle_t *h_inference = ui_handle(__ID__);
 	h_inference->i           = config_raw->neural_backend;
 #ifdef IRON_WINDOWS
@@ -730,12 +730,12 @@ void box_preferences_neural_tab() {
 	    },
 	    2);
 #endif
-	config_raw->neural_backend = ui_combo(h_inference, inference_combo, tr("Inference Backend", NULL), true, UI_ALIGN_LEFT, true);
+	config_raw->neural_backend = ui_combo(h_inference, inference_combo, tr("Inference Backend"), true, UI_ALIGN_LEFT, true);
 	if (ui->is_hovered) {
-		ui_tooltip(tr("Backend for neural node processing", NULL));
+		ui_tooltip(tr("Backend for neural node processing"));
 	}
 
-	ui_text(tr("Models", NULL), UI_ALIGN_LEFT, 0x00000000);
+	ui_text(tr("Models"), UI_ALIGN_LEFT, 0x00000000);
 
 	if (neural_node_models == NULL) {
 		neural_node_models_init();
@@ -751,7 +751,7 @@ void box_preferences_neural_tab() {
 	    },
 	    1);
 	ui_row(row);
-	if (ui_icon_button(tr("Models Directory...", NULL), ICON_FOLDER, UI_ALIGN_CENTER)) {
+	if (ui_icon_button(tr("Models Directory..."), ICON_FOLDER, UI_ALIGN_CENTER)) {
 		if (string_equals(file_read_directory(neural_node_dir())->buffer[0], "")) {
 			iron_create_directory(neural_node_dir());
 		}
@@ -782,11 +782,11 @@ char *box_preferneces_model_url_from_name(char *name) {
 
 void box_preferences_model_panel(neural_node_model_t *m) {
 	if (ui_panel(ui_handle(m->name), m->name, false, true, false)) {
-		if (ui_text(string("%s: %s (%s)", tr("source", NULL), m->web, m->license), UI_ALIGN_LEFT, 0x00000000) == UI_STATE_RELEASED) {
+		if (ui_text(string("%s: %s (%s)", tr("source"), m->web, m->license), UI_ALIGN_LEFT, 0x00000000) == UI_STATE_RELEASED) {
 			iron_load_url(m->web);
 		}
-		ui_text(string("%s: %s", tr("gpu memory", NULL), m->memory), UI_ALIGN_LEFT, 0x00000000);
-		ui_text(string("%s: %s", tr("nodes", NULL), m->nodes), UI_ALIGN_LEFT, 0x00000000);
+		ui_text(string("%s: %s", tr("gpu memory"), m->memory), UI_ALIGN_LEFT, 0x00000000);
+		ui_text(string("%s: %s", tr("nodes"), m->nodes), UI_ALIGN_LEFT, 0x00000000);
 
 		char *url       = m->urls->buffer[0];
 		char *file_name = box_preferences_file_name_from_url(url);
@@ -814,11 +814,11 @@ void box_preferences_model_panel(neural_node_model_t *m) {
 
 			ui->enabled = true;
 		}
-		else if (!found && ui_icon_button(string("%s (%s)", tr("Download", NULL), m->size), ICON_ARROW_DOWN, UI_ALIGN_CENTER)) {
+		else if (!found && ui_icon_button(string("%s (%s)", tr("Download"), m->size), ICON_ARROW_DOWN, UI_ALIGN_CENTER)) {
 			neural_node_download_models(m->urls);
-			console_info(tr("Downloading", NULL));
+			console_info(tr("Downloading"));
 		}
-		else if (found && ui_icon_button(string("%s (%s)", tr("Remove", NULL), m->size), ICON_DELETE, UI_ALIGN_CENTER)) {
+		else if (found && ui_icon_button(string("%s (%s)", tr("Remove"), m->size), ICON_DELETE, UI_ALIGN_CENTER)) {
 			for (i32 i = 0; i < m->urls->length; ++i) {
 				char *url       = m->urls->buffer[i];
 				char *file_name = box_preferences_file_name_from_url(url);
@@ -840,19 +840,19 @@ void box_preferences_plugins_tab_plugin_menu_export(char *dest) {
 
 void box_preferences_plugins_tab_plugin_menu() {
 	char *path = string("%s%splugins%s%s", path_data(), PATH_SEP, PATH_SEP, _box_preferences_f);
-	if (ui_menu_button(tr("Edit in Text Editor", NULL), "", ICON_NONE)) {
+	if (ui_menu_button(tr("Edit in Text Editor"), "", ICON_NONE)) {
 		file_start(path);
 	}
-	if (ui_menu_button(tr("Edit in Script Tab", NULL), "", ICON_NONE)) {
+	if (ui_menu_button(tr("Edit in Script Tab"), "", ICON_NONE)) {
 		buffer_t *blob            = data_get_blob(string("plugins/%s", _box_preferences_f));
 		tab_scripts_hscript->text = string_copy(sys_buffer_to_string(blob));
 		data_delete_blob(string("plugins/%s", _box_preferences_f));
-		console_info(tr("Script opened", NULL));
+		console_info(tr("Script opened"));
 	}
-	if (ui_menu_button(tr("Export", NULL), "", ICON_EXPORT)) {
+	if (ui_menu_button(tr("Export"), "", ICON_EXPORT)) {
 		ui_files_show("js", true, false, &box_preferences_plugins_tab_plugin_menu_export);
 	}
-	if (ui_menu_button(tr("Delete", NULL), "", ICON_DELETE)) {
+	if (ui_menu_button(tr("Delete"), "", ICON_DELETE)) {
 		if (string_array_index_of(config_raw->plugins, _box_preferences_f) >= 0) {
 			string_array_remove(config_raw->plugins, _box_preferences_f);
 			plugin_stop(_box_preferences_f);
@@ -872,8 +872,8 @@ void box_preferences_plugins_tab_new_box() {
 	if (h->init) {
 		h->text = "new_plugin";
 	}
-	char *plugin_name = ui_text_input(h, tr("Name", NULL), UI_ALIGN_LEFT, true, false);
-	if (ui_icon_button(tr("OK", NULL), ICON_CHECK, UI_ALIGN_CENTER) || ui->is_return_down) {
+	char *plugin_name = ui_text_input(h, tr("Name"), UI_ALIGN_LEFT, true, false);
+	if (ui_icon_button(tr("OK"), ICON_CHECK, UI_ALIGN_CENTER) || ui->is_return_down) {
 		char *template = "let plugin = plugin_create();\
 let h1 = ui_handle_create();\
 plugin_notify_on_ui(plugin, function() {\
@@ -906,10 +906,10 @@ void box_preferences_plugins_tab() {
 	    },
 	    2);
 	ui_row(row);
-	if (ui_icon_button(tr("New", NULL), ICON_PLUS, UI_ALIGN_CENTER)) {
-		ui_box_show_custom(&box_preferences_plugins_tab_new_box, 400, 200, NULL, true, tr("New Plugin", NULL));
+	if (ui_icon_button(tr("New"), ICON_PLUS, UI_ALIGN_CENTER)) {
+		ui_box_show_custom(&box_preferences_plugins_tab_new_box, 400, 200, NULL, true, tr("New Plugin"));
 	}
-	if (ui_icon_button(tr("Import", NULL), ICON_IMPORT, UI_ALIGN_CENTER)) {
+	if (ui_icon_button(tr("Import"), ICON_IMPORT, UI_ALIGN_CENTER)) {
 		ui_files_show("js,zip", false, false, &box_preferences_plugins_tab_import);
 	}
 	ui_end_sticky();
@@ -953,43 +953,43 @@ void box_preferences_show_on_hide() {
 }
 
 void box_preferences_show_box() {
-	if (ui_tab(box_preferences_htab, tr("Interface", NULL), true, -1, false)) {
+	if (ui_tab(box_preferences_htab, tr("Interface"), true, -1, false)) {
 		box_preferences_interface_tab();
 	}
-	if (ui_tab(box_preferences_htab, tr("Theme", NULL), true, -1, false)) {
+	if (ui_tab(box_preferences_htab, tr("Theme"), true, -1, false)) {
 		box_preferences_theme_tab();
 	}
-	if (ui_tab(box_preferences_htab, tr("Usage", NULL), true, -1, false)) {
+	if (ui_tab(box_preferences_htab, tr("Usage"), true, -1, false)) {
 		box_preferences_usage_tab();
 	}
 
 #ifdef IRON_IOS
-	char *pen_name = tr("Pencil", NULL);
+	char *pen_name = tr("Pencil");
 #else
-	char *pen_name = tr("Pen", NULL);
+	char *pen_name = tr("Pen");
 #endif
 	if (ui_tab(box_preferences_htab, pen_name, true, -1, false)) {
 		box_preferences_pen_tab();
 	}
 
-	if (ui_tab(box_preferences_htab, tr("Viewport", NULL), true, -1, false)) {
+	if (ui_tab(box_preferences_htab, tr("Viewport"), true, -1, false)) {
 		box_preferences_viewport_tab();
 	}
-	if (ui_tab(box_preferences_htab, tr("Keymap", NULL), true, -1, false)) {
+	if (ui_tab(box_preferences_htab, tr("Keymap"), true, -1, false)) {
 		box_preferences_keymap_tab();
 	}
 #if defined(IRON_WINDOWS) || defined(IRON_LINUX) || defined(IRON_MACOS)
-	if (ui_tab(box_preferences_htab, tr("Neural", NULL), true, -1, false)) {
+	if (ui_tab(box_preferences_htab, tr("Neural"), true, -1, false)) {
 		box_preferences_neural_tab();
 	}
 #endif
-	if (ui_tab(box_preferences_htab, tr("Plugins", NULL), true, -1, false)) {
+	if (ui_tab(box_preferences_htab, tr("Plugins"), true, -1, false)) {
 		box_preferences_plugins_tab();
 	}
 }
 
 void box_preferences_show() {
-	ui_box_show_custom(&box_preferences_show_box, 720, 520, &box_preferences_show_on_hide, true, tr("Preferences", NULL));
+	ui_box_show_custom(&box_preferences_show_box, 720, 520, &box_preferences_show_on_hide, true, tr("Preferences"));
 }
 
 void box_preferences_fetch_themes() {

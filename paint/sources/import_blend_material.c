@@ -2,19 +2,19 @@
 #include "global.h"
 
 void import_blend_material_run_box() {
-	if (ui_tab(ui_handle(__ID__), tr("Import Material", NULL), false, -1, false)) {
+	if (ui_tab(ui_handle(__ID__), tr("Import Material"), false, -1, false)) {
 		import_blend_mesh_ui();
 
 		ui_row2();
-		if (ui_icon_button(tr("Cancel", NULL), ICON_CLOSE, UI_ALIGN_CENTER)) {
+		if (ui_icon_button(tr("Cancel"), ICON_CLOSE, UI_ALIGN_CENTER)) {
 			ui_box_hide();
 		}
-		if (ui_icon_button(tr("Import", NULL), ICON_CHECK, UI_ALIGN_CENTER) || ui->is_return_down) {
+		if (ui_icon_button(tr("Import"), ICON_CHECK, UI_ALIGN_CENTER) || ui->is_return_down) {
 
 			ui_box_hide();
 
 			if (config_raw->blender == NULL || string_equals(config_raw->blender, "")) {
-				console_error(tr("Blender executable path not set", NULL));
+				console_error(tr("Blender executable path not set"));
 				return;
 			}
 			_import_blend_material();
@@ -74,6 +74,6 @@ for mat in bpy.data.materials:\n\
 }
 
 void _import_blend_material() {
-	console_toast(tr("Baking material", NULL));
+	console_toast(tr("Baking material"));
 	sys_notify_on_next_frame(&_import_blend_material_on_next_frame, NULL);
 }

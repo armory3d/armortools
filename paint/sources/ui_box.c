@@ -96,11 +96,11 @@ void ui_box_render() {
 			ui_end_element();
 
 			#if defined(IRON_WINDOWS) || defined(IRON_LINUX) || defined(IRON_MACOS)
-			if (ui_box_copyable && ui_icon_button(tr("Copy", NULL), ICON_COPY, UI_ALIGN_CENTER)) {
+			if (ui_box_copyable && ui_icon_button(tr("Copy"), ICON_COPY, UI_ALIGN_CENTER)) {
 				iron_copy_to_clipboard(ui_box_text);
 			}
 			#endif
-			if (ui_icon_button(tr("OK", NULL), ICON_CHECK, UI_ALIGN_CENTER)) {
+			if (ui_icon_button(tr("OK"), ICON_CHECK, UI_ALIGN_CENTER)) {
 				ui_box_hide();
 			}
 			ui_box_window_border();

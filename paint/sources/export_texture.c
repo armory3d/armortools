@@ -100,15 +100,15 @@ void export_texture_run(char *path, bool bake_material) {
 
 #ifdef IRON_IOS
 	if (config_is_iphone()) {
-		console_info(string("%s (\"Files/On My iPhone/%s\")", tr("Textures exported", NULL), manifest_title));
+		console_info(string("%s (\"Files/On My iPhone/%s\")", tr("Textures exported"), manifest_title));
 	}
 	else {
-		console_info(string("%s (\"Files/On My iPad/%s\")", tr("Textures exported", NULL), manifest_title));
+		console_info(string("%s (\"Files/On My iPad/%s\")", tr("Textures exported"), manifest_title));
 	}
 #elif defined(IRON_ANDROID)
-	console_info(string("%s (\"Files/Internal storage/Pictures/%s\")", tr("Textures exported", NULL), manifest_title));
+	console_info(string("%s (\"Files/Internal storage/Pictures/%s\")", tr("Textures exported"), manifest_title));
 #else
-	console_info(tr("Textures exported", NULL));
+	console_info(tr("Textures exported"));
 #endif
 	gc_unroot(ui_files_last_path);
 	ui_files_last_path = "";
@@ -170,7 +170,7 @@ void export_texture_run_layers(char *path, slot_layer_t_array_t *layers, char *o
 	char *f = ui_files_filename;
 #endif
 	if (string_equals(f, "")) {
-		f = string_copy(tr("untitled", NULL));
+		f = string_copy(tr("untitled"));
 	}
 	texture_ldr_format_t format_type = context_raw->format_type;
 	i32                  bits        = base_bits_handle->i == TEXTURE_BITS_BITS8 ? 8 : 16;

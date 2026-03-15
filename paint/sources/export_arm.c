@@ -188,7 +188,7 @@ void export_arm_run_project() {
 	array_insert(recent, 0, recent_path);
 	config_save();
 
-	console_info(tr("Project saved", NULL));
+	console_info(tr("Project saved"));
 }
 
 void export_arm_export_node(ui_node_t *n, asset_t_array_t *assets) {

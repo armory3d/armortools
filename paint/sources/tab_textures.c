@@ -13,7 +13,7 @@ void tab_textures_draw_export_on_next_frame2(gpu_texture_t *target) {
 	char *path = _tab_textures_draw_path;
 	char *f    = ui_files_filename;
 	if (string_equals(f, "")) {
-		f = string_copy(tr("untitled", NULL));
+		f = string_copy(tr("untitled"));
 	}
 	if (!ends_with(f, ".png")) {
 		f = string("%s.png", f);
@@ -42,19 +42,19 @@ void tab_textures_draw_export(char *path) {
 }
 
 void tab_textures_draw_context_menu() {
-	if (ui_menu_button(tr("Export", NULL), "", ICON_EXPORT)) {
+	if (ui_menu_button(tr("Export"), "", ICON_EXPORT)) {
 		ui_files_show("png", true, false, &tab_textures_draw_export);
 	}
-	if (ui_menu_button(tr("Reimport", NULL), "", ICON_SYNC)) {
+	if (ui_menu_button(tr("Reimport"), "", ICON_SYNC)) {
 		project_reimport_texture(_tab_textures_draw_asset);
 	}
-	if (ui_menu_button(tr("To Mask", NULL), "", ICON_MASK)) {
+	if (ui_menu_button(tr("To Mask"), "", ICON_MASK)) {
 		sys_notify_on_next_frame(&tab_textures_draw_to_mask, NULL);
 	}
-	if (ui_menu_button(tr("Set as Envmap", NULL), "", ICON_LANDSCAPE)) {
+	if (ui_menu_button(tr("Set as Envmap"), "", ICON_LANDSCAPE)) {
 		sys_notify_on_next_frame(&tab_textures_draw_set_as_envmap, NULL);
 	}
-	if (ui_menu_button(tr("Set as Color ID Map", NULL), "", ICON_COLOR_ID)) {
+	if (ui_menu_button(tr("Set as Color ID Map"), "", ICON_COLOR_ID)) {
 		context_raw->colorid_handle->i = _tab_textures_draw_i;
 		context_raw->colorid_picked    = false;
 		ui_toolbar_handle->redraws     = 1;
@@ -63,13 +63,13 @@ void tab_textures_draw_context_menu() {
 			context_raw->ddirty       = 2;
 		}
 	}
-	if (ui_menu_button(tr("Delete", NULL), "delete", ICON_DELETE)) {
+	if (ui_menu_button(tr("Delete"), "delete", ICON_DELETE)) {
 		tab_textures_delete_texture(_tab_textures_draw_asset);
 	}
-	if (!_tab_textures_draw_is_packed && ui_menu_button(tr("Open Containing Directory...", NULL), "", ICON_FOLDER_OPEN)) {
+	if (!_tab_textures_draw_is_packed && ui_menu_button(tr("Open Containing Directory..."), "", ICON_FOLDER_OPEN)) {
 		file_start(substring(_tab_textures_draw_asset->file, 0, string_last_index_of(_tab_textures_draw_asset->file, PATH_SEP)));
 	}
-	if (!_tab_textures_draw_is_packed && ui_menu_button(tr("Open in Browser", NULL), "", ICON_NONE)) {
+	if (!_tab_textures_draw_is_packed && ui_menu_button(tr("Open in Browser"), "", ICON_NONE)) {
 		tab_browser_show_directory(substring(_tab_textures_draw_asset->file, 0, string_last_index_of(_tab_textures_draw_asset->file, PATH_SEP)));
 	}
 }
@@ -81,7 +81,7 @@ void tab_textures_draw_import(char *path) {
 
 void tab_textures_draw(ui_handle_t *htab) {
 
-	if (ui_tab(htab, tr("Textures", NULL), false, -1, false) && ui->_window_h > ui_statusbar_default_h * UI_SCALE()) {
+	if (ui_tab(htab, tr("Textures"), false, -1, false) && ui->_window_h > ui_statusbar_default_h * UI_SCALE()) {
 
 		ui_begin_sticky();
 
@@ -93,13 +93,13 @@ void tab_textures_draw(ui_handle_t *htab) {
 		    2);
 		ui_row(row);
 
-		if (ui_icon_button(tr("Import", NULL), ICON_IMPORT, UI_ALIGN_CENTER)) {
+		if (ui_icon_button(tr("Import"), ICON_IMPORT, UI_ALIGN_CENTER)) {
 			ui_files_show(string_array_join(path_texture_formats(), ","), false, true, &tab_textures_draw_import);
 		}
 		if (ui->is_hovered) {
-			ui_tooltip(string("%s (%s)", tr("Import texture file", NULL), (char *)any_map_get(config_keymap, "file_import_assets")));
+			ui_tooltip(string("%s (%s)", tr("Import texture file"), (char *)any_map_get(config_keymap, "file_import_assets")));
 		}
-		if (ui_icon_button(tr("2D View", NULL), ICON_WINDOW, UI_ALIGN_CENTER)) {
+		if (ui_icon_button(tr("2D View"), ICON_WINDOW, UI_ALIGN_CENTER)) {
 			ui_base_show_2d_view(VIEW_2D_TYPE_ASSET);
 		}
 
@@ -181,7 +181,7 @@ void tab_textures_draw(ui_handle_t *htab) {
 					if (ui->is_hovered) {
 						ui_tooltip_image(img, 256);
 						if (is_packed) {
-							ui_tooltip(string("%s %s", asset->name, tr("(packed)", NULL)));
+							ui_tooltip(string("%s %s", asset->name, tr("(packed)")));
 						}
 						else {
 							ui_tooltip(asset->name);
@@ -222,7 +222,7 @@ void tab_textures_draw(ui_handle_t *htab) {
 			rect_t        *r   = resource_tile50(img, ICON_DROP);
 			ui_sub_image(img, ui->ops->theme->BUTTON_COL, r->h, r->x, r->y, r->w, r->h);
 			if (ui->is_hovered) {
-				ui_tooltip(tr("Drag and drop files here", NULL));
+				ui_tooltip(tr("Drag and drop files here"));
 			}
 		}
 

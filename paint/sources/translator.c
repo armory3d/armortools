@@ -9,7 +9,7 @@ char *_tr(char *s) {
 
 // Localizes a string with the given placeholders replaced (format is "{placeholder_name}")
 // If the string isn't available in the translation, this method will return the source English string
-char *tr(char *id, any_map_t *vars) {
+char *vtr(char *id, any_map_t *vars) {
 	char *translation = string_copy(id);
 
 	// English is the source language
@@ -35,6 +35,10 @@ char *tr(char *id, any_map_t *vars) {
 	}
 
 	return translation;
+}
+
+char *tr(char *id) {
+	return vtr(id, NULL);
 }
 
 void translator_load_translations_on_cjk_downloaded(char *url) {

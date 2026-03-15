@@ -17,7 +17,7 @@ void image_to_normal_map_node_button(i32 node_id) {
             "Marigold",
         },
         1);
-	i32 model = ui_combo(ui_nest(h, 0), models, tr("Model", NULL), false, UI_ALIGN_LEFT, true);
+	i32 model = ui_combo(ui_nest(h, 0), models, tr("Model"), false, UI_ALIGN_LEFT, true);
 	if (neural_node_button(node, models->buffer[model])) {
 		ui_node_t     *from_node = neural_from_node(node->inputs->buffer[0], 0);
 		gpu_texture_t *input     = ui_nodes_get_node_preview_image(from_node);

@@ -50,10 +50,10 @@ void tab_scene_import_mesh_done() {
 }
 
 void tab_scene_draw_list_context_menu() {
-	if (ui_menu_button(tr("Duplicate", NULL), "", ICON_DUPLICATE)) {
+	if (ui_menu_button(tr("Duplicate"), "", ICON_DUPLICATE)) {
 		sim_duplicate();
 	}
-	if (ui_menu_button(tr("Delete", NULL), "", ICON_DELETE)) {
+	if (ui_menu_button(tr("Delete"), "", ICON_DELETE)) {
 		sim_delete();
 	}
 }
@@ -137,7 +137,7 @@ void tab_scene_draw_list(ui_handle_t *list_handle, object_t *current_object) {
 }
 
 void tab_scene_draw(ui_handle_t *htab) {
-	if (ui_tab(htab, tr("Scene", NULL), false, -1, false)) {
+	if (ui_tab(htab, tr("Scene"), false, -1, false)) {
 
 		tab_scene_line_counter = 0;
 

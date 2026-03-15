@@ -52,10 +52,10 @@ void base_init() {
 	base_default_font_size = base_theme->FONT_SIZE;
 	translator_load_translations(config_raw->locale);
 	gc_unroot(ui_files_filename);
-	ui_files_filename = string_copy(tr("untitled", NULL));
+	ui_files_filename = string_copy(tr("untitled"));
 	gc_root(ui_files_filename);
 #if defined(IRON_ANDROID) || defined(IRON_IOS)
-	sys_title_set(tr("untitled", NULL));
+	sys_title_set(tr("untitled"));
 #endif
 
 	// Baked font for fast startup
@@ -769,7 +769,7 @@ void ui_base_init_on_next_frame(void *_) {
 
 void ui_base_init() {
 	ui_toolbar_init();
-	context_raw->text_tool_text = string_copy(tr("Text", NULL));
+	context_raw->text_tool_text = string_copy(tr("Text"));
 	ui_header_init();
 	ui_statusbar_init();
 	ui_menubar_init();
@@ -853,25 +853,25 @@ void ui_base_init() {
 void ui_base_menu_draw_viewport_mode() {
 	ui_handle_t *mode_handle = ui_handle(__ID__);
 	mode_handle->i           = context_raw->viewport_mode;
-	ui_text(tr("Viewport Mode", NULL), UI_ALIGN_RIGHT, 0x00000000);
+	ui_text(tr("Viewport Mode"), UI_ALIGN_RIGHT, 0x00000000);
 
 	string_t_array_t *modes = any_array_create_from_raw(
 	    (void *[]){
-	        tr("Lit", NULL),
-	        tr("Base Color", NULL),
-	        tr("Normal", NULL),
-	        tr("Occlusion", NULL),
-	        tr("Roughness", NULL),
-	        tr("Metallic", NULL),
-	        tr("Opacity", NULL),
-	        tr("Height", NULL),
-	        tr("Emission", NULL),
-	        tr("Subsurface", NULL),
-	        tr("TexCoord", NULL),
-	        tr("Object Normal", NULL),
-	        tr("Material ID", NULL),
-	        tr("Object ID", NULL),
-	        tr("Mask", NULL),
+	        tr("Lit"),
+	        tr("Base Color"),
+	        tr("Normal"),
+	        tr("Occlusion"),
+	        tr("Roughness"),
+	        tr("Metallic"),
+	        tr("Opacity"),
+	        tr("Height"),
+	        tr("Emission"),
+	        tr("Subsurface"),
+	        tr("TexCoord"),
+	        tr("Object Normal"),
+	        tr("Material ID"),
+	        tr("Object ID"),
+	        tr("Mask"),
 	    },
 	    15);
 	string_t_array_t *shortcuts = any_array_create_from_raw(
@@ -894,7 +894,7 @@ void ui_base_menu_draw_viewport_mode() {
 	    },
 	    15);
 	if (gpu_raytrace_supported()) {
-		any_array_push(modes, tr("Path Traced", NULL));
+		any_array_push(modes, tr("Path Traced"));
 		any_array_push(shortcuts, "p");
 	}
 	for (i32 i = 0; i < modes->length; ++i) {
@@ -1713,7 +1713,7 @@ void ui_base_render(void *_) {
 		ui->input_enabled = true;
 		ui_begin(ui);
 		if (ui_window(ui_handle(__ID__), 0, 0, 150, math_floor(UI_ELEMENT_H() + UI_ELEMENT_OFFSET() + 1), false)) {
-			if (ui_button(tr("Close", NULL), UI_ALIGN_CENTER, "")) {
+			if (ui_button(tr("Close"), UI_ALIGN_CENTER, "")) {
 				ui_base_toggle_distract_free();
 			}
 		}

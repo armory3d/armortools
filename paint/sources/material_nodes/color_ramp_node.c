@@ -105,11 +105,11 @@ void nodes_material_color_ramp_button(i32 node_id) {
 	}
 	string_t_array_t *interpolate_combo = any_array_create_from_raw(
 	    (void *[]){
-	        tr("Linear", NULL),
-	        tr("Constant", NULL),
+	        tr("Linear"),
+	        tr("Constant"),
 	    },
 	    2);
-	but->data->buffer[0] = ui_combo(h, interpolate_combo, tr("Interpolate", NULL), false, UI_ALIGN_LEFT, true);
+	but->data->buffer[0] = ui_combo(h, interpolate_combo, tr("Interpolate"), false, UI_ALIGN_LEFT, true);
 	ui_row2();
 	i32 i = math_floor(ui_slider(ihandle, "Index", 0, (vals->length / (float)5) - 1, false, 1, true, UI_ALIGN_LEFT, true));
 	if (i >= (vals->length * 5) || i < 0) {

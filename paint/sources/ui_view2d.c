@@ -125,8 +125,8 @@ void ui_view2d_render(void *_) {
 
 		if (!config_raw->touch_ui) {
 			bool expand = !base_view3d_show && !ui_nodes_show && config_raw->layout->buffer[LAYOUT_SIZE_SIDEBAR_W] == 0;
-			ui_tab(ui_view2d_htab, expand ? string("%s          ", tr("2D View", NULL)) : tr("2D View", NULL), false, -1, !base_view3d_show);
-			if (ui_tab(ui_view2d_htab, tr("+", NULL), false, -1, false)) {
+			ui_tab(ui_view2d_htab, expand ? string("%s          ", tr("2D View")) : tr("2D View"), false, -1, !base_view3d_show);
+			if (ui_tab(ui_view2d_htab, tr("+"), false, -1, false)) {
 				ui_view2d_htab->i = 0;
 			}
 		}
@@ -310,11 +310,11 @@ void ui_view2d_render(void *_) {
 			}
 			string_t_array_t *layer_mode_combo = any_array_create_from_raw(
 			    (void *[]){
-			        tr("Visible", NULL),
-			        tr("Selected", NULL),
+			        tr("Visible"),
+			        tr("Selected"),
 			    },
 			    2);
-			ui_view2d_layer_mode = ui_combo(h_layer_mode, layer_mode_combo, tr("Layers", NULL), false, UI_ALIGN_LEFT, true);
+			ui_view2d_layer_mode = ui_combo(h_layer_mode, layer_mode_combo, tr("Layers"), false, UI_ALIGN_LEFT, true);
 			ui->_x += ew + 3;
 			ui->_y = 2 + start_y;
 
@@ -325,13 +325,13 @@ void ui_view2d_render(void *_) {
 				}
 				string_t_array_t *tex_type_combo = any_array_create_from_raw(
 				    (void *[]){
-				        tr("Base Color", NULL),
-						tr("Opacity", NULL),
-				        tr("Normal Map", NULL),
-				        tr("Occlusion", NULL),
-				        tr("Roughness", NULL),
-				        tr("Metallic", NULL),
-				        tr("Height", NULL),
+				        tr("Base Color"),
+						tr("Opacity"),
+				        tr("Normal Map"),
+				        tr("Occlusion"),
+				        tr("Roughness"),
+				        tr("Metallic"),
+				        tr("Height"),
 				    },
 				    7);
 
@@ -343,7 +343,7 @@ void ui_view2d_render(void *_) {
 					array_splice(tex_type_combo, 2, 1);
 				}
 
-				ui_view2d_tex_type = ui_combo(h_tex_type, tex_type_combo, tr("Texture", NULL), false, UI_ALIGN_LEFT, true);
+				ui_view2d_tex_type = ui_combo(h_tex_type, tex_type_combo, tr("Texture"), false, UI_ALIGN_LEFT, true);
 				ui->_x += ew + 3;
 				ui->_y = 2 + start_y;
 			}
@@ -353,7 +353,7 @@ void ui_view2d_render(void *_) {
 			if (h_uvmap_show->init) {
 				h_uvmap_show->b = ui_view2d_uvmap_show;
 			}
-			ui_view2d_uvmap_show = ui_check(h_uvmap_show, tr("UV Map", NULL), "");
+			ui_view2d_uvmap_show = ui_check(h_uvmap_show, tr("UV Map"), "");
 			ui->_x += ew * 0.7 + 3;
 			ui->_y = 2 + start_y;
 		}
@@ -363,7 +363,7 @@ void ui_view2d_render(void *_) {
 		if (h_tiled_show->init) {
 			h_tiled_show->b = ui_view2d_tiled_show;
 		}
-		ui_view2d_tiled_show = ui_check(h_tiled_show, tr("Tiled", NULL), "");
+		ui_view2d_tiled_show = ui_check(h_tiled_show, tr("Tiled"), "");
 		ui->_x += ew * 0.6 + 3;
 		ui->_y = 2 + start_y;
 

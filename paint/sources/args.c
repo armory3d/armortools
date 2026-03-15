@@ -85,7 +85,7 @@ void args_run_on_next_frame(void *_) {
 
 	if (args_export_textures) {
 		if (!path_is_folder(args_export_textures_path)) {
-			iron_log(tr("Invalid export directory", NULL));
+			iron_log(tr("Invalid export directory"));
 		}
 
 		if (string_equals(args_export_textures_type, "png")) {
@@ -103,7 +103,7 @@ void args_run_on_next_frame(void *_) {
 			base_bits_handle->i = TEXTURE_BITS_BITS32;
 		}
 		else {
-			iron_log(tr("Invalid texture type", NULL));
+			iron_log(tr("Invalid texture type"));
 		}
 
 		context_raw->layers_export = EXPORT_MODE_VISIBLE;
@@ -136,12 +136,12 @@ void args_run_on_next_frame(void *_) {
 	}
 	else if (args_export_mesh) {
 		if (!path_is_folder(args_export_mesh_path)) {
-			iron_log(tr("Invalid export directory", NULL));
+			iron_log(tr("Invalid export directory"));
 		}
 
 		char *f = ui_files_filename;
 		if (string_equals(f, "")) {
-			f = string_copy(tr("untitled", NULL));
+			f = string_copy(tr("untitled"));
 		}
 		export_mesh_run(string("%s%s%s", args_export_mesh_path, PATH_SEP, f), NULL, false, true);
 	}

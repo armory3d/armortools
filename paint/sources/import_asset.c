@@ -11,9 +11,9 @@ void import_asset_run_cache_cloud_done(char *abs) {
 void import_asset_run(char *path, f32 drop_x, f32 drop_y, bool show_box, bool hdr_as_envmap, void (*done)(void)) {
 	if (starts_with(path, "cloud")) {
 		#ifdef IRON_ANDROID
-		console_toast(tr("Downloading", NULL));
+		console_toast(tr("Downloading"));
 		#else
-		console_info(tr("Downloading", NULL));
+		console_info(tr("Downloading"));
 		#endif
 
 		_import_asset_drop_x        = drop_x;

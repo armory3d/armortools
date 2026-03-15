@@ -22,7 +22,7 @@ void nodes_material_new_group_button(i32 node_id) {
 	ui_node_t *node = ui_get_node(ui_nodes_get_canvas(true)->nodes, node_id);
 	if (string_equals(node->name, "New Group")) {
 		for (i32 i = 1; i < 999; ++i) {
-			node->name = string("%s %s", tr("Group", NULL), i32_to_string(i));
+			node->name = string("%s %s", tr("Group"), i32_to_string(i));
 			bool found = false;
 			for (i32 i = 0; i < project_material_groups->length; ++i) {
 				node_group_t *g     = project_material_groups->buffer[i];
@@ -88,7 +88,7 @@ void nodes_material_new_group_button(i32 node_id) {
 			break;
 		}
 	}
-	if (ui_button(tr("Nodes", NULL), UI_ALIGN_CENTER, "")) {
+	if (ui_button(tr("Nodes"), UI_ALIGN_CENTER, "")) {
 		any_array_push(ui_nodes_group_stack, group);
 	}
 }
@@ -111,22 +111,22 @@ void nodes_material_add_socket_menu_draw() {
 	ui_node_socket_t_array_t *sockets     = _nodes_material_sockets;
 	node_group_t_array_t     *group_stack = ui_nodes_group_stack;
 	ui_node_canvas_t         *c           = group_stack->buffer[group_stack->length - 1]->canvas;
-	if (ui_menu_button(tr("RGBA", NULL), "", ICON_NONE)) {
+	if (ui_menu_button(tr("RGBA"), "", ICON_NONE)) {
 		any_array_push(sockets, nodes_material_create_socket(nodes, node, NULL, "RGBA", c, 0.0, 1.0, NULL));
 		nodes_material_sync_sockets(node);
 	}
-	if (ui_menu_button(tr("Vector", NULL), "", ICON_NONE)) {
+	if (ui_menu_button(tr("Vector"), "", ICON_NONE)) {
 		any_array_push(sockets, nodes_material_create_socket(nodes, node, NULL, "VECTOR", c, 0.0, 1.0, NULL));
 		nodes_material_sync_sockets(node);
 	}
-	if (ui_menu_button(tr("Value", NULL), "", ICON_NONE)) {
+	if (ui_menu_button(tr("Value"), "", ICON_NONE)) {
 		any_array_push(sockets, nodes_material_create_socket(nodes, node, NULL, "VALUE", c, 0.0, 1.0, NULL));
 		nodes_material_sync_sockets(node);
 	}
 }
 
 void nodes_material_add_socket_button(ui_nodes_t *nodes, ui_node_t *node, ui_node_socket_t_array_t *sockets) {
-	if (ui_button(tr("Add", NULL), UI_ALIGN_CENTER, "")) {
+	if (ui_button(tr("Add"), UI_ALIGN_CENTER, "")) {
 		gc_unroot(_nodes_material_nodes);
 		_nodes_material_nodes = nodes;
 		gc_root(_nodes_material_nodes);

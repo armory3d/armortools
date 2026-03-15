@@ -11,7 +11,7 @@ void tab_fonts_draw_make_font_preview(void * _) {
 
 void tab_fonts_draw_context_menu_draw() {
 	i32 i = _tab_fonts_draw_i;
-	if (project_fonts->length > 1 && ui_menu_button(tr("Delete", NULL), "delete", ICON_DELETE) && !string_equals(project_fonts->buffer[i]->file, "")) {
+	if (project_fonts->length > 1 && ui_menu_button(tr("Delete"), "delete", ICON_DELETE) && !string_equals(project_fonts->buffer[i]->file, "")) {
 		tab_fonts_delete_font(project_fonts->buffer[i]);
 	}
 }
@@ -27,7 +27,7 @@ void tab_fonts_draw_select_font(void * _) {
 }
 
 void tab_fonts_draw(ui_handle_t *htab) {
-	if (ui_tab(htab, tr("Fonts", NULL), false, -1, false) && ui->_window_h > ui_statusbar_default_h * UI_SCALE()) {
+	if (ui_tab(htab, tr("Fonts"), false, -1, false) && ui->_window_h > ui_statusbar_default_h * UI_SCALE()) {
 
 		ui_begin_sticky();
 		f32_array_t *row = f32_array_create_from_raw(
@@ -38,14 +38,14 @@ void tab_fonts_draw(ui_handle_t *htab) {
 		    2);
 		ui_row(row);
 
-		if (ui_icon_button(tr("Import", NULL), ICON_IMPORT, UI_ALIGN_CENTER)) {
+		if (ui_icon_button(tr("Import"), ICON_IMPORT, UI_ALIGN_CENTER)) {
 			project_import_asset("ttf,ttc,otf", true);
 		}
 		if (ui->is_hovered) {
-			ui_tooltip(tr("Import font file", NULL));
+			ui_tooltip(tr("Import font file"));
 		}
 
-		if (ui_icon_button(tr("2D View", NULL), ICON_WINDOW, UI_ALIGN_CENTER)) {
+		if (ui_icon_button(tr("2D View"), ICON_WINDOW, UI_ALIGN_CENTER)) {
 			ui_base_show_2d_view(VIEW_2D_TYPE_FONT);
 		}
 		ui_end_sticky();

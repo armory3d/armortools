@@ -48,7 +48,7 @@ void sim_play() {
 
 	if (sim_record) {
 		if (string_equals(project_filepath, "")) {
-			console_error(tr("Save project first", NULL));
+			console_error(tr("Save project first"));
 			sim_record = false;
 			return;
 		}

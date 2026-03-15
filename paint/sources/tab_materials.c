@@ -7,7 +7,7 @@ void tab_materials_draw(ui_handle_t *htab) {
 }
 
 void tab_materials_draw_mini(ui_handle_t *htab) {
-	ui_set_hovered_tab_name(tr("Materials", NULL));
+	ui_set_hovered_tab_name(tr("Materials"));
 
 	ui_begin_sticky();
 	ui_separator(5, true);
@@ -21,7 +21,7 @@ void tab_materials_draw_mini(ui_handle_t *htab) {
 }
 
 void tab_materials_draw_full(ui_handle_t *htab) {
-	if (ui_tab(htab, tr("Materials", NULL), false, -1, false)) {
+	if (ui_tab(htab, tr("Materials"), false, -1, false)) {
 		ui_begin_sticky();
 		f32_array_t *row = f32_array_create_from_raw(
 		    (f32[]){
@@ -32,8 +32,8 @@ void tab_materials_draw_full(ui_handle_t *htab) {
 		    3);
 		ui_row(row);
 
-		tab_materials_button_new(tr("New", NULL));
-		if (ui_icon_button(tr("Import", NULL), ICON_IMPORT, UI_ALIGN_CENTER)) {
+		tab_materials_button_new(tr("New"));
+		if (ui_icon_button(tr("Import"), ICON_IMPORT, UI_ALIGN_CENTER)) {
 			project_import_material();
 		}
 		tab_materials_button_nodes();
@@ -45,11 +45,11 @@ void tab_materials_draw_full(ui_handle_t *htab) {
 }
 
 void tab_materials_button_nodes() {
-	if (ui_button(tr("Nodes", NULL), UI_ALIGN_CENTER, "")) {
+	if (ui_button(tr("Nodes"), UI_ALIGN_CENTER, "")) {
 		ui_base_show_material_nodes();
 	}
 	else if (ui->is_hovered) {
-		ui_tooltip(string("%s (%s)", tr("Show Node Editor", NULL), (char *)any_map_get(config_keymap, "toggle_node_editor")));
+		ui_tooltip(string("%s (%s)", tr("Show Node Editor"), (char *)any_map_get(config_keymap, "toggle_node_editor")));
 	}
 }
 
@@ -67,26 +67,26 @@ void tab_materials_draw_slots_menu() {
 	i32              i = _tab_materials_draw_slots;
 	slot_material_t *m = project_materials->buffer[i];
 
-	if (ui_menu_button(tr("To Fill Layer", NULL), "", ICON_SPHERE)) {
+	if (ui_menu_button(tr("To Fill Layer"), "", ICON_SPHERE)) {
 		context_select_material(i);
 		layers_create_fill_layer(UV_TYPE_UVMAP, mat4nan, -1);
 	}
 
-	if (ui_menu_button(tr("Export", NULL), "", ICON_EXPORT)) {
+	if (ui_menu_button(tr("Export"), "", ICON_EXPORT)) {
 		context_select_material(i);
 		box_export_show_material();
 	}
 
-	if (ui_menu_button(tr("Bake", NULL), "", ICON_BAKE)) {
+	if (ui_menu_button(tr("Bake"), "", ICON_BAKE)) {
 		context_select_material(i);
 		box_export_show_bake_material();
 	}
 
-	if (ui_menu_button(tr("Duplicate", NULL), "", ICON_DUPLICATE)) {
+	if (ui_menu_button(tr("Duplicate"), "", ICON_DUPLICATE)) {
 		sys_notify_on_next_frame(&tab_materials_draw_slots_duplicate, NULL);
 	}
 
-	if (project_materials->length > 1 && ui_menu_button(tr("Delete", NULL), "delete", ICON_DELETE)) {
+	if (project_materials->length > 1 && ui_menu_button(tr("Delete"), "delete", ICON_DELETE)) {
 		tab_materials_delete_material(m);
 	}
 
@@ -137,23 +137,23 @@ void tab_materials_draw_slots_menu() {
 
 	ui_menu_separator();
 	ui_menu_align();
-	ui_menu_label(tr("Channels", NULL), NULL);
+	ui_menu_label(tr("Channels"), NULL);
 	ui_menu_align();
 	ui_row2();
-	m->paint_base = ui_check(base_handle, tr("Base Color", NULL), "");
-	m->paint_opac = ui_check(opac_handle, tr("Opacity", NULL), "");
+	m->paint_base = ui_check(base_handle, tr("Base Color"), "");
+	m->paint_opac = ui_check(opac_handle, tr("Opacity"), "");
 
 	if (config_raw->workflow == WORKFLOW_PBR) {
 		ui_row2();
-		m->paint_nor    = ui_check(nor_handle, tr("Normal", NULL), "");
-		m->paint_height = ui_check(height_handle, tr("Height", NULL), "");
+		m->paint_nor    = ui_check(nor_handle, tr("Normal"), "");
+		m->paint_height = ui_check(height_handle, tr("Height"), "");
 		ui_row2();
-		m->paint_rough = ui_check(rough_handle, tr("Roughness", NULL), "");
-		m->paint_met   = ui_check(met_handle, tr("Metallic", NULL), "");
+		m->paint_rough = ui_check(rough_handle, tr("Roughness"), "");
+		m->paint_met   = ui_check(met_handle, tr("Metallic"), "");
 		ui_row2();
-		m->paint_emis = ui_check(emis_handle, tr("Emission", NULL), "");
-		m->paint_subs = ui_check(subs_handle, tr("Subsurface", NULL), "");
-		m->paint_occ  = ui_check(occ_handle, tr("Occlusion", NULL), "");
+		m->paint_emis = ui_check(emis_handle, tr("Emission"), "");
+		m->paint_subs = ui_check(subs_handle, tr("Subsurface"), "");
+		m->paint_occ  = ui_check(occ_handle, tr("Occlusion"), "");
 	}
 
 	if (base_handle->changed || opac_handle->changed || nor_handle->changed || occ_handle->changed || rough_handle->changed || met_handle->changed ||
