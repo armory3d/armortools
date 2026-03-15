@@ -356,8 +356,8 @@ void tab_materials_accept_swatch_drop(swatch_color_t *swatch) {
 	for (i32 i = 0; i < context_raw->material->canvas->nodes->length; ++i) {
 		ui_node_t *node = context_raw->material->canvas->nodes->buffer[i];
 		if (string_equals(node->type, "RGB")) {
-			node->outputs->buffer[0]->default_value = f32_array_create_xyzw(color_get_rb(swatch->base) / (float)255, color_get_gb(swatch->base) / (float)255,
-			                                                                color_get_bb(swatch->base) / (float)255, color_get_ab(swatch->base) / (float)255);
+			node->outputs->buffer[0]->default_value = f32_array_create_xyzw(color_get_rb(swatch->base) / 255.0, color_get_gb(swatch->base) / 255.0,
+			                                                                color_get_bb(swatch->base) / 255.0, color_get_ab(swatch->base) / 255.0);
 		}
 		else if (string_equals(node->type, "OUTPUT_MATERIAL_PBR")) {
 			node->inputs->buffer[1]->default_value->buffer[0] = swatch->opacity;

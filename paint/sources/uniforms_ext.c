@@ -40,7 +40,7 @@ f32 uniforms_ext_f32_link(object_t *object, material_data_t *mat, char *link) {
 		f32  brush_decal_mask_radius = context_raw->brush_decal_mask_radius;
 		brush_decal_mask_radius *= context_raw->paint2d ? 0.55 * ui_view2d_pan_scale : 2.0;
 		f32 radius = decal_mask ? brush_decal_mask_radius : context_raw->brush_radius;
-		f32 val    = (radius * context_raw->brush_nodes_radius) / (float)15.0;
+		f32 val    = (radius * context_raw->brush_nodes_radius) / 15.0;
 		if (config_raw->pressure_radius && pen_down("tip")) {
 			val *= pen_pressure * config_raw->pressure_sensitivity;
 		}
@@ -172,7 +172,7 @@ vec2_t uniforms_ext_vec2_link(object_t *object, material_data_t *mat, char *link
 	else if (string_equals(link, "_brush_angle")) {
 		f32 brush_angle = context_raw->brush_angle + context_raw->brush_nodes_angle;
 		f32 angle       = context_raw->layer->fill_layer != NULL ? context_raw->layer->angle : brush_angle;
-		angle *= (math_pi() / (float)180);
+		angle *= (math_pi() / 180.0);
 		if (config_raw->pressure_angle && pen_down("tip")) {
 			angle *= pen_pressure * config_raw->pressure_sensitivity;
 		}
@@ -196,7 +196,7 @@ vec4_t uniforms_ext_vec3_link(object_t *object, material_data_t *mat, char *link
 			x     = uniforms_ext_vec2d(x);
 			lastx = uniforms_ext_vec2d(lastx);
 		}
-		f32 angle                     = math_atan2(-y + lasty, x - lastx) - math_pi() / (float)2;
+		f32 angle                     = math_atan2(-y + lasty, x - lastx) - math_pi() / 2.0;
 		v                             = vec4_create(math_cos(angle), math_sin(angle), allow_paint ? 1 : 0, 1.0);
 		context_raw->prev_paint_vec_x = context_raw->last_paint_vec_x;
 		context_raw->prev_paint_vec_y = context_raw->last_paint_vec_y;
@@ -215,14 +215,14 @@ vec4_t uniforms_ext_vec3_link(object_t *object, material_data_t *mat, char *link
 	}
 	else if (string_equals(link, "_picker_base")) {
 		v = _uniforms_vec;
-		v = vec4_create(color_get_rb(context_raw->picked_color->base) / (float)255, color_get_gb(context_raw->picked_color->base) / (float)255,
-		                color_get_bb(context_raw->picked_color->base) / (float)255, 1.0);
+		v = vec4_create(color_get_rb(context_raw->picked_color->base) / 255.0, color_get_gb(context_raw->picked_color->base) / 255.0,
+		                color_get_bb(context_raw->picked_color->base) / 255.0, 1.0);
 		return v;
 	}
 	else if (string_equals(link, "_picker_normal")) {
 		v = _uniforms_vec;
-		v = vec4_create(color_get_rb(context_raw->picked_color->normal) / (float)255, color_get_gb(context_raw->picked_color->normal) / (float)255,
-		                color_get_bb(context_raw->picked_color->normal) / (float)255, 1.0);
+		v = vec4_create(color_get_rb(context_raw->picked_color->normal) / 255.0, color_get_gb(context_raw->picked_color->normal) / 255.0,
+		                color_get_bb(context_raw->picked_color->normal) / 255.0, 1.0);
 		return v;
 	}
 	else if (string_equals(link, "_particle_hit")) {
@@ -282,7 +282,7 @@ vec4_t uniforms_ext_vec4_link(object_t *object, material_data_t *mat, char *link
 	}
 	else if (string_equals(link, "_decal_mask")) {
 		bool decal_mask = context_is_decal_mask_paint();
-		f32  val        = (context_raw->brush_radius * context_raw->brush_nodes_radius) / (float)15.0;
+		f32  val        = (context_raw->brush_radius * context_raw->brush_nodes_radius) / 15.0;
 		f32  scale2d    = (900 / (float)base_h()) * config_raw->window_scale;
 		val *= scale2d; // Projection ratio
 		vec4_t v = vec4_create(context_raw->decal_x, context_raw->decal_y, decal_mask ? 1 : 0, val);

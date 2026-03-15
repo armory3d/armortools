@@ -10,7 +10,7 @@ void tab_layers_draw_mini(ui_handle_t *htab) {
 	ui_set_hovered_tab_name(tr("Layers"));
 
 	i32 _ELEMENT_H            = ui->ops->theme->ELEMENT_H;
-	ui->ops->theme->ELEMENT_H = math_floor(ui_sidebar_w_mini / (float)2 / (float)UI_SCALE());
+	ui->ops->theme->ELEMENT_H = math_floor(ui_sidebar_w_mini / 2.0 / (float)UI_SCALE());
 
 	ui_begin_sticky();
 	ui_separator(5, true);
@@ -287,7 +287,7 @@ void tab_layers_draw_layer_slot(slot_layer_t *l, i32 i, bool mini) {
 	}
 
 	i32 step   = ui->ops->theme->ELEMENT_H;
-	f32 checkw = (ui->_window_w / (float)100 * 8) / (float)UI_SCALE();
+	f32 checkw = (ui->_window_w / 100.0 * 8) / (float)UI_SCALE();
 
 	// Highlight drag destination
 	f32 absy = ui->_window_y + ui->_y;
@@ -351,7 +351,7 @@ void tab_layers_draw_layer_slot_full_delete_layer(void *_) {
 
 void tab_layers_draw_layer_slot_full(slot_layer_t *l, i32 i) {
 	i32 step   = ui->ops->theme->ELEMENT_H;
-	f32 center = (step / (float)2) * UI_SCALE();
+	f32 center = (step / 2.0) * UI_SCALE();
 	f32 uiw    = ui->_w;
 	f32 uix    = ui->_x;
 	f32 uiy    = ui->_y;
@@ -625,10 +625,10 @@ ui_state_t tab_layers_draw_layer_icon(slot_layer_t *l, i32 i, f32 uix, f32 uiy, 
 	}
 
 	if (l->parent != NULL) {
-		ui->_x += (icon_h - icon_h * 0.9) / (float)2;
+		ui->_x += (icon_h - icon_h * 0.9) / 2.0;
 		icon_h *= 0.9;
 		if (l->parent->parent != NULL) {
-			ui->_x += (icon_h - icon_h * 0.9) / (float)2;
+			ui->_x += (icon_h - icon_h * 0.9) / 2.0;
 			icon_h *= 0.9;
 		}
 	}

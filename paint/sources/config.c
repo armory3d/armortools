@@ -271,8 +271,8 @@ void config_init_layout() {
 	i32_array_t *new_layout = i32_array_create_from_raw((i32[]){}, 0);
 
 	i32_array_push(new_layout, math_floor(ui_sidebar_default_w * raw->window_scale)); // LayoutSidebarW
-	i32_array_push(new_layout, math_floor(iron_window_height() / (float)2));          // LayoutSidebarH0
-	i32_array_push(new_layout, math_floor(iron_window_height() / (float)2));          // LayoutSidebarH1
+	i32_array_push(new_layout, math_floor(iron_window_height() / 2.0));          // LayoutSidebarH0
+	i32_array_push(new_layout, math_floor(iron_window_height() / 2.0));          // LayoutSidebarH1
 
 #ifdef IRON_IOS
 	i32_array_push(new_layout, show2d ? math_floor((sys_w() + raw->layout->buffer[LAYOUT_SIZE_NODES_W]) * 0.473) : math_floor(sys_w() * 0.473)); // LayoutNodesW
@@ -284,7 +284,7 @@ void config_init_layout() {
 	                      : math_floor(sys_w() * 0.515)); // Align with ui header controls
 #endif
 
-	i32_array_push(new_layout, math_floor(sys_h() / (float)2));                         // LayoutNodesH
+	i32_array_push(new_layout, math_floor(sys_h() / 2.0));                         // LayoutNodesH
 	i32_array_push(new_layout, math_floor(ui_statusbar_default_h * raw->window_scale)); // LayoutStatusH
 
 #if defined(IRON_ANDROID) || defined(IRON_IOS)
@@ -427,11 +427,11 @@ i32 config_get_scene_atlas_res() {
 }
 
 i32 config_get_texture_res_x() {
-	return context_raw->project_aspect_ratio == 2 ? math_floor(config_get_texture_res() / (float)2) : config_get_texture_res();
+	return context_raw->project_aspect_ratio == 2 ? math_floor(config_get_texture_res() / 2.0) : config_get_texture_res();
 }
 
 i32 config_get_texture_res_y() {
-	return context_raw->project_aspect_ratio == 1 ? math_floor(config_get_texture_res() / (float)2) : config_get_texture_res();
+	return context_raw->project_aspect_ratio == 1 ? math_floor(config_get_texture_res() / 2.0) : config_get_texture_res();
 }
 
 i32 config_get_texture_res_pos(i32 i) {

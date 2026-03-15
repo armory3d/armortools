@@ -12,7 +12,7 @@ char *color_ramp_node_vector(ui_node_t *node, ui_node_socket_t *socket) {
 	i32          data0  = node->buttons->buffer[0]->data->buffer[0];
 	char        *interp = data0 == 0 ? "LINEAR" : "CONSTANT";
 	f32_array_t *elems  = node->buttons->buffer[0]->default_value;
-	i32          len    = elems->length / (float)5;
+	i32          len    = elems->length / 5.0;
 	if (len == 1) {
 		return parser_material_vec3(elems);
 	}
@@ -66,7 +66,7 @@ void nodes_material_color_ramp_button(i32 node_id) {
 	f32_array_t      *vals    = but->default_value; // [r, g, b, a, pos, r, g, b, a, pos, ..]
 	f32               sw      = ui->_w / (float)UI_NODES_SCALE();
 	// Preview
-	for (i32 i = 0; i < vals->length / (float)5; ++i) {
+	for (i32 i = 0; i < vals->length / 5.0; ++i) {
 		f32 pos = vals->buffer[i * 5 + 4];
 		i32 col = color_from_floats(vals->buffer[i * 5 + 0], vals->buffer[i * 5 + 1], vals->buffer[i * 5 + 2], 1.0);
 		ui_fill(pos * sw, 0, (1.0 - pos) * sw, UI_LINE_H() - 2 * UI_NODES_SCALE(), col);
@@ -76,9 +76,9 @@ void nodes_material_color_ramp_button(i32 node_id) {
 	ui_handle_t *ihandle = ui_nest(ui_nest(nhandle, 0), 2);
 	f32_array_t *row     = f32_array_create_from_raw(
         (f32[]){
-            1 / (float)4,
-            1 / (float)4,
-            2 / (float)4,
+            1 / 4.0,
+            1 / 4.0,
+            2 / 4.0,
         },
         3);
 	ui_row(row);
@@ -111,9 +111,9 @@ void nodes_material_color_ramp_button(i32 node_id) {
 	    2);
 	but->data->buffer[0] = ui_combo(h, interpolate_combo, tr("Interpolate"), false, UI_ALIGN_LEFT, true);
 	ui_row2();
-	i32 i = math_floor(ui_slider(ihandle, "Index", 0, (vals->length / (float)5) - 1, false, 1, true, UI_ALIGN_LEFT, true));
+	i32 i = math_floor(ui_slider(ihandle, "Index", 0, (vals->length / 5.0) - 1, false, 1, true, UI_ALIGN_LEFT, true));
 	if (i >= (vals->length * 5) || i < 0) {
-		ihandle->f = i = (vals->length / (float)5) - 1; // Stay in bounds
+		ihandle->f = i = (vals->length / 5.0) - 1; // Stay in bounds
 	}
 	ui_nest(ui_nest(nhandle, 0), 3)->f = vals->buffer[i * 5 + 4];
 	vals->buffer[i * 5 + 4]            = ui_slider(ui_nest(ui_nest(nhandle, 0), 3), "Pos", 0, 1, true, 100, true, UI_ALIGN_LEFT, true);
@@ -131,7 +131,7 @@ void nodes_material_color_ramp_button(i32 node_id) {
 		nodes->_input_started = ui->input_started = false;
 		ui_nodes_rgba_popup(chandle, vals->buffer + i * 5, math_floor(rx), math_floor(ry + UI_ELEMENT_H()));
 	}
-	vals->buffer[i * 5 + 0] = color_get_rb(chandle->color) / (float)255;
-	vals->buffer[i * 5 + 1] = color_get_gb(chandle->color) / (float)255;
-	vals->buffer[i * 5 + 2] = color_get_bb(chandle->color) / (float)255;
+	vals->buffer[i * 5 + 0] = color_get_rb(chandle->color) / 255.0;
+	vals->buffer[i * 5 + 1] = color_get_gb(chandle->color) / 255.0;
+	vals->buffer[i * 5 + 2] = color_get_bb(chandle->color) / 255.0;
 }

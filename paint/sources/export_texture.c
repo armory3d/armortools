@@ -375,7 +375,7 @@ void export_texture_run_layers(char *path, slot_layer_t_array_t *layers, char *o
 		}
 		else {
 			if (pix == NULL) {
-				pix = buffer_create(texture_size_x * texture_size_y * 4 * math_floor(bits / (float)8));
+				pix = buffer_create(texture_size_x * texture_size_y * 4 * math_floor(bits / 8.0));
 			}
 			for (i32 i = 0; i < 4; ++i) {
 				char *c = t->channels->buffer[i];
@@ -512,7 +512,7 @@ void export_texture_copy_channel(buffer_t *from, i32 from_channel, buffer_t *to,
 #ifdef IRON_BGRA
 	from_channel = _export_texture_channel_bgra_swap(from_channel);
 #endif
-	for (i32 i = 0; i < math_floor((to->length) / (float)4); ++i) {
+	for (i32 i = 0; i < math_floor((to->length) / 4.0); ++i) {
 		buffer_set_u8(to, i * 4 + to_channel, buffer_get_u8(from, i * 4 + from_channel));
 	}
 	if (!linear) {
@@ -524,7 +524,7 @@ void export_texture_copy_channel_inv(buffer_t *from, i32 from_channel, buffer_t 
 #ifdef IRON_BGRA
 	from_channel = _export_texture_channel_bgra_swap(from_channel);
 #endif
-	for (i32 i = 0; i < math_floor((to->length) / (float)4); ++i) {
+	for (i32 i = 0; i < math_floor((to->length) / 4.0); ++i) {
 		buffer_set_u8(to, i * 4 + to_channel, 255 - buffer_get_u8(from, i * 4 + from_channel));
 	}
 	if (!linear) {
@@ -536,7 +536,7 @@ void export_texture_extract_channel(buffer_t *from, i32 from_channel, buffer_t *
 #ifdef IRON_BGRA
 	from_channel = _export_texture_channel_bgra_swap(from_channel);
 #endif
-	for (i32 i = 0; i < math_floor((to->length) / (float)4); ++i) {
+	for (i32 i = 0; i < math_floor((to->length) / 4.0); ++i) {
 		buffer_set_u8(to, i * 4 + to_channel, buffer_get_u8(from, i * 4 + from_channel) % step == mask ? 255 : 0);
 	}
 	if (!linear) {
@@ -545,7 +545,7 @@ void export_texture_extract_channel(buffer_t *from, i32 from_channel, buffer_t *
 }
 
 void export_texture_set_channel(i32 value, buffer_t *to, i32 to_channel, bool linear) {
-	for (i32 i = 0; i < math_floor((to->length) / (float)4); ++i) {
+	for (i32 i = 0; i < math_floor((to->length) / 4.0); ++i) {
 		buffer_set_u8(to, i * 4 + to_channel, value);
 	}
 	if (!linear) {
@@ -554,7 +554,7 @@ void export_texture_set_channel(i32 value, buffer_t *to, i32 to_channel, bool li
 }
 
 void export_texture_to_srgb(buffer_t *to, i32 to_channel) {
-	for (i32 i = 0; i < math_floor((to->length) / (float)4); ++i) {
-		buffer_set_u8(to, i * 4 + to_channel, math_floor(math_pow(buffer_get_u8(to, i * 4 + to_channel) / (float)255, export_texture_gamma) * 255));
+	for (i32 i = 0; i < math_floor((to->length) / 4.0); ++i) {
+		buffer_set_u8(to, i * 4 + to_channel, math_floor(math_pow(buffer_get_u8(to, i * 4 + to_channel) / 255.0, export_texture_gamma) * 255));
 	}
 }

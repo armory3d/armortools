@@ -153,13 +153,13 @@ void export_arm_run_project() {
 	gpu_texture_t   *mesh_icon = gpu_create_render_target(256, 256, GPU_TEXTURE_FORMAT_RGBA32);
 	f32              r         = sys_w() / (float)sys_h();
 	draw_begin(mesh_icon, false, 0);
-	draw_scaled_image(tex, -(256 * r - 256) / (float)2, 0, 256 * r, 256);
+	draw_scaled_image(tex, -(256 * r - 256) / 2.0, 0, 256 * r, 256);
 	draw_end();
 
 	buffer_t   *mesh_icon_pixels = gpu_get_texture_pixels(mesh_icon);
 	u8_array_t *u8a              = mesh_icon_pixels;
 	for (i32 i = 0; i < 256 * 256 * 4; ++i) {
-		u8a->buffer[i] = math_floor(math_pow(u8a->buffer[i] / (float)255, 1.0 / (float)2.2) * 255);
+		u8a->buffer[i] = math_floor(math_pow(u8a->buffer[i] / 255.0, 1.0 / 2.2) * 255);
 	}
 	iron_write_png(string("%s_icon.png", substring(project_filepath, 0, string_length(project_filepath) - 4)), mesh_icon_pixels, 256, 256, 0);
 	gpu_delete_texture(mesh_icon);
@@ -284,7 +284,7 @@ void export_arm_run_material(char *path) {
 }
 
 buffer_t *export_arm_bgra_swap(buffer_t *buffer) {
-	for (i32 i = 0; i < math_floor((buffer->length) / (float)4); ++i) {
+	for (i32 i = 0; i < math_floor((buffer->length) / 4.0); ++i) {
 		i32 r                     = buffer->buffer[i * 4];
 		buffer->buffer[i * 4]     = buffer->buffer[i * 4 + 2];
 		buffer->buffer[i * 4 + 2] = r;
@@ -293,7 +293,7 @@ buffer_t *export_arm_bgra_swap(buffer_t *buffer) {
 }
 
 buffer_t *export_arm_bgra64_swap(buffer_t *buffer) {
-	for (i32 i = 0; i < math_floor((buffer->length) / (float)8); ++i) {
+	for (i32 i = 0; i < math_floor((buffer->length) / 8.0); ++i) {
 		i32 r_low                 = buffer->buffer[i * 8 + 4];
 		i32 r_high                = buffer->buffer[i * 8 + 5];
 		buffer->buffer[i * 8 + 4] = buffer->buffer[i * 8 + 0];
@@ -494,7 +494,7 @@ f32_array_t *export_arm_vec3f32(vec4_t v) {
 }
 
 buffer_t *export_arm_rgba64_to_rgba32(buffer_t *buffer) {
-	for (i32 i = 0; i < buffer->length / (float)2; ++i) {
+	for (i32 i = 0; i < buffer->length / 2.0; ++i) {
 		buffer->buffer[i] = half_to_u8_fast(buffer_get_u16(buffer, i * 2));
 	}
 	return buffer;

@@ -104,16 +104,16 @@ logic_node_value_t *math_node_get(math_node_t *self, i32 from) {
 		f = (v2 != 0.0) ? v2 - math_abs(math_fmod(math_abs(v1), (2 * v2)) - v2) : 0.0;
 	}
 	else if (string_equals(op, "Hyperbolic Sine")) {
-		f = (math_exp(v1) - math_exp(-v1)) / (float)2.0;
+		f = (math_exp(v1) - math_exp(-v1)) / 2.0;
 	}
 	else if (string_equals(op, "Hyperbolic Cosine")) {
-		f = (math_exp(v1) + math_exp(-v1)) / (float)2.0;
+		f = (math_exp(v1) + math_exp(-v1)) / 2.0;
 	}
 	else if (string_equals(op, "Hyperbolic Tangent")) {
 		f = 1.0 - (2.0 / (float)(math_exp(2 * v1) + 1));
 	}
 	else if (string_equals(op, "To Radians")) {
-		f = v1 / (float)180.0 * math_pi();
+		f = v1 / 180.0 * math_pi();
 	}
 	else if (string_equals(op, "To Degrees")) {
 		f = v1 / (float)math_pi() * 180.0;

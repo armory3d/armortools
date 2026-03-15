@@ -157,7 +157,7 @@ void tab_meshes_draw(ui_handle_t *htab) {
 			gpu_texture_t *icons  = resource_get("icons05x.k");
 			rect_t        *rect   = resource_tile50(icons, ICON_CUBE);
 			i32            icon_h = 25 * UI_SCALE();
-			ui_sub_image(icons, ui->ops->theme->LABEL_COL - 0x00333333, icon_h, rect->x / (float)2, rect->y / (float)2, rect->w / (float)2, rect->h / (float)2);
+			ui_sub_image(icons, ui->ops->theme->LABEL_COL - 0x00333333, icon_h, rect->x / 2.0, rect->y / 2.0, rect->w / 2.0, rect->h / 2.0);
 
 			mesh_object_t *o = project_paint_objects->buffer[i];
 			ui_handle_t   *h = ui_handle(__ID__);
@@ -196,7 +196,7 @@ void tab_meshes_draw_properties(mesh_object_t *o) {
 
 	transform_t *t   = context_raw->selected_object->transform;
 	vec4_t       rot = quat_get_euler(t->rot);
-	rot              = vec4_mult(rot, 180 / (float)3.141592);
+	rot              = vec4_mult(rot, 180 / 3.141592);
 	f32  f           = 0.0;
 	bool changed     = false;
 
@@ -309,7 +309,7 @@ void tab_meshes_draw_properties(mesh_object_t *o) {
 	}
 
 	if (changed) {
-		rot                                          = vec4_mult(rot, 3.141592 / (float)180);
+		rot                                          = vec4_mult(rot, 3.141592 / 180.0);
 		context_raw->selected_object->transform->rot = quat_from_euler(rot.x, rot.y, rot.z);
 		transform_build_matrix(context_raw->selected_object->transform);
 		transform_compute_dim(context_raw->selected_object->transform);

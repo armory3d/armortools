@@ -461,9 +461,9 @@ node_shader_context_t *make_paint_run(material_t *data, material_context_t *matc
 	node_shader_add_texture(kong, "texpaint_undo", "_texpaint_undo");
 	node_shader_write_frag(kong, "var sample_undo: float4 = sample_lod(texpaint_undo, sampler_linear, sample_tc, 0.0);");
 
-	f32 matid = context_raw->material->id / (float)255;
+	f32 matid = context_raw->material->id / 255.0;
 	if (context_raw->picker_mask_handle->i == PICKER_MASK_MATERIAL) {
-		matid = context_raw->materialid_picked / (float)255; // Keep existing material id in place when mask is set
+		matid = context_raw->materialid_picked / 255.0; // Keep existing material id in place when mask is set
 	}
 	char *matid_string = parser_material_vec1(matid * 3.0);
 	node_shader_write_frag(kong, string("var matid: float = %s;", matid_string));

@@ -202,18 +202,18 @@ void render_path_paint_commands_paint(bool dilation) {
 				context_raw->picked_color->normal    = color_set_rb(context_raw->picked_color->normal, buffer_get_u8(b, i0));
 				context_raw->picked_color->normal    = color_set_gb(context_raw->picked_color->normal, buffer_get_u8(b, i1));
 				context_raw->picked_color->normal    = color_set_bb(context_raw->picked_color->normal, buffer_get_u8(b, i2));
-				context_raw->picked_color->occlusion = buffer_get_u8(c, i0) / (float)255;
-				context_raw->picked_color->roughness = buffer_get_u8(c, i1) / (float)255;
-				context_raw->picked_color->metallic  = buffer_get_u8(c, i2) / (float)255;
-				context_raw->picked_color->height    = buffer_get_u8(c, i3) / (float)255;
-				context_raw->picked_color->opacity   = buffer_get_u8(a, i3) / (float)255;
-				context_raw->uvx_picked              = buffer_get_u8(d, i0) / (float)255;
-				context_raw->uvy_picked              = buffer_get_u8(d, i1) / (float)255;
+				context_raw->picked_color->occlusion = buffer_get_u8(c, i0) / 255.0;
+				context_raw->picked_color->roughness = buffer_get_u8(c, i1) / 255.0;
+				context_raw->picked_color->metallic  = buffer_get_u8(c, i2) / 255.0;
+				context_raw->picked_color->height    = buffer_get_u8(c, i3) / 255.0;
+				context_raw->picked_color->opacity   = buffer_get_u8(a, i3) / 255.0;
+				context_raw->uvx_picked              = buffer_get_u8(d, i0) / 255.0;
+				context_raw->uvy_picked              = buffer_get_u8(d, i1) / 255.0;
 				// Pick material
 				if (context_raw->picker_select_material && context_raw->color_picker_callback == NULL) {
 					// matid % 3 == 0 - normal, 1 - emission, 2 - subsurface
 					i32 id    = buffer_get_u8(b, 3);
-					i32 matid = math_floor((id - (id % 3)) / (float)3);
+					i32 matid = math_floor((id - (id % 3)) / 3.0);
 					for (i32 i = 0; i < project_materials->length; ++i) {
 						slot_material_t *m = project_materials->buffer[i];
 						if (m->id == matid) {
@@ -440,7 +440,7 @@ void render_path_paint_commands_cursor() {
 	f32 my = 1.0 - context_raw->paint_vec.y;
 
 	f32 radius = decal_mask ? context_raw->brush_decal_mask_radius : context_raw->brush_radius;
-	render_path_paint_draw_cursor(mx, my, context_raw->brush_nodes_radius * radius / (float)3.4, 1.0, 1.0, 1.0);
+	render_path_paint_draw_cursor(mx, my, context_raw->brush_nodes_radius * radius / 3.4, 1.0, 1.0, 1.0);
 }
 
 void render_path_paint_draw_cursor(f32 mx, f32 my, f32 radius, f32 tint_r, f32 tint_g, f32 tint_b) {
@@ -830,7 +830,7 @@ void render_path_paint_set_plane_mesh() {
 
 	vec4_t v                                         = vec4_create(m.m00, m.m01, m.m02, 1.0);
 	f32    sx                                        = vec4_len(v);
-	render_path_paint_planeo->base->transform->rot   = quat_from_euler(-math_pi() / (float)2, 0, 0);
+	render_path_paint_planeo->base->transform->rot   = quat_from_euler(-math_pi() / 2.0, 0, 0);
 	render_path_paint_planeo->base->transform->scale = vec4_create(sx, 1.0, sx, 1.0);
 	render_path_paint_planeo->base->transform->scale.z *= config_get_texture_res_y() / (float)config_get_texture_res_x();
 	render_path_paint_planeo->base->transform->loc = vec4_create(m.m30, -m.m31, 0.0, 1.0);

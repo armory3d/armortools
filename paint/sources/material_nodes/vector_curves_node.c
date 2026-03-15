@@ -80,9 +80,9 @@ void nodes_material_vector_curves_button(i32 node_id) {
 	// Edit
 	f32_array_t *row = f32_array_create_from_raw(
 	    (f32[]){
-	        1 / (float)5,
-	        1 / (float)5,
-	        3 / (float)5,
+	        1 / 5.0,
+	        1 / 5.0,
+	        3 / 5.0,
 	    },
 	    3);
 	ui_row(row);

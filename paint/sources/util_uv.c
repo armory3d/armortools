@@ -31,8 +31,8 @@ void util_uv_cache_uv_map() {
 	draw_begin(util_uv_uvmap, true, 0x00000000);
 	draw_set_color(0xffffffff);
 	f32 strength = res_x > 2048 ? 2.0 : 1.0;
-	f32 f        = (1 / (float)32767) * util_uv_uvmap->width;
-	for (i32 i = 0; i < math_floor(inda->length / (float)3); ++i) {
+	f32 f        = (1 / 32767.0) * util_uv_uvmap->width;
+	for (i32 i = 0; i < math_floor(inda->length / 3.0); ++i) {
 		f32 x1 = (texa->buffer[inda->buffer[i * 3] * 2]) * f;
 		f32 x2 = (texa->buffer[inda->buffer[i * 3 + 1] * 2]) * f;
 		f32 x3 = (texa->buffer[inda->buffer[i * 3 + 2] * 2]) * f;
@@ -71,9 +71,9 @@ void util_uv_cache_triangle_map() {
 	i16_array_t *texa          = mesh->vertex_arrays->buffer[2]->values;
 	u32_array_t *inda          = mesh->index_array;
 	draw_begin(util_uv_trianglemap, true, 0xff000000);
-	f32 f     = (1 / (float)32767) * util_uv_trianglemap->width;
+	f32 f     = (1 / 32767.0) * util_uv_trianglemap->width;
 	i32 color = 0xff000001;
-	for (i32 i = 0; i < math_floor(inda->length / (float)3); ++i) {
+	for (i32 i = 0; i < math_floor(inda->length / 3.0); ++i) {
 		if (color == 0xffffffff)
 			color = 0xff000001;
 		color++;

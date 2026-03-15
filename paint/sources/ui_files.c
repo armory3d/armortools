@@ -217,7 +217,7 @@ char *ui_files_file_browser(ui_handle_t *handle, bool drag_files, char *search, 
 			if (ui_files_selected == i)
 				col = ui->ops->theme->HIGHLIGHT_COL;
 
-			f32 off = ui->_w / (float)2 - 25 * UI_SCALE();
+			f32 off = ui->_w / 2.0 - 25 * UI_SCALE();
 			ui->_x += off;
 
 			f32            uix     = ui->_x;

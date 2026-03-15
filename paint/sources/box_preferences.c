@@ -247,8 +247,8 @@ void box_preferences_theme_tab() {
 		if (is_hex) {
 			f32_array_t *row = f32_array_create_from_raw(
 			    (f32[]){
-			        1 / (float)8,
-			        7 / (float)8,
+			        1 / 8.0,
+			        7 / 8.0,
 			    },
 			    2);
 			ui_row(row);
@@ -498,7 +498,7 @@ void box_preferences_pen_tab() {
 	ui_end_element();
 	f32_array_t *row = f32_array_create_from_raw(
 	    (f32[]){
-	        1 / (float)4,
+	        1 / 4.0,
 	    },
 	    1);
 	ui_row(row);
@@ -604,8 +604,8 @@ void box_preferences_viewport_tab() {
 	camera_data_t   *cam_raw = cam->data;
 	ui_handle_t     *h_near  = ui_handle(__ID__);
 	ui_handle_t     *h_far   = ui_handle(__ID__);
-	h_near->f                = math_floor(cam_raw->near_plane * 1000) / (float)1000;
-	h_far->f                 = math_floor(cam_raw->far_plane * 100) / (float)100;
+	h_near->f                = math_floor(cam_raw->near_plane * 1000) / 1000.0;
+	h_far->f                 = math_floor(cam_raw->far_plane * 100) / 100.0;
 	cam_raw->near_plane      = ui_slider(h_near, tr("Clip Start"), 0.001, 1.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
 	cam_raw->far_plane       = ui_slider(h_far, tr("Clip End"), 50.0, 100.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
 	if (h_near->changed || h_far->changed) {
@@ -747,7 +747,7 @@ void box_preferences_neural_tab() {
 
 	f32_array_t *row = f32_array_create_from_raw(
 	    (f32[]){
-	        1 / (float)4,
+	        1 / 4.0,
 	    },
 	    1);
 	ui_row(row);
@@ -796,8 +796,8 @@ void box_preferences_model_panel(neural_node_model_t *m) {
 			ui->enabled = false;
 
 			u64   u                       = iron_net_bytes_downloaded;
-			i32   i                       = (u / (float)1000000000) * 100;
-			f32   f                       = i / (float)100;
+			i32   i                       = (u / 1000000000.0) * 100;
+			f32   f                       = i / 100.0;
 			char *downloaded              = string("%sGB", f32_to_string(f));
 			ui_box_hwnd->redraws          = 2;
 			box_preferences_htab->redraws = 2;
@@ -901,8 +901,8 @@ void box_preferences_plugins_tab() {
 	ui_begin_sticky();
 	f32_array_t *row = f32_array_create_from_raw(
 	    (f32[]){
-	        1 / (float)4,
-	        1 / (float)4,
+	        1 / 4.0,
+	        1 / 4.0,
 	    },
 	    2);
 	ui_row(row);

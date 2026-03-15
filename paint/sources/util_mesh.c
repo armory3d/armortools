@@ -24,7 +24,7 @@ void util_mesh_merge(mesh_object_t_array_t *paint_objects) {
 			max_scale = paint_objects->buffer[i]->data->scale_pos;
 		}
 	}
-	vlen                = math_floor(vlen / (float)4);
+	vlen                = math_floor(vlen / 4.0);
 	i16_array_t *va0    = i16_array_create(vlen * 4);
 	i16_array_t *va1    = i16_array_create(vlen * 2);
 	i16_array_t *va2    = i16_array_create(vlen * 2);
@@ -54,7 +54,7 @@ void util_mesh_merge(mesh_object_t_array_t *paint_objects) {
 		// }
 
 		// Re-scale
-		for (i32 j = voff; j < math_floor(va0->length / (float)4); ++j) {
+		for (i32 j = voff; j < math_floor(va0->length / 4.0); ++j) {
 			va0->buffer[j * 4]     = math_floor((va0->buffer[j * 4] * scale) / (float)max_scale);
 			va0->buffer[j * 4 + 1] = math_floor((va0->buffer[j * 4 + 1] * scale) / (float)max_scale);
 			va0->buffer[j * 4 + 2] = math_floor((va0->buffer[j * 4 + 2] * scale) / (float)max_scale);
@@ -85,7 +85,7 @@ void util_mesh_merge(mesh_object_t_array_t *paint_objects) {
 			ia->buffer[j + ioff] = ias->buffer[j] + voff;
 		}
 
-		voff += math_floor(vas->buffer[0]->values->length / (float)4);
+		voff += math_floor(vas->buffer[0]->values->length / 4.0);
 		ioff += math_floor(ias->length);
 	}
 	mesh_data_t *raw = GC_ALLOC_INIT(mesh_data_t, {.name          = context_raw->paint_object->base->name,
@@ -138,7 +138,7 @@ void util_mesh_swap_axis(i32 a, i32 b) {
 		i32                     d   = b == 2 ? 3 : b;
 		i32                     e   = a == 2 ? 4 : 2;
 		i32                     f   = b == 2 ? 4 : 2;
-		for (i32 i = 0; i < math_floor(pa->length / (float)4); ++i) {
+		for (i32 i = 0; i < math_floor(pa->length / 4.0); ++i) {
 			i32 t                  = pa->buffer[i * 4 + a];
 			pa->buffer[i * 4 + a]  = pa->buffer[i * 4 + b];
 			pa->buffer[i * 4 + b]  = -t;
@@ -160,7 +160,7 @@ void util_mesh_flip_normals() {
 		vertex_array_t_array_t *vas = o->data->vertex_arrays;
 		i16_array_t            *va0 = vas->buffer[0]->values;
 		i16_array_t            *va1 = vas->buffer[1]->values;
-		for (i32 i = 0; i < va0->length / (float)4; ++i) {
+		for (i32 i = 0; i < va0->length / 4.0; ++i) {
 			va0->buffer[i * 4 + 3] = -va0->buffer[i * 4 + 3];
 			va1->buffer[i * 2]     = -va1->buffer[i * 2];
 			va1->buffer[i * 2 + 1] = -va1->buffer[i * 2 + 1];
@@ -196,7 +196,7 @@ void util_mesh_calc_normals(bool smooth) {
 		u32_array_t   *inda        = g->index_array;
 		i16_array_t   *va0         = o->data->vertex_arrays->buffer[0]->values;
 		i16_array_t   *va1         = o->data->vertex_arrays->buffer[1]->values;
-		i32            num_verts   = math_floor(va0->length / (float)4);
+		i32            num_verts   = math_floor(va0->length / 4.0);
 		f32_array_t   *smooth_vals = NULL;
 		i32_array_t   *vert_map    = NULL;
 		if (smooth) {
@@ -228,7 +228,7 @@ void util_mesh_calc_normals(bool smooth) {
 			}
 		}
 
-		for (i32 i = 0; i < math_floor(inda->length / (float)3); ++i) {
+		for (i32 i = 0; i < math_floor(inda->length / 3.0); ++i) {
 			i32 i1 = inda->buffer[i * 3];
 			i32 i2 = inda->buffer[i * 3 + 1];
 			i32 i3 = inda->buffer[i * 3 + 2];
@@ -305,7 +305,7 @@ void util_mesh_to_origin() {
 	for (i32 i = 0; i < project_paint_objects->length; ++i) {
 		mesh_object_t *o    = project_paint_objects->buffer[i];
 		i32            l    = 4;
-		f32            sc   = o->data->scale_pos / (float)32767;
+		f32            sc   = o->data->scale_pos / 32767.0;
 		i16_array_t   *va   = o->data->vertex_arrays->buffer[0]->values;
 		f32            minx = va->buffer[0];
 		f32            maxx = va->buffer[0];
@@ -333,9 +333,9 @@ void util_mesh_to_origin() {
 				maxz = va->buffer[i * l + 2];
 			}
 		}
-		dx += (minx + maxx) / (float)2 * sc;
-		dy += (miny + maxy) / (float)2 * sc;
-		dz += (minz + maxz) / (float)2 * sc;
+		dx += (minx + maxx) / 2.0 * sc;
+		dy += (miny + maxy) / 2.0 * sc;
+		dz += (minz + maxz) / 2.0 * sc;
 	}
 	dx /= project_paint_objects->length;
 	dy /= project_paint_objects->length;
@@ -344,10 +344,10 @@ void util_mesh_to_origin() {
 	for (i32 i = 0; i < project_paint_objects->length; ++i) {
 		mesh_object_t *o         = project_paint_objects->buffer[i];
 		mesh_data_t   *g         = o->data;
-		f32            sc        = o->data->scale_pos / (float)32767;
+		f32            sc        = o->data->scale_pos / 32767.0;
 		i16_array_t   *va        = o->data->vertex_arrays->buffer[0]->values;
 		f32            max_scale = 0.0;
-		for (i32 i = 0; i < math_floor(va->length / (float)4); ++i) {
+		for (i32 i = 0; i < math_floor(va->length / 4.0); ++i) {
 			if (math_abs(va->buffer[i * 4] * sc - dx) > max_scale) {
 				max_scale = math_abs(va->buffer[i * 4] * sc - dx);
 			}
@@ -361,7 +361,7 @@ void util_mesh_to_origin() {
 		o->base->transform->scale_world = o->data->scale_pos = o->data->scale_pos = max_scale;
 		transform_build_matrix(o->base->transform);
 
-		for (i32 i = 0; i < math_floor(va->length / (float)4); ++i) {
+		for (i32 i = 0; i < math_floor(va->length / 4.0); ++i) {
 			va->buffer[i * 4]     = math_floor((va->buffer[i * 4] * sc - dx) / (float)max_scale * 32767);
 			va->buffer[i * 4 + 1] = math_floor((va->buffer[i * 4 + 1] * sc - dy) / (float)max_scale * 32767);
 			va->buffer[i * 4 + 2] = math_floor((va->buffer[i * 4 + 2] * sc - dz) / (float)max_scale * 32767);
@@ -381,15 +381,15 @@ void util_mesh_apply_displacement(gpu_texture_t *texpaint_pack, f32 strength, f3
 	i16_array_t   *va0       = g->vertex_arrays->buffer[0]->values;
 	i16_array_t   *va1       = g->vertex_arrays->buffer[1]->values;
 	i16_array_t   *va2       = g->vertex_arrays->buffer[2]->values;
-	i32            num_verts = math_floor(va0->length / (float)4);
+	i32            num_verts = math_floor(va0->length / 4.0);
 	for (i32 i = 0; i < num_verts; ++i) {
-		i32 x  = math_floor(va2->buffer[i * 2] / (float)32767 * res);
-		i32 y  = math_floor(va2->buffer[i * 2 + 1] / (float)32767 * res);
+		i32 x  = math_floor(va2->buffer[i * 2] / 32767.0 * res);
+		i32 y  = math_floor(va2->buffer[i * 2 + 1] / 32767.0 * res);
 		i32 ix = math_floor(x * uv_scale);
 		i32 iy = math_floor(y * uv_scale);
 		i32 xx = ix % res;
 		i32 yy = iy % res;
-		f32 h  = (1.0 - buffer_get_u8(height, (yy * res + xx) * 4 + 3) / (float)255) * strength;
+		f32 h  = (1.0 - buffer_get_u8(height, (yy * res + xx) * 4 + 3) / 255.0) * strength;
 		va0->buffer[i * 4] -= math_floor(va1->buffer[i * 2] * h);
 		va0->buffer[i * 4 + 1] -= math_floor(va1->buffer[i * 2 + 1] * h);
 		va0->buffer[i * 4 + 2] -= math_floor(va0->buffer[i * 4 + 3] * h);
@@ -398,11 +398,11 @@ void util_mesh_apply_displacement(gpu_texture_t *texpaint_pack, f32 strength, f3
 }
 
 void util_mesh_equirect_unwrap(raw_mesh_t *mesh) {
-	i32 verts  = math_floor(mesh->posa->length / (float)4);
+	i32 verts  = math_floor(mesh->posa->length / 4.0);
 	mesh->texa = i16_array_create(verts * 2);
 	vec4_t n   = vec4_create(0.0, 0.0, 0.0, 1.0);
 	for (i32 i = 0; i < verts; ++i) {
-		n = vec4_create(mesh->posa->buffer[i * 4] / (float)32767, mesh->posa->buffer[i * 4 + 1] / (float)32767, mesh->posa->buffer[i * 4 + 2] / (float)32767,
+		n = vec4_create(mesh->posa->buffer[i * 4] / 32767.0, mesh->posa->buffer[i * 4 + 1] / 32767.0, mesh->posa->buffer[i * 4 + 2] / 32767.0,
 		                1.0);
 		n = vec4_norm(n);
 		// Sphere projection
@@ -457,7 +457,7 @@ void util_mesh_decimate(f32 strength) {
 	i16_array_t           *va1       = g->vertex_arrays->buffer[1]->values;
 	i16_array_t           *va2       = g->vertex_arrays->buffer[2]->values;
 	u32_array_t           *inda      = g->index_array;
-	i32                    num_verts = math_floor(va0->length / (float)4);
+	i32                    num_verts = math_floor(va0->length / 4.0);
 	i32                    min_x     = 32767;
 	i32                    max_x     = -32767;
 	i32                    min_y     = 32767;
@@ -551,7 +551,7 @@ void util_mesh_decimate(f32 strength) {
 	}
 
 	u32_array_t *new_inda = u32_array_create_from_raw((u32[]){}, 0);
-	for (i32 i = 0; i < math_floor(inda->length / (float)3); ++i) {
+	for (i32 i = 0; i < math_floor(inda->length / 3.0); ++i) {
 		i32 i1 = remap->buffer[inda->buffer[i * 3]];
 		i32 i2 = remap->buffer[inda->buffer[i * 3 + 1]];
 		i32 i3 = remap->buffer[inda->buffer[i * 3 + 2]];
@@ -593,7 +593,7 @@ void util_mesh_pack_uvs(i16_array_t *texa) {
 	i32 atlas_step   = 32767 / (float)atlas_stride;
 	i32 item_x       = (item_i % atlas_stride) * atlas_step;
 	i32 item_y       = math_floor(item_i / (float)atlas_stride) * atlas_step;
-	for (i32 i = 0; i < texa->length / (float)2; ++i) {
+	for (i32 i = 0; i < texa->length / 2.0; ++i) {
 		texa->buffer[i * 2]     = texa->buffer[i * 2] / (float)atlas_stride + item_x;
 		texa->buffer[i * 2 + 1] = texa->buffer[i * 2 + 1] / (float)atlas_stride + item_y;
 	}

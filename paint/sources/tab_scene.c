@@ -82,8 +82,8 @@ void tab_scene_draw_list(ui_handle_t *list_handle, object_t *current_object) {
 	if (current_object->children->length > 0) {
 		f32_array_t *row = f32_array_create_from_raw(
 		    (f32[]){
-		        1 / (float)13,
-		        12 / (float)13,
+		        1 / 13.0,
+		        12 / 13.0,
 		    },
 		    2);
 		ui_row(row);
@@ -99,7 +99,7 @@ void tab_scene_draw_list(ui_handle_t *list_handle, object_t *current_object) {
 
 		// Draw line that shows parent relations
 		draw_set_color(ui->ops->theme->BUTTON_COL);
-		draw_line(ui->_x - 10, ui->_y + UI_ELEMENT_H() / (float)2, ui->_x, ui->_y + UI_ELEMENT_H() / (float)2, 1.0);
+		draw_line(ui->_x - 10, ui->_y + UI_ELEMENT_H() / 2.0, ui->_x, ui->_y + UI_ELEMENT_H() / 2.0, 1.0);
 		draw_set_color(0xffffffff);
 
 		ui_text(current_object->name, UI_ALIGN_LEFT, 0x00000000);
@@ -131,7 +131,7 @@ void tab_scene_draw_list(ui_handle_t *list_handle, object_t *current_object) {
 
 		// Draw line that shows parent relations
 		draw_set_color(ui->ops->theme->BUTTON_COL);
-		draw_line(ui->_x + 14, current_y, ui->_x + 14, ui->_y - UI_ELEMENT_H() / (float)2, 1.0);
+		draw_line(ui->_x + 14, current_y, ui->_x + 14, ui->_y - UI_ELEMENT_H() / 2.0, 1.0);
 		draw_set_color(0xffffffff);
 	}
 }

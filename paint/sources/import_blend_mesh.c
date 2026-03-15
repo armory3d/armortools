@@ -18,8 +18,8 @@ void import_blend_mesh_ui() {
 
 	f32_array_t *ar = f32_array_create_from_raw(
 	    (f32[]){
-	        7 / (float)8,
-	        1 / (float)8,
+	        7 / 8.0,
+	        1 / 8.0,
 	    },
 	    2);
 	ui_row(ar);

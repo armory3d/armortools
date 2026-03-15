@@ -215,7 +215,7 @@ void ui_view2d_render(void *_) {
 		i32 th = tw;
 		if (tex != NULL) {
 			th = tw * (tex->height / (float)tex->width);
-			ty = apph / (float)2 - th / (float)2 + ui_view2d_pan_y;
+			ty = apph / 2.0 - th / 2.0 + ui_view2d_pan_y;
 			if (ui_view2d_type == VIEW_2D_TYPE_LAYER) {
 				draw_set_pipeline(ui_view2d_pipe);
 			}
@@ -453,8 +453,8 @@ void ui_view2d_update(void *_) {
 
 		if (ui_touch_control) {
 			// Zoom to finger location
-			ui_view2d_pan_x -= (ui->input_x - ui->_window_x - ui->_window_w / (float)2) * control->zoom;
-			ui_view2d_pan_y -= (ui->input_y - ui->_window_y - ui->_window_h / (float)2) * control->zoom;
+			ui_view2d_pan_x -= (ui->input_x - ui->_window_x - ui->_window_w / 2.0) * control->zoom;
+			ui_view2d_pan_y -= (ui->input_y - ui->_window_y - ui->_window_h / 2.0) * control->zoom;
 		}
 		ui_view2d_grid_redraw = true;
 	}
@@ -482,10 +482,10 @@ void ui_view2d_update(void *_) {
 			f32            wm      = fmin(ui_view2d_ww, ui_view2d_wh);
 			f32            tw      = wm * 0.9 * ui_view2d_pan_scale;
 			f32            th      = tw * ratio;
-			f32            tx      = ui_view2d_ww / (float)2 - tw / (float)2 + ui_view2d_pan_x;
+			f32            tx      = ui_view2d_ww / 2.0 - tw / 2.0 + ui_view2d_pan_x;
 			i32            headerh = config_raw->layout->buffer[LAYOUT_SIZE_HEADER] == 1 ? ui_header_h * 2 : ui_header_h;
 			i32            apph    = iron_window_height() - config_raw->layout->buffer[LAYOUT_SIZE_STATUS_H] + headerh;
-			f32            ty      = apph / (float)2 - th / (float)2 + ui_view2d_pan_y;
+			f32            ty      = apph / 2.0 - th / 2.0 + ui_view2d_pan_y;
 			f32            mx      = mouse_x - ui_view2d_wx;
 			f32            my      = mouse_y - ui_view2d_wy;
 			if (mx > tx && mx < tx + tw && my > ty && my < ty + th) {
@@ -526,21 +526,21 @@ void ui_view2d_update(void *_) {
 	i32 border = 32;
 	f32 wm     = fmin(ui_view2d_ww, ui_view2d_wh);
 	f32 tw     = ui_view2d_ww * 0.9 * ui_view2d_pan_scale;
-	f32 tx     = ui_view2d_ww / (float)2 - tw / (float)2 + ui_view2d_pan_x;
+	f32 tx     = ui_view2d_ww / 2.0 - tw / 2.0 + ui_view2d_pan_x;
 	f32 hh     = sys_h();
-	f32 ty     = hh / (float)2 - tw / (float)2 + ui_view2d_pan_y;
+	f32 ty     = hh / 2.0 - tw / 2.0 + ui_view2d_pan_y;
 
 	if (tx + border > ui_view2d_ww) {
-		ui_view2d_pan_x = ui_view2d_ww / (float)2 + tw / (float)2 - border;
+		ui_view2d_pan_x = ui_view2d_ww / 2.0 + tw / 2.0 - border;
 	}
 	else if (tx - border < -tw) {
-		ui_view2d_pan_x = -tw / (float)2 - ui_view2d_ww / (float)2 + border;
+		ui_view2d_pan_x = -tw / 2.0 - ui_view2d_ww / 2.0 + border;
 	}
 	if (ty + border > hh) {
-		ui_view2d_pan_y = hh / (float)2 + tw / (float)2 - border;
+		ui_view2d_pan_y = hh / 2.0 + tw / 2.0 - border;
 	}
 	else if (ty - border < -tw) {
-		ui_view2d_pan_y = -tw / (float)2 - hh / (float)2 + border;
+		ui_view2d_pan_y = -tw / 2.0 - hh / 2.0 + border;
 	}
 
 	if (operator_shortcut(any_map_get(config_keymap, "view_reset"), SHORTCUT_TYPE_STARTED)) {

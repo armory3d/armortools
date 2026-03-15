@@ -6,12 +6,12 @@ void console_draw_toast(char *s) {
 	draw_set_color(0x55000000);
 	draw_filled_rect(0, 0, iron_window_width(), iron_window_height());
 	f32 scale = UI_SCALE();
-	f32 x     = iron_window_width() / (float)2;
+	f32 x     = iron_window_width() / 2.0;
 	f32 y     = iron_window_height() - 200 * scale;
 	draw_filled_rect(x - 200 * scale, y, 400 * scale, 80 * scale);
 	draw_set_font(base_font, math_floor(22 * scale));
 	draw_set_color(0xffffffff);
-	draw_string(s, x - draw_string_width(draw_font, draw_font_size, s) / (float)2, y + 40 * scale - draw_font_height(draw_font, draw_font_size) / (float)2);
+	draw_string(s, x - draw_string_width(draw_font, draw_font_size, s) / 2.0, y + 40 * scale - draw_font_height(draw_font, draw_font_size) / 2.0);
 	draw_end();
 }
 

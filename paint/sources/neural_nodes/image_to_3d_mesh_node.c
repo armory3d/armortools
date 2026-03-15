@@ -8,7 +8,7 @@ void image_to_3d_mesh_node_init() {
 }
 
 buffer_t *image_to_3d_mesh_node_remove_background(buffer_t *buffer) {
-	for (i32 i = 0; i < math_floor((buffer->length) / (float)4); ++i) {
+	for (i32 i = 0; i < math_floor((buffer->length) / 4.0); ++i) {
 		if (buffer->buffer[i * 4] <= 16 && buffer->buffer[i * 4 + 1] <= 16 && buffer->buffer[i * 4 + 2] <= 16) {
 			buffer->buffer[i * 4 + 3] = 0;
 		}

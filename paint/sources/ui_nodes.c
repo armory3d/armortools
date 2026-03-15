@@ -417,7 +417,7 @@ ui_canvas_control_t *ui_nodes_get_canvas_control(bool controls_down) {
 	}
 
 	bool pan        = ui->input_down_r || operator_shortcut(any_map_get(config_keymap, "action_pan"), SHORTCUT_TYPE_DOWN);
-	f32  zoom_delta = operator_shortcut(any_map_get(config_keymap, "action_zoom"), SHORTCUT_TYPE_DOWN) ? ui_nodes_get_zoom_delta() / (float)100.0 : 0.0;
+	f32  zoom_delta = operator_shortcut(any_map_get(config_keymap, "action_zoom"), SHORTCUT_TYPE_DOWN) ? ui_nodes_get_zoom_delta() / 100.0 : 0.0;
 	ui_canvas_control_t *control = GC_ALLOC_INIT(ui_canvas_control_t, {.pan_x         = pan ? ui->input_dx : 0.0,
 	                                                                   .pan_y         = pan ? ui->input_dy : 0.0,
 	                                                                   .zoom          = ui->input_wheel_delta != 0.0 ? -ui->input_wheel_delta / 10 : zoom_delta,
@@ -442,11 +442,11 @@ f32 ui_nodes_get_zoom_delta() {
 
 bool ui_nodes_is_tab_selected() {
 	return ui_nodes_htab->i > 0 && ui_nodes_htab->i % 2 == 1 && // [tab0, tab1, x, tab2, x, +]
-	       ui_nodes_tabs->length >= ui_nodes_htab->i / (float)2;
+	       ui_nodes_tabs->length >= ui_nodes_htab->i / 2.0;
 }
 
 i32 ui_nodes_tab_index() {
-	return (int)(ui_nodes_htab->i / (float)2);
+	return (int)(ui_nodes_htab->i / 2.0);
 }
 
 ui_node_canvas_t *ui_nodes_get_canvas(bool groups) {
@@ -1083,7 +1083,7 @@ void ui_nodes_render(void *_) {
 				nodes->nodes_drag = true;
 			}
 			// Next column
-			if (ui->_y - ui_nodes_wy + UI_ELEMENT_H() / (float)2 > ui_nodes_wh) {
+			if (ui->_y - ui_nodes_wy + UI_ELEMENT_H() / 2.0 > ui_nodes_wh) {
 				ui->_x += menuw;
 				ui->_y = py;
 			}
@@ -1094,8 +1094,8 @@ void ui_nodes_render(void *_) {
 				ui->enabled      = ui_nodes_can_place_group(g->canvas->name);
 				f32_array_t *row = f32_array_create_from_raw(
 				    (f32[]){
-				        5 / (float)6,
-				        1 / (float)6,
+				        5 / 6.0,
+				        1 / 6.0,
 				    },
 				    2);
 				ui_row(row);
@@ -1262,8 +1262,8 @@ void ui_nodes_draw_menubar() {
 			if (config_raw->touch_ui) {
 				ui_nodes_show_menu_first = true;
 				i32 menuw                = math_floor(ew * 2.3);
-				ui_nodes_popup_x -= menuw / (float)2;
-				ui_nodes_popup_x += ui->_w / (float)2;
+				ui_nodes_popup_x -= menuw / 2.0;
+				ui_nodes_popup_x += ui->_w / 2.0;
 			}
 		}
 		ui->_x += ui->_w + 3;
@@ -1394,8 +1394,8 @@ void ui_nodes_accept_swatch_drop(swatch_color_t *swatch) {
 	ui_nodes_push_undo(NULL);
 	node_group_t *g                         = ui_nodes_group_stack->length > 0 ? ui_nodes_group_stack->buffer[ui_nodes_group_stack->length - 1] : NULL;
 	ui_node_t    *n                         = nodes_material_create_node("RGB", g);
-	n->outputs->buffer[0]->default_value    = f32_array_create_xyzw(color_get_rb(swatch->base) / (float)255, color_get_gb(swatch->base) / (float)255,
-	                                                                color_get_bb(swatch->base) / (float)255, color_get_ab(swatch->base) / (float)255);
+	n->outputs->buffer[0]->default_value    = f32_array_create_xyzw(color_get_rb(swatch->base) / 255.0, color_get_gb(swatch->base) / 255.0,
+	                                                                color_get_bb(swatch->base) / 255.0, color_get_ab(swatch->base) / 255.0);
 	ui_nodes_get_nodes()->nodes_selected_id = i32_array_create_from_raw(
 	    (i32[]){
 	        n->id,

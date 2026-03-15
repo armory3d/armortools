@@ -10,8 +10,8 @@ raw_mesh_t *geom_make_plane(f32 size_x, f32 size_y, i32 verts_x, i32 verts_y, f3
 	mesh->has_next   = false;
 
 	// Pack positions to (-1, 1) range
-	f32 half_x       = size_x / (float)2;
-	f32 half_y       = size_y / (float)2;
+	f32 half_x       = size_x / 2.0;
+	f32 half_y       = size_y / 2.0;
 	mesh->scale_pos  = math_max(size_x, size_y);
 	f32 inv          = (1 / (float)mesh->scale_pos) * 32767;
 

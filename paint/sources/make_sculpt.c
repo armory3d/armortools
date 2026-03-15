@@ -5,9 +5,9 @@ void sculpt_import_mesh_pack_to_texture(mesh_data_t *mesh, slot_layer_t *l) {
 	buffer_t *b = buffer_create(config_get_texture_res_x() * config_get_texture_res_y() * 4 * 4);
 	for (i32 i = 0; i < math_floor(mesh->index_array->length); ++i) {
 		i32 index = mesh->index_array->buffer[i];
-		buffer_set_f32(b, 4 * i * 4, mesh->vertex_arrays->buffer[0]->values->buffer[index * 4] / (float)32767);
-		buffer_set_f32(b, 4 * i * 4 + 1 * 4, mesh->vertex_arrays->buffer[0]->values->buffer[index * 4 + 1] / (float)32767);
-		buffer_set_f32(b, 4 * i * 4 + 2 * 4, mesh->vertex_arrays->buffer[0]->values->buffer[index * 4 + 2] / (float)32767);
+		buffer_set_f32(b, 4 * i * 4, mesh->vertex_arrays->buffer[0]->values->buffer[index * 4] / 32767.0);
+		buffer_set_f32(b, 4 * i * 4 + 1 * 4, mesh->vertex_arrays->buffer[0]->values->buffer[index * 4 + 1] / 32767.0);
+		buffer_set_f32(b, 4 * i * 4 + 2 * 4, mesh->vertex_arrays->buffer[0]->values->buffer[index * 4 + 2] / 32767.0);
 		buffer_set_f32(b, 4 * i * 4 + 3 * 4, 1.0);
 	}
 

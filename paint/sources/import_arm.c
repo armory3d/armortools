@@ -88,7 +88,7 @@ void import_arm_run_project(char *path) {
 	base_res_handle->i                   = config_get_texture_res_pos(l0->res);
 	texture_bits_t bits_pos              = l0->bpp == 8 ? TEXTURE_BITS_BITS8 : l0->bpp == 16 ? TEXTURE_BITS_BITS16 : TEXTURE_BITS_BITS32;
 	base_bits_handle->i                  = bits_pos;
-	i32                  bytes_per_pixel = math_floor(l0->bpp / (float)8);
+	i32                  bytes_per_pixel = math_floor(l0->bpp / 8.0);
 	gpu_texture_format_t format          = l0->bpp == 8 ? GPU_TEXTURE_FORMAT_RGBA32 : l0->bpp == 16 ? GPU_TEXTURE_FORMAT_RGBA64 : GPU_TEXTURE_FORMAT_RGBA128;
 
 	char *base = path_base_dir(path);

@@ -99,7 +99,7 @@ void base_init() {
 	if (config_raw->layout->buffer[LAYOUT_SIZE_HEADER] == 1) {
 		base_appy = ui_header_h * 2;
 	}
-	scene_camera->data->fov = math_floor(scene_camera->data->fov * 100) / (float)100;
+	scene_camera->data->fov = math_floor(scene_camera->data->fov * 100) / 100.0;
 	camera_object_build_proj(scene_camera, -1.0);
 
 	args_run();
@@ -167,7 +167,7 @@ i32 base_view3d_w() {
 		res = iron_window_width();
 	}
 	if (context_raw->view_index > -1) {
-		res = math_ceil(res / (float)2);
+		res = math_ceil(res / 2.0);
 	}
 	if (context_raw->paint2d_view) {
 		res = ui_view2d_ww;
@@ -1005,13 +1005,13 @@ void ui_base_update(void *_) {
 		     operator_shortcut(string("%s+%s", any_map_get(config_keymap, "decal_mask"), any_map_get(config_keymap, "brush_radius")), SHORTCUT_TYPE_DOWN))) {
 			if (context_raw->brush_locked) {
 				if (operator_shortcut(any_map_get(config_keymap, "brush_opacity"), SHORTCUT_TYPE_DOWN)) {
-					context_raw->brush_opacity += mouse_movement_x / (float)500;
+					context_raw->brush_opacity += mouse_movement_x / 500.0;
 					context_raw->brush_opacity           = math_max(0.0, math_min(1.0, context_raw->brush_opacity));
-					context_raw->brush_opacity           = math_round(context_raw->brush_opacity * 100) / (float)100;
+					context_raw->brush_opacity           = math_round(context_raw->brush_opacity * 100) / 100.0;
 					context_raw->brush_opacity_handle->f = context_raw->brush_opacity;
 				}
 				else if (operator_shortcut(any_map_get(config_keymap, "brush_angle"), SHORTCUT_TYPE_DOWN)) {
-					context_raw->brush_angle += mouse_movement_x / (float)5;
+					context_raw->brush_angle += mouse_movement_x / 5.0;
 					i32 i                    = math_floor(context_raw->brush_angle);
 					context_raw->brush_angle = i % 360;
 					if (context_raw->brush_angle < 0)
@@ -1021,15 +1021,15 @@ void ui_base_update(void *_) {
 				}
 				else if (decal_mask && operator_shortcut(string("%s+%s", any_map_get(config_keymap, "decal_mask"), any_map_get(config_keymap, "brush_radius")),
 				                                         SHORTCUT_TYPE_DOWN)) {
-					context_raw->brush_decal_mask_radius += mouse_movement_x / (float)150;
+					context_raw->brush_decal_mask_radius += mouse_movement_x / 150.0;
 					context_raw->brush_decal_mask_radius           = math_max(0.01, math_min(4.0, context_raw->brush_decal_mask_radius));
-					context_raw->brush_decal_mask_radius           = math_round(context_raw->brush_decal_mask_radius * 100) / (float)100;
+					context_raw->brush_decal_mask_radius           = math_round(context_raw->brush_decal_mask_radius * 100) / 100.0;
 					context_raw->brush_decal_mask_radius_handle->f = context_raw->brush_decal_mask_radius;
 				}
 				else {
-					context_raw->brush_radius += mouse_movement_x / (float)150;
+					context_raw->brush_radius += mouse_movement_x / 150.0;
 					context_raw->brush_radius           = math_max(0.01, math_min(4.0, context_raw->brush_radius));
-					context_raw->brush_radius           = math_round(context_raw->brush_radius * 100) / (float)100;
+					context_raw->brush_radius           = math_round(context_raw->brush_radius * 100) / 100.0;
 					context_raw->brush_radius_handle->f = context_raw->brush_radius;
 				}
 				ui_header_handle->redraws = 2;
@@ -1124,13 +1124,13 @@ void ui_base_update(void *_) {
 			}
 			else if (operator_shortcut(any_map_get(config_keymap, "brush_radius_decrease"), SHORTCUT_TYPE_REPEAT)) {
 				context_raw->brush_radius -= ui_base_get_radius_increment();
-				context_raw->brush_radius           = math_max(math_round(context_raw->brush_radius * 100) / (float)100, 0.01);
+				context_raw->brush_radius           = math_max(math_round(context_raw->brush_radius * 100) / 100.0, 0.01);
 				context_raw->brush_radius_handle->f = context_raw->brush_radius;
 				ui_header_handle->redraws           = 2;
 			}
 			else if (operator_shortcut(any_map_get(config_keymap, "brush_radius_increase"), SHORTCUT_TYPE_REPEAT)) {
 				context_raw->brush_radius += ui_base_get_radius_increment();
-				context_raw->brush_radius           = math_round(context_raw->brush_radius * 100) / (float)100;
+				context_raw->brush_radius           = math_round(context_raw->brush_radius * 100) / 100.0;
 				context_raw->brush_radius_handle->f = context_raw->brush_radius;
 				ui_header_handle->redraws           = 2;
 			}
@@ -1138,14 +1138,14 @@ void ui_base_update(void *_) {
 				if (operator_shortcut(string("%s+%s", any_map_get(config_keymap, "decal_mask"), any_map_get(config_keymap, "brush_radius_decrease")),
 				                      SHORTCUT_TYPE_REPEAT)) {
 					context_raw->brush_decal_mask_radius -= ui_base_get_radius_increment();
-					context_raw->brush_decal_mask_radius           = math_max(math_round(context_raw->brush_decal_mask_radius * 100) / (float)100, 0.01);
+					context_raw->brush_decal_mask_radius           = math_max(math_round(context_raw->brush_decal_mask_radius * 100) / 100.0, 0.01);
 					context_raw->brush_decal_mask_radius_handle->f = context_raw->brush_decal_mask_radius;
 					ui_header_handle->redraws                      = 2;
 				}
 				else if (operator_shortcut(string("%s+%s", any_map_get(config_keymap, "decal_mask"), any_map_get(config_keymap, "brush_radius_increase")),
 				                           SHORTCUT_TYPE_REPEAT)) {
 					context_raw->brush_decal_mask_radius += ui_base_get_radius_increment();
-					context_raw->brush_decal_mask_radius           = math_round(context_raw->brush_decal_mask_radius * 100) / (float)100;
+					context_raw->brush_decal_mask_radius           = math_round(context_raw->brush_decal_mask_radius * 100) / 100.0;
 					context_raw->brush_decal_mask_radius_handle->f = context_raw->brush_decal_mask_radius;
 					ui_header_handle->redraws                      = 2;
 				}
@@ -1163,16 +1163,16 @@ void ui_base_update(void *_) {
 				viewport_scale_to_bounds(2.0);
 			}
 			else if (operator_shortcut(any_map_get(config_keymap, "view_back"), SHORTCUT_TYPE_STARTED)) {
-				viewport_set_view(0, 1, 0, math_pi() / (float)2, 0, math_pi());
+				viewport_set_view(0, 1, 0, math_pi() / 2.0, 0, math_pi());
 			}
 			else if (operator_shortcut(any_map_get(config_keymap, "view_front"), SHORTCUT_TYPE_STARTED)) {
-				viewport_set_view(0, -1, 0, math_pi() / (float)2, 0, 0);
+				viewport_set_view(0, -1, 0, math_pi() / 2.0, 0, 0);
 			}
 			else if (operator_shortcut(any_map_get(config_keymap, "view_left"), SHORTCUT_TYPE_STARTED)) {
-				viewport_set_view(-1, 0, 0, math_pi() / (float)2, 0, -math_pi() / (float)2);
+				viewport_set_view(-1, 0, 0, math_pi() / 2.0, 0, -math_pi() / 2.0);
 			}
 			else if (operator_shortcut(any_map_get(config_keymap, "view_right"), SHORTCUT_TYPE_STARTED)) {
-				viewport_set_view(1, 0, 0, math_pi() / (float)2, 0, math_pi() / (float)2);
+				viewport_set_view(1, 0, 0, math_pi() / 2.0, 0, math_pi() / 2.0);
 			}
 			else if (operator_shortcut(any_map_get(config_keymap, "view_bottom"), SHORTCUT_TYPE_STARTED)) {
 				viewport_set_view(0, 0, -1, math_pi(), 0, math_pi());
@@ -1183,16 +1183,16 @@ void ui_base_update(void *_) {
 				viewport_update_camera_type(context_raw->camera_type);
 			}
 			else if (operator_shortcut(any_map_get(config_keymap, "view_orbit_left"), SHORTCUT_TYPE_REPEAT)) {
-				viewport_orbit(-math_pi() / (float)12, 0);
+				viewport_orbit(-math_pi() / 12.0, 0);
 			}
 			else if (operator_shortcut(any_map_get(config_keymap, "view_orbit_right"), SHORTCUT_TYPE_REPEAT)) {
-				viewport_orbit(math_pi() / (float)12, 0);
+				viewport_orbit(math_pi() / 12.0, 0);
 			}
 			else if (operator_shortcut(any_map_get(config_keymap, "view_orbit_up"), SHORTCUT_TYPE_REPEAT)) {
-				viewport_orbit(0, -math_pi() / (float)12);
+				viewport_orbit(0, -math_pi() / 12.0);
 			}
 			else if (operator_shortcut(any_map_get(config_keymap, "view_orbit_down"), SHORTCUT_TYPE_REPEAT)) {
-				viewport_orbit(0, math_pi() / (float)12);
+				viewport_orbit(0, math_pi() / 12.0);
 			}
 			else if (operator_shortcut(any_map_get(config_keymap, "view_orbit_opposite"), SHORTCUT_TYPE_STARTED)) {
 				viewport_orbit_opposite();
@@ -1509,23 +1509,23 @@ void ui_base_update_ui() {
 			f32 cosa = math_cos(-context_raw->brush_stencil_angle);
 			f32 sina = math_sin(-context_raw->brush_stencil_angle);
 			f32 ox   = 0;
-			f32 oy   = -r->h / (float)2;
+			f32 oy   = -r->h / 2.0;
 			f32 x    = ox * cosa - oy * sina;
 			f32 y    = ox * sina + oy * cosa;
-			x += r->x + r->w / (float)2;
-			y += r->y + r->h / (float)2;
+			x += r->x + r->w / 2.0;
+			y += r->y + r->h / 2.0;
 			context_raw->brush_stencil_rotating = ui_base_hit_rect(mouse_x, mouse_y, math_floor(x - 16), math_floor(y - 16), 32, 32);
 		}
 		f32 _scale = context_raw->brush_stencil_scale;
 		if (mouse_down("left")) {
 			if (context_raw->brush_stencil_scaling) {
-				i32 mult = mouse_x > r->x + r->w / (float)2 ? 1 : -1;
-				context_raw->brush_stencil_scale += mouse_movement_x / (float)400 * mult;
+				i32 mult = mouse_x > r->x + r->w / 2 ? 1 : -1;
+				context_raw->brush_stencil_scale += mouse_movement_x / 400.0 * mult;
 			}
 			else if (context_raw->brush_stencil_rotating) {
-				f32 gizmo_x                      = r->x + r->w / (float)2;
-				f32 gizmo_y                      = r->y + r->h / (float)2;
-				context_raw->brush_stencil_angle = -math_atan2(mouse_y - gizmo_y, mouse_x - gizmo_x) - math_pi() / (float)2;
+				f32 gizmo_x                      = r->x + r->w / 2.0;
+				f32 gizmo_y                      = r->y + r->h / 2.0;
+				context_raw->brush_stencil_angle = -math_atan2(mouse_y - gizmo_y, mouse_x - gizmo_x) - math_pi() / 2.0;
 			}
 			else {
 				context_raw->brush_stencil_x += mouse_movement_x / (float)base_w();
@@ -1536,7 +1536,7 @@ void ui_base_update_ui() {
 			context_raw->brush_stencil_scaling = false;
 		}
 		if (mouse_wheel_delta != 0) {
-			context_raw->brush_stencil_scale -= mouse_wheel_delta / (float)10;
+			context_raw->brush_stencil_scale -= mouse_wheel_delta / 10.0;
 		}
 		// Center after scale
 		f32 ratio = base_h() / (float)context_raw->brush_stencil_image->height;
@@ -1544,8 +1544,8 @@ void ui_base_update_ui() {
 		f32 new_w = context_raw->brush_stencil_scale * context_raw->brush_stencil_image->width * ratio;
 		f32 old_h = _scale * base_h();
 		f32 new_h = context_raw->brush_stencil_scale * base_h();
-		context_raw->brush_stencil_x += (old_w - new_w) / (float)base_w() / (float)2;
-		context_raw->brush_stencil_y += (old_h - new_h) / (float)base_h() / (float)2;
+		context_raw->brush_stencil_x += (old_w - new_w) / (float)base_w() / 2.0;
+		context_raw->brush_stencil_y += (old_h - new_h) / (float)base_h() / 2.0;
 	}
 	bool set_clone_source =
 	    context_raw->tool == TOOL_TYPE_CLONE &&
@@ -1744,7 +1744,7 @@ void ui_base_render(void *_) {
 		draw_begin(NULL, true, base_theme->SEPARATOR_COL);
 		gpu_texture_t *img = data_get_image("badge_bw.k");
 		draw_set_color(0x22ffffff);
-		draw_image(img, base_view3d_w() / (float)2 - img->width / (float)2, base_h() / (float)2 - img->height / (float)2);
+		draw_image(img, base_view3d_w() / 2.0 - img->width / 2.0, base_h() / 2.0 - img->height / 2.0);
 		draw_end();
 	}
 	ui_begin(ui);
@@ -1797,11 +1797,11 @@ void ui_base_render_cursor(void *_) {
 			f32 cosa = math_cos(-context_raw->brush_stencil_angle);
 			f32 sina = math_sin(-context_raw->brush_stencil_angle);
 			f32 ox   = 0;
-			f32 oy   = -r->h / (float)2;
+			f32 oy   = -r->h / 2.0;
 			f32 x    = ox * cosa - oy * sina;
 			f32 y    = ox * sina + oy * cosa;
-			x += r->x + r->w / (float)2;
-			y += r->y + r->h / (float)2;
+			x += r->x + r->w / 2.0;
+			y += r->y + r->h / 2.0;
 			draw_filled_circle(x, y, 8, 0);
 		}
 	}
@@ -1823,8 +1823,8 @@ void ui_base_render_cursor(void *_) {
 	// Clone source cursor
 	if (context_raw->tool == TOOL_TYPE_CLONE && !keyboard_down("alt") && (mouse_down("left") || pen_down("tip"))) {
 		draw_set_color(0x66ffffff);
-		draw_scaled_image(cursor_img, mx + context_raw->clone_delta_x * sys_w() - psize / (float)2,
-		                  my + context_raw->clone_delta_y * sys_h() - psize / (float)2, psize, psize);
+		draw_scaled_image(cursor_img, mx + context_raw->clone_delta_x * sys_w() - psize / 2.0,
+		                  my + context_raw->clone_delta_y * sys_h() - psize / 2.0, psize, psize);
 		draw_set_color(0xffffffff);
 	}
 
@@ -1845,12 +1845,12 @@ void ui_base_render_cursor(void *_) {
 				i32 psizey = math_floor(256 * UI_SCALE() * (context_raw->brush_radius * context_raw->brush_nodes_radius));
 
 				context_raw->view_index = context_raw->view_index_last;
-				f32 decalx              = base_x() + context_raw->decal_x * base_w() - psizex / (float)2;
-				f32 decaly              = base_y() + context_raw->decal_y * base_h() - psizey / (float)2;
+				f32 decalx              = base_x() + context_raw->decal_x * base_w() - psizex / 2.0;
+				f32 decaly              = base_y() + context_raw->decal_y * base_h() - psizey / 2.0;
 				context_raw->view_index = -1;
 
 				draw_set_color(color_from_floats(1, 1, 1, decal_alpha));
-				f32 angle = (context_raw->brush_angle + context_raw->brush_nodes_angle) * (math_pi() / (float)180);
+				f32 angle = (context_raw->brush_angle + context_raw->brush_nodes_angle) * (math_pi() / 180.0);
 				draw_set_transform(mat3_multmat(mat3_multmat(mat3_translation(0.5, 0.5), mat3_rotation(angle)), mat3_translation(-0.5, -0.5)));
 				draw_scaled_image(context_raw->decal_image, decalx, decaly, psizex, psizey);
 				draw_set_transform(mat3_nan());
@@ -1866,7 +1866,7 @@ void ui_base_render_cursor(void *_) {
 			if (context_in_2d_view(VIEW_2D_TYPE_LAYER)) {
 				psize = math_floor(psize * ui_view2d_pan_scale);
 			}
-			draw_scaled_image(cursor_img, mx - psize / (float)2, my - psize / (float)2, psize, psize);
+			draw_scaled_image(cursor_img, mx - psize / 2.0, my - psize / 2.0, psize, psize);
 		}
 	}
 
@@ -1879,7 +1879,7 @@ void ui_base_render_cursor(void *_) {
 		my         = context_raw->brush_lazy_y * base_h() + base_y();
 		f32 radius = context_raw->brush_lazy_radius * 180;
 		draw_set_color(0xff666666);
-		draw_scaled_image(cursor_img, mx - radius / (float)2, my - radius / (float)2, radius, radius);
+		draw_scaled_image(cursor_img, mx - radius / 2.0, my - radius / 2.0, radius, radius);
 		draw_set_color(0xffffffff);
 	}
 	draw_end();

@@ -62,11 +62,11 @@ void camera_update(void * _) {
 		camera_redraws = 2;
 		f32 dist       = camera_distance();
 		transform_move(camera->base->transform, camera_object_look_world(camera), dist);
-		transform_rotate(camera->base->transform, vec4_z_axis(), -mouse_movement_x / (float)100 * config_raw->camera_rotation_speed);
-		transform_rotate(camera->base->transform, camera_object_right_world(camera), -mouse_movement_y / (float)100 * config_raw->camera_rotation_speed);
+		transform_rotate(camera->base->transform, vec4_z_axis(), -mouse_movement_x / 100.0 * config_raw->camera_rotation_speed);
+		transform_rotate(camera->base->transform, camera_object_right_world(camera), -mouse_movement_y / 100.0 * config_raw->camera_rotation_speed);
 		vec4_t up_world = camera_object_up_world(camera);
 		if (up_world.z < 0 && !config_raw->camera_upside_down) {
-			transform_rotate(camera->base->transform, camera_object_right_world(camera), mouse_movement_y / (float)100 * config_raw->camera_rotation_speed);
+			transform_rotate(camera->base->transform, camera_object_right_world(camera), mouse_movement_y / 100.0 * config_raw->camera_rotation_speed);
 		}
 		transform_move(camera->base->transform, camera_object_look_world(camera), -dist);
 	}
@@ -75,13 +75,13 @@ void camera_update(void * _) {
 		camera_redraws  = 2;
 		transform_t *t  = context_main_object()->base->transform;
 		vec4_t       up = transform_up(t);
-		transform_rotate(t, up, (mouse_movement_x / (float)120) * config_raw->camera_rotation_speed);
+		transform_rotate(t, up, (mouse_movement_x / 120.0) * config_raw->camera_rotation_speed);
 		vec4_t right = camera_object_right_world(camera);
-		transform_rotate(t, right, (mouse_movement_y / (float)120) * config_raw->camera_rotation_speed);
+		transform_rotate(t, right, (mouse_movement_y / 120.0) * config_raw->camera_rotation_speed);
 		transform_build_matrix(t);
 		vec4_t tup = transform_up(t);
 		if (tup.z < 0 && !config_raw->camera_upside_down) {
-			transform_rotate(t, right, -(mouse_movement_y / (float)120) * config_raw->camera_rotation_speed);
+			transform_rotate(t, right, -(mouse_movement_y / 120.0) * config_raw->camera_rotation_speed);
 		}
 	}
 
@@ -90,14 +90,14 @@ void camera_update(void * _) {
 
 		if (operator_shortcut(any_map_get(config_keymap, "action_zoom"), SHORTCUT_TYPE_DOWN)) {
 			camera_redraws = 2;
-			f32 f          = camera_get_zoom_delta() / (float)(150 * (1.0 / (float)(camera_distance() / (float)2.0)));
+			f32 f          = camera_get_zoom_delta() / (float)(150.0 * (1.0 / (camera_distance() / 2.0)));
 			f *= camera_get_zoom_speed();
 			transform_move(camera->base->transform, camera_object_look(camera), f);
 		}
 
 		if (mouse_wheel_delta != 0 && !modif_key) {
 			camera_redraws = 2;
-			f32 f          = mouse_wheel_delta * (-0.2) * ((camera_distance() / (float)4.0));
+			f32 f          = mouse_wheel_delta * (-0.2) * ((camera_distance() / 4.0));
 			f *= camera_get_zoom_speed();
 			transform_move(camera->base->transform, camera_object_look(camera), f);
 		}
@@ -157,8 +157,8 @@ void camera_update(void * _) {
 		}
 
 		camera_redraws = 2;
-		transform_rotate(camera->base->transform, vec4_z_axis(), -mouse_movement_x / (float)200 * config_raw->camera_rotation_speed);
-		transform_rotate(camera->base->transform, camera_object_right(camera), -mouse_movement_y / (float)200 * config_raw->camera_rotation_speed);
+		transform_rotate(camera->base->transform, vec4_z_axis(), -mouse_movement_x / 200.0 * config_raw->camera_rotation_speed);
+		transform_rotate(camera->base->transform, camera_object_right(camera), -mouse_movement_y / 200.0 * config_raw->camera_rotation_speed);
 	}
 
 	if (operator_shortcut(any_map_get(config_keymap, "view_pivot_center"), SHORTCUT_TYPE_STARTED)) {
@@ -167,7 +167,7 @@ void camera_update(void * _) {
 
 	if (operator_shortcut(any_map_get(config_keymap, "rotate_envmap"), SHORTCUT_TYPE_DOWN)) {
 		camera_redraws = 2;
-		context_raw->envmap_angle -= mouse_movement_x / (float)100;
+		context_raw->envmap_angle -= mouse_movement_x / 100.0;
 	}
 
 	if (camera_redraws > 0) {
@@ -243,7 +243,7 @@ void camera_pan_action(bool modif, bool default_keymap) {
 	camera_object_t *camera = scene_camera;
 	if (operator_shortcut(any_map_get(config_keymap, "action_pan"), SHORTCUT_TYPE_DOWN) || (mouse_down("middle") && !modif && default_keymap)) {
 		camera_redraws               = 2;
-		f32    f                     = 150 * (1.0 / (float)(camera_distance() / (float)4.0));
+		f32    f                     = 150 * (1.0 / (float)(camera_distance() / 4.0));
 		vec4_t look                  = vec4_mult(transform_look(camera->base->transform), mouse_movement_y / (float)f * config_raw->camera_pan_speed);
 		vec4_t right                 = vec4_mult(transform_right(camera->base->transform), -mouse_movement_x / (float)f * config_raw->camera_pan_speed);
 		camera->base->transform->loc = vec4_add(camera->base->transform->loc, look);

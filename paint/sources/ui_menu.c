@@ -130,7 +130,7 @@ bool ui_menu_button(char *text, char *label, icon_t icon) {
 			ui->_x = _x_left - 2 * UI_SCALE();
 			ui->_y = _y_top + 2 * UI_SCALE();
 		}
-		ui_sub_image(icons, ui->ops->theme->LABEL_COL - 0x00222222, icon_h, rect->x / (float)2, rect->y / (float)2, rect->w / (float)2, rect->h / (float)2);
+		ui_sub_image(icons, ui->ops->theme->LABEL_COL - 0x00222222, icon_h, rect->x / 2.0, rect->y / 2.0, rect->w / 2.0, rect->h / 2.0);
 		ui->_x = _x_left;
 		ui->_y = _y_bottom;
 	}
@@ -171,7 +171,7 @@ bool ui_icon_button(char *text, icon_t icon, ui_align_t align) {
 		gpu_texture_t *icons     = resource_get("icons05x.k");
 		rect_t        *rect      = resource_tile50(icons, icon);
 		i32            icon_h    = 25 * UI_SCALE();
-		ui->_x                   = align == UI_ALIGN_LEFT ? _x_left : _x_left + _w / (float)2 - textw / (float)2 - icon_h / (float)2;
+		ui->_x                   = align == UI_ALIGN_LEFT ? _x_left : _x_left + _w / 2.0 - textw / 2.0 - icon_h / 2.0;
 		ui->_y                   = _y_top;
 
 		if (config_raw->touch_ui) {
@@ -186,8 +186,8 @@ bool ui_icon_button(char *text, icon_t icon, ui_align_t align) {
 		}
 
 		ui->image_scroll_align = false;
-		ui_sub_image(icons, ui->enabled ? ui_menu_color_sub(ui->ops->theme->LABEL_COL, 0x00333333) : 0xffffffff, icon_h, rect->x / (float)2, rect->y / (float)2,
-		             rect->w / (float)2, rect->h / (float)2);
+		ui_sub_image(icons, ui->enabled ? ui_menu_color_sub(ui->ops->theme->LABEL_COL, 0x00333333) : 0xffffffff, icon_h, rect->x / 2.0, rect->y / 2.0,
+		             rect->w / 2.0, rect->h / 2.0);
 		ui->image_scroll_align = true;
 
 		ui->_x = _x_right;
@@ -227,8 +227,8 @@ void ui_menu_align() {
 	if (!config_raw->touch_ui) {
 		f32_array_t *row = f32_array_create_from_raw(
 		    (f32[]){
-		        12 / (float)100,
-		        88 / (float)100,
+		        12 / 100.0,
+		        88 / 100.0,
 		    },
 		    2);
 		ui_row(row);

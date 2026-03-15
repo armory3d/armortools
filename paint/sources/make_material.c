@@ -231,8 +231,8 @@ void make_material_bake_node_preview(ui_node_t *node, ui_node_canvas_t *group, u
 		char          *id    = parser_material_node_name(node, parents);
 		gpu_texture_t *image = any_map_get(context_raw->node_previews, id);
 		any_array_push(context_raw->node_previews_used, id);
-		i32 res_x = math_floor(config_get_texture_res_x() / (float)4);
-		i32 res_y = math_floor(config_get_texture_res_y() / (float)4);
+		i32 res_x = math_floor(config_get_texture_res_x() / 4.0);
+		i32 res_y = math_floor(config_get_texture_res_y() / 4.0);
 		if (image == NULL || image->width != res_x || image->height != res_y) {
 			if (image != NULL) {
 				gpu_delete_texture(image);

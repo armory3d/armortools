@@ -31,8 +31,8 @@ void import_envmap_run(char *path, gpu_texture_t *image) {
 		gc_root(import_envmap_mips);
 		i32 w = 512;
 		for (i32 i = 0; i < 5; ++i) {
-			any_array_push(import_envmap_mips, gpu_create_render_target(w, w > 1 ? math_floor(w / (float)2) : 1, GPU_TEXTURE_FORMAT_RGBA64));
-			w = math_floor(w / (float)2);
+			any_array_push(import_envmap_mips, gpu_create_render_target(w, w > 1 ? math_floor(w / 2.0) : 1, GPU_TEXTURE_FORMAT_RGBA64));
+			w = math_floor(w / 2.0);
 		}
 	}
 
@@ -77,7 +77,7 @@ void import_envmap_get_radiance_mip(gpu_texture_t *mip, i32 level, gpu_texture_t
 	import_envmap_params.y = 1024 * 16;
 	#endif
 	import_envmap_params.z = 1.0 / (float)pass_count;
-	import_envmap_params.x = (level + 1) / (float)10;
+	import_envmap_params.x = (level + 1) / 10.0;
 
 	for (i32 i = 0; i < pass_count; ++i) {
 		_gpu_begin(mip, NULL, NULL, i == 0 ? GPU_CLEAR_COLOR : GPU_CLEAR_NONE, 0x00000000, 0.0);
@@ -108,11 +108,11 @@ f32_array_t *import_envmap_get_spherical_harmonics(buffer_t *source, i32 source_
 	f32_array_t *sh      = f32_array_create(9 * 3 + 1); // Align to mult of 4 - 27->28
 	f32          accum   = 0.0;
 	f32          weight  = 1.0;
-	f32          weight1 = weight * 4 / (float)17;
-	f32          weight2 = weight * 8 / (float)17;
-	f32          weight3 = weight * 15 / (float)17;
-	f32          weight4 = weight * 5 / (float)68;
-	f32          weight5 = weight * 15 / (float)68;
+	f32          weight1 = weight * 4 / 17.0;
+	f32          weight2 = weight * 8 / 17.0;
+	f32          weight3 = weight * 15 / 17.0;
+	f32          weight4 = weight * 5 / 68.0;
+	f32          weight5 = weight * 15 / 68.0;
 
 	for (i32 x = 0; x < source_width; ++x) {
 		for (i32 y = 0; y < source_height; ++y) {
@@ -120,7 +120,7 @@ f32_array_t *import_envmap_get_spherical_harmonics(buffer_t *source, i32 source_
 
 			for (i32 i = 0; i < 3; ++i) {
 				f32 value = buffer_get_f16(source, ((x + y * source_width) * 8 + i * 2));
-				value     = math_pow(value, 1.0 / (float)2.2);
+				value     = math_pow(value, 1.0 / 2.2);
 
 				sh->buffer[0 + i] += value * weight1;
 				sh->buffer[3 + i] += value * weight2 * import_envmap_n.x;
@@ -140,7 +140,7 @@ f32_array_t *import_envmap_get_spherical_harmonics(buffer_t *source, i32 source_
 	}
 
 	for (i32 i = 0; i < sh->length; ++i) {
-		sh->buffer[i] /= accum / (float)16;
+		sh->buffer[i] /= accum / 16.0;
 	}
 
 	return sh;

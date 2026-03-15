@@ -70,18 +70,18 @@ void import_obj_run(char *path, bool replace_existing) {
 						texa1    = parts->buffer[j]->texa != NULL ? parts->buffer[j]->texa : NULL;
 						inda0    = parts->buffer[i]->inda;
 						inda1    = parts->buffer[j]->inda;
-						i32 voff = math_floor(posa0->length / (float)4);
+						i32 voff = math_floor(posa0->length / 4.0);
 						// Repack merged positions
-						f32_array_t *posa32 = f32_array_create(math_floor(posa0->length / (float)4) * 3 + math_floor(posa1->length / (float)4) * 3);
-						for (i32 k = 0; k < math_floor(posa0->length / (float)4); ++k) {
-							posa32->buffer[k * 3]     = posa0->buffer[k * 4] / (float)32767 * parts->buffer[i]->scale_pos;
-							posa32->buffer[k * 3 + 1] = posa0->buffer[k * 4 + 1] / (float)32767 * parts->buffer[i]->scale_pos;
-							posa32->buffer[k * 3 + 2] = posa0->buffer[k * 4 + 2] / (float)32767 * parts->buffer[i]->scale_pos;
+						f32_array_t *posa32 = f32_array_create(math_floor(posa0->length / 4.0) * 3 + math_floor(posa1->length / 4.0) * 3);
+						for (i32 k = 0; k < math_floor(posa0->length / 4.0); ++k) {
+							posa32->buffer[k * 3]     = posa0->buffer[k * 4] / 32767.0 * parts->buffer[i]->scale_pos;
+							posa32->buffer[k * 3 + 1] = posa0->buffer[k * 4 + 1] / 32767.0 * parts->buffer[i]->scale_pos;
+							posa32->buffer[k * 3 + 2] = posa0->buffer[k * 4 + 2] / 32767.0 * parts->buffer[i]->scale_pos;
 						}
-						for (i32 k = 0; k < math_floor(posa1->length / (float)4); ++k) {
-							posa32->buffer[voff * 3 + k * 3]     = posa1->buffer[k * 4] / (float)32767 * parts->buffer[j]->scale_pos;
-							posa32->buffer[voff * 3 + k * 3 + 1] = posa1->buffer[k * 4 + 1] / (float)32767 * parts->buffer[j]->scale_pos;
-							posa32->buffer[voff * 3 + k * 3 + 2] = posa1->buffer[k * 4 + 2] / (float)32767 * parts->buffer[j]->scale_pos;
+						for (i32 k = 0; k < math_floor(posa1->length / 4.0); ++k) {
+							posa32->buffer[voff * 3 + k * 3]     = posa1->buffer[k * 4] / 32767.0 * parts->buffer[j]->scale_pos;
+							posa32->buffer[voff * 3 + k * 3 + 1] = posa1->buffer[k * 4 + 1] / 32767.0 * parts->buffer[j]->scale_pos;
+							posa32->buffer[voff * 3 + k * 3 + 2] = posa1->buffer[k * 4 + 2] / 32767.0 * parts->buffer[j]->scale_pos;
 						}
 						f32 scale_pos = 0.0;
 						for (i32 k = 0; k < posa32->length; ++k) {
@@ -92,15 +92,15 @@ void import_obj_run(char *path, bool replace_existing) {
 						}
 						f32          inv  = 32767 * (1 / (float)scale_pos);
 						i16_array_t *posa = i16_array_create(posa0->length + posa1->length);
-						for (i32 k = 0; k < math_floor(posa->length / (float)4); ++k) {
+						for (i32 k = 0; k < math_floor(posa->length / 4.0); ++k) {
 							posa->buffer[k * 4]     = math_floor(posa32->buffer[k * 3] * inv);
 							posa->buffer[k * 4 + 1] = math_floor(posa32->buffer[k * 3 + 1] * inv);
 							posa->buffer[k * 4 + 2] = math_floor(posa32->buffer[k * 3 + 2] * inv);
 						}
-						for (i32 k = 0; k < math_floor(posa0->length / (float)4); ++k) {
+						for (i32 k = 0; k < math_floor(posa0->length / 4.0); ++k) {
 							posa->buffer[k * 4 + 3] = posa0->buffer[k * 4 + 3];
 						}
-						for (i32 k = 0; k < math_floor(posa1->length / (float)4); ++k) {
+						for (i32 k = 0; k < math_floor(posa1->length / 4.0); ++k) {
 							posa->buffer[posa0->length + k * 4 + 3] = posa1->buffer[k * 4 + 3];
 						}
 						// Merge normals and uvs

@@ -169,7 +169,7 @@ void box_projects_tab() {
 					}
 
 					if (show_asset_names) {
-						ui->_x = uix - (150 - 128) / (float)2;
+						ui->_x = uix - (150 - 128) / 2.0;
 						ui->_y += slotw * 0.9;
 						ui_text(name, UI_ALIGN_CENTER, 0x00000000);
 						if (ui->is_hovered) {
@@ -279,6 +279,6 @@ void box_projects_align_to_fullscreen() {
 	i32 apph            = iron_window_height();
 	i32 mw              = appw;
 	i32 mh              = apph;
-	ui_box_hwnd->drag_x = math_floor(-appw / (float)2 + mw / (float)2);
-	ui_box_hwnd->drag_y = math_floor(-apph / (float)2 + mh / (float)2);
+	ui_box_hwnd->drag_x = math_floor(-appw / 2.0 + mw / 2.0);
+	ui_box_hwnd->drag_y = math_floor(-apph / 2.0 + mh / 2.0);
 }

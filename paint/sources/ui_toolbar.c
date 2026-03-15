@@ -12,7 +12,7 @@ void ui_toolbar_draw_tool(i32 tool, gpu_texture_t *img, i32 icon_accent) {
 	if (context_raw->tool == tool) {
 		ui_toolbar_draw_highlight();
 	}
-	i32     tile_y = math_floor(tool / (float)12);
+	i32     tile_y = math_floor(tool / 12.0);
 	i32     tile_x = tile_y % 2 == 0 ? tool % 12 : (11 - (tool % 12));
 	i32     tile_i = tile_y * 12 + tile_x;
 	rect_t *rect   = resource_tile50(img, tile_i);
@@ -98,7 +98,7 @@ void ui_toolbar_draw_show_3d_view() {
 			ui->ops->theme->BUTTON_H   = ui->ops->theme->ELEMENT_H;
 			ui->ops->theme->BUTTON_COL = ui->ops->theme->WINDOW_BG_COL;
 			i32 font_height            = draw_font_height(ui->ops->font, ui->font_size);
-			ui->font_offset_y          = (UI_ELEMENT_H() - font_height) / (float)2;
+			ui->font_offset_y          = (UI_ELEMENT_H() - font_height) / 2.0;
 			i32 _w                     = ui->_w;
 			ui->_w                     = toolbar_w;
 			if (ui_icon_button("", ICON_CUBE, UI_ALIGN_CENTER)) {
@@ -174,7 +174,7 @@ void ui_toolbar_render_ui() {
 			ui->ops->theme->BUTTON_H   = ui->ops->theme->ELEMENT_H;
 			ui->ops->theme->BUTTON_COL = ui->ops->theme->WINDOW_BG_COL;
 			i32 font_height            = draw_font_height(ui->ops->font, ui->font_size);
-			ui->font_offset_y          = (UI_ELEMENT_H() - font_height) / (float)2;
+			ui->font_offset_y          = (UI_ELEMENT_H() - font_height) / 2.0;
 			i32 _w                     = ui->_w;
 			ui->_w                     = ui_toolbar_w(false);
 

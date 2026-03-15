@@ -19,10 +19,10 @@ void ui_box_render() {
 			i32 apph   = iron_window_height();
 			i32 mw     = math_floor(ui_box_modalw * UI_SCALE());
 			i32 mh     = math_floor(ui_box_modalh * UI_SCALE());
-			f32 left   = (appw / (float)2 - mw / (float)2) + ui_box_hwnd->drag_x;
-			f32 right  = (appw / (float)2 + mw / (float)2) + ui_box_hwnd->drag_x;
-			f32 top    = (apph / (float)2 - mh / (float)2) + ui_box_hwnd->drag_y;
-			f32 bottom = (apph / (float)2 + mh / (float)2) + ui_box_hwnd->drag_y;
+			f32 left   = (appw / 2.0 - mw / 2.0) + ui_box_hwnd->drag_x;
+			f32 right  = (appw / 2.0 + mw / 2.0) + ui_box_hwnd->drag_x;
+			f32 top    = (apph / 2.0 - mh / 2.0) + ui_box_hwnd->drag_y;
+			f32 bottom = (apph / 2.0 + mh / 2.0) + ui_box_hwnd->drag_y;
 			i32 mx     = mouse_x;
 			i32 my     = mouse_y;
 			if ((ui_box_click_to_hide && (mx < left || mx > right || my < top || my > bottom)) || is_escape) {
@@ -52,8 +52,8 @@ void ui_box_render() {
 	if (mh > apph) {
 		mh = apph;
 	}
-	i32 left          = math_floor(appw / (float)2 - mw / (float)2);
-	i32 top           = math_floor(apph / (float)2 - mh / (float)2);
+	i32 left          = math_floor(appw / 2.0 - mw / 2.0);
+	i32 top           = math_floor(apph / 2.0 - mh / 2.0);
 	ui_box_hwnd->text = string_copy(ui_box_title);
 
 	if (ui_box_commands == NULL) {
@@ -77,8 +77,8 @@ void ui_box_render() {
 			else {
 				f32_array_t *row = f32_array_create_from_raw(
 				    (f32[]){
-				        2 / (float)3,
-				        1 / (float)3,
+				        2 / 3.0,
+				        1 / 3.0,
 				    },
 				    2);
 				ui_row(row);
@@ -86,8 +86,8 @@ void ui_box_render() {
 			#else
 			f32_array_t *row = f32_array_create_from_raw(
 			    (f32[]){
-			        2 / (float)3,
-			        1 / (float)3,
+			        2 / 3.0,
+			        1 / 3.0,
 			    },
 			    2);
 			ui_row(row);
@@ -182,7 +182,7 @@ void ui_box_tween_in() {
 	tween_anim_t *a = GC_ALLOC_INIT(tween_anim_t, {.target = &ui_box_tween_alpha, .to = 0.5, .duration = 0.2, .ease = EASE_EXPO_OUT});
 	tween_to(a);
 
-	ui_box_hwnd->drag_y = math_floor(iron_window_height() / (float)2);
+	ui_box_hwnd->drag_y = math_floor(iron_window_height() / 2.0);
 	a = GC_ALLOC_INIT(tween_anim_t, {.target = &ui_box_hwnd->drag_y, .to = 0.0, .duration = 0.2, .ease = EASE_EXPO_OUT, .tick = ui_box_tween_tick});
 	tween_to(a);
 }

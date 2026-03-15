@@ -195,9 +195,9 @@ void tab_browser_draw(ui_handle_t *htab) {
 			// Menu, Up, Refresh
 			f32_array_t *row = f32_array_create_from_raw(
 			    (f32[]){
-			        0.5 / (float)4,
-			        0.5 / (float)4,
-			        3 / (float)4,
+			        0.5 / 4.0,
+			        0.5 / 4.0,
+			        3.0 / 4.0,
 			    },
 			    3);
 			ui_row(row);

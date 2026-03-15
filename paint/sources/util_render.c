@@ -92,7 +92,7 @@ void util_render_make_decal_preview() {
 
 	mesh_object_t *plane          = scene_get_child(".Plane")->ext;
 	plane->base->transform->scale = vec4_create(1, 1, 1, 1.0);
-	plane->base->transform->rot   = quat_from_euler(-math_pi() / (float)2, 0, 0);
+	plane->base->transform->rot   = quat_from_euler(-math_pi() / 2.0, 0, 0);
 	transform_build_matrix(plane->base->transform);
 	plane->base->visible          = true;
 	mesh_object_t_array_t *meshes = scene_meshes;
@@ -180,7 +180,7 @@ void util_render_make_text_preview() {
 	draw_begin(context_raw->text_tool_image, true, 0xff000000);
 	draw_set_font(font, font_size);
 	draw_set_color(0xffffffff);
-	draw_string(text, tex_w / (float)2 - text_w / (float)2, tex_w / (float)2 - text_h / (float)2);
+	draw_string(text, tex_w / 2.0 - text_w / 2.0, tex_w / 2.0 - text_h / 2.0);
 	draw_end();
 
 	if (in_use)
@@ -205,7 +205,7 @@ void util_render_make_font_preview() {
 	draw_begin(context_raw->font->image, true, 0x00000000);
 	draw_set_font(font, font_size);
 	draw_set_color(0xffffffff);
-	draw_string(text, tex_w / (float)2 - text_w / (float)2, tex_w / (float)2 - text_h / (float)2);
+	draw_string(text, tex_w / 2.0 - text_w / 2.0, tex_w / 2.0 - text_h / 2.0);
 	draw_end();
 	context_raw->font->preview_ready = true;
 
@@ -302,7 +302,7 @@ void util_render_make_brush_preview() {
 	vec4_t v                       = vec4_create(0.0, 0.0, 0.0, 1.0);
 	v                              = vec4_create(m.m00, m.m01, m.m02, 1.0);
 	f32 sx                         = vec4_len(v);
-	planeo->base->transform->rot   = quat_from_euler(-math_pi() / (float)2, 0, 0);
+	planeo->base->transform->rot   = quat_from_euler(-math_pi() / 2.0, 0, 0);
 	planeo->base->transform->scale = vec4_create(sx, 1.0, sx, 1.0);
 	planeo->base->transform->loc   = vec4_create(m.m30, -m.m31, 0.0, 1.0);
 	transform_build_matrix(planeo->base->transform);
@@ -538,10 +538,10 @@ void util_render_create_screen_aligned_full_data() {
 	gpu_vertex_struct_add(structure, "col", GPU_VERTEX_DATA_I16_4X_NORM);
 	gc_unroot(util_render_screen_aligned_full_vb);
 	util_render_screen_aligned_full_vb =
-	    gpu_create_vertex_buffer(math_floor(data->length / (float)math_floor(gpu_vertex_struct_size(structure) / (float)2)), structure);
+	    gpu_create_vertex_buffer(math_floor(data->length / (float)math_floor(gpu_vertex_struct_size(structure) / 2.0)), structure);
 	gc_root(util_render_screen_aligned_full_vb);
 	buffer_t *vertices = gpu_lock_vertex_buffer(util_render_screen_aligned_full_vb);
-	for (i32 i = 0; i < math_floor((vertices->length) / (float)2); ++i) {
+	for (i32 i = 0; i < math_floor((vertices->length) / 2.0); ++i) {
 		buffer_set_i16(vertices, i * 2, data->buffer[i]);
 	}
 	gpu_vertex_buffer_unlock(util_render_screen_aligned_full_vb);

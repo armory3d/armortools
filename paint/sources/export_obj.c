@@ -17,12 +17,12 @@ void export_obj_run(char *path, mesh_object_t_array_t *paint_objects, bool apply
 	for (i32 i = 0; i < paint_objects->length; ++i) {
 		mesh_object_t *p    = paint_objects->buffer[i];
 		mesh_data_t   *mesh = p->data;
-		f32            inv  = 1 / (float)32767;
+		f32            inv  = 1 / 32767.0;
 		f32            sc   = p->data->scale_pos * inv;
 		i16_array_t   *posa = mesh->vertex_arrays->buffer[0]->values;
 		i16_array_t   *nora = mesh->vertex_arrays->buffer[1]->values;
 		i16_array_t   *texa = mesh->vertex_arrays->buffer[2]->values;
-		i32            len  = math_floor(posa->length / (float)4);
+		i32            len  = math_floor(posa->length / 4.0);
 
 		// Merge shared vertices and remap indices
 		i16_array_t *posa2  = i16_array_create(len * 3);
@@ -135,7 +135,7 @@ void export_obj_run(char *path, mesh_object_t_array_t *paint_objects, bool apply
 		}
 
 		u32_array_t *inda = mesh->index_array;
-		for (i32 i = 0; i < math_floor(inda->length / (float)3); ++i) {
+		for (i32 i = 0; i < math_floor(inda->length / 3.0); ++i) {
 			i32 pi1 = posmap->buffer[inda->buffer[i * 3]] + 1 + poff;
 			i32 pi2 = posmap->buffer[inda->buffer[i * 3 + 1]] + 1 + poff;
 			i32 pi3 = posmap->buffer[inda->buffer[i * 3 + 2]] + 1 + poff;
@@ -188,13 +188,13 @@ void export_obj_run_fast(char *path, mesh_object_t_array_t *paint_objects) {
 	for (i32 i = 0; i < paint_objects->length; ++i) {
 		mesh_object_t *p    = paint_objects->buffer[i];
 		mesh_data_t   *mesh = p->data;
-		f32            inv  = 1 / (float)32767;
+		f32            inv  = 1 / 32767.0;
 		f32            sc   = p->data->scale_pos * inv;
 		i16_array_t   *posa = mesh->vertex_arrays->buffer[0]->values;
 		i16_array_t   *nora = mesh->vertex_arrays->buffer[1]->values;
 		i16_array_t   *texa = mesh->vertex_arrays->buffer[2]->values;
 
-		i32 pi = posa->length / (float)4;
+		i32 pi = posa->length / 4.0;
 		i32 ni = pi;
 		i32 ti = pi;
 
@@ -234,7 +234,7 @@ void export_obj_run_fast(char *path, mesh_object_t_array_t *paint_objects) {
 		}
 
 		u32_array_t *inda = mesh->index_array;
-		for (i32 i = 0; i < math_floor(inda->length / (float)3); ++i) {
+		for (i32 i = 0; i < math_floor(inda->length / 3.0); ++i) {
 			i32 pi1 = inda->buffer[i * 3] + 1 + poff;
 			i32 pi2 = inda->buffer[i * 3 + 1] + 1 + poff;
 			i32 pi3 = inda->buffer[i * 3 + 2] + 1 + poff;

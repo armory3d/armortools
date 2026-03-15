@@ -264,9 +264,9 @@ void box_export_tab_presets() {
 
 		f32_array_t *row = f32_array_create_from_raw(
 		    (f32[]){
-		        3 / (float)5,
-		        1 / (float)5,
-		        1 / (float)5,
+		        3 / 5.0,
+		        1 / 5.0,
+		        1 / 5.0,
 		    },
 		    3);
 		ui_row(row);
@@ -354,7 +354,7 @@ void box_export_tab_presets() {
 
 		row = f32_array_create_from_raw(
 		    (f32[]){
-		        1 / (float)6,
+		        1 / 6.0,
 		    },
 		    1);
 		ui_row(row);
@@ -493,7 +493,7 @@ void box_export_tab_export_mesh(ui_handle_t *htab) {
 		}
 		for (i32 i = 0; i < paint_objects->length; ++i) {
 			mesh_object_t *po = paint_objects->buffer[i];
-			tris += math_floor(po->data->index_array->length / (float)3);
+			tris += math_floor(po->data->index_array->length / 3.0);
 		}
 		ui_text(string("%s %s", i32_to_string(tris), tr("triangles")), UI_ALIGN_LEFT, 0x00000000);
 

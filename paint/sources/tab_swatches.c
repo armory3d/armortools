@@ -218,7 +218,7 @@ void tab_swatches_draw(ui_handle_t *htab) {
 					ui_header_handle->redraws = 2;
 				}
 				else if (state == UI_STATE_HOVERED) {
-					tab_swatches_drag_pos = (mouse_x > uix + ui->_window_x + slotw / (float)2)
+					tab_swatches_drag_pos = (mouse_x > uix + ui->_window_x + slotw / 2.0)
 					                            ? i + 1
 					                            : i; // Switch to the next position if the mouse crosses the swatch rectangle center
 					drag_pos_set          = true;

@@ -480,14 +480,14 @@ void ui_menubar_draw_category_items() {
 		ui_handle_t *enva_handle = ui_handle(__ID__);
 		enva_handle->f           = context_raw->envmap_angle / (float)math_pi() * 180.0;
 		if (enva_handle->f < 0) {
-			enva_handle->f += (math_floor(-enva_handle->f / (float)360) + 1) * 360;
+			enva_handle->f += (math_floor(-enva_handle->f / 360.0) + 1) * 360;
 		}
 		else if (enva_handle->f > 360) {
-			enva_handle->f -= math_floor(enva_handle->f / (float)360) * 360;
+			enva_handle->f -= math_floor(enva_handle->f / 360.0) * 360;
 		}
 		ui_menu_align();
 		context_raw->envmap_angle =
-		    ui_slider(enva_handle, tr("Environment Angle"), 0.0, 360.0, true, 1, true, UI_ALIGN_RIGHT, true) / (float)180.0 * math_pi();
+		    ui_slider(enva_handle, tr("Environment Angle"), 0.0, 360.0, true, 1, true, UI_ALIGN_RIGHT, true) / 180.0 * math_pi();
 		if (ui->is_hovered) {
 			any_map_t *vars = any_map_create();
 			any_map_set(vars, "shortcut", any_map_get(config_keymap, "rotate_envmap"));
@@ -671,16 +671,16 @@ void ui_menubar_draw_category_items() {
 			if (ui_menu_sub_button(ui_handle(__ID__), tr("View"))) {
 				ui_menu_sub_begin(6);
 				if (ui_menu_button(tr("Front"), any_map_get(config_keymap, "view_front"), ICON_NONE)) {
-					viewport_set_view(0, -1, 0, math_pi() / (float)2, 0, 0);
+					viewport_set_view(0, -1, 0, math_pi() / 2.0, 0, 0);
 				}
 				if (ui_menu_button(tr("Back"), any_map_get(config_keymap, "view_back"), ICON_NONE)) {
-					viewport_set_view(0, 1, 0, math_pi() / (float)2, 0, math_pi());
+					viewport_set_view(0, 1, 0, math_pi() / 2.0, 0, math_pi());
 				}
 				if (ui_menu_button(tr("Right"), any_map_get(config_keymap, "view_right"), ICON_NONE)) {
-					viewport_set_view(1, 0, 0, math_pi() / (float)2, 0, math_pi() / (float)2);
+					viewport_set_view(1, 0, 0, math_pi() / 2.0, 0, math_pi() / 2.0);
 				}
 				if (ui_menu_button(tr("Left"), any_map_get(config_keymap, "view_left"), ICON_NONE)) {
-					viewport_set_view(-1, 0, 0, math_pi() / (float)2, 0, -math_pi() / (float)2);
+					viewport_set_view(-1, 0, 0, math_pi() / 2.0, 0, -math_pi() / 2.0);
 				}
 				if (ui_menu_button(tr("Top"), any_map_get(config_keymap, "view_top"), ICON_NONE)) {
 					viewport_set_view(0, 0, 1, 0, 0, 0);
@@ -696,16 +696,16 @@ void ui_menubar_draw_category_items() {
 			if (ui_menu_sub_button(ui_handle(__ID__), tr("Orbit"))) {
 				ui_menu_sub_begin(5);
 				if (ui_menu_button(tr("Left"), any_map_get(config_keymap, "view_orbit_left"), ICON_ARROW_LEFT)) {
-					viewport_orbit(-math_pi() / (float)12, 0);
+					viewport_orbit(-math_pi() / 12.0, 0);
 				}
 				if (ui_menu_button(tr("Right"), any_map_get(config_keymap, "view_orbit_right"), ICON_ARROW_RIGHT)) {
-					viewport_orbit(math_pi() / (float)12, 0);
+					viewport_orbit(math_pi() / 12.0, 0);
 				}
 				if (ui_menu_button(tr("Up"), any_map_get(config_keymap, "view_orbit_up"), ICON_ARROW_UP)) {
-					viewport_orbit(0, -math_pi() / (float)12);
+					viewport_orbit(0, -math_pi() / 12.0);
 				}
 				if (ui_menu_button(tr("Down"), any_map_get(config_keymap, "view_orbit_down"), ICON_ARROW_DOWN)) {
-					viewport_orbit(0, math_pi() / (float)12);
+					viewport_orbit(0, math_pi() / 12.0);
 				}
 				if (ui_menu_button(tr("Opposite"), any_map_get(config_keymap, "view_orbit_opposite"), ICON_NONE)) {
 					viewport_orbit_opposite();
@@ -722,7 +722,7 @@ void ui_menubar_draw_category_items() {
 		}
 
 		camera_object_t *cam       = scene_camera;
-		context_raw->fov_handle->f = math_floor(cam->data->fov * 100) / (float)100;
+		context_raw->fov_handle->f = math_floor(cam->data->fov * 100) / 100.0;
 		ui_menu_align();
 		cam->data->fov = ui_slider(context_raw->fov_handle, tr("FoV"), 0.3, 1.4, true, 100.0, true, UI_ALIGN_RIGHT, true);
 		if (context_raw->fov_handle->changed) {
@@ -915,7 +915,7 @@ void ui_menubar_show_menu(i32 category) {
 	ui_menu_y   = math_floor(ui_MENUBAR_H(ui)) + panel_y + 2;
 	if (config_raw->touch_ui) {
 		i32 menu_w = math_floor(base_default_element_w * UI_SCALE() * 2.0);
-		ui_menu_x -= math_floor((menu_w - ui->_w) / (float)2) + math_floor(ui_header_h / (float)2);
+		ui_menu_x -= math_floor((menu_w - ui->_w) / 2.0) + math_floor(ui_header_h / 2.0);
 		ui_menu_x += math_floor(2 * UI_SCALE());
 		ui_menu_y -= math_floor(2 * UI_SCALE());
 		ui_menu_keep_open = true;

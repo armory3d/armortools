@@ -82,7 +82,7 @@ void viewport_update_camera_type(i32 camera_type) {
 	}
 	else {
 		f32_array_t *f32a = f32_array_create(4);
-		f32          f    = cam->data->fov * vec4_len(mat4_get_loc(cam->base->transform->world)) / (float)2.5;
+		f32          f    = cam->data->fov * vec4_len(mat4_get_loc(cam->base->transform->world)) / 2.5;
 		f32a->buffer[0]   = -2 * f;
 		f32a->buffer[1]   = 2 * f;
 		f32a->buffer[2]   = -2 * f * (sys_h() / (float)sys_w());

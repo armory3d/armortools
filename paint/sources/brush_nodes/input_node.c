@@ -16,7 +16,7 @@ input_node_t *input_node_create(ui_node_t *raw, f32_array_t *args) {
 
 void input_node_update(float_node_t *self) {
 	if (context_raw->split_view) {
-		context_raw->view_index = mouse_view_x() > base_w() / (float)2 ? 1 : 0;
+		context_raw->view_index = mouse_view_x() > base_w() / 2.0 ? 1 : 0;
 	}
 
 	bool decal_mask = context_is_decal_mask_paint();

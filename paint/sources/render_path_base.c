@@ -38,7 +38,7 @@ void render_path_base_begin() {
 		}
 		else {
 			// Set current viewport
-			context_raw->view_index = mouse_view_x() > base_w() / (float)2 ? 1 : 0;
+			context_raw->view_index = mouse_view_x() > base_w() / 2.0 ? 1 : 0;
 		}
 
 		camera_object_t *cam = scene_camera;

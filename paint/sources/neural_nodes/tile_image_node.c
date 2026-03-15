@@ -32,7 +32,7 @@ void tile_image_node_button_on_next_frame(ui_node_t *node) {
 		u8_array_t *u8a = u8_array_create(512 * 512);
 		for (i32 i = 0; i < 512 * 512; ++i) {
 			i32 x          = i % 512;
-			i32 y          = math_floor(i / (float)512);
+			i32 y          = math_floor(i / 512.0);
 			i32 l          = y < 256 ? y : (511 - y);
 			u8a->buffer[i] = (x > 256 - l && x < 256 + l) ? 255 : 0;
 			// u8a[i]     = (x > 256 - l && x < 256 + l) ? 128 : 0;
