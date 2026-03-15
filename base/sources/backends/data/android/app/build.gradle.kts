@@ -6,7 +6,6 @@ plugins {
 android {
     namespace = "{package}"
     compileSdk = {compileSdkVersion}
-    ndkVersion = "29.0.14206865"
 
     defaultConfig {
         applicationId = "{package}"
@@ -26,11 +25,9 @@ android {
         release {
             isMinifyEnabled = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-            {architecture}
         }
         debug {
             isMinifyEnabled = false
-            {architecture}
         }
     }
     compileOptions {
