@@ -75,6 +75,7 @@ typedef enum {
 	WORKSPACE_NODES    = 2,
 	WORKSPACE_SCRIPT   = 3,
 	WORKSPACE_SCULPT   = 4,
+	WORKSPACE_PLAYER   = 5,
 } workspace_t;
 
 typedef enum {

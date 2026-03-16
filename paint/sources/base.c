@@ -29,6 +29,10 @@ void base_on_drop_files(char *drop_path) {
 	any_array_push(base_drop_paths, drop_path);
 }
 
+void base_init_on_start_arm(void *_) {
+	import_arm_run_project(project_filepath);
+}
+
 void base_init() {
 	base_last_window_width  = iron_window_width();
 	base_last_window_height = iron_window_height();
@@ -36,7 +40,6 @@ void base_init() {
 	sys_notify_on_drop_files(&base_on_drop_files);
 	sys_notify_on_app_state(&base_on_foreground, &base_on_resume, &base_on_pause, &base_on_background, &base_on_shutdown);
 	iron_set_save_and_quit_callback(base_save_and_quit_callback);
-
 
 	base_font = data_get_font("font.ttf");
 	gc_root(base_font);
@@ -66,7 +69,6 @@ void base_init() {
 		draw_font_init(base_font);
 	}
 
-
 	ui_nodes_enum_texts = base_enum_texts;
 	gc_root(ui_nodes_enum_texts);
 
@@ -77,6 +79,7 @@ void base_init() {
 			plugin_start(plugin);
 		}
 	}
+
 	args_parse();
 	camera_init();
 	ui_base_init();
@@ -114,6 +117,20 @@ void base_init() {
 	bool has_projects = config_raw->recent_projects->length > 0;
 	if (config_raw->splash_screen && has_projects) {
 		box_projects_show();
+	}
+
+	// Startup project
+	char *start_arm = string("%s/start.arm", iron_internal_files_location());
+	if (iron_file_exists(start_arm)) {
+		gc_unroot(project_filepath);
+		project_filepath = start_arm;
+		gc_root(project_filepath);
+		sys_notify_on_next_frame(&base_init_on_start_arm, NULL);
+		context_raw->tool     = TOOL_TYPE_GIZMO;
+		make_material_parse_paint_material(true);
+		config_raw->workspace = WORKSPACE_PLAYER;
+		base_update_workspace();
+		base_player_lock = true;
 	}
 }
 
@@ -988,6 +1005,10 @@ void ui_base_update(void *_) {
 	if (keyboard_started(any_map_get(config_keymap, "view_distract_free")) || (keyboard_started("escape") && !ui_base_show && !ui_box_show)) {
 		ui_base_toggle_distract_free();
 	}
+	if (keyboard_started("f5") && config_raw->workspace != WORKSPACE_PLAYER) {
+		config_raw->workspace = WORKSPACE_PLAYER;
+		base_update_workspace();
+	}
 
 #ifdef IRON_LINUX
 	if (operator_shortcut("alt+enter", SHORTCUT_TYPE_STARTED)) {
@@ -1420,7 +1441,15 @@ void ui_base_operator_search() {
 }
 
 void ui_base_toggle_distract_free() {
+	if (base_player_lock) {
+		return;
+	}
+
 	ui_base_show = !ui_base_show;
+	if (ui_base_show) {
+		config_raw->workspace = WORKSPACE_PAINT_3D;
+		base_update_workspace();
+	}
 	base_resize();
 }
 
@@ -1823,8 +1852,8 @@ void ui_base_render_cursor(void *_) {
 	// Clone source cursor
 	if (context_raw->tool == TOOL_TYPE_CLONE && !keyboard_down("alt") && (mouse_down("left") || pen_down("tip"))) {
 		draw_set_color(0x66ffffff);
-		draw_scaled_image(cursor_img, mx + context_raw->clone_delta_x * sys_w() - psize / 2.0,
-		                  my + context_raw->clone_delta_y * sys_h() - psize / 2.0, psize, psize);
+		draw_scaled_image(cursor_img, mx + context_raw->clone_delta_x * sys_w() - psize / 2.0, my + context_raw->clone_delta_y * sys_h() - psize / 2.0, psize,
+		                  psize);
 		draw_set_color(0xffffffff);
 	}
 
@@ -2146,9 +2175,12 @@ void base_update_workspace() {
 
 		config_raw->layout->buffer[LAYOUT_SIZE_STATUS_H]   = iron_window_height() * 0.3;
 		config_raw->layout->buffer[LAYOUT_SIZE_SIDEBAR_W]  = iron_window_width() * 0.52;
-		float h = UI_ELEMENT_H() + UI_ELEMENT_OFFSET() + 2;
+		float h                                            = UI_ELEMENT_H() + UI_ELEMENT_OFFSET() + 2;
 		config_raw->layout->buffer[LAYOUT_SIZE_SIDEBAR_H0] = iron_window_height() - h;
 		config_raw->layout->buffer[LAYOUT_SIZE_SIDEBAR_H1] = h;
+	}
+	else if (config_raw->workspace == WORKSPACE_PLAYER) {
+		ui_base_show = false;
 	}
 
 	base_resize();

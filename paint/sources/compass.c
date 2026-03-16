@@ -2,7 +2,7 @@
 #include "global.h"
 
 void compass_render() {
-	if (!context_raw->show_compass) {
+	if (!context_raw->show_compass || config_raw->workspace == WORKSPACE_PLAYER) {
 		return;
 	}
 

@@ -7,7 +7,7 @@ void gizmo_update() {
 
 	object_t *gizmo     = context_raw->gizmo;
 	bool      hide      = operator_shortcut(any_map_get(config_keymap, "stencil_hide"), SHORTCUT_TYPE_DOWN);
-	gizmo->visible      = (is_object || is_decal) && !hide;
+	gizmo->visible      = (is_object || is_decal) && !hide && config_raw->workspace != WORKSPACE_PLAYER;
 	if (!gizmo->visible) {
 		return;
 	}

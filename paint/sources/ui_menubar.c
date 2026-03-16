@@ -864,6 +864,7 @@ void ui_menubar_draw_category_items() {
 
 		if (config_raw->experimental) {
 			any_array_push(modes, tr("Sculpt"));
+			any_array_push(modes, tr("Player"));
 		}
 
 		for (i32 i = 0; i < modes->length; ++i) {

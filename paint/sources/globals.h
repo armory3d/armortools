@@ -163,6 +163,7 @@ i32                       base_last_window_width  = 0;
 i32                       base_last_window_height = 0;
 slot_material_t          *base_drag_material      = NULL;
 slot_layer_t             *base_drag_layer         = NULL;
+bool                      base_player_lock        = false;
 i32                       _base_material_count;
 ui_t                     *ui;
 bool                      ui_base_show                   = true;
