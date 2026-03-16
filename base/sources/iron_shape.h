@@ -2,7 +2,7 @@
 
 #include "engine.h"
 #include "iron_global.h"
-#include "iron_vec4.h"
+#include "iron_math.h"
 
 extern i32             line_draw_color;
 extern f32             line_draw_strength;

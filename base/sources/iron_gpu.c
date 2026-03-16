@@ -1,5 +1,6 @@
 #include "iron_gpu.h"
 #include "iron_system.h"
+#include "iron_math.h"
 #include <string.h>
 
 static gpu_buffer_t   constant_buffer;
@@ -207,43 +208,41 @@ void gpu_set_bool(int location, bool value) {
 	ints[0]   = value ? 1 : 0;
 }
 
-static void gpu_internal_set_matrix3(int offset, iron_matrix3x3_t *value) {
+static void gpu_internal_set_mat3(int offset, mat3_t *value) {
 	float *floats = (float *)(&constant_buffer.data[offset]);
 	for (int y = 0; y < 3; ++y) {
 		for (int x = 0; x < 3; ++x) {
-			floats[x + y * 4] = iron_matrix3x3_get(value, x, y);
+			floats[x + y * 4] = value->m[x * 3 + y];
 		}
 	}
 }
 
-static void gpu_internal_set_matrix4(int offset, iron_matrix4x4_t *value) {
+static void gpu_internal_set_mat4(int offset, mat4_t *value) {
 	float *floats = (float *)(&constant_buffer.data[offset]);
 	for (int y = 0; y < 4; ++y) {
 		for (int x = 0; x < 4; ++x) {
-			floats[x + y * 4] = iron_matrix4x4_get(value, x, y);
+			floats[x + y * 4] = value->m[x * 4 + y];
 		}
 	}
 }
 
-void gpu_set_matrix3(int location, iron_matrix3x3_t value) {
+void gpu_set_mat3(int location, mat3_t value) {
 	if (gpu_transpose_mat) {
-		iron_matrix3x3_t m = value;
-		iron_matrix3x3_transpose(&m);
-		gpu_internal_set_matrix3(location, &m);
+		mat3_t m = mat3_transpose(value);
+		gpu_internal_set_mat3(location, &m);
 	}
 	else {
-		gpu_internal_set_matrix3(location, &value);
+		gpu_internal_set_mat3(location, &value);
 	}
 }
 
-void gpu_set_matrix4(int location, iron_matrix4x4_t value) {
+void gpu_set_mat4(int location, mat4_t value) {
 	if (gpu_transpose_mat) {
-		iron_matrix4x4_t m = value;
-		iron_matrix4x4_transpose(&m);
-		gpu_internal_set_matrix4(location, &m);
+		mat4_t m = mat4_transpose(value);
+		gpu_internal_set_mat4(location, &m);
 	}
 	else {
-		gpu_internal_set_matrix4(location, &value);
+		gpu_internal_set_mat4(location, &value);
 	}
 }
 
@@ -399,7 +398,7 @@ void _gpu_raytrace_as_init() {
 	gpu_raytrace_acceleration_structure_init(&rt_accel);
 }
 
-void _gpu_raytrace_as_add(struct gpu_buffer *vb, gpu_buffer_t *ib, iron_matrix4x4_t transform) {
+void _gpu_raytrace_as_add(struct gpu_buffer *vb, gpu_buffer_t *ib, mat4_t transform) {
 	gpu_raytrace_acceleration_structure_add(&rt_accel, vb, ib, transform);
 }
 

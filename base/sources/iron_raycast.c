@@ -1,8 +1,7 @@
 #include "iron_raycast.h"
 
 #include "iron_gc.h"
-#include "iron_mat4.h"
-#include "iron_vec4.h"
+#include "iron_math.h"
 #include <math.h>
 
 i32 sys_w(void);

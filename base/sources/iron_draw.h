@@ -7,7 +7,6 @@
 
 #include "iron_array.h"
 #include "iron_gpu.h"
-#include "iron_mat3.h"
 #include "iron_math.h"
 #include <stdbool.h>
 #include <stdint.h>

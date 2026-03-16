@@ -1403,7 +1403,7 @@ bool uniforms_set_context_const(i32 location, shader_const_t *c) {
 			return false;
 		}
 
-		gpu_set_matrix4(location, m);
+		gpu_set_mat4(location, m);
 		return true;
 	}
 	else if (string_equals(c->type, "vec4")) {
@@ -1654,14 +1654,14 @@ void uniforms_set_obj_const(object_t *obj, i32 loc, shader_const_t *c) {
 		if (mat4_isnan(m)) {
 			return;
 		}
-		gpu_set_matrix4(loc, m);
+		gpu_set_mat4(loc, m);
 	}
 	else if (string_equals(c->type, "mat3")) {
 		mat3_t m = mat3_nan();
 
 		if (string_equals(c->link, "_normal_matrix")) {
 			mat4_t m4 = mat4_inv(obj->transform->world);
-			m4        = mat4_transpose3x3(m4);
+			m4        = mat4_transpose3(m4);
 			m         = mat3_set_from4(m4);
 		}
 		else if (string_equals(c->link, "_view_matrix3")) {
@@ -1671,7 +1671,7 @@ void uniforms_set_obj_const(object_t *obj, i32 loc, shader_const_t *c) {
 		if (mat3_isnan(m)) {
 			return;
 		}
-		gpu_set_matrix3(loc, m);
+		gpu_set_mat3(loc, m);
 	}
 	else if (string_equals(c->type, "vec4")) {
 		vec4_t v = vec4_nan();
@@ -2451,21 +2451,21 @@ gpu_texture_t *gpu_create_render_target(i32 width, i32 height, i32 format);
 int            iron_window_width(void);
 int            iron_window_height(void);
 
-void (*render_path_commands)(void)                    = NULL;
-any_map_t        *render_path_render_targets          = NULL;
-i32               render_path_current_w               = 0;
-i32               render_path_current_h               = 0;
-f32               _render_path_frame_time             = 0.0;
-i32               _render_path_frame                  = 0;
-render_target_t  *_render_path_current_target         = NULL;
-gpu_texture_t    *_render_path_current_image          = NULL;
-bool              _render_path_paused                 = false;
-i32               _render_path_last_w                 = 0;
-i32               _render_path_last_h                 = 0;
-string_array_t *_render_path_bind_params            = NULL;
-f32               _render_path_last_frame_time        = 0.0;
-i32               _render_path_loading                = 0;
-any_map_t        *_render_path_cached_shader_contexts = NULL;
+void (*render_path_commands)(void)                   = NULL;
+any_map_t       *render_path_render_targets          = NULL;
+i32              render_path_current_w               = 0;
+i32              render_path_current_h               = 0;
+f32              _render_path_frame_time             = 0.0;
+i32              _render_path_frame                  = 0;
+render_target_t *_render_path_current_target         = NULL;
+gpu_texture_t   *_render_path_current_image          = NULL;
+bool             _render_path_paused                 = false;
+i32              _render_path_last_w                 = 0;
+i32              _render_path_last_h                 = 0;
+string_array_t  *_render_path_bind_params            = NULL;
+f32              _render_path_last_frame_time        = 0.0;
+i32              _render_path_loading                = 0;
+any_map_t       *_render_path_cached_shader_contexts = NULL;
 
 bool render_path_ready(void) {
 	return _render_path_loading == 0;

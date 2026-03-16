@@ -7,7 +7,6 @@
 #include "iron_simd.h"
 #include "iron_string.h"
 #include "iron_system.h"
-#include "iron_vec2.h"
 #include <math.h>
 
 #define MATH_PI 3.14159265358979323846
@@ -16,7 +15,7 @@ draw_font_t   *draw_font = NULL;
 int            draw_font_size;
 gpu_texture_t *_draw_current = NULL;
 
-static iron_matrix3x3_t draw_transform;
+static mat3_t draw_transform;
 static uint32_t         draw_color           = 0;
 static gpu_pipeline_t  *draw_custom_pipeline = NULL;
 
@@ -233,7 +232,7 @@ void draw_scaled_sub_image(gpu_texture_t *tex, float sx, float sy, float sw, flo
 	}
 	else {
 		gpu_set_pipeline(draw_custom_pipeline != NULL ? draw_custom_pipeline : &image_transform_pipeline);
-		gpu_set_matrix3(image_transform_w_loc, draw_transform);
+		gpu_set_mat3(image_transform_w_loc, draw_transform);
 	}
 	gpu_set_vertex_buffer(&rect_vertex_buffer);
 	gpu_set_index_buffer(&rect_index_buffer);
@@ -288,12 +287,12 @@ void draw_rect(float x, float y, float width, float height, float strength) {
 }
 
 void draw_line(float x0, float y0, float x1, float y1, float strength) {
-	iron_vector2_t vec;
+	vec2_t vec;
 	if (y1 == y0) {
-		vec = (iron_vector2_t){0.0f, -1.0f};
+		vec = (vec2_t){0.0f, -1.0f};
 	}
 	else {
-		vec = (iron_vector2_t){1.0f, -(x1 - x0) / (y1 - y0)};
+		vec = (vec2_t){1.0f, -(x1 - x0) / (y1 - y0)};
 	}
 
 	float current_length = sqrtf(vec.x * vec.x + vec.y * vec.y);
@@ -303,10 +302,10 @@ void draw_line(float x0, float y0, float x1, float y1, float strength) {
 		vec.y *= mul;
 	}
 
-	iron_vector2_t p0 = (iron_vector2_t){x0 + 0.5f * vec.x, y0 + 0.5f * vec.y};
-	iron_vector2_t p1 = (iron_vector2_t){x1 + 0.5f * vec.x, y1 + 0.5f * vec.y};
-	iron_vector2_t p2 = (iron_vector2_t){p0.x - vec.x, p0.y - vec.y};
-	iron_vector2_t p3 = (iron_vector2_t){p1.x - vec.x, p1.y - vec.y};
+	vec2_t p0 = (vec2_t){x0 + 0.5f * vec.x, y0 + 0.5f * vec.y};
+	vec2_t p1 = (vec2_t){x1 + 0.5f * vec.x, y1 + 0.5f * vec.y};
+	vec2_t p2 = (vec2_t){p0.x - vec.x, p0.y - vec.y};
+	vec2_t p3 = (vec2_t){p1.x - vec.x, p1.y - vec.y};
 	draw_filled_triangle(p0.x, p0.y, p1.x, p1.y, p2.x, p2.y);
 	draw_filled_triangle(p2.x, p2.y, p1.x, p1.y, p3.x, p3.y);
 }
@@ -741,7 +740,7 @@ void draw_inner_line(float x1, float y1, float x2, float y2, float strength) {
 	if (y2 == y1) {
 		side = x2 - x1 > 0 ? 1 : 0;
 	}
-	iron_vector2_t vec;
+	vec2_t vec;
 	if (y2 == y1) {
 		vec = vec2_create(0, -1);
 	}
@@ -749,10 +748,10 @@ void draw_inner_line(float x1, float y1, float x2, float y2, float strength) {
 		vec = vec2_create(1, -(x2 - x1) / (y2 - y1));
 	}
 	vec               = vec2_set_len(vec, strength);
-	iron_vector2_t p1 = {x1 + side * vec.x, y1 + side * vec.y};
-	iron_vector2_t p2 = {x2 + side * vec.x, y2 + side * vec.y};
-	iron_vector2_t p3 = vec2_sub(p1, vec);
-	iron_vector2_t p4 = vec2_sub(p2, vec);
+	vec2_t p1 = {x1 + side * vec.x, y1 + side * vec.y};
+	vec2_t p2 = {x2 + side * vec.x, y2 + side * vec.y};
+	vec2_t p3 = vec2_sub(p1, vec);
+	vec2_t p4 = vec2_sub(p2, vec);
 	draw_filled_triangle(p1.x, p1.y, p2.x, p2.y, p3.x, p3.y);
 	draw_filled_triangle(p3.x, p3.y, p2.x, p2.y, p4.x, p4.y);
 }

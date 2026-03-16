@@ -185,8 +185,8 @@ void gpu_set_float3(int location, float value1, float value2, float value3);
 void gpu_set_float4(int location, float value1, float value2, float value3, float value4);
 void gpu_set_floats(int location, f32_array_t *values);
 void gpu_set_bool(int location, bool value);
-void gpu_set_matrix3(int location, iron_matrix3x3_t value);
-void gpu_set_matrix4(int location, iron_matrix4x4_t value);
+void gpu_set_mat3(int location, mat3_t value);
+void gpu_set_mat4(int location, mat4_t value);
 
 void  gpu_vertex_structure_add(gpu_vertex_structure_t *structure, const char *name, gpu_vertex_data_t data);
 void  gpu_vertex_struct_add(gpu_vertex_structure_t *raw, char *name, gpu_vertex_data_t data);
@@ -232,7 +232,7 @@ bool gpu_raytrace_supported(void);
 void gpu_raytrace_pipeline_init(gpu_raytrace_pipeline_t *pipeline, void *shader, int shader_size, gpu_buffer_t *constant_buffer);
 void gpu_raytrace_pipeline_destroy(gpu_raytrace_pipeline_t *pipeline);
 void gpu_raytrace_acceleration_structure_init(gpu_acceleration_structure_t *accel);
-void gpu_raytrace_acceleration_structure_add(gpu_acceleration_structure_t *accel, gpu_buffer_t *vb, gpu_buffer_t *ib, iron_matrix4x4_t transform);
+void gpu_raytrace_acceleration_structure_add(gpu_acceleration_structure_t *accel, gpu_buffer_t *vb, gpu_buffer_t *ib, mat4_t transform);
 void gpu_raytrace_acceleration_structure_build(gpu_acceleration_structure_t *accel, gpu_buffer_t *_vb_full, gpu_buffer_t *_ib_full);
 void gpu_raytrace_acceleration_structure_destroy(gpu_acceleration_structure_t *accel);
 void gpu_raytrace_set_textures(gpu_texture_t *texpaint0, gpu_texture_t *texpaint1, gpu_texture_t *texpaint2, gpu_texture_t *texenv, gpu_texture_t *texsobol,
@@ -244,7 +244,7 @@ void gpu_raytrace_dispatch_rays();
 
 void _gpu_raytrace_init(buffer_t *shader);
 void _gpu_raytrace_as_init();
-void _gpu_raytrace_as_add(gpu_buffer_t *vb, gpu_buffer_t *ib, iron_matrix4x4_t transform);
+void _gpu_raytrace_as_add(gpu_buffer_t *vb, gpu_buffer_t *ib, mat4_t transform);
 void _gpu_raytrace_as_build(gpu_buffer_t *vb_full, gpu_buffer_t *ib_full);
 void gpu_raytrace_set_textures(gpu_texture_t *tex0, gpu_texture_t *tex1, gpu_texture_t *tex2, gpu_texture_t *texenv, gpu_texture_t *texsobol,
                                gpu_texture_t *texscramble, gpu_texture_t *texrank);

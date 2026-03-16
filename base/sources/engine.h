@@ -7,15 +7,11 @@
 #include "iron_gc.h"
 #include "iron_gpu.h"
 #include "iron_map.h"
-#include "iron_mat3.h"
-#include "iron_mat4.h"
+#include "iron_math.h"
 #include "iron_path.h"
-#include "iron_quat.h"
 #include "iron_string.h"
 #include "iron_sys.h"
 #include "iron_system.h"
-#include "iron_vec2.h"
-#include "iron_vec4.h"
 #include <math.h>
 #include <string.h>
 

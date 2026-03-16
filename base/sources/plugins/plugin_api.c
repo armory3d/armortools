@@ -3,11 +3,10 @@
 #include "iron_armpack.h"
 #include "iron_array.h"
 #include "iron_map.h"
-#include "iron_mat4.h"
+#include "iron_math.h"
 #include "iron_obj.h"
 #include "iron_ui.h"
 #include "iron_ui_nodes.h"
-#include "iron_vec4.h"
 
 void plugin_embed();
 

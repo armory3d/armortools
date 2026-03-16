@@ -3,7 +3,7 @@
 #include "iron_array.h"
 #include "iron_gc.h"
 #include "iron_string.h"
-#include "iron_vec4.h"
+#include "iron_math.h"
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
@@ -205,9 +205,9 @@ static bool pnpoly(float v0x, float v0y, float v1x, float v1y, float v2x, float 
 	return c;
 }
 
-static iron_vector4_t calc_normal(iron_vector4_t a, iron_vector4_t b, iron_vector4_t c) {
-	iron_vector4_t cb = vec4_sub(c, b);
-	iron_vector4_t ab = vec4_sub(a, b);
+static vec4_t calc_normal(vec4_t a, vec4_t b, vec4_t c) {
+	vec4_t cb = vec4_sub(c, b);
+	vec4_t ab = vec4_sub(a, b);
 	cb                = vec4_cross(cb, ab);
 	cb                = vec4_norm(cb);
 	return cb;
@@ -341,7 +341,7 @@ raw_mesh_t *obj_parse(buffer_t *file_bytes, char split_code, uint64_t start_pos,
 					nz = nor_temp.buffer[(na[0] - _nind_off) * 3 + 2];
 				}
 				else {
-					iron_vector4_t n = calc_normal(vec4_create(pos_temp.buffer[(va[0] - _vind_off) * 3], pos_temp.buffer[(va[0] - _vind_off) * 3 + 1],
+					vec4_t n = calc_normal(vec4_create(pos_temp.buffer[(va[0] - _vind_off) * 3], pos_temp.buffer[(va[0] - _vind_off) * 3 + 1],
 					                                           pos_temp.buffer[(va[0] - _vind_off) * 3 + 2], 1.0f),
 					                               vec4_create(pos_temp.buffer[(va[1] - _vind_off) * 3], pos_temp.buffer[(va[1] - _vind_off) * 3 + 1],
 					                                           pos_temp.buffer[(va[1] - _vind_off) * 3 + 2], 1.0f),
@@ -525,7 +525,7 @@ raw_mesh_t *obj_parse(buffer_t *file_bytes, char split_code, uint64_t start_pos,
 			int            i1 = part->inda->buffer[i * 3];
 			int            i2 = part->inda->buffer[i * 3 + 1];
 			int            i3 = part->inda->buffer[i * 3 + 2];
-			iron_vector4_t n  = calc_normal(vec4_create(part->posa->buffer[i1 * 4], part->posa->buffer[i1 * 4 + 1], part->posa->buffer[i1 * 4 + 2], 1.0),
+			vec4_t n  = calc_normal(vec4_create(part->posa->buffer[i1 * 4], part->posa->buffer[i1 * 4 + 1], part->posa->buffer[i1 * 4 + 2], 1.0),
 			                                vec4_create(part->posa->buffer[i2 * 4], part->posa->buffer[i2 * 4 + 1], part->posa->buffer[i2 * 4 + 2], 1.0),
 			                                vec4_create(part->posa->buffer[i3 * 4], part->posa->buffer[i3 * 4 + 1], part->posa->buffer[i3 * 4 + 2], 1.0));
 			part->nora->buffer[i1 * 2]     = (int)(n.x * 32767);

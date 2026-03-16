@@ -657,7 +657,7 @@ char *gpu_device_name() {
 }
 
 typedef struct inst {
-	iron_matrix4x4_t m;
+	mat4_t m;
 	int              i;
 } inst_t;
 
@@ -748,7 +748,7 @@ void gpu_raytrace_acceleration_structure_init(gpu_acceleration_structure_t *acce
 	instances_count = 0;
 }
 
-void gpu_raytrace_acceleration_structure_add(gpu_acceleration_structure_t *accel, gpu_buffer_t *_vb, gpu_buffer_t *_ib, iron_matrix4x4_t _transform) {
+void gpu_raytrace_acceleration_structure_add(gpu_acceleration_structure_t *accel, gpu_buffer_t *_vb, gpu_buffer_t *_ib, mat4_t _transform) {
 
 	int vb_i = -1;
 	for (int i = 0; i < vb_count; ++i) {

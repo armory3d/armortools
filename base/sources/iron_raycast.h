@@ -1,7 +1,7 @@
 #pragma once
 
 #include "engine.h"
-#include "iron_vec4.h"
+#include "iron_math.h"
 
 extern mat4_t _raycast_vp_inv;
 extern mat4_t _raycast_p_inv;

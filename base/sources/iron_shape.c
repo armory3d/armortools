@@ -1,8 +1,7 @@
 #include "iron_shape.h"
 
 #include "iron_array.h"
-#include "iron_mat4.h"
-#include "iron_vec4.h"
+#include "iron_math.h"
 
 gpu_shader_t *sys_get_shader(char *name);
 object_t     *scene_get_child(char *name);
@@ -36,7 +35,7 @@ gpu_pipeline_t *gpu_create_pipeline(void);
 void            gpu_set_pipeline(gpu_pipeline_t *pipeline);
 void            gpu_set_vertex_buffer(gpu_buffer_t *buffer);
 void            gpu_set_index_buffer(gpu_buffer_t *buffer);
-void            gpu_set_matrix4(i32 location, mat4_t value);
+void            gpu_set_mat4(i32 location, mat4_t value);
 void            gpu_set_float3(i32 location, f32 value1, f32 value2, f32 value3);
 void            gpu_draw(void);
 void            gpu_vertex_structure_add(gpu_vertex_structure_t *structure, const char *name, gpu_vertex_data_t data);
@@ -258,7 +257,7 @@ void line_draw_end(void) {
 	gpu_set_index_buffer(line_draw_index_buffer);
 	gpu_set_pipeline(line_draw_pipeline);
 	line_draw_vp = mat4_clone(scene_camera->vp);
-	gpu_set_matrix4(line_draw_vp_loc, line_draw_vp);
+	gpu_set_mat4(line_draw_vp_loc, line_draw_vp);
 	gpu_set_float3(line_draw_color_loc, color_get_rb(line_draw_color) / 255.0, color_get_gb(line_draw_color) / 255.0, color_get_bb(line_draw_color) / 255.0);
 	gpu_draw();
 }
@@ -293,7 +292,7 @@ void shape_draw_sphere(mat4_t mat) {
 	line_draw_vp = mat4_scale(line_draw_vp, vec4_create(f, f, f, 0.0));
 	line_draw_vp = mat4_mult_mat(line_draw_vp, scene_camera->v);
 	line_draw_vp = mat4_mult_mat(line_draw_vp, scene_camera->p);
-	gpu_set_matrix4(line_draw_vp_loc, line_draw_vp);
+	gpu_set_mat4(line_draw_vp_loc, line_draw_vp);
 	gpu_set_float3(line_draw_color_loc, color_get_rb(line_draw_color) / 255.0, color_get_gb(line_draw_color) / 255.0, color_get_bb(line_draw_color) / 255.0);
 	gpu_draw();
 }
