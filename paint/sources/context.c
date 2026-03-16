@@ -168,7 +168,6 @@ context_t *context_create() {
 }
 
 void context_init() {
-	gc_unroot(context_raw);
 	context_raw = context_create();
 	gc_root(context_raw);
 	context_raw->tool                       = TOOL_TYPE_BRUSH;

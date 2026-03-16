@@ -2,27 +2,27 @@
 #include "global.h"
 
 void ui_viewnodes_init() {
-	gc_unroot(ui_nodes_preview_image);
 	ui_nodes_preview_image = ui_nodes_get_node_preview_image;
 	gc_root(ui_nodes_preview_image);
-	gc_unroot(ui_nodes_on_link_drag);
+
 	ui_nodes_on_link_drag = ui_viewnodes_on_link_drag;
 	gc_root(ui_nodes_on_link_drag);
-	gc_unroot(ui_nodes_on_node_remove);
+
 	ui_nodes_on_node_remove = ui_viewnodes_on_node_remove;
 	gc_root(ui_nodes_on_node_remove);
-	gc_unroot(ui_nodes_on_node_changed);
+
 	ui_nodes_on_node_changed = ui_viewnodes_on_node_changed;
 	gc_root(ui_nodes_on_node_changed);
-	gc_unroot(ui_nodes_on_socket_released);
+
 	ui_nodes_on_socket_released = ui_viewnodes_on_socket_released;
 	gc_root(ui_nodes_on_socket_released);
-	gc_unroot(ui_nodes_on_canvas_released);
+
 	ui_nodes_on_canvas_released = ui_viewnodes_on_canvas_released;
 	gc_root(ui_nodes_on_canvas_released);
-	gc_unroot(ui_nodes_on_canvas_control);
+
 	ui_nodes_on_canvas_control = ui_viewnodes_on_canvas_control;
 	gc_root(ui_nodes_on_canvas_control);
+
 	ui_nodes_grid_snap = config_raw->grid_snap;
 	nodes_material_init();
 }

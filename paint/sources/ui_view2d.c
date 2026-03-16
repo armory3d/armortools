@@ -2,9 +2,9 @@
 #include "global.h"
 
 void ui_view2d_init() {
-	gc_unroot(ui_view2d_pipe);
 	ui_view2d_pipe = gpu_create_pipeline();
 	gc_root(ui_view2d_pipe);
+
 	ui_view2d_pipe->vertex_shader   = sys_get_shader("layer_view.vert");
 	ui_view2d_pipe->fragment_shader = sys_get_shader("layer_view.frag");
 	gpu_vertex_structure_t *vs      = GC_ALLOC_INIT(gpu_vertex_structure_t, {0});

@@ -37,13 +37,13 @@ void base_init() {
 	sys_notify_on_app_state(&base_on_foreground, &base_on_resume, &base_on_pause, &base_on_background, &base_on_shutdown);
 	iron_set_save_and_quit_callback(base_save_and_quit_callback);
 
-	gc_unroot(base_font);
+
 	base_font = data_get_font("font.ttf");
 	gc_root(base_font);
-	gc_unroot(base_color_wheel);
+
 	base_color_wheel = data_get_image("color_wheel.k");
 	gc_root(base_color_wheel);
-	gc_unroot(base_color_wheel_gradient);
+
 	base_color_wheel_gradient = data_get_image("color_wheel_gradient.k");
 	gc_root(base_color_wheel_gradient);
 	config_load_theme(config_raw->theme, false);
@@ -51,7 +51,7 @@ void base_init() {
 	base_default_element_h = base_theme->ELEMENT_H;
 	base_default_font_size = base_theme->FONT_SIZE;
 	translator_load_translations(config_raw->locale);
-	gc_unroot(ui_files_filename);
+
 	ui_files_filename = string_copy(tr("untitled"));
 	gc_root(ui_files_filename);
 #if defined(IRON_ANDROID) || defined(IRON_IOS)
@@ -66,7 +66,7 @@ void base_init() {
 		draw_font_init(base_font);
 	}
 
-	gc_unroot(ui_nodes_enum_texts);
+
 	ui_nodes_enum_texts = base_enum_texts;
 	gc_root(ui_nodes_enum_texts);
 
@@ -811,13 +811,13 @@ void ui_base_init() {
 	ui_options_t *ops   = GC_ALLOC_INIT(
         ui_options_t,
         {.theme = base_theme, .font = base_font, .scale_factor = scale, .color_wheel = base_color_wheel, .black_white_gradient = base_color_wheel_gradient});
-	gc_unroot(ui);
+
 	ui = ui_create(ops);
 	gc_root(ui);
-	gc_unroot(ui_on_border_hover);
+
 	ui_on_border_hover = ui_base_on_border_hover;
 	gc_root(ui_on_border_hover);
-	gc_unroot(ui_on_tab_drop);
+
 	ui_on_tab_drop = ui_base_on_tab_drop;
 	gc_root(ui_on_tab_drop);
 	if (UI_SCALE() > 1) {

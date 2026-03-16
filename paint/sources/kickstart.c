@@ -3,35 +3,30 @@
 #include "global.h"
 
 void _kickstart() {
-	gc_unroot(_render_path_cached_shader_contexts);
 	_render_path_cached_shader_contexts = any_map_create();
 	gc_root(_render_path_cached_shader_contexts);
-	gc_unroot(ui_children);
+
 	ui_children = any_map_create();
 	gc_root(ui_children);
-	gc_unroot(ui_nodes_custom_buttons);
+
 	ui_nodes_custom_buttons = any_map_create();
 	gc_root(ui_nodes_custom_buttons);
 
-	gc_unroot(operator_ops);
 	operator_ops = any_map_create();
 	gc_root(operator_ops);
 
-	gc_unroot(physics_body_object_map);
 	physics_body_object_map = any_imap_create();
 	gc_root(physics_body_object_map);
-	gc_unroot(box_export_htab);
+
 	box_export_htab = ui_handle_create();
 	gc_root(box_export_htab);
 
-	gc_unroot(box_export_mesh_handle);
 	box_export_mesh_handle = ui_handle_create();
 	gc_root(box_export_mesh_handle);
-	gc_unroot(box_export_hpreset);
+
 	box_export_hpreset = ui_handle_create();
 	gc_root(box_export_hpreset);
 
-	gc_unroot(box_export_channels);
 	box_export_channels = any_array_create_from_raw(
 	    (void *[]){
 	        "base_r",
@@ -54,7 +49,7 @@ void _kickstart() {
 	    },
 	    17);
 	gc_root(box_export_channels);
-	gc_unroot(box_export_color_spaces);
+
 	box_export_color_spaces = any_array_create_from_raw(
 	    (void *[]){
 	        "linear",
@@ -63,31 +58,27 @@ void _kickstart() {
 	    2);
 	gc_root(box_export_color_spaces);
 
-	gc_unroot(import_texture_importers);
 	import_texture_importers = any_map_create();
 	gc_root(import_texture_importers);
 
-	gc_unroot(ui_files_path);
 	ui_files_path = ui_files_default_path;
 	gc_root(ui_files_path);
 
-	gc_unroot(base_res_handle);
 	base_res_handle = ui_handle_create();
 	gc_root(base_res_handle);
-	gc_unroot(base_bits_handle);
+
 	base_bits_handle = ui_handle_create();
 	gc_root(base_bits_handle);
-	gc_unroot(base_drop_paths);
+
 	base_drop_paths = any_array_create_from_raw((void *[]){}, 0);
 	gc_root(base_drop_paths);
 
-	gc_unroot(ui_base_hwnds);
 	ui_base_hwnds = ui_base_init_hwnds();
 	gc_root(ui_base_hwnds);
-	gc_unroot(ui_base_htabs);
+
 	ui_base_htabs = ui_base_init_htabs();
 	gc_root(ui_base_htabs);
-	gc_unroot(ui_base_hwnd_tabs);
+
 	ui_base_hwnd_tabs = ui_base_init_hwnd_tabs();
 	gc_root(ui_base_hwnd_tabs);
 	gizmo_v  = vec4_create(0.0, 0.0, 0.0, 1.0);
@@ -95,11 +86,9 @@ void _kickstart() {
 	gizmo_q  = quat_create(0.0, 0.0, 0.0, 1.0);
 	gizmo_q0 = quat_create(0.0, 0.0, 0.0, 1.0);
 
-	gc_unroot(ui_toolbar_handle);
 	ui_toolbar_handle = ui_handle_create();
 	gc_root(ui_toolbar_handle);
 
-	gc_unroot(ui_toolbar_tool_names);
 	ui_toolbar_tool_names = any_array_create_from_raw(
 	    (void *[]){
 	        _tr("Brush"),
@@ -119,7 +108,7 @@ void _kickstart() {
 	    },
 	    14);
 	gc_root(ui_toolbar_tool_names);
-	gc_unroot(ui_toolbar_tooltip_extras);
+
 	ui_toolbar_tooltip_extras = any_array_create_from_raw(
 	    (void *[]){
 	        _tr("Hold {action_paint} to paint\nHold {brush_ruler} and press {action_paint} to paint a straight line (ruler mode)"),
@@ -140,162 +129,142 @@ void _kickstart() {
 	    14);
 	gc_root(ui_toolbar_tooltip_extras);
 	uniforms_ext_ortho_p = mat4_ortho(-0.5, 0.5, -0.5, 0.5, -0.5, 0.5);
-	gc_unroot(box_projects_htab);
+
 	box_projects_htab = ui_handle_create();
 	gc_root(box_projects_htab);
-	gc_unroot(box_projects_hsearch);
+
 	box_projects_hsearch = ui_handle_create();
 	gc_root(box_projects_hsearch);
 
-	gc_unroot(tab_scripts_hscript);
 	tab_scripts_hscript = ui_handle_create();
 	gc_root(tab_scripts_hscript);
 
-	gc_unroot(import_mesh_importers);
 	import_mesh_importers = any_map_create();
 	gc_root(import_mesh_importers);
 
-	gc_unroot(ui_menubar_hwnd);
 	ui_menubar_hwnd = ui_handle_create();
 	gc_root(ui_menubar_hwnd);
-	gc_unroot(ui_menubar_menu_handle);
+
 	ui_menubar_menu_handle = ui_handle_create();
 	gc_root(ui_menubar_menu_handle);
-	gc_unroot(ui_menubar_tab);
+
 	ui_menubar_tab = ui_handle_create();
 	gc_root(ui_menubar_tab);
 	ui_menubar_w             = ui_menubar_default_w;
 	_ui_menubar_saved_camera = mat4_nan();
-	gc_unroot(translator_translations);
+
 	translator_translations = any_map_create();
 	gc_root(translator_translations);
 
-	gc_unroot(project_raw);
 	project_raw = GC_ALLOC_INIT(project_format_t, {0});
 	gc_root(project_raw);
 
-	gc_unroot(project_assets);
 	project_assets = any_array_create_from_raw((void *[]){}, 0);
 	gc_root(project_assets);
-	gc_unroot(project_asset_names);
+
 	project_asset_names = any_array_create_from_raw((void *[]){}, 0);
 	gc_root(project_asset_names);
 
-	gc_unroot(project_mesh_assets);
 	project_mesh_assets = any_array_create_from_raw((void *[]){}, 0);
 	gc_root(project_mesh_assets);
-	gc_unroot(project_material_groups);
+
 	project_material_groups = any_array_create_from_raw((void *[]){}, 0);
 	gc_root(project_material_groups);
 
-	gc_unroot(project_asset_map);
 	project_asset_map = any_imap_create();
 	gc_root(project_asset_map);
 
-	gc_unroot(project_materials);
 	project_materials = any_array_create_from_raw((void *[]){}, 0);
 	gc_root(project_materials);
-	gc_unroot(project_brushes);
+
 	project_brushes = any_array_create_from_raw((void *[]){}, 0);
 	gc_root(project_brushes);
-	gc_unroot(project_layers);
+
 	project_layers = any_array_create_from_raw((void *[]){}, 0);
 	gc_root(project_layers);
-	gc_unroot(project_fonts);
+
 	project_fonts = any_array_create_from_raw((void *[]){}, 0);
 	gc_root(project_fonts);
 
-	gc_unroot(ui_view2d_hwnd);
 	ui_view2d_hwnd = ui_handle_create();
 	gc_root(ui_view2d_hwnd);
 
-	gc_unroot(ui_view2d_htab);
 	ui_view2d_htab = ui_handle_create();
 	gc_root(ui_view2d_htab);
 
-	gc_unroot(sim_object_script_map);
 	sim_object_script_map = any_map_create();
 	gc_root(sim_object_script_map);
 
-	gc_unroot(parser_material_node_values);
 	parser_material_node_values = any_map_create();
 	gc_root(parser_material_node_values);
-	gc_unroot(parser_material_node_vectors);
+
 	parser_material_node_vectors = any_map_create();
 	gc_root(parser_material_node_vectors);
-	gc_unroot(parser_material_custom_nodes);
+
 	parser_material_custom_nodes = any_map_create();
 	gc_root(parser_material_custom_nodes);
 
-	gc_unroot(parser_material_parsed_map);
 	parser_material_parsed_map = any_map_create();
 	gc_root(parser_material_parsed_map);
-	gc_unroot(parser_material_texture_map);
+
 	parser_material_texture_map = any_map_create();
 	gc_root(parser_material_texture_map);
 
-	gc_unroot(tab_browser_hpath);
 	tab_browser_hpath = ui_handle_create();
 	gc_root(tab_browser_hpath);
-	gc_unroot(tab_browser_hsearch);
+
 	tab_browser_hsearch = ui_handle_create();
 	gc_root(tab_browser_hsearch);
 
-	gc_unroot(util_mesh_unwrappers);
 	util_mesh_unwrappers = any_map_create();
 	gc_root(util_mesh_unwrappers);
 	ui_header_h = ui_header_default_h;
-	gc_unroot(ui_header_handle);
+
 	ui_header_handle = ui_handle_create();
 	gc_root(ui_header_handle);
-	gc_unroot(plugin_map);
+
 	plugin_map = any_map_create();
 	gc_root(plugin_map);
-	gc_unroot(parser_logic_custom_nodes);
+
 	parser_logic_custom_nodes = any_map_create();
 	gc_root(parser_logic_custom_nodes);
 
-	gc_unroot(resource_bundled);
 	resource_bundled = any_map_create();
 	gc_root(resource_bundled);
 
-	gc_unroot(ui_nodes_hwnd);
 	ui_nodes_hwnd = ui_handle_create();
 	gc_root(ui_nodes_hwnd);
-	gc_unroot(ui_nodes_group_stack);
+
 	ui_nodes_group_stack = any_array_create_from_raw((void *[]){}, 0);
 	gc_root(ui_nodes_group_stack);
 
-	gc_unroot(ui_nodes_htab);
 	ui_nodes_htab = ui_handle_create();
 	gc_root(ui_nodes_htab);
 
-	gc_unroot(_ui_nodes_htype);
 	_ui_nodes_htype = ui_handle_create();
 	gc_root(_ui_nodes_htype);
-	gc_unroot(_ui_nodes_hname);
+
 	_ui_nodes_hname = ui_handle_create();
 	gc_root(_ui_nodes_hname);
-	gc_unroot(_ui_nodes_hmin);
+
 	_ui_nodes_hmin = ui_handle_create();
 	gc_root(_ui_nodes_hmin);
-	gc_unroot(_ui_nodes_hmax);
+
 	_ui_nodes_hmax = ui_handle_create();
 	gc_root(_ui_nodes_hmax);
-	gc_unroot(_ui_nodes_hval0);
+
 	_ui_nodes_hval0 = ui_handle_create();
 	gc_root(_ui_nodes_hval0);
-	gc_unroot(_ui_nodes_hval1);
+
 	_ui_nodes_hval1 = ui_handle_create();
 	gc_root(_ui_nodes_hval1);
-	gc_unroot(_ui_nodes_hval2);
+
 	_ui_nodes_hval2 = ui_handle_create();
 	gc_root(_ui_nodes_hval2);
-	gc_unroot(_ui_nodes_hval3);
+
 	_ui_nodes_hval3 = ui_handle_create();
 	gc_root(_ui_nodes_hval3);
 
-	gc_unroot(nodes_brush_categories);
 	nodes_brush_categories = any_array_create_from_raw(
 	    (void *[]){
 	        _tr("Nodes"),
@@ -303,7 +272,6 @@ void _kickstart() {
 	    1);
 	gc_root(nodes_brush_categories);
 
-	gc_unroot(nodes_material_categories);
 #if defined(IRON_WINDOWS) || defined(IRON_LINUX) || defined(IRON_MACOS)
 	nodes_material_categories = any_array_create_from_raw(
 	    (void *[]){
@@ -334,34 +302,30 @@ void _kickstart() {
 	ui_sidebar_default_w = ui_sidebar_default_w_full;
 #endif
 
-	gc_unroot(ui_sidebar_hminimized);
 	ui_sidebar_hminimized = ui_handle_create();
 	gc_root(ui_sidebar_hminimized);
 	ui_sidebar_w_mini = ui_sidebar_default_w_mini;
-	gc_unroot(console_last_traces);
+
 	console_last_traces = any_array_create(0);
 	gc_root(console_last_traces);
 	camera_dir = vec4_create(0.0, 0.0, 0.0, 1.0);
-	gc_unroot(box_preferences_htab);
+
 	box_preferences_htab = ui_handle_create();
 	gc_root(box_preferences_htab);
 
-	gc_unroot(ui_box_hwnd);
 	ui_box_hwnd = ui_handle_create();
 	gc_root(ui_box_hwnd);
 
-	gc_unroot(tab_layers_layer_name_handle);
 	tab_layers_layer_name_handle = ui_handle_create();
 	gc_root(tab_layers_layer_name_handle);
 
-	gc_unroot(render_path_raytrace_f32a);
 	render_path_raytrace_f32a = f32_array_create(24);
 	gc_root(render_path_raytrace_f32a);
 	render_path_raytrace_help_mat = mat4_identity();
 
 	import_envmap_params = vec4_create(0.0, 0.0, 0.0, 1.0);
 	import_envmap_n      = vec4_create(0.0, 0.0, 0.0, 1.0);
-	gc_unroot(image_texture_node_def);
+
 	char *image_texture_color_space_data = string("%s\n%s\n%s\n%s", _tr("Auto"), _tr("Linear"), _tr("sRGB"), _tr("DirectX Normal Map"));
 	image_texture_node_def =
 	    GC_ALLOC_INIT(ui_node_t, {.id     = 0,
@@ -433,7 +397,7 @@ void _kickstart() {
 	                              .width = 0,
 	                              .flags = 0});
 	gc_root(image_texture_node_def);
-	gc_unroot(material_node_def);
+
 	material_node_def = GC_ALLOC_INIT(ui_node_t, {.id      = 0,
 	                                              .name    = _tr("Material"),
 	                                              .type    = "MATERIAL", // extension
@@ -551,7 +515,7 @@ void _kickstart() {
 	                                              .width = 0,
 	                                              .flags = 0});
 	gc_root(material_node_def);
-	gc_unroot(uv_map_node_def);
+
 	char *uv_map_data = string("%s\n%s", "uv0", "uv1");
 	uv_map_node_def   = GC_ALLOC_INIT(ui_node_t, {.id      = 0,
 	                                              .name    = _tr("UV Map"),
@@ -591,7 +555,6 @@ void _kickstart() {
 	                                              .flags = 0});
 	gc_root(uv_map_node_def);
 
-	gc_unroot(wave_texture_node_def);
 	wave_texture_node_def =
 	    GC_ALLOC_INIT(ui_node_t, {.id     = 0,
 	                              .name   = _tr("Wave Texture"),
@@ -651,7 +614,7 @@ void _kickstart() {
 	                              .width   = 0,
 	                              .flags   = 0});
 	gc_root(wave_texture_node_def);
-	gc_unroot(clamp_node_def);
+
 	char *clamp_operation_data = string("%s\n%s", _tr("Min Max"), _tr("Range"));
 	clamp_node_def             = GC_ALLOC_INIT(ui_node_t, {.id     = 0,
 	                                                       .name   = _tr("Clamp"),
@@ -723,7 +686,7 @@ void _kickstart() {
 	                                                       .width = 0,
 	                                                       .flags = 0});
 	gc_root(clamp_node_def);
-	gc_unroot(tangent_node_def);
+
 	tangent_node_def = GC_ALLOC_INIT(ui_node_t, {.id      = 0,
 	                                             .name    = _tr("Tangent"),
 	                                             .type    = "TANGENT",
@@ -750,7 +713,6 @@ void _kickstart() {
 	                                             .flags   = 0});
 	gc_root(tangent_node_def);
 
-	gc_unroot(curvature_bake_node_def);
 	curvature_bake_node_def =
 	    GC_ALLOC_INIT(ui_node_t, {.id     = 0,
 	                              .name   = _tr("Curvature Bake"),
@@ -810,7 +772,7 @@ void _kickstart() {
 	                              .width   = 0,
 	                              .flags   = 0});
 	gc_root(curvature_bake_node_def);
-	gc_unroot(blur_node_def);
+
 	blur_node_def = GC_ALLOC_INIT(ui_node_t, {.id     = 0,
 	                                          .name   = _tr("Blur"),
 	                                          .type   = "BLUR", // extension
@@ -859,7 +821,7 @@ void _kickstart() {
 	                                          .width   = 0,
 	                                          .flags   = 0});
 	gc_root(blur_node_def);
-	gc_unroot(text_texture_node_def);
+
 	text_texture_node_def =
 	    GC_ALLOC_INIT(ui_node_t, {.id     = 0,
 	                              .name   = _tr("Text Texture"),
@@ -921,7 +883,7 @@ void _kickstart() {
 	                              .width = 0,
 	                              .flags = 0});
 	gc_root(text_texture_node_def);
-	gc_unroot(gradient_texture_node_def);
+
 	char *gradient_type_data  = string("%s\n%s\n%s\n%s", _tr("Linear"), _tr("Diagonal"), _tr("Radial"), _tr("Spherical"));
 	gradient_texture_node_def = GC_ALLOC_INIT(ui_node_t, {.id     = 0,
 	                                                      .name   = _tr("Gradient Texture"),
@@ -983,7 +945,7 @@ void _kickstart() {
 	                                                      .width = 0,
 	                                                      .flags = 0});
 	gc_root(gradient_texture_node_def);
-	gc_unroot(object_info_node_def);
+
 	object_info_node_def =
 	    GC_ALLOC_INIT(ui_node_t, {.id      = 0,
 	                              .name    = _tr("Object Info"),
@@ -1061,7 +1023,6 @@ void _kickstart() {
 	                              .flags   = 0});
 	gc_root(object_info_node_def);
 
-	gc_unroot(magic_texture_node_def);
 	magic_texture_node_def =
 	    GC_ALLOC_INIT(ui_node_t, {.id     = 0,
 	                              .name   = _tr("Magic Texture"),
@@ -1131,7 +1092,7 @@ void _kickstart() {
 	                              .width   = 0,
 	                              .flags   = 0});
 	gc_root(magic_texture_node_def);
-	gc_unroot(fresnel_node_def);
+
 	fresnel_node_def =
 	    GC_ALLOC_INIT(ui_node_t, {.id     = 0,
 	                              .name   = _tr("Fresnel"),
@@ -1181,7 +1142,7 @@ void _kickstart() {
 	                              .width   = 0,
 	                              .flags   = 0});
 	gc_root(fresnel_node_def);
-	gc_unroot(warp_node_def);
+
 	warp_node_def = GC_ALLOC_INIT(ui_node_t, {.id     = 0,
 	                                          .name   = _tr("Warp"),
 	                                          .type   = "DIRECT_WARP", // extension
@@ -1240,7 +1201,7 @@ void _kickstart() {
 	                                          .width   = 0,
 	                                          .flags   = 0});
 	gc_root(warp_node_def);
-	gc_unroot(normal_node_def);
+
 	normal_node_def = GC_ALLOC_INIT(ui_node_t, {.id     = 0,
 	                                            .name   = _tr("Normal"),
 	                                            .type   = "NORMAL",
@@ -1301,7 +1262,7 @@ void _kickstart() {
 	                                            .width = 0,
 	                                            .flags = 0});
 	gc_root(normal_node_def);
-	gc_unroot(mapping_node_def);
+
 	mapping_node_def =
 	    GC_ALLOC_INIT(ui_node_t, {.id     = 0,
 	                              .name   = _tr("Mapping"),
@@ -1371,7 +1332,7 @@ void _kickstart() {
 	                              .width   = 0,
 	                              .flags   = 0});
 	gc_root(mapping_node_def);
-	gc_unroot(normal_map_node_def);
+
 	normal_map_node_def = GC_ALLOC_INIT(ui_node_t, {.id     = 0,
 	                                                .name   = _tr("Normal Map"),
 	                                                .type   = "NORMAL_MAP",
@@ -1420,7 +1381,7 @@ void _kickstart() {
 	                                                .width   = 0,
 	                                                .flags   = 0});
 	gc_root(normal_map_node_def);
-	gc_unroot(invert_color_node_def);
+
 	invert_color_node_def =
 	    GC_ALLOC_INIT(ui_node_t, {.id     = 0,
 	                              .name   = _tr("Invert Color"),
@@ -1470,7 +1431,7 @@ void _kickstart() {
 	                              .width   = 0,
 	                              .flags   = 0});
 	gc_root(invert_color_node_def);
-	gc_unroot(wireframe_node_def);
+
 	wireframe_node_def = GC_ALLOC_INIT(ui_node_t, {.id     = 0,
 	                                               .name   = _tr("Wireframe"),
 	                                               .type   = "WIREFRAME",
@@ -1521,7 +1482,7 @@ void _kickstart() {
 	                                               .width = 0,
 	                                               .flags = 0});
 	gc_root(wireframe_node_def);
-	gc_unroot(gamma_node_def);
+
 	gamma_node_def = GC_ALLOC_INIT(ui_node_t, {.id     = 0,
 	                                           .name   = _tr("Gamma"),
 	                                           .type   = "GAMMA",
@@ -1570,7 +1531,7 @@ void _kickstart() {
 	                                           .width   = 0,
 	                                           .flags   = 0});
 	gc_root(gamma_node_def);
-	gc_unroot(vector_math2_node_def);
+
 	char *vector_math_operation_data =
 	    string("%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s", _tr("Add"), _tr("Subtract"), _tr("Multiply"),
 	           _tr("Divide"), _tr("Average"), _tr("Cross Product"), _tr("Project"), _tr("Reflect"), _tr("Dot Product"), _tr("Distance"), _tr("Length"),
@@ -1648,7 +1609,6 @@ void _kickstart() {
 	                              .flags = 0});
 	gc_root(vector_math2_node_def);
 
-	gc_unroot(checker_texture_node_def);
 	checker_texture_node_def =
 	    GC_ALLOC_INIT(ui_node_t, {.id     = 0,
 	                              .name   = _tr("Checker Texture"),
@@ -1729,7 +1689,6 @@ void _kickstart() {
 	                              .flags   = 0});
 	gc_root(checker_texture_node_def);
 
-	gc_unroot(hue_saturation_value_node_def);
 	hue_saturation_value_node_def =
 	    GC_ALLOC_INIT(ui_node_t, {.id     = 0,
 	                              .name   = _tr("Hue/Saturation/Value"),
@@ -1809,7 +1768,7 @@ void _kickstart() {
 	                              .width   = 0,
 	                              .flags   = 0});
 	gc_root(hue_saturation_value_node_def);
-	gc_unroot(separate_xyz_node_def);
+
 	separate_xyz_node_def =
 	    GC_ALLOC_INIT(ui_node_t, {.id     = 0,
 	                              .name   = _tr("Separate XYZ"),
@@ -1869,7 +1828,7 @@ void _kickstart() {
 	                              .width   = 0,
 	                              .flags   = 0});
 	gc_root(separate_xyz_node_def);
-	gc_unroot(math2_node_def);
+
 	char *math_operation_data =
 	    string("%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s",
 	           _tr("Add"), _tr("Subtract"), _tr("Multiply"), _tr("Divide"), _tr("Power"), _tr("Logarithm"), _tr("Square Root"), _tr("Inverse Square Root"),
@@ -1946,7 +1905,7 @@ void _kickstart() {
 	                                           .width = 0,
 	                                           .flags = 0});
 	gc_root(math2_node_def);
-	gc_unroot(geometry_node_def);
+
 	geometry_node_def = GC_ALLOC_INIT(ui_node_t, {.id      = 0,
 	                                              .name    = _tr("Geometry"),
 	                                              .type    = "NEW_GEOMETRY",
@@ -2052,7 +2011,7 @@ void _kickstart() {
 	                                              .width   = 0,
 	                                              .flags   = 0});
 	gc_root(geometry_node_def);
-	gc_unroot(mix_color_node_def);
+
 	char *mix_color_blend_type_data =
 	    string("%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s", _tr("Mix"), _tr("Darken"), _tr("Multiply"), _tr("Burn"),
 	           _tr("Lighten"), _tr("Screen"), _tr("Dodge"), _tr("Add"), _tr("Overlay"), _tr("Soft Light"), _tr("Linear Light"), _tr("Difference"),
@@ -2136,7 +2095,7 @@ void _kickstart() {
 	                                               .width = 0,
 	                                               .flags = 0});
 	gc_root(mix_color_node_def);
-	gc_unroot(quantize_node_def);
+
 	quantize_node_def = GC_ALLOC_INIT(ui_node_t, {.id     = 0,
 	                                              .name   = _tr("Quantize"),
 	                                              .type   = "QUANTIZE", // extension
@@ -2185,7 +2144,7 @@ void _kickstart() {
 	                                              .width   = 0,
 	                                              .flags   = 0});
 	gc_root(quantize_node_def);
-	gc_unroot(layer_node_def);
+
 	layer_node_def = GC_ALLOC_INIT(ui_node_t, {.id      = 0,
 	                                           .name    = _tr("Layer"),
 	                                           .type    = "LAYER", // extension
@@ -2303,7 +2262,7 @@ void _kickstart() {
 	                                           .width = 0,
 	                                           .flags = 0});
 	gc_root(layer_node_def);
-	gc_unroot(map_range_node_def);
+
 	map_range_node_def = GC_ALLOC_INIT(ui_node_t, {.id     = 0,
 	                                               .name   = _tr("Map Range"),
 	                                               .type   = "MAPRANGE",
@@ -2395,7 +2354,6 @@ void _kickstart() {
 	                                               .flags = 0});
 	gc_root(map_range_node_def);
 
-	gc_unroot(voronoi_texture_node_def);
 	char *voronoi_coloring_data = string("%s\n%s", _tr("Intensity"), _tr("Cells"));
 	voronoi_texture_node_def =
 	    GC_ALLOC_INIT(ui_node_t, {.id     = 0,
@@ -2468,7 +2426,7 @@ void _kickstart() {
 	                              .width = 0,
 	                              .flags = 0});
 	gc_root(voronoi_texture_node_def);
-	gc_unroot(color_ramp_node_def);
+
 	color_ramp_node_def = GC_ALLOC_INIT(ui_node_t, {.id     = 0,
 	                                                .name   = _tr("Color Ramp"),
 	                                                .type   = "VALTORGB",
@@ -2529,7 +2487,7 @@ void _kickstart() {
 	                                                .width = 0,
 	                                                .flags = 0});
 	gc_root(color_ramp_node_def);
-	gc_unroot(picker_node_def);
+
 	picker_node_def = GC_ALLOC_INIT(ui_node_t, {.id      = 0,
 	                                            .name    = _tr("Picker"),
 	                                            .type    = "PICKER", // extension
@@ -2635,7 +2593,7 @@ void _kickstart() {
 	                                            .width   = 0,
 	                                            .flags   = 0});
 	gc_root(picker_node_def);
-	gc_unroot(layer_weight_node_def);
+
 	layer_weight_node_def =
 	    GC_ALLOC_INIT(ui_node_t, {.id     = 0,
 	                              .name   = _tr("Layer Weight"),
@@ -2695,7 +2653,7 @@ void _kickstart() {
 	                              .width   = 0,
 	                              .flags   = 0});
 	gc_root(layer_weight_node_def);
-	gc_unroot(replace_color_node_def);
+
 	replace_color_node_def =
 	    GC_ALLOC_INIT(ui_node_t, {.id     = 0,
 	                              .name   = _tr("Replace Color"),
@@ -2757,7 +2715,7 @@ void _kickstart() {
 	                                  1),
 	                              .buttons = any_array_create_from_raw((void *[]){}, 0)});
 	gc_root(replace_color_node_def);
-	gc_unroot(bump_node_def);
+
 	bump_node_def = GC_ALLOC_INIT(ui_node_t, {.id     = 0,
 	                                          .name   = _tr("Bump"),
 	                                          .type   = "BUMP",
@@ -2827,7 +2785,6 @@ void _kickstart() {
 	                                          .flags   = 0});
 	gc_root(bump_node_def);
 
-	gc_unroot(gabor_texture_node_def);
 	char *gabor_dimensions_data = string("%s\n%s", _tr("2D"), _tr("3D"));
 	gabor_texture_node_def =
 	    GC_ALLOC_INIT(ui_node_t, {.id     = 0,
@@ -2940,7 +2897,7 @@ void _kickstart() {
 	                              .width = 0,
 	                              .flags = 0});
 	gc_root(gabor_texture_node_def);
-	gc_unroot(mix_normal_map_node_def);
+
 	char *mix_normal_map_blend_type_data = string("%s\n%s\n%s", _tr("Partial Derivative"), _tr("Whiteout"), _tr("Reoriented"));
 	mix_normal_map_node_def =
 	    GC_ALLOC_INIT(ui_node_t, {.id     = 0,
@@ -3003,7 +2960,7 @@ void _kickstart() {
 	                              .width = 0,
 	                              .flags = 0});
 	gc_root(mix_normal_map_node_def);
-	gc_unroot(camera_data_node_def);
+
 	camera_data_node_def =
 	    GC_ALLOC_INIT(ui_node_t, {.id      = 0,
 	                              .name    = _tr("Camera Data"),
@@ -3050,7 +3007,7 @@ void _kickstart() {
 	                              .width   = 0,
 	                              .flags   = 0});
 	gc_root(camera_data_node_def);
-	gc_unroot(script_node_def);
+
 	script_node_def = GC_ALLOC_INIT(ui_node_t, {.id      = 0,
 	                                            .name    = _tr("Script"),
 	                                            .type    = "SCRIPT_CPU", // extension
@@ -3088,7 +3045,7 @@ void _kickstart() {
 	                                            .width = 0,
 	                                            .flags = 0});
 	gc_root(script_node_def);
-	gc_unroot(combine_xyz_node_def);
+
 	combine_xyz_node_def =
 	    GC_ALLOC_INIT(ui_node_t, {.id     = 0,
 	                              .name   = _tr("Combine XYZ"),
@@ -3149,7 +3106,6 @@ void _kickstart() {
 	                              .flags   = 0});
 	gc_root(combine_xyz_node_def);
 
-	gc_unroot(noise_texture_node_def);
 	noise_texture_node_def = GC_ALLOC_INIT(ui_node_t, {.id     = 0,
 	                                                   .name   = _tr("Noise Texture"),
 	                                                   .type   = "TEX_NOISE",
@@ -3209,7 +3165,6 @@ void _kickstart() {
 	                                                   .flags   = 0});
 	gc_root(noise_texture_node_def);
 
-	gc_unroot(brightness_contrast_node_def);
 	brightness_contrast_node_def =
 	    GC_ALLOC_INIT(ui_node_t, {.id     = 0,
 	                              .name   = _tr("Brightness/Contrast"),
@@ -3269,7 +3224,7 @@ void _kickstart() {
 	                              .width   = 0,
 	                              .flags   = 0});
 	gc_root(brightness_contrast_node_def);
-	gc_unroot(color_mask_node_def);
+
 	color_mask_node_def =
 	    GC_ALLOC_INIT(ui_node_t, {.id     = 0,
 	                              .name   = _tr("Color Mask"),
@@ -3339,7 +3294,7 @@ void _kickstart() {
 	                              .width   = 0,
 	                              .flags   = 0});
 	gc_root(color_mask_node_def);
-	gc_unroot(vector_curves_node_def);
+
 	vector_curves_node_def = GC_ALLOC_INIT(
 	    ui_node_t,
 	    {.id     = 0,
@@ -3402,7 +3357,7 @@ void _kickstart() {
 	     .width = 0,
 	     .flags = 0});
 	gc_root(vector_curves_node_def);
-	gc_unroot(layer_mask_node_def);
+
 	layer_mask_node_def = GC_ALLOC_INIT(ui_node_t, {.id      = 0,
 	                                                .name    = _tr("Layer Mask"),
 	                                                .type    = "LAYER_MASK", // extension
@@ -3440,7 +3395,7 @@ void _kickstart() {
 	                                                .width = 0,
 	                                                .flags = 0});
 	gc_root(layer_mask_node_def);
-	gc_unroot(camera_texture_node_def);
+
 	camera_texture_node_def = GC_ALLOC_INIT(ui_node_t, {.id      = 0,
 	                                                    .name    = _tr("Camera Texture"),
 	                                                    .type    = "TEX_CAMERA", // extension
@@ -3466,7 +3421,7 @@ void _kickstart() {
 	                                                    .width   = 0,
 	                                                    .flags   = 0});
 	gc_root(camera_texture_node_def);
-	gc_unroot(value_node_def);
+
 	value_node_def = GC_ALLOC_INIT(ui_node_t, {.id      = 0,
 	                                           .name    = _tr("Value"),
 	                                           .type    = "VALUE",
@@ -3504,7 +3459,7 @@ void _kickstart() {
 	                                           .width = 0,
 	                                           .flags = 0});
 	gc_root(value_node_def);
-	gc_unroot(texture_coordinate_node_def);
+
 	texture_coordinate_node_def =
 	    GC_ALLOC_INIT(ui_node_t, {.id      = 0,
 	                              .name    = _tr("Texture Coordinate"),
@@ -3589,7 +3544,7 @@ void _kickstart() {
 	                                  7),
 	                              .buttons = any_array_create_from_raw((void *[]){}, 0)});
 	gc_root(texture_coordinate_node_def);
-	gc_unroot(group_node_def);
+
 	group_node_def = GC_ALLOC_INIT(ui_node_t, {.id      = 0,
 	                                           .name    = _tr("New Group"),
 	                                           .type    = "GROUP",
@@ -3615,7 +3570,6 @@ void _kickstart() {
 	                                           .flags = 0});
 	gc_root(group_node_def);
 
-	gc_unroot(brick_texture_node_def);
 	brick_texture_node_def =
 	    GC_ALLOC_INIT(ui_node_t, {.id     = 0,
 	                              .name   = _tr("Brick Texture"),
@@ -3705,7 +3659,7 @@ void _kickstart() {
 	                              .width   = 0,
 	                              .flags   = 0});
 	gc_root(brick_texture_node_def);
-	gc_unroot(rgb_node_def);
+
 	rgb_node_def = GC_ALLOC_INIT(ui_node_t, {.id      = 0,
 	                                         .name    = _tr("Color"),
 	                                         .type    = "RGB",
@@ -3743,7 +3697,7 @@ void _kickstart() {
 	                                         .width = 0,
 	                                         .flags = 0});
 	gc_root(rgb_node_def);
-	gc_unroot(rgb_to_bw_node_def);
+
 	rgb_to_bw_node_def = GC_ALLOC_INIT(ui_node_t, {.id     = 0,
 	                                               .name   = _tr("RGB to BW"),
 	                                               .type   = "RGBTOBW",
@@ -3782,7 +3736,7 @@ void _kickstart() {
 	                                               .width   = 0,
 	                                               .flags   = 0});
 	gc_root(rgb_to_bw_node_def);
-	gc_unroot(attribute_node_def);
+
 	attribute_node_def = GC_ALLOC_INIT(ui_node_t, {.id      = 0,
 	                                               .name    = _tr("Attribute"),
 	                                               .type    = "ATTRIBUTE",
@@ -3850,7 +3804,7 @@ void _kickstart() {
 	                                               .width = 0,
 	                                               .flags = 0});
 	gc_root(attribute_node_def);
-	gc_unroot(shader_node_def);
+
 	shader_node_def = GC_ALLOC_INIT(ui_node_t, {.id      = 0,
 	                                            .name    = _tr("Shader"),
 	                                            .type    = "SHADER_GPU", // extension
@@ -3888,7 +3842,7 @@ void _kickstart() {
 	                                            .width = 0,
 	                                            .flags = 0});
 	gc_root(shader_node_def);
-	gc_unroot(upscale_image_node_def);
+
 	upscale_image_node_def = GC_ALLOC_INIT(ui_node_t, {.id     = 0,
 	                                                   .name   = _tr("Upscale Image"),
 	                                                   .type   = "NEURAL_UPSCALE_IMAGE",
@@ -3940,7 +3894,6 @@ void _kickstart() {
 	                                                   .flags = 0});
 	gc_root(upscale_image_node_def);
 
-	gc_unroot(image_to_pbr_node_def);
 	image_to_pbr_node_def =
 	    GC_ALLOC_INIT(ui_node_t, {.id     = 0,
 	                              .name   = _tr("Image to PBR"),
@@ -4042,7 +3995,7 @@ void _kickstart() {
 	                              .width = 0,
 	                              .flags = 0});
 	gc_root(image_to_pbr_node_def);
-	gc_unroot(inpaint_image_node_def);
+
 	inpaint_image_node_def = GC_ALLOC_INIT(ui_node_t, {.id     = 0,
 	                                                   .name   = _tr("Inpaint Image"),
 	                                                   .type   = "NEURAL_INPAINT_IMAGE",
@@ -4103,7 +4056,7 @@ void _kickstart() {
 	                                                   .width = 0,
 	                                                   .flags = 0});
 	gc_root(inpaint_image_node_def);
-	gc_unroot(text_to_image_node_def);
+
 	text_to_image_node_def = GC_ALLOC_INIT(ui_node_t, {.id      = 0,
 	                                                   .name    = _tr("Text to Image"),
 	                                                   .type    = "NEURAL_TEXT_TO_IMAGE",
@@ -4150,7 +4103,7 @@ void _kickstart() {
 	                                                   .width = 0,
 	                                                   .flags = 0});
 	gc_root(text_to_image_node_def);
-	gc_unroot(outpaint_image_node_def);
+
 	outpaint_image_node_def =
 	    GC_ALLOC_INIT(ui_node_t, {.id     = 0,
 	                              .name   = _tr("Outpaint Image"),
@@ -4202,11 +4155,10 @@ void _kickstart() {
 	                              .width = 0,
 	                              .flags = 0});
 	gc_root(outpaint_image_node_def);
-	gc_unroot(neural_node_results);
+
 	neural_node_results = any_imap_create();
 	gc_root(neural_node_results);
 
-	gc_unroot(edit_image_node_def);
 	edit_image_node_def = GC_ALLOC_INIT(ui_node_t, {.id     = 0,
 	                                                .name   = _tr("Edit Image"),
 	                                                .type   = "NEURAL_EDIT_IMAGE",
@@ -4257,7 +4209,7 @@ void _kickstart() {
 	                                                .width = 0,
 	                                                .flags = 0});
 	gc_root(edit_image_node_def);
-	gc_unroot(tile_image_node_def);
+
 	tile_image_node_def = GC_ALLOC_INIT(ui_node_t, {.id     = 0,
 	                                                .name   = _tr("Tile Image"),
 	                                                .type   = "NEURAL_TILE_IMAGE",
@@ -4308,7 +4260,7 @@ void _kickstart() {
 	                                                .width = 0,
 	                                                .flags = 0});
 	gc_root(tile_image_node_def);
-	gc_unroot(image_to_3d_mesh_node_def);
+
 	image_to_3d_mesh_node_def =
 	    GC_ALLOC_INIT(ui_node_t, {.id     = 0,
 	                              .name   = _tr("Image to 3D Mesh"),
@@ -4360,7 +4312,7 @@ void _kickstart() {
 	                              .width = 0,
 	                              .flags = 0});
 	gc_root(image_to_3d_mesh_node_def);
-	gc_unroot(vary_image_node_def);
+
 	vary_image_node_def = GC_ALLOC_INIT(ui_node_t, {.id     = 0,
 	                                                .name   = _tr("Vary Image"),
 	                                                .type   = "NEURAL_VARY_IMAGE",
@@ -4411,7 +4363,7 @@ void _kickstart() {
 	                                                .width = 0,
 	                                                .flags = 0});
 	gc_root(vary_image_node_def);
-	gc_unroot(image_to_normal_map_node_def);
+
 	image_to_normal_map_node_def =
 	    GC_ALLOC_INIT(ui_node_t, {.id     = 0,
 	                              .name   = _tr("Image to Normal Map"),
@@ -4463,7 +4415,7 @@ void _kickstart() {
 	                              .width = 0,
 	                              .flags = 0});
 	gc_root(image_to_normal_map_node_def);
-	gc_unroot(image_to_depth_node_def);
+
 	image_to_depth_node_def =
 	    GC_ALLOC_INIT(ui_node_t, {.id     = 0,
 	                              .name   = _tr("Image to Depth"),
@@ -4515,7 +4467,7 @@ void _kickstart() {
 	                              .width = 0,
 	                              .flags = 0});
 	gc_root(image_to_depth_node_def);
-	gc_unroot(tex_image_node_def);
+
 	tex_image_node_def = GC_ALLOC_INIT(ui_node_t, {.id   = 0,
 	                                               .name = _tr("Image Texture"),
 	                                               // type: "tex_image_node",
@@ -4587,7 +4539,6 @@ void _kickstart() {
 	                                               .flags = 0});
 	gc_root(tex_image_node_def);
 
-	gc_unroot(random_node_def);
 	random_node_def = GC_ALLOC_INIT(ui_node_t, {.id     = 0,
 	                                            .name   = _tr("Random"),
 	                                            .type   = "random_node",
@@ -4638,7 +4589,6 @@ void _kickstart() {
 	gc_root(random_node_def);
 	input_node_coords = vec4_create(0.0, 0.0, 0.0, 1.0);
 
-	gc_unroot(input_node_def);
 	input_node_def = GC_ALLOC_INIT(ui_node_t, {.id     = 0,
 	                                           .name   = _tr("Input"),
 	                                           .type   = "input_node",
@@ -4687,7 +4637,7 @@ void _kickstart() {
 	                                           .width   = 0,
 	                                           .flags   = 0});
 	gc_root(input_node_def);
-	gc_unroot(math_node_def);
+
 	math_node_def =
 	    GC_ALLOC_INIT(ui_node_t, {.id     = 0,
 	                              .name   = _tr("Math"),
@@ -4763,7 +4713,7 @@ void _kickstart() {
 	                              .width = 0,
 	                              .flags = 0});
 	gc_root(math_node_def);
-	gc_unroot(vector_node_def);
+
 	vector_node_def =
 	    GC_ALLOC_INIT(ui_node_t, {.id     = 0,
 	                              .name   = _tr("Vector"),
@@ -4823,7 +4773,7 @@ void _kickstart() {
 	                              .width   = 0,
 	                              .flags   = 0});
 	gc_root(vector_node_def);
-	gc_unroot(time_node_def);
+
 	time_node_def = GC_ALLOC_INIT(ui_node_t, {.id      = 0,
 	                                          .name    = _tr("Time"),
 	                                          .type    = "time_node",
@@ -4869,7 +4819,7 @@ void _kickstart() {
 	                                          .width   = 0,
 	                                          .flags   = 0});
 	gc_root(time_node_def);
-	gc_unroot(vector_math_node_def);
+
 	vector_math_node_def =
 	    GC_ALLOC_INIT(ui_node_t, {.id     = 0,
 	                              .name   = _tr("Vector Math"),
@@ -4944,7 +4894,7 @@ void _kickstart() {
 	                              .width = 0,
 	                              .flags = 0});
 	gc_root(vector_math_node_def);
-	gc_unroot(float_node_def);
+
 	float_node_def = GC_ALLOC_INIT(ui_node_t, {.id     = 0,
 	                                           .name   = _tr("Value"),
 	                                           .type   = "float_node",
@@ -4983,7 +4933,7 @@ void _kickstart() {
 	                                           .width   = 0,
 	                                           .flags   = 0});
 	gc_root(float_node_def);
-	gc_unroot(separate_vector_node_def);
+
 	separate_vector_node_def =
 	    GC_ALLOC_INIT(ui_node_t, {.id     = 0,
 	                              .name   = _tr("Separate Vector"),
@@ -5065,17 +5015,14 @@ void _kickstart() {
 	render_path_deferred_init(); // Allocate gbuffer
 	if (config_raw->render_mode == RENDER_MODE_FORWARD) {
 		render_path_forward_init();
-		gc_unroot(render_path_commands);
 		render_path_commands = render_path_forward_commands;
 		gc_root(render_path_commands);
 	}
 	else {
-		gc_unroot(render_path_commands);
+
 		render_path_commands = render_path_deferred_commands;
 		gc_root(render_path_commands);
 	}
-
 	base_init();
-
 	iron_start();
 }
