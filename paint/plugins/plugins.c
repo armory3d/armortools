@@ -3,7 +3,6 @@
 #include "iron_array.h"
 #include "iron_map.h"
 #include "iron_ui.h"
-#include "iron_ui_nodes.h"
 
 void proc_uv_unwrap(void *mesh);
 FN(proc_uv_unwrap) {
@@ -214,7 +213,7 @@ FN(util_mesh_unwrappers_delete) {
 	return JS_UNDEFINED;
 }
 
-extern any_map_t        *import_mesh_importers;
+extern any_map_t      *import_mesh_importers;
 extern string_array_t *_path_mesh_formats;
 string_array_t        *path_mesh_formats(void);
 FN(path_mesh_importers_set) {
@@ -236,7 +235,7 @@ FN(path_mesh_importers_delete) {
 	return JS_UNDEFINED;
 }
 
-extern any_map_t        *import_texture_importers;
+extern any_map_t      *import_texture_importers;
 extern string_array_t *_path_texture_formats;
 string_array_t        *path_texture_formats(void);
 FN(path_texture_importers_set) {

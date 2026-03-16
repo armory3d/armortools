@@ -6,7 +6,6 @@
 #include "iron_math.h"
 #include "iron_obj.h"
 #include "iron_ui.h"
-#include "iron_ui_nodes.h"
 
 void plugin_embed();
 

@@ -117,10 +117,10 @@ typedef struct ui_text_extract {
 } ui_text_extract_t;
 
 typedef struct ui_coloring {
-	uint32_t          color;
+	uint32_t        color;
 	string_array_t *start;
-	char             *end;
-	bool              separated;
+	char           *end;
+	bool            separated;
 } ui_coloring_t;
 
 typedef struct ui_coloring_array {
@@ -193,7 +193,8 @@ typedef struct ui {
 	float               input_started_time;
 	int                 cursor_x; // Text input
 	int                 highlight_anchor;
-	f32_array_t        *ratios; // Splitting rows
+	int                 cursor_sticky_x; // Remember column for vertical navigation
+	f32_array_t        *ratios;          // Splitting rows
 	int                 current_ratio;
 	float               x_before_split;
 	int                 w_before_split;
@@ -236,43 +237,43 @@ typedef struct ui {
 	float        restore_x;
 	float        restore_y;
 
-	ui_handle_t      *text_selected_handle;
-	char              text_selected[1024];
-	ui_handle_t      *submit_text_handle;
-	char              text_to_submit[1024];
-	bool              tab_pressed;
-	ui_handle_t      *tab_pressed_handle;
-	ui_handle_t      *combo_selected_handle;
-	ui_handle_t      *combo_selected_window;
-	int               combo_selected_align;
+	ui_handle_t    *text_selected_handle;
+	char            text_selected[1024];
+	ui_handle_t    *submit_text_handle;
+	char            text_to_submit[1024];
+	bool            tab_pressed;
+	ui_handle_t    *tab_pressed_handle;
+	ui_handle_t    *combo_selected_handle;
+	ui_handle_t    *combo_selected_window;
+	int             combo_selected_align;
 	string_array_t *combo_selected_texts;
-	char             *combo_selected_label;
-	int               combo_selected_x;
-	int               combo_selected_y;
-	int               combo_selected_w;
-	int               combo_selected_texts_filtered;
-	bool              combo_search_bar;
-	ui_handle_t      *submit_combo_handle;
-	int               combo_to_submit;
-	int               combo_initial_value;
-	char              tooltip_text[512];
-	gpu_texture_t    *tooltip_img;
-	int               tooltip_img_max_width;
-	float             tooltip_x;
-	float             tooltip_y;
-	bool              tooltip_shown;
-	bool              tooltip_wait;
-	double            tooltip_time;
-	char              tab_names[16][256];
-	uint32_t          tab_colors[16];
-	bool              tab_enabled[16];
-	int               tab_count; // Number of tab calls since window begin
-	ui_handle_t      *tab_handle;
-	float             tab_scroll;
-	bool              tab_vertical;
-	bool              tab_align_right;
-	bool              sticky;
-	bool              scissor;
+	char           *combo_selected_label;
+	int             combo_selected_x;
+	int             combo_selected_y;
+	int             combo_selected_w;
+	int             combo_selected_texts_filtered;
+	bool            combo_search_bar;
+	ui_handle_t    *submit_combo_handle;
+	int             combo_to_submit;
+	int             combo_initial_value;
+	char            tooltip_text[512];
+	gpu_texture_t  *tooltip_img;
+	int             tooltip_img_max_width;
+	float           tooltip_x;
+	float           tooltip_y;
+	bool            tooltip_shown;
+	bool            tooltip_wait;
+	double          tooltip_time;
+	char            tab_names[16][256];
+	uint32_t        tab_colors[16];
+	bool            tab_enabled[16];
+	int             tab_count; // Number of tab calls since window begin
+	ui_handle_t    *tab_handle;
+	float           tab_scroll;
+	bool            tab_vertical;
+	bool            tab_align_right;
+	bool            sticky;
+	bool            scissor;
 
 	bool          elements_baked;
 	gpu_texture_t check_select_image;
@@ -346,6 +347,7 @@ void  ui_fill(float x, float y, float w, float h, uint32_t color);
 void  ui_rect(float x, float y, float w, float h, uint32_t color, float strength);
 int   ui_line_count(char *str);
 char *ui_extract_line(char *str, int line);
+char *ui_extract_line_off(char *str, int line, int *off);
 bool  ui_is_visible(float elem_h);
 void  ui_end_element();
 void  ui_end_element_of_size(float element_size);
@@ -378,11 +380,13 @@ float UI_HEADER_DRAG_H();
 float UI_FLASH_SPEED();
 float UI_TOOLTIP_DELAY();
 
-extern bool ui_touch_control;
+extern bool  ui_touch_control;
 extern float ui_touch_speed;
-extern bool ui_is_cut;
-extern bool ui_is_copy;
-extern bool ui_is_paste;
+extern bool  ui_is_cut;
+extern bool  ui_is_copy;
+extern bool  ui_is_paste;
+extern char  ui_text_to_paste[1024];
+extern char  ui_text_to_copy[1024];
 extern void (*ui_on_border_hover)(ui_handle_t *, int);
 extern void (*ui_on_tab_drop)(ui_handle_t *, int, ui_handle_t *, int);
 extern const char *ui_theme_keys[];
@@ -407,3 +411,164 @@ uint32_t ui_color(uint8_t r, uint8_t g, uint8_t b, uint8_t a);
 extern bool                ui_text_area_line_numbers;
 extern bool                ui_text_area_scroll_past_end;
 extern ui_text_coloring_t *ui_text_area_coloring;
+
+typedef struct ui_canvas_control {
+	float pan_x;
+	float pan_y;
+	float zoom;
+	bool  controls_down;
+} ui_canvas_control_t;
+
+typedef struct ui_node_socket {
+	int          id;
+	int          node_id;
+	char        *name;
+	char        *type;
+	uint32_t     color;
+	f32_array_t *default_value;
+	float        min;
+	float        max;
+	float        precision;
+	int          display;
+} ui_node_socket_t;
+
+typedef struct ui_node_button {
+	char        *name;
+	char        *type;
+	int          output;
+	f32_array_t *default_value;
+	u8_array_t  *data;
+	float        min;
+	float        max;
+	float        precision;
+	float        height;
+} ui_node_button_t;
+
+typedef struct ui_node_socket_array {
+	ui_node_socket_t **buffer;
+	int                length;
+	int                capacity;
+} ui_node_socket_array_t;
+
+typedef struct ui_node_button_array {
+	ui_node_button_t **buffer;
+	int                length;
+	int                capacity;
+} ui_node_button_array_t;
+
+typedef enum ui_node_flag {
+	UI_NODE_FLAG_NONE      = 0,
+	UI_NODE_FLAG_COLLAPSED = 1,
+	UI_NODE_FLAG_PREVIEW   = 2,
+} ui_node_flag_t;
+
+typedef struct ui_node {
+	int                     id;
+	char                   *name;
+	char                   *type;
+	float                   x;
+	float                   y;
+	uint32_t                color;
+	ui_node_socket_array_t *inputs;
+	ui_node_socket_array_t *outputs;
+	ui_node_button_array_t *buttons;
+	float                   width;
+	int                     flags; // ui_node_flag_t
+} ui_node_t;
+
+typedef struct ui_node_link {
+	int id;
+	int from_id;
+	int from_socket;
+	int to_id;
+	int to_socket;
+} ui_node_link_t;
+
+typedef struct ui_node_array {
+	ui_node_t **buffer;
+	int         length;
+	int         capacity;
+} ui_node_array_t;
+
+typedef struct ui_node_link_array {
+	ui_node_link_t **buffer;
+	int              length;
+	int              capacity;
+} ui_node_link_array_t;
+
+typedef struct ui_node_canvas {
+	char                 *name;
+	ui_node_array_t      *nodes;
+	ui_node_link_array_t *links;
+} ui_node_canvas_t;
+
+typedef struct ui_nodes {
+	bool         nodes_drag;
+	i32_array_t *nodes_selected_id;
+	float        pan_x;
+	float        pan_y;
+	float        zoom;
+	int          uiw;
+	int          uih;
+	bool         _input_started;
+	void (*color_picker_callback)(uint32_t);
+	void        *color_picker_callback_data;
+	float        scale_factor;
+	float        ELEMENT_H;
+	bool         dragged;
+	ui_node_t   *move_on_top;
+	int          link_drag_id;
+	bool         is_new_link;
+	int          snap_from_id;
+	int          snap_to_id;
+	int          snap_socket;
+	float        snap_x;
+	float        snap_y;
+	ui_handle_t *handle;
+} ui_nodes_t;
+
+void ui_nodes_init(ui_nodes_t *nodes);
+void ui_node_canvas(ui_nodes_t *nodes, ui_node_canvas_t *canvas);
+void ui_nodes_rgba_popup(ui_handle_t *nhandle, float *val, int x, int y);
+
+void ui_remove_node(ui_node_t *n, ui_node_canvas_t *canvas);
+
+float                  UI_NODES_SCALE();
+float                  UI_NODES_PAN_X();
+float                  UI_NODES_PAN_Y();
+extern char           *ui_clipboard;
+extern string_array_t *ui_nodes_exclude_remove;
+extern bool            ui_nodes_socket_released;
+extern string_array_t *(*ui_nodes_enum_texts)(char *);
+extern gpu_texture_t *(*ui_nodes_preview_image)(ui_node_t *);
+extern void (*ui_nodes_on_custom_button)(int, char *);
+extern ui_canvas_control_t *(*ui_nodes_on_canvas_control)(void);
+extern void (*ui_nodes_on_canvas_released)(void);
+extern void (*ui_nodes_on_socket_released)(int);
+extern void (*ui_nodes_on_link_drag)(int, bool);
+extern void (*ui_nodes_on_node_remove)(ui_node_t *);
+extern void (*ui_nodes_on_node_changed)(ui_node_t *);
+extern bool ui_nodes_grid_snap;
+
+void     ui_node_canvas_encode(ui_node_canvas_t *canvas);
+uint32_t ui_node_canvas_encoded_size(ui_node_canvas_t *canvas);
+char    *ui_node_canvas_to_json(ui_node_canvas_t *canvas);
+
+float UI_NODE_X(ui_node_t *node);
+float UI_NODE_Y(ui_node_t *node);
+float UI_NODE_W(ui_node_t *node);
+float UI_NODE_H(ui_node_canvas_t *canvas, ui_node_t *node);
+float UI_OUTPUT_Y(ui_node_t *node, int pos);
+float UI_INPUT_Y(ui_node_canvas_t *canvas, ui_node_t *node, int pos);
+float UI_OUTPUTS_H(ui_node_t *node, int length);
+float UI_BUTTONS_H(ui_node_t *node);
+float UI_LINE_H();
+float UI_NODES_PAN_X();
+float UI_NODES_PAN_Y();
+
+float           ui_p(float f);
+int             ui_get_socket_id(ui_node_array_t *nodes);
+ui_node_link_t *ui_get_link(ui_node_link_array_t *links, int id);
+int             ui_next_link_id(ui_node_link_array_t *links);
+ui_node_t      *ui_get_node(ui_node_array_t *nodes, int id);
+int             ui_next_node_id(ui_node_array_t *nodes);

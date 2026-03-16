@@ -1,13 +1,12 @@
-#include "iron_ui_nodes.h"
+#include "iron_ui.h"
 
 #include "iron_armpack.h"
 #include "iron_array.h"
-#include "iron_string.h"
 #include "iron_draw.h"
 #include "iron_gc.h"
-#include "iron_json.h"
-#include "iron_ui.h"
 #include "iron_gpu.h"
+#include "iron_json.h"
+#include "iron_string.h"
 #include "iron_system.h"
 #include <math.h>
 #include <stdlib.h>
@@ -24,10 +23,10 @@ static const int     ui_max_buttons  = 9;
 static int           ui_node_id      = -1;
 static ui_node_t    *node_resize     = NULL;
 
-char             *ui_clipboard                           = "";
-string_array_t *ui_nodes_exclude_remove                = NULL; // No removal for listed node types
-bool              ui_nodes_socket_released               = false;
-string_array_t *(*ui_nodes_enum_texts)(char *)         = NULL; // Retrieve combo items for buttons of type ENUM
+char           *ui_clipboard                             = "";
+string_array_t *ui_nodes_exclude_remove                  = NULL; // No removal for listed node types
+bool            ui_nodes_socket_released                 = false;
+string_array_t *(*ui_nodes_enum_texts)(char *)           = NULL; // Retrieve combo items for buttons of type ENUM
 gpu_texture_t *(*ui_nodes_preview_image)(ui_node_t *)    = NULL; // Retrieve preview image
 void (*ui_nodes_on_custom_button)(int, char *)           = NULL; // Call external function
 ui_canvas_control_t *(*ui_nodes_on_canvas_control)(void) = NULL;
@@ -397,14 +396,14 @@ static float ui_nodes_snap(float f) {
 }
 
 static string_array_t enum_ar;
-static char             enum_label[64];
-static char             enum_texts_data[64][64];
-static char            *enum_texts[64];
+static char           enum_label[64];
+static char           enum_texts_data[64][64];
+static char          *enum_texts[64];
 
 static string_array_t temp_ar;
-static char             temp_label[64];
-static char             temp_texts_data[64][64];
-static char            *temp_texts[64];
+static char           temp_label[64];
+static char           temp_texts_data[64][64];
+static char          *temp_texts[64];
 
 void ui_node_draw_body(ui_node_t *node, ui_node_canvas_t *canvas, float nx, float ny) {
 	ui_t *current = ui_get_current();
@@ -412,7 +411,7 @@ void ui_node_draw_body(ui_node_t *node, ui_node_canvas_t *canvas, float nx, floa
 	float wy      = current->_window_y;
 	float w       = UI_NODE_W(node);
 	// float h       = UI_NODE_H(canvas, node);
-	float lineh   = UI_LINE_H();
+	float lineh = UI_LINE_H();
 
 	// Outputs
 	for (int i = 0; i < node->outputs->length; ++i) {
@@ -533,10 +532,10 @@ void ui_node_draw_body(ui_node_t *node, ui_node_canvas_t *canvas, float nx, floa
 			ui_handle_t *but_handle = ui_nest(nhandle, buti);
 			but_handle->i           = ((float *)but->default_value->buffer)[0];
 
-			bool  combo_select      = current->combo_selected_handle == NULL && ui_get_released(UI_ELEMENT_H());
-			char *label             = combo_select ? temp_label : enum_label;
-			char(*texts_data)[64]   = combo_select ? temp_texts_data : enum_texts_data;
-			char            **texts = combo_select ? temp_texts : enum_texts;
+			bool  combo_select    = current->combo_selected_handle == NULL && ui_get_released(UI_ELEMENT_H());
+			char *label           = combo_select ? temp_label : enum_label;
+			char(*texts_data)[64] = combo_select ? temp_texts_data : enum_texts_data;
+			char          **texts = combo_select ? temp_texts : enum_texts;
 			string_array_t *ar    = combo_select ? &temp_ar : &enum_ar;
 
 			int texts_count = 0;
@@ -1298,7 +1297,7 @@ void ui_node_canvas(ui_nodes_t *nodes, ui_node_canvas_t *canvas) {
 				for (int j = 0; j < paste_canvas->nodes->buffer[i]->buttons->length; ++j) {
 					ui_node_button_t *but = paste_canvas->nodes->buffer[i]->buttons->buffer[j];
 					if (but->data != NULL) {
-						char *s = string_replace_all(but->data, "\\n", "\n");
+						char *s   = string_replace_all(but->data, "\\n", "\n");
 						but->data = u8_array_create_from_raw((uint8_t *)s, strlen(s) + 1);
 					}
 				}
@@ -1746,7 +1745,7 @@ f32 ui_nodes_INPUT_Y(ui_node_canvas_t *canvas, ui_node_t *node, i32 pos) {
 	return UI_INPUT_Y(canvas, node, pos);
 }
 
-extern any_map_t                *ui_nodes_custom_buttons;
+extern any_map_t *ui_nodes_custom_buttons;
 
 void nodes_on_custom_button(i32 node_id, char *button_name) {
 	void (*f)(i32) = any_map_get(ui_nodes_custom_buttons, button_name);

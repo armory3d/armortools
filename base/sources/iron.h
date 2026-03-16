@@ -2,25 +2,24 @@
 
 #pragma clang diagnostic ignored "-Wincompatible-pointer-types"
 
+#include "const_data.h"
 #include "iron_armpack.h"
 #include "iron_array.h"
 #include "iron_draw.h"
+#include "iron_eval.h"
 #include "iron_file.h"
-#include "iron_path.h"
 #include "iron_gc.h"
 #include "iron_gpu.h"
 #include "iron_json.h"
+#include "iron_lz4.h"
 #include "iron_map.h"
 #include "iron_math.h"
 #include "iron_obj.h"
+#include "iron_path.h"
 #include "iron_string.h"
 #include "iron_system.h"
 #include "iron_thread.h"
-#include "iron_lz4.h"
-#include "iron_eval.h"
 #include "iron_ui.h"
-#include "iron_ui_nodes.h"
-#include "const_data.h"
 #include <ctype.h>
 #include <math.h>
 #include <stdlib.h>
@@ -38,8 +37,8 @@
 #endif
 
 #define ID__(x, y) x ":" #y
-#define ID_(x, y) ID__(x, y)
-#define __ID__ ID_(__FILE__, __LINE__)
+#define ID_(x, y)  ID__(x, y)
+#define __ID__     ID_(__FILE__, __LINE__)
 
 int    _argc;
 char **_argv;
@@ -175,15 +174,15 @@ char *iron_get_arg(i32 index) {
 // ██║██║  ██║╚██████╔╝██║ ╚████║    ██║  ██║██║     ██║
 // ╚═╝╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═══╝    ╚═╝  ╚═╝╚═╝     ╚═╝
 
+#include "engine.h"
+#include "iron_input.h"
 #include "iron_math.h"
 #include "iron_net.h"
-#include "iron_tween.h"
-#include "iron_input.h"
-#include "iron_tilesheet.h"
 #include "iron_raycast.h"
 #include "iron_shape.h"
 #include "iron_sys.h"
-#include "engine.h"
+#include "iron_tilesheet.h"
+#include "iron_tween.h"
 #include "kong/dir.h"
 #include <lz4x.h>
 #include <stdio.h>
