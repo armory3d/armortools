@@ -105,6 +105,7 @@
 #include "export_exr.c"
 #include "export_mesh.c"
 #include "export_obj.c"
+#include "export_player.c"
 #include "export_texture.c"
 #include "geom.c"
 #include "gizmo.c"

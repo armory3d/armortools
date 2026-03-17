@@ -28,7 +28,7 @@ void tab_plugins_draw(ui_handle_t *htab) {
 			}
 		}
 
-		#ifdef is_debug
+#ifdef is_debug
 		string_t_array_t *rt_keys = map_keys(render_path_render_targets);
 		array_sort(rt_keys, NULL);
 		for (i32 i = 0; i < rt_keys->length; ++i) {
@@ -36,12 +36,12 @@ void tab_plugins_draw(ui_handle_t *htab) {
 			ui_text(rt_keys->buffer[i], UI_ALIGN_LEFT, 0x00000000);
 			ui_image(rt->_image, 0xffffffff, -1.0);
 		}
-		#endif
+#endif
 	}
 }
 
 void plugin_uv_unwrap_button() {
-	void * cb = any_map_get(util_mesh_unwrappers, "uv_unwrap.js"); // JSValue * -> (a: raw_mesh_t)=>void
+	void *cb = any_map_get(util_mesh_unwrappers, "uv_unwrap.js"); // JSValue * -> (a: raw_mesh_t)=>void
 	for (i32 i = 0; i < project_paint_objects->length; ++i) {
 		mesh_data_t *md = project_paint_objects->buffer[i]->data;
 		raw_mesh_t  *mesh =
