@@ -395,14 +395,25 @@ void ui_view2d_render(void *_) {
 				ui->_y = 2 + start_y;
 			}
 
-			char *view_type = ui_view2d_type == VIEW_2D_TYPE_ASSET  ? "Asset"
-			                  : ui_view2d_type == VIEW_2D_TYPE_NODE ? "Node"
-			                  : ui_view2d_type == VIEW_2D_TYPE_FONT ? "Font"
-			                                                        : "Layer";
+			char *view_type = ui_view2d_type == VIEW_2D_TYPE_ASSET  ? tr("Asset")
+			                  : ui_view2d_type == VIEW_2D_TYPE_NODE ? tr("Node")
+			                  : ui_view2d_type == VIEW_2D_TYPE_FONT ? tr("Font")
+			                                                        : tr("Layer");
+
 			ui->_w          = math_floor(ew * 0.5 + 3);
 			ui_text(view_type, UI_ALIGN_LEFT, 0x00000000);
 			ui->_x += ew * 0.5 + 3;
 			ui->_y = 2 + start_y;
+
+			if (ui_view2d_type == VIEW_2D_TYPE_ASSET) {
+				asset_t *asset = context_raw->texture;
+				bool is_packed = project_raw->packed_assets != NULL && project_packed_asset_exists(project_raw->packed_assets, asset->file);
+				if (is_packed) {
+					ui_text(tr("(packed)"), UI_ALIGN_LEFT, 0x00000000);
+					ui->_x += ew * 0.5 + 3;
+					ui->_y = 2 + start_y;
+				}
+			}
 
 			ui->enabled = true;
 		}
