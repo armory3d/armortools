@@ -630,6 +630,9 @@ async function init() {
 					req.open("GET", read_string(filename), false);
 					req.overrideMimeType("text/plain; charset=x-user-defined");
 					req.send();
+					if (req.status === 0 || req.status >= 400) {
+						return 0;
+					}
 					str = req.response;
 				}
 				file_buffer_pos = 0;

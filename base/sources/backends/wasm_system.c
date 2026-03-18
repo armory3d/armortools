@@ -232,6 +232,10 @@ const char *iron_system_id() {
 	return "Wasm";
 }
 
+const char *iron_internal_save_path() {
+	return ".";
+}
+
 // char       *iron_internal_cut_callback(void);
 // char       *iron_internal_copy_callback(void);
 // void        iron_internal_paste_callback(char *);

@@ -2648,7 +2648,7 @@ class IronExporter {
 	copy_blob(from, to, embed) {
 		fs_ensuredir(path_join("build", "out", path_dirname(to)));
 		let to_full = path_join("build", "out", to);
-		if (embed && !to.endsWith(".txt") && !to.endsWith(".md") && !to.endsWith(".json") && !to.endsWith(".js")) {
+		if (embed && !to.endsWith(".txt") && !to.endsWith(".md") && !to.endsWith(".json") && !to.endsWith(".js") && !to.endsWith(".html")) {
 			fs_ensuredir(path_join("build", "temp", path_dirname(to)));
 			to_full = path_join("build", "temp", to);
 		}
@@ -2694,7 +2694,7 @@ function export_iron_project(project, options) {
 	if (globalThis.flags.embed) {
 		let embed_files = [];
 		for (let asset of assets) {
-			if (asset.noembed || asset.from.endsWith(".txt") || asset.from.endsWith(".md") || asset.from.endsWith(".json") || asset.from.endsWith(".js")) {
+			if (asset.noembed || asset.from.endsWith(".txt") || asset.from.endsWith(".md") || asset.from.endsWith(".json") || asset.from.endsWith(".js") || asset.from.endsWith(".html")) {
 				continue;
 			}
 			embed_files.push(path_resolve("build", "temp", asset.files[0]));
