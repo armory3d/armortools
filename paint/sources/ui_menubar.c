@@ -114,7 +114,7 @@ void ui_menubar_render_ui() {
 				ui_menubar_show_menu(MENUBAR_CATEGORY_CAMERA);
 			}
 			// if (ui_menubar_icon_button(ICON_WINDOW)) {
-				// ui_menubar_show_menu(MENUBAR_CATEGORY_WORKSPACE);
+			// ui_menubar_show_menu(MENUBAR_CATEGORY_WORKSPACE);
 			// }
 			if (ui_menu_show && ui_menubar_category == MENUBAR_CATEGORY_HELP) {
 				ui_fill(0, -6, size, size - 4, ui->ops->theme->HIGHLIGHT_COL);
@@ -369,8 +369,8 @@ void ui_menubar_draw_category_items() {
 		if (ui_menu_button(tr("Save As..."), any_map_get(config_keymap, "file_save_as"), ICON_SAVE_AS)) {
 			project_save_as(false);
 		}
-		ui_handle_t *h_pack_assets = ui_handle(__ID__);
-		h_pack_assets->b = context_raw->pack_assets_on_save;
+		ui_handle_t *h_pack_assets       = ui_handle(__ID__);
+		h_pack_assets->b                 = context_raw->pack_assets_on_save;
 		context_raw->pack_assets_on_save = ui_check(h_pack_assets, tr("Pack Assets"), "");
 		if (ui->changed) {
 			ui_menu_keep_open = true;
@@ -495,8 +495,7 @@ void ui_menubar_draw_category_items() {
 			enva_handle->f -= math_floor(enva_handle->f / 360.0) * 360;
 		}
 		ui_menu_align();
-		context_raw->envmap_angle =
-		    ui_slider(enva_handle, tr("Environment Angle"), 0.0, 360.0, true, 1, true, UI_ALIGN_RIGHT, true) / 180.0 * math_pi();
+		context_raw->envmap_angle = ui_slider(enva_handle, tr("Environment Angle"), 0.0, 360.0, true, 1, true, UI_ALIGN_RIGHT, true) / 180.0 * math_pi();
 		if (ui->is_hovered) {
 			any_map_t *vars = any_map_create();
 			any_map_set(vars, "shortcut", any_map_get(config_keymap, "rotate_envmap"));
@@ -575,6 +574,15 @@ void ui_menubar_draw_category_items() {
 
 		if (ui_menu_button(tr("Capture Screenshot"), "", ICON_PHOTO)) {
 			sys_notify_on_next_frame(&ui_menubar_draw_category_items_capture_screenshot, NULL);
+			ui->changed = false; // Close menu
+		}
+
+		if (config_raw->experimental && !viewport_recording && ui_menu_button(tr("Capture Video"), "", ICON_MOVIE)) {
+			viewport_capture_video_begin();
+			ui->changed = false; // Close menu
+		}
+		if (config_raw->experimental && viewport_recording && ui_menu_button(tr("Stop Capture"), "", ICON_STOP)) {
+			viewport_capture_video_end();
 			ui->changed = false; // Close menu
 		}
 
@@ -770,8 +778,8 @@ void ui_menubar_draw_category_items() {
 		any_map_set(vars, "zoom_shortcut", any_map_get(config_keymap, "action_zoom"));
 		any_map_set(vars, "pan_shortcut", any_map_get(config_keymap, "action_pan"));
 		char *orbit_and_rotate_tooltip = vtr("Orbit and Rotate mode:\n{rotate_shortcut} or move right mouse button to rotate.\n{zoom_shortcut} or scroll to "
-		                                    "zoom.\n{pan_shortcut} or move middle mouse to pan.",
-		                                    vars);
+		                                     "zoom.\n{pan_shortcut} or move middle mouse to pan.",
+		                                     vars);
 		char *fly_tooltip = tr("Fly mode:\nHold the right mouse button and one of the following commands:\nmove mouse to rotate.\nw, up or scroll up to "
 		                       "move forward.\ns, down or scroll down to move backward.\na or left to move left.\nd or right to move right.\ne to move "
 		                       "up.\nq to move down.\nHold shift to move faster or alt to move slower.");

@@ -1,9 +1,9 @@
 
 #pragma once
 
-#include <iron.h>
 #include "enums.h"
 #include "types.h"
+#include <iron.h>
 
 any_map_t     *ui_children;
 any_map_t     *ui_nodes_custom_buttons;
@@ -327,8 +327,9 @@ fun get_nor_from_depth(p0: float3, uv: float2, invVP: float4x4, tex_step: float2
 bool                      sim_running                = false;
 mat4_box_t_array_t       *sim_transforms;
 any_map_t                *sim_object_script_map;
-bool                      sim_record      = false;
-bool                      sim_initialized = false;
+bool                      sim_record         = false;
+bool                      sim_initialized    = false;
+bool                      viewport_recording = false;
 node_shader_context_t    *parser_material_con;
 node_shader_t            *parser_material_kong;
 material_context_t       *parser_material_matcon;
@@ -543,12 +544,12 @@ fun cotangent_frame(n: float3, p: float3, tex_coord: float2): float3x3 { \
 ";
 
 // let str_octahedron_wrap: string = "\
-	// fun octahedron_wrap(v: float2): float2 { \
-	// 	return (1.0 - abs(v.yx)) * (float2(v.x >= 0.0 ? 1.0 : -1.0, v.y >= 0.0 ? 1.0 : -1.0)); \
-	// } \
-	// ";
+// fun octahedron_wrap(v: float2): float2 { \
+// 	return (1.0 - abs(v.yx)) * (float2(v.x >= 0.0 ? 1.0 : -1.0, v.y >= 0.0 ? 1.0 : -1.0)); \
+// } \
+// ";
 
-char                *str_octahedron_wrap        = "\
+char *str_octahedron_wrap = "\
 fun octahedron_wrap(v: float2): float2 { \
 	var a: float2; \
 	if (v.x >= 0.0) { a.x = 1.0; } else { a.x = -1.0; } \
@@ -563,22 +564,22 @@ fun octahedron_wrap(v: float2): float2 { \
 ";
 
 // let str_pack_float_int16: string = "\
-	// fun pack_f32_i16(f: float, i: uint): float { \
-	// 	var prec: float = float(1 << 16); \
-	// 	var maxi: float = float(1 << 4); \
-	// 	var prec_minus_one: float = prec - 1.0; \
-	// 	var t1: float = ((prec / maxi) - 1.0) / prec_minus_one; \
-	// 	var t2: float = (prec / maxi) / prec_minus_one; \
-	// 	return t1 * f + t2 * float(i); \
-	// } \
-	// ";
+// fun pack_f32_i16(f: float, i: uint): float { \
+// 	var prec: float = float(1 << 16); \
+// 	var maxi: float = float(1 << 4); \
+// 	var prec_minus_one: float = prec - 1.0; \
+// 	var t1: float = ((prec / maxi) - 1.0) / prec_minus_one; \
+// 	var t2: float = (prec / maxi) / prec_minus_one; \
+// 	return t1 * f + t2 * float(i); \
+// } \
+// ";
 
-char                *str_pack_float_int16       = "\
+char *str_pack_float_int16 = "\
 fun pack_f32_i16(f: float, i: uint): float { \
 	return 0.062504762 * min(f, 0.9999) + 0.062519999 * float(i); \
 } \
 ";
-char                *str_sh_irradiance          = "\
+char *str_sh_irradiance    = "\
 fun sh_irradiance(nor: float3): float3 { \
 	var c1: float = 0.429043; \
 	var c2: float = 0.511664; \
@@ -608,7 +609,7 @@ fun sh_irradiance(nor: float3): float3 { \
 	); \
 } \
 ";
-char                *str_envmap_equirect        = "\
+char *str_envmap_equirect  = "\
 fun envmap_equirect(normal: float3, angle: float): float2 { \
 	var PI: float = 3.1415926535; \
 	var PI2: float = PI * 2.0; \
@@ -617,7 +618,7 @@ fun envmap_equirect(normal: float3, angle: float): float2 { \
 	return float2(theta / PI2, phi / PI); \
 } \
 ";
-char                *str_envmap_sample          = "\
+char *str_envmap_sample    = "\
 fun envmap_sample(lod: float, coord: float2): float3 { \
 	if (lod == 0.0) { \
 		return sample_lod(senvmap_radiance, sampler_linear, coord, 0.0).rgb; \
@@ -752,53 +753,53 @@ f32                 export_texture_gamma = 1.0 / 2.2;
 bool                ui_box_show          = false;
 bool                ui_box_draggable     = true;
 ui_handle_t        *ui_box_hwnd;
-char               *ui_box_title                = "";
-char               *ui_box_text                 = "";
-void (*ui_box_commands)(void)                   = NULL;
-bool ui_box_click_to_hide                       = true;
-i32  ui_box_modalw                              = 400;
-i32  ui_box_modalh                              = 170;
-void (*ui_box_modal_on_hide)(void)              = NULL;
-i32                          ui_box_draws       = 0;
-bool                         ui_box_copyable    = false;
-f32                          ui_box_tween_alpha = 0.0;
-i32                          _tab_meshes_draw_i;
-i32                          tab_scene_line_counter         = 0;
-i32                          _tab_scene_paint_object_length = 1;
-i32                          tab_layers_layer_name_edit     = -1;
-ui_handle_t                 *tab_layers_layer_name_handle;
-bool                         tab_layers_show_context_menu = false;
-slot_layer_t                *tab_layers_l;
-bool                         tab_layers_mini;
-gpu_texture_t               *util_uv_uvmap                    = NULL;
-bool                         util_uv_uvmap_cached             = false;
-gpu_texture_t               *util_uv_trianglemap              = NULL;
-bool                         util_uv_trianglemap_cached       = false;
-gpu_texture_t               *util_uv_dilatemap                = NULL;
-bool                         util_uv_dilatemap_cached         = false;
-gpu_texture_t               *util_uv_uvislandmap              = NULL;
-bool                         util_uv_uvislandmap_cached       = false;
-buffer_t                    *util_uv_dilate_bytes             = NULL;
-gpu_pipeline_t              *util_uv_pipe_dilate              = NULL;
-i32                          render_path_raytrace_frame       = 0;
-bool                         render_path_raytrace_ready       = false;
-i32                          render_path_raytrace_dirty       = 0;
-f32                          render_path_raytrace_uv_scale    = 1.0;
-bool                         render_path_raytrace_init_shader = true;
-f32_array_t                 *render_path_raytrace_f32a;
-mat4_t                       render_path_raytrace_help_mat;
-mat4_t                       render_path_raytrace_transform;
-gpu_buffer_t                *render_path_raytrace_vb;
-gpu_buffer_t                *render_path_raytrace_ib;
-gpu_texture_t               *render_path_raytrace_last_envmap = NULL;
-bool                         render_path_raytrace_is_bake     = false;
+char               *ui_box_title   = "";
+char               *ui_box_text    = "";
+void (*ui_box_commands)(void)      = NULL;
+bool ui_box_click_to_hide          = true;
+i32  ui_box_modalw                 = 400;
+i32  ui_box_modalh                 = 170;
+void (*ui_box_modal_on_hide)(void) = NULL;
+i32             ui_box_draws       = 0;
+bool            ui_box_copyable    = false;
+f32             ui_box_tween_alpha = 0.0;
+i32             _tab_meshes_draw_i;
+i32             tab_scene_line_counter         = 0;
+i32             _tab_scene_paint_object_length = 1;
+i32             tab_layers_layer_name_edit     = -1;
+ui_handle_t    *tab_layers_layer_name_handle;
+bool            tab_layers_show_context_menu = false;
+slot_layer_t   *tab_layers_l;
+bool            tab_layers_mini;
+gpu_texture_t  *util_uv_uvmap                    = NULL;
+bool            util_uv_uvmap_cached             = false;
+gpu_texture_t  *util_uv_trianglemap              = NULL;
+bool            util_uv_trianglemap_cached       = false;
+gpu_texture_t  *util_uv_dilatemap                = NULL;
+bool            util_uv_dilatemap_cached         = false;
+gpu_texture_t  *util_uv_uvislandmap              = NULL;
+bool            util_uv_uvislandmap_cached       = false;
+buffer_t       *util_uv_dilate_bytes             = NULL;
+gpu_pipeline_t *util_uv_pipe_dilate              = NULL;
+i32             render_path_raytrace_frame       = 0;
+bool            render_path_raytrace_ready       = false;
+i32             render_path_raytrace_dirty       = 0;
+f32             render_path_raytrace_uv_scale    = 1.0;
+bool            render_path_raytrace_init_shader = true;
+f32_array_t    *render_path_raytrace_f32a;
+mat4_t          render_path_raytrace_help_mat;
+mat4_t          render_path_raytrace_transform;
+gpu_buffer_t   *render_path_raytrace_vb;
+gpu_buffer_t   *render_path_raytrace_ib;
+gpu_texture_t  *render_path_raytrace_last_envmap = NULL;
+bool            render_path_raytrace_is_bake     = false;
 
 #ifdef IRON_DIRECT3D12
-char                        *render_path_raytrace_ext = ".cso";
+char *render_path_raytrace_ext = ".cso";
 #elif defined(IRON_METAL)
-char                        *render_path_raytrace_ext = ".metal";
+char *render_path_raytrace_ext = ".metal";
 #else
-char                        *render_path_raytrace_ext = ".spirv";
+char *render_path_raytrace_ext = ".spirv";
 #endif
 
 gpu_texture_t               *render_path_raytrace_last_texpaint = NULL;

@@ -428,6 +428,8 @@ void                      viewport_orbit_opposite();
 void                      viewport_zoom(f32 f);
 void                      viewport_update_camera_type(i32 camera_type);
 void                      viewport_capture_screenshot();
+void                      viewport_capture_video_begin();
+void                      viewport_capture_video_end();
 void                      tab_fonts_draw(ui_handle_t *htab);
 void                      tab_fonts_delete_font(slot_font_t *font);
 physics_world_t          *physics_world_create();

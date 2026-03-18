@@ -127,3 +127,30 @@ void viewport_capture_screenshot() {
 	any_map_set(data_cached_images, abs, screenshot);
 	import_texture_run(abs, true);
 }
+
+void viewport_capture_video_update(void *_) {
+	render_target_t *rt     = any_map_get(render_path_render_targets, "last");
+	buffer_t        *pixels = gpu_get_texture_pixels(rt->_image);
+#ifdef IRON_BGRA
+	export_arm_bgra_swap(pixels);
+#endif
+	iron_mp4_encode(pixels);
+}
+
+void viewport_capture_video_begin() {
+	if (string_equals(project_filepath, "")) {
+		console_error(tr("Save project first"));
+		return;
+	}
+	viewport_recording    = true;
+	char            *path = string("%s/output.mp4", path_base_dir(project_filepath));
+	render_target_t *rt   = any_map_get(render_path_render_targets, "last");
+	iron_mp4_begin(path, rt->_image->width, rt->_image->height);
+	sys_notify_on_update(viewport_capture_video_update, NULL);
+}
+
+void viewport_capture_video_end() {
+	sys_remove_update(viewport_capture_video_update);
+	iron_mp4_end();
+	viewport_recording = false;
+}
