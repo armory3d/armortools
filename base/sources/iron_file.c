@@ -21,6 +21,7 @@
 #include "backends/windows_mini.h"
 #include <malloc.h>
 #include <memory.h>
+#elif defined(IRON_WASM)
 #else
 #include <sys/stat.h>
 #endif
@@ -365,6 +366,8 @@ bool iron_is_directory(char *path) {
 #ifdef IRON_WINDOWS
 	DWORD attribs = GetFileAttributesA(path);
 	return attribs != INVALID_FILE_ATTRIBUTES && (attribs & FILE_ATTRIBUTE_DIRECTORY);
+#elif defined(IRON_WASM)
+	return false;
 #else
 	struct stat st;
 	return stat(path, &st) == 0 && S_ISDIR(st.st_mode);

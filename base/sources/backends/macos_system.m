@@ -891,6 +891,10 @@ static void initDeviceElements(struct HIDGamepad *gamepad, CFArrayRef elements);
 static void buttonChanged(struct HIDGamepad *gamepad, IOHIDElementRef elementRef, IOHIDValueRef valueRef, int buttonIndex);
 static void axisChanged(struct HIDGamepad *gamepad, IOHIDElementRef elementRef, IOHIDValueRef valueRef, int axisIndex);
 
+static int iron_mini(int a, int b) {
+	return a > b ? b : a;
+}
+
 static void cstringFromCFStringRef(CFStringRef string, char *cstr, size_t clen) {
 	cstr[0] = '\0';
 	if (string != NULL) {

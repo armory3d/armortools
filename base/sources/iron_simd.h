@@ -479,10 +479,10 @@ static inline float iron_float32x4_get(iron_float32x4_t t, int index) {
 
 static inline iron_float32x4_t iron_float32x4_abs(iron_float32x4_t t) {
 	iron_float32x4_t value;
-	value.values[0] = iron_abs(t.values[0]);
-	value.values[1] = iron_abs(t.values[1]);
-	value.values[2] = iron_abs(t.values[2]);
-	value.values[3] = iron_abs(t.values[3]);
+	value.values[0] = fabsf(t.values[0]);
+	value.values[1] = fabsf(t.values[1]);
+	value.values[2] = fabsf(t.values[2]);
+	value.values[3] = fabsf(t.values[3]);
 	return value;
 }
 
@@ -560,19 +560,19 @@ static inline iron_float32x4_t iron_float32x4_sqrt(iron_float32x4_t t) {
 
 static inline iron_float32x4_t iron_float32x4_max(iron_float32x4_t a, iron_float32x4_t b) {
 	iron_float32x4_t value;
-	value.values[0] = iron_max(a.values[0], b.values[0]);
-	value.values[1] = iron_max(a.values[1], b.values[1]);
-	value.values[2] = iron_max(a.values[2], b.values[2]);
-	value.values[3] = iron_max(a.values[3], b.values[3]);
+	value.values[0] = fmaxf(a.values[0], b.values[0]);
+	value.values[1] = fmaxf(a.values[1], b.values[1]);
+	value.values[2] = fmaxf(a.values[2], b.values[2]);
+	value.values[3] = fmaxf(a.values[3], b.values[3]);
 	return value;
 }
 
 static inline iron_float32x4_t iron_float32x4_min(iron_float32x4_t a, iron_float32x4_t b) {
 	iron_float32x4_t value;
-	value.values[0] = iron_min(a.values[0], b.values[0]);
-	value.values[1] = iron_min(a.values[1], b.values[1]);
-	value.values[2] = iron_min(a.values[2], b.values[2]);
-	value.values[3] = iron_min(a.values[3], b.values[3]);
+	value.values[0] = fminf(a.values[0], b.values[0]);
+	value.values[1] = fminf(a.values[1], b.values[1]);
+	value.values[2] = fminf(a.values[2], b.values[2]);
+	value.values[3] = fminf(a.values[3], b.values[3]);
 	return value;
 }
 

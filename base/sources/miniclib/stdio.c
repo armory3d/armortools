@@ -1,6 +1,6 @@
 #include "stdio.h"
 #define STB_SPRINTF_IMPLEMENTATION
-#include "../stb_sprintf.h"
+#include "stb_sprintf.h"
 
 #ifdef IRON_WASM
 __attribute__((import_module("imports"), import_name("js_printf"))) void    js_printf(const char *format);

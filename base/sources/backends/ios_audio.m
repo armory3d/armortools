@@ -48,9 +48,9 @@ static void copySample(void *buffer, void *secondary_buffer) {
 	if (video != NULL) {
 		float *frame = iron_internal_video_sound_stream_next_frame(video);
 		left_value += frame[0];
-		left_value = iron_max(iron_min(left_value, 1.0f), -1.0f);
+		left_value = fmaxf(fminf(left_value, 1.0f), -1.0f);
 		right_value += frame[1];
-		right_value = iron_max(iron_min(right_value, 1.0f), -1.0f);
+		right_value = fmaxf(fminf(right_value, 1.0f), -1.0f);
 		if (iron_internal_video_sound_stream_ended(video)) {
 			video = NULL;
 		}

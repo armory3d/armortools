@@ -26,6 +26,7 @@
 #include <string.h>
 #ifdef IRON_WINDOWS
 #include <Windows.h>
+#elif defined(IRON_WASM)
 #else
 #include <sys/stat.h>
 #endif

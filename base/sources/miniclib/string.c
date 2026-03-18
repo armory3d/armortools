@@ -1,7 +1,7 @@
 #include "string.h"
 
-#include <stdlib.h>
 #include <stdbool.h>
+#include <stdlib.h>
 
 void *memset(void *ptr, int value, size_t num) {
 	unsigned char *data = (unsigned char *)ptr;
@@ -104,13 +104,40 @@ char *strcat(char *destination, const char *source) {
 	return destination;
 }
 
+char *strncat(char *destination, const char *source, size_t num) {
+	size_t di = 0;
+	while (destination[di] != 0) {
+		++di;
+	}
+	for (size_t si = 0; si < num; ++si) {
+		if (source[si] == 0) {
+			break;
+		}
+		destination[di++] = source[si];
+	}
+	destination[di] = 0;
+	return destination;
+}
+
 char *strdup(const char *str) {
 	if (str == NULL) {
-        return NULL;
-    }
-    size_t len = strlen(str) + 1;
-    char *copy = (char *)malloc(len);
-    return strcpy(copy, str);
+		return NULL;
+	}
+	size_t len  = strlen(str) + 1;
+	char  *copy = (char *)malloc(len);
+	return strcpy(copy, str);
+}
+
+char *strchr(const char *str, int c) {
+	char target = (char)c;
+	for (size_t i = 0;; ++i) {
+		if (str[i] == target) {
+			return (char *)&str[i];
+		}
+		if (str[i] == 0) {
+			return NULL;
+		}
+	}
 }
 
 char *strstr(const char *str1, const char *str2) {
