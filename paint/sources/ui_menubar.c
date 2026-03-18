@@ -369,6 +369,12 @@ void ui_menubar_draw_category_items() {
 		if (ui_menu_button(tr("Save As..."), any_map_get(config_keymap, "file_save_as"), ICON_SAVE_AS)) {
 			project_save_as(false);
 		}
+		ui_handle_t *h_pack_assets = ui_handle(__ID__);
+		h_pack_assets->b = context_raw->pack_assets_on_save;
+		context_raw->pack_assets_on_save = ui_check(h_pack_assets, tr("Pack Assets"), "");
+		if (ui->changed) {
+			ui_menu_keep_open = true;
+		}
 		ui_menu_separator();
 		if (ui_menu_sub_button(ui_handle(__ID__), tr("Import"))) {
 			ui_menu_sub_begin(7);

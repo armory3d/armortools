@@ -165,8 +165,7 @@ void export_arm_run_project() {
 	gpu_delete_texture(mesh_icon);
 #endif
 
-	bool is_packed = ends_with(project_filepath, "_packed_.arm");
-	if (is_packed) { // Pack textures
+	if (context_raw->pack_assets_on_save) { // Pack textures
 		export_arm_pack_assets(project_raw, project_assets);
 	}
 
