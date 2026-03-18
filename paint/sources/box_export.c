@@ -639,12 +639,16 @@ char *box_export_preset_to_json(export_preset_t *p) {
 	return json_encode_end();
 }
 
+void box_export_show_player_box_on_next_frame(void *path) {
+	export_player_run((char *)path);
+}
+
 void box_export_show_player_box_path_picked(char *path) {
 	char *f = ui_files_filename;
 	if (string_equals(f, "")) {
 		f = string_copy(tr("untitled"));
 	}
-	export_player_run(string("%s%s%s", path, PATH_SEP, f));
+	sys_notify_on_next_frame(&box_export_show_player_box_on_next_frame, string("%s%s%s", path, PATH_SEP, f));
 }
 
 void box_export_show_player_box() {

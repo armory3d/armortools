@@ -104,10 +104,13 @@ static void export_player_run_on_download(char *url, buffer_t *ab) {}
 void export_player_run(char *path) {
 	char *path_base = path_base_dir(path);
 
-	char *_project_filepath = string_copy(project_filepath);
-	project_filepath        = string("%s/%s", path_base, "start.arm");
+	char *_project_filepath          = string_copy(project_filepath);
+	project_filepath                 = string("%s/%s", path_base, "start.arm");
+	bool _pack_assets_on_save        = context_raw->pack_assets_on_save;
+	context_raw->pack_assets_on_save = true;
 	export_arm_run_project();
-	project_filepath = _project_filepath;
+	context_raw->pack_assets_on_save = _pack_assets_on_save;
+	project_filepath                 = _project_filepath;
 
 	char *start_js = string("%s/start.js", path_base);
 	iron_file_download("https://armorpaint.app/start.js", &export_player_run_on_download, 0, start_js);
