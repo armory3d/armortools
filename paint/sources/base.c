@@ -10,8 +10,8 @@ void base_on_shutdown() {
 
 void base_on_background() {
 	// Release keys after alt-tab / win-tab
-	_key_up(KEY_CODE_ALT, NULL);
-	_key_up(KEY_CODE_WIN, NULL);
+	// _key_up(KEY_CODE_ALT, NULL);
+	// _key_up(KEY_CODE_WIN, NULL);
 }
 
 void base_on_pause() {}

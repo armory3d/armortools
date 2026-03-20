@@ -386,21 +386,27 @@ ui_canvas_control_t *ui_viewnodes_on_canvas_control() {
 
 ui_canvas_control_t *ui_nodes_get_canvas_control(bool controls_down) {
 	if (config_raw->wrap_mouse && controls_down) {
-		if (ui->input_x < ui->_window_x) {
-			ui->input_x = ui->_window_x + ui->_window_w;
-			iron_mouse_set_position(math_floor(ui->input_x), math_floor(ui->input_y));
-		}
-		else if (ui->input_x > ui->_window_x + ui->_window_w) {
-			ui->input_x = ui->_window_x;
-			iron_mouse_set_position(math_floor(ui->input_x), math_floor(ui->input_y));
-		}
-		else if (ui->input_y < ui->_window_y) {
-			ui->input_y = ui->_window_y + ui->_window_h;
-			iron_mouse_set_position(math_floor(ui->input_x), math_floor(ui->input_y));
-		}
-		else if (ui->input_y > ui->_window_y + ui->_window_h) {
-			ui->input_y = ui->_window_y;
-			iron_mouse_set_position(math_floor(ui->input_x), math_floor(ui->input_y));
+		if (ui->input_x != -1 && ui->input_y != -1) {
+			bool need_reposition = false;
+			if (ui->input_x < ui->_window_x) {
+				ui->input_x     = ui->_window_x + ui->_window_w;
+				need_reposition = true;
+			}
+			else if (ui->input_x > ui->_window_x + ui->_window_w) {
+				ui->input_x     = ui->_window_x;
+				need_reposition = true;
+			}
+			if (ui->input_y < ui->_window_y) {
+				ui->input_y     = ui->_window_y + ui->_window_h;
+				need_reposition = true;
+			}
+			else if (ui->input_y > ui->_window_y + ui->_window_h) {
+				ui->input_y     = ui->_window_y;
+				need_reposition = true;
+			}
+			if (need_reposition) {
+				iron_mouse_set_position(math_floor(ui->input_x), math_floor(ui->input_y));
+			}
 		}
 	}
 	if (operator_shortcut(any_map_get(config_keymap, "action_pan"), SHORTCUT_TYPE_STARTED) ||

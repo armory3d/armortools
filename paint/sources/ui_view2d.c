@@ -1,4 +1,4 @@
-
+﻿
 #include "global.h"
 
 void ui_view2d_init() {
@@ -122,6 +122,30 @@ void ui_view2d_render(void *_) {
 	}
 
 	if (ui_window(ui_view2d_hwnd, ui_view2d_wx, ui_view2d_wy, ui_view2d_ww, ui_view2d_wh, false)) {
+		ui_canvas_control_t *control = ui_nodes_get_canvas_control(ui_view2d_controls_down);
+		ui_view2d_pan_x += control->pan_x;
+		ui_view2d_pan_y += control->pan_y;
+		ui_view2d_controls_down = control->controls_down;
+		if (control->zoom != 0.0) {
+			f32 _pan_x = ui_view2d_pan_x / (float)ui_view2d_pan_scale;
+			f32 _pan_y = ui_view2d_pan_y / (float)ui_view2d_pan_scale;
+			ui_view2d_pan_scale += control->zoom;
+			if (ui_view2d_pan_scale < 0.1) {
+				ui_view2d_pan_scale = 0.1;
+			}
+			if (ui_view2d_pan_scale > 6.0) {
+				ui_view2d_pan_scale = 6.0;
+			}
+			ui_view2d_pan_x = _pan_x * ui_view2d_pan_scale;
+			ui_view2d_pan_y = _pan_y * ui_view2d_pan_scale;
+
+			if (ui_touch_control) {
+				// Zoom to finger location
+				ui_view2d_pan_x -= (ui->input_x - ui->_window_x - ui->_window_w / 2.0) * control->zoom;
+				ui_view2d_pan_y -= (ui->input_y - ui->_window_y - ui->_window_h / 2.0) * control->zoom;
+			}
+			ui_view2d_grid_redraw = true;
+		}
 
 		if (!config_raw->touch_ui) {
 			bool expand = !base_view3d_show && !ui_nodes_show && config_raw->layout->buffer[LAYOUT_SIZE_SIDEBAR_W] == 0;
@@ -438,36 +462,7 @@ void ui_view2d_update(void *_) {
 
 	if (!base_ui_enabled || !ui_view2d_show || mouse_x < ui_view2d_wx || mouse_x > ui_view2d_wx + ui_view2d_ww || mouse_y < ui_view2d_wy + headerh ||
 	    mouse_y > ui_view2d_wy + ui_view2d_wh) {
-		if (ui_view2d_controls_down) {
-			ui_canvas_control_t *control = ui_nodes_get_canvas_control(ui_view2d_controls_down);
-			ui_view2d_controls_down      = control->controls_down;
-		}
 		return;
-	}
-
-	ui_canvas_control_t *control = ui_nodes_get_canvas_control(ui_view2d_controls_down);
-	ui_view2d_pan_x += control->pan_x;
-	ui_view2d_pan_y += control->pan_y;
-	ui_view2d_controls_down = control->controls_down;
-	if (control->zoom != 0.0) {
-		f32 _pan_x = ui_view2d_pan_x / (float)ui_view2d_pan_scale;
-		f32 _pan_y = ui_view2d_pan_y / (float)ui_view2d_pan_scale;
-		ui_view2d_pan_scale += control->zoom;
-		if (ui_view2d_pan_scale < 0.1) {
-			ui_view2d_pan_scale = 0.1;
-		}
-		if (ui_view2d_pan_scale > 6.0) {
-			ui_view2d_pan_scale = 6.0;
-		}
-		ui_view2d_pan_x = _pan_x * ui_view2d_pan_scale;
-		ui_view2d_pan_y = _pan_y * ui_view2d_pan_scale;
-
-		if (ui_touch_control) {
-			// Zoom to finger location
-			ui_view2d_pan_x -= (ui->input_x - ui->_window_x - ui->_window_w / 2.0) * control->zoom;
-			ui_view2d_pan_y -= (ui->input_y - ui->_window_y - ui->_window_h / 2.0) * control->zoom;
-		}
-		ui_view2d_grid_redraw = true;
 	}
 
 	bool decal_mask = context_is_decal_mask_paint();

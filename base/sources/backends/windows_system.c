@@ -476,6 +476,13 @@ LRESULT WINAPI IronWindowsMessageProcedure(HWND hWnd, UINT msg, WPARAM wParam, L
 #ifdef HANDLE_ALT_ENTER
 			altDown = false;
 #endif
+			for (int i = 0; i < 256; ++i) {
+				if (keyPressed[i]){
+					keyPressed[i] = false;
+					iron_internal_keyboard_trigger_key_up(keyTranslated[i]);
+				}
+			}
+			controlDown = false;
 		}
 		RegisterTouchWindow(hWnd, 0);
 		break;
@@ -922,9 +929,6 @@ void iron_init(iron_window_options_t *ops) {
 	QueryPerformanceCounter(&startCount);
 	QueryPerformanceFrequency(&frequency);
 
-	for (int i = 0; i < 256; ++i) {
-		keyPressed[i] = false;
-	}
 
 	iron_set_app_name(ops->title);
 	iron_window_create(ops);
