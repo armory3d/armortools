@@ -6,7 +6,7 @@ Contains a general-purpose 3D engine.
 
 #### `/sources`
 
-A collection of C source files for the complete 3D engine, hardware abstraction, OS and graphics api specifics (`/backends`) and some helper libraries (`/libs`). Only a minimal single file / header libraries are used, with the exception of `quickjs`. `quickjs` is used to provide js scripting capabilities for the engine at runtime.
+A collection of C source files for the complete 3D engine, hardware abstraction, OS and graphics api specifics (`/backends`) and some helper libraries (`/libs`). Only a minimal single file / header libraries are used.
 
 #### `/tests`
 
