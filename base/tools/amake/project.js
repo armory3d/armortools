@@ -8,8 +8,7 @@ project.add_cfiles("../../sources/iron_array.c");
 project.add_cfiles("../../sources/iron_gc.c");
 project.add_define("NO_GC");
 
-project.add_include_dir("../../sources/libs");
-project.add_cfiles("../../sources/libs/quickjs-amalgam.c");
+project.add_cfiles("quickjs-amalgam.c");
 project.add_define("JS_DEFAULT_STACK_SIZE=8388608"); // 8 * 1024 * 1024
 project.add_define("QJS_BUILD_LIBC");
 project.add_cfiles("main.c");
