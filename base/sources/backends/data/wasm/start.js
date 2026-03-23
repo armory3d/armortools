@@ -705,9 +705,6 @@ async function init() {
 				return Math.atan2(x, y);
 			},
 
-			js_eval : function(str) {
-				(1, eval)(read_string(str));
-			},
 			js_canvas_w : function() {
 				return canvas.width;
 			},
