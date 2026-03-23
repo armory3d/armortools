@@ -21,7 +21,7 @@ void console_toast(char *s) {
 	bool           in_use  = gpu_in_use;
 	if (in_use)
 		draw_end();
-	console_trace(s);
+	console_log(s);
 	console_draw_toast(s);
 	if (in_use)
 		draw_begin(current, false, 0);
@@ -40,7 +40,7 @@ void console_progress(char *s) {
 		sys_notify_on_render(console_draw_progress, NULL);
 	}
 	if (s != NULL) {
-		console_trace(s);
+		console_log(s);
 	}
 	gc_unroot(console_progress_text);
 	console_progress_text = string_copy(s);
@@ -61,7 +61,7 @@ void console_info(char *s) {
 	gc_root(console_message);
 	console_message_color = 0x00000000;
 	base_redraw_status();
-	console_trace(s);
+	console_log(s);
 }
 
 void console_error(char *s) {
@@ -71,14 +71,10 @@ void console_error(char *s) {
 	gc_root(console_message);
 	console_message_color = 0xffaa0000;
 	base_redraw_status();
-	console_trace(s);
+	console_log(s);
 }
 
 void console_log(char *s) {
-	console_trace(s);
-}
-
-void console_trace(char *s) {
 	iron_log(s);
 	base_redraw_console();
 	string_array_push(console_last_traces, string_copy(s));

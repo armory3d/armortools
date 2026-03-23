@@ -417,7 +417,8 @@ node_shader_context_t *make_mesh_run(material_t *data, i32 layer_pass) {
 
 			if (context_raw->viewport_shader != NULL) {
 				node_shader_write_frag(kong, "var output_color: float3;");
-				js_call_ptr(context_raw->viewport_shader, kong);
+				minic_val_t args[1] = {minic_val_ptr(kong)};
+				minic_call_fn(context_raw->viewport_shader, args, 1);
 				node_shader_write_frag(kong, "output[1] = float4(output_color, 1.0);");
 			}
 			else if (config_raw->render_mode == RENDER_MODE_FORWARD && context_raw->viewport_mode != VIEWPORT_MODE_PATH_TRACE) {

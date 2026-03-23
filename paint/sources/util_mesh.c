@@ -577,7 +577,9 @@ void util_mesh_decimate(f32 strength) {
 	mesh_data_t *new_data = mesh_data_create(raw);
 	o->data               = new_data;
 	util_mesh_calc_normals(true);
+#ifdef WITH_PLUGINS
 	plugin_uv_unwrap_button();
+#endif
 }
 
 i32 _util_mesh_unique_data_count() {

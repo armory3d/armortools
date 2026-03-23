@@ -107,7 +107,7 @@ i32             pipes_cursor_tint;
 i32             pipes_cursor_gbufferd;
 i32             pipes_offset;
 char           *_import_blend_material_path;
-any_map_t      *import_texture_importers; // JSValue -> (s: string)=>gpu_texture_t
+any_map_t      *import_texture_importers;
 
 #ifdef IRON_WINDOWS
 char *ui_files_default_path = "C:\\Users";
@@ -211,7 +211,7 @@ ui_handle_t            *tab_scripts_hscript;
 ui_text_coloring_t     *tab_scripts_text_coloring    = NULL;
 bool                    import_mesh_clear_layers     = true;
 any_array_t            *import_mesh_meshes_to_unwrap = NULL;
-any_map_t              *import_mesh_importers; // JSValue -> (s: string)=>raw_mesh_t
+any_map_t              *import_mesh_importers;
 i32                     ui_menubar_default_w = 406;
 ui_handle_t            *ui_menubar_hwnd;
 ui_handle_t            *ui_menubar_menu_handle;
@@ -343,7 +343,7 @@ char                     *parser_material_tex_coord = "tex_coord";
 f32                       parser_material_eps       = 0.000001;
 any_map_t                *parser_material_node_values;
 any_map_t                *parser_material_node_vectors;
-any_map_t                *parser_material_custom_nodes; // JSValue -> (n: ui_node_t, s: string)=>string
+any_map_t                *parser_material_custom_nodes;
 bool                      parser_material_parse_surface           = true;
 bool                      parser_material_parse_opacity           = true;
 bool                      parser_material_parse_height            = false;
@@ -394,7 +394,7 @@ char                     *tab_browser_last_path = "";
 char                     *_tab_browser_draw_file;
 char                     *_tab_browser_draw_b;
 bool                      tab_browser_refresh = false;
-any_map_t                *util_mesh_unwrappers; // JSValue * -> ((a: raw_mesh_t)=>void)
+any_map_t                *util_mesh_unwrappers;
 i16_array_t              *util_mesh_va0;
 i32_array_t              *util_mesh_quantized;
 i32                       ui_header_default_h = 30;

@@ -84,13 +84,11 @@ void tab_meshes_draw_edit() {
 		ui_menu_sub_end();
 	}
 
+#ifdef WITH_PLUGINS
 	if (ui_menu_button(tr("UV Unwrap"), "", ICON_NONE)) {
-		char *f = "uv_unwrap.js";
-		if (string_array_index_of(config_raw->plugins, f) == -1) {
-			config_enable_plugin(f);
-		}
 		plugin_uv_unwrap_button();
 	}
+#endif
 
 	if (config_raw->experimental && ui_menu_button(tr("Decimate"), "", ICON_NONE)) {
 		util_mesh_decimate(0.5);

@@ -392,8 +392,9 @@ char *parser_material_parse_vector(ui_node_t *node, ui_node_socket_t *socket) {
 		return parser_material_parse_group_input(node, socket);
 	}
 	else if (any_map_get(parser_material_custom_nodes, node->type) != NULL) {
-		void *cb = any_map_get(parser_material_custom_nodes, node->type); // JSValue -> (n: ui_node_t, s: string)=>string
-		return js_call_ptr_str(cb, node, socket->name);
+		void *cb = any_map_get(parser_material_custom_nodes, node->type);
+		minic_val_t args[2] = {minic_val_ptr(node), minic_val_ptr(socket->name)};
+		return minic_call_fn(cb, args, 2).p;
 	}
 	return "float3(0.0, 0.0, 0.0)";
 }
@@ -453,7 +454,8 @@ char *parser_material_parse_value(ui_node_t *node, ui_node_socket_t *socket) {
 	}
 	else if (any_map_get(parser_material_custom_nodes, node->type) != NULL) {
 		void *cb = any_map_get(parser_material_custom_nodes, node->type);
-		return js_call_ptr_str(cb, node, socket->name);
+		minic_val_t args[2] = {minic_val_ptr(node), minic_val_ptr(socket->name)};
+		return minic_call_fn(cb, args, 2).p;
 	}
 	return "0.0";
 }

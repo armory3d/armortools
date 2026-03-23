@@ -482,13 +482,17 @@ void config_load_theme(char *theme, bool tag_redraw) {
 }
 
 void config_enable_plugin(char *f) {
-	any_array_push(config_raw->plugins, f);
-	plugin_start(f);
+	if (string_array_index_of(config_raw->plugins, f) == -1) {
+		any_array_push(config_raw->plugins, f);
+		plugin_start(f);
+	}
 }
 
 void config_disable_plugin(char *f) {
-	string_array_remove(config_raw->plugins, f);
-	plugin_stop(f);
+	if (string_array_index_of(config_raw->plugins, f) > -1) {
+		string_array_remove(config_raw->plugins, f);
+		plugin_stop(f);
+	}
 }
 
 #ifdef IRON_IOS

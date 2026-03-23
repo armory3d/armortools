@@ -6,7 +6,6 @@
 #include "iron_armpack.h"
 #include "iron_array.h"
 #include "iron_draw.h"
-#include "iron_eval.h"
 #include "iron_file.h"
 #include "iron_gc.h"
 #include "iron_gpu.h"
@@ -20,6 +19,7 @@
 #include "iron_system.h"
 #include "iron_thread.h"
 #include "iron_ui.h"
+#include "libs/minic.h"
 #include <ctype.h>
 #include <math.h>
 #include <stdlib.h>
@@ -821,6 +821,9 @@ gpu_texture_t *gpu_create_texture_from_bytes(buffer_t *data, i32 width, i32 heig
 
 gpu_texture_t *gpu_create_texture_from_encoded_bytes(buffer_t *data, char *format) {
 	if (data == NULL || data->length == 0) {
+		return NULL;
+	}
+	if (ends_with(format, "txt")) { // plugin
 		return NULL;
 	}
 	gpu_texture_t *texture = (gpu_texture_t *)malloc(sizeof(gpu_texture_t));

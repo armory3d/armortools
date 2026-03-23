@@ -30,7 +30,6 @@ bool  path_is_project(char *path);
 bool  path_is_plugin(char *path);
 bool  path_is_json(char *path);
 bool  path_is_text(char *path);
-bool  path_is_gimp_color_palette(char *path);
 bool  path_is_ext_format(char *path);
 bool  path_is_known(char *path);
 bool  path_is_base_color_tex(char *p);

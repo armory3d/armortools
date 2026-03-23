@@ -24,7 +24,7 @@ void tab_plugins_draw(ui_handle_t *htab) {
 		for (i32 i = 0; i < keys->length; ++i) {
 			plugin_t *p = any_map_get(plugin_map, keys->buffer[i]);
 			if (p->on_ui != NULL) {
-				js_call(p->on_ui);
+				minic_ctx_call_fn(p->ctx, p->on_ui, NULL, 0);
 			}
 		}
 
@@ -40,14 +40,15 @@ void tab_plugins_draw(ui_handle_t *htab) {
 	}
 }
 
+#ifdef WITH_PLUGINS
+void proc_uv_unwrap(void *mesh);
 void plugin_uv_unwrap_button() {
-	void *cb = any_map_get(util_mesh_unwrappers, "uv_unwrap.js"); // JSValue * -> (a: raw_mesh_t)=>void
 	for (i32 i = 0; i < project_paint_objects->length; ++i) {
 		mesh_data_t *md = project_paint_objects->buffer[i]->data;
 		raw_mesh_t  *mesh =
 		    GC_ALLOC_INIT(raw_mesh_t,
 		                  {.posa = md->vertex_arrays->buffer[0]->values, .nora = md->vertex_arrays->buffer[1]->values, .texa = NULL, .inda = md->index_array});
-		js_call_ptr(cb, mesh);
+		proc_uv_unwrap(mesh);
 		md->vertex_arrays->buffer[0]->values = mesh->posa;
 		md->vertex_arrays->buffer[1]->values = mesh->nora;
 		md->vertex_arrays->buffer[2]->values = mesh->texa;
@@ -56,3 +57,4 @@ void plugin_uv_unwrap_button() {
 	}
 	util_mesh_merge(NULL);
 }
+#endif

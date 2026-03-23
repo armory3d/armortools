@@ -942,7 +942,7 @@ void ui_base_update(void *_) {
 	for (i32 i = 0; i < keys->length; ++i) {
 		plugin_t *p = any_map_get(plugin_map, keys->buffer[i]);
 		if (p->on_update != NULL) {
-			js_call(p->on_update);
+			minic_ctx_call_fn(p->ctx, p->on_update, NULL, 0);
 		}
 	}
 

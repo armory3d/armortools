@@ -2,6 +2,10 @@
 
 #include "global.h"
 
+#ifdef WITH_PLUGINS
+void plugins_init();
+#endif
+
 void _kickstart() {
 	_render_path_cached_shader_contexts = any_map_create();
 	gc_root(_render_path_cached_shader_contexts);
@@ -218,6 +222,7 @@ void _kickstart() {
 
 	util_mesh_unwrappers = any_map_create();
 	gc_root(util_mesh_unwrappers);
+
 	ui_header_h = ui_header_default_h;
 
 	ui_header_handle = ui_handle_create();
@@ -5023,6 +5028,11 @@ void _kickstart() {
 		render_path_commands = render_path_deferred_commands;
 		gc_root(render_path_commands);
 	}
+
+	#ifdef WITH_PLUGINS
+	plugins_init();
+	#endif
+
 	base_init();
 	iron_start();
 }

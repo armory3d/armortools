@@ -252,7 +252,7 @@ bool path_is_project(char *path) {
 
 bool path_is_plugin(char *path) {
 	char *p = to_lower_case(path);
-	return ends_with(p, ".js");
+	return ends_with(p, ".c");
 }
 
 bool path_is_json(char *path) {
@@ -265,19 +265,14 @@ bool path_is_text(char *path) {
 	return ends_with(p, ".txt");
 }
 
-bool path_is_gimp_color_palette(char *path) {
-	char *p = to_lower_case(path);
-	return ends_with(p, ".gpl");
-}
-
 bool path_is_ext_format(char *path) {
 	char *p = to_lower_case(path);
-	return ends_with(p, ".fbx") || ends_with(p, ".gltf") || ends_with(p, ".glb") || ends_with(p, ".stl") || ends_with(p, ".svg");
+	return ends_with(p, ".stl") || ends_with(p, ".svg");
 }
 
 bool path_is_known(char *path) {
 	return path_is_mesh(path) || path_is_texture(path) || path_is_font(path) || path_is_project(path) || path_is_plugin(path) || path_is_text(path) ||
-	       path_is_gimp_color_palette(path) || path_is_ext_format(path);
+	       path_is_ext_format(path);
 }
 
 bool path_check_ext(char *p, string_array_t *exts) {

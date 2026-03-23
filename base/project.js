@@ -204,10 +204,10 @@ if (flags.with_audio) {
 
 if (flags.with_eval) {
 	project.add_define("WITH_EVAL");
-	project.add_cfiles("sources/libs/quickjs-amalgam.c");
-	project.add_define("QJS_BUILD_LIBC");
-	// project.add_cfiles("tools/amake/alang.c");
-	// project.add_cfiles("tools/amake/alang_eval.c");
+	project.add_cfiles("sources/libs/minic.c");
+	project.add_cfiles("sources/libs/minic_ext.c");
+	project.add_cfiles("sources/libs/minic_api.c");
+	project.add_cfiles("sources/libs/minic_tests.c");
 }
 
 if (flags.with_gamepad) {

@@ -829,9 +829,9 @@ void box_preferences_model_panel(neural_node_model_t *m) {
 }
 
 void box_preferences_plugins_tab_plugin_menu_export(char *dest) {
-	if (!ends_with(ui_files_filename, ".js")) {
+	if (!ends_with(ui_files_filename, ".c")) {
 		gc_unroot(ui_files_filename);
-		ui_files_filename = string("%s.js", ui_files_filename);
+		ui_files_filename = string("%s.c", ui_files_filename);
 		gc_root(ui_files_filename);
 	}
 	char *path = string("%s%splugins%s%s", path_data(), PATH_SEP, PATH_SEP, _box_preferences_f);
@@ -850,7 +850,7 @@ void box_preferences_plugins_tab_plugin_menu() {
 		console_info(tr("Script opened"));
 	}
 	if (ui_menu_button(tr("Export"), "", ICON_EXPORT)) {
-		ui_files_show("js", true, false, &box_preferences_plugins_tab_plugin_menu_export);
+		ui_files_show("c", true, false, &box_preferences_plugins_tab_plugin_menu_export);
 	}
 	if (ui_menu_button(tr("Delete"), "", ICON_DELETE)) {
 		if (string_array_index_of(config_raw->plugins, _box_preferences_f) >= 0) {
@@ -884,8 +884,8 @@ plugin_notify_on_ui(plugin, function() {\
 	}\
 });\
 ";
-		if (!ends_with(plugin_name, ".js")) {
-			plugin_name = string("%s.js", plugin_name);
+		if (!ends_with(plugin_name, ".c")) {
+			plugin_name = string("%s.c", plugin_name);
 		}
 		char *path = string("%s%splugins%s%s", path_data(), PATH_SEP, PATH_SEP, plugin_name);
 		iron_file_save_bytes(path, sys_string_to_buffer(template), 0);
@@ -910,7 +910,7 @@ void box_preferences_plugins_tab() {
 		ui_box_show_custom(&box_preferences_plugins_tab_new_box, 400, 200, NULL, true, tr("New Plugin"));
 	}
 	if (ui_icon_button(tr("Import"), ICON_IMPORT, UI_ALIGN_CENTER)) {
-		ui_files_show("js,zip", false, false, &box_preferences_plugins_tab_import);
+		ui_files_show("c,zip", false, false, &box_preferences_plugins_tab_import);
 	}
 	ui_end_sticky();
 
@@ -927,13 +927,13 @@ void box_preferences_plugins_tab() {
 	}
 	for (i32 i = 0; i < box_preferences_files_plugin->length; ++i) {
 		char *f     = box_preferences_files_plugin->buffer[i];
-		bool  is_js = ends_with(f, ".js");
-		if (!is_js) {
+		bool  is_c = ends_with(f, ".c");
+		if (!is_c) {
 			continue;
 		}
 		bool enabled = string_array_index_of(config_raw->plugins, f) >= 0;
 		h->b         = enabled;
-		char *tag    = is_js ? string_split(f, ".")->buffer[0] : f;
+		char *tag    = is_c ? string_split(f, ".")->buffer[0] : f;
 		ui_check(h, tag, "");
 		if (h->changed && h->b != enabled) {
 			h->b ? config_enable_plugin(f) : config_disable_plugin(f);

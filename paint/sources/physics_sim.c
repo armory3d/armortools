@@ -24,7 +24,7 @@ void sim_update() {
 			char     *s    = any_map_get(sim_object_script_map, o);
 			char     *addr = i64_to_string((i64)(o->transform));
 			s              = string("{let transform=%s;%s}", addr, s);
-			js_eval(s);
+			// minic_eval(s);
 		}
 
 		physics_world_t *world = physics_world_active;

@@ -34,7 +34,7 @@ bool  ui_is_paste                                              = false;
 void (*ui_on_border_hover)(ui_handle_t *, int)                 = NULL; // Mouse over window border, use for resizing
 void (*ui_on_tab_drop)(ui_handle_t *, int, ui_handle_t *, int) = NULL; // Tab reorder via drag and drop
 #ifdef WITH_EVAL
-float js_eval(char *str);
+#include "libs/minic.h"
 #endif
 
 f32_array_t *_ui_row2 = NULL;
@@ -2280,7 +2280,9 @@ float ui_slider(ui_handle_t *handle, char *text, float from, float to, bool fill
 	if (current->submit_text_handle == handle) {
 		ui_submit_text_edit();
 #ifdef WITH_EVAL
-		handle->f = js_eval(handle->text);
+		minic_ctx_t *_ctx = minic_eval(string("float main() { return %s; }", handle->text));
+		handle->f         = minic_ctx_result(_ctx);
+		minic_ctx_free(_ctx);
 #else
 		handle->f = atof(handle->text);
 #endif

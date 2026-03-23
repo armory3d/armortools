@@ -756,7 +756,6 @@ void                         console_progress(char *s);
 void                         console_info(char *s);
 void                         console_error(char *s);
 void                         console_log(char *s);
-void                         console_trace(char *s);
 void                         export_mesh_run(char *path, mesh_object_t_array_t *paint_objects, bool apply_disp, bool merge_vertices);
 void                         export_player_run(char *path);
 void                         camera_init();

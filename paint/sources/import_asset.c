@@ -69,9 +69,6 @@ void import_asset_run(char *path, f32 drop_x, f32 drop_y, bool show_box, bool hd
 	else if (path_is_plugin(path)) {
 		import_plugin_run(path);
 	}
-	else if (path_is_gimp_color_palette(path)) {
-		// import_gpl_run(path, false);
-	}
 	else if (path_is_font(path)) {
 		import_font_run(path);
 	}

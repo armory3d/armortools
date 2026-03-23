@@ -83,7 +83,7 @@ void tab_console_draw(ui_handle_t *htab) {
 		ui->font_size = _font_size;
 
 		if (ui_icon_button(tr("Run"), ICON_PLAY, UI_ALIGN_CENTER)) {
-			js_eval(h_input->text);
+			minic_ctx_free(minic_eval(string("float main() { %s }", h_input->text)));
 			h_input->text = "";
 		}
 	}

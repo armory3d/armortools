@@ -356,8 +356,10 @@ char *ui_files_file_browser(ui_handle_t *handle, bool drag_files, char *search, 
 					any_map_set(ui_files_icon_map, shandle, empty);
 					gpu_texture_t *image = data_get_image(shandle);
 
-					ui_files_make_icon_t *args = GC_ALLOC_INIT(ui_files_make_icon_t, {.image = image, .shandle = shandle, .w = w});
-					sys_notify_on_next_frame(ui_files_make_icon, args);
+					if (image != NULL) {
+						ui_files_make_icon_t *args = GC_ALLOC_INIT(ui_files_make_icon_t, {.image = image, .shandle = shandle, .w = w});
+						sys_notify_on_next_frame(ui_files_make_icon, args);
+					}
 				}
 				if (icon != NULL) {
 					if (i == ui_files_selected) {

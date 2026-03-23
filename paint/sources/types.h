@@ -2,6 +2,7 @@
 #pragma once
 
 #include "enums.h"
+#include "minic.h"
 
 typedef struct mat4_box {
 	mat4_t v;
@@ -227,7 +228,7 @@ typedef struct context {
 	split_type_t                split_by;
 	f32                         select_time;
 	viewport_mode_t             viewport_mode;
-	void                       *viewport_shader; // JSValue * -> (ns: node_shader_t)=>void;
+	void                       *viewport_shader;
 	bool                        hscale_was_changed;
 	mesh_format_t               export_mesh_format;
 	i32                         export_mesh_index;
@@ -607,12 +608,13 @@ typedef struct shader_out {
 } shader_out_t;
 
 typedef struct plugin {
-	void *on_ui;     // JSValue *
-	void *on_draw;   // JSValue *
-	void *on_update; // JSValue *
-	void *on_delete; // JSValue *
-	char *version;
-	char *name;
+	void          *on_ui;
+	void          *on_draw;
+	void          *on_update;
+	void          *on_delete;
+	char          *version;
+	char          *name;
+	minic_ctx_t   *ctx;
 } plugin_t;
 
 typedef struct rect {

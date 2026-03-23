@@ -8,8 +8,8 @@ void tab_scripts_draw_export(char *path) {
 		f = string_copy(tr("untitled"));
 	}
 	path = string("%s%s%s", path, PATH_SEP, f);
-	if (!ends_with(path, ".js")) {
-		path = string("%s.js", path);
+	if (!ends_with(path, ".c")) {
+		path = string("%s.c", path);
 	}
 	iron_file_save_bytes(path, sys_string_to_buffer(str), 0);
 }
@@ -25,10 +25,10 @@ void tab_scripts_draw_edit() {
 		tab_scripts_hscript->text = "";
 	}
 	if (ui_menu_button(tr("Import"), "", ICON_IMPORT)) {
-		ui_files_show("js", false, false, &tab_scripts_draw_import);
+		ui_files_show("c", false, false, &tab_scripts_draw_import);
 	}
 	if (ui_menu_button(tr("Export"), "", ICON_EXPORT)) {
-		ui_files_show("js", true, false, &tab_scripts_draw_export);
+		ui_files_show("c", true, false, &tab_scripts_draw_export);
 	}
 }
 
@@ -46,7 +46,7 @@ void tab_scripts_draw(ui_handle_t *htab) {
 		ui_row(row);
 
 		if (ui_icon_button(tr("Run"), ICON_PLAY, UI_ALIGN_CENTER)) {
-			js_eval(tab_scripts_hscript->text);
+			minic_ctx_free(minic_eval(tab_scripts_hscript->text));
 		}
 
 		if (ui_icon_button(tr("Edit"), ICON_EDIT, UI_ALIGN_CENTER)) {
@@ -55,11 +55,17 @@ void tab_scripts_draw(ui_handle_t *htab) {
 
 		string_t_array_t *ar = any_array_create_from_raw(
 		    (void *[]){
-		        "script.js",
+		        "script.c",
 		    },
 		    1);
 		ui_handle_t *file_handle = ui_handle(__ID__);
 		ui_combo(file_handle, ar, tr("File"), false, UI_ALIGN_LEFT, true);
+
+#ifdef is_debug
+		if (ui_icon_button("Run Tests", ICON_PLAY, UI_ALIGN_CENTER)) {
+			minic_tests();
+		}
+#endif
 
 		ui_end_sticky();
 

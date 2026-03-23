@@ -13,15 +13,20 @@ void plugin_start(char *plugin) {
 	gc_unroot(_plugin_name);
 	_plugin_name = string_copy(plugin);
 	gc_root(_plugin_name);
-	js_eval(string("(1, eval)(`%s`)", sys_buffer_to_string(blob)));
+	minic_ctx_t *ctx = minic_eval(sys_buffer_to_string(blob));
 	data_delete_blob(string("plugins/%s", plugin));
+	// Store context on the plugin so callbacks can use it and it can be freed on stop
+	plugin_t *p = any_map_get(plugin_map, plugin);
+	p->ctx = ctx;
 }
 
 void plugin_stop(char *plugin) {
 	plugin_t *p = any_map_get(plugin_map, plugin);
 	if (p->on_delete != NULL) {
-		js_call(p->on_delete);
+		minic_ctx_call_fn(p->ctx, p->on_delete, NULL, 0);
 	}
+	minic_ctx_free(p->ctx);
+	p->ctx = NULL;
 	map_delete(plugin_map, plugin);
 }
 

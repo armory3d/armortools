@@ -23,9 +23,10 @@ void import_mesh_run(char *path, bool _clear_layers, bool replace_existing) {
 		import_blend_mesh_run(path, replace_existing);
 	}
 	else {
-		char       *ext      = substring(path, string_last_index_of(path, ".") + 1, string_length(path));
-		void       *importer = any_map_get(import_mesh_importers, ext); // JSValue -> (s: string)=>raw_mesh_t
-		raw_mesh_t *mesh     = js_pcall_str(importer, path);
+		char *ext                           = substring(path, string_last_index_of(path, ".") + 1, string_length(path));
+		raw_mesh_t *(*importer)(char *path) = any_map_get(import_mesh_importers, ext);
+
+		raw_mesh_t *mesh = importer(path);
 		if (string_equals(mesh->name, "")) {
 			mesh->name = string_copy(path_base_name(path));
 		}
@@ -34,7 +35,7 @@ void import_mesh_run(char *path, bool _clear_layers, bool replace_existing) {
 
 		bool has_next = mesh->has_next;
 		while (has_next) {
-			raw_mesh_t *mesh = js_pcall_str(importer, path);
+			raw_mesh_t *mesh = importer(path);
 			if (string_equals(mesh->name, "")) {
 				mesh->name = string_copy(path_base_name(path));
 			}

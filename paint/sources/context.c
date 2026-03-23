@@ -492,7 +492,7 @@ void context_update_envmap() {
 	}
 }
 
-void context_set_viewport_shader(void *viewport_shader) { // JSValue * -> (ns: node_shader_t)=>void
+void context_set_viewport_shader(void *viewport_shader) {
 	context_raw->viewport_shader = viewport_shader;
 	context_set_render_path();
 }

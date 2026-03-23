@@ -377,7 +377,6 @@ float UI_SCROLL_W();
 float UI_TEXT_OFFSET();
 float UI_TAB_W();
 float UI_HEADER_DRAG_H();
-float UI_FLASH_SPEED();
 float UI_TOOLTIP_DELAY();
 
 extern bool  ui_touch_control;

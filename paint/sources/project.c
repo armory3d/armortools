@@ -419,16 +419,6 @@ void project_import_mesh(bool replace_existing, void (*done)(void)) {
 	_project_import_mesh_done = done;
 	gc_root(_project_import_mesh_done);
 	char *formats = string_array_join(path_mesh_formats(), ",");
-	if (string_index_of(formats, "fbx") == -1) {
-		// Show .fbx in the file picker even when fbx plugin is not yet enabled
-		formats = string("%s,fbx", formats);
-	}
-	if (string_index_of(formats, "gltf") == -1) {
-		formats = string("%s,gltf", formats);
-	}
-	if (string_index_of(formats, "glb") == -1) {
-		formats = string("%s,glb", formats);
-	}
 	ui_files_show(formats, false, false, &project_import_mesh_on_file_picked);
 }
 
@@ -517,12 +507,15 @@ string_t_array_t *project_get_unwrap_plugins() {
 	if (box_preferences_files_plugin == NULL) {
 		box_preferences_fetch_plugins();
 	}
+#ifdef WITH_PLUGINS
 	for (i32 i = 0; i < box_preferences_files_plugin->length; ++i) {
 		char *f = box_preferences_files_plugin->buffer[i];
-		if (string_index_of(f, "uv_unwrap") >= 0 && ends_with(f, ".js")) {
+		if (string_index_of(f, "uv_unwrap") >= 0 && ends_with(f, ".c")) {
 			any_array_push(unwrap_plugins, f);
 		}
 	}
+	any_array_push(unwrap_plugins, "uv_unwrap");
+#endif
 	any_array_push(unwrap_plugins, "equirect");
 	return unwrap_plugins;
 }
@@ -572,13 +565,9 @@ void project_unwrap_mesh(raw_mesh_t *mesh, void (*done)(raw_mesh_t *)) {
 		util_mesh_equirect_unwrap(mesh);
 	}
 	else {
-		char *f = unwrap_plugins->buffer[_project_unwrap_by];
-		if (string_array_index_of(config_raw->plugins, f) == -1) {
-			config_enable_plugin(f);
-			console_info(string("%s %s", f, tr("plugin enabled")));
-		}
-		void *cb = any_map_get(util_mesh_unwrappers, f); // JSValue * -> (a: raw_mesh_t)=>void
-		js_call_ptr(cb, mesh);
+		char *f  = unwrap_plugins->buffer[_project_unwrap_by];
+		void (*cb)(void *mesh) = any_map_get(util_mesh_unwrappers, f);
+		cb(mesh);
 	}
 	done(mesh);
 }
@@ -598,17 +587,12 @@ void project_import_asset(char *filters, bool hdr_as_envmap) {
 }
 
 void project_import_swatches_on_file_picked(char *path) {
-	if (path_is_gimp_color_palette(path)) {
-		// import_gpl_run(path, _project_import_swatches_replace_existing);
-	}
-	else {
-		import_arm_run_swatches(path, _project_import_swatches_replace_existing);
-	}
+	import_arm_run_swatches(path, _project_import_swatches_replace_existing);
 }
 
 void project_import_swatches(bool replace_existing) {
 	_project_import_swatches_replace_existing = replace_existing;
-	ui_files_show("arm,gpl", false, false, &project_import_swatches_on_file_picked);
+	ui_files_show("arm", false, false, &project_import_swatches_on_file_picked);
 }
 
 void project_reimport_textures() {
@@ -728,16 +712,11 @@ void project_export_swatches_on_file_picked(char *path) {
 	if (string_equals(f, "")) {
 		f = string_copy(tr("untitled"));
 	}
-	if (path_is_gimp_color_palette(f)) {
-		// export_gpl_run(path + PATH_SEP + f, substring(f, 0, string_last_index_of(f, ".")), project_raw.swatches);
-	}
-	else {
-		export_arm_run_swatches(string("%s%s%s", path, PATH_SEP, f));
-	}
+	export_arm_run_swatches(string("%s%s%s", path, PATH_SEP, f));
 }
 
 void project_export_swatches() {
-	ui_files_show("arm,gpl", true, false, &project_export_swatches_on_file_picked);
+	ui_files_show("arm", true, false, &project_export_swatches_on_file_picked);
 }
 
 swatch_color_t *project_make_swatch(i32 base) {
