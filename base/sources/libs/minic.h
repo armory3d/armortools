@@ -43,7 +43,9 @@ typedef struct {
 typedef struct {
 	char         name[64];
 	char         fields[MINIC_MAX_STRUCT_FIELDS][64];
+	char         field_struct_names[MINIC_MAX_STRUCT_FIELDS][64]; // struct type name for PTR fields, or ""
 	int          field_count;
+	int          size; // sizeof the native C struct, 0 if unknown
 	bool         has_native_layout;
 	int          field_offsets[MINIC_MAX_STRUCT_FIELDS]; // byte offset of each field in the native C struct
 	minic_type_t field_native_types[MINIC_MAX_STRUCT_FIELDS];
@@ -82,6 +84,9 @@ void minic_register_struct_native(const char *name, const char **fields, const i
 
 void        *minic_alloc(int size);
 minic_ctx_t *minic_eval(const char *src);
+minic_ctx_t *minic_eval_named(const char *src, const char *filename);
+void         minic_struct_field_set_type(const char *struct_name, const char *field_name, const char *field_struct_name);
+void         minic_struct_set_size(const char *struct_name, int size);
 void         minic_ctx_free(minic_ctx_t *ctx);
 float        minic_ctx_result(minic_ctx_t *ctx);
 minic_val_t  minic_ctx_call_fn(minic_ctx_t *ctx, void *fn_ptr, minic_val_t *args, int argc);

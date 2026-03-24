@@ -7,11 +7,7 @@ char *node_type = "HELLO_WORLD";
 
 char *custom_node(ui_node_t *node, char *socket_name) {
 	void *kong = plugin_material_kong_get();
-	any_array_t *ar = node->inputs;
-	ui_node_socket_t *soc = ar->buffer[0];
-	// ui_node_socket_t *soc = node->inputs->buffer[0];
-	char *scale = parser_material_parse_value_input(soc, false);
-	// char *scale = parser_material_parse_value_input(node->inputs->buffer[0], false);
+	char *scale = parser_material_parse_value_input(node->inputs->buffer[0], false);
 	char *my_out = "my_out";
 
 	node_shader_write_frag(kong,
@@ -37,8 +33,7 @@ void main() {
 
 	// Create new node category
 	any_array_t *node_list = any_array_create(0);
-	// ui_node_t *n = gc_alloc(sizeof(ui_node_t));
-	ui_node_t *n = gc_alloc(72);
+	ui_node_t *n = gc_alloc(sizeof(ui_node_t));
 	any_array_push(node_list, n);
 
 	n->id = 0;
@@ -49,8 +44,7 @@ void main() {
 	n->color = 0xffb34f5a;
 
 	n->inputs = any_array_create(0);
-	// ui_node_socket_t *s = gc_alloc(sizeof(ui_node_socket_t));
-	ui_node_socket_t *s = gc_alloc(56);
+	ui_node_socket_t *s = gc_alloc(sizeof(ui_node_socket_t));
 	any_array_push(n->inputs, s);
 	s->id = 0;
 	s->node_id = 0;
@@ -64,8 +58,7 @@ void main() {
 	s->display = 0;
 
 	n->outputs = any_array_create(0);
-	// s = gc_alloc(sizeof(ui_node_socket_t));
-	s = gc_alloc(56);
+	s = gc_alloc(sizeof(ui_node_socket_t));
 	any_array_push(n->outputs, s);
 	s->id = 0;
 	s->node_id = 0;
@@ -78,8 +71,7 @@ void main() {
 	s->precision = 100.0;
 	s->display = 0;
 
-	// s = gc_alloc(sizeof(ui_node_socket_t));
-	s = gc_alloc(56);
+	s = gc_alloc(sizeof(ui_node_socket_t));
 	any_array_push(n->outputs, s);
 	s->id = 1;
 	s->node_id = 0;

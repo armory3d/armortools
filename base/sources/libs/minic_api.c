@@ -1,6 +1,7 @@
 #include "iron_array.h"
 #include "iron_string.h"
 #include "minic.h"
+#include <math.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -14,7 +15,6 @@ static const char *minic_read_str(minic_val_t v) {
 	return "";
 }
 
-// Returns number of chars written (excl. NUL). buf=NULL does a measure-only pass.
 static int minic_vformat(const char *fmt, minic_val_t *args, int argc, char *buf, int bufsize) {
 	int pos = 0;
 	int arg = 0;
@@ -138,9 +138,7 @@ static minic_val_t minic_string_native(minic_val_t *args, int argc) {
 
 #define R(name, sig) minic_register(#name, sig, (minic_ext_fn_raw_t)name)
 
-// ─── iron_math.h struct layout helpers ───────────────────────────────────────
-// Minic struct vars use one minic_val_t slot per field; native C structs use
-// packed floats.  These helpers convert between the two layouts.
+// iron_math.h struct layout helpers
 
 static vec2_t minic_get_vec2(void *p) {
 	minic_val_t *f = (minic_val_t *)p;
@@ -779,6 +777,16 @@ void minic_register_builtins() {
 	minic_register_struct_native("any_array_t", array_fields, array_offsets, array_types, array_ptr_derefs, 3);
 	minic_register_struct_native("string_array_t", array_fields, array_offsets, array_types, array_ptr_derefs, 3);
 	minic_register_struct_native("buffer_t", array_fields, array_offsets, array_types, array_int_derefs, 3);
+	minic_struct_set_size("i8_array_t",     (int)sizeof(i8_array_t));
+	minic_struct_set_size("u8_array_t",     (int)sizeof(u8_array_t));
+	minic_struct_set_size("i16_array_t",    (int)sizeof(i16_array_t));
+	minic_struct_set_size("u16_array_t",    (int)sizeof(u16_array_t));
+	minic_struct_set_size("i32_array_t",    (int)sizeof(i32_array_t));
+	minic_struct_set_size("u32_array_t",    (int)sizeof(u32_array_t));
+	minic_struct_set_size("f32_array_t",    (int)sizeof(f32_array_t));
+	minic_struct_set_size("any_array_t",    (int)sizeof(any_array_t));
+	minic_struct_set_size("string_array_t", (int)sizeof(string_array_t));
+	minic_struct_set_size("buffer_t",       (int)sizeof(buffer_t));
 
 	// iron_math
 	static const char *vec2_fields[] = {"x", "y"};
@@ -838,6 +846,8 @@ void minic_register_builtins() {
 	static const minic_type_t ui_handle_deref_types[] = {MINIC_T_INT,  MINIC_T_FLOAT, MINIC_T_INT, MINIC_T_INT, MINIC_T_FLOAT, MINIC_T_INT, MINIC_T_INT,
 	                                                     MINIC_T_CHAR, MINIC_T_INT,   MINIC_T_INT, MINIC_T_INT, MINIC_T_INT,   MINIC_T_PTR};
 	minic_register_struct_native("ui_handle_t", ui_handle_fields, ui_handle_offsets, ui_handle_types, ui_handle_deref_types, 13);
+	minic_struct_set_size("ui_handle_t", (int)sizeof(ui_handle_t));
+	minic_struct_field_set_type("ui_handle_t", "children", "any_array_t");
 
 	static const char *ui_node_socket_fields[]  = {"id", "node_id", "name", "type", "color", "default_value", "min", "max", "precision", "display"};
 	static const int   ui_node_socket_offsets[] = {
@@ -851,6 +861,8 @@ void minic_register_builtins() {
 	static const minic_type_t ui_node_socket_deref_types[] = {MINIC_T_INT, MINIC_T_INT,   MINIC_T_CHAR,  MINIC_T_CHAR,  MINIC_T_INT,
 	                                                          MINIC_T_PTR, MINIC_T_FLOAT, MINIC_T_FLOAT, MINIC_T_FLOAT, MINIC_T_INT};
 	minic_register_struct_native("ui_node_socket_t", ui_node_socket_fields, ui_node_socket_offsets, ui_node_socket_types, ui_node_socket_deref_types, 10);
+	minic_struct_set_size("ui_node_socket_t", (int)sizeof(ui_node_socket_t));
+	minic_struct_field_set_type("ui_node_socket_t", "default_value", "f32_array_t");
 
 	static const char *ui_node_button_fields[]  = {"name", "type", "output", "default_value", "data", "min", "max", "precision", "height"};
 	static const int   ui_node_button_offsets[] = {
@@ -863,6 +875,9 @@ void minic_register_builtins() {
 	static const minic_type_t ui_node_button_deref_types[] = {MINIC_T_CHAR,  MINIC_T_CHAR,  MINIC_T_INT,   MINIC_T_PTR,  MINIC_T_PTR,
 	                                                          MINIC_T_FLOAT, MINIC_T_FLOAT, MINIC_T_FLOAT, MINIC_T_FLOAT};
 	minic_register_struct_native("ui_node_button_t", ui_node_button_fields, ui_node_button_offsets, ui_node_button_types, ui_node_button_deref_types, 9);
+	minic_struct_set_size("ui_node_button_t", (int)sizeof(ui_node_button_t));
+	minic_struct_field_set_type("ui_node_button_t", "default_value", "f32_array_t");
+	minic_struct_field_set_type("ui_node_button_t", "data",          "u8_array_t");
 
 	static const char *ui_node_link_fields[]  = {"id", "from_id", "from_socket", "to_id", "to_socket"};
 	static const int   ui_node_link_offsets[] = {
@@ -872,6 +887,7 @@ void minic_register_builtins() {
 	static const minic_type_t ui_node_link_types[]       = {MINIC_T_INT, MINIC_T_INT, MINIC_T_INT, MINIC_T_INT, MINIC_T_INT};
 	static const minic_type_t ui_node_link_deref_types[] = {MINIC_T_INT, MINIC_T_INT, MINIC_T_INT, MINIC_T_INT, MINIC_T_INT};
 	minic_register_struct_native("ui_node_link_t", ui_node_link_fields, ui_node_link_offsets, ui_node_link_types, ui_node_link_deref_types, 5);
+	minic_struct_set_size("ui_node_link_t", (int)sizeof(ui_node_link_t));
 
 	static const char *ui_node_fields[]  = {"id", "name", "type", "x", "y", "color", "inputs", "outputs", "buttons", "width", "flags"};
 	static const int   ui_node_offsets[] = {
@@ -884,6 +900,10 @@ void minic_register_builtins() {
 	static const minic_type_t ui_node_deref_types[] = {MINIC_T_INT, MINIC_T_CHAR, MINIC_T_CHAR, MINIC_T_FLOAT, MINIC_T_FLOAT, MINIC_T_INT,
 	                                                   MINIC_T_PTR, MINIC_T_PTR,  MINIC_T_PTR,  MINIC_T_FLOAT, MINIC_T_INT};
 	minic_register_struct_native("ui_node_t", ui_node_fields, ui_node_offsets, ui_node_types, ui_node_deref_types, 11);
+	minic_struct_set_size("ui_node_t", (int)sizeof(ui_node_t));
+	minic_struct_field_set_type("ui_node_t", "inputs",  "any_array_t");
+	minic_struct_field_set_type("ui_node_t", "outputs", "any_array_t");
+	minic_struct_field_set_type("ui_node_t", "buttons", "any_array_t");
 
 	// iron_math
 	R(iron_random_init, "v(i)");
@@ -893,6 +913,8 @@ void minic_register_builtins() {
 	R(iron_hash_djb2, "i(p)");
 	R(vec4_fdist, "f(f,f,f,f,f,f)");
 	R(mat4_cofactor, "f(f,f,f,f,f,f,f,f,f)");
+	R(cosf, "f(f)");
+	R(sinf, "f(f)");
 
 	// iron_math
 #define MR(sym) minic_register_native(#sym, mn_##sym)

@@ -13,7 +13,7 @@ void plugin_start(char *plugin) {
 	gc_unroot(_plugin_name);
 	_plugin_name = string_copy(plugin);
 	gc_root(_plugin_name);
-	minic_ctx_t *ctx = minic_eval(sys_buffer_to_string(blob));
+	minic_ctx_t *ctx = minic_eval_named(sys_buffer_to_string(blob), plugin);
 	data_delete_blob(string("plugins/%s", plugin));
 	// Store context on the plugin so callbacks can use it and it can be freed on stop
 	plugin_t *p = any_map_get(plugin_map, plugin);

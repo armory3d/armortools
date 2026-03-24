@@ -6,7 +6,9 @@ char *node_name = "Hello World";
 char *node_type = "HELLO_WORLD";
 
 float custom_node(logic_node_t *node, int from) {
-	return sin(sys_time() * node->inputs->buffer[0]->get(0));
+	// float f = node->inputs->buffer[0]->get(0);
+	float f = 1.0;
+	return sinf(sys_time() * f);
 }
 
 void on_delete() {
@@ -20,8 +22,7 @@ void main() {
 
 	// Create new node category
 	any_array_t *node_list = any_array_create(0);
-	// ui_node_t *n = gc_alloc(sizeof(ui_node_t));
-	ui_node_t *n = gc_alloc(72);
+	ui_node_t *n = gc_alloc(sizeof(ui_node_t));
 	any_array_push(node_list, n);
 
 	n->id = 0;
@@ -32,8 +33,7 @@ void main() {
 	n->color = 0xffb34f5a;
 
 	n->inputs = any_array_create(0);
-	// ui_node_socket_t *s = gc_alloc(sizeof(ui_node_socket_t));
-	ui_node_socket_t *s = gc_alloc(56);
+	ui_node_socket_t *s = gc_alloc(sizeof(ui_node_socket_t));
 	any_array_push(n->inputs, s);
 	s->id = 0;
 	s->node_id = 0;
@@ -47,8 +47,7 @@ void main() {
 	s->display = 0;
 
 	n->outputs = any_array_create(0);
-	// s = gc_alloc(sizeof(ui_node_socket_t));
-	s = gc_alloc(56);
+	s = gc_alloc(sizeof(ui_node_socket_t));
 	any_array_push(n->outputs, s);
 	s->id = 0;
 	s->node_id = 0;

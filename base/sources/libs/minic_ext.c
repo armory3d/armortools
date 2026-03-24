@@ -62,6 +62,30 @@ void minic_register_struct(const char *name, const char **fields, int field_coun
 	}
 }
 
+void minic_struct_set_size(const char *struct_name, int size) {
+	for (int i = 0; i < minic_global_struct_count; ++i) {
+		if (strcmp(minic_global_structs[i].name, struct_name) == 0) {
+			minic_global_structs[i].size = size;
+			return;
+		}
+	}
+}
+
+void minic_struct_field_set_type(const char *struct_name, const char *field_name, const char *field_struct_name) {
+	for (int i = 0; i < minic_global_struct_count; ++i) {
+		if (strcmp(minic_global_structs[i].name, struct_name) == 0) {
+			minic_global_struct_t *def = &minic_global_structs[i];
+			for (int j = 0; j < def->field_count; ++j) {
+				if (strcmp(def->fields[j], field_name) == 0) {
+					strncpy(def->field_struct_names[j], field_struct_name, 63);
+					return;
+				}
+			}
+			return;
+		}
+	}
+}
+
 void minic_register_enum(const char *typedef_name, const char **names, const int *values, int count) {
 	if (typedef_name != NULL) {
 		bool found = false;
