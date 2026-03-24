@@ -30,6 +30,30 @@ void tab_scripts_draw_edit() {
 	if (ui_menu_button(tr("Export"), "", ICON_EXPORT)) {
 		ui_files_show("c", true, false, &tab_scripts_draw_export);
 	}
+	if (ui_menu_sub_button(ui_handle(__ID__), tr("Templates"))) {
+		ui_menu_sub_begin(2);
+		if (ui_menu_button("hello.c", "", ICON_DRAFT)) {
+			project_raw->script_datas->buffer[0] = "\
+void main() {\n\
+	printf(\"Hello, world!\\n\");\n\
+}\n\
+";
+		}
+		if (ui_menu_button("rotate.c", "", ICON_DRAFT)) {
+			project_raw->script_datas->buffer[0] = "\
+void on_update() {\n\
+	mesh_object_t *o = context_main_object();\n\
+	transform_rotate(o->base->transform, vec4_z_axis(), 0.005);\n\
+	context_t *c = script_get_context();\n\
+	c->ddirty = 2;\n\
+}\n\
+void main() {\n\
+	script_notify_on_update(on_update);\n\
+}\n\
+";
+		}
+		ui_menu_sub_end();
+	}
 }
 
 void tab_scripts_draw(ui_handle_t *htab) {
@@ -46,7 +70,8 @@ void tab_scripts_draw(ui_handle_t *htab) {
 		ui_row(row);
 
 		if (ui_icon_button(tr("Run"), ICON_PLAY, UI_ALIGN_CENTER)) {
-			minic_ctx_free(minic_eval(tab_scripts_hscript->text));
+			minic_ctx_t *ctx = minic_eval(tab_scripts_hscript->text);
+			// minic_ctx_free(ctx);
 		}
 
 		if (ui_icon_button(tr("Edit"), ICON_EDIT, UI_ALIGN_CENTER)) {
