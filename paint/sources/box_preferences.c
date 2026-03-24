@@ -874,15 +874,20 @@ void box_preferences_plugins_tab_new_box() {
 	}
 	char *plugin_name = ui_text_input(h, tr("Name"), UI_ALIGN_LEFT, true, false);
 	if (ui_icon_button(tr("OK"), ICON_CHECK, UI_ALIGN_CENTER) || ui->is_return_down) {
-		char *template = "let plugin = plugin_create();\
-let h1 = ui_handle_create();\
-plugin_notify_on_ui(plugin, function() {\
-	if (ui_panel(h1, \"New Plugin\")) {\
-		if (ui_button(\"Button\")) {\
-			console_info(\"Hello\");\
-		}\
-	}\
-});\
+		char *template = "\
+ui_handle_t *h1;\n\
+void on_ui() {\n\
+	if (ui_panel(h1, \"New Plugin\", false, false, false)) {\n\
+		if (ui_button(\"Button\", UI_ALIGN_CENTER, "")) {\n\
+			console_info(\"Hello\");\n\
+		}\n\
+	}\n\
+}\n\
+void main() {\n\
+	void *plugin = plugin_create();\n\
+	plugin_notify_on_ui(plugin, on_ui);\n\
+	h1 = ui_handle_create();\n\
+}\n\
 ";
 		if (!ends_with(plugin_name, ".c")) {
 			plugin_name = string("%s.c", plugin_name);
