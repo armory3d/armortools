@@ -79,7 +79,18 @@ void tab_scripts_draw(ui_handle_t *htab) {
 		gc_unroot(ui_text_area_coloring);
 		ui_text_area_coloring = tab_scripts_get_text_coloring();
 		gc_root(ui_text_area_coloring);
+
+		if (project_raw->script_datas == NULL) {
+			project_raw->script_datas = string_array_create(0);
+		}
+		if (project_raw->script_datas->length == 0) {
+			string_array_push(project_raw->script_datas, "");
+		}
+
+		tab_scripts_hscript->text = project_raw->script_datas->buffer[0];
 		ui_text_area(tab_scripts_hscript, UI_ALIGN_LEFT, true, "", false);
+		project_raw->script_datas->buffer[0] = tab_scripts_hscript->text;
+
 		ui_text_area_line_numbers    = false;
 		ui_text_area_scroll_past_end = false;
 		gc_unroot(ui_text_area_coloring);

@@ -137,7 +137,7 @@ buffer_t *util_encode_project(project_format_t *raw) {
 	buffer_t *encoded = buffer_create(size);
 
 	armpack_encode_start(encoded->buffer);
-	armpack_encode_map(24);
+	armpack_encode_map(25);
 	armpack_encode_string("version");
 	armpack_encode_string(raw->version);
 	armpack_encode_string("assets");
@@ -345,6 +345,8 @@ buffer_t *util_encode_project(project_format_t *raw) {
 	armpack_encode_array_i32(raw->atlas_objects);
 	armpack_encode_string("atlas_names");
 	armpack_encode_array_string(raw->atlas_names);
+	armpack_encode_string("script_datas");
+	armpack_encode_array_string(raw->script_datas);
 
 	i32 ei          = armpack_encode_end();
 	encoded->length = ei;

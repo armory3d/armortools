@@ -540,6 +540,7 @@ typedef struct project_format {
 	struct buffer_t_array         *mesh_icons;
 	struct i32_array              *atlas_objects;
 	struct string_t_array         *atlas_names;
+	struct string_t_array         *script_datas;
 } project_format_t;
 
 typedef struct asset {

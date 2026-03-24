@@ -172,7 +172,7 @@ void export_arm_run_project() {
 	buffer_t *buffer = util_encode_project(project_raw);
 	iron_file_save_bytes(project_filepath, buffer, buffer->length + 1);
 
-// Save to recent
+	// Save to recent
 #ifdef IRON_IOS
 	char *recent_path = substring(project_filepath, string_last_index_of(project_filepath, "/") + 1, string_length(project_filepath));
 #else
