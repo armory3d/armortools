@@ -10,7 +10,7 @@
 #define MINIC_MAX_ENUM_CONSTS   512
 #define MINIC_MAX_INT_TYPEDEFS  128
 #define MINIC_MAX_STRUCT_FIELDS 16
-#define MINIC_MAX_STRUCTS       32
+#define MINIC_MAX_STRUCTS       64
 
 typedef unsigned char minic_u8;
 
