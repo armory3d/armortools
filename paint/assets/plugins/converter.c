@@ -5,12 +5,7 @@ ui_handle_t *h1;
 
 void on_arm_to_json(char *path) {
 	buffer_t *b = data_get_blob(path);
-	any_map_t *parsed = armpack_decode_to_map(b);
-
-	json_encode_begin();
-	json_encode_map(parsed);
-	char *s = json_encode_end();
-
+	char *s = armpack_decode_to_json(b);
 	buffer_t *out = sys_string_to_buffer(s);
 	char *p = substring(path, 0, string_length(path) - 3);
 	p = string("%sjson", p);
@@ -19,13 +14,10 @@ void on_arm_to_json(char *path) {
 
 void on_json_to_arm(char *path) {
 	buffer_t *b = data_get_blob(path);
-
-	// void *parsed = json_parse(sys_buffer_to_string(b));
-	// let out = armpack_encode(parsed);
-
+	buffer_t *out = json_encode_to_armpack(sys_buffer_to_string(b));
 	char *p = substring(path, 0, string_length(path) - 4);
 	p = string("%sarm", p);
-	// iron_file_save_bytes(p, out, 0);
+	iron_file_save_bytes(p, out, 0);
 }
 
 void on_ui() {

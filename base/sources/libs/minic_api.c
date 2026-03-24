@@ -1661,10 +1661,12 @@ void minic_register_builtins() {
 	R(json_encode_begin_object, "v()");
 	R(json_encode_end_object, "v()");
 	R(json_encode_map, "v(p)");
+	R(json_encode_to_armpack, "p(p)");
 
 	// armpack
 	R(armpack_decode, "p(p)");
 	R(armpack_decode_to_map, "p(p)");
+	R(armpack_decode_to_json, "p(p)");
 	R(armpack_encode_start, "v(p)");
 	R(armpack_encode_end, "i()");
 	R(armpack_encode_map, "v(i)");

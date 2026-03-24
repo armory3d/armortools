@@ -2,6 +2,8 @@
 #include "iron_armpack.h"
 
 #include "iron_gc.h"
+#include "iron_json.h"
+#include "iron_string.h"
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
@@ -18,7 +20,7 @@ static uint8_t *decoded;
 static uint8_t *encoded;
 static uint32_t capacity;
 static uint32_t array_count;
-static uint32_t string_length;
+static uint32_t str_len;
 static void     read_store();
 
 static inline uint64_t pad(int di, int n) {
@@ -67,7 +69,7 @@ static void store_ptr_abs(void *ptr) {
 }
 
 static void store_string_bytes(char *str) {
-	for (int i = 0; i < string_length; ++i) {
+	for (int i = 0; i < str_len; ++i) {
 		store_u8(str[i]);
 	}
 	store_u8('\0');
@@ -114,9 +116,9 @@ static float read_f32() {
 }
 
 static char *read_string() {
-	string_length = read_u32();
-	char *str     = (char *)(encoded + ei);
-	ei += string_length;
+	str_len   = read_u32();
+	char *str = (char *)(encoded + ei);
+	ei += str_len;
 	return str;
 }
 
@@ -448,27 +450,27 @@ int armpack_encode_end() {
 	return ei;
 }
 
-static void armpack_write_u8(uint8_t i) {
+void armpack_write_u8(uint8_t i) {
 	*(uint8_t *)(encoded + ei) = i;
 	ei += 1;
 }
 
-static void armpack_write_i16(int16_t i) {
+void armpack_write_i16(int16_t i) {
 	*(int16_t *)(encoded + ei) = i;
 	ei += 2;
 }
 
-static void armpack_write_u32(uint32_t i) {
+void armpack_write_u32(uint32_t i) {
 	*(uint32_t *)(encoded + ei) = i;
 	ei += 4;
 }
 
-static void armpack_write_i32(int32_t i) {
+void armpack_write_i32(int32_t i) {
 	*(int32_t *)(encoded + ei) = i;
 	ei += 4;
 }
 
-static void armpack_write_f32(float i) {
+void armpack_write_f32(float i) {
 	*(float *)(encoded + ei) = i;
 	ei += 4;
 }
@@ -620,9 +622,9 @@ uint32_t armpack_size_bool() {
 
 static char *read_string_alloc() {
 	char *s         = read_string();
-	char *allocated = gc_alloc(string_length + 1);
-	memcpy(allocated, s, string_length);
-	allocated[string_length] = '\0';
+	char *allocated = gc_alloc(str_len + 1);
+	memcpy(allocated, s, str_len);
+	allocated[str_len] = '\0';
 	return allocated;
 }
 
@@ -770,6 +772,129 @@ any_map_t *armpack_decode_to_map(buffer_t *b) {
 	ei      = 0;
 	read_u8(); // Must be 0xdf for a map
 	return _armpack_decode_to_map();
+}
+
+static char *armpack_to_json_value();
+
+static const char *peek_typed_array_suffix() {
+	if (encoded[ei] != 0xdd)
+		return "";
+	uint32_t saved_ei = ei;
+	ei++;
+	uint32_t    count  = read_u32();
+	const char *suffix = "";
+	if (count > 0) {
+		uint8_t flag2 = read_u8();
+		if (flag2 == 0xca)
+			suffix = "[f32]";
+		else if (flag2 == 0xd2)
+			suffix = "[i32]";
+		else if (flag2 == 0xd1)
+			suffix = "[i16]";
+		else if (flag2 == 0xc4)
+			suffix = "[u8]";
+	}
+	ei = saved_ei;
+	return suffix;
+}
+
+static char *armpack_to_json_map(uint32_t count) {
+	char *result = "{";
+	for (uint32_t i = 0; i < count; i++) {
+		read_u8(); // 0xdb string flag
+		char       *key    = read_string_alloc();
+		const char *suffix = peek_typed_array_suffix();
+		char       *value  = armpack_to_json_value();
+		if (i > 0) {
+			result = string("%s,", result);
+		}
+		result = string("%s\"%s%s\":%s", result, key, suffix, value);
+	}
+	return string("%s}", result);
+}
+
+static char *armpack_to_json_value() {
+	uint8_t flag = read_u8();
+	switch (flag) {
+	case 0xc0:
+		return "null";
+	case 0xc2:
+		return "false";
+	case 0xc3:
+		return "true";
+	case 0xca:
+		return f32_to_string_with_zeros(read_f32());
+	case 0xd2:
+		return i32_to_string(read_i32());
+	case 0xdb: {
+		char *s = read_string_alloc();
+		return string("\"%s\"", s);
+	}
+	case 0xdf:
+		return armpack_to_json_map(read_i32());
+	case 0xdd: {
+		uint32_t count = read_u32();
+		if (count == 0) {
+			return "[]";
+		}
+		uint8_t flag2  = read_u8();
+		char   *result = "[";
+		if (flag2 == 0xca) { // f32
+			for (uint32_t i = 0; i < count; i++) {
+				if (i > 0)
+					result = string("%s,", result);
+				result = string("%s%s", result, f32_to_string_with_zeros(read_f32()));
+			}
+		}
+		else if (flag2 == 0xd2) { // i32
+			for (uint32_t i = 0; i < count; i++) {
+				if (i > 0)
+					result = string("%s,", result);
+				result = string("%s%s", result, i32_to_string(read_i32()));
+			}
+		}
+		else if (flag2 == 0xd1) { // i16
+			for (uint32_t i = 0; i < count; i++) {
+				if (i > 0)
+					result = string("%s,", result);
+				result = string("%s%s", result, i32_to_string(read_i16()));
+			}
+		}
+		else if (flag2 == 0xc4) { // u8
+			for (uint32_t i = 0; i < count; i++) {
+				if (i > 0)
+					result = string("%s,", result);
+				result = string("%s%s", result, i32_to_string(read_u8()));
+			}
+		}
+		else if (flag2 == 0xc2 || flag2 == 0xc3) { // Deprecated: bool array
+			ei--;                                  // undo flag2 read
+			for (uint32_t i = 0; i < count; i++) {
+				if (i > 0)
+					result = string("%s,", result);
+				result = string("%s%s", result, read_u8() ? "true" : "false");
+			}
+		}
+		else {    // dynamic (string, array, map)
+			ei--; // undo flag2 read
+			for (uint32_t i = 0; i < count; i++) {
+				if (i > 0)
+					result = string("%s,", result);
+				result = string("%s%s", result, armpack_to_json_value());
+			}
+		}
+		return string("%s]", result);
+	}
+	default:
+		return "null";
+	}
+}
+
+char *armpack_decode_to_json(buffer_t *b) {
+	encoded = b->buffer;
+	ei      = 0;
+	read_u8(); // Must be 0xdf for a map
+	return armpack_to_json_map(read_i32());
 }
 
 float armpack_map_get_f32(any_map_t *map, char *key) {

@@ -1,5 +1,6 @@
 
 #include "iron_json.h"
+#include "iron_armpack.h"
 #include "iron_string.h"
 #include <jsmn.h>
 #include <stdbool.h>
@@ -430,4 +431,236 @@ void json_encode_map(any_map_t *m) {
 	for (uint32_t i = 0; i < keys->length; i++) {
 		json_encode_string(keys->buffer[i], any_map_get(m, keys->buffer[i]));
 	}
+}
+
+static char      *jenc_src;
+static jsmntok_t *jenc_tokens;
+static int        jenc_ti;
+static uint8_t    jenc_forced_array_type;
+
+static bool jenc_has_dot(int start, int end) {
+	for (int i = start; i < end; i++) {
+		if (jenc_src[i] == '.')
+			return true;
+	}
+	return false;
+}
+
+static int jenc_skip(int ti) {
+	jsmntok_t t = jenc_tokens[ti++];
+	if (t.type == JSMN_OBJECT) {
+		for (int i = 0; i < t.size; i++) {
+			ti = jenc_skip(ti); // key
+			ti = jenc_skip(ti); // value
+		}
+	}
+	else if (t.type == JSMN_ARRAY) {
+		for (int i = 0; i < t.size; i++) {
+			ti = jenc_skip(ti);
+		}
+	}
+	return ti;
+}
+
+static uint8_t jenc_elem_type(int ti) {
+	jsmntok_t t = jenc_tokens[ti];
+	if (t.type == JSMN_STRING)
+		return 0xdb;
+	if (t.type == JSMN_OBJECT)
+		return 0xdf;
+	if (t.type == JSMN_ARRAY)
+		return 0xdd;
+	char c = jenc_src[t.start];
+	if (c == 't' || c == 'f')
+		return 0xc2;
+	if (c == 'n')
+		return 0xc0;
+	if (jenc_has_dot(t.start, t.end))
+		return 0xca;
+	return 0xd2;
+}
+
+static uint8_t jenc_array_type(int count) {
+	if (count == 0)
+		return 0x0;
+	int     ti         = jenc_ti;
+	uint8_t first_type = jenc_elem_type(ti);
+	if (first_type != 0xca && first_type != 0xd2 && first_type != 0xdb) {
+		return 0x0; // non-scalar types -> dynamic
+	}
+	for (int i = 0; i < count; i++) {
+		if (jenc_elem_type(ti) != first_type)
+			return 0x0;
+		ti = jenc_skip(ti);
+	}
+	return first_type;
+}
+
+static void jenc_write_string(int start, int len) {
+	armpack_write_u8(0xdb);
+	armpack_write_u32(len);
+	for (int i = 0; i < len; i++) {
+		armpack_write_u8(jenc_src[start + i]);
+	}
+}
+
+static void jenc_value();
+
+static void jenc_object(int count) {
+	armpack_write_u8(0xdf);
+	armpack_write_i32(count);
+	for (int i = 0; i < count; i++) {
+		jsmntok_t key     = jenc_tokens[jenc_ti++];
+		int       key_len = key.end - key.start;
+		// Check for [type] suffix in key name
+		uint8_t forced_type = 0;
+		int     actual_len  = key_len;
+		if (key_len >= 4 && jenc_src[key.end - 1] == ']') {
+			const char *ks = jenc_src + key.start;
+			if (key_len >= 5 && strncmp(ks + key_len - 5, "[f32]", 5) == 0) {
+				forced_type = 0xca;
+				actual_len  = key_len - 5;
+			}
+			else if (key_len >= 5 && strncmp(ks + key_len - 5, "[i32]", 5) == 0) {
+				forced_type = 0xd2;
+				actual_len  = key_len - 5;
+			}
+			else if (key_len >= 5 && strncmp(ks + key_len - 5, "[i16]", 5) == 0) {
+				forced_type = 0xd1;
+				actual_len  = key_len - 5;
+			}
+			else if (key_len >= 4 && strncmp(ks + key_len - 4, "[u8]", 4) == 0) {
+				forced_type = 0xc4;
+				actual_len  = key_len - 4;
+			}
+		}
+		jenc_write_string(key.start, actual_len);
+		jenc_forced_array_type = forced_type;
+		jenc_value();
+		jenc_forced_array_type = 0;
+	}
+}
+
+static void jenc_array(int count) {
+	armpack_write_u8(0xdd);
+	armpack_write_u32(count);
+	if (count == 0)
+		return;
+
+	uint8_t forced         = jenc_forced_array_type;
+	jenc_forced_array_type = 0;
+	uint8_t elem_type      = forced != 0 ? forced : jenc_array_type(count);
+
+	if (elem_type == 0xca) { // typed f32
+		armpack_write_u8(0xca);
+		for (int i = 0; i < count; i++) {
+			jsmntok_t t = jenc_tokens[jenc_ti++];
+			armpack_write_f32(strtof(jenc_src + t.start, NULL));
+		}
+	}
+	else if (elem_type == 0xd2) { // typed i32
+		armpack_write_u8(0xd2);
+		for (int i = 0; i < count; i++) {
+			jsmntok_t t = jenc_tokens[jenc_ti++];
+#ifdef _WIN32
+			armpack_write_i32((int32_t)_strtoi64(jenc_src + t.start, NULL, 10));
+#else
+			armpack_write_i32((int32_t)strtol(jenc_src + t.start, NULL, 10));
+#endif
+		}
+	}
+	else if (elem_type == 0xd1) { // typed i16
+		armpack_write_u8(0xd1);
+		for (int i = 0; i < count; i++) {
+			jsmntok_t t = jenc_tokens[jenc_ti++];
+#ifdef _WIN32
+			armpack_write_i16((int16_t)_strtoi64(jenc_src + t.start, NULL, 10));
+#else
+			armpack_write_i16((int16_t)strtol(jenc_src + t.start, NULL, 10));
+#endif
+		}
+	}
+	else if (elem_type == 0xc4) { // typed u8
+		armpack_write_u8(0xc4);
+		for (int i = 0; i < count; i++) {
+			jsmntok_t t = jenc_tokens[jenc_ti++];
+#ifdef _WIN32
+			armpack_write_u8((uint8_t)_strtoi64(jenc_src + t.start, NULL, 10));
+#else
+			armpack_write_u8((uint8_t)strtol(jenc_src + t.start, NULL, 10));
+#endif
+		}
+	}
+	else { // dynamic
+		for (int i = 0; i < count; i++) {
+			jenc_value();
+		}
+	}
+}
+
+static void jenc_value() {
+	jsmntok_t t = jenc_tokens[jenc_ti++];
+	if (t.type == JSMN_OBJECT) {
+		jenc_object(t.size);
+		return;
+	}
+	if (t.type == JSMN_ARRAY) {
+		jenc_array(t.size);
+		return;
+	}
+	if (t.type == JSMN_STRING) {
+		jenc_write_string(t.start, t.end - t.start);
+		return;
+	}
+	// JSMN_PRIMITIVE
+	char c = jenc_src[t.start];
+	if (c == 't') {
+		armpack_write_u8(0xc3); // true
+	}
+	else if (c == 'f') {
+		armpack_write_u8(0xc2); // false
+	}
+	else if (c == 'n') {
+		armpack_write_u8(0xc0); // null
+	}
+	else if (jenc_has_dot(t.start, t.end)) {
+		armpack_write_u8(0xca);
+		armpack_write_f32(strtof(jenc_src + t.start, NULL));
+	}
+	else {
+		armpack_write_u8(0xd2);
+#ifdef _WIN32
+		armpack_write_i32((int32_t)_strtoi64(jenc_src + t.start, NULL, 10));
+#else
+		armpack_write_i32((int32_t)strtol(jenc_src + t.start, NULL, 10));
+#endif
+	}
+}
+
+buffer_t *json_encode_to_armpack(char *json) {
+	jsmn_parser parser;
+	jsmn_init(&parser);
+	int n = jsmn_parse(&parser, json, strlen(json), NULL, 0);
+	if (n <= 0)
+		return NULL;
+
+	jenc_tokens = malloc(sizeof(jsmntok_t) * n);
+	jsmn_init(&parser);
+	jsmn_parse(&parser, json, strlen(json), jenc_tokens, n);
+
+	jenc_src = json;
+	jenc_ti  = 0;
+
+	int      max_size = strlen(json) * 3 + 64;
+	uint8_t *buf      = malloc(max_size);
+	armpack_encode_start(buf);
+	jenc_value();
+	int size = armpack_encode_end();
+
+	free(jenc_tokens);
+
+	buffer_t *b = buffer_create(size);
+	memcpy(b->buffer, buf, size);
+	free(buf);
+	return b;
 }

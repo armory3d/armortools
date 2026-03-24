@@ -36,16 +36,23 @@ uint32_t armpack_size_f32();
 uint32_t armpack_size_bool();
 
 any_map_t *armpack_decode_to_map(buffer_t *b);
+char      *armpack_decode_to_json(buffer_t *b);
 float      armpack_map_get_f32(any_map_t *map, char *key);
 int        armpack_map_get_i32(any_map_t *map, char *key);
 
-/* JS object:
+void armpack_write_u8(uint8_t i);
+void armpack_write_i16(int16_t i);
+void armpack_write_u32(uint32_t i);
+void armpack_write_i32(int32_t i);
+void armpack_write_f32(float i);
 
-    let test = {
+/* JSON object:
+
+    {
         name: "test",
         point: { x: 2, y: 4 },
         array: i32_array_create([1, 2, 3])
-    };
+    }
 */
 
 /* C struct:
