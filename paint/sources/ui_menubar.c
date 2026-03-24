@@ -235,7 +235,7 @@ void ui_menubar_draw_category_items_about_box() {
 #endif
 
 	if (ui_icon_button(tr("Contributors"), ICON_LINK, UI_ALIGN_CENTER)) {
-		iron_load_url("https://github.com/armory3d/armortools/graphs/contributors");
+		iron_load_url("https://github.com/armory3d/armorpaint/graphs/contributors");
 	}
 	if (ui_icon_button(tr("OK"), ICON_CHECK, UI_ALIGN_CENTER)) {
 		ui_box_hide();
@@ -817,14 +817,14 @@ void ui_menubar_draw_category_items() {
 			iron_load_url(string("%s/notes", manifest_url));
 		}
 		if (ui_menu_button(tr("Issue Tracker"), "", ICON_LINK)) {
-			iron_load_url("https://github.com/armory3d/armortools/issues");
+			iron_load_url("https://github.com/armory3d/armorpaint/issues");
 		}
 		if (ui_menu_button(tr("Report Bug"), "", ICON_LINK)) {
 #if defined(IRON_MACOS) || defined(IRON_IOS) // Limited url length
-			iron_load_url(string("https://github.com/armory3d/armortools/issues/new?labels=bug&template=bug_report.md&body=*%s%%20%s-%s,%%20%s", manifest_title,
+			iron_load_url(string("https://github.com/armory3d/armorpaint/issues/new?labels=bug&template=bug_report.md&body=*%s%%20%s-%s,%%20%s", manifest_title,
 			                     manifest_version, config_get_sha(), iron_system_id()));
 #else
-			iron_load_url(string("https://github.com/armory3d/armortools/issues/new?labels=bug&template=bug_report.md&body=*%s%%20%s-%s,%%20%s*%%0A%%0A**Issue "
+			iron_load_url(string("https://github.com/armory3d/armorpaint/issues/new?labels=bug&template=bug_report.md&body=*%s%%20%s-%s,%%20%s*%%0A%%0A**Issue "
 			                     "description:**%%0A%%0A**Steps to reproduce:**%%0A%%0A",
 			                     manifest_title, manifest_version, config_get_sha(), iron_system_id()));
 #endif
@@ -832,10 +832,10 @@ void ui_menubar_draw_category_items() {
 		if (ui_menu_button(tr("Request Feature"), "", ICON_LINK)) {
 #if defined(IRON_MACOS) || defined(IRON_IOS) // Limited url length
 			iron_load_url(
-			    string("https://github.com/armory3d/armortools/issues/new?labels=feature%%20request&template=feature_request.md&body=*%s%%20%s-%s,%%20%s",
+			    string("https://github.com/armory3d/armorpaint/issues/new?labels=feature%%20request&template=feature_request.md&body=*%s%%20%s-%s,%%20%s",
 			           manifest_title, manifest_version, config_get_sha(), iron_system_id()));
 #else
-			iron_load_url(string("https://github.com/armory3d/armortools/issues/"
+			iron_load_url(string("https://github.com/armory3d/armorpaint/issues/"
 			                     "new?labels=feature%%20request&template=feature_request.md&body=*%s%%20%s-%s,%%20%s*%%0A%%0A**Feature description:**%%0A%%0A",
 			                     manifest_title, manifest_version, config_get_sha(), iron_system_id()));
 #endif

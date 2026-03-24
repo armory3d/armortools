@@ -1,6 +1,6 @@
 
 // Based on https://github.com/gorhill/lz4-wasm by Raymond Hill
-// armortools/base/assets/licenses/license_lz4-wasm.md
+// armorpaint/base/assets/licenses/license_lz4-wasm.md
 #include "iron_lz4.h"
 
 #include "iron_gc.h"

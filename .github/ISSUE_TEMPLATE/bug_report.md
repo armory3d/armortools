@@ -7,12 +7,12 @@ assignees: ''
 
 ---
 
-<!-- NOTE: If you are unable to compile the program, please open a discussion instead:
-https://github.com/armory3d/armortools/discussions
+<!-- NOTE: If you are unable to compile the program, please open a forum thread instead:
+https://forums.armorpaint.org/c/support
 -->
 
 <!-- Please search existing issues first:
-https://github.com/armory3d/armortools/issues?q=is%3Aissue
+https://github.com/armory3d/armorpaint/issues?q=is%3Aissue
 -->
 
 **ArmorPaint version:**

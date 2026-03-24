@@ -1,11 +1,11 @@
 ![](https://armorpaint.org/img/git_root.jpg)
 
-armortools
+armorpaint
 ==============
 
 3D content creation tools.
 
-[armorpaint/](https://github.com/armory3d/armortools/tree/main/paint)<br>
+[armorpaint/](https://github.com/armory3d/armorpaint/tree/main/paint)<br>
 
 **Generating a locale file**
 ```bash
