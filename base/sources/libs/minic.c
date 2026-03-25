@@ -684,7 +684,8 @@ static const char *minic_tok_name(minic_tok_type_t t) {
 static int minic_current_line(minic_env_t *e) {
 	int line = 1;
 	for (int i = 0; i < e->lex.pos; i++) {
-		if (e->lex.src[i] == '\n') line++;
+		if (e->lex.src[i] == '\n')
+			line++;
 	}
 	return line;
 }
@@ -1171,7 +1172,7 @@ static minic_val_t minic_parse_primary(minic_env_t *e) {
 			minic_expect(e, TOK_LPAREN); // checks and consumes '('
 			char type_name[64];
 			strncpy(type_name, e->lex.cur.text, 63);
-			minic_lex_next(&e->lex); // Consume type name
+			minic_lex_next(&e->lex);     // Consume type name
 			minic_expect(e, TOK_RPAREN); // checks and consumes ')'
 			minic_struct_def_t *def = minic_struct_get(e, type_name);
 			return minic_val_int(def != NULL ? def->size : 0);
@@ -1240,9 +1241,11 @@ static minic_val_t minic_parse_primary(minic_env_t *e) {
 			// Handle chained -> or . access (e.g. node->inputs->buffer)
 			while ((e->lex.cur.type == TOK_ARROW || e->lex.cur.type == TOK_DOT) && !e->error) {
 				int fidx = minic_struct_field_idx(def, field);
-				if (fidx < 0 || def->field_struct_names[fidx][0] == '\0') break;
+				if (fidx < 0 || def->field_struct_names[fidx][0] == '\0')
+					break;
 				minic_struct_def_t *next_def = minic_struct_get(e, def->field_struct_names[fidx]);
-				if (next_def == NULL) break;
+				if (next_def == NULL)
+					break;
 				minic_lex_next(&e->lex); // Consume '->' or '.'
 				strncpy(field, e->lex.cur.text, 63);
 				minic_lex_next(&e->lex);
