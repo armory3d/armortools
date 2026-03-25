@@ -426,6 +426,8 @@ void project_append_mesh() {
 	project_import_mesh(false, import_mesh_finish_import);
 }
 
+extern int plugins_skinning_frame;
+
 void project_import_mesh_box_draw() {
 	char *path             = _project_import_mesh_box_path;
 	bool  replace_existing = _project_import_mesh_box_replace_existing;
@@ -449,6 +451,17 @@ void project_import_mesh_box_draw() {
 
 	if (ends_with(to_lower_case(path), ".blend")) {
 		import_blend_mesh_ui();
+	}
+
+	if (ends_with(to_lower_case(path), ".fbx") || ends_with(to_lower_case(path), ".gltf") || ends_with(to_lower_case(path), ".glb")) {
+		ui_row2();
+		bool b = ui_check(ui_handle(__ID__), tr("Apply Skinning"), "");
+		ui->enabled = b;
+		plugins_skinning_frame = ui_slider(ui_handle(__ID__), tr("Frame"), 1, 99, false, 1, true, UI_ALIGN_RIGHT, true);
+		ui->enabled = true;
+		if (!b) {
+			plugins_skinning_frame = -1;
+		}
 	}
 
 	f32_array_t *row = f32_array_create_from_raw(
@@ -565,7 +578,7 @@ void project_unwrap_mesh(raw_mesh_t *mesh, void (*done)(raw_mesh_t *)) {
 		util_mesh_equirect_unwrap(mesh);
 	}
 	else {
-		char *f  = unwrap_plugins->buffer[_project_unwrap_by];
+		char *f                = unwrap_plugins->buffer[_project_unwrap_by];
 		void (*cb)(void *mesh) = any_map_get(util_mesh_unwrappers, f);
 		cb(mesh);
 	}

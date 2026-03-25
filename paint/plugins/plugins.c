@@ -10,7 +10,9 @@ void *io_svg_parse(char *buf);
 void *io_exr_parse(char *buf, size_t len);
 void *io_tiff_parse(uint8_t *buf, size_t len);
 void *io_gltf_parse(char *buf, size_t size, const char *path);
+void *io_gltf_parse_skinned(char *buf, size_t size, const char *path, int frame);
 void *io_fbx_parse(char *buf, size_t size);
+void *io_fbx_parse_skinned(char *buf, size_t size, int frame);
 void proc_uv_unwrap(void *mesh);
 
 extern any_map_t      *import_mesh_importers;
@@ -20,6 +22,8 @@ extern any_map_t      *import_texture_importers;
 extern string_array_t *_path_texture_formats;
 string_array_t        *path_texture_formats(void);
 extern any_map_t *util_mesh_unwrappers;
+
+int plugins_skinning_frame = -1;
 
 static void *import_exr(char *path) {
 	buffer_t *b = data_get_blob(path);
@@ -42,13 +46,23 @@ static void *import_svg(char *path) {
 static void *import_gltf_glb(char *path) {
 	buffer_t *b = data_get_blob(path);
 	data_delete_blob(path);
-	return io_gltf_parse((char *)b->buffer, b->length, path);
+	if (plugins_skinning_frame == -1) {
+		return io_gltf_parse((char *)b->buffer, b->length, path);
+	}
+	else {
+		return io_gltf_parse_skinned((char *)b->buffer, b->length, path, plugins_skinning_frame);
+	}
 }
 
 static void *import_fbx(char *path) {
 	buffer_t *b = data_get_blob(path);
 	data_delete_blob(path);
-	return io_fbx_parse((char *)b->buffer, b->length);
+	if (plugins_skinning_frame == -1) {
+		return io_fbx_parse((char *)b->buffer, b->length);
+	}
+	else {
+		return io_fbx_parse_skinned((char *)b->buffer, b->length, plugins_skinning_frame);
+	}
 }
 
 void plugins_init() {
