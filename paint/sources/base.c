@@ -32,7 +32,7 @@ void base_on_drop_files(char *drop_path) {
 void base_init_on_start_arm(void *_) {
 	import_arm_run_project(project_filepath);
 	// Auto-run script
-	if (project_raw->script_datas == NULL && project_raw->script_datas->length > 0) {
+	if (project_raw->script_datas != NULL && project_raw->script_datas->length > 0) {
 		minic_ctx_t *ctx = minic_eval(project_raw->script_datas->buffer[0]);
 	}
 }

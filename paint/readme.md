@@ -49,5 +49,5 @@ cd armorpaint/paint
 
 **WASM**
 ```bash
-../base/make --target wasm --compile
+../base/make --target wasm --compile --embed
 ```

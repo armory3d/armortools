@@ -2,6 +2,7 @@
 #include "string.h"
 #include "stddef.h"
 #include "stdio.h"
+#include "ctype.h"
 
 #define ALIGNMENT   8
 #define ALIGN(size) (((size) + (ALIGNMENT - 1)) & ~(ALIGNMENT - 1))
@@ -115,14 +116,6 @@ int system(const char *string) {
 
 void exit(int code) {
 	exit(code);
-}
-
-int isdigit(int c) {
-	return c >= '0' && c <= '9';
-}
-
-int isspace(int c) {
-	return c == ' ' || c == '\t' || c == '\n' || c == '\r';
 }
 
 long int strtol(const char *str, char **endptr, int base) {
