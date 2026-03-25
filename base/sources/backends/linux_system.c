@@ -367,7 +367,9 @@ void iron_window_create(iron_window_options_t *win) {
 	window->mode = IRON_WINDOW_MODE_WINDOW;
 	iron_window_change_mode(win->mode);
 
-	XMapWindow(x11_ctx.display, window->window);
+	if (win->visible) {
+		XMapWindow(x11_ctx.display, window->window);
+	}
 
 	Atom XdndVersion = 5;
 	XChangeProperty(x11_ctx.display, window->window, XdndAware, XA_ATOM, 32, PropModeReplace, (unsigned char *)&XdndVersion, 1);
