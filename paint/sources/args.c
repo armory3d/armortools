@@ -5,7 +5,7 @@ void args_parse() {
 	if (iron_get_arg_count() > 1) {
 		args_use = true;
 
-		i32 i = 0;
+		i32 i = 1;
 		while (i < iron_get_arg_count()) {
 			// Process each arg
 			char *current_arg = iron_get_arg(i);
@@ -15,7 +15,7 @@ void args_parse() {
 				project_filepath = string_copy(current_arg);
 				gc_root(project_filepath);
 			}
-			else if (string_equals(current_arg, "--b") || string_equals(current_arg, "--background")) {
+			else if (string_equals(current_arg, "--background")) {
 				args_background = true;
 			}
 			else if (path_is_texture(current_arg)) {
@@ -48,7 +48,7 @@ void args_parse() {
 				args_export_mesh_path = string_copy(iron_get_arg(i));
 				gc_root(args_export_mesh_path);
 			}
-			else if (path_is_mesh(current_arg) || (i > 1 && !starts_with(current_arg, "-") && path_is_folder(current_arg))) {
+			else if (path_is_mesh(current_arg) || iron_is_directory(current_arg)) {
 				gc_unroot(args_asset_path);
 				args_asset_path = string_copy(current_arg);
 				gc_root(args_asset_path);
