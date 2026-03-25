@@ -639,30 +639,21 @@ char *box_export_preset_to_json(export_preset_t *p) {
 	return json_encode_end();
 }
 
-void box_export_show_player_box_on_next_frame(void *path) {
-	export_player_run((char *)path);
-}
-
 void box_export_show_player_box_path_picked(char *path) {
 	char *f = ui_files_filename;
 	if (string_equals(f, "")) {
 		f = string_copy(tr("untitled"));
 	}
-	sys_notify_on_next_frame(&box_export_show_player_box_on_next_frame, string("%s%s%s", path, PATH_SEP, f));
+	sys_notify_on_next_frame(&export_player_run, string("%s%s%s", path, PATH_SEP, f));
 }
 
 void box_export_show_player_box() {
-	ui_handle_t *htab = ui_handle(__ID__);
-	bool tab_vertical = config_raw->touch_ui;
+	ui_handle_t *htab         = ui_handle(__ID__);
+	bool         tab_vertical = config_raw->touch_ui;
 	if (ui_tab(htab, tr("Export Player"), tab_vertical, -1, false)) {
 
-		ui_handle_t *h_export_player_target = ui_handle(__ID__);
-		string_t_array_t *export_player_target_combo = any_array_create_from_raw(
-		    (void *[]){
-		        "Web",
-		    },
-		    1);
-		ui_combo(h_export_player_target, export_player_target_combo, tr("Target"), true, UI_ALIGN_LEFT, true);
+		string_t_array_t *export_player_target_combo = any_array_create_from_raw((void *[]){"Web", "Windows", "Linux", "MacOS"}, 4);
+		ui_combo(box_export_h_export_player_target, export_player_target_combo, tr("Target"), true, UI_ALIGN_LEFT, true);
 
 		ui_row2();
 		if (ui_icon_button(tr("Cancel"), ICON_CLOSE, UI_ALIGN_CENTER)) {
@@ -670,7 +661,7 @@ void box_export_show_player_box() {
 		}
 		if (ui_icon_button(tr("Export"), ICON_CHECK, UI_ALIGN_CENTER)) {
 			ui_box_hide();
-			ui_files_show("html", true, false, &box_export_show_player_box_path_picked);
+			ui_files_show("", true, false, &box_export_show_player_box_path_picked);
 		}
 	}
 }

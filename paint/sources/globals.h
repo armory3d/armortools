@@ -48,6 +48,7 @@ ui_handle_t             *box_export_hpreset;
 export_preset_t         *box_export_preset = NULL;
 string_t_array_t        *box_export_channels;
 string_t_array_t        *box_export_color_spaces;
+ui_handle_t             *box_export_h_export_player_target;
 bool                     _box_export_bake_material;
 export_preset_texture_t *_box_export_t;
 bool                     _box_export_apply_displacement;

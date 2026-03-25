@@ -111,6 +111,13 @@ typedef enum {
 } export_destination_t;
 
 typedef enum {
+	PLAYER_TARGET_WEB   = 0,
+	PLAYER_TARGET_WINDOWS = 1,
+	PLAYER_TARGET_LINUX = 2,
+	PLAYER_TARGET_MACOS = 3,
+} player_target_t;
+
+typedef enum {
 	PATHTRACE_MODE_FAST    = 0,
 	PATHTRACE_MODE_QUALITY = 1,
 } pathtrace_mode_t;

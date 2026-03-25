@@ -62,6 +62,9 @@ void _kickstart() {
 	    2);
 	gc_root(box_export_color_spaces);
 
+	box_export_h_export_player_target = ui_handle_create();
+	gc_root(box_export_h_export_player_target);
+
 	import_texture_importers = any_map_create();
 	gc_root(import_texture_importers);
 

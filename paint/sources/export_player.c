@@ -112,15 +112,30 @@ void export_player_run(char *path) {
 	context_raw->pack_assets_on_save = _pack_assets_on_save;
 	project_filepath                 = _project_filepath;
 
-	char *start_js = string("%s/start.js", path_base);
-	iron_file_download("https://armorpaint.app/start.js", &export_player_run_on_download, 0, start_js);
+	if (box_export_h_export_player_target->i == PLAYER_TARGET_WEB) {
+		char *start_js = string("%s/start.js", path_base);
+		iron_file_download("https://armorpaint.app/start.js", &export_player_run_on_download, 0, start_js);
 
-	char *start_wasm = string("%s/start.wasm", path_base);
-	iron_file_download("https://armorpaint.app/start.wasm", &export_player_run_on_download, 0, start_wasm);
+		char *start_wasm = string("%s/start.wasm", path_base);
+		iron_file_download("https://armorpaint.app/start.wasm", &export_player_run_on_download, 0, start_wasm);
 
-	char *readme_txt = string("%s/readme.txt", path_base);
-	iron_file_save_bytes(readme_txt, sys_string_to_buffer(export_player_readme), 0);
+		char *readme_txt = string("%s/readme.txt", path_base);
+		iron_file_save_bytes(readme_txt, sys_string_to_buffer(export_player_readme), 0);
 
-	char *index_html = string("%s/index.html", path_base);
-	iron_file_save_bytes(index_html, sys_string_to_buffer(export_player_index), 0);
+		char *index_html = string("%s/index.html", path_base);
+		iron_file_save_bytes(index_html, sys_string_to_buffer(export_player_index), 0);
+	}
+	else if (box_export_h_export_player_target->i == PLAYER_TARGET_WINDOWS) {
+		char *player_bin_src = string("%s%s%s", iron_internal_files_location(), PATH_SEP, "ArmorPaint.exe");
+		char *player_bin_to = string("%s/player.exe", path_base);
+		file_copy(player_bin_src, player_bin_to);
+	}
+	else if (box_export_h_export_player_target->i == PLAYER_TARGET_LINUX) {
+		char *player_bin_src = string("%s%s%s", iron_internal_files_location(), PATH_SEP, "ArmorPaint");
+		char *player_bin_to = string("%s/player", path_base);
+		file_copy(player_bin_src, player_bin_to);
+	}
+	else if (box_export_h_export_player_target->i == PLAYER_TARGET_MACOS) {
+		console_error("Not implemented");
+	}
 }
