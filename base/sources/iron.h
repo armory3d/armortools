@@ -130,14 +130,6 @@ int kickstart(int argc, char **argv) {
 	bindir = _substring(bindir, 0, string_last_index_of(bindir, "/"));
 #endif
 
-	char *assetsdir = argc > 1 ? argv[1] : bindir;
-
-	// Opening a file
-	int l = strlen(assetsdir);
-	if ((l > 6 && assetsdir[l - 6] == '.') || (l > 5 && assetsdir[l - 5] == '.') || (l > 4 && assetsdir[l - 4] == '.')) {
-		assetsdir = bindir;
-	}
-
 	for (int i = 2; i < argc; ++i) {
 		if (strcmp(argv[i], "--nowindow") == 0) {
 			enable_window = false;
@@ -145,7 +137,7 @@ int kickstart(int argc, char **argv) {
 	}
 
 #if !defined(IRON_MACOS) && !defined(IRON_IOS)
-	iron_internal_set_files_location(assetsdir);
+	iron_internal_set_files_location(bindir);
 #endif
 
 	iron_threads_init();
