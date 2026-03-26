@@ -1,694 +1,697 @@
 
 #include "uv_unwrap.h"
+#include "iron_system.h"
 #include <float.h>
-#include <iron_system.h>
 #include <math.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
+// Cosine of 66 degrees - angle threshold for chart grouping
+#define UV_ANGLE_THRESHOLD 0.4067f
+#define UV_PACK_MARGIN     0.005f
+
+// Position hash map entry for canonical vertex deduplication
 typedef struct {
-	float x, y, z;
-} vec3_t;
+	int16_t x, y, z;
+	int     id;
+	bool    occupied;
+} uv_pos_entry_t;
 
+// Edge hash map entry for face adjacency
 typedef struct {
-	float x, y;
-} vec2_t;
+	int  v0, v1;
+	int  face0, face1;
+	bool occupied;
+} uv_edge_entry_t;
 
-static inline vec3_t v3_add(vec3_t a, vec3_t b) {
-	return (vec3_t){a.x + b.x, a.y + b.y, a.z + b.z};
-}
-static inline vec3_t v3_sub(vec3_t a, vec3_t b) {
-	return (vec3_t){a.x - b.x, a.y - b.y, a.z - b.z};
-}
-static inline vec3_t v3_mul(vec3_t a, float s) {
-	return (vec3_t){a.x * s, a.y * s, a.z * s};
-}
-static inline float v3_dot(vec3_t a, vec3_t b) {
-	return a.x * b.x + a.y * b.y + a.z * b.z;
-}
-static inline float v3_len(vec3_t a) {
-	return sqrtf(a.x * a.x + a.y * a.y + a.z * a.z);
-}
-static inline vec3_t v3_cross(vec3_t a, vec3_t b) {
-	return (vec3_t){a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x};
-}
-static inline vec3_t v3_norm(vec3_t a) {
-	float l = v3_len(a);
-	if (l < 1e-6f)
-		return (vec3_t){0, 0, 1};
-	return v3_mul(a, 1.0f / l);
+static uint32_t uv_hash_pos(int16_t x, int16_t y, int16_t z) {
+	uint32_t h = (uint32_t)(x + 32768);
+	h          = h * 2654435761u ^ (uint32_t)(y + 32768);
+	h          = h * 2654435761u ^ (uint32_t)(z + 32768);
+	return h;
 }
 
-#define sb__raw(a)     ((int *)(a) - 2)
-#define sb__len(a)     (sb__raw(a)[0])
-#define sb__cap_val(a) (sb__raw(a)[1])
-#define sb_count(a)    ((a) ? sb__len(a) : 0)
-#define sb_cap(a)      ((a) ? sb__cap_val(a) : 0)
-#define sb_free(a)     ((a) ? free(sb__raw(a)), 0 : 0)
-#define sb_push(a, v)  (sb__grow((void **)&(a), sizeof(*(a))) ? ((a)[sb__len(a)++] = (v), 0) : 0)
-
-static int sb__grow(void **ptr, size_t item_size) {
-	int *arr = *ptr ? sb__raw(*ptr) : NULL;
-	if (arr) {
-		int len = arr[0];
-		int cap = arr[1];
-		if (len < cap)
-			return 1;
-		int  new_cap = cap * 2;
-		int *new_arr = (int *)realloc(arr, sizeof(int) * 2 + item_size * new_cap);
-		if (!new_arr)
-			return 0;
-		new_arr[1] = new_cap;
-		*ptr       = new_arr + 2;
-	}
-	else {
-		int  new_cap = 16;
-		int *new_arr = (int *)malloc(sizeof(int) * 2 + item_size * new_cap);
-		if (!new_arr)
-			return 0;
-		new_arr[0] = 0;
-		new_arr[1] = new_cap;
-		*ptr       = new_arr + 2;
-	}
-	return 1;
-}
-
-typedef struct {
-	int    *faces; // SB
-	vec2_t *uvs;   // SB
-	vec2_t  min, max;
-	int     p_x, p_y;
-} Island;
-
-typedef struct {
-	float *pa;
-	int    index;
-} sort_vert_t;
-
-typedef struct {
-	int u1, u2, face;
-} edge_ref_t;
-
-typedef struct {
-	int spatial_idx;
-	int local_idx;
-} relax_vert_t;
-
-typedef struct {
-	int u, v;
-} relax_edge_t;
-
-typedef struct pack_node {
-	struct pack_node *child[2];
-	int               x, y, w, h;
-	int               occupied;
-} pack_node_t;
-
-static int compare_verts(const void *a, const void *b) {
-	const sort_vert_t *va  = (const sort_vert_t *)a;
-	const sort_vert_t *vb  = (const sort_vert_t *)b;
-	float              eps = 0.0001f;
-	if (fabsf(va->pa[0] - vb->pa[0]) > eps)
-		return (va->pa[0] > vb->pa[0]) ? 1 : -1;
-	if (fabsf(va->pa[1] - vb->pa[1]) > eps)
-		return (va->pa[1] > vb->pa[1]) ? 1 : -1;
-	if (fabsf(va->pa[2] - vb->pa[2]) > eps)
-		return (va->pa[2] > vb->pa[2]) ? 1 : -1;
-	return 0;
-}
-
-static int compare_edges(const void *a, const void *b) {
-	const edge_ref_t *ea = (const edge_ref_t *)a;
-	const edge_ref_t *eb = (const edge_ref_t *)b;
-	if (ea->u1 != eb->u1)
-		return ea->u1 - eb->u1;
-	return ea->u2 - eb->u2;
-}
-
-static int compare_relax_verts(const void *a, const void *b) {
-	const relax_vert_t *va = (const relax_vert_t *)a;
-	const relax_vert_t *vb = (const relax_vert_t *)b;
-	return va->spatial_idx - vb->spatial_idx;
-}
-
-static int compare_relax_edges(const void *a, const void *b) {
-	const relax_edge_t *ea = (const relax_edge_t *)a;
-	const relax_edge_t *eb = (const relax_edge_t *)b;
-	if (ea->u != eb->u)
-		return ea->u - eb->u;
-	return ea->v - eb->v;
-}
-
-static int compare_islands_area(const void *a, const void *b) {
-	const Island *ia     = (const Island *)a;
-	const Island *ib     = (const Island *)b;
-	float         area_a = (ia->max.x - ia->min.x) * (ia->max.y - ia->min.y);
-	float         area_b = (ib->max.x - ib->min.x) * (ib->max.y - ib->min.y);
-	return (area_a < area_b) ? 1 : -1;
-}
-
-static pack_node_t *pack_insert(pack_node_t *node, int w, int h) {
-	if (!node)
-		return NULL;
-
-	if (w > node->w || h > node->h)
-		return NULL;
-
-	if (!node->child[0]) {
-		if (node->occupied)
-			return NULL;
-
-		// Perfect fit or fits within node
-		// If perfectly same size, use it
-		if (w == node->w && h == node->h) {
-			node->occupied = 1;
-			return node;
-		}
-
-		// Split the node to create a perfect fit for the requested size
-		node->child[0] = (pack_node_t *)calloc(1, sizeof(pack_node_t));
-		node->child[1] = (pack_node_t *)calloc(1, sizeof(pack_node_t));
-
-		// Decide split axis based on maximizing the remaining rectangle area
-		int dw = node->w - w;
-		int dh = node->h - h;
-
-		if (dw > dh) {
-			// Split vertically: Child 0 is Left (fit w), Child 1 is Right (remainder)
-			node->child[0]->x = node->x;
-			node->child[0]->y = node->y;
-			node->child[0]->w = w;
-			node->child[0]->h = node->h; // Keep full height
-
-			node->child[1]->x = node->x + w;
-			node->child[1]->y = node->y;
-			node->child[1]->w = dw;
-			node->child[1]->h = node->h;
-		}
-		else {
-			// Split horizontally: Child 0 is Top (fit h), Child 1 is Bottom (remainder)
-			node->child[0]->x = node->x;
-			node->child[0]->y = node->y;
-			node->child[0]->w = node->w; // Keep full width
-			node->child[0]->h = h;
-
-			node->child[1]->x = node->x;
-			node->child[1]->y = node->y + h;
-			node->child[1]->w = node->w;
-			node->child[1]->h = dh;
-		}
-
-		// Insert into the newly created child that matches the dimension we just set up
-		return pack_insert(node->child[0], w, h);
-	}
-
-	// Recursive insert
-	pack_node_t *res = pack_insert(node->child[0], w, h);
-	if (!res)
-		res = pack_insert(node->child[1], w, h);
-	return res;
-}
-
-static void free_pack_node(pack_node_t *node) {
-	if (!node)
-		return;
-	free_pack_node(node->child[0]);
-	free_pack_node(node->child[1]);
-	free(node);
-}
-
-static void relax_island(Island *isl, uint32_t *indices, float *pa, int iterations) {
-	if (sb_count(isl->faces) < 2)
-		return;
-
-	int num_uvs = sb_count(isl->uvs);
-
-	relax_vert_t *rverts = (relax_vert_t *)malloc(sizeof(relax_vert_t) * num_uvs);
-	for (int i = 0; i < num_uvs; ++i) {
-		int f                 = i / 3;
-		int v                 = i % 3;
-		rverts[i].spatial_idx = indices[isl->faces[f] * 3 + v];
-		rverts[i].local_idx   = i;
-	}
-	qsort(rverts, num_uvs, sizeof(relax_vert_t), compare_relax_verts);
-
-	int *uv_weld_map      = (int *)malloc(sizeof(int) * num_uvs);
-	int  current_group_id = -1;
-	int  last_spatial     = -1;
-	for (int i = 0; i < num_uvs; ++i) {
-		if (rverts[i].spatial_idx != last_spatial) {
-			current_group_id = rverts[i].local_idx;
-			last_spatial     = rverts[i].spatial_idx;
-		}
-		uv_weld_map[rverts[i].local_idx] = current_group_id;
-	}
-	free(rverts);
-
-	relax_edge_t *redges = NULL;
-	typedef struct {
-		int   count;
-		int   neighbors[8];
-		float dists[8];
-	} VInfo;
-	VInfo *v_info = (VInfo *)calloc(num_uvs, sizeof(VInfo));
-
-	for (int f = 0; f < sb_count(isl->faces); ++f) {
-		for (int k = 0; k < 3; ++k) {
-			int u_local = f * 3 + k;
-			int v_local = f * 3 + (k + 1) % 3;
-			int u_weld  = uv_weld_map[u_local];
-			int v_weld  = uv_weld_map[v_local];
-			if (u_weld > v_weld) {
-				int t  = u_weld;
-				u_weld = v_weld;
-				v_weld = t;
-			}
-
-			relax_edge_t re = {u_weld, v_weld};
-			sb_push(redges, re);
-
-			int    idx_u = indices[isl->faces[f] * 3 + k];
-			int    idx_v = indices[isl->faces[f] * 3 + (k + 1) % 3];
-			vec3_t p1    = {pa[idx_u * 3], pa[idx_u * 3 + 1], pa[idx_u * 3 + 2]};
-			vec3_t p2    = {pa[idx_v * 3], pa[idx_v * 3 + 1], pa[idx_v * 3 + 2]};
-			float  d     = v3_len(v3_sub(p1, p2));
-
-			if (v_info[u_local].count < 8) {
-				v_info[u_local].neighbors[v_info[u_local].count] = v_local;
-				v_info[u_local].dists[v_info[u_local].count]     = d;
-				v_info[u_local].count++;
-			}
-			if (v_info[v_local].count < 8) {
-				v_info[v_local].neighbors[v_info[v_local].count] = u_local;
-				v_info[v_local].dists[v_info[v_local].count]     = d;
-				v_info[v_local].count++;
-			}
-		}
-	}
-
-	qsort(redges, sb_count(redges), sizeof(relax_edge_t), compare_relax_edges);
-
-	char *weld_is_border = (char *)calloc(num_uvs, 1);
-	int   num_edges      = sb_count(redges);
-	int   i              = 0;
-	while (i < num_edges) {
-		int count = 1;
-		while (i + count < num_edges && redges[i + count].u == redges[i].u && redges[i + count].v == redges[i].v)
-			count++;
-		if (count == 1) {
-			weld_is_border[redges[i].u] = 1;
-			weld_is_border[redges[i].v] = 1;
-		}
-		i += count;
-	}
-	sb_free(redges);
-
-	char *is_border = (char *)calloc(num_uvs, 1);
-	for (int k = 0; k < num_uvs; ++k) {
-		if (weld_is_border[uv_weld_map[k]])
-			is_border[k] = 1;
-	}
-	free(weld_is_border);
-
-	vec2_t *temp_uvs = (vec2_t *)malloc(sizeof(vec2_t) * num_uvs);
-	float  *sum_x    = (float *)calloc(num_uvs, sizeof(float));
-	float  *sum_y    = (float *)calloc(num_uvs, sizeof(float));
-	int    *counts   = (int *)calloc(num_uvs, sizeof(int));
-
-	for (int iter = 0; iter < iterations; ++iter) {
-		memcpy(temp_uvs, isl->uvs, sizeof(vec2_t) * num_uvs);
-
-		for (int k = 0; k < num_uvs; ++k) {
-			if (is_border[k])
-				continue;
-
-			vec2_t sum_pos    = {0, 0};
-			float  weight_sum = 0;
-
-			for (int n = 0; n < v_info[k].count; ++n) {
-				int   neighbor_idx = v_info[k].neighbors[n];
-				float target_dist  = v_info[k].dists[n];
-				if (target_dist < 0.0001f)
-					target_dist = 0.0001f;
-
-				vec2_t n_pos = temp_uvs[neighbor_idx];
-				float  w     = 1.0f / target_dist;
-
-				sum_pos.x += n_pos.x * w;
-				sum_pos.y += n_pos.y * w;
-				weight_sum += w;
-			}
-
-			if (weight_sum > 0) {
-				isl->uvs[k].x = sum_pos.x / weight_sum;
-				isl->uvs[k].y = sum_pos.y / weight_sum;
-			}
-		}
-
-		memset(sum_x, 0, sizeof(float) * num_uvs);
-		memset(sum_y, 0, sizeof(float) * num_uvs);
-		memset(counts, 0, sizeof(int) * num_uvs);
-
-		for (int k = 0; k < num_uvs; ++k) {
-			int wid = uv_weld_map[k];
-			sum_x[wid] += isl->uvs[k].x;
-			sum_y[wid] += isl->uvs[k].y;
-			counts[wid]++;
-		}
-
-		for (int k = 0; k < num_uvs; ++k) {
-			int wid = uv_weld_map[k];
-			if (counts[wid] > 1) {
-				isl->uvs[k].x = sum_x[wid] / counts[wid];
-				isl->uvs[k].y = sum_y[wid] / counts[wid];
-			}
-		}
-	}
-
-	free(sum_x);
-	free(sum_y);
-	free(counts);
-	free(temp_uvs);
-	free(uv_weld_map);
-	free(v_info);
-	free(is_border);
+static uint32_t uv_hash_edge(int v0, int v1) {
+	return (uint32_t)v0 * 2654435761u ^ (uint32_t)v1 * 2246822519u;
 }
 
 void proc_uv_unwrap(raw_mesh_t *mesh) {
 	double t = iron_time();
 
-	// Prepare Data
+	// Decode input mesh data
 	int    vertex_count = mesh->posa->length / 4;
 	float *pa           = (float *)malloc(sizeof(float) * vertex_count * 3);
-	float *na           = (float *)malloc(sizeof(float) * vertex_count * 3);
 	float  inv          = 1.0f / 32767.0f;
 
 	for (int i = 0; i < vertex_count; i++) {
 		pa[i * 3]     = mesh->posa->buffer[i * 4] * inv;
 		pa[i * 3 + 1] = mesh->posa->buffer[i * 4 + 1] * inv;
 		pa[i * 3 + 2] = mesh->posa->buffer[i * 4 + 2] * inv;
-		na[i * 3]     = mesh->nora->buffer[i * 2] * inv;
-		na[i * 3 + 1] = mesh->nora->buffer[i * 2 + 1] * inv;
-		na[i * 3 + 2] = mesh->posa->buffer[i * 4 + 3] * inv;
 	}
 
 	int       index_count = mesh->inda->length;
 	uint32_t *indices     = mesh->inda->buffer;
 	int       face_count  = index_count / 3;
 
-	// Weld
-	int         *weld_map = (int *)malloc(sizeof(int) * vertex_count);
-	sort_vert_t *sverts   = (sort_vert_t *)malloc(sizeof(sort_vert_t) * vertex_count);
-	for (int i = 0; i < vertex_count; i++) {
-		sverts[i].pa    = &pa[i * 3];
-		sverts[i].index = i;
+	// Compute face normals
+	float *fnormals = (float *)malloc(sizeof(float) * face_count * 3);
+	for (int f = 0; f < face_count; f++) {
+		int   i0  = indices[f * 3];
+		int   i1  = indices[f * 3 + 1];
+		int   i2  = indices[f * 3 + 2];
+		float e1x = pa[i1 * 3] - pa[i0 * 3];
+		float e1y = pa[i1 * 3 + 1] - pa[i0 * 3 + 1];
+		float e1z = pa[i1 * 3 + 2] - pa[i0 * 3 + 2];
+		float e2x = pa[i2 * 3] - pa[i0 * 3];
+		float e2y = pa[i2 * 3 + 1] - pa[i0 * 3 + 1];
+		float e2z = pa[i2 * 3 + 2] - pa[i0 * 3 + 2];
+		float nx  = e1y * e2z - e1z * e2y;
+		float ny  = e1z * e2x - e1x * e2z;
+		float nz  = e1x * e2y - e1y * e2x;
+		float len = sqrtf(nx * nx + ny * ny + nz * nz);
+		if (len > 1e-10f) {
+			nx /= len;
+			ny /= len;
+			nz /= len;
+		}
+		fnormals[f * 3]     = nx;
+		fnormals[f * 3 + 1] = ny;
+		fnormals[f * 3 + 2] = nz;
 	}
-	qsort(sverts, vertex_count, sizeof(sort_vert_t), compare_verts);
 
-	int   unique_counter = 0;
-	float eps            = 0.0001f;
+	// Build canonical vertex ID map (deduplicate positions)
+	int             pos_cap     = vertex_count * 2 + 1;
+	uv_pos_entry_t *pos_map     = (uv_pos_entry_t *)calloc(pos_cap, sizeof(uv_pos_entry_t));
+	int            *vert_canon  = (int *)malloc(sizeof(int) * vertex_count);
+	int             canon_count = 0;
+
 	for (int i = 0; i < vertex_count; i++) {
-		if (i > 0) {
-			if (fabsf(sverts[i].pa[0] - sverts[i - 1].pa[0]) > eps || fabsf(sverts[i].pa[1] - sverts[i - 1].pa[1]) > eps ||
-			    fabsf(sverts[i].pa[2] - sverts[i - 1].pa[2]) > eps) {
-				unique_counter++;
+		int16_t  x = mesh->posa->buffer[i * 4];
+		int16_t  y = mesh->posa->buffer[i * 4 + 1];
+		int16_t  z = mesh->posa->buffer[i * 4 + 2];
+		uint32_t h = uv_hash_pos(x, y, z) % pos_cap;
+		while (true) {
+			if (!pos_map[h].occupied) {
+				pos_map[h].x        = x;
+				pos_map[h].y        = y;
+				pos_map[h].z        = z;
+				pos_map[h].id       = canon_count;
+				pos_map[h].occupied = true;
+				vert_canon[i]       = canon_count++;
+				break;
+			}
+			if (pos_map[h].x == x && pos_map[h].y == y && pos_map[h].z == z) {
+				vert_canon[i] = pos_map[h].id;
+				break;
+			}
+			h = (h + 1) % pos_cap;
+		}
+	}
+	free(pos_map);
+
+	// Build face adjacency via shared edges
+	int              edge_cap = face_count * 6 + 1;
+	uv_edge_entry_t *edge_map = (uv_edge_entry_t *)calloc(edge_cap, sizeof(uv_edge_entry_t));
+	int             *face_adj = (int *)malloc(sizeof(int) * face_count * 3);
+	for (int i = 0; i < face_count * 3; i++) {
+		face_adj[i] = -1;
+	}
+
+	for (int f = 0; f < face_count; f++) {
+		for (int e = 0; e < 3; e++) {
+			int c0 = vert_canon[indices[f * 3 + e]];
+			int c1 = vert_canon[indices[f * 3 + (e + 1) % 3]];
+			int ea = c0 < c1 ? c0 : c1;
+			int eb = c0 < c1 ? c1 : c0;
+
+			uint32_t h = uv_hash_edge(ea, eb) % edge_cap;
+			while (true) {
+				if (!edge_map[h].occupied) {
+					edge_map[h].v0       = ea;
+					edge_map[h].v1       = eb;
+					edge_map[h].face0    = f;
+					edge_map[h].face1    = -1;
+					edge_map[h].occupied = true;
+					break;
+				}
+				if (edge_map[h].v0 == ea && edge_map[h].v1 == eb) {
+					if (edge_map[h].face1 == -1) {
+						edge_map[h].face1 = f;
+						int f0            = edge_map[h].face0;
+						for (int s = 0; s < 3; s++) {
+							if (face_adj[f0 * 3 + s] == -1) {
+								face_adj[f0 * 3 + s] = f;
+								break;
+							}
+						}
+						for (int s = 0; s < 3; s++) {
+							if (face_adj[f * 3 + s] == -1) {
+								face_adj[f * 3 + s] = f0;
+								break;
+							}
+						}
+					}
+					break;
+				}
+				h = (h + 1) % edge_cap;
 			}
 		}
-		weld_map[sverts[i].index] = unique_counter;
 	}
-	free(sverts);
+	free(edge_map);
+	free(vert_canon);
 
-	// Adjacency
-	vec3_t *face_normals = (vec3_t *)malloc(sizeof(vec3_t) * face_count);
-	for (int i = 0; i < face_count; i++) {
-		uint32_t i0     = indices[i * 3];
-		uint32_t i1     = indices[i * 3 + 1];
-		uint32_t i2     = indices[i * 3 + 2];
-		vec3_t   v0     = {pa[i0 * 3], pa[i0 * 3 + 1], pa[i0 * 3 + 2]};
-		vec3_t   v1     = {pa[i1 * 3], pa[i1 * 3 + 1], pa[i1 * 3 + 2]};
-		vec3_t   v2     = {pa[i2 * 3], pa[i2 * 3 + 1], pa[i2 * 3 + 2]};
-		face_normals[i] = v3_norm(v3_cross(v3_sub(v1, v0), v3_sub(v2, v0)));
-	}
+	// Flood-fill faces into charts based on normal angle threshold
+	int *chart_id    = (int *)malloc(sizeof(int) * face_count);
+	int  chart_count = 0;
+	int *stack       = (int *)malloc(sizeof(int) * face_count);
+	memset(chart_id, -1, sizeof(int) * face_count);
 
-	edge_ref_t *edges = (edge_ref_t *)malloc(sizeof(edge_ref_t) * face_count * 3);
-	for (int i = 0; i < face_count; i++) {
-		for (int j = 0; j < 3; j++) {
-			int idx1 = weld_map[indices[i * 3 + j]];
-			int idx2 = weld_map[indices[i * 3 + (j + 1) % 3]];
-			if (idx1 > idx2) {
-				int t = idx1;
-				idx1  = idx2;
-				idx2  = t;
-			}
-			edges[i * 3 + j] = (edge_ref_t){idx1, idx2, i};
-		}
-	}
-	qsort(edges, face_count * 3, sizeof(edge_ref_t), compare_edges);
-
-	int **adj = (int **)calloc(face_count, sizeof(int *));
-	for (int i = 0; i < face_count * 3 - 1; i++) {
-		if (edges[i].u1 == edges[i + 1].u1 && edges[i].u2 == edges[i + 1].u2) {
-			int f1 = edges[i].face;
-			int f2 = edges[i + 1].face;
-			sb_push(adj[f1], f2);
-			sb_push(adj[f2], f1);
-		}
-	}
-	free(edges);
-
-	// Segmentation
-	float   angle_limit_deg = 66.0f;
-	float   angle_threshold = cosf(angle_limit_deg * (3.14159f / 180.0f));
-	int    *face_visited    = (int *)calloc(face_count, sizeof(int));
-	Island *islands         = NULL;
-
-	for (int i = 0; i < face_count; i++) {
-		if (face_visited[i])
+	for (int f = 0; f < face_count; f++) {
+		if (chart_id[f] != -1) {
 			continue;
+		}
+		int   cid     = chart_count++;
+		float seed_nx = fnormals[f * 3];
+		float seed_ny = fnormals[f * 3 + 1];
+		float seed_nz = fnormals[f * 3 + 2];
+		chart_id[f]   = cid;
+		int sp        = 0;
+		stack[sp++]   = f;
 
-		Island island = {0};
-		int   *queue  = NULL;
-		sb_push(queue, i);
-		face_visited[i] = 1;
-		sb_push(island.faces, i);
-
-		int    head       = 0;
-		vec3_t island_avg = face_normals[i];
-
-		while (head < sb_count(queue)) {
-			int  curr_f    = queue[head++];
-			int *neighbors = adj[curr_f];
-			for (int k = 0; k < sb_count(neighbors); k++) {
-				int next_f = neighbors[k];
-				if (face_visited[next_f])
+		while (sp > 0) {
+			int cf = stack[--sp];
+			for (int s = 0; s < 3; s++) {
+				int nf = face_adj[cf * 3 + s];
+				if (nf == -1 || chart_id[nf] != -1) {
 					continue;
+				}
+				// Compare against seed normal to prevent chart drift
+				float dot = seed_nx * fnormals[nf * 3] + seed_ny * fnormals[nf * 3 + 1] + seed_nz * fnormals[nf * 3 + 2];
+				if (dot >= UV_ANGLE_THRESHOLD) {
+					chart_id[nf] = cid;
+					stack[sp++]  = nf;
+				}
+			}
+		}
+	}
+	free(stack);
+	free(face_adj);
 
-				float dot_local  = v3_dot(face_normals[curr_f], face_normals[next_f]);
-				float dot_global = v3_dot(v3_norm(island_avg), face_normals[next_f]);
+	// Compute average normal per chart
+	float *chart_nx = (float *)calloc(chart_count, sizeof(float));
+	float *chart_ny = (float *)calloc(chart_count, sizeof(float));
+	float *chart_nz = (float *)calloc(chart_count, sizeof(float));
 
-				if (dot_local > angle_threshold && dot_global > 0.5f) {
-					face_visited[next_f] = 1;
-					sb_push(island.faces, next_f);
-					sb_push(queue, next_f);
-					island_avg = v3_add(island_avg, face_normals[next_f]);
+	for (int f = 0; f < face_count; f++) {
+		int c = chart_id[f];
+		chart_nx[c] += fnormals[f * 3];
+		chart_ny[c] += fnormals[f * 3 + 1];
+		chart_nz[c] += fnormals[f * 3 + 2];
+	}
+	free(fnormals);
+
+	for (int c = 0; c < chart_count; c++) {
+		float len = sqrtf(chart_nx[c] * chart_nx[c] + chart_ny[c] * chart_ny[c] + chart_nz[c] * chart_nz[c]);
+		if (len > 1e-10f) {
+			chart_nx[c] /= len;
+			chart_ny[c] /= len;
+			chart_nz[c] /= len;
+		}
+	}
+
+	// Compute projection axes (U, V) per chart from average normal
+	float *chart_ux = (float *)malloc(sizeof(float) * chart_count);
+	float *chart_uy = (float *)malloc(sizeof(float) * chart_count);
+	float *chart_uz = (float *)malloc(sizeof(float) * chart_count);
+	float *chart_vx = (float *)malloc(sizeof(float) * chart_count);
+	float *chart_vy = (float *)malloc(sizeof(float) * chart_count);
+	float *chart_vz = (float *)malloc(sizeof(float) * chart_count);
+
+	for (int c = 0; c < chart_count; c++) {
+		float nx = chart_nx[c];
+		float ny = chart_ny[c];
+		float nz = chart_nz[c];
+
+		// Reference vector not parallel to normal
+		float rx, ry, rz;
+		if (fabsf(ny) < 0.9f) {
+			rx = 0.0f;
+			ry = 1.0f;
+			rz = 0.0f;
+		}
+		else {
+			rx = 1.0f;
+			ry = 0.0f;
+			rz = 0.0f;
+		}
+
+		// U = normalize(cross(N, ref))
+		float ux = ny * rz - nz * ry;
+		float uy = nz * rx - nx * rz;
+		float uz = nx * ry - ny * rx;
+		float ul = sqrtf(ux * ux + uy * uy + uz * uz);
+		if (ul > 1e-10f) {
+			ux /= ul;
+			uy /= ul;
+			uz /= ul;
+		}
+
+		// V = cross(N, U)
+		chart_ux[c] = ux;
+		chart_uy[c] = uy;
+		chart_uz[c] = uz;
+		chart_vx[c] = ny * uz - nz * uy;
+		chart_vy[c] = nz * ux - nx * uz;
+		chart_vz[c] = nx * uy - ny * ux;
+	}
+	free(chart_nx);
+	free(chart_ny);
+	free(chart_nz);
+
+	// Project vertices onto chart planes and compute per-chart bounding boxes
+	float *uv_out  = (float *)malloc(sizeof(float) * index_count * 2);
+	float *c_min_u = (float *)malloc(sizeof(float) * chart_count);
+	float *c_min_v = (float *)malloc(sizeof(float) * chart_count);
+	float *c_max_u = (float *)malloc(sizeof(float) * chart_count);
+	float *c_max_v = (float *)malloc(sizeof(float) * chart_count);
+
+	for (int c = 0; c < chart_count; c++) {
+		c_min_u[c] = FLT_MAX;
+		c_min_v[c] = FLT_MAX;
+		c_max_u[c] = -FLT_MAX;
+		c_max_v[c] = -FLT_MAX;
+	}
+
+	for (int f = 0; f < face_count; f++) {
+		int c = chart_id[f];
+		for (int k = 0; k < 3; k++) {
+			int   vi        = indices[f * 3 + k];
+			float px        = pa[vi * 3];
+			float py        = pa[vi * 3 + 1];
+			float pz        = pa[vi * 3 + 2];
+			float u         = px * chart_ux[c] + py * chart_uy[c] + pz * chart_uz[c];
+			float v         = px * chart_vx[c] + py * chart_vy[c] + pz * chart_vz[c];
+			int   idx       = (f * 3 + k) * 2;
+			uv_out[idx]     = u;
+			uv_out[idx + 1] = v;
+			if (u < c_min_u[c])
+				c_min_u[c] = u;
+			if (v < c_min_v[c])
+				c_min_v[c] = v;
+			if (u > c_max_u[c])
+				c_max_u[c] = u;
+			if (v > c_max_v[c])
+				c_max_v[c] = v;
+		}
+	}
+	free(chart_ux);
+	free(chart_uy);
+	free(chart_uz);
+	free(chart_vx);
+	free(chart_vy);
+	free(chart_vz);
+
+	// Normalize UVs per chart to origin
+	for (int f = 0; f < face_count; f++) {
+		int c = chart_id[f];
+		for (int k = 0; k < 3; k++) {
+			int idx = (f * 3 + k) * 2;
+			uv_out[idx] -= c_min_u[c];
+			uv_out[idx + 1] -= c_min_v[c];
+		}
+	}
+
+	// Compute chart sizes and total area for scaling
+	float *chart_w    = (float *)malloc(sizeof(float) * chart_count);
+	float *chart_h    = (float *)malloc(sizeof(float) * chart_count);
+	float  total_area = 0.0f;
+
+	for (int c = 0; c < chart_count; c++) {
+		chart_w[c] = c_max_u[c] - c_min_u[c];
+		chart_h[c] = c_max_v[c] - c_min_v[c];
+		if (chart_w[c] < 1e-10f)
+			chart_w[c] = 1e-6f;
+		if (chart_h[c] < 1e-10f)
+			chart_h[c] = 1e-6f;
+		total_area += chart_w[c] * chart_h[c];
+	}
+	free(c_min_u);
+	free(c_min_v);
+	free(c_max_u);
+	free(c_max_v);
+
+	// Sort charts by area (descending) for packing
+	int *chart_order = (int *)malloc(sizeof(int) * chart_count);
+	for (int i = 0; i < chart_count; i++) {
+		chart_order[i] = i;
+	}
+	for (int i = 1; i < chart_count; i++) {
+		int   key = chart_order[i];
+		float ka  = chart_w[key] * chart_h[key];
+		int   j   = i - 1;
+		while (j >= 0 && chart_w[chart_order[j]] * chart_h[chart_order[j]] < ka) {
+			chart_order[j + 1] = chart_order[j];
+			j--;
+		}
+		chart_order[j + 1] = key;
+	}
+
+	// Determine per-chart rotation: if width > height, rotate 90 degrees for tighter packing
+	bool  *chart_rotated = (bool *)calloc(chart_count, sizeof(bool));
+	float *pack_w        = (float *)malloc(sizeof(float) * chart_count);
+	float *pack_h        = (float *)malloc(sizeof(float) * chart_count);
+	for (int c = 0; c < chart_count; c++) {
+		if (chart_w[c] > chart_h[c]) {
+			chart_rotated[c] = true;
+			pack_w[c]        = chart_h[c];
+			pack_h[c]        = chart_w[c];
+		}
+		else {
+			pack_w[c] = chart_w[c];
+			pack_h[c] = chart_h[c];
+		}
+	}
+
+	// Skyline packing with binary search for optimal scale
+	float *chart_off_u = (float *)malloc(sizeof(float) * chart_count);
+	float *chart_off_v = (float *)malloc(sizeof(float) * chart_count);
+
+	// Skyline: array of (x, y) pairs representing the top edge of placed islands
+	int    sky_cap = chart_count + 1;
+	float *sky_x   = (float *)malloc(sizeof(float) * sky_cap);
+	float *sky_y   = (float *)malloc(sizeof(float) * sky_cap);
+	int    sky_len;
+
+	float margin   = UV_PACK_MARGIN;
+	float scale_lo = 0.0f;
+	float scale_hi = total_area > 1e-10f ? (2.0f / sqrtf(total_area)) : 2.0f;
+	float scale    = 0.0f;
+
+	// Binary search: find largest scale where all islands fit in [0,1]
+	for (int iter = 0; iter < 40; iter++) {
+		float try_scale = (scale_lo + scale_hi) * 0.5f;
+
+		// Reset skyline
+		sky_len  = 1;
+		sky_x[0] = 0.0f;
+		sky_y[0] = 0.0f;
+
+		bool fits = true;
+		for (int i = 0; i < chart_count; i++) {
+			int   c  = chart_order[i];
+			float cw = pack_w[c] * try_scale + margin;
+			float ch = pack_h[c] * try_scale + margin;
+
+			// Find best skyline position (lowest y where island fits)
+			float best_x = 0.0f;
+			float best_y = FLT_MAX;
+			int   best_j = -1;
+
+			for (int j = 0; j < sky_len; j++) {
+				float x0    = sky_x[j];
+				float x_end = sky_x[j] + cw;
+				if (x_end > 1.0f + 1e-6f) {
+					continue;
+				}
+
+				// Find max y across skyline segments this island spans
+				float max_y = 0.0f;
+				for (int k = j; k < sky_len; k++) {
+					float seg_end = (k + 1 < sky_len) ? sky_x[k + 1] : 1.0f;
+					if (sky_x[k] >= x_end - 1e-6f) {
+						break;
+					}
+					if (sky_y[k] > max_y) {
+						max_y = sky_y[k];
+					}
+				}
+
+				if (max_y + ch <= 1.0f + 1e-6f && max_y < best_y) {
+					best_y = max_y;
+					best_x = x0;
+					best_j = j;
+				}
+			}
+
+			if (best_j == -1) {
+				fits = false;
+				break;
+			}
+
+			chart_off_u[c] = best_x + margin * 0.5f;
+			chart_off_v[c] = best_y + margin * 0.5f;
+
+			// Update skyline: insert new segment for this island
+			float new_x0 = best_x;
+			float new_x1 = best_x + cw;
+			float new_y  = best_y + ch;
+
+			// Collect segments that are NOT fully covered by the new island
+			float tmp_x[1024];
+			float tmp_y[1024];
+			int   tmp_len = 0;
+
+			for (int k = 0; k < sky_len; k++) {
+				float seg_x0 = sky_x[k];
+				float seg_x1 = (k + 1 < sky_len) ? sky_x[k + 1] : 1.0f;
+				float seg_y  = sky_y[k];
+
+				if (seg_x1 <= new_x0 + 1e-6f || seg_x0 >= new_x1 - 1e-6f) {
+					// Segment fully outside new island
+					if (tmp_len < 1024) {
+						tmp_x[tmp_len] = seg_x0;
+						tmp_y[tmp_len] = seg_y;
+						tmp_len++;
+					}
+				}
+				else {
+					// Segment overlaps with new island
+					if (seg_x0 < new_x0 - 1e-6f && tmp_len < 1024) {
+						tmp_x[tmp_len] = seg_x0;
+						tmp_y[tmp_len] = seg_y;
+						tmp_len++;
+					}
+					// Insert the new island segment at its left edge
+					if (tmp_len == 0 || tmp_x[tmp_len - 1] < new_x0 - 1e-6f || tmp_y[tmp_len - 1] != new_y) {
+						if (tmp_len < 1024) {
+							tmp_x[tmp_len] = new_x0;
+							tmp_y[tmp_len] = new_y;
+							tmp_len++;
+						}
+					}
+					if (seg_x1 > new_x1 + 1e-6f && tmp_len < 1024) {
+						tmp_x[tmp_len] = new_x1;
+						tmp_y[tmp_len] = seg_y;
+						tmp_len++;
+					}
+				}
+			}
+
+			// Deduplicate and copy back
+			sky_len = 0;
+			for (int k = 0; k < tmp_len && sky_len < sky_cap; k++) {
+				if (sky_len > 0 && fabsf(tmp_y[k] - sky_y[sky_len - 1]) < 1e-6f) {
+					continue; // Merge segments at same height
+				}
+				sky_x[sky_len] = tmp_x[k];
+				sky_y[sky_len] = tmp_y[k];
+				sky_len++;
+			}
+		}
+
+		if (fits) {
+			scale    = try_scale;
+			scale_lo = try_scale;
+		}
+		else {
+			scale_hi = try_scale;
+		}
+	}
+
+	// Final pass with best scale to get definitive offsets
+	sky_len  = 1;
+	sky_x[0] = 0.0f;
+	sky_y[0] = 0.0f;
+
+	for (int i = 0; i < chart_count; i++) {
+		int   c  = chart_order[i];
+		float cw = pack_w[c] * scale + margin;
+		float ch = pack_h[c] * scale + margin;
+
+		float best_x = 0.0f;
+		float best_y = FLT_MAX;
+		int   best_j = -1;
+
+		for (int j = 0; j < sky_len; j++) {
+			float x_end = sky_x[j] + cw;
+			if (x_end > 1.0f + 1e-6f) {
+				continue;
+			}
+			float max_y = 0.0f;
+			for (int k = j; k < sky_len; k++) {
+				if (sky_x[k] >= x_end - 1e-6f) {
+					break;
+				}
+				if (sky_y[k] > max_y) {
+					max_y = sky_y[k];
+				}
+			}
+			if (max_y + ch <= 1.0f + 1e-6f && max_y < best_y) {
+				best_y = max_y;
+				best_x = sky_x[j];
+				best_j = j;
+			}
+		}
+
+		chart_off_u[c] = best_x + margin * 0.5f;
+		chart_off_v[c] = best_y + margin * 0.5f;
+
+		float new_x0 = best_x;
+		float new_x1 = best_x + cw;
+		float new_y  = best_y + ch;
+
+		float tmp_x[1024];
+		float tmp_y[1024];
+		int   tmp_len = 0;
+
+		for (int k = 0; k < sky_len; k++) {
+			float seg_x0 = sky_x[k];
+			float seg_x1 = (k + 1 < sky_len) ? sky_x[k + 1] : 1.0f;
+			float seg_y  = sky_y[k];
+
+			if (seg_x1 <= new_x0 + 1e-6f || seg_x0 >= new_x1 - 1e-6f) {
+				if (tmp_len < 1024) {
+					tmp_x[tmp_len] = seg_x0;
+					tmp_y[tmp_len] = seg_y;
+					tmp_len++;
+				}
+			}
+			else {
+				if (seg_x0 < new_x0 - 1e-6f && tmp_len < 1024) {
+					tmp_x[tmp_len] = seg_x0;
+					tmp_y[tmp_len] = seg_y;
+					tmp_len++;
+				}
+				if (tmp_len == 0 || tmp_x[tmp_len - 1] < new_x0 - 1e-6f || tmp_y[tmp_len - 1] != new_y) {
+					if (tmp_len < 1024) {
+						tmp_x[tmp_len] = new_x0;
+						tmp_y[tmp_len] = new_y;
+						tmp_len++;
+					}
+				}
+				if (seg_x1 > new_x1 + 1e-6f && tmp_len < 1024) {
+					tmp_x[tmp_len] = new_x1;
+					tmp_y[tmp_len] = seg_y;
+					tmp_len++;
 				}
 			}
 		}
 
-		// Project
-		island_avg = v3_norm(island_avg);
-		vec3_t up  = {0, 1, 0};
-		if (fabsf(v3_dot(up, island_avg)) > 0.9f)
-			up = (vec3_t){0, 0, 1};
-		vec3_t right = v3_norm(v3_cross(up, island_avg));
-		up           = v3_norm(v3_cross(island_avg, right));
-
-		for (int k = 0; k < sb_count(island.faces); k++) {
-			int f = island.faces[k];
-			for (int v = 0; v < 3; v++) {
-				int    idx = indices[f * 3 + v];
-				vec3_t pos = {pa[idx * 3], pa[idx * 3 + 1], pa[idx * 3 + 2]};
-				vec2_t uv;
-				uv.x = v3_dot(pos, right);
-				uv.y = v3_dot(pos, up);
-				sb_push(island.uvs, uv);
+		sky_len = 0;
+		for (int k = 0; k < tmp_len && sky_len < sky_cap; k++) {
+			if (sky_len > 0 && fabsf(tmp_y[k] - sky_y[sky_len - 1]) < 1e-6f) {
+				continue;
 			}
+			sky_x[sky_len] = tmp_x[k];
+			sky_y[sky_len] = tmp_y[k];
+			sky_len++;
 		}
-
-		// Relax
-		relax_island(&island, indices, pa, 5);
-
-		// Calc Bounds
-		island.min = (vec2_t){FLT_MAX, FLT_MAX};
-		island.max = (vec2_t){-FLT_MAX, -FLT_MAX};
-		for (int k = 0; k < sb_count(island.uvs); k++) {
-			if (island.uvs[k].x < island.min.x)
-				island.min.x = island.uvs[k].x;
-			if (island.uvs[k].y < island.min.y)
-				island.min.y = island.uvs[k].y;
-			if (island.uvs[k].x > island.max.x)
-				island.max.x = island.uvs[k].x;
-			if (island.uvs[k].y > island.max.y)
-				island.max.y = island.uvs[k].y;
-		}
-
-		// Normalize to local 0,0
-		for (int k = 0; k < sb_count(island.uvs); k++) {
-			island.uvs[k].x -= island.min.x;
-			island.uvs[k].y -= island.min.y;
-		}
-
-		sb_push(islands, island);
-		sb_free(queue);
 	}
+	free(sky_x);
+	free(sky_y);
+	free(chart_order);
 
-	free(face_visited);
-	for (int i = 0; i < face_count; i++)
-		sb_free(adj[i]);
-	free(adj);
-	free(weld_map);
-
-	// Sort by Area
-	qsort(islands, sb_count(islands), sizeof(Island), compare_islands_area);
-
-	int map_size = 2048;
-	int padding  = 4;
-
-	// Calc total area
-	float total_area = 0;
-	for (int i = 0; i < sb_count(islands); i++) {
-		total_area += (islands[i].max.x - islands[i].min.x) * (islands[i].max.y - islands[i].min.y);
-	}
-
-	// Iterative Fit
-	float ideal_scale = 1.0f;
-	if (total_area > 0.0001f) {
-		ideal_scale = sqrtf((map_size * map_size * 1.0f) / total_area); // Start high
-	}
-	if (ideal_scale > 1000.0f)
-		ideal_scale = 1000.0f;
-
-	float final_scale = 0;
-
-	// Retry loop
-	for (float try_scale = ideal_scale; try_scale > 0.001f; try_scale *= 0.95f) {
-		pack_node_t *root = (pack_node_t *)calloc(1, sizeof(pack_node_t));
-		root->w           = map_size;
-		root->h           = map_size;
-
-		int success = 1;
-		for (int i = 0; i < sb_count(islands); i++) {
-			int w = (int)((islands[i].max.x - islands[i].min.x) * try_scale) + padding * 2;
-			int h = (int)((islands[i].max.y - islands[i].min.y) * try_scale) + padding * 2;
-			if (w < 1)
-				w = 1;
-			if (h < 1)
-				h = 1;
-
-			pack_node_t *node = pack_insert(root, w, h);
-			if (node) {
-				// Store temporary packed coords in island
-				islands[i].p_x = node->x;
-				islands[i].p_y = node->y;
+	// Apply packing offsets, scale, and rotation to all UVs
+	for (int f = 0; f < face_count; f++) {
+		int c = chart_id[f];
+		for (int k = 0; k < 3; k++) {
+			int   idx = (f * 3 + k) * 2;
+			float u   = uv_out[idx];
+			float v   = uv_out[idx + 1];
+			if (chart_rotated[c]) {
+				// Rotate 90 degrees: (u, v) -> (v, w - u) where w = chart_w[c]
+				float ru = v;
+				float rv = chart_w[c] - u;
+				u        = ru;
+				v        = rv;
 			}
-			else {
-				success = 0;
-				break;
-			}
-		}
-
-		free_pack_node(root);
-
-		if (success) {
-			final_scale = try_scale;
-			break;
+			uv_out[idx]     = u * scale + chart_off_u[c];
+			uv_out[idx + 1] = v * scale + chart_off_v[c];
 		}
 	}
+	free(chart_off_u);
+	free(chart_off_v);
+	free(chart_rotated);
+	free(pack_w);
+	free(pack_h);
+	free(chart_w);
+	free(chart_h);
 
-	// Final Apply
-	for (int i = 0; i < sb_count(islands); i++) {
-		float off_x = (islands[i].p_x + padding) / (float)map_size;
-		float off_y = (islands[i].p_y + padding) / (float)map_size;
+	// Build output arrays (per-face-corner vertices)
+	int       out_v_count = index_count;
+	int16_t  *pa_out      = (int16_t *)malloc(sizeof(int16_t) * out_v_count * 4);
+	int16_t  *na_out      = (int16_t *)malloc(sizeof(int16_t) * out_v_count * 2);
+	int16_t  *ta_out      = (int16_t *)malloc(sizeof(int16_t) * out_v_count * 2);
+	uint32_t *ia_out      = (uint32_t *)malloc(sizeof(uint32_t) * out_v_count);
 
-		// Recalculate dimensions based on the winning scale
-		int w_px = (int)((islands[i].max.x - islands[i].min.x) * final_scale) + padding * 2;
-		int h_px = (int)((islands[i].max.y - islands[i].min.y) * final_scale) + padding * 2;
+	for (int i = 0; i < out_v_count; i++) {
+		int vi            = indices[i];
+		pa_out[i * 4]     = mesh->posa->buffer[vi * 4];
+		pa_out[i * 4 + 1] = mesh->posa->buffer[vi * 4 + 1];
+		pa_out[i * 4 + 2] = mesh->posa->buffer[vi * 4 + 2];
+		pa_out[i * 4 + 3] = mesh->posa->buffer[vi * 4 + 3];
+		na_out[i * 2]     = mesh->nora->buffer[vi * 2];
+		na_out[i * 2 + 1] = mesh->nora->buffer[vi * 2 + 1];
 
-		float uv_w = (w_px - padding * 2) / (float)map_size;
-		float uv_h = (h_px - padding * 2) / (float)map_size;
+		float u = uv_out[i * 2];
+		float v = uv_out[i * 2 + 1];
+		if (u < 0.0f)
+			u = 0.0f;
+		if (u > 1.0f)
+			u = 1.0f;
+		if (v < 0.0f)
+			v = 0.0f;
+		if (v > 1.0f)
+			v = 1.0f;
+		ta_out[i * 2]     = (int16_t)(u * 32767.0f);
+		ta_out[i * 2 + 1] = (int16_t)((1.0f - v) * 32767.0f);
 
-		float local_w = (islands[i].max.x - islands[i].min.x);
-		float local_h = (islands[i].max.y - islands[i].min.y);
-
-		for (int k = 0; k < sb_count(islands[i].uvs); k++) {
-			float u_norm        = (local_w > 1e-6f) ? islands[i].uvs[k].x / local_w : 0.0f;
-			float v_norm        = (local_h > 1e-6f) ? islands[i].uvs[k].y / local_h : 0.0f;
-			islands[i].uvs[k].x = off_x + u_norm * uv_w;
-			islands[i].uvs[k].y = off_y + v_norm * uv_h;
-		}
+		ia_out[i] = i;
 	}
 
-	// Output
-	int16_t  *pa_out      = NULL;
-	int16_t  *na_out      = NULL;
-	int16_t  *ta_out      = NULL;
-	uint32_t *ia_out      = NULL;
-	int       out_v_count = 0;
+	free(uv_out);
+	free(chart_id);
+	free(pa);
 
-	for (int i = 0; i < sb_count(islands); i++) {
-		Island *isl = &islands[i];
-		for (int f = 0; f < sb_count(isl->faces); f++) {
-			int face_idx = isl->faces[f];
-			for (int v = 0; v < 3; v++) {
-				uint32_t old_idx = indices[face_idx * 3 + v];
-				sb_push(pa_out, (int16_t)(pa[old_idx * 3] / inv));
-				sb_push(pa_out, (int16_t)(pa[old_idx * 3 + 1] / inv));
-				sb_push(pa_out, (int16_t)(pa[old_idx * 3 + 2] / inv));
-				sb_push(pa_out, (int16_t)(na[old_idx * 3 + 2] / inv));
-				sb_push(na_out, (int16_t)(na[old_idx * 3] / inv));
-				sb_push(na_out, (int16_t)(na[old_idx * 3 + 1] / inv));
-				vec2_t uv = isl->uvs[f * 3 + v];
-				sb_push(ta_out, (int16_t)(uv.x / inv));
-				sb_push(ta_out, (int16_t)(uv.y / inv));
-				sb_push(ia_out, out_v_count);
-				out_v_count++;
-			}
-		}
-		sb_free(isl->faces);
-		sb_free(isl->uvs);
-	}
-	sb_free(islands);
-
-	// if (mesh->posa->buffer)
-	// 	free(mesh->posa->buffer);
-	// if (mesh->nora->buffer)
-	// 	free(mesh->nora->buffer);
-	// if (mesh->inda->buffer)
-	// 	free(mesh->inda->buffer);
-	// if (mesh->texa) {
-	// 	if (mesh->texa->buffer)
-	// 		free(mesh->texa->buffer);
-	// 	free(mesh->texa);
-	// }
+	// Replace mesh data
+	free(mesh->posa->buffer);
+	free(mesh->nora->buffer);
+	free(mesh->inda->buffer);
 
 	mesh->posa->buffer   = pa_out;
 	mesh->posa->length   = out_v_count * 4;
-	mesh->posa->capacity = sb_cap(pa_out);
+	mesh->posa->capacity = out_v_count * 4;
 	mesh->nora->buffer   = na_out;
 	mesh->nora->length   = out_v_count * 2;
-	mesh->texa           = (i16_array_t *)malloc(sizeof(i16_array_t));
+	mesh->nora->capacity = out_v_count * 2;
+
+	if (mesh->texa == NULL) {
+		mesh->texa = (i16_array_t *)calloc(1, sizeof(i16_array_t));
+	}
+	else {
+		free(mesh->texa->buffer);
+	}
 	mesh->texa->buffer   = ta_out;
 	mesh->texa->length   = out_v_count * 2;
-	mesh->texa->capacity = sb_cap(ta_out);
+	mesh->texa->capacity = out_v_count * 2;
+
 	mesh->inda->buffer   = ia_out;
 	mesh->inda->length   = out_v_count;
-	mesh->inda->capacity = sb_cap(ia_out);
+	mesh->inda->capacity = out_v_count;
 	mesh->vertex_count   = out_v_count;
 	mesh->index_count    = out_v_count;
-	free(pa);
-	free(na);
-	free(face_normals);
+
 	iron_log("Unwrapped in %fs\n", iron_time() - t);
 }
