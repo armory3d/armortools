@@ -89,7 +89,7 @@ void import_folder_run(char *path) {
 	// Place nodes
 	i32 pos     = 0;
 	i32 start_y = 100;
-	i32 node_h  = 170;
+	i32 node_h  = 180;
 	if (!string_equals(mapbase, "")) {
 		import_folder_place_image_node(nodes, canvas, mapbase, start_y + node_h * pos, nout->id, 0);
 		pos++;
