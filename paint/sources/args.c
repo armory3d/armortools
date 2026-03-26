@@ -60,6 +60,19 @@ void args_parse() {
 				args_export_material_path = string_copy(iron_get_arg(i));
 				gc_root(args_export_material_path);
 			}
+			else if (string_equals(current_arg, "--help")) {
+				printf("Usage: armorpaint [options] [file]\n");
+				printf("Options:\n");
+				printf("  --background                      Run without displaying the window\n");
+				printf("  --export-textures <type> <preset> <path>\n");
+				printf("                                    Export textures to path\n");
+				printf("                                    type: png, jpg, exr16, exr32\n");
+				printf("  --export-mesh <path>              Export mesh to path\n");
+				printf("  --export-material <path>          Export material to path\n");
+				printf("  --reload-mesh                     Reimport mesh on startup\n");
+				printf("  --help                            Show this help message\n");
+				exit(1);
+			}
 			++i;
 		}
 	}
