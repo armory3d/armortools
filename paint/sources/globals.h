@@ -371,6 +371,7 @@ bool                      parser_material_is_frag            = true;
 bool                      args_use                           = false;
 char                     *args_asset_path                    = "";
 bool                      args_background                    = false;
+bool                      args_player                        = false;
 bool                      args_export_textures               = false;
 char                     *args_export_textures_type          = "";
 char                     *args_export_textures_preset        = "";

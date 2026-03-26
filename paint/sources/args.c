@@ -18,6 +18,9 @@ void args_parse() {
 			else if (string_equals(current_arg, "--background")) {
 				args_background = true;
 			}
+			else if (string_equals(current_arg, "--player")) {
+				args_player = true;
+			}
 			else if (path_is_texture(current_arg)) {
 				gc_unroot(args_asset_path);
 				args_asset_path = string_copy(current_arg);
@@ -70,6 +73,7 @@ void args_parse() {
 				printf("  --export-mesh <path>              Export mesh to path\n");
 				printf("  --export-material <path>          Export material to path\n");
 				printf("  --reload-mesh                     Reimport mesh on startup\n");
+				printf("  --player                          Run in player mode\n");
 				printf("  --help                            Show this help message\n");
 				exit(1);
 			}

@@ -589,6 +589,11 @@ void ui_menubar_draw_category_items() {
 			ui->changed = false; // Close menu
 		}
 
+		if (config_raw->experimental && ui_menu_button(tr("Run in Player"), "f5", ICON_PLAY)) {
+			base_run_in_player();
+			ui->changed = false; // Close menu
+		}
+
 		context_update_envmap();
 
 		if (ui->changed) {

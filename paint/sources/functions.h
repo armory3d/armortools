@@ -180,6 +180,7 @@ void                      base_resize();
 void                      base_update(void *_);
 void                      base_update_workspace();
 void                      base_update_workflow();
+void                      base_run_in_player();
 void                      base_material_dropped();
 void                      base_handle_drop_paths();
 rect_t                   *base_get_drag_background();

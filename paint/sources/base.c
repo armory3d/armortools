@@ -129,6 +129,10 @@ void base_init() {
 		gc_unroot(project_filepath);
 		project_filepath = start_arm;
 		gc_root(project_filepath);
+		args_player = true;
+	}
+
+	if (args_player) {
 		sys_notify_on_next_frame(&base_init_on_start_arm, NULL);
 		context_raw->tool     = TOOL_TYPE_GIZMO;
 		make_material_parse_paint_material(true);
@@ -1009,9 +1013,12 @@ void ui_base_update(void *_) {
 	if (keyboard_started(any_map_get(config_keymap, "view_distract_free")) || (keyboard_started("escape") && !ui_base_show && !ui_box_show)) {
 		ui_base_toggle_distract_free();
 	}
-	if (keyboard_started("f5") && config_raw->workspace != WORKSPACE_PLAYER) {
-		config_raw->workspace = WORKSPACE_PLAYER;
-		base_update_workspace();
+	// if (config_raw->experimental && keyboard_started("f5") && config_raw->workspace != WORKSPACE_PLAYER) {
+	// 	config_raw->workspace = WORKSPACE_PLAYER;
+	// 	base_update_workspace();
+	// }
+	if (config_raw->experimental && keyboard_started("f5")) {
+		base_run_in_player();
 	}
 
 #ifdef IRON_LINUX
@@ -2200,4 +2207,15 @@ void base_update_workflow() {
 			}
 		}
 	}
+}
+
+void base_run_in_player() {
+	if (string_equals(project_filepath, "")) {
+		console_error(tr("Save project first"));
+		return;
+	}
+	export_arm_run_project();
+	char *bin = iron_get_arg(0);
+	iron_sys_command(string("%s %s --player", bin, project_filepath));
+	// iron_exec_async()
 }
