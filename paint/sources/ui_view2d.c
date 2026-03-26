@@ -122,29 +122,36 @@ void ui_view2d_render(void *_) {
 	}
 
 	if (ui_window(ui_view2d_hwnd, ui_view2d_wx, ui_view2d_wy, ui_view2d_ww, ui_view2d_wh, false)) {
-		ui_canvas_control_t *control = ui_nodes_get_canvas_control(ui_view2d_controls_down);
-		ui_view2d_pan_x += control->pan_x;
-		ui_view2d_pan_y += control->pan_y;
-		ui_view2d_controls_down = control->controls_down;
-		if (control->zoom != 0.0) {
-			f32 _pan_x = ui_view2d_pan_x / (float)ui_view2d_pan_scale;
-			f32 _pan_y = ui_view2d_pan_y / (float)ui_view2d_pan_scale;
-			ui_view2d_pan_scale += control->zoom;
-			if (ui_view2d_pan_scale < 0.1) {
-				ui_view2d_pan_scale = 0.1;
-			}
-			if (ui_view2d_pan_scale > 6.0) {
-				ui_view2d_pan_scale = 6.0;
-			}
-			ui_view2d_pan_x = _pan_x * ui_view2d_pan_scale;
-			ui_view2d_pan_y = _pan_y * ui_view2d_pan_scale;
+		f32 headerh = UI_ELEMENT_H() * 1.4;
+		if (!base_ui_enabled || !ui_view2d_show || mouse_x < ui_view2d_wx || mouse_x > ui_view2d_wx + ui_view2d_ww || mouse_y < ui_view2d_wy + headerh ||
+		    mouse_y > ui_view2d_wy + ui_view2d_wh) {
+			ui_canvas_control_t *control = ui_nodes_get_canvas_control(ui_view2d_controls_down);
+			ui_view2d_controls_down      = control->controls_down;
+		}else{
+			ui_canvas_control_t *control = ui_nodes_get_canvas_control(ui_view2d_controls_down);
+			ui_view2d_pan_x += control->pan_x;
+			ui_view2d_pan_y += control->pan_y;
+			ui_view2d_controls_down = control->controls_down;
+			if (control->zoom != 0.0) {
+				f32 _pan_x = ui_view2d_pan_x / (float)ui_view2d_pan_scale;
+				f32 _pan_y = ui_view2d_pan_y / (float)ui_view2d_pan_scale;
+				ui_view2d_pan_scale += control->zoom;
+				if (ui_view2d_pan_scale < 0.1) {
+					ui_view2d_pan_scale = 0.1;
+				}
+				if (ui_view2d_pan_scale > 6.0) {
+					ui_view2d_pan_scale = 6.0;
+				}
+				ui_view2d_pan_x = _pan_x * ui_view2d_pan_scale;
+				ui_view2d_pan_y = _pan_y * ui_view2d_pan_scale;
 
-			if (ui_touch_control) {
-				// Zoom to finger location
-				ui_view2d_pan_x -= (ui->input_x - ui->_window_x - ui->_window_w / 2.0) * control->zoom;
-				ui_view2d_pan_y -= (ui->input_y - ui->_window_y - ui->_window_h / 2.0) * control->zoom;
+				if (ui_touch_control) {
+					// Zoom to finger location
+					ui_view2d_pan_x -= (ui->input_x - ui->_window_x - ui->_window_w / 2.0) * control->zoom;
+					ui_view2d_pan_y -= (ui->input_y - ui->_window_y - ui->_window_h / 2.0) * control->zoom;
+				}
+				ui_view2d_grid_redraw = true;
 			}
-			ui_view2d_grid_redraw = true;
 		}
 
 		if (!config_raw->touch_ui) {
@@ -350,7 +357,7 @@ void ui_view2d_render(void *_) {
 				string_t_array_t *tex_type_combo = any_array_create_from_raw(
 				    (void *[]){
 				        tr("Base Color"),
-						tr("Opacity"),
+				        tr("Opacity"),
 				        tr("Normal Map"),
 				        tr("Occlusion"),
 				        tr("Roughness"),
@@ -424,14 +431,14 @@ void ui_view2d_render(void *_) {
 			                  : ui_view2d_type == VIEW_2D_TYPE_FONT ? tr("Font")
 			                                                        : tr("Layer");
 
-			ui->_w          = math_floor(ew * 0.5 + 3);
+			ui->_w = math_floor(ew * 0.5 + 3);
 			ui_text(view_type, UI_ALIGN_LEFT, 0x00000000);
 			ui->_x += ew * 0.5 + 3;
 			ui->_y = 2 + start_y;
 
 			if (ui_view2d_type == VIEW_2D_TYPE_ASSET) {
-				asset_t *asset = context_raw->texture;
-				bool is_packed = project_raw->packed_assets != NULL && project_packed_asset_exists(project_raw->packed_assets, asset->file);
+				asset_t *asset     = context_raw->texture;
+				bool     is_packed = project_raw->packed_assets != NULL && project_packed_asset_exists(project_raw->packed_assets, asset->file);
 				if (is_packed) {
 					ui_text(tr("(packed)"), UI_ALIGN_LEFT, 0x00000000);
 					ui->_x += ew * 0.5 + 3;
