@@ -126,6 +126,11 @@ int kickstart(int argc, char **argv) {
 	GetModuleFileNameW(hmodule, temp_wstring, 1024);
 	WideCharToMultiByte(CP_UTF8, 0, temp_wstring, -1, temp_string, 4096, NULL, NULL);
 	bindir = _substring(temp_string, 0, string_last_index_of(temp_string, "\\"));
+	// Running from Visual Studio
+	if (argc > 1 && strlen(argv[1]) > 4 && argv[1][strlen(argv[1]) - 4] == '\\' && argv[1][strlen(argv[1]) - 3] == 'o' && argv[1][strlen(argv[1]) - 2] == 'u' &&
+	    argv[1][strlen(argv[1]) - 1] == 't') {
+		bindir = argv[1];
+	}
 #else
 	bindir = _substring(bindir, 0, string_last_index_of(bindir, "/"));
 #endif
