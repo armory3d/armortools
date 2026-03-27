@@ -514,9 +514,7 @@ void ui_node_draw_body(ui_node_t *node, ui_node_canvas_t *canvas, float nx, floa
 			current->_w           = w;
 			ui_node_socket_t *soc = but->output >= 0 ? node->outputs->buffer[but->output] : NULL;
 			ui_handle_t      *h   = ui_nest(nhandle, buti);
-			if (h->init) {
-				h->text = soc != NULL ? (char *)soc->default_value->buffer : but->default_value->buffer != NULL ? (char *)but->default_value->buffer : "";
-			}
+			h->text = soc != NULL ? (char *)soc->default_value->buffer : but->default_value->buffer != NULL ? (char *)but->default_value->buffer : "";
 			but->default_value->buffer = ui_text_input(h, ui_tr(but->name), UI_ALIGN_LEFT, true, false);
 			but->default_value->length = strlen(but->default_value->buffer) + 1;
 			if (soc != NULL) {
