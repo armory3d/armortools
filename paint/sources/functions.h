@@ -216,6 +216,7 @@ void                      ui_base_toggle_browser();
 void                      ui_base_set_icon_scale();
 void                      ui_base_on_border_hover(ui_handle_t *handle, i32 side);
 void                      ui_base_on_tab_drop(ui_handle_t *to, i32 to_position, ui_handle_t *from, i32 from_position);
+bool                      ui_base_picker_button();
 void                      base_redraw_ui();
 void                      ui_base_make_empty_envmap(i32 col);
 void                      ui_base_set_viewport_col(i32 col);
@@ -992,6 +993,7 @@ char                        *camera_data_node_vector(ui_node_t *node, ui_node_so
 char                        *camera_data_node_value(ui_node_t *node, ui_node_socket_t *socket);
 void                         script_node_init();
 char                        *script_node_value(ui_node_t *node, ui_node_socket_t *socket);
+void                         script_node_button(i32 node_id);
 void                         combine_xyz_node_init();
 char                        *combine_xyz_node_vector(ui_node_t *node, ui_node_socket_t *socket);
 void                         noise_texture_node_init();
