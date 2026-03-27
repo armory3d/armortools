@@ -151,8 +151,8 @@ f32 uniforms_ext_f32_link(object_t *object, material_data_t *mat, char *link) {
 			f32   result = NAN;
 			if (!string_equals(script, "")) {
 				minic_ctx_t *_ctx = minic_eval(string("float main() { return %s; }", script));
-			result            = minic_ctx_result(_ctx);
-			minic_ctx_free(_ctx);
+				result            = minic_ctx_result(_ctx);
+				minic_ctx_free(_ctx);
 			}
 			return result;
 		}
