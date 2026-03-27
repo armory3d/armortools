@@ -269,9 +269,7 @@ void export_arm_run_material(char *path) {
 		buf = export_arm_bgra_swap(buf);
 #endif
 		iron_write_png(string("%s_icon.png", substring(path, 0, string_length(path) - 4)), buf, m->image->width, m->image->height, 0);
-		if (is_cloud) {
-			iron_write_jpg(string("%s_icon.jpg", substring(path, 0, string_length(path) - 4)), buf, m->image->width, m->image->height, 0, 50);
-		}
+		iron_write_jpg(string("%s_icon.jpg", substring(path, 0, string_length(path) - 4)), buf, m->image->width, m->image->height, 0, 50);
 	}
 
 	if (context_raw->pack_assets_on_export) { // Pack textures
