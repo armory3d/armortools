@@ -134,7 +134,7 @@ void base_init() {
 
 	if (args_player) {
 		sys_notify_on_next_frame(&base_init_on_start_arm, NULL);
-		context_raw->tool     = TOOL_TYPE_GIZMO;
+		context_raw->tool = TOOL_TYPE_GIZMO;
 		make_material_parse_paint_material(true);
 		config_raw->workspace = WORKSPACE_PLAYER;
 		base_update_workspace();
@@ -453,6 +453,23 @@ void base_update(void *_) {
 		}
 		if (keyboard_started("delete")) {
 			sim_delete();
+		}
+	}
+
+	// Live material when using sys_time() script node
+	if (context_raw->tool == TOOL_TYPE_MATERIAL) {
+		bool              has_script_node = false;
+		ui_node_canvas_t *canvas          = context_raw->material->canvas;
+		for (i32 i = 0; i < canvas->nodes->length; ++i) {
+			ui_node_t *n = canvas->nodes->buffer[i];
+			if (string_equals(n->type, "SCRIPT_CPU")) {
+				has_script_node = true;
+				break;
+			}
+		}
+		if (has_script_node) {
+			layers_update_fill_layers();
+			iron_delay_idle_sleep();
 		}
 	}
 
@@ -938,7 +955,7 @@ void ui_base_menu_draw_viewport_mode() {
 	}
 }
 
-void ui_base_update_51603(void *_) {
+void ui_base_update_next_frame(void *_) {
 	export_texture_run(context_raw->texture_export_path, false);
 }
 
@@ -997,7 +1014,7 @@ void ui_base_update(void *_) {
 			box_export_show_textures();
 		}
 		else {
-			sys_notify_on_next_frame(&ui_base_update_51603, NULL);
+			sys_notify_on_next_frame(&ui_base_update_next_frame, NULL);
 		}
 	}
 	else if (operator_shortcut(any_map_get(config_keymap, "file_export_textures_as"), SHORTCUT_TYPE_STARTED)) {
