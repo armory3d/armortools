@@ -63,6 +63,11 @@ void render_path_base_begin() {
 	bool skip_taa =
 	    context_raw->split_view || context_raw->viewport_mode == VIEWPORT_MODE_PATH_TRACE || context_raw->camera_type == CAMERA_TYPE_ORTHOGRAPHIC ||
 	    ((context_raw->tool == TOOL_TYPE_CLONE || context_raw->tool == TOOL_TYPE_BLUR || context_raw->tool == TOOL_TYPE_SMUDGE) && context_raw->pdirty > 0);
+
+	if (config_raw->brush_live) {
+		render_path_base_taa_frame = 0;
+	}
+
 	scene_camera->frame = skip_taa ? 0 : render_path_base_taa_frame;
 	camera_object_proj_jitter(scene_camera);
 	camera_object_build_mat(scene_camera);
