@@ -653,7 +653,7 @@ void                         ui_viewnodes_on_link_drag(i32 link_drag_id, bool is
 void                         ui_viewnodes_on_socket_released(i32 socket_id);
 void                         ui_viewnodes_on_canvas_released();
 ui_canvas_control_t         *ui_viewnodes_on_canvas_control();
-ui_canvas_control_t         *ui_nodes_get_canvas_control(bool controls_down);
+ui_canvas_control_t         *ui_nodes_get_canvas_control(bool controls_down, bool is_node_view);
 f32                          ui_nodes_get_zoom_delta();
 bool                         ui_nodes_is_tab_selected();
 i32                          ui_nodes_tab_index();

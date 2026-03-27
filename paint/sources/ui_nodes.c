@@ -379,12 +379,12 @@ void ui_viewnodes_on_canvas_released() {
 }
 
 ui_canvas_control_t *ui_viewnodes_on_canvas_control() {
-	ui_canvas_control_t *control = ui_nodes_get_canvas_control(ui_nodes_controls_down);
+	ui_canvas_control_t *control = ui_nodes_get_canvas_control(ui_nodes_controls_down, true);
 	ui_nodes_controls_down       = control->controls_down;
 	return control;
 }
 
-ui_canvas_control_t *ui_nodes_get_canvas_control(bool controls_down) {
+ui_canvas_control_t *ui_nodes_get_canvas_control(bool controls_down, bool is_node_view) {
 	if (config_raw->wrap_mouse && controls_down) {
 		if (ui->input_x < ui->_window_x) {
 			ui->input_x = ui->_window_x + ui->_window_w;
@@ -411,6 +411,7 @@ ui_canvas_control_t *ui_nodes_get_canvas_control(bool controls_down) {
 	         !operator_shortcut(any_map_get(config_keymap, "action_zoom"), SHORTCUT_TYPE_DOWN) && !ui->input_down_r && ui->input_wheel_delta == 0.0) {
 		controls_down = false;
 	}
+
 	if (!controls_down) {
 		ui_canvas_control_t *cc = GC_ALLOC_INIT(ui_canvas_control_t, {.pan_x = 0, .pan_y = 0, .zoom = 0, .controls_down = controls_down});
 		return cc;
@@ -422,6 +423,13 @@ ui_canvas_control_t *ui_nodes_get_canvas_control(bool controls_down) {
 	                                                                   .pan_y         = pan ? ui->input_dy : 0.0,
 	                                                                   .zoom          = ui->input_wheel_delta != 0.0 ? -ui->input_wheel_delta / 10 : zoom_delta,
 	                                                                   .controls_down = controls_down});
+
+	if (is_node_view && ui->input_x < ui->_window_x) {
+		control->pan_x = 0.0;
+		control->pan_y = 0.0;
+		control->zoom = 0.0;
+	}
+
 	if (ui->combo_selected_handle != NULL) {
 		control->zoom = 0.0;
 	}
@@ -491,7 +499,7 @@ void ui_nodes_update(void *_) {
 	ui_nodes_wx = math_floor(sys_w()) + ui_toolbar_w(true);
 	ui_nodes_wy = ui_header_h * 2;
 
-	if (ui_view2d_show) {
+	if (ui_view2d_show && base_view3d_show) {
 		ui_nodes_wy += sys_h() - config_raw->layout->buffer[LAYOUT_SIZE_NODES_H];
 	}
 
@@ -910,6 +918,10 @@ void ui_nodes_render(void *_) {
 		if (config_raw->layout->buffer[LAYOUT_SIZE_HEADER] == 1) {
 			ui_nodes_wh += ui_header_h * 2;
 		}
+	}
+
+	if (!base_view3d_show) {
+		ui_nodes_wh -= ui_header_h * 4;
 	}
 
 	if (ui_window(ui_nodes_hwnd, ui_nodes_wx, ui_nodes_wy, ui_nodes_ww, ui_nodes_wh, false)) {

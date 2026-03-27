@@ -439,13 +439,13 @@ void ui_view2d_update(void *_) {
 	if (!base_ui_enabled || !ui_view2d_show || mouse_x < ui_view2d_wx || mouse_x > ui_view2d_wx + ui_view2d_ww || mouse_y < ui_view2d_wy + headerh ||
 	    mouse_y > ui_view2d_wy + ui_view2d_wh) {
 		if (ui_view2d_controls_down) {
-			ui_canvas_control_t *control = ui_nodes_get_canvas_control(ui_view2d_controls_down);
+			ui_canvas_control_t *control = ui_nodes_get_canvas_control(ui_view2d_controls_down, false);
 			ui_view2d_controls_down      = control->controls_down;
 		}
 		return;
 	}
 
-	ui_canvas_control_t *control = ui_nodes_get_canvas_control(ui_view2d_controls_down);
+	ui_canvas_control_t *control = ui_nodes_get_canvas_control(ui_view2d_controls_down, false);
 	ui_view2d_pan_x += control->pan_x;
 	ui_view2d_pan_y += control->pan_y;
 	ui_view2d_controls_down = control->controls_down;
