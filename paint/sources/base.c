@@ -866,6 +866,8 @@ void ui_base_init() {
 		ui_base_set_icon_scale();
 	}
 
+	ui_picker_button = ui_base_picker_button;
+
 	context_raw->gizmo             = scene_get_child(".Gizmo");
 	context_raw->gizmo_translate_x = object_get_child(context_raw->gizmo, ".TranslateX");
 	context_raw->gizmo_translate_y = object_get_child(context_raw->gizmo, ".TranslateY");
@@ -2127,6 +2129,10 @@ void ui_base_on_tab_drop(ui_handle_t *to, i32 to_position, ui_handle_t *from, i3
 		ui_base_hwnds->buffer[i]->redraws = 2;
 		ui_base_hwnds->buffer[j]->redraws = 2;
 	}
+}
+
+bool ui_base_picker_button() {
+	return ui_icon_button("", ICON_PICKER, UI_ALIGN_CENTER);
 }
 
 void base_redraw_ui() {
