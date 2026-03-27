@@ -3048,8 +3048,17 @@ void _kickstart() {
 	                                                                                     .max           = 1.0,
 	                                                                                     .precision     = 100,
 	                                                                                     .height        = 0}),
+	                                                    GC_ALLOC_INIT(ui_node_button_t, {.name          = "script_node_button",
+	                                                                                     .type          = "CUSTOM",
+	                                                                                     .output        = -1,
+	                                                                                     .default_value = f32_array_create_x(0),
+	                                                                                     .data          = NULL,
+	                                                                                     .min           = 0.0,
+	                                                                                     .max           = 1.0,
+	                                                                                     .precision     = 100,
+	                                                                                     .height        = 1}),
 	                                                },
-	                                                1),
+	                                                2),
 	                                            .width = 0,
 	                                            .flags = 0});
 	gc_root(script_node_def);
@@ -5032,9 +5041,9 @@ void _kickstart() {
 		gc_root(render_path_commands);
 	}
 
-	#ifdef WITH_PLUGINS
+#ifdef WITH_PLUGINS
 	plugins_init();
-	#endif
+#endif
 
 	base_init();
 	iron_start();
