@@ -1625,6 +1625,13 @@ bool uniforms_set_context_const(i32 location, shader_const_t *c) {
 	return false;
 }
 
+vec4_t uniforms_vec4_zero_to_one(vec4_t v) {
+	v.x = v.x == 0.0 ? 1.0 : v.x;
+	v.y = v.y == 0.0 ? 1.0 : v.y;
+	v.z = v.z == 0.0 ? 1.0 : v.z;
+	return v;
+}
+
 void uniforms_set_obj_const(object_t *obj, i32 loc, shader_const_t *c) {
 	if (c->link == NULL) {
 		return;
@@ -1691,11 +1698,15 @@ void uniforms_set_obj_const(object_t *obj, i32 loc, shader_const_t *c) {
 		if (string_equals(c->link, "_dim")) { // Model space
 			vec4_t d = obj->transform->dim;
 			vec4_t s = obj->transform->scale;
+			d        = uniforms_vec4_zero_to_one(d);
+			s        = uniforms_vec4_zero_to_one(s);
 			v        = vec4_create((d.x / s.x), (d.y / s.y), (d.z / s.z), 0.0);
 		}
 		else if (string_equals(c->link, "_half_dim")) { // Model space
 			vec4_t d = obj->transform->dim;
 			vec4_t s = obj->transform->scale;
+			d        = uniforms_vec4_zero_to_one(d);
+			s        = uniforms_vec4_zero_to_one(s);
 			v        = vec4_create((d.x / s.x) / 2, (d.y / s.y) / 2, (d.z / s.z) / 2, 0.0);
 		}
 		else if (uniforms_vec3_links != NULL) {
