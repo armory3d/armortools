@@ -388,6 +388,7 @@ extern char  ui_text_to_paste[1024];
 extern char  ui_text_to_copy[1024];
 extern void (*ui_on_border_hover)(ui_handle_t *, int);
 extern void (*ui_on_tab_drop)(ui_handle_t *, int, ui_handle_t *, int);
+extern bool (*ui_picker_button)(void);
 extern const char *ui_theme_keys[];
 extern int         ui_theme_keys_count;
 

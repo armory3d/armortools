@@ -19,6 +19,7 @@ static int          text_area_selection_start_col = 0;
 bool                ui_text_area_line_numbers     = false;
 bool                ui_text_area_scroll_past_end  = false;
 ui_text_coloring_t *ui_text_area_coloring         = NULL;
+bool (*ui_picker_button)(void)                    = NULL;
 
 float ui_dist(float x1, float y1, float x2, float y2) {
 	float vx = x1 - x2;
@@ -158,6 +159,10 @@ uint32_t ui_color(uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
 	return (a << 24) | (r << 16) | (g << 8) | b;
 }
 
+bool _ui_picker_button() {
+	return ui_button("P", UI_ALIGN_CENTER, "");
+}
+
 int ui_color_wheel(ui_handle_t *handle, bool alpha, float w, float h, bool color_preview, void (*picker)(void *), void *data) {
 	ui_t *current = ui_get_current();
 	if (w < 0) {
@@ -186,7 +191,10 @@ int ui_color_wheel(ui_handle_t *handle, bool alpha, float w, float h, bool color
 	float _y    = current->_y;
 	float _w    = current->_w;
 	current->_w = (int)(28.0 * UI_SCALE());
-	if (picker != NULL && ui_button("P", UI_ALIGN_CENTER, "")) {
+	if (ui_picker_button == NULL) {
+		ui_picker_button = &_ui_picker_button;
+	}
+	if (picker != NULL && ui_picker_button()) {
 		(*picker)(data);
 		current->changed = false;
 		handle->changed  = false;
