@@ -50,10 +50,11 @@ typedef struct {
 } gpu_shader_impl_t;
 
 typedef struct {
-	struct ID3D12Resource       *image;
-	struct ID3D12DescriptorHeap *srv_descriptor_heap;
-	struct ID3D12DescriptorHeap *rtv_descriptor_heap;
-	bool                         has_storage_bit;
+	struct ID3D12Resource *image;
+	int                    srv_index;
+	int                    rtv_index;
+	bool                   is_dsv;
+	bool                   has_storage_bit;
 } gpu_texture_impl_t;
 
 typedef struct {

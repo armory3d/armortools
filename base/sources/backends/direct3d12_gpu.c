@@ -27,9 +27,9 @@ static D3D12_CPU_DESCRIPTOR_HANDLE  target_descriptors[GPU_MAX_TEXTURES];
 static D3D12_CPU_DESCRIPTOR_HANDLE  depth_handle;
 static D3D12_CPU_DESCRIPTOR_HANDLE *current_depth_handle;
 static bool                         window_vsync;
-static ID3D12DescriptorHeap        *sampler_heap;
-static ID3D12DescriptorHeap        *srv_heap;
-static int                          srv_heap_index = 0;
+static ID3D12DescriptorHeap        *gpu_sampler_heap;
+static ID3D12DescriptorHeap        *gpu_srv_heap;
+static int                          gpu_srv_heap_index = 0;
 static UINT64                       fence_value;
 static ID3D12Fence                 *fence;
 static HANDLE                       fence_event;
@@ -42,6 +42,18 @@ static int                          upload_buffer_size                        = 
 static ID3D12Resource              *resources_to_destroy[512];
 static int                          resources_to_destroy_count = 0;
 static char                         device_name[256];
+static ID3D12DescriptorHeap        *rtv_heap  = NULL;
+static int                          rtv_count = 0;
+static int                          rtv_free[2048];
+static int                          rtv_free_count = 0;
+static ID3D12DescriptorHeap        *dsv_heap       = NULL;
+static int                          dsv_count      = 0;
+static int                          dsv_free[32];
+static int                          dsv_free_count = 0;
+static ID3D12DescriptorHeap        *srv_heap       = NULL;
+static int                          srv_count      = 0;
+static int                          srv_free[2048];
+static int                          srv_free_count = 0;
 
 static D3D12_BLEND convert_blend_factor(gpu_blend_t factor) {
 	switch (factor) {
@@ -164,18 +176,61 @@ void gpu_destroy() {
 	window_swapchain->lpVtbl->Release(window_swapchain);
 	queue->lpVtbl->Release(queue);
 	root_signature->lpVtbl->Release(root_signature);
-	srv_heap->lpVtbl->Release(srv_heap);
+	gpu_srv_heap->lpVtbl->Release(gpu_srv_heap);
 	fence->lpVtbl->Release(fence);
 	CloseHandle(fence_event);
 	device->lpVtbl->Release(device);
 }
 
+static D3D12_CPU_DESCRIPTOR_HANDLE descriptor_handle(ID3D12DescriptorHeap *heap, D3D12_DESCRIPTOR_HEAP_TYPE type, int index) {
+	D3D12_CPU_DESCRIPTOR_HANDLE h;
+	heap->lpVtbl->GetCPUDescriptorHandleForHeapStart(heap, &h);
+	h.ptr += (SIZE_T)index * device->lpVtbl->GetDescriptorHandleIncrementSize(device, type);
+	return h;
+}
+
+static D3D12_CPU_DESCRIPTOR_HANDLE rtv_handle(int index) {
+	return descriptor_handle(rtv_heap, D3D12_DESCRIPTOR_HEAP_TYPE_RTV, index);
+}
+
+static D3D12_CPU_DESCRIPTOR_HANDLE dsv_handle(int index) {
+	return descriptor_handle(dsv_heap, D3D12_DESCRIPTOR_HEAP_TYPE_DSV, index);
+}
+
+static D3D12_CPU_DESCRIPTOR_HANDLE srv_handle(int index) {
+	return descriptor_handle(srv_heap, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, index);
+}
+
+static int alloc_rtv_index(void) {
+	return rtv_free_count > 0 ? rtv_free[--rtv_free_count] : rtv_count++;
+}
+
+static int alloc_dsv_index(void) {
+	return dsv_free_count > 0 ? dsv_free[--dsv_free_count] : dsv_count++;
+}
+
+static int alloc_srv_index(void) {
+	return srv_free_count > 0 ? srv_free[--srv_free_count] : srv_count++;
+}
+
+static void free_rtv_index(int i) {
+	rtv_free[rtv_free_count++] = i;
+}
+
+static void free_dsv_index(int i) {
+	dsv_free[dsv_free_count++] = i;
+}
+
+static void free_srv_index(int i) {
+	srv_free[srv_free_count++] = i;
+}
+
 void gpu_render_target_init2(gpu_texture_t *render_target, int width, int height, gpu_texture_format_t format, int framebuffer_index) {
-	render_target->width  = width;
-	render_target->height = height;
-	render_target->format = format;
-	render_target->state  = (framebuffer_index >= 0) ? GPU_TEXTURE_STATE_PRESENT : GPU_TEXTURE_STATE_SHADER_RESOURCE;
-	render_target->buffer = NULL;
+	render_target->width                = width;
+	render_target->height               = height;
+	render_target->format               = format;
+	render_target->state                = (framebuffer_index >= 0) ? GPU_TEXTURE_STATE_PRESENT : GPU_TEXTURE_STATE_SHADER_RESOURCE;
+	render_target->buffer               = NULL;
 	render_target->impl.has_storage_bit = false;
 
 	DXGI_FORMAT dxgi_format = convert_format(format);
@@ -210,24 +265,21 @@ void gpu_render_target_init2(gpu_texture_t *render_target, int width, int height
 	    .Flags              = format == GPU_TEXTURE_FORMAT_D32 ? D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL : D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET,
 	};
 
-	D3D12_DESCRIPTOR_HEAP_DESC heap_desc = {
-	    .NumDescriptors = 1,
-	    .Type           = format == GPU_TEXTURE_FORMAT_D32 ? D3D12_DESCRIPTOR_HEAP_TYPE_DSV : D3D12_DESCRIPTOR_HEAP_TYPE_RTV,
-	    .Flags          = D3D12_DESCRIPTOR_HEAP_FLAG_NONE,
-	};
-	device->lpVtbl->CreateDescriptorHeap(device, &heap_desc, &IID_ID3D12DescriptorHeap, &render_target->impl.rtv_descriptor_heap);
+	render_target->impl.is_dsv    = (format == GPU_TEXTURE_FORMAT_D32);
+	render_target->impl.rtv_index = render_target->impl.is_dsv ? alloc_dsv_index() : alloc_rtv_index();
 
 	if (framebuffer_index >= 0) {
 		window_swapchain->lpVtbl->GetBuffer(window_swapchain, framebuffer_index, &IID_ID3D12Resource, &render_target->impl.image);
 	}
 	else {
-		HRESULT result = device->lpVtbl->CreateCommittedResource(device, &heap_properties, D3D12_HEAP_FLAG_NONE, &resource_desc, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
-		                                                         &clear_value, &IID_ID3D12Resource, &render_target->impl.image);
+		HRESULT result =
+		    device->lpVtbl->CreateCommittedResource(device, &heap_properties, D3D12_HEAP_FLAG_NONE, &resource_desc, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
+		                                            &clear_value, &IID_ID3D12Resource, &render_target->impl.image);
 		if (result != S_OK && gpu_cleanup_pending()) {
 			gpu_execute_and_wait();
 			gpu_cleanup();
 			device->lpVtbl->CreateCommittedResource(device, &heap_properties, D3D12_HEAP_FLAG_NONE, &resource_desc, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
-		                                            &clear_value, &IID_ID3D12Resource, &render_target->impl.image);
+			                                        &clear_value, &IID_ID3D12Resource, &render_target->impl.image);
 		}
 	}
 
@@ -238,8 +290,8 @@ void gpu_render_target_init2(gpu_texture_t *render_target, int width, int height
 	    .Texture2D.PlaneSlice = 0,
 	};
 
-	D3D12_CPU_DESCRIPTOR_HANDLE handle;
-	render_target->impl.rtv_descriptor_heap->lpVtbl->GetCPUDescriptorHandleForHeapStart(render_target->impl.rtv_descriptor_heap, &handle);
+	D3D12_CPU_DESCRIPTOR_HANDLE handle =
+	    render_target->impl.is_dsv ? dsv_handle(render_target->impl.rtv_index) : rtv_handle(render_target->impl.rtv_index);
 
 	if (format == GPU_TEXTURE_FORMAT_D32) {
 		device->lpVtbl->CreateDepthStencilView(device, render_target->impl.image, NULL, handle);
@@ -248,14 +300,7 @@ void gpu_render_target_init2(gpu_texture_t *render_target, int width, int height
 		device->lpVtbl->CreateRenderTargetView(device, render_target->impl.image, &view_desc, handle);
 	}
 
-	D3D12_DESCRIPTOR_HEAP_DESC descriptor_heap_desc = {
-	    .NumDescriptors = 1,
-	    .Type           = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
-	    .NodeMask       = 0,
-	    .Flags          = D3D12_DESCRIPTOR_HEAP_FLAG_NONE,
-	};
-
-	device->lpVtbl->CreateDescriptorHeap(device, &descriptor_heap_desc, &IID_ID3D12DescriptorHeap, &render_target->impl.srv_descriptor_heap);
+	render_target->impl.srv_index = alloc_srv_index();
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC srv_desc = {
 	    .ViewDimension                 = D3D12_SRV_DIMENSION_TEXTURE2D,
@@ -266,7 +311,7 @@ void gpu_render_target_init2(gpu_texture_t *render_target, int width, int height
 	    .Texture2D.ResourceMinLODClamp = 0.0f,
 	};
 
-	render_target->impl.srv_descriptor_heap->lpVtbl->GetCPUDescriptorHandleForHeapStart(render_target->impl.srv_descriptor_heap, &handle);
+	handle = srv_handle(render_target->impl.srv_index);
 	device->lpVtbl->CreateShaderResourceView(device, render_target->impl.image, &srv_desc, handle);
 }
 
@@ -275,12 +320,12 @@ void create_root_signature(bool linear_sampling) {
 	ID3DBlob              *error_blob;
 	D3D12_ROOT_PARAMETER   parameters[3] = {0};
 	D3D12_DESCRIPTOR_RANGE range         = {
-	            .RangeType                         = D3D12_DESCRIPTOR_RANGE_TYPE_SRV,
-	            .NumDescriptors                    = (UINT)GPU_MAX_TEXTURES,
-	            .BaseShaderRegister                = 0,
-	            .RegisterSpace                     = 0,
-	            .OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND,
-    };
+	    .RangeType                         = D3D12_DESCRIPTOR_RANGE_TYPE_SRV,
+	    .NumDescriptors                    = (UINT)GPU_MAX_TEXTURES,
+	    .BaseShaderRegister                = 0,
+	    .RegisterSpace                     = 0,
+	    .OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND,
+	};
 	parameters[0].ParameterType                       = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
 	parameters[0].ShaderVisibility                    = D3D12_SHADER_VISIBILITY_ALL;
 	parameters[0].DescriptorTable.NumDescriptorRanges = 1;
@@ -290,12 +335,12 @@ void create_root_signature(bool linear_sampling) {
 	parameters[1].Descriptor.ShaderRegister           = 0;
 	parameters[1].Descriptor.RegisterSpace            = 0;
 	D3D12_DESCRIPTOR_RANGE sampler_range              = {
-	                 .RangeType                         = D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER,
-	                 .NumDescriptors                    = 1,
-	                 .BaseShaderRegister                = 0,
-	                 .RegisterSpace                     = 0,
-	                 .OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND,
-    };
+	    .RangeType                         = D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER,
+	    .NumDescriptors                    = 1,
+	    .BaseShaderRegister                = 0,
+	    .RegisterSpace                     = 0,
+	    .OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND,
+	};
 	parameters[2].ParameterType                       = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
 	parameters[2].ShaderVisibility                    = D3D12_SHADER_VISIBILITY_ALL;
 	parameters[2].DescriptorTable.NumDescriptorRanges = 1;
@@ -350,6 +395,33 @@ void gpu_init_internal(int depth_buffer_bits, bool vsync) {
 	fence_event = CreateEvent(NULL, FALSE, FALSE, NULL);
 	device->lpVtbl->CreateFence(device, 0, D3D12_FENCE_FLAG_NONE, &IID_ID3D12Fence, &fence);
 
+	D3D12_DESCRIPTOR_HEAP_DESC rtv_desc = {
+	    .NumDescriptors = 2048,
+	    .Type           = D3D12_DESCRIPTOR_HEAP_TYPE_RTV,
+	    .Flags          = D3D12_DESCRIPTOR_HEAP_FLAG_NONE,
+	};
+	device->lpVtbl->CreateDescriptorHeap(device, &rtv_desc, &IID_ID3D12DescriptorHeap, &rtv_heap);
+	rtv_count      = 0;
+	rtv_free_count = 0;
+
+	D3D12_DESCRIPTOR_HEAP_DESC dsv_desc = {
+	    .NumDescriptors = 32,
+	    .Type           = D3D12_DESCRIPTOR_HEAP_TYPE_DSV,
+	    .Flags          = D3D12_DESCRIPTOR_HEAP_FLAG_NONE,
+	};
+	device->lpVtbl->CreateDescriptorHeap(device, &dsv_desc, &IID_ID3D12DescriptorHeap, &dsv_heap);
+	dsv_count      = 0;
+	dsv_free_count = 0;
+
+	D3D12_DESCRIPTOR_HEAP_DESC srv_desc = {
+	    .NumDescriptors = 2048,
+	    .Type           = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
+	    .Flags          = D3D12_DESCRIPTOR_HEAP_FLAG_NONE,
+	};
+	device->lpVtbl->CreateDescriptorHeap(device, &srv_desc, &IID_ID3D12DescriptorHeap, &srv_heap);
+	srv_count      = 0;
+	srv_free_count = 0;
+
 	gpu_create_framebuffers(depth_buffer_bits);
 
 	D3D12_DESCRIPTOR_HEAP_DESC heap_desc = {
@@ -357,14 +429,14 @@ void gpu_init_internal(int depth_buffer_bits, bool vsync) {
 	    .Type           = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
 	    .Flags          = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE,
 	};
-	device->lpVtbl->CreateDescriptorHeap(device, &heap_desc, &IID_ID3D12DescriptorHeap, &srv_heap);
+	device->lpVtbl->CreateDescriptorHeap(device, &heap_desc, &IID_ID3D12DescriptorHeap, &gpu_srv_heap);
 
 	D3D12_DESCRIPTOR_HEAP_DESC sampler_heap_desc = {
 	    .NumDescriptors = 1,
 	    .Type           = D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER,
 	    .Flags          = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE,
 	};
-	device->lpVtbl->CreateDescriptorHeap(device, &sampler_heap_desc, &IID_ID3D12DescriptorHeap, &sampler_heap);
+	device->lpVtbl->CreateDescriptorHeap(device, &sampler_heap_desc, &IID_ID3D12DescriptorHeap, &gpu_sampler_heap);
 	gpu_use_linear_sampling(true);
 
 	device->lpVtbl->CreateCommandAllocator(device, D3D12_COMMAND_LIST_TYPE_DIRECT, &IID_ID3D12CommandAllocator, &command_allocator);
@@ -373,13 +445,11 @@ void gpu_init_internal(int depth_buffer_bits, bool vsync) {
 
 void gpu_begin_internal(gpu_clear_t flags, unsigned color, float depth) {
 	for (int i = 0; i < current_render_targets_count; ++i) {
-		current_render_targets[i]->impl.rtv_descriptor_heap->lpVtbl->GetCPUDescriptorHandleForHeapStart(current_render_targets[i]->impl.rtv_descriptor_heap,
-		                                                                                                &target_descriptors[i]);
+		target_descriptors[i] = rtv_handle(current_render_targets[i]->impl.rtv_index);
 	}
 
 	if (current_depth_buffer != NULL) {
-		current_depth_buffer->impl.rtv_descriptor_heap->lpVtbl->GetCPUDescriptorHandleForHeapStart(current_depth_buffer->impl.rtv_descriptor_heap,
-		                                                                                           &depth_handle);
+		depth_handle         = dsv_handle(current_depth_buffer->impl.rtv_index);
 		current_depth_handle = &depth_handle;
 	}
 	else {
@@ -396,14 +466,11 @@ void gpu_begin_internal(gpu_clear_t flags, unsigned color, float depth) {
 		float clear_color[] = {((color & 0x00ff0000) >> 16) / 255.0f, ((color & 0x0000ff00) >> 8) / 255.0f, (color & 0x000000ff) / 255.0f,
 		                       ((color & 0xff000000) >> 24) / 255.0f};
 
-		D3D12_CPU_DESCRIPTOR_HANDLE handle;
-		target->impl.rtv_descriptor_heap->lpVtbl->GetCPUDescriptorHandleForHeapStart(target->impl.rtv_descriptor_heap, &handle);
-		command_list->lpVtbl->ClearRenderTargetView(command_list, handle, clear_color, 0, NULL);
+		command_list->lpVtbl->ClearRenderTargetView(command_list, rtv_handle(target->impl.rtv_index), clear_color, 0, NULL);
 	}
 	if (flags & GPU_CLEAR_DEPTH && current_depth_buffer != NULL) {
-		D3D12_CPU_DESCRIPTOR_HANDLE handle;
-		current_depth_buffer->impl.rtv_descriptor_heap->lpVtbl->GetCPUDescriptorHandleForHeapStart(current_depth_buffer->impl.rtv_descriptor_heap, &handle);
-		command_list->lpVtbl->ClearDepthStencilView(command_list, handle, D3D12_CLEAR_FLAG_DEPTH, depth, 0, 0, NULL);
+		command_list->lpVtbl->ClearDepthStencilView(command_list, dsv_handle(current_depth_buffer->impl.rtv_index), D3D12_CLEAR_FLAG_DEPTH, depth, 0, 0,
+		                                            NULL);
 	}
 }
 
@@ -495,35 +562,32 @@ void gpu_set_constant_buffer(gpu_buffer_t *buffer, int offset, size_t size) {
 
 void gpu_internal_set_textures() {
 	UINT srv_step = device->lpVtbl->GetDescriptorHandleIncrementSize(device, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-	if (srv_heap_index + GPU_MAX_TEXTURES > GPU_CONSTANT_BUFFER_MULTIPLE) {
-		srv_heap_index = 0;
+	if (gpu_srv_heap_index + GPU_MAX_TEXTURES > GPU_CONSTANT_BUFFER_MULTIPLE) {
+		gpu_srv_heap_index = 0;
 	}
 
 	D3D12_CPU_DESCRIPTOR_HANDLE cpu_base;
 	D3D12_GPU_DESCRIPTOR_HANDLE gpu_base;
-	srv_heap->lpVtbl->GetCPUDescriptorHandleForHeapStart(srv_heap, &cpu_base);
-	srv_heap->lpVtbl->GetGPUDescriptorHandleForHeapStart(srv_heap, &gpu_base);
-	cpu_base.ptr += srv_heap_index * srv_step;
-	gpu_base.ptr += srv_heap_index * srv_step;
+	gpu_srv_heap->lpVtbl->GetCPUDescriptorHandleForHeapStart(gpu_srv_heap, &cpu_base);
+	gpu_srv_heap->lpVtbl->GetGPUDescriptorHandleForHeapStart(gpu_srv_heap, &gpu_base);
+	cpu_base.ptr += gpu_srv_heap_index * srv_step;
+	gpu_base.ptr += gpu_srv_heap_index * srv_step;
 
 	for (int i = 0; i < GPU_MAX_TEXTURES; ++i) {
 		if (current_textures[i] != NULL) {
-			D3D12_CPU_DESCRIPTOR_HANDLE source_cpu;
-			ID3D12DescriptorHeap       *source_heap = current_textures[i]->impl.srv_descriptor_heap;
-			source_heap->lpVtbl->GetCPUDescriptorHandleForHeapStart(source_heap, &source_cpu);
-
-			device->lpVtbl->CopyDescriptorsSimple(device, 1, cpu_base, source_cpu, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+			device->lpVtbl->CopyDescriptorsSimple(device, 1, cpu_base, srv_handle(current_textures[i]->impl.srv_index),
+			                                      D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 			cpu_base.ptr += srv_step;
-			srv_heap_index++;
+			gpu_srv_heap_index++;
 		}
 	}
 
-	ID3D12DescriptorHeap *heaps[] = {srv_heap, sampler_heap};
+	ID3D12DescriptorHeap *heaps[] = {gpu_srv_heap, gpu_sampler_heap};
 	command_list->lpVtbl->SetDescriptorHeaps(command_list, 2, heaps);
 	command_list->lpVtbl->SetGraphicsRootDescriptorTable(command_list, 0, gpu_base);
 
 	D3D12_GPU_DESCRIPTOR_HANDLE sampler_gpu_base;
-	sampler_heap->lpVtbl->GetGPUDescriptorHandleForHeapStart(sampler_heap, &sampler_gpu_base);
+	gpu_sampler_heap->lpVtbl->GetGPUDescriptorHandleForHeapStart(gpu_sampler_heap, &sampler_gpu_base);
 	command_list->lpVtbl->SetGraphicsRootDescriptorTable(command_list, 2, sampler_gpu_base);
 }
 
@@ -703,7 +767,7 @@ void gpu_use_linear_sampling(bool b) {
 	    .MaxLOD         = D3D12_FLOAT32_MAX,
 	};
 	D3D12_CPU_DESCRIPTOR_HANDLE sampler_handle;
-	sampler_heap->lpVtbl->GetCPUDescriptorHandleForHeapStart(sampler_heap, &sampler_handle);
+	gpu_sampler_heap->lpVtbl->GetCPUDescriptorHandleForHeapStart(gpu_sampler_heap, &sampler_handle);
 	device->lpVtbl->CreateSampler(device, &sampler_desc, sampler_handle);
 }
 
@@ -794,8 +858,8 @@ void gpu_pipeline_compile(gpu_pipeline_t *pipe) {
 
 	psoDesc.BlendState.IndependentBlendEnable = true;
 	for (UINT i = 0; i < D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT; ++i) {
-		psoDesc.BlendState.RenderTarget[i].BlendEnable = pipe->blend_source != GPU_BLEND_ONE || pipe->blend_destination != GPU_BLEND_ZERO ||
-		                                                 pipe->alpha_blend_source != GPU_BLEND_ONE || pipe->alpha_blend_destination != GPU_BLEND_ZERO;
+		psoDesc.BlendState.RenderTarget[i].BlendEnable    = pipe->blend_source != GPU_BLEND_ONE || pipe->blend_destination != GPU_BLEND_ZERO ||
+		                                                    pipe->alpha_blend_source != GPU_BLEND_ONE || pipe->alpha_blend_destination != GPU_BLEND_ZERO;
 		psoDesc.BlendState.RenderTarget[i].SrcBlend       = convert_blend_factor(pipe->blend_source);
 		psoDesc.BlendState.RenderTarget[i].DestBlend      = convert_blend_factor(pipe->blend_destination);
 		psoDesc.BlendState.RenderTarget[i].BlendOp        = D3D12_BLEND_OP_ADD;
@@ -823,14 +887,14 @@ void gpu_shader_destroy(gpu_shader_t *shader) {
 }
 
 void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, int height, gpu_texture_format_t format) {
-	texture->width                    = width;
-	texture->height                   = height;
-	texture->format                   = format;
-	texture->state                    = GPU_TEXTURE_STATE_SHADER_RESOURCE;
-	texture->buffer                   = NULL;
-	texture->impl.rtv_descriptor_heap = NULL;
-	DXGI_FORMAT dxgi_format           = convert_format(format);
-	int         format_size           = gpu_texture_format_size(format);
+	texture->width          = width;
+	texture->height         = height;
+	texture->format         = format;
+	texture->state          = GPU_TEXTURE_STATE_SHADER_RESOURCE;
+	texture->buffer         = NULL;
+	texture->impl.rtv_index = -1;
+	DXGI_FORMAT dxgi_format = convert_format(format);
+	int         format_size = gpu_texture_format_size(format);
 
 	D3D12_HEAP_PROPERTIES heap_properties = {
 	    .Type                 = D3D12_HEAP_TYPE_DEFAULT,
@@ -854,14 +918,14 @@ void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, 
 	    .Flags              = D3D12_RESOURCE_FLAG_NONE,
 	};
 
-	HRESULT result = device->lpVtbl->CreateCommittedResource(device, &heap_properties, D3D12_HEAP_FLAG_NONE, &resource_desc, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, NULL,
-	                                                         &IID_ID3D12Resource, &texture->impl.image);
+	HRESULT result = device->lpVtbl->CreateCommittedResource(device, &heap_properties, D3D12_HEAP_FLAG_NONE, &resource_desc,
+	                                                         D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, NULL, &IID_ID3D12Resource, &texture->impl.image);
 
 	if (result != S_OK && gpu_cleanup_pending()) {
 		gpu_execute_and_wait();
 		gpu_cleanup();
-		device->lpVtbl->CreateCommittedResource(device, &heap_properties, D3D12_HEAP_FLAG_NONE, &resource_desc, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, NULL,
-	                                            &IID_ID3D12Resource, &texture->impl.image);
+		device->lpVtbl->CreateCommittedResource(device, &heap_properties, D3D12_HEAP_FLAG_NONE, &resource_desc, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
+		                                        NULL, &IID_ID3D12Resource, &texture->impl.image);
 	}
 
 	D3D12_PLACED_SUBRESOURCE_FOOTPRINT footprint;
@@ -912,13 +976,7 @@ void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, 
 	}
 	upload_buffer->lpVtbl->Unmap(upload_buffer, 0, NULL);
 
-	D3D12_DESCRIPTOR_HEAP_DESC descriptor_heap_desc = {
-	    .NumDescriptors = 1,
-	    .Type           = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
-	    .NodeMask       = 0,
-	    .Flags          = D3D12_DESCRIPTOR_HEAP_FLAG_NONE,
-	};
-	device->lpVtbl->CreateDescriptorHeap(device, &descriptor_heap_desc, &IID_ID3D12DescriptorHeap, &texture->impl.srv_descriptor_heap);
+	texture->impl.srv_index = alloc_srv_index();
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC srv_desc = {
 	    .ViewDimension                 = D3D12_SRV_DIMENSION_TEXTURE2D,
@@ -928,10 +986,7 @@ void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, 
 	    .Texture2D.MostDetailedMip     = 0,
 	    .Texture2D.ResourceMinLODClamp = 0.0f,
 	};
-
-	D3D12_CPU_DESCRIPTOR_HANDLE handle;
-	texture->impl.srv_descriptor_heap->lpVtbl->GetCPUDescriptorHandleForHeapStart(texture->impl.srv_descriptor_heap, &handle);
-	device->lpVtbl->CreateShaderResourceView(device, texture->impl.image, &srv_desc, handle);
+	device->lpVtbl->CreateShaderResourceView(device, texture->impl.image, &srv_desc, srv_handle(texture->impl.srv_index));
 
 	D3D12_RESOURCE_BARRIER barrier = {
 	    .Type                   = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION,
@@ -963,15 +1018,17 @@ void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, 
 	gpu_execute_and_wait(); ////
 }
 
-void gpu_texture_destroy_internal(gpu_texture_t *render_target) {
-	if (render_target->impl.image != NULL) {
-		render_target->impl.image->lpVtbl->Release(render_target->impl.image);
+void gpu_texture_destroy_internal(gpu_texture_t *tex) {
+	if (tex->impl.image != NULL) {
+		tex->impl.image->lpVtbl->Release(tex->impl.image);
 	}
-	if (render_target->impl.rtv_descriptor_heap != NULL) {
-		render_target->impl.rtv_descriptor_heap->lpVtbl->Release(render_target->impl.rtv_descriptor_heap);
+	if (tex->impl.rtv_index >= 0) {
+		tex->impl.is_dsv ? free_dsv_index(tex->impl.rtv_index) : free_rtv_index(tex->impl.rtv_index);
+		tex->impl.rtv_index = -1;
 	}
-	if (render_target->impl.srv_descriptor_heap != NULL) {
-		render_target->impl.srv_descriptor_heap->lpVtbl->Release(render_target->impl.srv_descriptor_heap);
+	if (tex->impl.srv_index >= 0) {
+		free_srv_index(tex->impl.srv_index);
+		tex->impl.srv_index = -1;
 	}
 }
 
@@ -1007,16 +1064,17 @@ void _gpu_buffer_init(ID3D12Resource **buffer, int size, D3D12_HEAP_TYPE heap_ty
 	    .Flags              = D3D12_RESOURCE_FLAG_NONE,
 	};
 
-	HRESULT result = device->lpVtbl->CreateCommittedResource(device, &heap_properties, D3D12_HEAP_FLAG_NONE, &resource_desc,
-	                                                         heap_type == D3D12_HEAP_TYPE_UPLOAD ? D3D12_RESOURCE_STATE_GENERIC_READ : D3D12_RESOURCE_STATE_COMMON, NULL,
-	                                                         &IID_ID3D12Resource, buffer);
+	HRESULT result =
+	    device->lpVtbl->CreateCommittedResource(device, &heap_properties, D3D12_HEAP_FLAG_NONE, &resource_desc,
+	                                            heap_type == D3D12_HEAP_TYPE_UPLOAD ? D3D12_RESOURCE_STATE_GENERIC_READ : D3D12_RESOURCE_STATE_COMMON, NULL,
+	                                            &IID_ID3D12Resource, buffer);
 
 	if (result != S_OK && gpu_cleanup_pending()) {
 		gpu_execute_and_wait();
 		gpu_cleanup();
 		device->lpVtbl->CreateCommittedResource(device, &heap_properties, D3D12_HEAP_FLAG_NONE, &resource_desc,
-	                                            heap_type == D3D12_HEAP_TYPE_UPLOAD ? D3D12_RESOURCE_STATE_GENERIC_READ : D3D12_RESOURCE_STATE_COMMON, NULL,
-	                                            &IID_ID3D12Resource, buffer);
+		                                        heap_type == D3D12_HEAP_TYPE_UPLOAD ? D3D12_RESOURCE_STATE_GENERIC_READ : D3D12_RESOURCE_STATE_COMMON, NULL,
+		                                        &IID_ID3D12Resource, buffer);
 	}
 }
 
@@ -1103,9 +1161,9 @@ void gpu_constant_buffer_lock(gpu_buffer_t *buffer, int start, int count) {
 	buffer->impl.last_start = start;
 	buffer->impl.last_count = count;
 	D3D12_RANGE range       = {
-	          .Begin = start,
-	          .End   = start + count,
-    };
+	    .Begin = start,
+	    .End   = start + count,
+	};
 	uint8_t *p;
 	buffer->impl.buffer->lpVtbl->Map(buffer->impl.buffer, 0, &range, (void **)&p);
 	buffer->data = &p[start];
@@ -1140,36 +1198,36 @@ char *gpu_device_name() {
 
 typedef struct inst {
 	mat4_t m;
-	int              i;
+	int    i;
 } inst_t;
 
-static ID3D12Device5                         *dxr_device          = NULL;
-static ID3D12GraphicsCommandList4            *dxr_command_list    = NULL;
-static ID3D12RootSignature                   *dxr_root_signature  = NULL;
-static ID3D12DescriptorHeap                  *dxr_descriptor_heap = NULL;
-static gpu_acceleration_structure_t          *dxr_accel;
-static gpu_raytrace_pipeline_t               *dxr_pipeline;
-static gpu_texture_t                         *dxr_output = NULL;
-static D3D12_CPU_DESCRIPTOR_HANDLE            dxr_output_cpu_descriptor;
-static D3D12_GPU_DESCRIPTOR_HANDLE            dxr_output_descriptor_handle;
-static D3D12_GPU_DESCRIPTOR_HANDLE            dxr_vbgpu_descriptor_handle;
-static D3D12_GPU_DESCRIPTOR_HANDLE            dxr_ibgpu_descriptor_handle;
-static D3D12_GPU_DESCRIPTOR_HANDLE            dxr_tex0gpu_descriptor_handle;
-static D3D12_GPU_DESCRIPTOR_HANDLE            dxr_tex1gpu_descriptor_handle;
-static D3D12_GPU_DESCRIPTOR_HANDLE            dxr_tex2gpu_descriptor_handle;
-static D3D12_GPU_DESCRIPTOR_HANDLE            dxr_texenvgpu_descriptor_handle;
-static D3D12_GPU_DESCRIPTOR_HANDLE            dxr_texsobolgpu_descriptor_handle;
-static D3D12_GPU_DESCRIPTOR_HANDLE            dxr_texscramblegpu_descriptor_handle;
-static D3D12_GPU_DESCRIPTOR_HANDLE            dxr_texrankgpu_descriptor_handle;
-static int                                    dxr_descriptors_allocated = 0;
-static UINT                                   dxr_descriptor_size;
-static gpu_buffer_t                          *dxr_vb[16];
-static gpu_buffer_t                          *dxr_vb_last[16];
-static gpu_buffer_t                          *dxr_ib[16];
-static int                                    dxr_vb_count      = 0;
-static int                                    dxr_vb_count_last = 0;
-static inst_t                                 dxr_instances[1024];
-static int                                    dxr_instances_count = 0;
+static ID3D12Device5                *dxr_device          = NULL;
+static ID3D12GraphicsCommandList4   *dxr_command_list    = NULL;
+static ID3D12RootSignature          *dxr_root_signature  = NULL;
+static ID3D12DescriptorHeap         *dxr_descriptor_heap = NULL;
+static gpu_acceleration_structure_t *dxr_accel;
+static gpu_raytrace_pipeline_t      *dxr_pipeline;
+static gpu_texture_t                *dxr_output = NULL;
+static D3D12_CPU_DESCRIPTOR_HANDLE   dxr_output_cpu_descriptor;
+static D3D12_GPU_DESCRIPTOR_HANDLE   dxr_output_descriptor_handle;
+static D3D12_GPU_DESCRIPTOR_HANDLE   dxr_vbgpu_descriptor_handle;
+static D3D12_GPU_DESCRIPTOR_HANDLE   dxr_ibgpu_descriptor_handle;
+static D3D12_GPU_DESCRIPTOR_HANDLE   dxr_tex0gpu_descriptor_handle;
+static D3D12_GPU_DESCRIPTOR_HANDLE   dxr_tex1gpu_descriptor_handle;
+static D3D12_GPU_DESCRIPTOR_HANDLE   dxr_tex2gpu_descriptor_handle;
+static D3D12_GPU_DESCRIPTOR_HANDLE   dxr_texenvgpu_descriptor_handle;
+static D3D12_GPU_DESCRIPTOR_HANDLE   dxr_texsobolgpu_descriptor_handle;
+static D3D12_GPU_DESCRIPTOR_HANDLE   dxr_texscramblegpu_descriptor_handle;
+static D3D12_GPU_DESCRIPTOR_HANDLE   dxr_texrankgpu_descriptor_handle;
+static int                           dxr_descriptors_allocated = 0;
+static UINT                          dxr_descriptor_size;
+static gpu_buffer_t                 *dxr_vb[16];
+static gpu_buffer_t                 *dxr_vb_last[16];
+static gpu_buffer_t                 *dxr_ib[16];
+static int                           dxr_vb_count      = 0;
+static int                           dxr_vb_count_last = 0;
+static inst_t                        dxr_instances[1024];
+static int                           dxr_instances_count = 0;
 
 void gpu_raytrace_pipeline_init(gpu_raytrace_pipeline_t *pipeline, void *shader, int shader_size, gpu_buffer_t *constant_buffer) {
 	dxr_output                = NULL;
@@ -1444,13 +1502,13 @@ void gpu_raytrace_acceleration_structure_build(gpu_acceleration_structure_t *acc
 			geometry_descs[i]                                  = geometry_desc;
 
 			D3D12_RAYTRACING_ACCELERATION_STRUCTURE_PREBUILD_INFO bottom_level_prebuild_info = {0};
-			D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_INPUTS  inputs                  = {
-			                      .DescsLayout    = D3D12_ELEMENTS_LAYOUT_ARRAY,
-			                      .NumDescs       = 1,
-			                      .Type           = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL,
-			                      .pGeometryDescs = &geometry_descs[i],
-			                      .Flags          = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_PREFER_FAST_TRACE,
-            };
+			D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_INPUTS  inputs                     = {
+			    .DescsLayout    = D3D12_ELEMENTS_LAYOUT_ARRAY,
+			    .NumDescs       = 1,
+			    .Type           = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL,
+			    .pGeometryDescs = &geometry_descs[i],
+			    .Flags          = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_PREFER_FAST_TRACE,
+			};
 			dxr_device->lpVtbl->GetRaytracingAccelerationStructurePrebuildInfo(dxr_device, &inputs, &bottom_level_prebuild_info);
 			bottom_level_inputs[i] = inputs;
 
@@ -1637,7 +1695,7 @@ void gpu_raytrace_set_textures(gpu_texture_t *texpaint0, gpu_texture_t *texpaint
 	dxr_descriptor_heap->lpVtbl->GetCPUDescriptorHandleForHeapStart(dxr_descriptor_heap, &handle);
 	for (int i = 0; i < 7; i++) {
 		cpu_descriptor.ptr = handle.ptr + (5 + i) * (UINT64)dxr_descriptor_size;
-		textures[i]->impl.srv_descriptor_heap->lpVtbl->GetCPUDescriptorHandleForHeapStart(textures[i]->impl.srv_descriptor_heap, &sourceCpu);
+		sourceCpu          = srv_handle(textures[i]->impl.srv_index);
 		device->lpVtbl->CopyDescriptorsSimple(device, 1, cpu_descriptor, sourceCpu, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 		dxr_descriptor_heap->lpVtbl->GetGPUDescriptorHandleForHeapStart(dxr_descriptor_heap, &ghandle);
 		gpu_handles[i]->ptr = ghandle.ptr + (5 + i) * (UINT64)dxr_descriptor_size;
@@ -1692,24 +1750,12 @@ void gpu_raytrace_set_target(gpu_texture_t *output) {
 		    .Texture2D.MipSlice   = 0,
 		    .Texture2D.PlaneSlice = 0,
 		};
-		D3D12_DESCRIPTOR_HEAP_DESC heap_desc = {
-		    .NumDescriptors = 1,
-		    .Type           = D3D12_DESCRIPTOR_HEAP_TYPE_RTV,
-		    .Flags          = D3D12_DESCRIPTOR_HEAP_FLAG_NONE,
-		};
-		device->lpVtbl->CreateDescriptorHeap(device, &heap_desc, &IID_ID3D12DescriptorHeap, &output->impl.rtv_descriptor_heap);
-		D3D12_CPU_DESCRIPTOR_HANDLE handle;
-		output->impl.rtv_descriptor_heap->lpVtbl->GetCPUDescriptorHandleForHeapStart(output->impl.rtv_descriptor_heap, &handle);
+		output->impl.is_dsv                = false;
+		output->impl.rtv_index             = alloc_rtv_index();
+		D3D12_CPU_DESCRIPTOR_HANDLE handle = rtv_handle(output->impl.rtv_index);
 		device->lpVtbl->CreateRenderTargetView(device, output->impl.image, &view, handle);
 
-		D3D12_DESCRIPTOR_HEAP_DESC descriptor_heap_desc = {
-		    .NumDescriptors = 1,
-		    .Type           = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
-		    .NodeMask       = 0,
-		    .Flags          = D3D12_DESCRIPTOR_HEAP_FLAG_NONE,
-		};
-		device->lpVtbl->CreateDescriptorHeap(device, &descriptor_heap_desc, &IID_ID3D12DescriptorHeap, &output->impl.srv_descriptor_heap);
-
+		output->impl.srv_index                   = alloc_srv_index();
 		D3D12_SHADER_RESOURCE_VIEW_DESC srv_desc = {
 		    .ViewDimension                 = D3D12_SRV_DIMENSION_TEXTURE2D,
 		    .Shader4ComponentMapping       = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING,
@@ -1718,8 +1764,7 @@ void gpu_raytrace_set_target(gpu_texture_t *output) {
 		    .Texture2D.MostDetailedMip     = 0,
 		    .Texture2D.ResourceMinLODClamp = 0.0f,
 		};
-		output->impl.srv_descriptor_heap->lpVtbl->GetCPUDescriptorHandleForHeapStart(output->impl.srv_descriptor_heap, &handle);
-		device->lpVtbl->CreateShaderResourceView(device, output->impl.image, &srv_desc, handle);
+		device->lpVtbl->CreateShaderResourceView(device, output->impl.image, &srv_desc, srv_handle(output->impl.srv_index));
 
 		D3D12_UNORDERED_ACCESS_VIEW_DESC uav_desc = {
 		    .ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2D,
@@ -1739,8 +1784,9 @@ void gpu_raytrace_dispatch_rays() {
 	                                                       dxr_accel->impl.top_level_accel->lpVtbl->GetGPUVirtualAddress(dxr_accel->impl.top_level_accel));
 	command_list->lpVtbl->SetComputeRootDescriptorTable(command_list, 2, dxr_ibgpu_descriptor_handle);
 	command_list->lpVtbl->SetComputeRootDescriptorTable(command_list, 3, dxr_vbgpu_descriptor_handle);
-	command_list->lpVtbl->SetComputeRootConstantBufferView(
-	    command_list, 4, dxr_pipeline->constant_buffer->impl.buffer->lpVtbl->GetGPUVirtualAddress(dxr_pipeline->constant_buffer->impl.buffer));
+	command_list->lpVtbl->SetComputeRootConstantBufferView(command_list, 4,
+	                                                       dxr_pipeline->constant_buffer->impl.buffer->lpVtbl->GetGPUVirtualAddress(
+	                                                           dxr_pipeline->constant_buffer->impl.buffer));
 	command_list->lpVtbl->SetComputeRootDescriptorTable(command_list, 5, dxr_tex0gpu_descriptor_handle);
 	command_list->lpVtbl->SetComputeRootDescriptorTable(command_list, 6, dxr_tex1gpu_descriptor_handle);
 	command_list->lpVtbl->SetComputeRootDescriptorTable(command_list, 7, dxr_tex2gpu_descriptor_handle);
