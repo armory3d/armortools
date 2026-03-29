@@ -80,7 +80,7 @@ void ui_files_file_browser_on_cache_cloud_done_on_next_frame(draw_cloud_icon_dat
 
 void ui_files_file_browser_on_cache_cloud_done(char *abs) {
 	if (abs != NULL) {
-		gpu_texture_t *image = data_get_image(abs);
+		gpu_texture_t *image = data_get_image(string_copy(abs));
 		if (image != NULL) {
 #ifdef IRON_WINDOWS
 			abs = string_copy(string_replace_all(abs, "\\", "/"));
@@ -101,8 +101,45 @@ void ui_files_file_browser_on_init_cloud_done() {
 	tab_browser_refresh                             = true;
 }
 
-char *ui_files_file_browser(ui_handle_t *handle, bool drag_files, char *search, bool refresh, void (*context_menu)(char *)) {
+static void ui_files_clear_icon_map(void) {
+	if (ui_files_icon_map == NULL) {
+		return;
+	}
+	gpu_texture_t   *icons_tex = resource_get("icons.k");
+	render_target_t *rt        = any_map_get(render_path_render_targets, "empty_black");
+	gpu_texture_t   *empty     = rt->_image;
+	for (i32 i = 0; i < (i32)ui_files_icon_map->keys->capacity; ++i) {
+		gpu_texture_t *tex = ui_files_icon_map->values->buffer[i];
+		if (tex != NULL && tex != icons_tex && tex != empty) {
+			gpu_delete_texture(tex);
+		}
+	}
+	gc_unroot(ui_files_icon_map);
+	ui_files_icon_map = NULL;
 
+	if (ui_files_icon_file_map != NULL) {
+		char dest[512];
+		if (path_is_protected()) {
+			strcpy(dest, iron_internal_save_path());
+		}
+		else {
+			strcpy(dest, iron_internal_files_location());
+			strcat(dest, PATH_SEP);
+		}
+
+		for (i32 i = 0; i < (i32)ui_files_icon_file_map->keys->capacity; ++i) {
+			char *icon_file = ui_files_icon_file_map->keys->buffer[i];
+			if (icon_file != NULL) {
+				char *path = string("%s%s%s%s", dest, ui_files_last_path, PATH_SEP, icon_file);
+				data_delete_image(path);
+			}
+		}
+	}
+	gc_unroot(ui_files_icon_file_map);
+	ui_files_icon_file_map = NULL;
+}
+
+char *ui_files_file_browser(ui_handle_t *handle, bool drag_files, char *search, bool refresh, void (*context_menu)(char *)) {
 	gpu_texture_t *icons       = resource_get("icons.k");
 	rect_t        *folder      = resource_tile50(icons, ICON_FOLDER_FULL);
 	rect_t        *file        = resource_tile50(icons, ICON_FILE);
@@ -124,6 +161,10 @@ char *ui_files_file_browser(ui_handle_t *handle, bool drag_files, char *search, 
 
 	if (string_equals(handle->text, "")) {
 		handle->text = string_copy(ui_files_default_path);
+	}
+
+	if (!string_equals(handle->text, ui_files_last_path)) {
+		ui_files_clear_icon_map();
 	}
 
 	if (!string_equals(handle->text, ui_files_last_path) || !string_equals(search, ui_files_last_search) || refresh) {
@@ -228,12 +269,10 @@ char *ui_files_file_browser(ui_handle_t *handle, bool drag_files, char *search, 
 
 			if (is_cloud && !ui_files_offline) {
 				if (ui_files_icon_map == NULL) {
-					gc_unroot(ui_files_icon_map);
 					ui_files_icon_map = any_map_create();
 					gc_root(ui_files_icon_map);
 				}
 				if (ui_files_icon_file_map == NULL) {
-					gc_unroot(ui_files_icon_file_map);
 					ui_files_icon_file_map = any_map_create();
 					gc_root(ui_files_icon_file_map);
 				}
@@ -275,7 +314,6 @@ char *ui_files_file_browser(ui_handle_t *handle, bool drag_files, char *search, 
 
 			if (!is_folder && ends_with(f, ".arm") && !is_cloud) {
 				if (ui_files_icon_map == NULL) {
-					gc_unroot(ui_files_icon_map);
 					ui_files_icon_map = any_map_create();
 					gc_root(ui_files_icon_map);
 				}

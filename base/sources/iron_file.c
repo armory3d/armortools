@@ -600,9 +600,11 @@ static void _file_cache_cloud_callback(char *url) {
 	if (!iron_file_exists(fccd->dest)) {
 		console_error(strings_check_internet_connection());
 		fccd->done(NULL);
+		free(fccd);
 		return;
 	}
 	fccd->done(fccd->dest);
+	free(fccd);
 }
 
 void file_cache_cloud(char *path, void (*done)(char *dest), char *server) {
