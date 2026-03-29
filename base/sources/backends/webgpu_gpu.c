@@ -305,18 +305,6 @@ void gpu_init_internal(int depth_buffer_bits, bool vsync) {
 	create_swapchain();
 }
 
-void gpu_destroy() {
-	if (readback_buffer_size > 0) {
-		wgpuBufferDestroy(readback_buffer);
-		wgpuBufferRelease(readback_buffer);
-	}
-	// wgpuSurfaceUnconfigure(surface);
-	// wgpuSurfaceRelease(surface);
-	// wgpuDeviceRelease(device);
-	// wgpuAdapterRelease(gpu);
-	// wgpuInstanceRelease(instance);
-}
-
 void gpu_begin_internal(gpu_clear_t flags, unsigned color, float depth) {
 	int width  = iron_window_width();
 	int height = iron_window_height();

@@ -1012,18 +1012,6 @@ void gpu_init_internal(int depth_buffer_bits, bool vsync) {
 	vkCreateFence(device, &fence_info, NULL, &fence);
 }
 
-void gpu_destroy() {
-	if (readback_buffer_size > 0) {
-		vkFreeMemory(device, readback_mem, NULL);
-		vkDestroyBuffer(device, readback_buffer, NULL);
-	}
-	vkFreeCommandBuffers(device, cmd_pool, 1, &command_buffer);
-	vkDestroyFence(device, fence, NULL);
-	VkSwapchainKHR swapchain = cleanup_swapchain();
-	vkDestroySwapchainKHR(device, swapchain, NULL);
-	vkDestroySurfaceKHR(instance, surface, NULL);
-}
-
 void iron_vulkan_surface_destroyed() {
 	surface_destroyed = true;
 }

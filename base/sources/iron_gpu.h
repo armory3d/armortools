@@ -170,7 +170,6 @@ void gpu_barrier(gpu_texture_t *render_target, gpu_texture_state_t state_after);
 void gpu_create_framebuffers(int depth_buffer_bits);
 void gpu_init(int depth_buffer_bits, bool vsync);
 void gpu_init_internal(int depth_buffer_bits, bool vsync);
-void gpu_destroy(void);
 void gpu_draw(void);
 void gpu_resize(int width, int height);
 void gpu_resize_internal(int width, int height);

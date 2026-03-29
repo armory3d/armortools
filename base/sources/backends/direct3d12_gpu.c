@@ -157,31 +157,6 @@ void gpu_barrier(gpu_texture_t *render_target, gpu_texture_state_t state_after) 
 	render_target->state = state_after;
 }
 
-void gpu_destroy() {
-	wait_for_fence(fence, fence_value, fence_event);
-	for (int i = 0; i < GPU_FRAMEBUFFER_COUNT; ++i) {
-		gpu_texture_destroy_internal(&framebuffers[i]);
-	}
-	if (framebuffer_depth.width > 0) {
-		gpu_texture_destroy_internal(&framebuffer_depth);
-	}
-	if (readback_buffer != NULL) {
-		readback_buffer->lpVtbl->Release(readback_buffer);
-	}
-	if (upload_buffer != NULL) {
-		upload_buffer->lpVtbl->Release(upload_buffer);
-	}
-	command_list->lpVtbl->Release(command_list);
-	command_allocator->lpVtbl->Release(command_allocator);
-	window_swapchain->lpVtbl->Release(window_swapchain);
-	queue->lpVtbl->Release(queue);
-	root_signature->lpVtbl->Release(root_signature);
-	gpu_srv_heap->lpVtbl->Release(gpu_srv_heap);
-	fence->lpVtbl->Release(fence);
-	CloseHandle(fence_event);
-	device->lpVtbl->Release(device);
-}
-
 static D3D12_CPU_DESCRIPTOR_HANDLE descriptor_handle(ID3D12DescriptorHeap *heap, D3D12_DESCRIPTOR_HEAP_TYPE type, int index) {
 	D3D12_CPU_DESCRIPTOR_HANDLE h;
 	heap->lpVtbl->GetCPUDescriptorHandleForHeapStart(heap, &h);

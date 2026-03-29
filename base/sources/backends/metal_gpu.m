@@ -117,11 +117,6 @@ void gpu_render_target_init2(gpu_texture_t *target, int width, int height, gpu_t
 	}
 }
 
-void gpu_destroy(void) {
-	id<MTLTexture> readback = (__bridge_transfer id<MTLTexture>)readback_buffer;
-	readback                = nil;
-}
-
 void gpu_resize_internal(int width, int height) {
 	resized = true;
 }

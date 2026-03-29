@@ -944,7 +944,6 @@ void iron_internal_shutdown() {
 	iron_windows_hide_windows();
 	iron_internal_shutdown_callback();
 	iron_windows_destroy_windows();
-	gpu_destroy();
 	iron_windows_restore_displays();
 }
 
