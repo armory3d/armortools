@@ -5022,6 +5022,11 @@ void _kickstart() {
 	config_init();
 	context_init();
 	sys_start(config_get_options());
+
+#ifdef is_debug
+	double t_start = iron_time();
+#endif
+
 	if (config_raw->layout == NULL) {
 		config_init_layout();
 	}
@@ -5046,5 +5051,10 @@ void _kickstart() {
 #endif
 
 	base_init();
+
+#ifdef is_debug
+	iron_log("Started in %fs\n", iron_time() - t_start);
+#endif
+
 	iron_start();
 }
