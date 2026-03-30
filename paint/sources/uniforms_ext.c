@@ -84,7 +84,7 @@ f32 uniforms_ext_f32_link(object_t *object, material_data_t *mat, char *link) {
 		if (context_raw->tool != TOOL_TYPE_BRUSH && context_raw->tool != TOOL_TYPE_ERASER && context_raw->tool != TOOL_TYPE_CLONE && !decal_mask) {
 			return 1.0;
 		}
-		f32 val = context_raw->brush_hardness * context_raw->brush_nodes_hardness;
+		f32 val = fmaxf((context_raw->brush_hardness * context_raw->brush_nodes_hardness) - 0.02, 0.0);
 		if (config_raw->pressure_hardness && pen_down("tip")) {
 			val *= pen_pressure * config_raw->pressure_sensitivity;
 		}

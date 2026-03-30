@@ -316,7 +316,7 @@ void util_render_make_brush_preview() {
 	f32 _brush_hardness         = context_raw->brush_hardness;
 	context_raw->brush_radius   = 0.33;
 	context_raw->brush_opacity  = 1.0;
-	context_raw->brush_hardness = 0.8;
+	context_raw->brush_hardness = 1.0;
 	f32 _x                      = context_raw->paint_vec.x;
 	f32 _y                      = context_raw->paint_vec.y;
 	f32 _last_x                 = context_raw->last_paint_vec_x;

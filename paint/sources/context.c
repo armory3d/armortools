@@ -175,7 +175,7 @@ void context_init() {
 	context_raw->color_picker_previous_tool = TOOL_TYPE_BRUSH;
 	context_raw->brush_radius               = 0.5;
 	context_raw->brush_radius_handle->f     = 0.5;
-	context_raw->brush_hardness             = 0.8;
+	context_raw->brush_hardness             = 1.0;
 }
 
 bool context_use_deferred() {
