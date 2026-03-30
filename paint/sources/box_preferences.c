@@ -298,6 +298,7 @@ void box_preferences_theme_tab() {
 		}
 		if (ui->changed) {
 			ui->elements_baked = false;
+			ui->font_size = ui->ops->theme->FONT_SIZE;
 		}
 	}
 	ui->input_enabled = true;
