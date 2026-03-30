@@ -1,0 +1,213 @@
+
+// Slug font rendering algorithm by Eric Lengyel
+// Licensed under Apache-2.0
+// https://github.com/EricLengyel/Slug
+
+#[set(everything)]
+const constants: {
+	pos: float4;
+	col: float4;
+	em_rect: float4; // xoff, yoff, glyph_w, glyph_h
+	glyph_loc: int4;
+	band_max: int4;
+	band_tf: float4;
+};
+
+#[set(everything)]
+const sampler_linear: sampler;
+
+#[set(everything)]
+const curve_tex: tex2d;
+
+#[set(everything)]
+const band_tex: tex2d;
+
+struct vert_in {
+	pos: float2;
+}
+
+struct vert_out {
+	pos: float4;
+	em: float2;
+}
+
+fun draw_slug_vert(input: vert_in): vert_out {
+	var output: vert_out;
+	var cpos: float4 = constants.pos;
+	output.pos = float4(input.pos, 0.0, 1.0);
+	output.pos.xy = output.pos.xy * cpos.zw + cpos.xy;
+	output.pos.xy = output.pos.xy * 2.0 - 1.0;
+	output.pos.y = -output.pos.y;
+	var er: float4 = constants.em_rect;
+	output.em = input.pos * er.zw + er.xy;
+	return output;
+}
+
+fun curve_fetch(x: int, y: int): float4 {
+	var coord: uint2 = uint2(uint(x), uint(y));
+	return curve_tex[coord];
+}
+
+fun band_fetch(x: int, y: int): float4 {
+	var coord: uint2 = uint2(uint(x), uint(y));
+	return band_tex[coord];
+}
+
+fun calc_root_code(y1: float, y2: float, y3: float): uint {
+	var shift: uint = uint(0);
+	if (y1 < 0.0) { shift = shift | 1; }
+	if (y2 < 0.0) { shift = shift | 2; }
+	if (y3 < 0.0) { shift = shift | 4; }
+	// return (0x2E74 >> shift) & 0x0101;
+	return uint((11892 >> shift) & 257);
+}
+
+fun solve_horiz(p12: float4, p3: float2): float2 {
+	var a: float2 = p12.xy - p12.zw * 2.0 + p3;
+	var b: float2 = p12.xy - p12.zw;
+	var d: float = sqrt(max(b.y * b.y - a.y * p12.y, 0.0));
+	var t1: float;
+	var t2: float;
+	if (abs(a.y) < (1.0 / 65536.0)) {
+		t1 = p12.y * (0.5 / b.y);
+		t2 = t1;
+	}
+	else {
+		var ra: float = 1.0 / a.y;
+		t1 = (b.y - d) * ra;
+		t2 = (b.y + d) * ra;
+	}
+	var r: float2;
+	r.x = (a.x * t1 - b.x * 2.0) * t1 + p12.x;
+	r.y = (a.x * t2 - b.x * 2.0) * t2 + p12.x;
+	return r;
+}
+
+fun solve_vert(p12: float4, p3: float2): float2 {
+	var a: float2 = p12.xy - p12.zw * 2.0 + p3;
+	var b: float2 = p12.xy - p12.zw;
+	var d: float = sqrt(max(b.x * b.x - a.x * p12.x, 0.0));
+	var t1: float;
+	var t2: float;
+	if (abs(a.x) < (1.0 / 65536.0)) {
+		t1 = p12.x * (0.5 / b.x);
+		t2 = t1;
+	}
+	else {
+		var ra: float = 1.0 / a.x;
+		t1 = (b.x - d) * ra;
+		t2 = (b.x + d) * ra;
+	}
+	var r: float2;
+	r.x = (a.y * t1 - b.y * 2.0) * t1 + p12.y;
+	r.y = (a.y * t2 - b.y * 2.0) * t2 + p12.y;
+	return r;
+}
+
+fun band_loc_x(base_x: int, offset: int): int {
+	return (base_x + offset) & 4095;
+}
+
+fun band_loc_y(base_x: int, base_y: int, offset: int): int {
+	return base_y + ((base_x + offset) >> 12);
+}
+
+fun draw_slug_frag(input: vert_out): float4 {
+	var gx: int = constants.glyph_loc.x;
+	var gy: int = constants.glyph_loc.y;
+	var vband_max: int = constants.band_max.x;
+	var hband_max: int = constants.band_max.y;
+	var tf: float4 = constants.band_tf;
+
+	var band_ix: int = int(clamp(input.em.x * tf.x, 0.0, float(vband_max)));
+	var band_iy: int = int(clamp(input.em.y * tf.y, 0.0, float(hband_max)));
+	var xcov: float = 0.0;
+	var xwgt: float = 0.0;
+
+	var hb: float4 = band_fetch(band_loc_x(gx, band_iy), band_loc_y(gx, gy, band_iy));
+	var hb_count: int  = int(hb.x);
+	var hb_off: int    = int(hb.y);
+	var hb_lx: int     = band_loc_x(gx, hb_off);
+	var hb_ly: int     = band_loc_y(gx, gy, hb_off);
+
+	var ci: int = 0;
+	while (ci < hb_count) {
+		var cl: float4 = band_fetch(band_loc_x(hb_lx, ci), band_loc_y(hb_lx, hb_ly, ci));
+		var cx: int = int(cl.x);
+		var cy: int = int(cl.y);
+
+		var p12: float4 = curve_fetch(cx, cy) - float4(input.em.x, input.em.y, input.em.x, input.em.y);
+		var p3:  float2 = curve_fetch(cx + 1, cy).xy - input.em;
+
+		if (max(max(p12.x, p12.z), p3.x) < -0.5) {
+			ci = hb_count;
+		}
+		else {
+			var code: uint = calc_root_code(p12.y, p12.w, p3.y);
+			if (code != 0) {
+				var r: float2 = solve_horiz(p12, p3);
+				if ((code & 1) != 0) {
+					xcov += clamp(r.x + 0.5, 0.0, 1.0);
+					xwgt = max(xwgt, clamp(1.0 - abs(r.x) * 2.0, 0.0, 1.0));
+				}
+				if (code > 1) {
+					xcov -= clamp(r.y + 0.5, 0.0, 1.0);
+					xwgt = max(xwgt, clamp(1.0 - abs(r.y) * 2.0, 0.0, 1.0));
+				}
+			}
+			ci += 1;
+		}
+	}
+
+	var ycov: float = 0.0;
+	var ywgt: float = 0.0;
+
+	var vb_di: int = hband_max + 1 + band_ix;
+	var vb: float4 = band_fetch(band_loc_x(gx, vb_di), band_loc_y(gx, gy, vb_di));
+	var vb_count: int  = int(vb.x);
+	var vb_off: int    = int(vb.y);
+	var vb_lx: int     = band_loc_x(gx, vb_off);
+	var vb_ly: int     = band_loc_y(gx, gy, vb_off);
+
+	ci = 0;
+	while (ci < vb_count) {
+		var cl: float4 = band_fetch(band_loc_x(vb_lx, ci), band_loc_y(vb_lx, vb_ly, ci));
+		var cx: int = int(cl.x);
+		var cy: int = int(cl.y);
+
+		var p12: float4 = curve_fetch(cx, cy) - float4(input.em.x, input.em.y, input.em.x, input.em.y);
+		var p3:  float2 = curve_fetch(cx + 1, cy).xy - input.em;
+
+		if (max(max(p12.y, p12.w), p3.y) < -0.5) {
+			ci = vb_count;
+		}
+		else {
+			var code: uint = calc_root_code(p12.x, p12.z, p3.x);
+			if (code != 0) {
+				var r: float2 = solve_vert(p12, p3);
+				if ((code & 1) != 0) {
+					ycov -= clamp(r.x + 0.5, 0.0, 1.0);
+					ywgt = max(ywgt, clamp(1.0 - abs(r.x) * 2.0, 0.0, 1.0));
+				}
+				if (code > 1) {
+					ycov += clamp(r.y + 0.5, 0.0, 1.0);
+					ywgt = max(ywgt, clamp(1.0 - abs(r.y) * 2.0, 0.0, 1.0));
+				}
+			}
+			ci += 1;
+		}
+	}
+
+	var denom: float   = max(xwgt + ywgt, 1.0 / 65536.0);
+	var coverage: float = max(abs(xcov * xwgt + ycov * ywgt) / denom, min(abs(xcov), abs(ycov)));
+	coverage = clamp(coverage, 0.0, 1.0);
+
+	var c: float4 = constants.col;
+	return float4(c.rgb, c.a * coverage);
+}
+
+#[pipe]
+struct pipe {
+	vertex = draw_slug_vert;
+	fragment = draw_slug_frag;
+}

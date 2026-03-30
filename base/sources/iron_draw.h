@@ -26,7 +26,8 @@ typedef struct draw_font {
 } draw_font_t;
 
 void     draw_init(buffer_t *image_vert, buffer_t *image_frag, buffer_t *image_transform_vert, buffer_t *image_transform_frag, buffer_t *rect_vert,
-                   buffer_t *rect_frag, buffer_t *tris_vert, buffer_t *tris_frag, buffer_t *text_vert, buffer_t *text_frag);
+                   buffer_t *rect_frag, buffer_t *tris_vert, buffer_t *tris_frag, buffer_t *text_vert, buffer_t *text_frag,
+                   buffer_t *slug_vert, buffer_t *slug_frag);
 void     draw_begin(gpu_texture_t *target, bool clear, unsigned color);
 void     draw_scaled_sub_image(gpu_texture_t *img, float sx, float sy, float sw, float sh, float dx, float dy, float dw, float dh);
 void     draw_scaled_image(gpu_texture_t *tex, float dx, float dy, float dw, float dh);
@@ -46,7 +47,6 @@ void     draw_set_transform(mat3_t matrix);
 bool     draw_set_font(draw_font_t *font, int size);
 void     draw_font_init(draw_font_t *font);
 void     draw_font_destroy(draw_font_t *font);
-void     draw_font_13(draw_font_t *font);
 bool     draw_font_has_glyph(int glyph);
 void     draw_font_add_glyph(int glyph);
 void     draw_font_init_glyphs(int from, int to);

@@ -8,14 +8,15 @@
 #include "iron_string.h"
 #include "iron_system.h"
 #include <math.h>
+#include <string.h>
 
 draw_font_t   *draw_font = NULL;
 int            draw_font_size;
 gpu_texture_t *_draw_current = NULL;
 
-static mat3_t draw_transform;
-static uint32_t         draw_color           = 0;
-static gpu_pipeline_t  *draw_custom_pipeline = NULL;
+static mat3_t          draw_transform;
+static uint32_t        draw_color           = 0;
+static gpu_pipeline_t *draw_custom_pipeline = NULL;
 
 static gpu_buffer_t           rect_vertex_buffer;
 static gpu_buffer_t           rect_index_buffer;
@@ -48,6 +49,17 @@ static int            text_tex_unit;
 static int            text_pos_loc;
 static int            text_tex_loc;
 static int            text_col_loc;
+
+static gpu_pipeline_t slug_pipeline;
+static gpu_pipeline_t slug_rt_pipeline;
+static int            slug_curve_tex_unit;
+static int            slug_band_tex_unit;
+static int            slug_pos_loc;
+static int            slug_col_loc;
+static int            slug_em_rect_loc;
+static int            slug_glyph_loc_loc;
+static int            slug_band_max_loc;
+static int            slug_band_tf_loc;
 
 static i32_array_t *draw_font_glyph_blocks = NULL;
 static i32_array_t *draw_font_glyphs       = NULL;
@@ -93,7 +105,8 @@ static void draw_pipeline_init(gpu_pipeline_t *pipe, gpu_shader_t *vert, gpu_sha
 }
 
 void draw_init(buffer_t *image_vert, buffer_t *image_frag, buffer_t *image_transform_vert, buffer_t *image_transform_frag, buffer_t *rect_vert,
-               buffer_t *rect_frag, buffer_t *tris_vert, buffer_t *tris_frag, buffer_t *text_vert, buffer_t *text_frag) {
+               buffer_t *rect_frag, buffer_t *tris_vert, buffer_t *tris_frag, buffer_t *text_vert, buffer_t *text_frag, buffer_t *slug_vert,
+               buffer_t *slug_frag) {
 	draw_transform      = mat3_nan();
 	draw_structure.size = 0;
 	gpu_vertex_structure_add(&draw_structure, "pos", GPU_VERTEX_DATA_F32_2X);
@@ -206,6 +219,27 @@ void draw_init(buffer_t *image_vert, buffer_t *image_frag, buffer_t *image_trans
 		text_rt_pipeline.blend_source = GPU_BLEND_SOURCE_ALPHA;
 		gpu_pipeline_compile(&text_rt_pipeline);
 	}
+
+	// Slug painter
+	{
+		gpu_shader_init(&vert_shader, slug_vert->buffer, slug_vert->length, GPU_SHADER_TYPE_VERTEX);
+		gpu_shader_init(&frag_shader, slug_frag->buffer, slug_frag->length, GPU_SHADER_TYPE_FRAGMENT);
+		draw_pipeline_init(&slug_pipeline, &vert_shader, &frag_shader);
+		slug_pipeline.blend_source = GPU_BLEND_SOURCE_ALPHA;
+		gpu_pipeline_compile(&slug_pipeline);
+		slug_curve_tex_unit = 0;
+		slug_band_tex_unit  = 1;
+		slug_pos_loc        = 0;
+		slug_col_loc        = 16;
+		slug_em_rect_loc    = 32;
+		slug_glyph_loc_loc  = 48;
+		slug_band_max_loc   = 64;
+		slug_band_tf_loc    = 80;
+
+		draw_pipeline_init(&slug_rt_pipeline, &vert_shader, &frag_shader);
+		slug_rt_pipeline.blend_source = GPU_BLEND_SOURCE_ALPHA;
+		gpu_pipeline_compile(&slug_rt_pipeline);
+	}
 }
 
 void draw_begin(gpu_texture_t *target, bool clear, unsigned color) {
@@ -226,7 +260,9 @@ void draw_end(void) {
 
 void draw_scaled_sub_image(gpu_texture_t *tex, float sx, float sy, float sw, float sh, float dx, float dy, float dw, float dh) {
 	if (mat3_isnan(draw_transform)) {
-		gpu_set_pipeline(draw_custom_pipeline != NULL ? draw_custom_pipeline : (_draw_current != NULL && _draw_current->format == GPU_TEXTURE_FORMAT_R8) ? &image_r8_pipeline : &image_pipeline);
+		gpu_set_pipeline(draw_custom_pipeline != NULL                                                ? draw_custom_pipeline
+		                 : (_draw_current != NULL && _draw_current->format == GPU_TEXTURE_FORMAT_R8) ? &image_r8_pipeline
+		                                                                                             : &image_pipeline);
 	}
 	else {
 		gpu_set_pipeline(draw_custom_pipeline != NULL ? draw_custom_pipeline : &image_transform_pipeline);
@@ -322,18 +358,38 @@ void draw_line_aa(float x0, float y0, float x1, float y1, float strength) {
 #define STB_TRUETYPE_IMPLEMENTATION
 #include <stb_truetype.h>
 
-typedef struct draw_font_aligned_quad {
-	float x0, y0, s0, t0; // Top-left
-	float x1, y1, s1, t1; // Bottom-right
+typedef struct draw_glyph {
+	int16_t x0, y0, x1, y1;
+	float   xoff, yoff, xadvance;
+} draw_glyph_t;
+
+#define SLUG_HBAND_COUNT     16
+#define SLUG_VBAND_COUNT     16
+#define SLUG_CURVE_TEX_WIDTH 4096
+#define SLUG_BAND_TEX_WIDTH  4096
+
+typedef struct slug_glyph {
+	int   band_tex_x, band_tex_y;
+	float xoff, yoff, glyph_w, glyph_h;
 	float xadvance;
-} draw_font_aligned_quad_t;
+	float band_scale_x, band_scale_y;
+} slug_glyph_t;
 
 typedef struct draw_font_image {
-	float            m_size;
-	stbtt_bakedchar *chars;
-	gpu_texture_t   *tex;
-	int              width, height, first_unused_y;
-	float            baseline, descent, line_gap;
+	float          m_size;
+	slug_glyph_t  *slug_glyphs;
+	gpu_texture_t *curve_tex;
+	gpu_texture_t *band_tex;
+	int            curve_tex_width;
+	int            curve_tex_height;
+	int            band_tex_width;
+	int            band_tex_height;
+	int            width;
+	int            height;
+	int            first_unused_y;
+	float          baseline;
+	float          descent;
+	float          line_gap;
 } draw_font_image_t;
 
 draw_font_image_t *draw_font_get_image_internal(draw_font_t *font, int size) {
@@ -364,49 +420,98 @@ static inline bool draw_prepare_font_load_internal(draw_font_t *font, int size) 
 	return true;
 }
 
-static int stbtt_BakeFontBitmapArr(unsigned char *data, int offset,       // Font location (use offset=0 for plain .ttf)
-                                   float          pixel_height,           // Height of font in pixels
-                                   unsigned char *pixels, int pw, int ph, // Bitmap to be filled in
-                                   int *chars, int num_chars,             // Characters to bake
-                                   stbtt_bakedchar *chardata) {
-	float          scale;
-	int            x, y, bottom_y, i;
-	stbtt_fontinfo f;
-	f.userdata = NULL;
-	if (!stbtt_InitFont(&f, data, offset))
-		return -1;
-	STBTT_memset(pixels, 0, pw * ph); // Background of 0 around pixels
-	x = y    = 1;
-	bottom_y = 1;
+typedef struct {
+	float p1x, p1y, p2x, p2y, p3x, p3y;
+} _slug_curve_t;
 
-	scale = stbtt_ScaleForPixelHeight(&f, pixel_height);
-
-	for (i = 0; i < num_chars; ++i) {
-		int advance, lsb, x0, y0, x1, y1, gw, gh;
-		int g = stbtt_FindGlyphIndex(&f, chars[i]);
-		stbtt_GetGlyphHMetrics(&f, g, &advance, &lsb);
-		stbtt_GetGlyphBitmapBox(&f, g, scale, scale, &x0, &y0, &x1, &y1);
-		gw = x1 - x0;
-		gh = y1 - y0;
-		if (x + gw + 1 >= pw)
-			y = bottom_y, x = 1; // Advance to next row
-		if (y + gh + 1 >= ph)    // Check if it fits vertically AFTER potentially moving to next row
-			return -i;
-		STBTT_assert(x + gw < pw);
-		STBTT_assert(y + gh < ph);
-		stbtt_MakeGlyphBitmap(&f, pixels + x + y * pw, gw, gh, pw, scale, scale, g);
-		chardata[i].x0       = (stbtt_int16)x;
-		chardata[i].y0       = (stbtt_int16)y;
-		chardata[i].x1       = (stbtt_int16)(x + gw);
-		chardata[i].y1       = (stbtt_int16)(y + gh);
-		chardata[i].xadvance = scale * advance;
-		chardata[i].xoff     = (float)x0;
-		chardata[i].yoff     = (float)y0;
-		x                    = x + gw + 1;
-		if (y + gh + 1 > bottom_y)
-			bottom_y = y + gh + 1;
+static int _slug_extract_curves(stbtt_fontinfo *info, int glyph_index, float scale, int bx0, int by0, _slug_curve_t **out) {
+	stbtt_vertex *verts;
+	int           nv = stbtt_GetGlyphShape(info, glyph_index, &verts);
+	if (nv == 0) {
+		*out = NULL;
+		return 0;
 	}
-	return bottom_y;
+
+	_slug_curve_t *c  = (_slug_curve_t *)malloc(nv * 2 * sizeof(_slug_curve_t));
+	int            nc = 0;
+	float          cx = 0.0f, cy = 0.0f;
+
+	for (int i = 0; i < nv; i++) {
+		float vx  = verts[i].x * scale - bx0;
+		float vy  = -verts[i].y * scale - by0;
+		float vcx = verts[i].cx * scale - bx0;
+		float vcy = -verts[i].cy * scale - by0;
+
+		switch (verts[i].type) {
+		case STBTT_vmove:
+			cx = vx;
+			cy = vy;
+			break;
+		case STBTT_vline:
+			c[nc++] = (_slug_curve_t){cx, cy, (cx + vx) * 0.5f, (cy + vy) * 0.5f, vx, vy};
+			cx      = vx;
+			cy      = vy;
+			break;
+		case STBTT_vcurve:
+			c[nc++] = (_slug_curve_t){cx, cy, vcx, vcy, vx, vy};
+			cx      = vx;
+			cy      = vy;
+			break;
+		case STBTT_vcubic: {
+			float cx2 = verts[i].cx1 * scale - bx0;
+			float cy2 = -verts[i].cy1 * scale - by0;
+			float m1x = (cx + vcx) * 0.5f, m1y = (cy + vcy) * 0.5f;
+			float m2x = (vcx + cx2) * 0.5f, m2y = (vcy + cy2) * 0.5f;
+			float m3x = (cx2 + vx) * 0.5f, m3y = (cy2 + vy) * 0.5f;
+			float m12x = (m1x + m2x) * 0.5f, m12y = (m1y + m2y) * 0.5f;
+			float m23x = (m2x + m3x) * 0.5f, m23y = (m2y + m3y) * 0.5f;
+			float midx = (m12x + m23x) * 0.5f, midy = (m12y + m23y) * 0.5f;
+			c[nc++] = (_slug_curve_t){cx, cy, m12x, m12y, midx, midy};
+			c[nc++] = (_slug_curve_t){midx, midy, m23x, m23y, vx, vy};
+			cx      = vx;
+			cy      = vy;
+			break;
+		}
+		}
+	}
+	stbtt_FreeShape(info, verts);
+	*out = c;
+	return nc;
+}
+
+static _slug_curve_t *_slug_sort_curves;
+
+static int _slug_cmp_hband(const void *a, const void *b) {
+	int   ia = *(const int *)a, ib = *(const int *)b;
+	float ma = fmaxf(fmaxf(_slug_sort_curves[ia].p1x, _slug_sort_curves[ia].p2x), _slug_sort_curves[ia].p3x);
+	float mb = fmaxf(fmaxf(_slug_sort_curves[ib].p1x, _slug_sort_curves[ib].p2x), _slug_sort_curves[ib].p3x);
+	return (ma < mb) - (ma > mb);
+}
+
+static int _slug_cmp_vband(const void *a, const void *b) {
+	int   ia = *(const int *)a, ib = *(const int *)b;
+	float ma = fmaxf(fmaxf(_slug_sort_curves[ia].p1y, _slug_sort_curves[ia].p2y), _slug_sort_curves[ia].p3y);
+	float mb = fmaxf(fmaxf(_slug_sort_curves[ib].p1y, _slug_sort_curves[ib].p2y), _slug_sort_curves[ib].p3y);
+	return (ma < mb) - (ma > mb);
+}
+
+typedef struct {
+	float *data;
+	int    texels;
+	int    cap;
+} _slug_fbuf_t;
+
+static void _slug_push(_slug_fbuf_t *b, float r, float g, float bv, float a) {
+	if (b->texels >= b->cap) {
+		b->cap  = b->cap < 64 ? 256 : b->cap * 2;
+		b->data = (float *)realloc(b->data, (size_t)b->cap * 4 * sizeof(float));
+	}
+	int i          = b->texels * 4;
+	b->data[i]     = r;
+	b->data[i + 1] = g;
+	b->data[i + 2] = bv;
+	b->data[i + 3] = a;
+	b->texels++;
 }
 
 bool draw_font_load(draw_font_t *font, int size) {
@@ -416,49 +521,180 @@ bool draw_font_load(draw_font_t *font, int size) {
 
 	draw_font_image_t *img = &(font->images[font->m_images_len]);
 	font->m_images_len += 1;
-	int              width  = 64;
-	int              height = 32;
-	stbtt_bakedchar *baked  = (stbtt_bakedchar *)malloc(draw_font_glyphs->length * sizeof(stbtt_bakedchar));
-	unsigned char   *pixels = NULL;
-
-	int status = -1;
-	while (status <= 0) {
-		if (height < width)
-			height *= 2;
-		else
-			width *= 2;
-		if (pixels == NULL)
-			pixels = (unsigned char *)malloc(width * height);
-		else
-			pixels = (unsigned char *)realloc(pixels, width * height);
-		if (pixels == NULL)
-			return false;
-		status =
-		    stbtt_BakeFontBitmapArr(font->blob, font->offset, (float)size, pixels, width, height, draw_font_glyphs->buffer, draw_font_glyphs->length, baked);
-	}
+	memset(img, 0, sizeof(draw_font_image_t));
+	img->m_size = (float)size;
 
 	stbtt_fontinfo info;
-	int            ascent, descent, line_gap;
 	stbtt_InitFont(&info, font->blob, font->offset);
-	stbtt_GetFontVMetrics(&info, &ascent, &descent, &line_gap);
-	float scale         = stbtt_ScaleForPixelHeight(&info, (float)size);
-	img->m_size         = (float)size;
-	img->baseline       = (float)((int)((float)ascent * scale + 0.5f));
-	img->descent        = (float)((int)((float)descent * scale + 0.5f));
-	img->line_gap       = (float)((int)((float)line_gap * scale + 0.5f));
-	img->width          = width;
-	img->height         = height;
-	img->chars          = baked;
-	img->first_unused_y = status;
-	img->tex            = (gpu_texture_t *)malloc(sizeof(gpu_texture_t));
-	gpu_texture_init_from_bytes(img->tex, pixels, width, height, GPU_TEXTURE_FORMAT_R8);
-	free(pixels);
-	return true;
-}
 
-gpu_texture_t *draw_font_get_texture(draw_font_t *font, int size) {
-	draw_font_image_t *img = draw_font_get_image_internal(font, size);
-	return img->tex;
+	int ascent, descent, line_gap;
+	stbtt_GetFontVMetrics(&info, &ascent, &descent, &line_gap);
+	float scale   = stbtt_ScaleForPixelHeight(&info, (float)size);
+	img->baseline = (float)((int)(ascent * scale + 0.5f));
+	img->descent  = (float)((int)(descent * scale + 0.5f));
+	img->line_gap = (float)((int)(line_gap * scale + 0.5f));
+
+	int num_glyphs   = draw_font_glyphs->length;
+	img->slug_glyphs = (slug_glyph_t *)malloc((size_t)num_glyphs * sizeof(slug_glyph_t));
+	memset(img->slug_glyphs, 0, (size_t)num_glyphs * sizeof(slug_glyph_t));
+
+	_slug_fbuf_t curve_buf = {NULL, 0, 0};
+	_slug_fbuf_t band_buf  = {NULL, 0, 0};
+
+	int total_bands = SLUG_HBAND_COUNT + SLUG_VBAND_COUNT;
+
+	for (int gi = 0; gi < num_glyphs; gi++) {
+		int codepoint   = draw_font_glyphs->buffer[gi];
+		int glyph_index = stbtt_FindGlyphIndex(&info, codepoint);
+		int advance, lsb;
+		stbtt_GetGlyphHMetrics(&info, glyph_index, &advance, &lsb);
+		img->slug_glyphs[gi].xadvance = advance * scale;
+
+		int bx0, by0, bx1, by1;
+		stbtt_GetGlyphBitmapBox(&info, glyph_index, scale, scale, &bx0, &by0, &bx1, &by1);
+		int gw = bx1 - bx0, gh = by1 - by0;
+
+		img->slug_glyphs[gi].xoff    = (float)bx0;
+		img->slug_glyphs[gi].yoff    = (float)by0;
+		img->slug_glyphs[gi].glyph_w = (float)gw;
+		img->slug_glyphs[gi].glyph_h = (float)gh;
+
+		if (gw <= 0 || gh <= 0) {
+			continue; // whitespace or zero-size glyph
+		}
+
+		_slug_curve_t *curves;
+		int            nc = _slug_extract_curves(&info, glyph_index, scale, bx0, by0, &curves);
+
+		// Glyph's band texture origin (top-left of its band data block)
+		int glyph_band_start              = band_buf.texels;
+		img->slug_glyphs[gi].band_tex_x   = glyph_band_start % SLUG_BAND_TEX_WIDTH;
+		img->slug_glyphs[gi].band_tex_y   = glyph_band_start / SLUG_BAND_TEX_WIDTH;
+		img->slug_glyphs[gi].band_scale_x = (gw > 0) ? (float)(SLUG_VBAND_COUNT - 1) / (float)gw : 0.0f;
+		img->slug_glyphs[gi].band_scale_y = (gh > 0) ? (float)(SLUG_HBAND_COUNT - 1) / (float)gh : 0.0f;
+
+		// Reserve descriptor texels: HBAND_COUNT + VBAND_COUNT
+		int descriptor_start = band_buf.texels;
+		for (int b = 0; b < total_bands; b++) {
+			_slug_push(&band_buf, 0.0f, 0.0f, 0.0f, 0.0f); // placeholder
+		}
+
+		// Build per-band curve index lists (use COUNT-1 to match shader's band_scale)
+		float hband_h = (float)gh / (SLUG_HBAND_COUNT - 1);
+		float vband_w = (float)gw / (SLUG_VBAND_COUNT - 1);
+
+		// Per-band curve index arrays (stored as flat array: band * nc + index)
+		int *band_indices = (int *)malloc((size_t)(total_bands * (nc + 1)) * sizeof(int));
+		int *band_sizes   = (int *)calloc((size_t)total_bands, sizeof(int));
+
+		_slug_sort_curves = curves;
+		for (int c = 0; c < nc; c++) {
+			float ymin = fminf(fminf(curves[c].p1y, curves[c].p2y), curves[c].p3y);
+			float ymax = fmaxf(fmaxf(curves[c].p1y, curves[c].p2y), curves[c].p3y);
+			float xmin = fminf(fminf(curves[c].p1x, curves[c].p2x), curves[c].p3x);
+			float xmax = fmaxf(fmaxf(curves[c].p1x, curves[c].p2x), curves[c].p3x);
+
+			int hlo = (int)(ymin / hband_h);
+			if (hlo < 0)
+				hlo = 0;
+			int hhi = (int)(ymax / hband_h);
+			if (hhi >= SLUG_HBAND_COUNT)
+				hhi = SLUG_HBAND_COUNT - 1;
+			for (int b = hlo; b <= hhi; b++) {
+				band_indices[b * (nc + 1) + band_sizes[b]] = c;
+				band_sizes[b]++;
+			}
+
+			int vlo = (int)(xmin / vband_w);
+			if (vlo < 0)
+				vlo = 0;
+			int vhi = (int)(xmax / vband_w);
+			if (vhi >= SLUG_VBAND_COUNT)
+				vhi = SLUG_VBAND_COUNT - 1;
+			for (int b = vlo; b <= vhi; b++) {
+				int bi                                       = SLUG_HBAND_COUNT + b;
+				band_indices[bi * (nc + 1) + band_sizes[bi]] = c;
+				band_sizes[bi]++;
+			}
+		}
+
+		// Sort horizontal bands by descending max-x, vertical by descending max-y
+		for (int b = 0; b < SLUG_HBAND_COUNT; b++) {
+			qsort(&band_indices[b * (nc + 1)], (size_t)band_sizes[b], sizeof(int), _slug_cmp_hband);
+		}
+		for (int b = 0; b < SLUG_VBAND_COUNT; b++) {
+			int bi = SLUG_HBAND_COUNT + b;
+			qsort(&band_indices[bi * (nc + 1)], (size_t)band_sizes[bi], sizeof(int), _slug_cmp_vband);
+		}
+
+		// Write each curve exactly once to the curve texture; record its (tx, ty) position.
+		int *curve_tex_pos_x = (int *)malloc((size_t)nc * sizeof(int));
+		int *curve_tex_pos_y = (int *)malloc((size_t)nc * sizeof(int));
+		for (int c = 0; c < nc; c++) {
+			curve_tex_pos_x[c] = curve_buf.texels % SLUG_CURVE_TEX_WIDTH;
+			curve_tex_pos_y[c] = curve_buf.texels / SLUG_CURVE_TEX_WIDTH;
+			_slug_push(&curve_buf, curves[c].p1x, curves[c].p1y, curves[c].p2x, curves[c].p2y);
+			_slug_push(&curve_buf, curves[c].p3x, curves[c].p3y, 0.0f, 0.0f);
+		}
+
+		// Write band curve-location lists into band texture; back-fill descriptors.
+		for (int b = 0; b < total_bands; b++) {
+			int count  = band_sizes[b];
+			int offset = band_buf.texels - glyph_band_start;
+
+			for (int k = 0; k < count; k++) {
+				int ci = band_indices[b * (nc + 1) + k];
+				_slug_push(&band_buf, (float)curve_tex_pos_x[ci], (float)curve_tex_pos_y[ci], 0.0f, 0.0f);
+			}
+
+			int desc_abs                    = descriptor_start + b;
+			band_buf.data[desc_abs * 4 + 0] = (float)count;
+			band_buf.data[desc_abs * 4 + 1] = (float)offset;
+			band_buf.data[desc_abs * 4 + 2] = 0.0f;
+			band_buf.data[desc_abs * 4 + 3] = 0.0f;
+		}
+
+		free(curve_tex_pos_x);
+		free(curve_tex_pos_y);
+
+		free(band_indices);
+		free(band_sizes);
+		free(curves);
+	}
+
+	// Build GPU textures
+	int ctw = SLUG_CURVE_TEX_WIDTH;
+	int cth = (curve_buf.texels + ctw - 1) / ctw;
+	if (cth < 1)
+		cth = 1;
+	int btw = SLUG_BAND_TEX_WIDTH;
+	int bth = (band_buf.texels + btw - 1) / btw;
+	if (bth < 1)
+		bth = 1;
+
+	// Pad to full rows
+	int curve_total = ctw * cth;
+	int band_total  = btw * bth;
+	curve_buf.data  = (float *)realloc(curve_buf.data, (size_t)curve_total * 4 * sizeof(float));
+	if (curve_buf.texels < curve_total)
+		memset(&curve_buf.data[curve_buf.texels * 4], 0, (size_t)(curve_total - curve_buf.texels) * 4 * sizeof(float));
+	band_buf.data = (float *)realloc(band_buf.data, (size_t)band_total * 4 * sizeof(float));
+	if (band_buf.texels < band_total)
+		memset(&band_buf.data[band_buf.texels * 4], 0, (size_t)(band_total - band_buf.texels) * 4 * sizeof(float));
+
+	img->curve_tex        = (gpu_texture_t *)malloc(sizeof(gpu_texture_t));
+	img->band_tex         = (gpu_texture_t *)malloc(sizeof(gpu_texture_t));
+	img->curve_tex_width  = ctw;
+	img->curve_tex_height = cth;
+	img->band_tex_width   = btw;
+	img->band_tex_height  = bth;
+
+	gpu_texture_init_from_bytes(img->curve_tex, curve_buf.data, ctw, cth, GPU_TEXTURE_FORMAT_RGBA128);
+	gpu_texture_init_from_bytes(img->band_tex, band_buf.data, btw, bth, GPU_TEXTURE_FORMAT_RGBA128);
+
+	free(curve_buf.data);
+	free(band_buf.data);
+	return true;
 }
 
 int draw_font_get_char_index_internal(int char_index) {
@@ -484,57 +720,50 @@ int draw_font_get_char_index_internal(int char_index) {
 	return char_index - offset;
 }
 
-bool draw_font_get_baked_quad(draw_font_t *font, int size, draw_font_aligned_quad_t *q, int char_code, float xpos, float ypos) {
-	draw_font_image_t *img        = draw_font_get_image_internal(font, size);
-	int                char_index = draw_font_get_char_index_internal(char_code);
-	if (char_index >= draw_font_glyphs->length) {
-		return false;
-	}
-	float           ipw     = 1.0f / (float)img->width;
-	float           iph     = 1.0f / (float)img->height;
-	stbtt_bakedchar b       = img->chars[char_index];
-	int             round_x = (int)(xpos + b.xoff + 0.5);
-	int             round_y = (int)(ypos + b.yoff + 0.5);
-
-	q->x0 = (float)round_x;
-	q->y0 = (float)round_y;
-	q->x1 = (float)round_x + b.x1 - b.x0;
-	q->y1 = (float)round_y + b.y1 - b.y0;
-
-	q->s0 = b.x0 * ipw;
-	q->t0 = b.y0 * iph;
-	q->s1 = b.x1 * ipw;
-	q->t1 = b.y1 * iph;
-
-	q->xadvance = b.xadvance;
-
-	return true;
-}
-
 void draw_string(const char *text, float x, float y) {
-	draw_font_image_t       *img  = draw_font_get_image_internal(draw_font, draw_font_size);
-	float                    xpos = x;
-	float                    ypos = y + img->baseline;
-	draw_font_aligned_quad_t q;
+	draw_font_image_t *img  = draw_font_get_image_internal(draw_font, draw_font_size);
+	float              xpos = x;
+	float              ypos = y + img->baseline;
+	float              cr   = _draw_color_r(draw_color) / 255.0f;
+	float              cg   = _draw_color_g(draw_color) / 255.0f;
+	float              cb   = _draw_color_b(draw_color) / 255.0f;
+	float              ca   = _draw_color_a(draw_color) / 255.0f;
 
-	gpu_set_pipeline(draw_custom_pipeline != NULL ? draw_custom_pipeline : _draw_current != NULL ? &text_rt_pipeline : &text_pipeline);
-	gpu_set_vertex_buffer(&rect_vertex_buffer);
-	gpu_set_index_buffer(&rect_index_buffer);
-	gpu_set_texture(text_tex_unit, img->tex);
+	// Slug vector rendering path
 
 	for (int i = 0; text[i] != 0;) {
+
+		gpu_set_pipeline(draw_custom_pipeline != NULL ? draw_custom_pipeline : _draw_current != NULL ? &slug_rt_pipeline : &slug_pipeline);
+		gpu_set_vertex_buffer(&rect_vertex_buffer);
+		gpu_set_index_buffer(&rect_index_buffer);
+		gpu_set_texture(slug_curve_tex_unit, img->curve_tex);
+		gpu_set_texture(slug_band_tex_unit, img->band_tex);
+		gpu_set_float4(slug_col_loc, cr, cg, cb, ca);
+
 		int l         = 0;
 		int codepoint = string_utf8_decode(&text[i], &l);
 		i += l;
 
-		if (draw_font_get_baked_quad(draw_font, draw_font_size, &q, codepoint, xpos, ypos)) {
-			xpos += q.xadvance;
-			gpu_set_float4(text_pos_loc, (int)q.x0 / vw(), (int)q.y0 / vh(), (int)(q.x1 - q.x0) / vw(), (q.y1 - q.y0) / vh());
-			gpu_set_float4(text_tex_loc, q.s0, q.t0, q.s1 - q.s0, q.t1 - q.t0);
-			gpu_set_float4(text_col_loc, _draw_color_r(draw_color) / 255.0, _draw_color_g(draw_color) / 255.0, _draw_color_b(draw_color) / 255.0,
-			               _draw_color_a(draw_color) / 255.0);
-			gpu_draw();
+		int char_index = draw_font_get_char_index_internal(codepoint);
+		if (char_index >= draw_font_glyphs->length) {
+			continue;
 		}
+
+		slug_glyph_t *g = &img->slug_glyphs[char_index];
+		xpos += g->xadvance;
+		if (g->glyph_w <= 0.0f || g->glyph_h <= 0.0f) {
+			continue;
+		}
+
+		float rx = (float)(int)(xpos - g->xadvance + g->xoff + 0.5f);
+		float ry = (float)(int)(ypos + g->yoff + 0.5f);
+
+		gpu_set_float4(slug_pos_loc, rx / vw(), ry / vh(), g->glyph_w / vw(), g->glyph_h / vh());
+		gpu_set_float4(slug_em_rect_loc, 0.0f, 0.0f, g->glyph_w, g->glyph_h);
+		gpu_set_int4(slug_glyph_loc_loc, g->band_tex_x, g->band_tex_y, 0, 0);
+		gpu_set_int4(slug_band_max_loc, SLUG_VBAND_COUNT - 1, SLUG_HBAND_COUNT - 1, 0, 0);
+		gpu_set_float4(slug_band_tf_loc, g->band_scale_x, g->band_scale_y, 0.0f, 0.0f);
+		gpu_draw();
 	}
 }
 
@@ -558,43 +787,6 @@ void draw_font_init(draw_font_t *font) {
 
 void draw_font_destroy(draw_font_t *font) {
 	font->buf = NULL;
-}
-
-void draw_font_13(draw_font_t *font) {
-	if (draw_font_glyphs == NULL) {
-		draw_font_init_glyphs(32, 127);
-	}
-
-	font->blob         = font->buf->buffer;
-	font->images       = NULL;
-	font->m_images_len = 0;
-	font->m_capacity   = 0;
-	font->offset       = 0;
-	draw_prepare_font_load_internal(font, 13);
-
-	draw_font_image_t *img = &(font->images[font->m_images_len]);
-	font->m_images_len += 1;
-	img->m_size         = 13;
-	img->baseline       = 0; // 10
-	img->descent        = 0;
-	img->line_gap       = 0;
-	img->width          = 128;
-	img->height         = 128;
-	img->first_unused_y = 0;
-	img->tex            = (gpu_texture_t *)malloc(sizeof(gpu_texture_t));
-	gpu_texture_init_from_bytes(img->tex, (void *)iron_font_13_pixels, 128, 128, GPU_TEXTURE_FORMAT_R8);
-
-	stbtt_bakedchar *baked = (stbtt_bakedchar *)malloc(95 * sizeof(stbtt_bakedchar));
-	for (int i = 0; i < 95; ++i) {
-		baked[i].x0       = iron_font_13_x0[i];
-		baked[i].x1       = iron_font_13_x1[i];
-		baked[i].y0       = iron_font_13_y0[i];
-		baked[i].y1       = iron_font_13_y1[i];
-		baked[i].xoff     = iron_font_13_xoff[i];
-		baked[i].yoff     = iron_font_13_yoff[i];
-		baked[i].xadvance = iron_font_13_xadvance[i];
-	}
-	img->chars = baked;
 }
 
 void draw_font_init_glyphs(int from, int to) {
@@ -673,7 +865,7 @@ int draw_font_height(draw_font_t *font, int font_size) {
 
 float draw_font_get_char_width_internal(draw_font_image_t *img, int char_index) {
 	int i = draw_font_get_char_index_internal(char_index);
-	return img->chars[i].xadvance;
+	return img->slug_glyphs[i].xadvance;
 }
 
 float draw_sub_string_width(draw_font_t *font, int font_size, const char *text, int start, int end) {
@@ -745,7 +937,7 @@ void draw_inner_line(float x1, float y1, float x2, float y2, float strength) {
 	else {
 		vec = vec2_create(1, -(x2 - x1) / (y2 - y1));
 	}
-	vec               = vec2_set_len(vec, strength);
+	vec       = vec2_set_len(vec, strength);
 	vec2_t p1 = {x1 + side * vec.x, y1 + side * vec.y};
 	vec2_t p2 = {x2 + side * vec.x, y2 + side * vec.y};
 	vec2_t p3 = vec2_sub(p1, vec);

@@ -123,6 +123,8 @@ void sys_start(iron_window_options_t *ops) {
 	char path_tris_frag[512];
 	char path_text_vert[512];
 	char path_text_frag[512];
+	char path_slug_vert[512];
+	char path_slug_frag[512];
 
 	strcpy(path_image_vert, dp);
 	strcat(path_image_vert, "draw_image.vert");
@@ -154,10 +156,17 @@ void sys_start(iron_window_options_t *ops) {
 	strcpy(path_text_frag, dp);
 	strcat(path_text_frag, "draw_text.frag");
 	strcat(path_text_frag, ext);
+	strcpy(path_slug_vert, dp);
+	strcat(path_slug_vert, "draw_slug.vert");
+	strcat(path_slug_vert, ext);
+	strcpy(path_slug_frag, dp);
+	strcat(path_slug_frag, "draw_slug.frag");
+	strcat(path_slug_frag, ext);
 
 	draw_init(iron_load_blob(path_image_vert), iron_load_blob(path_image_frag), iron_load_blob(path_image_transform_vert),
 	          iron_load_blob(path_image_transform_frag), iron_load_blob(path_rect_vert), iron_load_blob(path_rect_frag), iron_load_blob(path_tris_vert),
-	          iron_load_blob(path_tris_frag), iron_load_blob(path_text_vert), iron_load_blob(path_text_frag));
+	          iron_load_blob(path_tris_frag), iron_load_blob(path_text_vert), iron_load_blob(path_text_frag),
+	          iron_load_blob(path_slug_vert), iron_load_blob(path_slug_frag));
 
 	_iron_set_update_callback(sys_render);
 	_iron_set_drop_files_callback(sys_drop_files_callback);

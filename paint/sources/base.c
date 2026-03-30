@@ -65,13 +65,7 @@ void base_init() {
 	sys_title_set(tr("untitled"));
 #endif
 
-	// Baked font for fast startup
-	if (string_equals(config_raw->locale, "en")) {
-		draw_font_13(base_font);
-	}
-	else {
-		draw_font_init(base_font);
-	}
+	draw_font_init(base_font);
 
 	ui_nodes_enum_texts = base_enum_texts;
 	gc_root(ui_nodes_enum_texts);

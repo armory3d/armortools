@@ -1815,7 +1815,7 @@ void minic_register_builtins() {
 	minic_register_native("shape_draw_sphere", mn_shape_draw_sphere);
 
 	// iron_draw
-	R(draw_init, "v(p,p,p,p,p,p,p,p,p,p)");
+	R(draw_init, "v(p,p,p,p,p,p,p,p,p,p,p,p)");
 	R(draw_begin, "v(p,i,i)");
 	R(draw_scaled_sub_image, "v(p,f,f,f,f,f,f,f,f)");
 	R(draw_scaled_image, "v(p,f,f,f,f)");
@@ -1835,7 +1835,6 @@ void minic_register_builtins() {
 	R(draw_set_font, "i(p,i)");
 	R(draw_font_init, "v(p)");
 	R(draw_font_destroy, "v(p)");
-	R(draw_font_13, "v(p)");
 	R(draw_font_has_glyph, "i(i)");
 	R(draw_font_add_glyph, "v(i)");
 	R(draw_font_init_glyphs, "v(i,i)");
