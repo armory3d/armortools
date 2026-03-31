@@ -370,7 +370,7 @@ void ui_menubar_draw_category_items() {
 			project_save_as(false);
 		}
 
-		ui->changed = false;
+		ui->changed                      = false;
 		ui_handle_t *h_pack_assets       = ui_handle(__ID__);
 		h_pack_assets->b                 = context_raw->pack_assets_on_save;
 		context_raw->pack_assets_on_save = ui_check(h_pack_assets, tr("Pack Assets"), "");
@@ -758,13 +758,15 @@ void ui_menubar_draw_category_items() {
 		ui_menu_align();
 		ui_menu_label(tr("Pivot"), any_map_get(config_keymap, "view_pivot_center"));
 		ui_menu_align();
-		ui_handle_t      *h                  = ui_handle(__ID__);
+		ui_handle_t *camera_pivot_handle     = ui_handle(__ID__);
+		camera_pivot_handle->i               = context_raw->camera_pivot;
 		string_t_array_t *pivot_center_items = any_array_create_from_raw(
 		    (void *[]){
-		        tr("Cursor"), tr("Center"),
+		        tr("Cursor"),
+		        tr("Center"),
 		    },
 		    2);
-		context_raw->camera_pivot = ui_inline_radio(h, pivot_center_items, UI_ALIGN_LEFT);
+		context_raw->camera_pivot = ui_inline_radio(camera_pivot_handle, pivot_center_items, UI_ALIGN_LEFT);
 
 		ui_menu_separator();
 		ui_menu_align();

@@ -208,7 +208,7 @@ void config_init() {
 		config_raw->zoom_direction     = ZOOM_DIRECTION_VERTICAL;
 		config_raw->displace_strength  = 0.0;
 		config_raw->wrap_mouse         = false;
-		config_raw->camera_pivot       = CAMERA_PIVOT_CURSOR;
+		config_raw->camera_pivot       = CAMERA_PIVOT_CENTER;
 		config_raw->camera_controls    = CAMERA_CONTROLS_ORBIT;
 		config_raw->layer_res          = TEXTURE_RES_RES2048;
 #if defined(IRON_ANDROID) || defined(IRON_IOS)

@@ -71,8 +71,8 @@ static void camera_orbit_action(bool modif, bool default_keymap) {
 			camera->base->transform->loc.y = pivot_y + offset.y;
 			camera->base->transform->loc.z = pivot_z + offset.z;
 			camera_object_build_mat(camera);
-			return;
 		}
+		return;
 	}
 
 	f32 dist = camera_distance();
@@ -133,8 +133,8 @@ static void camera_rotate_action(bool modif, bool default_keymap) {
 			t->loc.y      = pivot_y + offset.y;
 			t->loc.z      = pivot_z + offset.z;
 			transform_build_matrix(t);
-			return;
 		}
+		return;
 	}
 
 	transform_rotate(t, up, (mouse_movement_x / 120.0) * config_raw->camera_rotation_speed);

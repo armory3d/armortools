@@ -168,8 +168,8 @@ typedef enum {
 } camera_controls_t;
 
 typedef enum {
-	CAMERA_PIVOT_CURSOR        = 0,
-	CAMERA_PIVOT_CAMERA_CENTER = 1,
+	CAMERA_PIVOT_CURSOR = 0,
+	CAMERA_PIVOT_CENTER = 1,
 } camera_pivot_t;
 
 typedef enum {
