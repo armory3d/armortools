@@ -287,7 +287,7 @@ void render_path_sculpt_commands() {
 	render_path_set_target("texpaint_blend1", NULL, NULL, GPU_CLEAR_NONE, 0, 0.0);
 	render_path_bind_target("texpaint_blend0", "tex");
 	render_path_draw_shader("Scene/copy_pass/copyR8_pass");
-	string_t_array_t *additional = any_array_create_from_raw(
+	string_array_t *additional = any_array_create_from_raw(
 	    (void *[]){
 	        "texpaint_blend0",
 	    },

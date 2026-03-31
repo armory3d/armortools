@@ -592,6 +592,6 @@ bind_tex_t *parser_material_make_bind_tex(char *tex_name, char *file) {
 
 char *u8_array_string_at(u8_array_t *a, i32 i) {
 	char             *s  = u8_array_to_string(a);
-	string_t_array_t *ss = string_split(s, "\n");
+	string_array_t *ss = string_split(s, "\n");
 	return ss->buffer[i];
 }

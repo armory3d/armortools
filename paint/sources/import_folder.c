@@ -2,7 +2,7 @@
 #include "global.h"
 
 void import_folder_run(char *path) {
-	string_t_array_t *files     = file_read_directory(path);
+	string_array_t *files     = file_read_directory(path);
 	char             *mapbase   = "";
 	char             *mapopac   = "";
 	char             *mapnor    = "";
@@ -68,7 +68,7 @@ void import_folder_run(char *path) {
 	any_array_push(project_materials, context_raw->material);
 	ui_nodes_t       *nodes  = context_raw->material->nodes;
 	ui_node_canvas_t *canvas = context_raw->material->canvas;
-	string_t_array_t *dirs   = string_split(path, PATH_SEP);
+	string_array_t *dirs   = string_split(path, PATH_SEP);
 	canvas->name             = string_copy(dirs->buffer[dirs->length - 1]);
 	ui_node_t *nout          = NULL;
 	for (i32 i = 0; i < canvas->nodes->length; ++i) {

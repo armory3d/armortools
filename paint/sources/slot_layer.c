@@ -1099,7 +1099,7 @@ void layers_update_fill_layer(bool parse_paint) {
 }
 
 void layers_set_object_mask() {
-	string_t_array_t *ar = any_array_create_from_raw(
+	string_array_t *ar = any_array_create_from_raw(
 	    (void *[]){
 	        tr("None"),
 	    },

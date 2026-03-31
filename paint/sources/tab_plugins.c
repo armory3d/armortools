@@ -20,7 +20,7 @@ void tab_plugins_draw(ui_handle_t *htab) {
 		ui_end_sticky();
 
 		// Draw plugins
-		string_t_array_t *keys = map_keys(plugin_map);
+		string_array_t *keys = map_keys(plugin_map);
 		for (i32 i = 0; i < keys->length; ++i) {
 			plugin_t *p = any_map_get(plugin_map, keys->buffer[i]);
 			if (p->on_ui != NULL) {
@@ -29,7 +29,7 @@ void tab_plugins_draw(ui_handle_t *htab) {
 		}
 
 #ifdef is_debug
-		string_t_array_t *rt_keys = map_keys(render_path_render_targets);
+		string_array_t *rt_keys = map_keys(render_path_render_targets);
 		array_sort(rt_keys, NULL);
 		for (i32 i = 0; i < rt_keys->length; ++i) {
 			render_target_t *rt = any_map_get(render_path_render_targets, rt_keys->buffer[i]);

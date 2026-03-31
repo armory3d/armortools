@@ -10,7 +10,7 @@ tex_image_node_t *tex_image_node_create(ui_node_t *raw, f32_array_t *args) {
 }
 
 logic_node_value_t *tex_image_node_get(tex_image_node_t *self, i32 from) {
-	string_t_array_t *ar   = ui_nodes_enum_texts(self->raw->type);
+	string_array_t *ar   = ui_nodes_enum_texts(self->raw->type);
 	i32               i    = self->raw->buttons->buffer[0]->default_value->buffer[0];
 	char         *file = ar->buffer[i];
 

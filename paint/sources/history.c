@@ -707,7 +707,7 @@ void history_copy_to_undo(i32 from_id, i32 to_id, bool is_mask) {
 		render_path_draw_shader("Scene/copy_pass/copyRGBA128_pass");
 	}
 	else {
-		string_t_array_t *additional = any_array_create_from_raw(
+		string_array_t *additional = any_array_create_from_raw(
 		    (void *[]){
 		        string("texpaint_nor_undo%s", to_id_s),
 		        string("texpaint_pack_undo%s", to_id_s),

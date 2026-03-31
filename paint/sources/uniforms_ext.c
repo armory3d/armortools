@@ -144,7 +144,7 @@ f32 uniforms_ext_f32_link(object_t *object, material_data_t *mat, char *link) {
 		return 0.833;
 	}
 	if (parser_material_script_links != NULL) {
-		string_t_array_t *keys = map_keys(parser_material_script_links);
+		string_array_t *keys = map_keys(parser_material_script_links);
 		for (i32 i = 0; i < keys->length; ++i) {
 			char *key    = keys->buffer[i];
 			char *script = any_map_get(parser_material_script_links, key);

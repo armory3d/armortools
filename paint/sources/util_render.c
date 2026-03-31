@@ -434,7 +434,7 @@ void util_render_make_node_preview(ui_node_canvas_t *canvas, ui_node_t *node, gp
 
 	_gpu_begin(image, NULL, NULL, GPU_CLEAR_NONE, 0, 0.0);
 	gpu_set_pipeline(res->scon->_->pipe);
-	string_t_array_t *empty = any_array_create_from_raw(
+	string_array_t *empty = any_array_create_from_raw(
 	    (void *[]){
 	        "",
 	    },

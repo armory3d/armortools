@@ -22,11 +22,11 @@ u8_array_t *util_clone_u8_array(u8_array_t *u8a) {
 	return u8_array_create_from_array(u8a);
 }
 
-string_t_array_t *util_clone_string_array(string_t_array_t *a) {
+string_array_t *util_clone_string_array(string_array_t *a) {
 	if (a == NULL) {
 		return NULL;
 	}
-	string_t_array_t *r = any_array_create_from_raw((void *[]){}, 0);
+	string_array_t *r = any_array_create_from_raw((void *[]){}, 0);
 	for (i32 i = 0; i < a->length; ++i) {
 		char *s = a->buffer[i];
 		any_array_push(r, s);

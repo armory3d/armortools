@@ -78,7 +78,7 @@ void tab_scripts_draw(ui_handle_t *htab) {
 			ui_menu_draw(&tab_scripts_draw_edit, -1, -1);
 		}
 
-		string_t_array_t *ar = any_array_create_from_raw(
+		string_array_t *ar = any_array_create_from_raw(
 		    (void *[]){
 		        "script.c",
 		    },

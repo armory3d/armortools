@@ -95,9 +95,9 @@ typedef struct config {
 	f32  rp_vignette;
 	f32  rp_grain;
 	// Application
-	struct string_t_array *recent_projects; // Recently opened projects
-	struct string_t_array *bookmarks;       // Bookmarked folders in browser
-	struct string_t_array *plugins;         // List of enabled plugins
+	struct string_array *recent_projects; // Recently opened projects
+	struct string_array *bookmarks;       // Bookmarked folders in browser
+	struct string_array *plugins;         // List of enabled plugins
 	char                  *keymap;          // Link to keymap file
 	char                  *theme;           // Link to theme file
 	i32                    undo_steps;      // Number of undo steps to preserve
@@ -275,7 +275,7 @@ typedef struct context {
 	struct any_imap            *node_preview_map;
 	char                       *node_preview_name;
 	struct any_map             *node_previews;
-	struct string_t_array      *node_previews_used;
+	struct string_array      *node_previews_used;
 	bool                        selected_node_preview;
 	struct gpu_texture         *mask_preview_rgba32;
 	struct slot_layer          *mask_preview_last;
@@ -413,11 +413,11 @@ typedef struct context {
 
 typedef struct node_shader {
 	struct node_shader_context *context;
-	struct string_t_array      *ins;
-	struct string_t_array      *outs;
+	struct string_array      *ins;
+	struct string_array      *outs;
 	char                       *frag_out;
-	struct string_t_array      *consts;
-	struct string_t_array      *textures;
+	struct string_array      *consts;
+	struct string_array      *textures;
 	struct any_map             *functions;
 
 	char *vert;
@@ -518,7 +518,7 @@ typedef struct node_group {
 
 typedef struct project_format {
 	char                          *version;
-	struct string_t_array         *assets;  // texture_assets
+	struct string_array         *assets;  // texture_assets
 	bool                           is_bgra; // Swapped red and blue channels for layer textures
 	struct packed_asset_t_array   *packed_assets;
 	char                          *envmap; // Asset name
@@ -534,14 +534,14 @@ typedef struct project_format {
 	struct ui_node_canvas_t_array *material_nodes;
 	struct ui_node_canvas_t_array *material_groups;
 	struct buffer_t_array         *material_icons;
-	struct string_t_array         *font_assets;
+	struct string_array         *font_assets;
 	struct layer_data_t_array     *layer_datas;
 	struct mesh_data_t_array      *mesh_datas;
-	struct string_t_array         *mesh_assets;
+	struct string_array         *mesh_assets;
 	struct buffer_t_array         *mesh_icons;
 	struct i32_array              *atlas_objects;
-	struct string_t_array         *atlas_names;
-	struct string_t_array         *script_datas;
+	struct string_array         *atlas_names;
+	struct string_array         *script_datas;
 } project_format_t;
 
 typedef struct asset {
@@ -639,7 +639,7 @@ typedef struct export_preset {
 
 typedef struct export_preset_texture {
 	char                  *name;
-	struct string_t_array *channels;
+	struct string_array *channels;
 	char                  *color_space;
 } export_preset_texture_t;
 
@@ -648,7 +648,7 @@ typedef struct neural_node_model {
 	char                  *memory;
 	char                  *size;
 	char                  *nodes;
-	struct string_t_array *urls;
+	struct string_array *urls;
 	char                  *web;
 	char                  *license;
 } neural_node_model_t;
@@ -810,12 +810,6 @@ typedef struct slot_font_t_array {
 	int           length;
 	int           capacity;
 } slot_font_t_array_t;
-
-typedef struct string_t_array {
-	char **buffer;
-	int    length;
-	int    capacity;
-} string_t_array_t;
 
 typedef struct ui_coloring_t_array {
 	ui_coloring_t **buffer;

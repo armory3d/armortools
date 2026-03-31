@@ -76,7 +76,7 @@ void import_arm_run_project(char *path) {
 #ifdef IRON_WINDOWS
 	recent_path = string_copy(string_replace_all(recent_path, "\\", "/"));
 #endif
-	string_t_array_t *recent = config_raw->recent_projects;
+	string_array_t *recent = config_raw->recent_projects;
 	string_array_remove(recent, recent_path);
 	array_insert(recent, 0, recent_path);
 	config_save();

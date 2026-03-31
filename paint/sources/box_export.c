@@ -65,7 +65,7 @@ void box_export_tab_export_textures(char *title, bool bake_material) {
 		ui_row2();
 
 #if defined(IRON_ANDROID) || defined(IRON_IOS)
-		string_t_array_t *base_res_combo = any_array_create_from_raw(
+		string_array_t *base_res_combo = any_array_create_from_raw(
 		    (void *[]){
 		        "128",
 		        "256",
@@ -76,7 +76,7 @@ void box_export_tab_export_textures(char *title, bool bake_material) {
 		    },
 		    6);
 #else
-		string_t_array_t *base_res_combo = any_array_create_from_raw(
+		string_array_t *base_res_combo = any_array_create_from_raw(
 		    (void *[]){
 		        "128",
 		        "256",
@@ -96,13 +96,13 @@ void box_export_tab_export_textures(char *title, bool bake_material) {
 		}
 
 #if defined(IRON_ANDROID) || defined(IRON_IOS)
-		string_t_array_t *base_bits_combo = any_array_create_from_raw(
+		string_array_t *base_bits_combo = any_array_create_from_raw(
 		    (void *[]){
 		        "8bit",
 		    },
 		    1);
 #else
-		string_t_array_t *base_bits_combo = any_array_create_from_raw(
+		string_array_t *base_bits_combo = any_array_create_from_raw(
 		    (void *[]){
 		        "8bit",
 		        "16bit",
@@ -122,7 +122,7 @@ void box_export_tab_export_textures(char *title, bool bake_material) {
 			if (h->init) {
 				h->i = context_raw->format_type;
 			}
-			string_t_array_t *format_combo = any_array_create_from_raw(
+			string_array_t *format_combo = any_array_create_from_raw(
 			    (void *[]){
 			        "png",
 			        "jpg",
@@ -135,7 +135,7 @@ void box_export_tab_export_textures(char *title, bool bake_material) {
 			if (h->init) {
 				h->i = context_raw->format_type;
 			}
-			string_t_array_t *format_combo = any_array_create_from_raw(
+			string_array_t *format_combo = any_array_create_from_raw(
 			    (void *[]){
 			        "exr",
 			    },
@@ -157,7 +157,7 @@ void box_export_tab_export_textures(char *title, bool bake_material) {
 		ui->enabled                           = !bake_material;
 		ui_handle_t *layers_export_handle     = ui_handle(__ID__);
 		layers_export_handle->i               = context_raw->layers_export;
-		string_t_array_t *layers_export_combo = any_array_create_from_raw(
+		string_array_t *layers_export_combo = any_array_create_from_raw(
 		    (void *[]){
 		        tr("Visible"),
 		        tr("Selected"),
@@ -177,7 +177,7 @@ void box_export_tab_export_textures(char *title, bool bake_material) {
 		ui_handle_t *layers_destination_handle = ui_handle(__ID__);
 		layers_destination_handle->i           = context_raw->layers_destination;
 
-		string_t_array_t *layers_destination_combo = any_array_create_from_raw(
+		string_array_t *layers_destination_combo = any_array_create_from_raw(
 		    (void *[]){
 		        tr("Disk"),
 		        tr("Pack into Project"),
@@ -450,7 +450,7 @@ void box_export_tab_export_mesh(ui_handle_t *htab) {
 		if (h_export_mesh_format->init) {
 			h_export_mesh_format->i = context_raw->export_mesh_format;
 		}
-		string_t_array_t *export_mesh_format_combo = any_array_create_from_raw(
+		string_array_t *export_mesh_format_combo = any_array_create_from_raw(
 		    (void *[]){
 		        "obj",
 		        "arm",
@@ -458,7 +458,7 @@ void box_export_tab_export_mesh(ui_handle_t *htab) {
 		    2);
 		context_raw->export_mesh_format = ui_combo(h_export_mesh_format, export_mesh_format_combo, tr("Format"), true, UI_ALIGN_LEFT, true);
 
-		string_t_array_t *ar = any_array_create_from_raw(
+		string_array_t *ar = any_array_create_from_raw(
 		    (void *[]){
 		        tr("All"),
 		    },
@@ -652,7 +652,7 @@ void box_export_show_player_box() {
 	bool         tab_vertical = config_raw->touch_ui;
 	if (ui_tab(htab, tr("Export Player"), tab_vertical, -1, false)) {
 
-		string_t_array_t *export_player_target_combo = any_array_create_from_raw((void *[]){"Web", "Windows", "Linux", "MacOS"}, 4);
+		string_array_t *export_player_target_combo = any_array_create_from_raw((void *[]){"Web", "Windows", "Linux", "MacOS"}, 4);
 		ui_combo(box_export_h_export_player_target, export_player_target_combo, tr("Target"), true, UI_ALIGN_LEFT, true);
 
 		ui_row2();

@@ -5,7 +5,7 @@ typedef struct storage {
 	char                  *file;
 	char                  *text;
 	bool                   modified;
-	struct string_t_array *expanded;
+	struct string_array   *expanded;
 	i32                    window_w;
 	i32                    window_h;
 	i32                    window_x;
@@ -22,12 +22,6 @@ typedef struct ui_coloring_t_array {
 	int             length;
 	int             capacity;
 } ui_coloring_t_array_t;
-
-typedef struct string_t_array {
-	char **buffer;
-	int    length;
-	int    capacity;
-} string_t_array_t;
 
 extern any_map_t *ui_children;
 
@@ -196,7 +190,7 @@ char *armpack_to_string(buffer_t *bytes) {
 }
 
 void list_folder(char *path) {
-	string_t_array_t *files = file_read_directory(path);
+	string_array_t *files = file_read_directory(path);
 	for (i32 i = 0; i < files->length; ++i) {
 		char *f           = files->buffer[i];
 		char *abs         = string("%s/%s", path, f);
@@ -268,7 +262,7 @@ void render(void *_) {
 	if (ui_window(editor_handle, storage->sidebar_w + 1, 0, iron_window_width() - storage->sidebar_w - minimap_w, iron_window_height(), false)) {
 		ui_handle_t      *htab       = ui_handle("main.ts:204");
 		char             *file_name  = substring(storage->file, string_last_index_of(storage->file, "/") + 1, string_length(storage->file));
-		string_t_array_t *file_names = any_array_create_from_raw(
+		string_array_t *file_names = any_array_create_from_raw(
 		    (void *[]){
 		        file_name,
 		    },
@@ -340,7 +334,7 @@ void render(void *_) {
 
 void save_file() {
 	// Trim
-	string_t_array_t *lines = string_split(storage->text, "\n");
+	string_array_t *lines = string_split(storage->text, "\n");
 	for (i32 i = 0; i < lines->length; ++i) {
 		lines->buffer[i] = trim_end(lines->buffer[i]);
 	}
@@ -384,7 +378,7 @@ void draw_minimap() {
 	}
 	draw_begin(minimap, true, theme->SEPARATOR_COL);
 	draw_set_color(0xff333333);
-	string_t_array_t *lines           = string_split(storage->text, "\n");
+	string_array_t *lines           = string_split(storage->text, "\n");
 	i32               minimap_full_h  = lines->length * 2;
 	f32               scroll_progress = -editor_handle->scroll_offset / (float)(lines->length * UI_ELEMENT_H());
 	i32               out_of_screen   = minimap_full_h - minimap_h;
@@ -397,7 +391,7 @@ void draw_minimap() {
 			// Out of screen
 			break;
 		}
-		string_t_array_t *words = string_split(lines->buffer[i + offset], " ");
+		string_array_t *words = string_split(lines->buffer[i + offset], " ");
 		i32               x     = 0;
 		for (i32 j = 0; j < words->length; ++j) {
 			char *word = words->buffer[j];

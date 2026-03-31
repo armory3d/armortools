@@ -1271,10 +1271,6 @@ void minic_register_builtins() {
 	minic_struct_set_size("cached_shader_context_t", (int)sizeof(cached_shader_context_t));
 	minic_struct_field_set_type("cached_shader_context_t", "context", "shader_context_t");
 
-	// types.h array types
-	minic_register_struct_native("string_t_array_t", array_fields, array_offsets, array_types, array_ptr_derefs, 3);
-	minic_struct_set_size("string_t_array_t", (int)sizeof(string_t_array_t));
-
 	// config_t (16 of 62 fields; most script-relevant)
 	static const char *config_fields[]  = {"window_w",      "window_h",      "window_scale", "rp_supersample", "recent_projects", "plugins",
 	                                       "keymap",        "theme",         "undo_steps",   "camera_fov",     "layer_res",       "brush_live",
@@ -1294,8 +1290,8 @@ void minic_register_builtins() {
 	                                                  MINIC_T_INT,  MINIC_T_INT,  MINIC_T_INT,   MINIC_T_INT};
 	minic_register_struct_native("config_t", config_fields, config_offsets, config_types, config_deref_types, 16);
 	minic_struct_set_size("config_t", (int)sizeof(config_t));
-	minic_struct_field_set_type("config_t", "recent_projects", "string_t_array_t");
-	minic_struct_field_set_type("config_t", "plugins", "string_t_array_t");
+	minic_struct_field_set_type("config_t", "recent_projects", "string_array_t");
+	minic_struct_field_set_type("config_t", "plugins", "string_array_t");
 
 	// context_t (16 of many fields; most script-relevant)
 	static const char *ctx_fields[]  = {"paint_object", "ddirty",         "pdirty",        "rdirty",        "material",       "layer",
@@ -1337,11 +1333,11 @@ void minic_register_builtins() {
 	                                              MINIC_T_PTR,   MINIC_T_PTR, MINIC_T_PTR, MINIC_T_PTR};
 	minic_register_struct_native("project_format_t", pf_fields, pf_offsets, pf_types, pf_deref_types, 16);
 	minic_struct_set_size("project_format_t", (int)sizeof(project_format_t));
-	minic_struct_field_set_type("project_format_t", "assets", "string_t_array_t");
+	minic_struct_field_set_type("project_format_t", "assets", "string_array_t");
 	minic_struct_field_set_type("project_format_t", "camera_world", "f32_array_t");
 	minic_struct_field_set_type("project_format_t", "camera_origin", "f32_array_t");
-	minic_struct_field_set_type("project_format_t", "font_assets", "string_t_array_t");
-	minic_struct_field_set_type("project_format_t", "script_datas", "string_t_array_t");
+	minic_struct_field_set_type("project_format_t", "font_assets", "string_array_t");
+	minic_struct_field_set_type("project_format_t", "script_datas", "string_array_t");
 
 	// iron_math
 	R(iron_random_init, "v(i)");

@@ -5,9 +5,9 @@ bool make_paint_is_raytraced_bake() {
 	return context_raw->bake_type == BAKE_TYPE_INIT;
 }
 
-string_t_array_t *make_paint_color_attachments() {
+string_array_t *make_paint_color_attachments() {
 	if (context_raw->tool == TOOL_TYPE_COLORID) {
-		string_t_array_t *res = any_array_create_from_raw(
+		string_array_t *res = any_array_create_from_raw(
 		    (void *[]){
 		        "RGBA32",
 		    },
@@ -15,7 +15,7 @@ string_t_array_t *make_paint_color_attachments() {
 		return res;
 	}
 	if (context_raw->tool == TOOL_TYPE_PICKER && context_raw->pick_pos_nor_tex) {
-		string_t_array_t *res = any_array_create_from_raw(
+		string_array_t *res = any_array_create_from_raw(
 		    (void *[]){
 		        "RGBA128",
 		        "RGBA128",
@@ -24,7 +24,7 @@ string_t_array_t *make_paint_color_attachments() {
 		return res;
 	}
 	if (context_raw->tool == TOOL_TYPE_PICKER || context_raw->tool == TOOL_TYPE_MATERIAL) {
-		string_t_array_t *res = any_array_create_from_raw(
+		string_array_t *res = any_array_create_from_raw(
 		    (void *[]){
 		        "RGBA32",
 		        "RGBA32",
@@ -35,7 +35,7 @@ string_t_array_t *make_paint_color_attachments() {
 		return res;
 	}
 	if (context_raw->tool == TOOL_TYPE_BAKE && make_paint_is_raytraced_bake()) {
-		string_t_array_t *res = any_array_create_from_raw(
+		string_array_t *res = any_array_create_from_raw(
 		    (void *[]){
 		        "RGBA64",
 		        "RGBA64",
@@ -49,7 +49,7 @@ string_t_array_t *make_paint_color_attachments() {
 	                                                                           : GPU_TEXTURE_FORMAT_RGBA128;
 
 	if (format == GPU_TEXTURE_FORMAT_RGBA64) {
-		string_t_array_t *res = any_array_create_from_raw(
+		string_array_t *res = any_array_create_from_raw(
 		    (void *[]){
 		        "RGBA64",
 		        "RGBA64",
@@ -60,7 +60,7 @@ string_t_array_t *make_paint_color_attachments() {
 		return res;
 	}
 	if (format == GPU_TEXTURE_FORMAT_RGBA128) {
-		string_t_array_t *res = any_array_create_from_raw(
+		string_array_t *res = any_array_create_from_raw(
 		    (void *[]){
 		        "RGBA128",
 		        "RGBA128",
@@ -71,7 +71,7 @@ string_t_array_t *make_paint_color_attachments() {
 		return res;
 	}
 
-	string_t_array_t *res = any_array_create_from_raw(
+	string_array_t *res = any_array_create_from_raw(
 	    (void *[]){
 	        "RGBA32",
 	        "RGBA32",

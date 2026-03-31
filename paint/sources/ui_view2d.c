@@ -276,7 +276,7 @@ void ui_view2d_render(void *_) {
 		if (ui_view2d_type == VIEW_2D_TYPE_ASSET) {
 			asset_t *asset = context_raw->texture;
 			if (asset != NULL) {
-				string_t_array_t *asset_names = project_asset_names;
+				string_array_t *asset_names = project_asset_names;
 				i32               i           = string_array_index_of(asset_names, asset->name);
 				h->text                       = string_copy(asset->name);
 				asset->name                   = string_copy(ui_text_input(h, "", UI_ALIGN_LEFT, true, false));
@@ -308,7 +308,7 @@ void ui_view2d_render(void *_) {
 			if (h_layer_mode->init) {
 				h_layer_mode->i = ui_view2d_layer_mode;
 			}
-			string_t_array_t *layer_mode_combo = any_array_create_from_raw(
+			string_array_t *layer_mode_combo = any_array_create_from_raw(
 			    (void *[]){
 			        tr("Visible"),
 			        tr("Selected"),
@@ -323,7 +323,7 @@ void ui_view2d_render(void *_) {
 				if (h_tex_type->init) {
 					h_tex_type->i = ui_view2d_tex_type;
 				}
-				string_t_array_t *tex_type_combo = any_array_create_from_raw(
+				string_array_t *tex_type_combo = any_array_create_from_raw(
 				    (void *[]){
 				        tr("Base Color"),
 				        tr("Opacity"),

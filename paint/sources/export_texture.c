@@ -7,7 +7,7 @@ void export_texture_run(char *path, bool bake_material) {
 		export_texture_run_bake_material(path);
 	}
 	else if (context_raw->layers_export == EXPORT_MODE_PER_UDIM_TILE) {
-		string_t_array_t *udim_tiles = any_array_create_from_raw((void *[]){}, 0);
+		string_array_t *udim_tiles = any_array_create_from_raw((void *[]){}, 0);
 		for (i32 i = 0; i < project_layers->length; ++i) {
 			slot_layer_t *l = project_layers->buffer[i];
 			if (slot_layer_get_object_mask(l) > 0) {
@@ -28,7 +28,7 @@ void export_texture_run(char *path, bool bake_material) {
 		}
 	}
 	else if (context_raw->layers_export == EXPORT_MODE_PER_OBJECT) {
-		string_t_array_t *object_names = any_array_create_from_raw((void *[]){}, 0);
+		string_array_t *object_names = any_array_create_from_raw((void *[]){}, 0);
 		for (i32 i = 0; i < project_layers->length; ++i) {
 			slot_layer_t *l = project_layers->buffer[i];
 			if (slot_layer_get_object_mask(l) > 0) {
@@ -342,7 +342,7 @@ void export_texture_run_layers(char *path, slot_layer_t_array_t *layers, char *o
 
 	for (i32 i = 0; i < preset->textures->length; ++i) {
 		export_preset_texture_t *t              = preset->textures->buffer[i];
-		string_t_array_t        *c              = t->channels;
+		string_array_t        *c              = t->channels;
 		char                    *tex_name       = !string_equals(t->name, "") ? string("_%s", t->name) : "";
 		bool                     single_channel = c->buffer[0] == c->buffer[1] && c->buffer[1] == c->buffer[2] && string_equals(c->buffer[3], "1.0");
 		char                    *out_path       = string("%s%s%s%s%s", path, PATH_SEP, f, tex_name, ext);
@@ -471,7 +471,7 @@ void export_texture_write_texture(char *file, buffer_t *pixels, i32 type, i32 of
 #endif
 		gpu_texture_t *image = gpu_create_texture_from_bytes(pixels, res_x, res_y, GPU_TEXTURE_FORMAT_RGBA32);
 		any_map_set(data_cached_images, file, image);
-		string_t_array_t *ar    = string_split(file, PATH_SEP);
+		string_array_t *ar    = string_split(file, PATH_SEP);
 		char             *name  = ar->buffer[ar->length - 1];
 		asset_t          *asset = GC_ALLOC_INIT(asset_t, {.name = name, .file = file, .id = project_asset_id++});
 		any_array_push(project_assets, asset);

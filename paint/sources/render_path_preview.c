@@ -65,7 +65,7 @@ void render_path_preview_init() {
 
 void render_path_preview_commands_preview() {
 	render_path_set_target("mgbuffer0", NULL, "mmain", GPU_CLEAR_COLOR | GPU_CLEAR_DEPTH, 0xffffffff, 1.0);
-	string_t_array_t *additional = any_array_create_from_raw(
+	string_array_t *additional = any_array_create_from_raw(
 	    (void *[]){
 	        "mgbuffer1",
 	    },
@@ -102,7 +102,7 @@ void render_path_preview_commands_preview() {
 
 void render_path_preview_commands_decal() {
 	render_path_set_target("gbuffer0", NULL, "main", GPU_CLEAR_COLOR | GPU_CLEAR_DEPTH, 0xffffffff, 1.0);
-	string_t_array_t *additional = any_array_create_from_raw(
+	string_array_t *additional = any_array_create_from_raw(
 	    (void *[]){
 	        "gbuffer1",
 	    },

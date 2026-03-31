@@ -60,10 +60,10 @@ void export_arm_run_project() {
 		any_array_push(md, p->data);
 	}
 
-	string_t_array_t *texture_files = export_arm_assets_to_files(project_filepath, project_assets);
+	string_array_t *texture_files = export_arm_assets_to_files(project_filepath, project_assets);
 
-	string_t_array_t *font_files = export_arm_fonts_to_files(project_filepath, project_fonts);
-	string_t_array_t *mesh_files = export_arm_meshes_to_files(project_filepath);
+	string_array_t *font_files = export_arm_fonts_to_files(project_filepath, project_fonts);
+	string_array_t *mesh_files = export_arm_meshes_to_files(project_filepath);
 
 	i32 bits_pos = base_bits_handle->i;
 	i32 bpp      = bits_pos == TEXTURE_BITS_BITS8 ? 8 : bits_pos == TEXTURE_BITS_BITS16 ? 16 : 32;
@@ -182,7 +182,7 @@ void export_arm_run_project() {
 #ifdef IRON_WINDOWS
 	recent_path = string_copy(string_replace_all(recent_path, "\\", "/"));
 #endif
-	string_t_array_t *recent = config_raw->recent_projects;
+	string_array_t *recent = config_raw->recent_projects;
 	string_array_remove(recent, recent_path);
 	array_insert(recent, 0, recent_path);
 	config_save();
@@ -234,7 +234,7 @@ void export_arm_run_material(char *path) {
 	}
 	any_array_push(mnodes, c);
 
-	string_t_array_t *texture_files = export_arm_assets_to_files(path, assets);
+	string_array_t *texture_files = export_arm_assets_to_files(path, assets);
 	bool              is_cloud      = ends_with(path, "_cloud_.arm");
 	if (is_cloud) {
 		path = string_copy(string_replace_all(path, "_cloud_", ""));
@@ -315,7 +315,7 @@ void export_arm_run_brush(char *path) {
 	}
 	any_array_push(bnodes, c);
 
-	string_t_array_t *texture_files = export_arm_assets_to_files(path, assets);
+	string_array_t *texture_files = export_arm_assets_to_files(path, assets);
 	bool              is_cloud      = ends_with(path, "_cloud_.arm");
 	if (is_cloud) {
 		path = string_copy(string_replace_all(path, "_cloud_", ""));
@@ -359,8 +359,8 @@ void export_arm_run_brush(char *path) {
 	iron_file_save_bytes(path, buffer, buffer->length + 1);
 }
 
-string_t_array_t *export_arm_assets_to_files(char *project_path, asset_t_array_t *assets) {
-	string_t_array_t *texture_files = any_array_create_from_raw((void *[]){}, 0);
+string_array_t *export_arm_assets_to_files(char *project_path, asset_t_array_t *assets) {
+	string_array_t *texture_files = any_array_create_from_raw((void *[]){}, 0);
 	for (i32 i = 0; i < assets->length; ++i) {
 		asset_t *a = assets->buffer[i];
 #ifdef IRON_IOS
@@ -379,8 +379,8 @@ string_t_array_t *export_arm_assets_to_files(char *project_path, asset_t_array_t
 	return texture_files;
 }
 
-string_t_array_t *export_arm_meshes_to_files(char *project_path) {
-	string_t_array_t *mesh_files = any_array_create_from_raw((void *[]){}, 0);
+string_array_t *export_arm_meshes_to_files(char *project_path) {
+	string_array_t *mesh_files = any_array_create_from_raw((void *[]){}, 0);
 	for (i32 i = 0; i < project_mesh_assets->length; ++i) {
 		char *file = project_mesh_assets->buffer[i];
 #ifdef IRON_IOS
@@ -399,8 +399,8 @@ string_t_array_t *export_arm_meshes_to_files(char *project_path) {
 	return mesh_files;
 }
 
-string_t_array_t *export_arm_fonts_to_files(char *project_path, slot_font_t_array_t *fonts) {
-	string_t_array_t *font_files = any_array_create_from_raw((void *[]){}, 0);
+string_array_t *export_arm_fonts_to_files(char *project_path, slot_font_t_array_t *fonts) {
+	string_array_t *font_files = any_array_create_from_raw((void *[]){}, 0);
 	for (i32 i = 1; i < fonts->length; ++i) {
 		slot_font_t *f = fonts->buffer[i];
 #ifdef IRON_IOS
@@ -419,7 +419,7 @@ string_t_array_t *export_arm_fonts_to_files(char *project_path, slot_font_t_arra
 	return font_files;
 }
 
-packed_asset_t_array_t *export_arm_get_packed_assets(char *project_path, string_t_array_t *texture_files) {
+packed_asset_t_array_t *export_arm_get_packed_assets(char *project_path, string_array_t *texture_files) {
 	packed_asset_t_array_t *packed_assets = NULL;
 	if (project_raw->packed_assets != NULL) {
 		for (i32 i = 0; i < project_raw->packed_assets->length; ++i) {

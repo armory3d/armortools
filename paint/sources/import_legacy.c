@@ -88,7 +88,7 @@ ui_node_canvas_t_array_t *_import_arm_get_legacy_node_canvas_array(any_map_t *ma
 						b->data               = sys_string_to_buffer(data_string);
 					}
 					else {
-						string_t_array_t *data_strings = any_map_get(old, "data");
+						string_array_t *data_strings = any_map_get(old, "data");
 						char         *joined       = string_array_join(data_strings, "\n");
 						b->data                        = sys_string_to_buffer(joined);
 					}

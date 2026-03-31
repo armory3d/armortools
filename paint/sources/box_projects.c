@@ -16,7 +16,7 @@ void box_projects_show_box() {
 
 void box_projects_show() {
 	if (box_projects_icon_map != NULL) {
-		string_t_array_t *keys = map_keys(box_projects_icon_map);
+		string_array_t *keys = map_keys(box_projects_icon_map);
 		for (i32 i = 0; i < keys->length; ++i) {
 			char *handle = keys->buffer[i];
 			data_delete_image(handle);
@@ -40,7 +40,7 @@ void box_projects_tab_menu_on_next_frame(void *_) {
 	iron_delete_file(_box_projects_icon_path);
 	char *data_path = substring(_box_projects_path, 0, string_length(_box_projects_path) - 4);
 	iron_delete_file(data_path);
-	string_t_array_t *recent_projects = config_raw->recent_projects;
+	string_array_t *recent_projects = config_raw->recent_projects;
 	array_splice(recent_projects, _box_projects_i, 1);
 }
 
@@ -91,7 +91,7 @@ void box_projects_tab() {
 		if (num == 0) {
 			return;
 		}
-		string_t_array_t *recent_projects  = config_raw->recent_projects;
+		string_array_t *recent_projects  = config_raw->recent_projects;
 		bool              show_asset_names = true;
 
 		for (i32 row = 0; row < math_ceil(recent_projects->length / (float)num); ++row) {

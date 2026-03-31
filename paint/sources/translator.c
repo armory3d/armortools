@@ -27,7 +27,7 @@ char *vtr(char *id, any_map_t *vars) {
 	}
 
 	if (vars != NULL) {
-		string_t_array_t *keys = map_keys(vars);
+		string_array_t *keys = map_keys(vars);
 		for (i32 i = 0; i < keys->length; ++i) {
 			char *search = string("{%s}", keys->buffer[i]);
 			translation  = string_copy(string_replace_all(translation, search, any_map_get(vars, keys->buffer[i])));
@@ -108,7 +108,7 @@ void translator_load_translations(char *new_locale) {
 
 	// Push additional char codes contained in translation file
 	bool              cjk  = false;
-	string_t_array_t *keys = map_keys(translator_translations);
+	string_array_t *keys = map_keys(translator_translations);
 	for (i32 i = 0; i < keys->length; ++i) {
 		char *s = any_map_get(translator_translations, keys->buffer[i]);
 
@@ -211,14 +211,14 @@ void translator_extended_glyphs() {
 }
 
 // Returns a list of supported locales (plus English and the automatically detected system locale)
-string_t_array_t *translator_get_supported_locales() {
-	string_t_array_t *locales = any_array_create_from_raw(
+string_array_t *translator_get_supported_locales() {
+	string_array_t *locales = any_array_create_from_raw(
 	    (void *[]){
 	        "system",
 	        "en",
 	    },
 	    2);
-	string_t_array_t *files = file_read_directory(string("%s%slocale", path_data(), PATH_SEP));
+	string_array_t *files = file_read_directory(string("%s%slocale", path_data(), PATH_SEP));
 	for (i32 i = 0; i < files->length; ++i) {
 		char *locale_filename = files->buffer[i];
 		// Trim the ".json" file extension from file names

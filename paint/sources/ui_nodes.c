@@ -115,7 +115,7 @@ void ui_viewnodes_on_link_drag(i32 link_drag_id, bool is_new_link) {
 void ui_viewnodes_on_socket_released_group_edit_box() {
 	ui_node_socket_t *socket     = _ui_nodes_on_socket_released_socket;
 	ui_node_t        *node       = _ui_nodes_on_socket_released_node;
-	string_t_array_t *type_combo = any_array_create_from_raw(
+	string_array_t *type_combo = any_array_create_from_raw(
 	    (void *[]){
 	        tr("Color"),
 	        tr("Vector"),
@@ -1280,7 +1280,7 @@ void ui_nodes_draw_menubar() {
 	bool _SHADOWS              = ui->ops->theme->SHADOWS;
 	ui->ops->theme->BUTTON_COL = ui->ops->theme->WINDOW_BG_COL;
 	ui->ops->theme->SHADOWS    = false;
-	string_t_array_t *cats     = ui_nodes_canvas_type == CANVAS_TYPE_MATERIAL ? nodes_material_categories : nodes_brush_categories;
+	string_array_t *cats     = ui_nodes_canvas_type == CANVAS_TYPE_MATERIAL ? nodes_material_categories : nodes_brush_categories;
 	for (i32 i = 0; i < cats->length; ++i) {
 		if ((ui_menubar_button(tr(cats->buffer[i]))) || (ui->is_hovered && ui_nodes_show_menu)) {
 			ui_nodes_show_menu     = true;

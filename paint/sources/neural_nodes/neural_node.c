@@ -156,7 +156,7 @@ void neural_node_download(char *url) {
 	file_download_to(url, file_path, &neural_node_download_done, 0);
 }
 
-void neural_node_download_models(string_t_array_t *models) {
+void neural_node_download_models(string_array_t *models) {
 	if (string_equals(file_read_directory(neural_node_dir())->buffer[0], "")) {
 		iron_create_directory(neural_node_dir());
 	}

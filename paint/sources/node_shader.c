@@ -37,7 +37,7 @@ void node_shader_add_out(node_shader_t *raw, char *s) {
 void node_shader_add_constant(node_shader_t *raw, char *s, char *link) {
 	// inp: float4
 	if (string_array_index_of(raw->consts, s) == -1) {
-		string_t_array_t *ar    = string_split(s, ": ");
+		string_array_t *ar    = string_split(s, ": ");
 		char             *uname = ar->buffer[0];
 		char             *utype = ar->buffer[1];
 
@@ -172,7 +172,7 @@ char *node_shader_get(node_shader_t *raw) {
 		s       = string("%sconst %s: tex2d;\n", s, a);
 	}
 
-	string_t_array_t *keys = map_keys(raw->functions);
+	string_array_t *keys = map_keys(raw->functions);
 	for (i32 i = 0; i < keys->length; ++i) {
 		char *f = any_map_get(raw->functions, keys->buffer[i]);
 		s       = string("%s%s\n", s, f);

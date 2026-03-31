@@ -45,7 +45,7 @@ void import_texture_run(char *path, bool hdr_as_envmap) {
 	}
 
 	any_map_set(data_cached_images, path, image);
-	string_t_array_t *ar    = string_split(path, PATH_SEP);
+	string_array_t *ar    = string_split(path, PATH_SEP);
 	char             *name  = ar->buffer[ar->length - 1];
 	asset_t          *asset = GC_ALLOC_INIT(asset_t, {.name = name, .file = path, .id = project_asset_id++});
 	any_array_push(project_assets, asset);

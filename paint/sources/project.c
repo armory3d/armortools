@@ -103,7 +103,7 @@ void project_new_box_draw() {
 	if (h_project_aspect_ratio->init) {
 		h_project_aspect_ratio->i = context_raw->project_aspect_ratio;
 	}
-	string_t_array_t *project_aspect_ratio_combo = any_array_create_from_raw(
+	string_array_t *project_aspect_ratio_combo = any_array_create_from_raw(
 	    (void *[]){
 	        "1:1",
 	        "2:1",
@@ -435,7 +435,7 @@ void project_import_mesh_box_draw() {
 	void (*done)(void)     = _project_import_mesh_box_done;
 
 	if (ends_with(to_lower_case(path), ".obj")) {
-		string_t_array_t *split_by_combo = any_array_create_from_raw(
+		string_array_t *split_by_combo = any_array_create_from_raw(
 		    (void *[]){
 		        tr("Object"),
 		        tr("Group"),
@@ -515,8 +515,8 @@ void project_reimport_mesh() {
 	}
 }
 
-string_t_array_t *project_get_unwrap_plugins() {
-	string_t_array_t *unwrap_plugins = any_array_create_from_raw((void *[]){}, 0);
+string_array_t *project_get_unwrap_plugins() {
+	string_array_t *unwrap_plugins = any_array_create_from_raw((void *[]){}, 0);
 	if (box_preferences_files_plugin == NULL) {
 		box_preferences_fetch_plugins();
 	}
@@ -537,7 +537,7 @@ void project_unwrap_mesh_box_draw() {
 	raw_mesh_t *mesh           = _project_unwrap_mesh_box_mesh;
 	void (*done)(raw_mesh_t *) = _project_unwrap_mesh_box_done;
 
-	string_t_array_t *unwrap_plugins = project_get_unwrap_plugins();
+	string_array_t *unwrap_plugins = project_get_unwrap_plugins();
 	_project_unwrap_by               = ui_combo(ui_handle(__ID__), unwrap_plugins, tr("Plugin"), true, UI_ALIGN_LEFT, true);
 
 	ui_row2();
@@ -572,7 +572,7 @@ void project_unwrap_mesh_box(raw_mesh_t *mesh, void (*done)(raw_mesh_t *), bool 
 }
 
 void project_unwrap_mesh(raw_mesh_t *mesh, void (*done)(raw_mesh_t *)) {
-	string_t_array_t *unwrap_plugins = project_get_unwrap_plugins();
+	string_array_t *unwrap_plugins = project_get_unwrap_plugins();
 
 	if (_project_unwrap_by == unwrap_plugins->length - 1) {
 		util_mesh_equirect_unwrap(mesh);
@@ -661,7 +661,7 @@ gpu_texture_t *project_get_image(asset_t *asset) {
 	return asset != NULL ? any_imap_get(project_asset_map, asset->id) : NULL;
 }
 
-string_t_array_t *project_get_used_atlases() {
+string_array_t *project_get_used_atlases() {
 	if (project_atlas_objects == NULL) {
 		return NULL;
 	}
@@ -673,7 +673,7 @@ string_t_array_t *project_get_used_atlases() {
 		}
 	}
 	if (used->length > 1) {
-		string_t_array_t *res = any_array_create_from_raw((void *[]){}, 0);
+		string_array_t *res = any_array_create_from_raw((void *[]){}, 0);
 		for (i32 i = 0; i < used->length; ++i) {
 			i32 u = used->buffer[i];
 			any_array_push(res, project_atlas_names->buffer[u]);
@@ -694,7 +694,7 @@ bool project_is_atlas_object(mesh_object_t *p) {
 }
 
 mesh_object_t_array_t *project_get_atlas_objects(i32 object_mask) {
-	string_t_array_t *atlases = project_get_used_atlases();
+	string_array_t *atlases = project_get_used_atlases();
 	i32               i       = object_mask - project_paint_objects->length - 1;
 	if (atlases == NULL || i >= atlases->length) {
 		return project_paint_objects;

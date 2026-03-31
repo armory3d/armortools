@@ -10,7 +10,7 @@ void render_path_base_init() {
 void render_path_base_apply_config() {
 	if (render_path_base_super_sample != config_raw->rp_supersample) {
 		render_path_base_super_sample = config_raw->rp_supersample;
-		string_t_array_t *keys        = map_keys(render_path_render_targets);
+		string_array_t *keys        = map_keys(render_path_render_targets);
 		for (i32 i = 0; i < keys->length; ++i) {
 			render_target_t *rt = any_map_get(render_path_render_targets, keys->buffer[i]);
 			if (rt->width == 0) {
@@ -353,7 +353,7 @@ void render_path_base_swap_buf(char *bufb) {
 
 void render_path_base_draw_gbuffer() {
 	render_path_set_target("gbuffer0", NULL, "main", GPU_CLEAR_DEPTH, 0, 1.0); // Only clear gbuffer0
-	string_t_array_t *additional = any_array_create_from_raw(
+	string_array_t *additional = any_array_create_from_raw(
 	    (void *[]){
 	        "gbuffer1",
 	        "gbuffer2",
@@ -373,7 +373,7 @@ void render_path_base_draw_gbuffer() {
 			}
 			char             *g1ping     = string("gbuffer1%s", ping);
 			char             *g2ping     = string("gbuffer2%s", ping);
-			string_t_array_t *additional = any_array_create_from_raw(
+			string_array_t *additional = any_array_create_from_raw(
 			    (void *[]){
 			        g1ping,
 			        g2ping,
@@ -397,7 +397,7 @@ void render_path_base_draw_gbuffer() {
 	if (is_decal && !hide) {
 		line_draw_color              = 0xff000000;
 		line_draw_strength           = 0.002;
-		string_t_array_t *additional = any_array_create_from_raw(
+		string_array_t *additional = any_array_create_from_raw(
 		    (void *[]){
 		        "gbuffer1",
 		    },
@@ -443,7 +443,7 @@ void render_path_base_make_gbuffer_copy_textures() {
 }
 
 void render_path_base_copy_to_gbuffer() {
-	string_t_array_t *additional = any_array_create_from_raw(
+	string_array_t *additional = any_array_create_from_raw(
 	    (void *[]){
 	        "gbuffer1",
 	        "gbuffer2",

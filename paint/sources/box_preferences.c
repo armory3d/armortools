@@ -276,7 +276,7 @@ void box_preferences_theme_tab() {
 			*(u32_theme + i) = b;
 		}
 		else if (string_equals(key, "LINK_STYLE")) {
-			string_t_array_t *styles = any_array_create_from_raw(
+			string_array_t *styles = any_array_create_from_raw(
 			    (void *[]){
 			        tr("Straight"),
 			        tr("Curved"),
@@ -341,7 +341,7 @@ void box_preferences_usage_tab() {
 	ui_handle_t *h_layer_res = ui_handle(__ID__);
 	h_layer_res->i           = config_raw->layer_res;
 #if defined(IRON_ANDROID) || defined(IRON_IOS)
-	string_t_array_t *res_combo = any_array_create_from_raw(
+	string_array_t *res_combo = any_array_create_from_raw(
 	    (void *[]){
 	        "128",
 	        "256",
@@ -352,7 +352,7 @@ void box_preferences_usage_tab() {
 	    },
 	    6);
 #else
-	string_t_array_t *res_combo = any_array_create_from_raw(
+	string_array_t *res_combo = any_array_create_from_raw(
 	    (void *[]){
 	        "128",
 	        "256",
@@ -432,7 +432,7 @@ void box_preferences_usage_tab() {
 void box_preferences_camera_tab() {
 	ui_handle_t *h_camera_pivot          = ui_handle(__ID__);
 	h_camera_pivot->i                    = config_raw->camera_pivot;
-	string_t_array_t *camera_pivot_combo = any_array_create_from_raw(
+	string_array_t *camera_pivot_combo = any_array_create_from_raw(
 	    (void *[]){
 	        tr("Cursor"),
 	        tr("Center"),
@@ -442,7 +442,7 @@ void box_preferences_camera_tab() {
 
 	ui_handle_t *h_camera_controls          = ui_handle(__ID__);
 	h_camera_controls->i                    = config_raw->camera_controls;
-	string_t_array_t *camera_controls_combo = any_array_create_from_raw(
+	string_array_t *camera_controls_combo = any_array_create_from_raw(
 	    (void *[]){
 	        tr("Orbit"),
 	        tr("Rotate"),
@@ -469,7 +469,7 @@ void box_preferences_camera_tab() {
 
 	ui_handle_t *h_zoom_direction          = ui_handle(__ID__);
 	h_zoom_direction->i                    = config_raw->zoom_direction;
-	string_t_array_t *zoom_direction_combo = any_array_create_from_raw(
+	string_array_t *zoom_direction_combo = any_array_create_from_raw(
 	    (void *[]){
 	        tr("Vertical"),
 	        tr("Vertical Inverted"),
@@ -523,7 +523,7 @@ void box_preferences_pen_tab() {
 void box_preferences_viewport_tab() {
 	ui_handle_t *h_mode          = ui_handle(__ID__);
 	h_mode->i                    = config_raw->viewport_mode;
-	string_t_array_t *mode_combo = any_array_create_from_raw(
+	string_array_t *mode_combo = any_array_create_from_raw(
 	    (void *[]){
 	        tr("Lit"),
 	        tr("Path Traced"),
@@ -536,7 +536,7 @@ void box_preferences_viewport_tab() {
 
 	ui_handle_t *h_pathtrace_mode          = ui_handle(__ID__);
 	h_pathtrace_mode->i                    = config_raw->pathtrace_mode;
-	string_t_array_t *pathtrace_mode_combo = any_array_create_from_raw(
+	string_array_t *pathtrace_mode_combo = any_array_create_from_raw(
 	    (void *[]){
 	        tr("Fast"),
 	        tr("Quality"),
@@ -551,7 +551,7 @@ void box_preferences_viewport_tab() {
 
 	ui_handle_t *h_render_mode          = ui_handle(__ID__);
 	h_render_mode->i                    = config_raw->render_mode;
-	string_t_array_t *render_mode_combo = any_array_create_from_raw(
+	string_array_t *render_mode_combo = any_array_create_from_raw(
 	    (void *[]){
 	        tr("Desktop"),
 	        tr("Mobile"),
@@ -564,7 +564,7 @@ void box_preferences_viewport_tab() {
 
 	ui_handle_t *h_supersample          = ui_handle(__ID__);
 	h_supersample->i                    = config_get_super_sample_quality(config_raw->rp_supersample);
-	string_t_array_t *supersample_combo = any_array_create_from_raw(
+	string_array_t *supersample_combo = any_array_create_from_raw(
 	    (void *[]){
 	        "0.25x",
 	        "0.5x",
@@ -705,7 +705,7 @@ void box_preferences_keymap_tab() {
 
 	i32 index              = 0;
 	ui->changed            = false;
-	string_t_array_t *keys = map_keys(config_keymap);
+	string_array_t *keys = map_keys(config_keymap);
 	array_sort(keys, NULL);
 	for (i32 i = 0; i < keys->length; ++i) {
 		char        *key = keys->buffer[i];
@@ -725,7 +725,7 @@ void box_preferences_neural_tab() {
 	ui_handle_t *h_inference = ui_handle(__ID__);
 	h_inference->i           = config_raw->neural_backend;
 #ifdef IRON_WINDOWS
-	string_t_array_t *inference_combo = any_array_create_from_raw(
+	string_array_t *inference_combo = any_array_create_from_raw(
 	    (void *[]){
 	        "CPU",
 	        "Vulkan",
@@ -733,7 +733,7 @@ void box_preferences_neural_tab() {
 	    },
 	    3);
 #else
-	string_t_array_t *inference_combo = any_array_create_from_raw(
+	string_array_t *inference_combo = any_array_create_from_raw(
 	    (void *[]){
 	        "CPU",
 	        "Vulkan",

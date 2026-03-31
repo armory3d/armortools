@@ -25,7 +25,7 @@ void import_font_run(char *path) {
 	slot_font_t_array_t *font_slots = any_array_create_from_raw((void *[]){}, 0);
 
 	for (i32 i = 0; i < count; ++i) {
-		string_t_array_t *ar   = string_split(path, PATH_SEP);
+		string_array_t *ar   = string_split(path, PATH_SEP);
 		char         *name = ar->buffer[ar->length - 1];
 		draw_font_t      *f    = GC_ALLOC_INIT(draw_font_t, {.buf = font->buf, .index = font->index});
 		draw_font_init(f);

@@ -196,7 +196,7 @@ void make_material_bake_node_previews() {
 	ui_node_t_array_t *empty = any_array_create_from_raw((void *[]){}, 0);
 	make_material_traverse_nodes(context_raw->material->canvas->nodes, NULL, empty);
 
-	string_t_array_t *keys = map_keys(context_raw->node_previews);
+	string_array_t *keys = map_keys(context_raw->node_previews);
 	for (i32 i = 0; i < keys->length; ++i) {
 		char *key = keys->buffer[i];
 		if (string_array_index_of(context_raw->node_previews_used, key) == -1) {

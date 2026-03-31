@@ -2,6 +2,58 @@
 #include "../global.h"
 
 void edit_image_node_init() {
+
+	edit_image_node_def = GC_ALLOC_INIT(ui_node_t, {.id     = 0,
+	                                                .name   = _tr("Edit Image"),
+	                                                .type   = "NEURAL_EDIT_IMAGE",
+	                                                .x      = 0,
+	                                                .y      = 0,
+	                                                .color  = 0xff4982a0,
+	                                                .inputs = any_array_create_from_raw(
+	                                                    (void *[]){
+	                                                        GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
+	                                                                                         .node_id       = 0,
+	                                                                                         .name          = _tr("Color"),
+	                                                                                         .type          = "RGBA",
+	                                                                                         .color         = 0xffc7c729,
+	                                                                                         .default_value = f32_array_create_xyzw(1.0, 1.0, 1.0, 1.0),
+	                                                                                         .min           = 0.0,
+	                                                                                         .max           = 1.0,
+	                                                                                         .precision     = 100,
+	                                                                                         .display       = 0}),
+	                                                    },
+	                                                    1),
+	                                                .outputs = any_array_create_from_raw(
+	                                                    (void *[]){
+	                                                        GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
+	                                                                                         .node_id       = 0,
+	                                                                                         .name          = _tr("Color"),
+	                                                                                         .type          = "RGBA",
+	                                                                                         .color         = 0xffc7c729,
+	                                                                                         .default_value = f32_array_create_xyzw(0.0, 0.0, 0.0, 1.0),
+	                                                                                         .min           = 0.0,
+	                                                                                         .max           = 1.0,
+	                                                                                         .precision     = 100,
+	                                                                                         .display       = 0}),
+	                                                    },
+	                                                    1),
+	                                                .buttons = any_array_create_from_raw(
+	                                                    (void *[]){
+	                                                        GC_ALLOC_INIT(ui_node_button_t, {.name          = "edit_image_node_button",
+	                                                                                         .type          = "CUSTOM",
+	                                                                                         .output        = -1,
+	                                                                                         .default_value = f32_array_create_x(0),
+	                                                                                         .data          = NULL,
+	                                                                                         .min           = 0.0,
+	                                                                                         .max           = 1.0,
+	                                                                                         .precision     = 100,
+	                                                                                         .height        = 0}),
+	                                                    },
+	                                                    1),
+	                                                .width = 0,
+	                                                .flags = 0});
+	gc_root(edit_image_node_def);
+
 	any_array_push(nodes_material_neural, edit_image_node_def);
 	any_map_set(parser_material_node_vectors, "NEURAL_EDIT_IMAGE", neural_node_vector);
 	any_map_set(ui_nodes_custom_buttons, "edit_image_node_button", edit_image_node_button);
@@ -13,7 +65,7 @@ void edit_image_node_button(i32 node_id) {
 	char             *node_name = parser_material_node_name(node, NULL);
 	ui_handle_t      *h         = ui_handle(node_name);
 
-	string_t_array_t *models = any_array_create_from_raw(
+	string_array_t *models = any_array_create_from_raw(
 	    (void *[]){
 	        "Qwen Image Edit",
 	    },
@@ -39,7 +91,7 @@ void edit_image_node_button(i32 node_id) {
 				prompt = ".";
 			}
 
-			string_t_array_t *argv = any_array_create_from_raw(
+			string_array_t *argv = any_array_create_from_raw(
 			    (void *[]){
 			        string("%s/%s", dir, neural_node_sd_bin()),
 			        "--diffusion-model",

@@ -113,7 +113,7 @@ void render_path_paint_commands_paint(bool dilation) {
 		else if (context_raw->tool == TOOL_TYPE_PICKER || context_raw->tool == TOOL_TYPE_MATERIAL) {
 			if (context_raw->pick_pos_nor_tex) {
 				if (context_raw->paint2d) {
-					string_t_array_t *additional = any_array_create_from_raw(
+					string_array_t *additional = any_array_create_from_raw(
 					    (void *[]){
 					        "gbuffer1",
 					        "gbuffer2",
@@ -122,7 +122,7 @@ void render_path_paint_commands_paint(bool dilation) {
 					render_path_set_target("gbuffer0", additional, "main", GPU_CLEAR_NONE, 0, 0.0);
 					render_path_draw_meshes("mesh");
 				}
-				string_t_array_t *additional = any_array_create_from_raw(
+				string_array_t *additional = any_array_create_from_raw(
 				    (void *[]){
 				        "texpaint_posnortex_picker1",
 				    },
@@ -147,7 +147,7 @@ void render_path_paint_commands_paint(bool dilation) {
 				context_raw->uvy_picked                     = buffer_get_f32(b, 12);
 			}
 			else {
-				string_t_array_t *additional = any_array_create_from_raw(
+				string_array_t *additional = any_array_create_from_raw(
 				    (void *[]){
 				        "texpaint_nor_picker",
 				        "texpaint_pack_picker",
@@ -245,7 +245,7 @@ void render_path_paint_commands_paint(bool dilation) {
 						break;
 					}
 				}
-				string_t_array_t *additional = any_array_create_from_raw(
+				string_array_t *additional = any_array_create_from_raw(
 				    (void *[]){
 				        string("texpaint_nor%d", ptid),
 				        string("texpaint_pack%d", ptid),
@@ -255,7 +255,7 @@ void render_path_paint_commands_paint(bool dilation) {
 				render_path_set_target(texpaint, additional, NULL, GPU_CLEAR_NONE, 0, 0.0);
 			}
 			else {
-				string_t_array_t *additional = any_array_create_from_raw(
+				string_array_t *additional = any_array_create_from_raw(
 				    (void *[]){
 				        string("texpaint_nor%d", tid),
 				        string("texpaint_pack%d", tid),
@@ -378,7 +378,7 @@ void render_path_paint_commands_live_brush() {
 		render_path_draw_shader("Scene/copy_pass/copy_pass");
 	}
 	else {
-		string_t_array_t *additional = any_array_create_from_raw(
+		string_array_t *additional = any_array_create_from_raw(
 		    (void *[]){
 		        "texpaint_nor_live",
 		        "texpaint_pack_live",

@@ -640,13 +640,13 @@ void base_render(void *_) {
 #endif
 }
 
-string_t_array_t *base_combo_enum_texts(char *node_type) {
+string_array_t *base_combo_enum_texts(char *node_type) {
 	if (string_equals(node_type, "TEX_IMAGE")) {
 		if (project_asset_names->length > 0) {
 			return project_asset_names;
 		}
 		else {
-			string_t_array_t *empty = any_array_create_from_raw(
+			string_array_t *empty = any_array_create_from_raw(
 			    (void *[]){
 			        "",
 			    },
@@ -656,7 +656,7 @@ string_t_array_t *base_combo_enum_texts(char *node_type) {
 	}
 
 	if (string_equals(node_type, "LAYER") || string_equals(node_type, "LAYER_MASK")) {
-		string_t_array_t *layer_names = any_array_create_from_raw((void *[]){}, 0);
+		string_array_t *layer_names = any_array_create_from_raw((void *[]){}, 0);
 		for (i32 i = 0; i < project_layers->length; ++i) {
 			slot_layer_t *l = project_layers->buffer[i];
 			any_array_push(layer_names, l->name);
@@ -665,7 +665,7 @@ string_t_array_t *base_combo_enum_texts(char *node_type) {
 	}
 
 	if (string_equals(node_type, "MATERIAL")) {
-		string_t_array_t *material_names = any_array_create_from_raw((void *[]){}, 0);
+		string_array_t *material_names = any_array_create_from_raw((void *[]){}, 0);
 		for (i32 i = 0; i < project_materials->length; ++i) {
 			slot_material_t *m = project_materials->buffer[i];
 			any_array_push(material_names, m->canvas->name);
@@ -678,7 +678,7 @@ string_t_array_t *base_combo_enum_texts(char *node_type) {
 			return project_asset_names;
 		}
 		else {
-			string_t_array_t *empty = any_array_create_from_raw(
+			string_array_t *empty = any_array_create_from_raw(
 			    (void *[]){
 			        "",
 			    },
@@ -882,7 +882,7 @@ void ui_base_init() {
 	scene_world->_->envmap = context_raw->show_envmap ? context_raw->saved_envmap : context_raw->empty_envmap;
 	context_raw->ddirty    = 1;
 
-	string_t_array_t *resources = any_array_create_from_raw(
+	string_array_t *resources = any_array_create_from_raw(
 	    (void *[]){
 	        "cursor.k",
 	        "icons.k",
@@ -941,7 +941,7 @@ void ui_base_menu_draw_viewport_mode() {
 	mode_handle->i           = context_raw->viewport_mode;
 	ui_text(tr("Viewport Mode"), UI_ALIGN_RIGHT, 0x00000000);
 
-	string_t_array_t *modes = any_array_create_from_raw(
+	string_array_t *modes = any_array_create_from_raw(
 	    (void *[]){
 	        tr("Lit"),
 	        tr("Base Color"),
@@ -960,7 +960,7 @@ void ui_base_menu_draw_viewport_mode() {
 	        tr("Mask"),
 	    },
 	    15);
-	string_t_array_t *shortcuts = any_array_create_from_raw(
+	string_array_t *shortcuts = any_array_create_from_raw(
 	    (void *[]){
 	        "l",
 	        "b",
@@ -1007,7 +1007,7 @@ void ui_base_update(void *_) {
 	ui_base_update_ui();
 	operator_update();
 
-	string_t_array_t *keys = map_keys(plugin_map);
+	string_array_t *keys = map_keys(plugin_map);
 	for (i32 i = 0; i < keys->length; ++i) {
 		plugin_t *p = any_map_get(plugin_map, keys->buffer[i]);
 		if (p->on_update != NULL) {
@@ -1482,7 +1482,7 @@ void ui_base_operator_search_menu_draw() {
 	i32  count      = 0;
 	i32  BUTTON_COL = ui->ops->theme->BUTTON_COL;
 
-	string_t_array_t *keys = map_keys(config_keymap);
+	string_array_t *keys = map_keys(config_keymap);
 	for (i32 i = 0; i < keys->length; ++i) {
 		char *n = keys->buffer[i];
 		if (string_index_of(n, search) >= 0) {
@@ -2084,7 +2084,7 @@ void ui_base_toggle_browser() {
 
 void ui_base_set_icon_scale() {
 	if (UI_SCALE() > 1) {
-		string_t_array_t *res = any_array_create_from_raw(
+		string_array_t *res = any_array_create_from_raw(
 		    (void *[]){
 		        "icons.k",
 		        "icons05x.k",
@@ -2096,7 +2096,7 @@ void ui_base_set_icon_scale() {
 		any_map_set(resource_bundled, "icons.k", resource_get("icons2x.k"));
 	}
 	else {
-		string_t_array_t *res = any_array_create_from_raw(
+		string_array_t *res = any_array_create_from_raw(
 		    (void *[]){
 		        "icons.k",
 		        "icons05x.k",

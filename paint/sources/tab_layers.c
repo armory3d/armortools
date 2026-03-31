@@ -190,7 +190,7 @@ void tab_layers_button_new(char *text) {
 }
 
 void tab_layers_combo_filter() {
-	string_t_array_t *ar = any_array_create_from_raw(
+	string_array_t *ar = any_array_create_from_raw(
 	    (void *[]){
 	        tr("All"),
 	    },
@@ -199,7 +199,7 @@ void tab_layers_combo_filter() {
 		mesh_object_t *p = project_paint_objects->buffer[i];
 		any_array_push(ar, p->base->name);
 	}
-	string_t_array_t *atlases = project_get_used_atlases();
+	string_array_t *atlases = project_get_used_atlases();
 	if (atlases != NULL) {
 		for (i32 i = 0; i < atlases->length; ++i) {
 			char *a = atlases->buffer[i];
@@ -257,7 +257,7 @@ i32_map_t *tab_layers_init_layer_map() {
 
 i32_imap_t *tab_layers_fill_layer_map(i32_map_t *map) {
 	i32_imap_t       *res  = any_map_create();
-	string_t_array_t *keys = map_keys(map);
+	string_array_t *keys = map_keys(map);
 	for (i32 i = 0; i < keys->length; ++i) {
 		char *l = keys->buffer[i];
 		i32_imap_set(res, i32_map_get(map, l), array_index_of(project_layers, l) > -1 ? array_index_of(project_layers, l) : 9999);
@@ -481,7 +481,7 @@ void tab_layers_combo_object_layer_clear(slot_layer_t *l) {
 }
 
 ui_handle_t *tab_layers_combo_object(slot_layer_t *l, bool label) {
-	string_t_array_t *ar = any_array_create_from_raw(
+	string_array_t *ar = any_array_create_from_raw(
 	    (void *[]){
 	        tr("Shared"),
 	    },
@@ -490,7 +490,7 @@ ui_handle_t *tab_layers_combo_object(slot_layer_t *l, bool label) {
 		mesh_object_t *p = project_paint_objects->buffer[i];
 		any_array_push(ar, p->base->name);
 	}
-	string_t_array_t *atlases = project_get_used_atlases();
+	string_array_t *atlases = project_get_used_atlases();
 	if (atlases != NULL) {
 		for (i32 i = 0; i < atlases->length; ++i) {
 			char *a = atlases->buffer[i];
@@ -516,7 +516,7 @@ ui_handle_t *tab_layers_combo_object(slot_layer_t *l, bool label) {
 ui_handle_t *tab_layers_combo_blending(slot_layer_t *l, bool label) {
 	ui_handle_t *blending_handle     = ui_nest(ui_handle(__ID__), l->id);
 	blending_handle->i               = l->blending;
-	string_t_array_t *blending_combo = any_array_create_from_raw(
+	string_array_t *blending_combo = any_array_create_from_raw(
 	    (void *[]){
 	        tr("Mix"),
 	        tr("Darken"),
@@ -899,7 +899,7 @@ void tab_layers_draw_layer_context_menu_draw() {
 	if (!slot_layer_is_group(l)) {
 		ui_menu_align();
 #if defined(IRON_ANDROID) || defined(IRON_IOS)
-		string_t_array_t *ar = any_array_create_from_raw(
+		string_array_t *ar = any_array_create_from_raw(
 		    (void *[]){
 		        "128",
 		        "256",
@@ -910,7 +910,7 @@ void tab_layers_draw_layer_context_menu_draw() {
 		    },
 		    6);
 #else
-		string_t_array_t *ar = any_array_create_from_raw(
+		string_array_t *ar = any_array_create_from_raw(
 		    (void *[]){
 		        "128",
 		        "256",
@@ -937,7 +937,7 @@ void tab_layers_draw_layer_context_menu_draw() {
 		ui_menu_align();
 		ui_handle_t *huv       = ui_handle(__ID__);
 		huv->i                 = l->uv_map;
-		string_t_array_t *aruv = any_array_create_from_raw(
+		string_array_t *aruv = any_array_create_from_raw(
 		    (void *[]){
 		        "uv0",
 		    },
@@ -961,7 +961,7 @@ void tab_layers_draw_layer_context_menu_draw() {
 		ui_menu_align();
 		ui_menu_label(tr("Bits"), NULL);
 		ui_menu_align();
-		string_t_array_t *bits_items = any_array_create_from_raw(
+		string_array_t *bits_items = any_array_create_from_raw(
 		    (void *[]){
 		        "8",
 		        "16",
@@ -1003,7 +1003,7 @@ void tab_layers_draw_layer_context_menu_draw() {
 		ui_menu_align();
 		ui_handle_t *uv_type_handle     = ui_nest(ui_handle(__ID__), l->id);
 		uv_type_handle->i               = l->uv_type;
-		string_t_array_t *uv_type_items = any_array_create_from_raw(
+		string_array_t *uv_type_items = any_array_create_from_raw(
 		    (void *[]){
 		        tr("UV Map"),
 		        tr("Triplanar"),
