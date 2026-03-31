@@ -247,6 +247,7 @@ typedef struct ui {
 	ui_handle_t    *combo_selected_window;
 	int             combo_selected_align;
 	string_array_t *combo_selected_texts;
+	any_array_t    *combo_selected_images;
 	char           *combo_selected_label;
 	int             combo_selected_x;
 	int             combo_selected_y;
@@ -540,6 +541,7 @@ extern char           *ui_clipboard;
 extern string_array_t *ui_nodes_exclude_remove;
 extern bool            ui_nodes_socket_released;
 extern string_array_t *(*ui_nodes_enum_texts)(char *);
+extern any_array_t *(*ui_nodes_enum_images)(char *);
 extern gpu_texture_t *(*ui_nodes_preview_image)(ui_node_t *);
 extern void (*ui_nodes_on_custom_button)(int, char *);
 extern ui_canvas_control_t *(*ui_nodes_on_canvas_control)(void);

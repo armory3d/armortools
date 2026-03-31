@@ -197,7 +197,7 @@ void export_arm_export_node(ui_node_t *n, asset_t_array_t *assets) {
 			n->buttons->buffer[0]->data = u8_array_create_from_string("");
 		}
 		else {
-			n->buttons->buffer[0]->data = u8_array_create_from_string(base_enum_texts(n->type)->buffer[index]);
+			n->buttons->buffer[0]->data = u8_array_create_from_string(base_combo_enum_texts(n->type)->buffer[index]);
 		}
 		if (assets != NULL) {
 			asset_t *asset = project_assets->buffer[index];

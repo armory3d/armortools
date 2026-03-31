@@ -27,6 +27,7 @@ char           *ui_clipboard                             = "";
 string_array_t *ui_nodes_exclude_remove                  = NULL; // No removal for listed node types
 bool            ui_nodes_socket_released                 = false;
 string_array_t *(*ui_nodes_enum_texts)(char *)           = NULL; // Retrieve combo items for buttons of type ENUM
+any_array_t *(*ui_nodes_enum_images)(char *)             = NULL;
 gpu_texture_t *(*ui_nodes_preview_image)(ui_node_t *)    = NULL; // Retrieve preview image
 void (*ui_nodes_on_custom_button)(int, char *)           = NULL; // Call external function
 ui_canvas_control_t *(*ui_nodes_on_canvas_control)(void) = NULL;
@@ -530,14 +531,16 @@ void ui_node_draw_body(ui_node_t *node, ui_node_canvas_t *canvas, float nx, floa
 			ui_handle_t *but_handle = ui_nest(nhandle, buti);
 			but_handle->i           = ((float *)but->default_value->buffer)[0];
 
-			bool  combo_select    = current->combo_selected_handle == NULL && ui_get_released(UI_ELEMENT_H());
-			char *label           = combo_select ? temp_label : enum_label;
-			char(*texts_data)[64] = combo_select ? temp_texts_data : enum_texts_data;
-			char          **texts = combo_select ? temp_texts : enum_texts;
-			string_array_t *ar    = combo_select ? &temp_ar : &enum_ar;
+			bool  combo_select     = current->combo_selected_handle == NULL && ui_get_released(UI_ELEMENT_H());
+			char *label            = combo_select ? temp_label : enum_label;
+			char (*texts_data)[64] = combo_select ? temp_texts_data : enum_texts_data;
+			char          **texts  = combo_select ? temp_texts : enum_texts;
+			string_array_t *ar     = combo_select ? &temp_ar : &enum_ar;
+			any_array_t    *images = NULL;
 
-			int texts_count = 0;
-			if (but->data != NULL && but->data->length > 1) {
+			int  texts_count  = 0;
+			bool has_but_data = but->data != NULL && but->data->length > 1;
+			if (has_but_data) {
 				int wi = 0;
 				for (int i = 0; i < but->data->length; ++i) {
 					char c = ((char *)but->data->buffer)[i];
@@ -572,6 +575,9 @@ void ui_node_draw_body(ui_node_t *node, ui_node_canvas_t *canvas, float nx, floa
 			strcpy(label, ui_tr(but->name));
 
 			((float *)but->default_value->buffer)[0] = ui_combo(but_handle, ar, label, false, UI_ALIGN_LEFT, true);
+			if (current->combo_selected_handle == but_handle && !has_but_data && ui_nodes_enum_images != NULL) {
+				current->combo_selected_images = (*ui_nodes_enum_images)(node->type);
+			}
 		}
 		else if (strcmp(but->type, "BOOL") == 0) {
 			ny += lineh;

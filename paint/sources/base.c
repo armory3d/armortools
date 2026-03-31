@@ -73,7 +73,8 @@ void base_init() {
 		draw_font_init(base_font);
 	}
 
-	ui_nodes_enum_texts = base_enum_texts;
+	ui_nodes_enum_texts  = base_combo_enum_texts;
+	ui_nodes_enum_images = base_combo_enum_images;
 	gc_root(ui_nodes_enum_texts);
 
 	// Init plugins
@@ -639,7 +640,7 @@ void base_render(void *_) {
 #endif
 }
 
-string_t_array_t *base_enum_texts(char *node_type) {
+string_t_array_t *base_combo_enum_texts(char *node_type) {
 	if (string_equals(node_type, "TEX_IMAGE")) {
 		if (project_asset_names->length > 0) {
 			return project_asset_names;
@@ -684,6 +685,48 @@ string_t_array_t *base_enum_texts(char *node_type) {
 			    1);
 			return empty;
 		}
+	}
+
+	return NULL;
+}
+
+any_array_t *base_combo_enum_images(char *node_type) {
+	if (string_equals(node_type, "TEX_IMAGE")) {
+		any_array_t *ar = any_array_create(0);
+		for (i32 i = 0; i < project_assets->length; ++i) {
+			asset_t       *asset = project_assets->buffer[i];
+			gpu_texture_t *img   = project_get_image(asset);
+			any_array_push(ar, img);
+		}
+		return ar;
+	}
+
+	if (string_equals(node_type, "LAYER") || string_equals(node_type, "LAYER_MASK")) {
+		any_array_t *ar = any_array_create(0);
+		for (i32 i = 0; i < project_layers->length; ++i) {
+			slot_layer_t *l = project_layers->buffer[i];
+			any_array_push(ar, l->texpaint_preview);
+		}
+		return ar;
+	}
+
+	if (string_equals(node_type, "MATERIAL")) {
+		any_array_t *ar = any_array_create(0);
+		for (i32 i = 0; i < project_materials->length; ++i) {
+			slot_material_t *m = project_materials->buffer[i];
+			any_array_push(ar, m->image_icon);
+		}
+		return ar;
+	}
+
+	if (string_equals(node_type, "image_texture_node")) {
+		any_array_t *ar = any_array_create(0);
+		for (i32 i = 0; i < project_assets->length; ++i) {
+			asset_t       *asset = project_assets->buffer[i];
+			gpu_texture_t *img   = project_get_image(asset);
+			any_array_push(ar, img);
+		}
+		return ar;
 	}
 
 	return NULL;

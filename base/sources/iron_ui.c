@@ -888,6 +888,9 @@ void ui_draw_combo() {
 			}
 			break;
 		}
+		if (current->combo_selected_images != NULL && current->combo_selected_images->length > i) {
+			draw_scaled_image(current->combo_selected_images->buffer[i], current->_x - UI_ELEMENT_H(), current->_y - UI_ELEMENT_H() + 1, UI_ELEMENT_H(), UI_ELEMENT_H());
+		}
 		if (current->_y + UI_ELEMENT_H() > iron_window_height() - current->window_border_bottom ||
 		    current->_y - UI_ELEMENT_H() * 2 < current->window_border_top) {
 			current->_x += current->combo_selected_w * unroll_right; // Next column
@@ -2148,6 +2151,7 @@ int ui_combo(ui_handle_t *handle, string_array_t *texts, char *label, bool show_
 			current->combo_selected_window         = current->current_window;
 			current->combo_selected_align          = align;
 			current->combo_selected_texts          = texts;
+			current->combo_selected_images         = NULL;
 			current->combo_selected_label          = (char *)label;
 			current->combo_selected_x              = current->_x + current->_window_x;
 			current->combo_selected_y              = current->_y + current->_window_y + UI_ELEMENT_H();

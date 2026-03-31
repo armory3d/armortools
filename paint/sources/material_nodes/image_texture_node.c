@@ -75,7 +75,7 @@ bind_tex_t *parser_material_make_texture(ui_node_t *image_node, char *tex_name) 
 	if (i > 9000) { // 9999 - Texture deleted, use pink now
 		return NULL;
 	}
-	char *filepath = parser_material_enum_data(base_enum_texts(image_node->type)->buffer[i]);
+	char *filepath = parser_material_enum_data(base_combo_enum_texts(image_node->type)->buffer[i]);
 	if (string_equals(filepath, "") || string_index_of(filepath, ".") == -1) {
 		return NULL;
 	}

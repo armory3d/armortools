@@ -109,7 +109,10 @@ void ui_header_draw_tool_properties() {
 		ui->enabled = true;
 		ui_text(tr("Color ID Map"), UI_ALIGN_LEFT, 0x00000000);
 		if (project_asset_names->length > 0) {
-			i32 cid = ui_combo(context_raw->colorid_handle, base_enum_texts("TEX_IMAGE"), tr("Color ID"), false, UI_ALIGN_LEFT, true);
+			i32 cid = ui_combo(context_raw->colorid_handle, base_combo_enum_texts("TEX_IMAGE"), tr("Color ID"), false, UI_ALIGN_LEFT, true);
+			if (context_raw->colorid_handle == ui->combo_selected_handle) {
+				ui->combo_selected_images = base_combo_enum_images("TEX_IMAGE");
+			}
 			if (context_raw->colorid_handle->changed) {
 				context_raw->ddirty         = 2;
 				context_raw->colorid_picked = false;
