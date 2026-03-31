@@ -503,7 +503,7 @@ node_shader_context_t *make_paint_run(material_t *data, material_context_t *matc
 			}
 			else {
 				node_shader_write_frag(kong, string("output[0] = float4(%s, str + sample_undo.a * (1.0 - str));",
-				                                    make_material_blend_mode(kong, context_raw->brush_blending, "sample_undo.rgb", "basecol", "opacity")));
+				                                    make_material_blend_mode(kong, context_raw->brush_blending, "sample_undo.rgb", "basecol", "str")));
 			}
 		}
 		node_shader_write_frag(kong, "output[1] = float4(nortan, matid);");

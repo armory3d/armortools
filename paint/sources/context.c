@@ -56,6 +56,7 @@ context_t *context_create() {
 	c->fov_handle              = ui_handle_create();
 	c->texture_export_path     = "";
 	c->last_status_position    = 0;
+	c->camera_pivot            = CAMERA_PIVOT_CURSOR;
 	c->camera_controls         = CAMERA_CONTROLS_ORBIT;
 	c->pen_painting_only       = false; // Reject painting with finger when using pen
 	c->layer_preview_dirty     = true;

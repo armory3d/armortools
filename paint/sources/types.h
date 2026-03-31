@@ -113,7 +113,8 @@ typedef struct config {
 	bool                   splash_screen;
 	struct i32_array      *layout;          // Sizes
 	struct i32_array      *layout_tabs;     // Active tabs
-	i32                    camera_controls; // Orbit, rotate
+	i32                    camera_pivot;    // Cursor, camera center
+	i32                    camera_controls; // Orbit, rotate, fly
 	char                  *server;
 	i32                    viewport_mode;
 	i32                    pathtrace_mode;
@@ -260,6 +261,7 @@ typedef struct context {
 	struct ui_handle           *fov_handle;
 	char                       *texture_export_path;
 	i32                         last_status_position;
+	camera_pivot_t              camera_pivot;
 	camera_controls_t           camera_controls;
 	bool                        pen_painting_only;
 	struct slot_material       *material;

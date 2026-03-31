@@ -111,10 +111,10 @@ typedef enum {
 } export_destination_t;
 
 typedef enum {
-	PLAYER_TARGET_WEB   = 0,
+	PLAYER_TARGET_WEB     = 0,
 	PLAYER_TARGET_WINDOWS = 1,
-	PLAYER_TARGET_LINUX = 2,
-	PLAYER_TARGET_MACOS = 3,
+	PLAYER_TARGET_LINUX   = 2,
+	PLAYER_TARGET_MACOS   = 3,
 } player_target_t;
 
 typedef enum {
@@ -166,6 +166,11 @@ typedef enum {
 	CAMERA_CONTROLS_ROTATE = 1,
 	CAMERA_CONTROLS_FLY    = 2,
 } camera_controls_t;
+
+typedef enum {
+	CAMERA_PIVOT_CURSOR        = 0,
+	CAMERA_PIVOT_CAMERA_CENTER = 1,
+} camera_pivot_t;
 
 typedef enum {
 	CAMERA_TYPE_PERSPECTIVE  = 0,

@@ -25,6 +25,10 @@ void ui_header_render_ui() {
 	i32 nodesw = (ui_nodes_show || ui_view2d_show) ? config_raw->layout->buffer[LAYOUT_SIZE_NODES_W] : 0;
 	i32 ww     = iron_window_width() - ui_toolbar_w(true) - config_raw->layout->buffer[LAYOUT_SIZE_SIDEBAR_W] - nodesw;
 
+	if (ui->is_typing) {
+		ui_header_handle->redraws = 2;
+	}
+
 	if (ui_window(ui_header_handle, base_x(), ui_header_h, ww, ui_header_h, false)) {
 		ui->_y += 2;
 		ui_header_draw_tool_properties();

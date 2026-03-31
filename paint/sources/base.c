@@ -582,9 +582,8 @@ void base_render(void *_) {
 	if (context_raw->frame == 2) {
 		make_material_parse_mesh_material();
 		make_material_parse_paint_material(true);
-		context_raw->ddirty = 0;
-
-		// Mouse coords not updated during drag
+		context_raw->ddirty          = 0;
+		context_raw->camera_pivot    = config_raw->camera_pivot;
 		context_raw->camera_controls = config_raw->camera_controls;
 	}
 	else if (context_raw->frame == 3) {
@@ -1806,6 +1805,7 @@ void ui_base_render(void *_) {
 		draw_image(img, base_view3d_w() / 2.0 - img->width / 2.0, base_h() / 2.0 - img->height / 2.0);
 		draw_end();
 	}
+
 	ui_begin(ui);
 	ui_toolbar_render_ui();
 	ui_menubar_render_ui();

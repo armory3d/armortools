@@ -338,6 +338,16 @@ void box_preferences_usage_tab() {
 		ui_tooltip(tr("Dilate painted textures to prevent seams"));
 	}
 
+	ui_handle_t *h_camera_pivot          = ui_handle(__ID__);
+	h_camera_pivot->i                    = config_raw->camera_pivot;
+	string_t_array_t *camera_pivot_combo = any_array_create_from_raw(
+	    (void *[]){
+	        tr("Cursor"),
+	        tr("Center"),
+	    },
+	    2);
+	config_raw->camera_pivot = ui_combo(h_camera_pivot, camera_pivot_combo, tr("Default Camera Pivot"), true, UI_ALIGN_LEFT, true);
+
 	ui_handle_t *h_camera_controls          = ui_handle(__ID__);
 	h_camera_controls->i                    = config_raw->camera_controls;
 	string_t_array_t *camera_controls_combo = any_array_create_from_raw(

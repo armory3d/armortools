@@ -92,6 +92,7 @@ void config_save() {
 	else {
 		json_encode_null("layout_tabs");
 	}
+	json_encode_i32("camera_pivot", config_raw->camera_pivot);
 	json_encode_i32("camera_controls", config_raw->camera_controls);
 	json_encode_string("server", config_raw->server);
 	json_encode_i32("viewport_mode", config_raw->viewport_mode);
@@ -207,6 +208,7 @@ void config_init() {
 		config_raw->zoom_direction     = ZOOM_DIRECTION_VERTICAL;
 		config_raw->displace_strength  = 0.0;
 		config_raw->wrap_mouse         = false;
+		config_raw->camera_pivot       = CAMERA_PIVOT_CURSOR;
 		config_raw->camera_controls    = CAMERA_CONTROLS_ORBIT;
 		config_raw->layer_res          = TEXTURE_RES_RES2048;
 #if defined(IRON_ANDROID) || defined(IRON_IOS)

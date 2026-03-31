@@ -761,10 +761,10 @@ void ui_menubar_draw_category_items() {
 		ui_handle_t      *h                  = ui_handle(__ID__);
 		string_t_array_t *pivot_center_items = any_array_create_from_raw(
 		    (void *[]){
-		        tr("Camera Center"), // tr("Paint Stroke")
+		        tr("Cursor"), tr("Center"),
 		    },
-		    1);
-		ui_inline_radio(h, pivot_center_items, UI_ALIGN_LEFT);
+		    2);
+		context_raw->camera_pivot = ui_inline_radio(h, pivot_center_items, UI_ALIGN_LEFT);
 
 		ui_menu_separator();
 		ui_menu_align();
