@@ -39,7 +39,7 @@ ui_node_t *neural_from_node(ui_node_socket_t *inp, i32 socket) {
 }
 
 void neural_node_button_on_next_frame(void *_) {
-	box_preferences_htab->i = PREFERENCE_TAB_NEURAL;
+	box_preferences_htab->i = PREFERENCES_TAB_NEURAL;
 	box_preferences_show();
 }
 

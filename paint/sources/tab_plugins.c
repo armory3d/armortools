@@ -14,7 +14,7 @@ void tab_plugins_draw(ui_handle_t *htab) {
 		ui_row(row);
 
 		if (ui_icon_button(tr("Preferences"), ICON_COG, UI_ALIGN_CENTER)) {
-			box_preferences_htab->i = PREFERENCE_TAB_PLUGINS;
+			box_preferences_htab->i = PREFERENCES_TAB_PLUGINS;
 			box_preferences_show();
 		}
 		ui_end_sticky();

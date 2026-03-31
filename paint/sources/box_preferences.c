@@ -338,61 +338,6 @@ void box_preferences_usage_tab() {
 		ui_tooltip(tr("Dilate painted textures to prevent seams"));
 	}
 
-	ui_handle_t *h_camera_pivot          = ui_handle(__ID__);
-	h_camera_pivot->i                    = config_raw->camera_pivot;
-	string_t_array_t *camera_pivot_combo = any_array_create_from_raw(
-	    (void *[]){
-	        tr("Cursor"),
-	        tr("Center"),
-	    },
-	    2);
-	config_raw->camera_pivot = ui_combo(h_camera_pivot, camera_pivot_combo, tr("Default Camera Pivot"), true, UI_ALIGN_LEFT, true);
-
-	ui_handle_t *h_camera_controls          = ui_handle(__ID__);
-	h_camera_controls->i                    = config_raw->camera_controls;
-	string_t_array_t *camera_controls_combo = any_array_create_from_raw(
-	    (void *[]){
-	        tr("Orbit"),
-	        tr("Rotate"),
-	        tr("Fly"),
-	    },
-	    3);
-	config_raw->camera_controls = ui_combo(h_camera_controls, camera_controls_combo, tr("Default Camera Controls"), true, UI_ALIGN_LEFT, true);
-
-	ui_handle_t *h_fov     = ui_handle(__ID__);
-	h_fov->f               = config_raw->camera_fov;
-	config_raw->camera_fov = ui_slider(h_fov, tr("Default Camera FoV"), 0.3, 1.4, true, 100.0, true, UI_ALIGN_RIGHT, true);
-
-	ui_handle_t *h_speed          = ui_handle(__ID__);
-	h_speed->f                    = config_raw->camera_zoom_speed;
-	config_raw->camera_zoom_speed = ui_slider(h_speed, tr("Camera Zoom Speed"), 0.1, 4.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
-
-	h_speed                           = ui_handle(__ID__);
-	h_speed->f                        = config_raw->camera_rotation_speed;
-	config_raw->camera_rotation_speed = ui_slider(h_speed, tr("Camera Rotation Speed"), 0.1, 4.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
-
-	h_speed                      = ui_handle(__ID__);
-	h_speed->f                   = config_raw->camera_pan_speed;
-	config_raw->camera_pan_speed = ui_slider(h_speed, tr("Camera Pan Speed"), 0.1, 4.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
-
-	ui_handle_t *h_upside_down     = ui_handle(__ID__);
-	h_upside_down->b               = config_raw->camera_upside_down;
-	config_raw->camera_upside_down = ui_check(h_upside_down, tr("Allow Upside Down Camera"), "");
-
-	ui_handle_t *h_zoom_direction          = ui_handle(__ID__);
-	h_zoom_direction->i                    = config_raw->zoom_direction;
-	string_t_array_t *zoom_direction_combo = any_array_create_from_raw(
-	    (void *[]){
-	        tr("Vertical"),
-	        tr("Vertical Inverted"),
-	        tr("Horizontal"),
-	        tr("Horizontal Inverted"),
-	        tr("Vertical and Horizontal"),
-	        tr("Vertical and Horizontal Inverted"),
-	    },
-	    6);
-	config_raw->zoom_direction = ui_combo(h_zoom_direction, zoom_direction_combo, tr("Direction to Zoom"), true, UI_ALIGN_LEFT, true);
-
 	ui_handle_t *h_layer_res = ui_handle(__ID__);
 	h_layer_res->i           = config_raw->layer_res;
 #if defined(IRON_ANDROID) || defined(IRON_IOS)
@@ -484,6 +429,63 @@ void box_preferences_usage_tab() {
 	}
 }
 
+void box_preferences_camera_tab() {
+	ui_handle_t *h_camera_pivot          = ui_handle(__ID__);
+	h_camera_pivot->i                    = config_raw->camera_pivot;
+	string_t_array_t *camera_pivot_combo = any_array_create_from_raw(
+	    (void *[]){
+	        tr("Cursor"),
+	        tr("Center"),
+	    },
+	    2);
+	config_raw->camera_pivot = ui_combo(h_camera_pivot, camera_pivot_combo, tr("Default Camera Pivot"), true, UI_ALIGN_LEFT, true);
+
+	ui_handle_t *h_camera_controls          = ui_handle(__ID__);
+	h_camera_controls->i                    = config_raw->camera_controls;
+	string_t_array_t *camera_controls_combo = any_array_create_from_raw(
+	    (void *[]){
+	        tr("Orbit"),
+	        tr("Rotate"),
+	        tr("Fly"),
+	    },
+	    3);
+	config_raw->camera_controls = ui_combo(h_camera_controls, camera_controls_combo, tr("Default Camera Controls"), true, UI_ALIGN_LEFT, true);
+
+	ui_handle_t *h_fov     = ui_handle(__ID__);
+	h_fov->f               = config_raw->camera_fov;
+	config_raw->camera_fov = ui_slider(h_fov, tr("Default Camera FoV"), 0.3, 1.4, true, 100.0, true, UI_ALIGN_RIGHT, true);
+
+	ui_handle_t *h_speed          = ui_handle(__ID__);
+	h_speed->f                    = config_raw->camera_zoom_speed;
+	config_raw->camera_zoom_speed = ui_slider(h_speed, tr("Camera Zoom Speed"), 0.1, 4.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
+
+	h_speed                           = ui_handle(__ID__);
+	h_speed->f                        = config_raw->camera_rotation_speed;
+	config_raw->camera_rotation_speed = ui_slider(h_speed, tr("Camera Rotation Speed"), 0.1, 4.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
+
+	h_speed                      = ui_handle(__ID__);
+	h_speed->f                   = config_raw->camera_pan_speed;
+	config_raw->camera_pan_speed = ui_slider(h_speed, tr("Camera Pan Speed"), 0.1, 4.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
+
+	ui_handle_t *h_zoom_direction          = ui_handle(__ID__);
+	h_zoom_direction->i                    = config_raw->zoom_direction;
+	string_t_array_t *zoom_direction_combo = any_array_create_from_raw(
+	    (void *[]){
+	        tr("Vertical"),
+	        tr("Vertical Inverted"),
+	        tr("Horizontal"),
+	        tr("Horizontal Inverted"),
+	        tr("Vertical and Horizontal"),
+	        tr("Vertical and Horizontal Inverted"),
+	    },
+	    6);
+	config_raw->zoom_direction = ui_combo(h_zoom_direction, zoom_direction_combo, tr("Direction to Zoom"), true, UI_ALIGN_LEFT, true);
+
+	ui_handle_t *h_upside_down     = ui_handle(__ID__);
+	h_upside_down->b               = config_raw->camera_upside_down;
+	config_raw->camera_upside_down = ui_check(h_upside_down, tr("Allow Upside Down Camera"), "");
+}
+
 void box_preferences_pen_tab() {
 	ui_text(tr("Pressure controls"), UI_ALIGN_LEFT, 0x00000000);
 	ui_handle_t *h_pressure_radius = ui_handle(__ID__);
@@ -514,10 +516,7 @@ void box_preferences_pen_tab() {
 	    1);
 	ui_row(row);
 	if (ui_icon_button(tr("Help"), ICON_LINK, UI_ALIGN_CENTER)) {
-		char *url  = "https://github.com/armory3d/";
-		char *name = to_lower_case(manifest_title);
-		url        = string("%s%s_docs#pen", url, name);
-		iron_load_url(url);
+		iron_load_url("https://armorpaint.org/manual#pen");
 	}
 }
 
@@ -977,6 +976,9 @@ void box_preferences_show_box() {
 	}
 	if (ui_tab(box_preferences_htab, tr("Usage"), true, -1, false)) {
 		box_preferences_usage_tab();
+	}
+	if (ui_tab(box_preferences_htab, tr("Camera"), true, -1, false)) {
+		box_preferences_camera_tab();
 	}
 
 #ifdef IRON_IOS
