@@ -1,36 +1,238 @@
 
 #include "global.h"
 
+static bool camera_wrap_mouse() {
+	if (mouse_view_x() < 0 || mouse_view_x() > sys_w() || mouse_view_y() < 0 || mouse_view_y() > sys_h()) {
+		if (!config_raw->wrap_mouse || !camera_controls_down) {
+			return false;
+		}
+		if (mouse_view_x() < 0) {
+			mouse_x = mouse_last_x = sys_x() + sys_w();
+			iron_mouse_set_position(math_floor(mouse_x), math_floor(mouse_y));
+		}
+		else if (mouse_view_x() > sys_w()) {
+			mouse_x = mouse_last_x = sys_x();
+			iron_mouse_set_position(math_floor(mouse_x), math_floor(mouse_y));
+		}
+		else if (mouse_view_y() < 0) {
+			mouse_y = mouse_last_y = sys_y() + sys_h();
+			iron_mouse_set_position(math_floor(mouse_x), math_floor(mouse_y));
+		}
+		else if (mouse_view_y() > sys_h()) {
+			mouse_y = mouse_last_y = sys_y();
+			iron_mouse_set_position(math_floor(mouse_x), math_floor(mouse_y));
+		}
+	}
+	return true;
+}
+
+static void camera_orbit_action(bool modif, bool default_keymap) {
+	camera_object_t *camera = scene_camera;
+	camera_redraws          = 2;
+
+	if (context_raw->camera_pivot == CAMERA_PIVOT_CURSOR) {
+		static f32  pivot_x     = 0;
+		static f32  pivot_y     = 0;
+		static f32  pivot_z     = 0;
+		static bool pivot_valid = false;
+
+		bool rotate_started =
+		    operator_shortcut(any_map_get(config_keymap, "action_rotate"), SHORTCUT_TYPE_STARTED) || (mouse_started("right") && !modif && default_keymap);
+		if (rotate_started) {
+			util_render_pick_pos_nor_tex();
+			pivot_valid = math_abs(context_raw->posx_picked) < 50 && math_abs(context_raw->posy_picked) < 50 && math_abs(context_raw->posz_picked) < 50;
+			if (pivot_valid) {
+				pivot_x = context_raw->posx_picked;
+				pivot_y = context_raw->posy_picked;
+				pivot_z = context_raw->posz_picked;
+			}
+		}
+
+		if (pivot_valid) {
+			f32 angle_x = -mouse_movement_x / 100.0 * config_raw->camera_rotation_speed;
+			f32 angle_y = -mouse_movement_y / 100.0 * config_raw->camera_rotation_speed;
+
+			transform_rotate(camera->base->transform, vec4_z_axis(), angle_x);
+			vec4_t right = camera_object_right_world(camera);
+			transform_rotate(camera->base->transform, right, angle_y);
+			vec4_t up_world = camera_object_up_world(camera);
+			if (up_world.z < 0 && !config_raw->camera_upside_down) {
+				transform_rotate(camera->base->transform, right, -angle_y);
+				angle_y = 0.0;
+			}
+
+			vec4_t offset =
+			    vec4_create(camera->base->transform->loc.x - pivot_x, camera->base->transform->loc.y - pivot_y, camera->base->transform->loc.z - pivot_z, 0.0);
+			quat_t q_x                     = quat_from_axis_angle(vec4_z_axis(), angle_x);
+			quat_t q_y                     = quat_from_axis_angle(right, angle_y);
+			offset                         = vec4_apply_quat(offset, q_x);
+			offset                         = vec4_apply_quat(offset, q_y);
+			camera->base->transform->loc.x = pivot_x + offset.x;
+			camera->base->transform->loc.y = pivot_y + offset.y;
+			camera->base->transform->loc.z = pivot_z + offset.z;
+			camera_object_build_mat(camera);
+			return;
+		}
+	}
+
+	f32 dist = camera_distance();
+	transform_move(camera->base->transform, camera_object_look_world(camera), dist);
+	transform_rotate(camera->base->transform, vec4_z_axis(), -mouse_movement_x / 100.0 * config_raw->camera_rotation_speed);
+	transform_rotate(camera->base->transform, camera_object_right_world(camera), -mouse_movement_y / 100.0 * config_raw->camera_rotation_speed);
+	vec4_t up_world = camera_object_up_world(camera);
+	if (up_world.z < 0 && !config_raw->camera_upside_down) {
+		transform_rotate(camera->base->transform, camera_object_right_world(camera), mouse_movement_y / 100.0 * config_raw->camera_rotation_speed);
+	}
+	transform_move(camera->base->transform, camera_object_look_world(camera), -dist);
+}
+
+static void camera_rotate_action(bool modif, bool default_keymap) {
+	camera_object_t *camera = scene_camera;
+	camera_redraws          = 2;
+	transform_t *t          = context_main_object()->base->transform;
+	vec4_t       up         = transform_up(t);
+
+	if (context_raw->camera_pivot == CAMERA_PIVOT_CURSOR) {
+		static f32  pivot_x     = 0;
+		static f32  pivot_y     = 0;
+		static f32  pivot_z     = 0;
+		static bool pivot_valid = false;
+
+		bool rotate_started =
+		    operator_shortcut(any_map_get(config_keymap, "action_rotate"), SHORTCUT_TYPE_STARTED) || (mouse_started("right") && !modif && default_keymap);
+		if (rotate_started) {
+			util_render_pick_pos_nor_tex();
+			pivot_valid = math_abs(context_raw->posx_picked) < 50 && math_abs(context_raw->posy_picked) < 50 && math_abs(context_raw->posz_picked) < 50;
+			if (pivot_valid) {
+				pivot_x = context_raw->posx_picked;
+				pivot_y = context_raw->posy_picked;
+				pivot_z = context_raw->posz_picked;
+			}
+		}
+
+		if (pivot_valid) {
+			f32    angle_x = (mouse_movement_x / 120.0) * config_raw->camera_rotation_speed;
+			f32    angle_y = (mouse_movement_y / 120.0) * config_raw->camera_rotation_speed;
+			vec4_t right   = camera_object_right_world(camera);
+
+			transform_rotate(t, up, angle_x);
+			transform_rotate(t, right, angle_y);
+			transform_build_matrix(t);
+			vec4_t tup = transform_up(t);
+			if (tup.z < 0 && !config_raw->camera_upside_down) {
+				transform_rotate(t, right, -angle_y);
+				angle_y = 0.0;
+			}
+
+			vec4_t offset = vec4_create(t->loc.x - pivot_x, t->loc.y - pivot_y, t->loc.z - pivot_z, 0.0);
+			quat_t q_x    = quat_from_axis_angle(up, angle_x);
+			quat_t q_y    = quat_from_axis_angle(right, angle_y);
+			offset        = vec4_apply_quat(offset, q_x);
+			offset        = vec4_apply_quat(offset, q_y);
+			t->loc.x      = pivot_x + offset.x;
+			t->loc.y      = pivot_y + offset.y;
+			t->loc.z      = pivot_z + offset.z;
+			transform_build_matrix(t);
+			return;
+		}
+	}
+
+	transform_rotate(t, up, (mouse_movement_x / 120.0) * config_raw->camera_rotation_speed);
+	vec4_t right = camera_object_right_world(camera);
+	transform_rotate(t, right, (mouse_movement_y / 120.0) * config_raw->camera_rotation_speed);
+	transform_build_matrix(t);
+	vec4_t tup = transform_up(t);
+	if (tup.z < 0 && !config_raw->camera_upside_down) {
+		transform_rotate(t, right, -(mouse_movement_y / 120.0) * config_raw->camera_rotation_speed);
+	}
+}
+
+static void camera_zoom_action(bool modif_key) {
+	camera_object_t *camera = scene_camera;
+
+	if (operator_shortcut(any_map_get(config_keymap, "action_zoom"), SHORTCUT_TYPE_DOWN)) {
+		camera_redraws = 2;
+		f32 f          = camera_get_zoom_delta() / (float)(150.0 * (1.0 / (camera_distance() / 2.0)));
+		f *= camera_get_zoom_speed();
+		transform_move(camera->base->transform, camera_object_look(camera), f);
+	}
+
+	if (mouse_wheel_delta != 0 && !modif_key) {
+		camera_redraws = 2;
+		f32 f          = mouse_wheel_delta * (-0.2) * ((camera_distance() / 4.0));
+		f *= camera_get_zoom_speed();
+		transform_move(camera->base->transform, camera_object_look(camera), f);
+	}
+}
+
+static void camera_fly_action(bool modif_key) {
+	camera_object_t *camera = scene_camera;
+
+	bool move_forward  = keyboard_down("w") || keyboard_down("up") || mouse_wheel_delta < 0;
+	bool move_backward = keyboard_down("s") || keyboard_down("down") || mouse_wheel_delta > 0;
+	bool strafe_left   = keyboard_down("a") || keyboard_down("left");
+	bool strafe_right  = keyboard_down("d") || keyboard_down("right");
+	bool strafe_up     = keyboard_down("e");
+	bool strafe_down   = keyboard_down("q");
+	f32  fast          = keyboard_down("shift") ? 2.0 : (keyboard_down("alt") ? 0.5 : 1.0);
+	if (mouse_wheel_delta != 0) {
+		fast *= math_abs(mouse_wheel_delta) * 4.0;
+	}
+
+	if (move_forward || move_backward || strafe_right || strafe_left || strafe_up || strafe_down) {
+		camera_ease += sys_delta() * 15;
+		if (camera_ease > 1.0) {
+			camera_ease = 1.0;
+		}
+		camera_dir   = vec4_create(0, 0, 0, 1.0);
+		vec4_t look  = camera_object_look(camera);
+		vec4_t right = camera_object_right(camera);
+		if (move_forward) {
+			camera_dir = vec4_fadd(camera_dir, look.x, look.y, look.z, 0.0);
+		}
+		if (move_backward) {
+			camera_dir = vec4_fadd(camera_dir, -look.x, -look.y, -look.z, 0.0);
+		}
+		if (strafe_right) {
+			camera_dir = vec4_fadd(camera_dir, right.x, right.y, right.z, 0.0);
+		}
+		if (strafe_left) {
+			camera_dir = vec4_fadd(camera_dir, -right.x, -right.y, -right.z, 0.0);
+		}
+		if (strafe_up) {
+			camera_dir = vec4_fadd(camera_dir, 0, 0, 1, 0.0);
+		}
+		if (strafe_down) {
+			camera_dir = vec4_fadd(camera_dir, 0, 0, -1, 0.0);
+		}
+	}
+	else {
+		camera_ease -= sys_delta() * 20.0 * camera_ease;
+		if (camera_ease < 0.0) {
+			camera_ease = 0.0;
+		}
+	}
+
+	f32 d = sys_delta() * fast * camera_ease * 2.0 * ((move_forward || move_backward) ? config_raw->camera_zoom_speed : config_raw->camera_pan_speed);
+	if (d > 0.0) {
+		transform_move(camera->base->transform, camera_dir, d);
+		if (context_raw->camera_type == CAMERA_TYPE_ORTHOGRAPHIC) {
+			viewport_update_camera_type(context_raw->camera_type);
+		}
+	}
+
+	camera_redraws = 2;
+	transform_rotate(camera->base->transform, vec4_z_axis(), -mouse_movement_x / 200.0 * config_raw->camera_rotation_speed);
+	transform_rotate(camera->base->transform, camera_object_right(camera), -mouse_movement_y / 200.0 * config_raw->camera_rotation_speed);
+}
+
 void camera_init() {
 	camera_reset(-1);
 }
 
-void camera_update(void * _) {
-	camera_object_t *camera = scene_camera;
-
-	if (mouse_view_x() < 0 || mouse_view_x() > sys_w() || mouse_view_y() < 0 || mouse_view_y() > sys_h()) {
-
-		if (config_raw->wrap_mouse && camera_controls_down) {
-			if (mouse_view_x() < 0) {
-				mouse_x = mouse_last_x = sys_x() + sys_w();
-				iron_mouse_set_position(math_floor(mouse_x), math_floor(mouse_y));
-			}
-			else if (mouse_view_x() > sys_w()) {
-				mouse_x = mouse_last_x = sys_x();
-				iron_mouse_set_position(math_floor(mouse_x), math_floor(mouse_y));
-			}
-			else if (mouse_view_y() < 0) {
-				mouse_y = mouse_last_y = sys_y() + sys_h();
-				iron_mouse_set_position(math_floor(mouse_x), math_floor(mouse_y));
-			}
-			else if (mouse_view_y() > sys_h()) {
-				mouse_y = mouse_last_y = sys_y();
-				iron_mouse_set_position(math_floor(mouse_x), math_floor(mouse_y));
-			}
-		}
-		else {
-			return;
-		}
+void camera_update(void *_) {
+	if (!camera_wrap_mouse()) {
+		return;
 	}
 
 	bool modif_key      = keyboard_down("alt") || keyboard_down("shift") || keyboard_down("control");
@@ -57,108 +259,22 @@ void camera_update(void * _) {
 	}
 
 	camera_controls_t controls = context_raw->camera_controls;
+
 	if (controls == CAMERA_CONTROLS_ORBIT &&
 	    (operator_shortcut(any_map_get(config_keymap, "action_rotate"), SHORTCUT_TYPE_DOWN) || (mouse_down("right") && !modif && default_keymap))) {
-		camera_redraws = 2;
-		f32 dist       = camera_distance();
-		transform_move(camera->base->transform, camera_object_look_world(camera), dist);
-		transform_rotate(camera->base->transform, vec4_z_axis(), -mouse_movement_x / 100.0 * config_raw->camera_rotation_speed);
-		transform_rotate(camera->base->transform, camera_object_right_world(camera), -mouse_movement_y / 100.0 * config_raw->camera_rotation_speed);
-		vec4_t up_world = camera_object_up_world(camera);
-		if (up_world.z < 0 && !config_raw->camera_upside_down) {
-			transform_rotate(camera->base->transform, camera_object_right_world(camera), mouse_movement_y / 100.0 * config_raw->camera_rotation_speed);
-		}
-		transform_move(camera->base->transform, camera_object_look_world(camera), -dist);
+		camera_orbit_action(modif, default_keymap);
 	}
 	else if (controls == CAMERA_CONTROLS_ROTATE &&
 	         (operator_shortcut(any_map_get(config_keymap, "action_rotate"), SHORTCUT_TYPE_DOWN) || (mouse_down("right") && !modif && default_keymap))) {
-		camera_redraws  = 2;
-		transform_t *t  = context_main_object()->base->transform;
-		vec4_t       up = transform_up(t);
-		transform_rotate(t, up, (mouse_movement_x / 120.0) * config_raw->camera_rotation_speed);
-		vec4_t right = camera_object_right_world(camera);
-		transform_rotate(t, right, (mouse_movement_y / 120.0) * config_raw->camera_rotation_speed);
-		transform_build_matrix(t);
-		vec4_t tup = transform_up(t);
-		if (tup.z < 0 && !config_raw->camera_upside_down) {
-			transform_rotate(t, right, -(mouse_movement_y / 120.0) * config_raw->camera_rotation_speed);
-		}
+		camera_rotate_action(modif, default_keymap);
 	}
 
 	if (controls == CAMERA_CONTROLS_ROTATE || controls == CAMERA_CONTROLS_ORBIT) {
 		camera_pan_action(modif, default_keymap);
-
-		if (operator_shortcut(any_map_get(config_keymap, "action_zoom"), SHORTCUT_TYPE_DOWN)) {
-			camera_redraws = 2;
-			f32 f          = camera_get_zoom_delta() / (float)(150.0 * (1.0 / (camera_distance() / 2.0)));
-			f *= camera_get_zoom_speed();
-			transform_move(camera->base->transform, camera_object_look(camera), f);
-		}
-
-		if (mouse_wheel_delta != 0 && !modif_key) {
-			camera_redraws = 2;
-			f32 f          = mouse_wheel_delta * (-0.2) * ((camera_distance() / 4.0));
-			f *= camera_get_zoom_speed();
-			transform_move(camera->base->transform, camera_object_look(camera), f);
-		}
+		camera_zoom_action(modif_key);
 	}
 	else if (controls == CAMERA_CONTROLS_FLY && mouse_down("right")) {
-		bool move_forward  = keyboard_down("w") || keyboard_down("up") || mouse_wheel_delta < 0;
-		bool move_backward = keyboard_down("s") || keyboard_down("down") || mouse_wheel_delta > 0;
-		bool strafe_left   = keyboard_down("a") || keyboard_down("left");
-		bool strafe_right  = keyboard_down("d") || keyboard_down("right");
-		bool strafe_up     = keyboard_down("e");
-		bool strafe_down   = keyboard_down("q");
-		f32  fast          = keyboard_down("shift") ? 2.0 : (keyboard_down("alt") ? 0.5 : 1.0);
-		if (mouse_wheel_delta != 0) {
-			fast *= math_abs(mouse_wheel_delta) * 4.0;
-		}
-
-		if (move_forward || move_backward || strafe_right || strafe_left || strafe_up || strafe_down) {
-			camera_ease += sys_delta() * 15;
-			if (camera_ease > 1.0) {
-				camera_ease = 1.0;
-			}
-			camera_dir   = vec4_create(0, 0, 0, 1.0);
-			vec4_t look  = camera_object_look(camera);
-			vec4_t right = camera_object_right(camera);
-			if (move_forward) {
-				camera_dir = vec4_fadd(camera_dir, look.x, look.y, look.z, 0.0);
-			}
-			if (move_backward) {
-				camera_dir = vec4_fadd(camera_dir, -look.x, -look.y, -look.z, 0.0);
-			}
-			if (strafe_right) {
-				camera_dir = vec4_fadd(camera_dir, right.x, right.y, right.z, 0.0);
-			}
-			if (strafe_left) {
-				camera_dir = vec4_fadd(camera_dir, -right.x, -right.y, -right.z, 0.0);
-			}
-			if (strafe_up) {
-				camera_dir = vec4_fadd(camera_dir, 0, 0, 1, 0.0);
-			}
-			if (strafe_down) {
-				camera_dir = vec4_fadd(camera_dir, 0, 0, -1, 0.0);
-			}
-		}
-		else {
-			camera_ease -= sys_delta() * 20.0 * camera_ease;
-			if (camera_ease < 0.0) {
-				camera_ease = 0.0;
-			}
-		}
-
-		f32 d = sys_delta() * fast * camera_ease * 2.0 * ((move_forward || move_backward) ? config_raw->camera_zoom_speed : config_raw->camera_pan_speed);
-		if (d > 0.0) {
-			transform_move(camera->base->transform, camera_dir, d);
-			if (context_raw->camera_type == CAMERA_TYPE_ORTHOGRAPHIC) {
-				viewport_update_camera_type(context_raw->camera_type);
-			}
-		}
-
-		camera_redraws = 2;
-		transform_rotate(camera->base->transform, vec4_z_axis(), -mouse_movement_x / 200.0 * config_raw->camera_rotation_speed);
-		transform_rotate(camera->base->transform, camera_object_right(camera), -mouse_movement_y / 200.0 * config_raw->camera_rotation_speed);
+		camera_fly_action(modif_key);
 	}
 
 	if (operator_shortcut(any_map_get(config_keymap, "view_pivot_center"), SHORTCUT_TYPE_STARTED)) {
@@ -228,7 +344,7 @@ void camera_reset(i32 view_index) {
 		camera_views->buffer[view_index]->v   = mat4_clone(camera->base->transform->local);
 	}
 
-	#ifdef IRON_IOS
+#ifdef IRON_IOS
 	if (config_is_iphone()) {
 		viewport_zoom(-2.8);
 		vec4_t right                              = vec4_mult(transform_right(camera->base->transform), -0.135);
@@ -236,7 +352,7 @@ void camera_reset(i32 view_index) {
 		camera_origins->buffer[camera_index()]->v = vec4_add(camera_origins->buffer[camera_index()]->v, right);
 		camera_object_build_mat(camera);
 	}
-	#endif
+#endif
 }
 
 void camera_pan_action(bool modif, bool default_keymap) {
@@ -269,10 +385,10 @@ void camera_set_pivot_center_to_mouse() {
 		return;
 	}
 
-	vec4_box_t *o                  = camera_origins->buffer[camera_index()];
-	o->v.x                         = context_raw->posx_picked;
-	o->v.y                         = context_raw->posy_picked;
-	o->v.z                         = context_raw->posz_picked;
+	vec4_box_t *o = camera_origins->buffer[camera_index()];
+	o->v.x        = context_raw->posx_picked;
+	o->v.y        = context_raw->posy_picked;
+	o->v.z        = context_raw->posz_picked;
 
 	camera_redraws                 = 2;
 	camera_object_t *camera        = scene_camera;
