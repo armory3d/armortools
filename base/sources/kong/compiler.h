@@ -16,7 +16,7 @@ typedef struct variable {
 
 typedef enum access_kind { ACCESS_MEMBER, ACCESS_ELEMENT, ACCESS_SWIZZLE } access_kind;
 
-typedef struct access {
+typedef struct kong_access {
 	access_kind kind;
 	type_id     type;
 
@@ -33,7 +33,7 @@ typedef struct access {
 			swizzle swizzle;
 		} access_swizzle;
 	};
-} access;
+} kong_access;
 
 typedef struct opcode {
 	enum {
@@ -105,7 +105,7 @@ typedef struct opcode {
 			variable from;
 			variable to;
 
-			access  access_list[64];
+			kong_access  access_list[64];
 			uint8_t access_list_size;
 		} op_store_access_list;
 		struct {
@@ -124,7 +124,7 @@ typedef struct opcode {
 			variable from;
 			variable to;
 
-			access  access_list[64];
+			kong_access  access_list[64];
 			uint8_t access_list_size;
 		} op_load_access_list;
 		struct {

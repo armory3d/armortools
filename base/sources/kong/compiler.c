@@ -299,11 +299,11 @@ variable emit_expression(opcodes *code, block *parent, expression *e) {
 
 				expression *of = left;
 
-				access   access_list[64];
+				kong_access   access_list[64];
 				uint32_t access_list_size = 0;
 
 				while (of->kind == EXPRESSION_ELEMENT || of->kind == EXPRESSION_MEMBER || of->kind == EXPRESSION_SWIZZLE) {
-					access *a = &access_list[access_list_size];
+					kong_access *a = &access_list[access_list_size];
 					a->type   = of->type.type;
 
 					switch (of->kind) {
@@ -512,11 +512,11 @@ variable emit_expression(opcodes *code, block *parent, expression *e) {
 
 		expression *of = e;
 
-		access   access_list[64];
+		kong_access   access_list[64];
 		uint32_t access_list_size = 0;
 
 		while (of->kind == EXPRESSION_ELEMENT || of->kind == EXPRESSION_MEMBER || of->kind == EXPRESSION_SWIZZLE) {
-			access *a = &access_list[access_list_size];
+			kong_access *a = &access_list[access_list_size];
 			a->type   = of->type.type;
 
 			switch (of->kind) {

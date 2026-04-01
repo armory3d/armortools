@@ -38,7 +38,7 @@ void transform(uint32_t flags) {
 
 			switch (o->type) {
 			case OPCODE_STORE_ACCESS_LIST: {
-				access a = o->op_store_access_list.access_list[o->op_store_access_list.access_list_size - 1];
+				kong_access a = o->op_store_access_list.access_list[o->op_store_access_list.access_list_size - 1];
 
 				if ((flags & TRANSFORM_FLAG_ONE_COMPONENT_SWIZZLE) != 0 && a.kind == ACCESS_SWIZZLE && a.access_swizzle.swizzle.size > 1) {
 					assert(is_vector(o->op_store_access_list.from.type.type));
@@ -81,7 +81,7 @@ void transform(uint32_t flags) {
 
 						new_opcode.op_store_access_list.from = from;
 
-						access *new_access = &new_opcode.op_store_access_list.access_list[new_opcode.op_store_access_list.access_list_size - 1];
+						kong_access *new_access = &new_opcode.op_store_access_list.access_list[new_opcode.op_store_access_list.access_list_size - 1];
 						new_access->access_swizzle.swizzle.size       = 1;
 						new_access->access_swizzle.swizzle.indices[0] = a.access_swizzle.swizzle.indices[swizzle_index];
 						new_access->type                              = from_base_type;
@@ -95,7 +95,7 @@ void transform(uint32_t flags) {
 				break;
 			}
 			case OPCODE_LOAD_ACCESS_LIST: {
-				access a = o->op_load_access_list.access_list[o->op_load_access_list.access_list_size - 1];
+				kong_access a = o->op_load_access_list.access_list[o->op_load_access_list.access_list_size - 1];
 
 				if ((flags & TRANSFORM_FLAG_ONE_COMPONENT_SWIZZLE) != 0 && a.kind == ACCESS_SWIZZLE && a.access_swizzle.swizzle.size > 1) {
 					assert(is_vector(o->op_load_access_list.to.type.type));
@@ -115,7 +115,7 @@ void transform(uint32_t flags) {
 
 						new_opcode.op_load_access_list.to = to[swizzle_index];
 
-						access *new_access = &new_opcode.op_load_access_list.access_list[new_opcode.op_load_access_list.access_list_size - 1];
+						kong_access *new_access = &new_opcode.op_load_access_list.access_list[new_opcode.op_load_access_list.access_list_size - 1];
 						new_access->access_swizzle.swizzle.size       = 1;
 						new_access->access_swizzle.swizzle.indices[0] = a.access_swizzle.swizzle.indices[swizzle_index];
 						new_access->type                              = to_type;
