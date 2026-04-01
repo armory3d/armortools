@@ -10,7 +10,7 @@
 
 // Cosine of 66 degrees - angle threshold for chart grouping
 #define UV_ANGLE_THRESHOLD 0.4067f
-#define UV_PACK_MARGIN     0.005f
+#define UV_PACK_MARGIN     0.001f
 
 // Position hash map entry for canonical vertex deduplication
 typedef struct {
