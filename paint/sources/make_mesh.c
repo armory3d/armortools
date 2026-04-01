@@ -1,6 +1,80 @@
 
 #include "global.h"
 
+char *str_sh_irradiance    = "\
+fun sh_irradiance(nor: float3): float3 { \
+	var c1: float = 0.429043; \
+	var c2: float = 0.511664; \
+	var c3: float = 0.743125; \
+	var c4: float = 0.886227; \
+	var c5: float = 0.247708; \
+	var cl00: float3 = float3(constants.shirr0.x, constants.shirr0.y, constants.shirr0.z); \
+	var cl1m1: float3 = float3(constants.shirr0.w, constants.shirr1.x, constants.shirr1.y); \
+	var cl10: float3 = float3(constants.shirr1.z, constants.shirr1.w, constants.shirr2.x); \
+	var cl11: float3 = float3(constants.shirr2.y, constants.shirr2.z, constants.shirr2.w); \
+	var cl2m2: float3 = float3(constants.shirr3.x, constants.shirr3.y, constants.shirr3.z); \
+	var cl2m1: float3 = float3(constants.shirr3.w, constants.shirr4.x, constants.shirr4.y); \
+	var cl20: float3 = float3(constants.shirr4.z, constants.shirr4.w, constants.shirr5.x); \
+	var cl21: float3 = float3(constants.shirr5.y, constants.shirr5.z, constants.shirr5.w); \
+	var cl22: float3 = float3(constants.shirr6.x, constants.shirr6.y, constants.shirr6.z); \
+	return ( \
+		cl22 * c1 * (nor.y * nor.y - (-nor.z) * (-nor.z)) + \
+		cl20 * c3 * nor.x * nor.x + \
+		cl00 * c4 - \
+		cl20 * c5 + \
+		cl2m2 * 2.0 * c1 * nor.y * (-nor.z) + \
+		cl21  * 2.0 * c1 * nor.y * nor.x + \
+		cl2m1 * 2.0 * c1 * (-nor.z) * nor.x + \
+		cl11  * 2.0 * c2 * nor.y + \
+		cl1m1 * 2.0 * c2 * (-nor.z) + \
+		cl10  * 2.0 * c2 * nor.x \
+	); \
+} \
+";
+
+char *str_envmap_equirect  = "\
+fun envmap_equirect(normal: float3, angle: float): float2 { \
+	var PI: float = 3.1415926535; \
+	var PI2: float = PI * 2.0; \
+	var phi: float = acos(normal.z); \
+	var theta: float = atan2(-normal.y, normal.x) + PI + angle; \
+	return float2(theta / PI2, phi / PI); \
+} \
+";
+
+char *str_envmap_sample    = "\
+fun envmap_sample(lod: float, coord: float2): float3 { \
+	if (lod == 0.0) { \
+		return sample_lod(senvmap_radiance, sampler_linear, coord, 0.0).rgb; \
+	} \
+	if (lod == 1.0) { \
+		return sample_lod(senvmap_radiance0, sampler_linear, coord, 0.0).rgb; \
+	} \
+	if (lod == 2.0) { \
+		return sample_lod(senvmap_radiance1, sampler_linear, coord, 0.0).rgb; \
+	} \
+	if (lod == 3.0) { \
+		return sample_lod(senvmap_radiance2, sampler_linear, coord, 0.0).rgb; \
+	} \
+	if (lod == 4.0) { \
+		return sample_lod(senvmap_radiance3, sampler_linear, coord, 0.0).rgb; \
+	} \
+	return sample_lod(senvmap_radiance4, sampler_linear, coord, 0.0).rgb; \
+} \
+";
+
+// https://www.unrealengine.com/en-US/blog/physically-based-shading-on-mobile
+char               *str_env_brdf_approx       = "\
+fun env_brdf_approx(specular: float3, roughness: float, dotnv: float): float3 { \
+	var c0: float4 = float4(-1.0, -0.0275, -0.572, 0.022); \
+	var c1: float4 = float4(1.0, 0.0425, 1.04, -0.04); \
+	var r: float4 = c0 * roughness + c1; \
+	var a004: float = min(r.x * r.x, exp((-9.28 * dotnv) * log(2.0))) * r.x + r.y; \
+	var ab: float2 = float2(-1.04, 1.04) * a004 + r.zw; \
+	return specular * ab.x + ab.y; \
+} \
+";
+
 node_shader_context_t *make_mesh_run(material_t *data, i32 layer_pass) {
 	char                  *context_id = layer_pass == 0 ? "mesh" : string("mesh%s", i32_to_string(layer_pass));
 	shader_context_t      *props      = GC_ALLOC_INIT(shader_context_t, {.name            = context_id,

@@ -1,6 +1,71 @@
 
 #include "../global.h"
 
+char                        *str_tex_gabor = "\
+fun gabor_hash3(p: float3): float3 { \
+	var q: float3 = float3(dot(p, float3(127.1, 311.7, 74.7)), \
+						   dot(p, float3(269.5, 183.3, 246.1)), \
+						   dot(p, float3(113.5, 271.9, 124.6))); \
+	return frac3(float3(sin(q.x) * 43758.5453, sin(q.y) * 43758.5453, sin(q.z) * 43758.5453)); \
+} \
+fun gabor_hash1(p: float3): float { \
+	return frac(sin(dot(p, float3(12.9898, 78.233, 53.539))) * 43758.5453); \
+} \
+fun gabor_random_unit_vector(p: float3): float3 { \
+	var h1: float = gabor_hash1(p); \
+	var h2: float = gabor_hash1(p + float3(1.1, 1.1, 1.1)); \
+	var theta: float = acos(2.0 * h1 - 1.0); \
+	var phi: float = 2.0 * 3.14159 * h2; \
+	var sin_theta: float = sin(theta); \
+	return float3(sin_theta * cos(phi), sin_theta * sin(phi), cos(theta)); \
+} \
+fun tex_gabor(co: float3, scale: float, frequency: float, anisotropy: float, orientation: float3): float3 { \
+	var p: float3 = co * scale; \
+	var ip: float3 = floor3(p); \
+	var fp: float3 = frac3(p); \
+	var value: float = 0.0; \
+	var intensity: float = 0.0; \
+	var phase_sin: float = 0.0; \
+	var phase_cos: float = 0.0; \
+	var pi: float = 3.14159; \
+	var a: float = 1.0; \
+	for (var k: int = 0; k <= 2; k += 1) { \
+		for (var j: int = 0; j <= 2; j += 1) { \
+			for (var i: int = 0; i <= 2; i += 1) { \
+				var b: float3 = float3(float(i - 1), float(j - 1), float(k - 1)); \
+				var h: float3 = gabor_hash3(ip + b); \
+				var r: float3 = b - fp + h; \
+				var dir: float3 = normalize(orientation); \
+				if (anisotropy < 1.0) { \
+					var hr_p: float3 = ip + b + float3(2.2, 2.2, 2.2);\
+					var hr: float = gabor_hash1(hr_p); \
+					if (hr > anisotropy) { \
+						var dir_p: float3 = ip + b + float3(3.3, 3.3, 3.3);\
+						dir = gabor_random_unit_vector(dir_p); \
+					} \
+				} \
+				var dot_rd: float = dot(r, dir); \
+				var r_parallel: float3 = dot_rd * dir; \
+				var r_perp: float3 = r - r_parallel; \
+				var a_parallel: float = a * (1.0 - anisotropy) + 0.001; \
+				var a_perp: float = a; \
+				var d_eff: float = a_parallel * a_parallel * dot(r_parallel, r_parallel) + a_perp * a_perp * dot(r_perp, r_perp); \
+				var g: float = exp(-pi * d_eff); \
+				var random_phase: float = 2.0 * pi * gabor_hash1(ip + b + float3(1.1, 1.1, 1.1)); \
+				var theta: float = 2.0 * pi * frequency * dot_rd + random_phase; \
+				value += g * sin(theta); \
+				intensity += g; \
+				phase_sin += sin(theta); \
+				phase_cos += cos(theta); \
+			} \
+		} \
+	} \
+	intensity = intensity * 0.5 + 0.5; \
+	var phase: float = atan2(phase_sin, phase_cos) / (2.0 * pi) + 0.5; \
+	return float3(value, phase, intensity); \
+} \
+";
+
 void gabor_texture_node_init() {
 
 	char *gabor_dimensions_data = string("%s\n%s", _tr("2D"), _tr("3D"));

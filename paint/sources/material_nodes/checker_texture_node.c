@@ -1,6 +1,35 @@
 
 #include "../global.h"
 
+char                        *str_tex_checker = "\
+fun tex_checker(co: float3, col1: float3, col2: float3, scale: float): float3 { \
+	/* Prevent precision issues on unit coordinates */ \
+	var p: float3 = (co + 0.000001 * 0.999999) * scale; \
+	var xi: float = abs(floor(p.x)); \
+	var yi: float = abs(floor(p.y)); \
+	var zi: float = abs(floor(p.z)); \
+	/* var check: bool = (xi % 2.0 == yi % 2.0) == zi % 2.0;*/ \
+	var checka: int = 0; \
+	var checkb: int = 0; \
+	if (xi % 2.0 == yi % 2.0) { checka = 1; } \
+	if (zi % 2.0 != 0.0) { checkb = 1; } \
+	if (checka == checkb) { return col1; } return col2; \
+} \
+fun tex_checker_f(co: float3, scale: float): float { \
+	var p: float3 = (co + 0.000001 * 0.999999) * scale; \
+	var xi: float = abs(floor(p.x)); \
+	var yi: float = abs(floor(p.y)); \
+	var zi: float = abs(floor(p.z)); \
+	/*return float((xi % 2.0 == yi % 2.0) == zi % 2.0);*/ \
+	var checka: int = 0; \
+	var checkb: int = 0; \
+	if (xi % 2.0 == yi % 2.0) { checka = 1; } \
+	if (zi % 2.0 != 0.0) { checkb = 1; } \
+	if (checka == checkb) { return 1.0; } return 0.0; \
+	\
+} \
+";
+
 void checker_texture_node_init() {
 
 	checker_texture_node_def =

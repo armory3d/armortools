@@ -1,6 +1,19 @@
 
 #include "../global.h"
 
+char                        *str_tex_magic = "\
+fun tex_magic(p: float3): float3 { \
+	var a: float = 1.0 - (sin(p.x) + sin(p.y)); \
+	var b: float = 1.0 - sin(p.x - p.y); \
+	var c: float = 1.0 - sin(p.x + p.y); \
+	return float3(a, b, c); \
+} \
+fun tex_magic_f(p: float3): float { \
+	var c: float3 = tex_magic(p); \
+	return (c.x + c.y + c.z) / 3.0; \
+} \
+";
+
 void magic_texture_node_init() {
 
 	magic_texture_node_def =

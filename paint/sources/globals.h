@@ -312,19 +312,6 @@ gpu_texture_t            *ui_view2d_grid        = NULL;
 bool                      ui_view2d_grid_redraw = true;
 ui_handle_t              *ui_view2d_htab;
 bool                      ui_view2d_layer_touched    = false;
-char                     *str_get_pos_nor_from_depth = "\
-fun get_pos_from_depth(uv: float2, invVP: float4x4): float3 { \
-	var depth: float = sample_lod(gbufferD, sampler_linear, float2(uv.x, 1.0 - uv.y), 0.0).r; \
-	var wpos: float4 = float4(uv * 2.0 - 1.0, depth, 1.0); \
-	wpos = invVP * wpos; \
-	return wpos.xyz / wpos.w; \
-} \
-fun get_nor_from_depth(p0: float3, uv: float2, invVP: float4x4, tex_step: float2): float3 { \
-	var p1: float3 = get_pos_from_depth(uv + float2(tex_step.x * 4.0, 0.0), invVP); \
-	var p2: float3 = get_pos_from_depth(uv + float2(0.0, tex_step.y * 4.0), invVP); \
-	return normalize(cross(p2 - p0, p1 - p0)); \
-} \
-";
 bool                      sim_running                = false;
 mat4_box_t_array_t       *sim_transforms;
 any_map_t                *sim_object_script_map;
@@ -479,36 +466,6 @@ string_array_t    *nodes_brush_categories;
 ui_node_t_array_t   *nodes_brush_category0;
 node_list_t_array_t *nodes_brush_list;
 any_map_t           *nodes_brush_creates;
-char                *str_get_smudge_tool_weight = "\
-fun get_smudge_tool_weight(i: int): float { \
-	if (i == 0) { return 1.0 / 28.0; } \
-	if (i == 1) { return 2.0 / 28.0; } \
-	if (i == 2) { return 3.0 / 28.0; } \
-	if (i == 3) { return 4.0 / 28.0; } \
-	if (i == 4) { return 5.0 / 28.0; } \
-	if (i == 5) { return 6.0 / 28.0; } \
-	return 7.0 / 28.0; \
-} \
-";
-char                *str_get_blur_tool_weight   = "\
-fun get_blur_tool_weight(i: int): float { \
-	if (i == 0) { return 0.034619 / 2.0; } \
-	if (i == 1) { return 0.044859 / 2.0; } \
-	if (i == 2) { return 0.055857 / 2.0; } \
-	if (i == 3) { return 0.066833 / 2.0; } \
-	if (i == 4) { return 0.076841 / 2.0; } \
-	if (i == 5) { return 0.084894 / 2.0; } \
-	if (i == 6) { return 0.090126 / 2.0; } \
-	if (i == 7) { return 0.09194 / 2.0; } \
-	if (i == 8) { return 0.090126 / 2.0; } \
-	if (i == 9) { return 0.084894 / 2.0; } \
-	if (i == 10) { return 0.076841 / 2.0; } \
-	if (i == 11) { return 0.066833 / 2.0; } \
-	if (i == 12) { return 0.055857 / 2.0; } \
-	if (i == 13) { return 0.044859 / 2.0; } \
-	return 0.034619 / 2.0; \
-} \
-";
 char                *manifest_title             = "ArmorPaint";
 char                *manifest_version           = "1.0 alpha";
 char                *manifest_version_project   = "4";
@@ -581,76 +538,7 @@ fun pack_f32_i16(f: float, i: uint): float { \
 	return 0.062504762 * min(f, 0.9999) + 0.062519999 * float(i); \
 } \
 ";
-char *str_sh_irradiance    = "\
-fun sh_irradiance(nor: float3): float3 { \
-	var c1: float = 0.429043; \
-	var c2: float = 0.511664; \
-	var c3: float = 0.743125; \
-	var c4: float = 0.886227; \
-	var c5: float = 0.247708; \
-	var cl00: float3 = float3(constants.shirr0.x, constants.shirr0.y, constants.shirr0.z); \
-	var cl1m1: float3 = float3(constants.shirr0.w, constants.shirr1.x, constants.shirr1.y); \
-	var cl10: float3 = float3(constants.shirr1.z, constants.shirr1.w, constants.shirr2.x); \
-	var cl11: float3 = float3(constants.shirr2.y, constants.shirr2.z, constants.shirr2.w); \
-	var cl2m2: float3 = float3(constants.shirr3.x, constants.shirr3.y, constants.shirr3.z); \
-	var cl2m1: float3 = float3(constants.shirr3.w, constants.shirr4.x, constants.shirr4.y); \
-	var cl20: float3 = float3(constants.shirr4.z, constants.shirr4.w, constants.shirr5.x); \
-	var cl21: float3 = float3(constants.shirr5.y, constants.shirr5.z, constants.shirr5.w); \
-	var cl22: float3 = float3(constants.shirr6.x, constants.shirr6.y, constants.shirr6.z); \
-	return ( \
-		cl22 * c1 * (nor.y * nor.y - (-nor.z) * (-nor.z)) + \
-		cl20 * c3 * nor.x * nor.x + \
-		cl00 * c4 - \
-		cl20 * c5 + \
-		cl2m2 * 2.0 * c1 * nor.y * (-nor.z) + \
-		cl21  * 2.0 * c1 * nor.y * nor.x + \
-		cl2m1 * 2.0 * c1 * (-nor.z) * nor.x + \
-		cl11  * 2.0 * c2 * nor.y + \
-		cl1m1 * 2.0 * c2 * (-nor.z) + \
-		cl10  * 2.0 * c2 * nor.x \
-	); \
-} \
-";
-char *str_envmap_equirect  = "\
-fun envmap_equirect(normal: float3, angle: float): float2 { \
-	var PI: float = 3.1415926535; \
-	var PI2: float = PI * 2.0; \
-	var phi: float = acos(normal.z); \
-	var theta: float = atan2(-normal.y, normal.x) + PI + angle; \
-	return float2(theta / PI2, phi / PI); \
-} \
-";
-char *str_envmap_sample    = "\
-fun envmap_sample(lod: float, coord: float2): float3 { \
-	if (lod == 0.0) { \
-		return sample_lod(senvmap_radiance, sampler_linear, coord, 0.0).rgb; \
-	} \
-	if (lod == 1.0) { \
-		return sample_lod(senvmap_radiance0, sampler_linear, coord, 0.0).rgb; \
-	} \
-	if (lod == 2.0) { \
-		return sample_lod(senvmap_radiance1, sampler_linear, coord, 0.0).rgb; \
-	} \
-	if (lod == 3.0) { \
-		return sample_lod(senvmap_radiance2, sampler_linear, coord, 0.0).rgb; \
-	} \
-	if (lod == 4.0) { \
-		return sample_lod(senvmap_radiance3, sampler_linear, coord, 0.0).rgb; \
-	} \
-	return sample_lod(senvmap_radiance4, sampler_linear, coord, 0.0).rgb; \
-} \
-";
-// https://www.unrealengine.com/en-US/blog/physically-based-shading-on-mobile
-char               *str_env_brdf_approx       = "\
-fun env_brdf_approx(specular: float3, roughness: float, dotnv: float): float3 { \
-	var c0: float4 = float4(-1.0, -0.0275, -0.572, 0.022); \
-	var c1: float4 = float4(1.0, 0.0425, 1.04, -0.04); \
-	var r: float4 = c0 * roughness + c1; \
-	var a004: float = min(r.x * r.x, exp((-9.28 * dotnv) * log(2.0))) * r.x + r.y; \
-	var ab: float2 = float2(-1.04, 1.04) * a004 + r.zw; \
-	return specular * ab.x + ab.y; \
-} \
-";
+
 char               *str_dither_bayer          = "\
 fun dither_bayer(uv: float2): float { \
 	var x: int = int(uv.x % 4.0); \
@@ -834,18 +722,6 @@ ui_node_t                   *blur_node_def;
 ui_node_t                   *text_texture_node_def;
 ui_node_t                   *gradient_texture_node_def;
 ui_node_t                   *object_info_node_def;
-char                        *str_tex_magic = "\
-fun tex_magic(p: float3): float3 { \
-	var a: float = 1.0 - (sin(p.x) + sin(p.y)); \
-	var b: float = 1.0 - sin(p.x - p.y); \
-	var c: float = 1.0 - sin(p.x + p.y); \
-	return float3(a, b, c); \
-} \
-fun tex_magic_f(p: float3): float { \
-	var c: float3 = tex_magic(p); \
-	return (c.x + c.y + c.z) / 3.0; \
-} \
-";
 ui_node_t                   *magic_texture_node_def;
 ui_node_t                   *warp_node_def;
 ui_node_t                   *normal_node_def;
@@ -855,34 +731,6 @@ ui_node_t                   *invert_color_node_def;
 ui_node_t                   *wireframe_node_def;
 ui_node_t                   *gamma_node_def;
 ui_node_t                   *vector_math2_node_def;
-char                        *str_tex_checker = "\
-fun tex_checker(co: float3, col1: float3, col2: float3, scale: float): float3 { \
-	/* Prevent precision issues on unit coordinates */ \
-	var p: float3 = (co + 0.000001 * 0.999999) * scale; \
-	var xi: float = abs(floor(p.x)); \
-	var yi: float = abs(floor(p.y)); \
-	var zi: float = abs(floor(p.z)); \
-	/* var check: bool = (xi % 2.0 == yi % 2.0) == zi % 2.0;*/ \
-	var checka: int = 0; \
-	var checkb: int = 0; \
-	if (xi % 2.0 == yi % 2.0) { checka = 1; } \
-	if (zi % 2.0 != 0.0) { checkb = 1; } \
-	if (checka == checkb) { return col1; } return col2; \
-} \
-fun tex_checker_f(co: float3, scale: float): float { \
-	var p: float3 = (co + 0.000001 * 0.999999) * scale; \
-	var xi: float = abs(floor(p.x)); \
-	var yi: float = abs(floor(p.y)); \
-	var zi: float = abs(floor(p.z)); \
-	/*return float((xi % 2.0 == yi % 2.0) == zi % 2.0);*/ \
-	var checka: int = 0; \
-	var checkb: int = 0; \
-	if (xi % 2.0 == yi % 2.0) { checka = 1; } \
-	if (zi % 2.0 != 0.0) { checkb = 1; } \
-	if (checka == checkb) { return 1.0; } return 0.0; \
-	\
-} \
-";
 ui_node_t                   *checker_texture_node_def;
 char                        *str_hue_sat = "\
 fun hsv_to_rgb(c: float3): float3 { \
@@ -914,128 +762,15 @@ ui_node_t                   *mix_color_node_def;
 ui_node_t                   *quantize_node_def;
 ui_node_t                   *layer_node_def;
 ui_node_t                   *map_range_node_def;
-char                        *str_tex_voronoi = "\
-fun tex_voronoi(x: float3): float4 { \
-	var p: float3 = floor3(x); \
-	var f: float3 = frac3(x); \
-	var id: float = 0.0; \
-	var res: float = 100.0; \
-	for (var k: int = 0; k <= 2; k += 1) \
-	for (var j: int = 0; j <= 2; j += 1) \
-	for (var i: int = 0; i <= 2; i += 1) { \
-		var b: float3 = float3(float(i - 1), float(j - 1), float(k - 1)); \
-		var pb: float3 = p + b; \
-		var snoise_sample: float3 = sample(snoise256, sampler_linear, (pb.xy + float2(3.0, 1.0) * pb.z + 0.5) / 256.0).xyz; \
-		var r: float3 = b - f + snoise_sample; \
-		var d: float = dot(r, r); \
-		if (d < res) { \
-			id = dot(p + b, float3(1.0, 57.0, 113.0)); \
-			res = d; \
-		} \
-	} \
-	/*var col: float3 = 0.5 + 0.5 * cos(id * 0.35 + float3(0.0, 1.0, 2.0));*/ \
-	var col: float3; \
-	col.x = 0.5 + 0.5 * cos(id * 0.35 + 0.0); \
-	col.y = 0.5 + 0.5 * cos(id * 0.35 + 1.0); \
-	col.z = 0.5 + 0.5 * cos(id * 0.35 + 2.0); \
-	return float4(col, sqrt(res)); \
-} \
-";
 ui_node_t                   *voronoi_texture_node_def;
 ui_node_t                   *color_ramp_node_def;
 ui_node_t                   *picker_node_def;
 ui_node_t                   *replace_color_node_def;
 ui_node_t                   *bump_node_def;
-char                        *str_tex_gabor = "\
-fun gabor_hash3(p: float3): float3 { \
-	var q: float3 = float3(dot(p, float3(127.1, 311.7, 74.7)), \
-						   dot(p, float3(269.5, 183.3, 246.1)), \
-						   dot(p, float3(113.5, 271.9, 124.6))); \
-	return frac3(float3(sin(q.x) * 43758.5453, sin(q.y) * 43758.5453, sin(q.z) * 43758.5453)); \
-} \
-fun gabor_hash1(p: float3): float { \
-	return frac(sin(dot(p, float3(12.9898, 78.233, 53.539))) * 43758.5453); \
-} \
-fun gabor_random_unit_vector(p: float3): float3 { \
-	var h1: float = gabor_hash1(p); \
-	var h2: float = gabor_hash1(p + float3(1.1, 1.1, 1.1)); \
-	var theta: float = acos(2.0 * h1 - 1.0); \
-	var phi: float = 2.0 * 3.14159 * h2; \
-	var sin_theta: float = sin(theta); \
-	return float3(sin_theta * cos(phi), sin_theta * sin(phi), cos(theta)); \
-} \
-fun tex_gabor(co: float3, scale: float, frequency: float, anisotropy: float, orientation: float3): float3 { \
-	var p: float3 = co * scale; \
-	var ip: float3 = floor3(p); \
-	var fp: float3 = frac3(p); \
-	var value: float = 0.0; \
-	var intensity: float = 0.0; \
-	var phase_sin: float = 0.0; \
-	var phase_cos: float = 0.0; \
-	var pi: float = 3.14159; \
-	var a: float = 1.0; \
-	for (var k: int = 0; k <= 2; k += 1) { \
-		for (var j: int = 0; j <= 2; j += 1) { \
-			for (var i: int = 0; i <= 2; i += 1) { \
-				var b: float3 = float3(float(i - 1), float(j - 1), float(k - 1)); \
-				var h: float3 = gabor_hash3(ip + b); \
-				var r: float3 = b - fp + h; \
-				var dir: float3 = normalize(orientation); \
-				if (anisotropy < 1.0) { \
-					var hr_p: float3 = ip + b + float3(2.2, 2.2, 2.2);\
-					var hr: float = gabor_hash1(hr_p); \
-					if (hr > anisotropy) { \
-						var dir_p: float3 = ip + b + float3(3.3, 3.3, 3.3);\
-						dir = gabor_random_unit_vector(dir_p); \
-					} \
-				} \
-				var dot_rd: float = dot(r, dir); \
-				var r_parallel: float3 = dot_rd * dir; \
-				var r_perp: float3 = r - r_parallel; \
-				var a_parallel: float = a * (1.0 - anisotropy) + 0.001; \
-				var a_perp: float = a; \
-				var d_eff: float = a_parallel * a_parallel * dot(r_parallel, r_parallel) + a_perp * a_perp * dot(r_perp, r_perp); \
-				var g: float = exp(-pi * d_eff); \
-				var random_phase: float = 2.0 * pi * gabor_hash1(ip + b + float3(1.1, 1.1, 1.1)); \
-				var theta: float = 2.0 * pi * frequency * dot_rd + random_phase; \
-				value += g * sin(theta); \
-				intensity += g; \
-				phase_sin += sin(theta); \
-				phase_cos += cos(theta); \
-			} \
-		} \
-	} \
-	intensity = intensity * 0.5 + 0.5; \
-	var phase: float = atan2(phase_sin, phase_cos) / (2.0 * pi) + 0.5; \
-	return float3(value, phase, intensity); \
-} \
-";
 ui_node_t                   *gabor_texture_node_def;
 ui_node_t                   *mix_normal_map_node_def;
 ui_node_t                   *script_node_def;
 ui_node_t                   *combine_xyz_node_def;
-char                        *str_tex_noise = "\
-fun hash(n: float): float { return frac(sin(n) * 10000.0); } \
-fun tex_noise_f(x: float3): float { \
-    var step: float3 = float3(110.0, 241.0, 171.0); \
-    var i: float3 = floor3(x); \
-    var f: float3 = frac3(x); \
-    var n: float = dot(i, step); \
-    var u: float3 = f * f * (3.0 - 2.0 * f); \
-    return lerp(lerp(lerp(hash(n + dot(step, float3(0.0, 0.0, 0.0))), hash(n + dot(step, float3(1.0, 0.0, 0.0))), u.x), \
-                     lerp(hash(n + dot(step, float3(0.0, 1.0, 0.0))), hash(n + dot(step, float3(1.0, 1.0, 0.0))), u.x), u.y), \
-                lerp(lerp(hash(n + dot(step, float3(0.0, 0.0, 1.0))), hash(n + dot(step, float3(1.0, 0.0, 1.0))), u.x), \
-                     lerp(hash(n + dot(step, float3(0.0, 1.0, 1.0))), hash(n + dot(step, float3(1.0, 1.0, 1.0))), u.x), u.y), u.z); \
-} \
-fun tex_noise(p: float3): float { \
-	p = p * 1.25; \
-	var f: float = 0.5 * tex_noise_f(p); p = p * 2.01; \
-	f += 0.25 * tex_noise_f(p); p = p * 2.02; \
-	f += 0.125 * tex_noise_f(p); p = p * 2.03; \
-	f += 0.0625 * tex_noise_f(p); \
-	return 1.0 - f; \
-} \
-";
 ui_node_t                   *noise_texture_node_def;
 char                        *str_brightcontrast = "\
 fun brightcontrast(col: float3, bright: float, contr: float): float3 { \
@@ -1055,35 +790,6 @@ ui_nodes_t                  *_nodes_material_nodes;
 ui_node_t                   *_nodes_material_node;
 ui_node_socket_t_array_t    *_nodes_material_sockets;
 ui_node_t                   *group_node_def;
-char                        *str_tex_brick = "\
-fun tex_brick_noise(n: int): float { \
-	var nn: int; \
-	n = (n >> 13) ^ n; \
-	/*nn = (n * (n * n * 60493 + 19990303) + 1376312589) & 0x7fffffff;*/ \
-	nn = (n * (n * n * 60493 + 19990303) + 1376312589) & 2147483647; \
-	return 0.5 * float(nn) / 1073741824.0; \
-} \
-fun tex_brick(p: float3, c1: float3, c2: float3, c3: float3): float3 { \
-	var brick_size: float3 = float3(0.9, 0.49, 0.49); \
-	var mortar_size: float3 = float3(0.05, 0.1, 0.1); \
-	p /= brick_size / 2.0; \
-	if (frac(p.y * 0.5) > 0.5) { p.x += 0.5; } \
-	var col: float = floor(p.x / (brick_size.x + (mortar_size.x * 2.0))); \
-	var row: float = p.y; \
-	p = frac3(p); \
-	var b: float3 = step3(p, 1.0 - mortar_size); \
-	/*var tint: float = min(max(tex_brick_noise((int(col) << 16) + (int(row) & 0xffff)), 0.0), 1.0);*/ \
-	var tint: float = min(max(tex_brick_noise((int(col) << 16) + (int(row) & 65535)), 0.0), 1.0); \
-	return lerp3(c3, lerp3(c1, c2, tint), b.x * b.y * b.z); \
-} \
-fun tex_brick_f(p: float3): float { \
-	p /= float3(0.9, 0.49, 0.49) / 2.0; \
-	if (frac(p.y * 0.5) > 0.5) { p.x += 0.5; } \
-	p = frac3(p); \
-	var b: float3 = step3(p, float3(0.95, 0.9, 0.9)); \
-	return lerp(1.0, 0.0, b.x * b.y * b.z); \
-} \
-";
 ui_node_t                   *brick_texture_node_def;
 ui_node_t                   *rgb_node_def;
 ui_node_t                   *rgb_to_bw_node_def;

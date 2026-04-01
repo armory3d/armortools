@@ -1,6 +1,20 @@
 
 #include "global.h"
 
+char                     *str_get_pos_nor_from_depth = "\
+fun get_pos_from_depth(uv: float2, invVP: float4x4): float3 { \
+	var depth: float = sample_lod(gbufferD, sampler_linear, float2(uv.x, 1.0 - uv.y), 0.0).r; \
+	var wpos: float4 = float4(uv * 2.0 - 1.0, depth, 1.0); \
+	wpos = invVP * wpos; \
+	return wpos.xyz / wpos.w; \
+} \
+fun get_nor_from_depth(p0: float3, uv: float2, invVP: float4x4, tex_step: float2): float3 { \
+	var p1: float3 = get_pos_from_depth(uv + float2(tex_step.x * 4.0, 0.0), invVP); \
+	var p2: float3 = get_pos_from_depth(uv + float2(0.0, tex_step.y * 4.0), invVP); \
+	return normalize(cross(p2 - p0, p1 - p0)); \
+} \
+";
+
 void make_colorid_picker_run(node_shader_t *kong) {
 	// Mangle vertices to form full screen triangle
 	node_shader_write_vert(kong, "output.pos = float4(-1.0 + float((vertex_id() & 1) << 2), -1.0 + float((vertex_id() & 2) << 1), 0.0, 1.0);");

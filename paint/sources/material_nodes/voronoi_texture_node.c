@@ -1,6 +1,34 @@
 
 #include "../global.h"
 
+char                        *str_tex_voronoi = "\
+fun tex_voronoi(x: float3): float4 { \
+	var p: float3 = floor3(x); \
+	var f: float3 = frac3(x); \
+	var id: float = 0.0; \
+	var res: float = 100.0; \
+	for (var k: int = 0; k <= 2; k += 1) \
+	for (var j: int = 0; j <= 2; j += 1) \
+	for (var i: int = 0; i <= 2; i += 1) { \
+		var b: float3 = float3(float(i - 1), float(j - 1), float(k - 1)); \
+		var pb: float3 = p + b; \
+		var snoise_sample: float3 = sample(snoise256, sampler_linear, (pb.xy + float2(3.0, 1.0) * pb.z + 0.5) / 256.0).xyz; \
+		var r: float3 = b - f + snoise_sample; \
+		var d: float = dot(r, r); \
+		if (d < res) { \
+			id = dot(p + b, float3(1.0, 57.0, 113.0)); \
+			res = d; \
+		} \
+	} \
+	/*var col: float3 = 0.5 + 0.5 * cos(id * 0.35 + float3(0.0, 1.0, 2.0));*/ \
+	var col: float3; \
+	col.x = 0.5 + 0.5 * cos(id * 0.35 + 0.0); \
+	col.y = 0.5 + 0.5 * cos(id * 0.35 + 1.0); \
+	col.z = 0.5 + 0.5 * cos(id * 0.35 + 2.0); \
+	return float4(col, sqrt(res)); \
+} \
+";
+
 void voronoi_texture_node_init() {
 
 	char *voronoi_coloring_data = string("%s\n%s", _tr("Intensity"), _tr("Cells"));

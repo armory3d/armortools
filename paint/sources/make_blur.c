@@ -1,6 +1,38 @@
 
 #include "global.h"
 
+char                *str_get_smudge_tool_weight = "\
+fun get_smudge_tool_weight(i: int): float { \
+	if (i == 0) { return 1.0 / 28.0; } \
+	if (i == 1) { return 2.0 / 28.0; } \
+	if (i == 2) { return 3.0 / 28.0; } \
+	if (i == 3) { return 4.0 / 28.0; } \
+	if (i == 4) { return 5.0 / 28.0; } \
+	if (i == 5) { return 6.0 / 28.0; } \
+	return 7.0 / 28.0; \
+} \
+";
+
+char                *str_get_blur_tool_weight   = "\
+fun get_blur_tool_weight(i: int): float { \
+	if (i == 0) { return 0.034619 / 2.0; } \
+	if (i == 1) { return 0.044859 / 2.0; } \
+	if (i == 2) { return 0.055857 / 2.0; } \
+	if (i == 3) { return 0.066833 / 2.0; } \
+	if (i == 4) { return 0.076841 / 2.0; } \
+	if (i == 5) { return 0.084894 / 2.0; } \
+	if (i == 6) { return 0.090126 / 2.0; } \
+	if (i == 7) { return 0.09194 / 2.0; } \
+	if (i == 8) { return 0.090126 / 2.0; } \
+	if (i == 9) { return 0.084894 / 2.0; } \
+	if (i == 10) { return 0.076841 / 2.0; } \
+	if (i == 11) { return 0.066833 / 2.0; } \
+	if (i == 12) { return 0.055857 / 2.0; } \
+	if (i == 13) { return 0.044859 / 2.0; } \
+	return 0.034619 / 2.0; \
+} \
+";
+
 void make_blur_run(node_shader_t *kong) {
 	// node_shader_write_frag(kong, "var tex_coord_inp: float2 = gbuffer2[uint2(sp.x * constants.gbuffer_size.x, sp.y * constants.gbuffer_size.y)].ba;");
 	node_shader_write_frag(kong, "var tex_coord_inp4: float4 = gbuffer2[uint2(uint(sp.x * constants.gbuffer_size.x), uint(sp.y * constants.gbuffer_size.y))];");

@@ -1,6 +1,29 @@
 
 #include "../global.h"
 
+char                        *str_tex_noise = "\
+fun hash(n: float): float { return frac(sin(n) * 10000.0); } \
+fun tex_noise_f(x: float3): float { \
+    var step: float3 = float3(110.0, 241.0, 171.0); \
+    var i: float3 = floor3(x); \
+    var f: float3 = frac3(x); \
+    var n: float = dot(i, step); \
+    var u: float3 = f * f * (3.0 - 2.0 * f); \
+    return lerp(lerp(lerp(hash(n + dot(step, float3(0.0, 0.0, 0.0))), hash(n + dot(step, float3(1.0, 0.0, 0.0))), u.x), \
+                     lerp(hash(n + dot(step, float3(0.0, 1.0, 0.0))), hash(n + dot(step, float3(1.0, 1.0, 0.0))), u.x), u.y), \
+                lerp(lerp(hash(n + dot(step, float3(0.0, 0.0, 1.0))), hash(n + dot(step, float3(1.0, 0.0, 1.0))), u.x), \
+                     lerp(hash(n + dot(step, float3(0.0, 1.0, 1.0))), hash(n + dot(step, float3(1.0, 1.0, 1.0))), u.x), u.y), u.z); \
+} \
+fun tex_noise(p: float3): float { \
+	p = p * 1.25; \
+	var f: float = 0.5 * tex_noise_f(p); p = p * 2.01; \
+	f += 0.25 * tex_noise_f(p); p = p * 2.02; \
+	f += 0.125 * tex_noise_f(p); p = p * 2.03; \
+	f += 0.0625 * tex_noise_f(p); \
+	return 1.0 - f; \
+} \
+";
+
 void noise_texture_node_init() {
 
 	noise_texture_node_def = GC_ALLOC_INIT(ui_node_t, {.id     = 0,

@@ -107,4 +107,5 @@ char *texture_coordinate_node_vector(ui_node_t *node, ui_node_socket_t *socket) 
 		parser_material_kong->frag_wvpposition = true;
 		return "input.wvpposition.xyz";
 	}
+	return "";
 }

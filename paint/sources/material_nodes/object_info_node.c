@@ -70,6 +70,7 @@ char *object_info_node_vector(ui_node_t *node, ui_node_socket_t *socket) {
 		parser_material_kong->frag_wposition = true;
 		return "input.wposition";
 	}
+	return "";
 }
 
 char *object_info_node_value(ui_node_t *node, ui_node_socket_t *socket) {

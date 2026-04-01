@@ -122,4 +122,5 @@ char *geometry_node_value(ui_node_t *node, ui_node_socket_t *socket) {
 		                                                   store, store, f32_to_string(radius), f32_to_string(strength), f32_to_string(offset)));
 		return string("%s_curvature", store);
 	}
+	return "";
 }
