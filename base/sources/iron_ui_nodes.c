@@ -398,13 +398,13 @@ static float ui_nodes_snap(float f) {
 
 static string_array_t enum_ar;
 static char           enum_label[64];
-static char           enum_texts_data[64][64];
-static char          *enum_texts[64];
+static char           enum_texts_data[256][64];
+static char          *enum_texts[256];
 
-static string_array_t temp_ar;
+static string_array_t temp_ar; // Used by open combo
 static char           temp_label[64];
-static char           temp_texts_data[64][64];
-static char          *temp_texts[64];
+static char           temp_texts_data[256][64];
+static char          *temp_texts[256];
 
 void ui_node_draw_body(ui_node_t *node, ui_node_canvas_t *canvas, float nx, float ny) {
 	ui_t *current = ui_get_current();
@@ -531,18 +531,21 @@ void ui_node_draw_body(ui_node_t *node, ui_node_canvas_t *canvas, float nx, floa
 			ui_handle_t *but_handle = ui_nest(nhandle, buti);
 			but_handle->i           = ((float *)but->default_value->buffer)[0];
 
-			bool  combo_select     = current->combo_selected_handle == NULL && ui_get_released(UI_ELEMENT_H());
-			char *label            = combo_select ? temp_label : enum_label;
-			char (*texts_data)[64] = combo_select ? temp_texts_data : enum_texts_data;
-			char          **texts  = combo_select ? temp_texts : enum_texts;
-			string_array_t *ar     = combo_select ? &temp_ar : &enum_ar;
-			any_array_t    *images = NULL;
+			bool  combo_select      = current->combo_selected_handle == NULL && ui_get_released(UI_ELEMENT_H());
+			char *label             = combo_select ? temp_label : enum_label;
+			char (*texts_data)[256] = combo_select ? temp_texts_data : enum_texts_data;
+			char          **texts   = combo_select ? temp_texts : enum_texts;
+			string_array_t *ar      = combo_select ? &temp_ar : &enum_ar;
+			any_array_t    *images  = NULL;
 
 			int  texts_count  = 0;
 			bool has_but_data = but->data != NULL && but->data->length > 1;
 			if (has_but_data) {
 				int wi = 0;
 				for (int i = 0; i < but->data->length; ++i) {
+					if (texts_count == 255) {
+						break;
+					}
 					char c = ((char *)but->data->buffer)[i];
 					if (c == '\0') {
 						texts_data[texts_count][wi] = '\0';

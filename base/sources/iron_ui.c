@@ -2152,7 +2152,7 @@ int ui_combo(ui_handle_t *handle, string_array_t *texts, char *label, bool show_
 			current->combo_selected_align          = align;
 			current->combo_selected_texts          = texts;
 			current->combo_selected_images         = NULL;
-			current->combo_selected_label          = (char *)label;
+			current->combo_selected_label          = label;
 			current->combo_selected_x              = current->_x + current->_window_x;
 			current->combo_selected_y              = current->_y + current->_window_y + UI_ELEMENT_H();
 			current->combo_selected_w              = current->_w;
