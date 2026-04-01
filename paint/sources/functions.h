@@ -975,6 +975,7 @@ char                        *voronoi_texture_node_vector(ui_node_t *node, ui_nod
 char                        *voronoi_texture_node_value(ui_node_t *node, ui_node_socket_t *socket);
 void                         color_ramp_node_init();
 char                        *color_ramp_node_vector(ui_node_t *node, ui_node_socket_t *socket);
+char                        *color_ramp_node_value(ui_node_t *node, ui_node_socket_t *socket);
 void                         nodes_material_color_ramp_button(i32 node_id);
 void                         picker_node_init();
 char                        *picker_node_vector(ui_node_t *node, ui_node_socket_t *socket);
