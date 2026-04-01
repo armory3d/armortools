@@ -44,16 +44,6 @@ void geometry_node_init() {
 	                                                                                       .display       = 0}),
 	                                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                                       .node_id       = 0,
-	                                                                                       .name          = _tr("True Normal"),
-	                                                                                       .type          = "VECTOR",
-	                                                                                       .color         = 0xff6363c7,
-	                                                                                       .default_value = f32_array_create_xyz(0.0, 0.0, 0.0),
-	                                                                                       .min           = 0.0,
-	                                                                                       .max           = 1.0,
-	                                                                                       .precision     = 100,
-	                                                                                       .display       = 0}),
-	                                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
-	                                                                                       .node_id       = 0,
 	                                                                                       .name          = _tr("Incoming"),
 	                                                                                       .type          = "VECTOR",
 	                                                                                       .color         = 0xff6363c7,
@@ -74,16 +64,6 @@ void geometry_node_init() {
 	                                                                                       .display       = 0}),
 	                                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                                       .node_id       = 0,
-	                                                                                       .name          = _tr("Backfacing"),
-	                                                                                       .type          = "VALUE",
-	                                                                                       .color         = 0xffa1a1a1,
-	                                                                                       .default_value = f32_array_create_x(0.0),
-	                                                                                       .min           = 0.0,
-	                                                                                       .max           = 1.0,
-	                                                                                       .precision     = 100,
-	                                                                                       .display       = 0}),
-	                                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
-	                                                                                       .node_id       = 0,
 	                                                                                       .name          = _tr("Pointiness"),
 	                                                                                       .type          = "VALUE",
 	                                                                                       .color         = 0xffa1a1a1,
@@ -92,18 +72,8 @@ void geometry_node_init() {
 	                                                                                       .max           = 1.0,
 	                                                                                       .precision     = 100,
 	                                                                                       .display       = 0}),
-	                                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
-	                                                                                       .node_id       = 0,
-	                                                                                       .name          = _tr("Random Per Island"),
-	                                                                                       .type          = "VALUE",
-	                                                                                       .color         = 0xffa1a1a1,
-	                                                                                       .default_value = f32_array_create_x(0.0),
-	                                                                                       .min           = 0.0,
-	                                                                                       .max           = 1.0,
-	                                                                                       .precision     = 100,
-	                                                                                       .display       = 0}),
 	                                                  },
-	                                                  9),
+	                                                  6),
 	                                              .buttons = any_array_create_from_raw((void *[]){}, 0),
 	                                              .width   = 0,
 	                                              .flags   = 0});
@@ -127,11 +97,7 @@ char *geometry_node_vector(ui_node_t *node, ui_node_socket_t *socket) {
 		parser_material_kong->frag_wtangent = true;
 		return "input.wtangent";
 	}
-	else if (socket == node->outputs->buffer[3]) { // True Normal
-		parser_material_kong->frag_n = true;
-		return "n";
-	}
-	else if (socket == node->outputs->buffer[4]) { // Incoming
+	else if (socket == node->outputs->buffer[3]) { // Incoming
 		parser_material_kong->frag_vvec = true;
 		return "vvec";
 	}
@@ -142,11 +108,7 @@ char *geometry_node_vector(ui_node_t *node, ui_node_socket_t *socket) {
 }
 
 char *geometry_node_value(ui_node_t *node, ui_node_socket_t *socket) {
-	if (socket == node->outputs->buffer[6]) { // Backfacing
-		return "0.0";                         // SV_IsFrontFace
-		                                      // return "(1.0 - float(gl_FrontFacing))";
-	}
-	else if (socket == node->outputs->buffer[7]) { // Pointiness
+	if (socket == node->outputs->buffer[5]) { // Pointiness
 		f32   strength               = 1.0;
 		f32   radius                 = 1.0;
 		f32   offset                 = 0.0;
@@ -159,8 +121,5 @@ char *geometry_node_value(ui_node_t *node, ui_node_socket_t *socket) {
 		parser_material_write(parser_material_kong, string("%s_curvature = clamp(pow(%s_curvature, (1.0 / %s) * 0.25) * %s * 2.0 + %s / 10.0, 0.0, 1.0);",
 		                                                   store, store, f32_to_string(radius), f32_to_string(strength), f32_to_string(offset)));
 		return string("%s_curvature", store);
-	}
-	else { // Random Per Island
-		return "0.0";
 	}
 }

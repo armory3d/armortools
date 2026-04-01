@@ -10,19 +10,15 @@ void nodes_material_init() {
 	nodes_material_input = any_array_create_from_raw((void *[]){}, 0);
 	gc_root(nodes_material_input);
 	attribute_node_init();
-	camera_data_node_init();
 	rgb_node_init(); // color_node_init
-	fresnel_node_init();
 	geometry_node_init();
 	layer_node_init();
 	layer_mask_node_init();
-	layer_weight_node_init();
 	material_node_init();
 	object_info_node_init();
 	picker_node_init();
 	script_node_init();
 	shader_node_init();
-	tangent_node_init();
 	texture_coordinate_node_init();
 	uv_map_node_init();
 	value_node_init();

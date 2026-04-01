@@ -25,26 +25,6 @@ void object_info_node_init() {
 	                                                                       .display       = 0}),
 	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                       .node_id       = 0,
-	                                                                       .name          = _tr("Color"),
-	                                                                       .type          = "RGBA",
-	                                                                       .color         = 0xffc7c729,
-	                                                                       .default_value = f32_array_create_xyzw(0.0, 0.0, 0.0, 1.0),
-	                                                                       .min           = 0.0,
-	                                                                       .max           = 1.0,
-	                                                                       .precision     = 100,
-	                                                                       .display       = 0}),
-	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
-	                                                                       .node_id       = 0,
-	                                                                       .name          = _tr("Alpha"),
-	                                                                       .type          = "VALUE",
-	                                                                       .color         = 0xffa1a1a1,
-	                                                                       .default_value = f32_array_create_x(0.0),
-	                                                                       .min           = 0.0,
-	                                                                       .max           = 1.0,
-	                                                                       .precision     = 100,
-	                                                                       .display       = 0}),
-	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
-	                                                                       .node_id       = 0,
 	                                                                       .name          = _tr("Object Index"),
 	                                                                       .type          = "VALUE",
 	                                                                       .color         = 0xffa1a1a1,
@@ -74,7 +54,7 @@ void object_info_node_init() {
 	                                                                       .precision     = 100,
 	                                                                       .display       = 0}),
 	                                  },
-	                                  6),
+	                                  4),
 	                              .buttons = any_array_create_from_raw((void *[]){}, 0),
 	                              .width   = 0,
 	                              .flags   = 0});
@@ -90,20 +70,14 @@ char *object_info_node_vector(ui_node_t *node, ui_node_socket_t *socket) {
 		parser_material_kong->frag_wposition = true;
 		return "input.wposition";
 	}
-	else { // Color
-		return "float3(0.0, 0.0, 0.0)";
-	}
 }
 
 char *object_info_node_value(ui_node_t *node, ui_node_socket_t *socket) {
-	if (socket == node->outputs->buffer[2]) { // Alpha
-		return "0.0";
-	}
-	else if (socket == node->outputs->buffer[3]) { // Object Index
+	if (socket == node->outputs->buffer[1]) { // Object Index
 		node_shader_add_constant(parser_material_kong, "object_info_index: float", "_object_info_index");
 		return "constants.object_info_index";
 	}
-	else if (socket == node->outputs->buffer[4]) { // Material Index
+	else if (socket == node->outputs->buffer[2]) { // Material Index
 		node_shader_add_constant(parser_material_kong, "object_info_material_index: float", "_object_info_material_index");
 		return "constants.object_info_material_index";
 	}

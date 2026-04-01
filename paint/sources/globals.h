@@ -826,7 +826,6 @@ fun tex_wave_f(p: float3): float { \
 ";
 ui_node_t                   *wave_texture_node_def;
 ui_node_t                   *clamp_node_def;
-ui_node_t                   *tangent_node_def;
 char                        *parser_material_bake_passthrough_strength = "0.0";
 char                        *parser_material_bake_passthrough_radius   = "0.0";
 char                        *parser_material_bake_passthrough_offset   = "0.0";
@@ -848,7 +847,6 @@ fun tex_magic_f(p: float3): float { \
 } \
 ";
 ui_node_t                   *magic_texture_node_def;
-ui_node_t                   *fresnel_node_def;
 ui_node_t                   *warp_node_def;
 ui_node_t                   *normal_node_def;
 ui_node_t                   *mapping_node_def;
@@ -946,7 +944,6 @@ fun tex_voronoi(x: float3): float4 { \
 ui_node_t                   *voronoi_texture_node_def;
 ui_node_t                   *color_ramp_node_def;
 ui_node_t                   *picker_node_def;
-ui_node_t                   *layer_weight_node_def;
 ui_node_t                   *replace_color_node_def;
 ui_node_t                   *bump_node_def;
 char                        *str_tex_gabor = "\
@@ -1015,7 +1012,6 @@ fun tex_gabor(co: float3, scale: float, frequency: float, anisotropy: float, ori
 ";
 ui_node_t                   *gabor_texture_node_def;
 ui_node_t                   *mix_normal_map_node_def;
-ui_node_t                   *camera_data_node_def;
 ui_node_t                   *script_node_def;
 ui_node_t                   *combine_xyz_node_def;
 char                        *str_tex_noise = "\

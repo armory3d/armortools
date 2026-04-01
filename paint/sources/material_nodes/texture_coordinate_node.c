@@ -73,18 +73,8 @@ void texture_coordinate_node_init() {
 	                                                                       .max           = 1.0,
 	                                                                       .precision     = 100,
 	                                                                       .display       = 0}),
-	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
-	                                                                       .node_id       = 0,
-	                                                                       .name          = _tr("Reflection"),
-	                                                                       .type          = "VECTOR",
-	                                                                       .color         = 0xff6363c7,
-	                                                                       .default_value = f32_array_create_xyz(0.0, 0.0, 0.0),
-	                                                                       .min           = 0.0,
-	                                                                       .max           = 1.0,
-	                                                                       .precision     = 100,
-	                                                                       .display       = 0}),
 	                                  },
-	                                  7),
+	                                  6),
 	                              .buttons = any_array_create_from_raw((void *[]){}, 0)});
 	gc_root(texture_coordinate_node_def);
 
@@ -116,8 +106,5 @@ char *texture_coordinate_node_vector(ui_node_t *node, ui_node_socket_t *socket) 
 	else if (socket == node->outputs->buffer[5]) { // Window
 		parser_material_kong->frag_wvpposition = true;
 		return "input.wvpposition.xyz";
-	}
-	else { // Reflection
-		return "float3(0.0, 0.0, 0.0)";
 	}
 }
