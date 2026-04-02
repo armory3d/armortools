@@ -70,7 +70,6 @@
 #include "material_nodes/voronoi_texture_node.c"
 #include "material_nodes/warp_node.c"
 #include "material_nodes/wave_texture_node.c"
-#include "material_nodes/wavelength_node.c"
 #include "material_nodes/wireframe_node.c"
 
 #include "neural_nodes/edit_image_node.c"

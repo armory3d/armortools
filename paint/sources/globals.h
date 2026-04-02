@@ -707,11 +707,6 @@ gpu_texture_t_array_t       *import_envmap_mips = NULL;
 ui_node_t                   *image_texture_node_def;
 ui_node_t                   *material_node_def;
 ui_node_t                   *uv_map_node_def;
-char                        *str_tex_wave = "\
-fun tex_wave_f(p: float3): float { \
-	return 1.0 - sin((p.x + p.y) * 10.0); \
-} \
-";
 ui_node_t                   *wave_texture_node_def;
 ui_node_t                   *clamp_node_def;
 char                        *parser_material_bake_passthrough_strength = "0.0";
