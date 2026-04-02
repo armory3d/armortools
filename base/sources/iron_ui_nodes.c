@@ -505,7 +505,7 @@ void ui_node_draw_body(ui_node_t *node, ui_node_canvas_t *canvas, float nx, floa
 			if (soc_handle->init) {
 				soc_handle->f = ((float *)soc->default_value->buffer)[0];
 			}
-			((float *)soc->default_value->buffer)[0] = ui_slider(soc_handle, "Value", min, max, true, prec, true, UI_ALIGN_LEFT, true);
+			((float *)soc->default_value->buffer)[0] = ui_slider(soc_handle, ui_tr(but->name), min, max, true, prec, true, UI_ALIGN_LEFT, true);
 			current->ops->theme->TEXT_OFFSET         = text_off;
 		}
 		else if (strcmp(but->type, "STRING") == 0) {
