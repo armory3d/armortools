@@ -14,11 +14,6 @@
 #include <memory.h>
 #include <stddef.h>
 
-typedef enum {
-	IRON_LOG_LEVEL_INFO,
-	IRON_LOG_LEVEL_ERROR
-} iron_log_level_t;
-
 void iron_log_args(iron_log_level_t level, const char *format, va_list args) {
 #ifdef IRON_ANDROID
 	va_list args_android_copy;

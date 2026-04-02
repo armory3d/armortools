@@ -7,6 +7,12 @@
 #include <stddef.h>
 #include <stdint.h>
 
+typedef enum {
+	IRON_LOG_LEVEL_INFO,
+	IRON_LOG_LEVEL_ERROR
+} iron_log_level_t;
+
+void iron_log_args(iron_log_level_t level, const char *format, va_list args);
 void iron_log(const char *format, ...);
 void iron_error(const char *format, ...);
 
