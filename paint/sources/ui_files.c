@@ -85,10 +85,12 @@ void ui_files_file_browser_on_cache_cloud_done(char *abs) {
 #ifdef IRON_WINDOWS
 			abs = string_copy(string_replace_all(abs, "\\", "/"));
 #endif
-			char                   *icon_file = substring(abs, string_last_index_of(abs, "/") + 1, string_length(abs));
-			char                   *f         = any_map_get(ui_files_icon_file_map, icon_file);
-			draw_cloud_icon_data_t *data      = make_draw_cloud_icon_data(f, image);
-			sys_notify_on_next_frame(&ui_files_file_browser_on_cache_cloud_done_on_next_frame, data);
+			char *icon_file = substring(abs, string_last_index_of(abs, "/") + 1, string_length(abs));
+			char *f         = any_map_get(ui_files_icon_file_map, icon_file);
+			if (f != NULL) {
+				draw_cloud_icon_data_t *data = make_draw_cloud_icon_data(f, image);
+				sys_notify_on_next_frame(&ui_files_file_browser_on_cache_cloud_done_on_next_frame, data);
+			}
 		}
 	}
 	else {
@@ -281,7 +283,7 @@ char *ui_files_file_browser(ui_handle_t *handle, bool drag_files, char *search, 
 					i32 dot = string_last_index_of(f, ".");
 					if (dot > -1) {
 						string_array_t *files_all = file_read_directory(handle->text);
-						char             *icon_file = string("%s_icon.jpg", substring(f, 0, dot));
+						char           *icon_file = string("%s_icon.jpg", substring(f, 0, dot));
 						if (string_array_index_of(files_all, icon_file) >= 0) {
 							any_map_set(ui_files_icon_map, string("%s%s%s", handle->text, PATH_SEP, f), icons);
 
