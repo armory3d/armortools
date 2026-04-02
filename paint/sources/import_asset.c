@@ -5,7 +5,7 @@ void import_asset_run_cache_cloud_done(char *abs) {
 	if (abs == NULL) {
 		return;
 	}
-	import_asset_run(abs, _import_asset_drop_x, _import_asset_drop_y, _import_asset_show_box, _import_asset_hdr_as_envmap, _import_asset_done);
+	import_asset_run(string_copy(abs), _import_asset_drop_x, _import_asset_drop_y, _import_asset_show_box, _import_asset_hdr_as_envmap, _import_asset_done);
 }
 
 void import_asset_run(char *path, f32 drop_x, f32 drop_y, bool show_box, bool hdr_as_envmap, void (*done)(void)) {
