@@ -104,6 +104,8 @@ name_id       names_index = 1;
 static descriptor_set sets[MAX_SETS];
 size_t                sets_count = 0;
 
+opcodes new_code;
+
 struct {
 	char   *key;
 	name_id value;
@@ -4624,8 +4626,6 @@ tokens tokenize(const char *filename, const char *source) {
 		}
 	}
 }
-
-opcodes new_code;
 
 static void copy_opcode(opcode *o) {
 	uint8_t *new_data = &new_code.o[new_code.size];
