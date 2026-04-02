@@ -6,24 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-#include "../../sources/kong/analyzer.h"
-#include "../../sources/kong/backends/hlsl.h"
-#include "../../sources/kong/backends/metal.h"
-#include "../../sources/kong/backends/spirv.h"
-#include "../../sources/kong/backends/wgsl.h"
-#include "../../sources/kong/compiler.h"
-#include "../../sources/kong/disasm.h"
-#include "../../sources/kong/errors.h"
-#include "../../sources/kong/functions.h"
-#include "../../sources/kong/globals.h"
-#include "../../sources/kong/log.h"
-#include "../../sources/kong/names.h"
-#include "../../sources/kong/parser.h"
-#include "../../sources/kong/tokenizer.h"
-#include "../../sources/kong/transformer.h"
-#include "../../sources/kong/typer.h"
-#include "../../sources/kong/types.h"
+#include "../../sources/kong/kong.h"
 
 #ifdef _WIN32
 #include <D3Dcompiler.h>
