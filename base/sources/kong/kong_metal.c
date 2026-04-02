@@ -1,21 +1,22 @@
-#include "metal.h"
-
-#include "../analyzer.h"
-#include "../compiler.h"
-#include "../errors.h"
-#include "../functions.h"
-#include "../parser.h"
-#include "../shader_stage.h"
-#include "../types.h"
-#include "cstyle.h"
-#include "util.h"
-
+#include "kong.h"
 #include <assert.h>
 #include <inttypes.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+static type_id     vertex_inputs[256];
+size_t             vertex_inputs_size = 0;
+static type_id     fragment_inputs[256];
+size_t             fragment_inputs_size = 0;
+static int         global_register_indices[512];
+static function_id vertex_functions[256];
+size_t             vertex_functions_size = 0;
+static function_id fragment_functions[256];
+size_t             fragment_functions_size = 0;
+static function_id compute_functions[256];
+static size_t      compute_functions_size = 0;
 
 static char *type_string(type_id type) {
 	if (type == float_id) {
@@ -48,17 +49,6 @@ static void write_code(char *metal, char *directory, const char *filename) {
 	fprintf(file, "%s", metal);
 	fclose(file);
 }
-
-static type_id vertex_inputs[256];
-////
-// static size_t  vertex_inputs_size = 0;
-size_t  vertex_inputs_size = 0;
-////
-static type_id fragment_inputs[256];
-////
-// static size_t  fragment_inputs_size = 0;
-size_t  fragment_inputs_size = 0;
-////
 
 static bool is_vertex_input(type_id t) {
 	for (size_t i = 0; i < vertex_inputs_size; ++i) {
@@ -180,21 +170,6 @@ static void write_types(char *metal, size_t *offset) {
 	}
 }
 
-static int global_register_indices[512];
-
-static function_id vertex_functions[256];
-////
-// static size_t      vertex_functions_size = 0;
-size_t              vertex_functions_size = 0;
-////
-static function_id fragment_functions[256];
-////
-// static size_t      fragment_functions_size = 0;
-size_t             fragment_functions_size = 0;
-////
-static function_id compute_functions[256];
-static size_t      compute_functions_size = 0;
-
 static bool is_vertex_function(function_id f) {
 	for (size_t i = 0; i < vertex_functions_size; ++i) {
 		if (f == vertex_functions[i]) {
@@ -251,23 +226,11 @@ static void write_argument_buffers(char *code, size_t *offset) {
 				}
 			}
 			else if (is_texture(g->type)) {
-				if (get_type(g->type)->tex_kind == TEXTURE_KIND_2D) {
-					if (writable) {
-						*offset += sprintf(&code[*offset], "\ttexture2d<float, access::write> _%" PRIu64 " [[id(%zu)]];\n", g->var_index, global_index);
-					}
-					else {
-						*offset += sprintf(&code[*offset], "\ttexture2d<float> _%" PRIu64 " [[id(%zu)]];\n", g->var_index, global_index);
-					}
-				}
-				else if (get_type(g->type)->tex_kind == TEXTURE_KIND_2D_ARRAY) {
-					*offset += sprintf(&code[*offset], "\ttexture2d_array<float> _%" PRIu64 " [[id(%zu)]];\n", g->var_index, global_index);
-				}
-				else if (get_type(g->type)->tex_kind == TEXTURE_KIND_CUBE) {
-					*offset += sprintf(&code[*offset], "\ttexturecube<float> _%" PRIu64 " [[id(%zu)]];\n", g->var_index, global_index);
+				if (writable) {
+					*offset += sprintf(&code[*offset], "\ttexture2d<float, access::write> _%" PRIu64 " [[id(%zu)]];\n", g->var_index, global_index);
 				}
 				else {
-					// TODO
-					assert(false);
+					*offset += sprintf(&code[*offset], "\ttexture2d<float> _%" PRIu64 " [[id(%zu)]];\n", g->var_index, global_index);
 				}
 			}
 			else if (is_sampler(g->type)) {
@@ -671,28 +634,9 @@ static void write_functions(char *code, size_t *offset) {
 					check(o->op_call.parameters_size == 3, context, "sample requires three parameters");
 
 					variable image_var = o->op_call.parameters[0];
-
-					if (get_type(o->op_call.parameters[0].type.type)->tex_kind == TEXTURE_KIND_2D_ARRAY) {
-						*offset +=
-						    sprintf(&code[*offset],
-						            "%s _%" PRIu64 " = argument_buffer0._%" PRIu64 ".sample(argument_buffer0._%" PRIu64 ", _%" PRIu64 ".xy, _%" PRIu64 ".z);\n",
-						            type_string(o->op_call.var.type.type), o->op_call.var.index, image_var.index, o->op_call.parameters[1].index,
-						            o->op_call.parameters[2].index, o->op_call.parameters[2].index);
-					}
-					else {
-						if (is_depth(get_type(image_var.type.type)->tex_format)) {
-							*offset += sprintf(&code[*offset],
-							                   "%s _%" PRIu64 " = argument_buffer0._%" PRIu64 ".sample(argument_buffer0._%" PRIu64 ", _%" PRIu64 ").r;\n",
-							                   type_string(o->op_call.var.type.type), o->op_call.var.index, image_var.index, o->op_call.parameters[1].index,
-							                   o->op_call.parameters[2].index);
-						}
-						else {
-							*offset += sprintf(&code[*offset],
-							                   "%s _%" PRIu64 " = argument_buffer0._%" PRIu64 ".sample(argument_buffer0._%" PRIu64 ", _%" PRIu64 ");\n",
-							                   type_string(o->op_call.var.type.type), o->op_call.var.index, image_var.index, o->op_call.parameters[1].index,
-							                   o->op_call.parameters[2].index);
-						}
-					}
+					*offset += sprintf(&code[*offset], "%s _%" PRIu64 " = argument_buffer0._%" PRIu64 ".sample(argument_buffer0._%" PRIu64 ", _%" PRIu64 ");\n",
+					                   type_string(o->op_call.var.type.type), o->op_call.var.index, image_var.index, o->op_call.parameters[1].index,
+					                   o->op_call.parameters[2].index);
 				}
 				else if (o->op_call.func == add_name("sample_lod")) {
 					check(o->op_call.parameters_size == 4, context, "sample_lod requires four parameters");
@@ -746,24 +690,27 @@ static void write_functions(char *code, size_t *offset) {
 				////
 
 				else if (o->op_call.func == add_name("lerp3")) {
-					*offset += sprintf(&code[*offset], "%s _%" PRIu64 " = mix(_%" PRIu64 ", _%" PRIu64 ", _%" PRIu64 ");\n", type_string(o->op_call.var.type.type),
-					                   o->op_call.var.index, o->op_call.parameters[0].index, o->op_call.parameters[1].index, o->op_call.parameters[2].index);
+					*offset +=
+					    sprintf(&code[*offset], "%s _%" PRIu64 " = mix(_%" PRIu64 ", _%" PRIu64 ", _%" PRIu64 ");\n", type_string(o->op_call.var.type.type),
+					            o->op_call.var.index, o->op_call.parameters[0].index, o->op_call.parameters[1].index, o->op_call.parameters[2].index);
 				}
 				else if (o->op_call.func == add_name("lerp4")) {
-					*offset += sprintf(&code[*offset], "%s _%" PRIu64 " = mix(_%" PRIu64 ", _%" PRIu64 ", _%" PRIu64 ");\n", type_string(o->op_call.var.type.type),
-					                   o->op_call.var.index, o->op_call.parameters[0].index, o->op_call.parameters[1].index, o->op_call.parameters[2].index);
+					*offset +=
+					    sprintf(&code[*offset], "%s _%" PRIu64 " = mix(_%" PRIu64 ", _%" PRIu64 ", _%" PRIu64 ");\n", type_string(o->op_call.var.type.type),
+					            o->op_call.var.index, o->op_call.parameters[0].index, o->op_call.parameters[1].index, o->op_call.parameters[2].index);
 				}
 				else if (o->op_call.func == add_name("frac3")) {
-					*offset += sprintf(&code[*offset], "%s _%" PRIu64 " = fract(_%" PRIu64 ");\n", type_string(o->op_call.var.type.type),
-					                   o->op_call.var.index, o->op_call.parameters[0].index);
+					*offset += sprintf(&code[*offset], "%s _%" PRIu64 " = fract(_%" PRIu64 ");\n", type_string(o->op_call.var.type.type), o->op_call.var.index,
+					                   o->op_call.parameters[0].index);
 				}
 				else if (o->op_call.func == add_name("abs3")) {
-					*offset += sprintf(&code[*offset], "%s _%" PRIu64 " = abs(_%" PRIu64 ");\n", type_string(o->op_call.var.type.type),
-					                   o->op_call.var.index, o->op_call.parameters[0].index);
+					*offset += sprintf(&code[*offset], "%s _%" PRIu64 " = abs(_%" PRIu64 ");\n", type_string(o->op_call.var.type.type), o->op_call.var.index,
+					                   o->op_call.parameters[0].index);
 				}
 				else if (o->op_call.func == add_name("clamp3")) {
-					*offset += sprintf(&code[*offset], "%s _%" PRIu64 " = clamp(_%" PRIu64 ", _%" PRIu64 ", _%" PRIu64 ");\n", type_string(o->op_call.var.type.type),
-					                   o->op_call.var.index, o->op_call.parameters[0].index, o->op_call.parameters[1].index, o->op_call.parameters[2].index);
+					*offset +=
+					    sprintf(&code[*offset], "%s _%" PRIu64 " = clamp(_%" PRIu64 ", _%" PRIu64 ", _%" PRIu64 ");\n", type_string(o->op_call.var.type.type),
+					            o->op_call.var.index, o->op_call.parameters[0].index, o->op_call.parameters[1].index, o->op_call.parameters[2].index);
 				}
 				else if (o->op_call.func == add_name("min3")) {
 					*offset += sprintf(&code[*offset], "%s _%" PRIu64 " = min(_%" PRIu64 ", _%" PRIu64 ");\n", type_string(o->op_call.var.type.type),
@@ -786,28 +733,28 @@ static void write_functions(char *code, size_t *offset) {
 					                   o->op_call.var.index, o->op_call.parameters[0].index, o->op_call.parameters[1].index);
 				}
 				else if (o->op_call.func == add_name("floor3")) {
-					*offset += sprintf(&code[*offset], "%s _%" PRIu64 " = floor(_%" PRIu64 ");\n", type_string(o->op_call.var.type.type),
-					                   o->op_call.var.index, o->op_call.parameters[0].index);
+					*offset += sprintf(&code[*offset], "%s _%" PRIu64 " = floor(_%" PRIu64 ");\n", type_string(o->op_call.var.type.type), o->op_call.var.index,
+					                   o->op_call.parameters[0].index);
 				}
 				else if (o->op_call.func == add_name("ceil3")) {
-					*offset += sprintf(&code[*offset], "%s _%" PRIu64 " = ceil(_%" PRIu64 ");\n", type_string(o->op_call.var.type.type),
-					                   o->op_call.var.index, o->op_call.parameters[0].index);
+					*offset += sprintf(&code[*offset], "%s _%" PRIu64 " = ceil(_%" PRIu64 ");\n", type_string(o->op_call.var.type.type), o->op_call.var.index,
+					                   o->op_call.parameters[0].index);
 				}
 				else if (o->op_call.func == add_name("ddx2")) {
-					*offset += sprintf(&code[*offset], "%s _%" PRIu64 " = dfdx(_%" PRIu64 ");\n", type_string(o->op_call.var.type.type),
-					                   o->op_call.var.index, o->op_call.parameters[0].index);
+					*offset += sprintf(&code[*offset], "%s _%" PRIu64 " = dfdx(_%" PRIu64 ");\n", type_string(o->op_call.var.type.type), o->op_call.var.index,
+					                   o->op_call.parameters[0].index);
 				}
 				else if (o->op_call.func == add_name("ddy2")) {
-					*offset += sprintf(&code[*offset], "%s _%" PRIu64 " = dfdy(_%" PRIu64 ");\n", type_string(o->op_call.var.type.type),
-					                   o->op_call.var.index, o->op_call.parameters[0].index);
+					*offset += sprintf(&code[*offset], "%s _%" PRIu64 " = dfdy(_%" PRIu64 ");\n", type_string(o->op_call.var.type.type), o->op_call.var.index,
+					                   o->op_call.parameters[0].index);
 				}
 				else if (o->op_call.func == add_name("ddx3")) {
-					*offset += sprintf(&code[*offset], "%s _%" PRIu64 " = dfdx(_%" PRIu64 ");\n", type_string(o->op_call.var.type.type),
-					                   o->op_call.var.index, o->op_call.parameters[0].index);
+					*offset += sprintf(&code[*offset], "%s _%" PRIu64 " = dfdx(_%" PRIu64 ");\n", type_string(o->op_call.var.type.type), o->op_call.var.index,
+					                   o->op_call.parameters[0].index);
 				}
 				else if (o->op_call.func == add_name("ddy3")) {
-					*offset += sprintf(&code[*offset], "%s _%" PRIu64 " = dfdy(_%" PRIu64 ");\n", type_string(o->op_call.var.type.type),
-					                   o->op_call.var.index, o->op_call.parameters[0].index);
+					*offset += sprintf(&code[*offset], "%s _%" PRIu64 " = dfdy(_%" PRIu64 ");\n", type_string(o->op_call.var.type.type), o->op_call.var.index,
+					                   o->op_call.parameters[0].index);
 				}
 
 				////
@@ -860,10 +807,7 @@ static void write_functions(char *code, size_t *offset) {
 	}
 }
 
-////
-// static void metal_export_everything(char *directory) {
 static char *metal_export_everything(char *directory) {
-////
 	char         *metal   = (char *)calloc(1024 * 1024, 1);
 	debug_context context = {0};
 	check(metal != NULL, context, "Could not allocate Metal string");
@@ -878,23 +822,13 @@ static char *metal_export_everything(char *directory) {
 	offset += sprintf(&metal[offset], "};\n\n");
 
 	write_types(metal, &offset);
-
 	write_argument_buffers(metal, &offset);
-
 	write_globals(metal, &offset);
-
 	write_functions(metal, &offset);
-
-	////
-	// write_code(metal, directory, "kong");
 	return metal;
-	////
 }
 
-////
-// void metal_export(char *directory) {
 char *metal_export(char *directory) {
-////
 	int cbuffer_index = 0;
 	int texture_index = 0;
 	int sampler_index = 0;
@@ -969,8 +903,5 @@ char *metal_export(char *directory) {
 		}
 	}
 
-	////
-	// metal_export_everything(directory);
 	return metal_export_everything(directory);
-	////
 }

@@ -1,16 +1,8 @@
-#include "cstyle.h"
-
-#include "../errors.h"
-#include "util.h"
-
+#include "kong.h"
 #include <assert.h>
 #include <inttypes.h>
 #include <stdio.h>
 #include <string.h>
-
-// static char *function_string(name_id func) {
-//	return get_name(func);
-// }
 
 void cstyle_write_opcode(char *code, size_t *offset, opcode *o, type_string_func type_string, int *indentation) {
 	switch (o->type) {

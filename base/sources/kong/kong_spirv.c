@@ -1,280 +1,128 @@
-#include "spirv.h"
-
-#include "../analyzer.h"
-#include "../compiler.h"
-#include "../errors.h"
-#include "../functions.h"
-#include "../hashmap.h"
-#include "../log.h"
-#include "../parser.h"
-#include "../shader_stage.h"
-#include "../types.h"
-
-#include "../libs/stb_ds.h"
-
-#include "util.h"
-
+#include "kong.h"
+#include "stb_ds.h"
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 
-typedef struct spirv_id {
-	uint32_t id;
-} spirv_id;
-
-typedef struct instructions_buffer {
-	uint32_t *instructions;
-	size_t    offset;
-} instructions_buffer;
-
-static void write_buffer(FILE *file, uint8_t *output, size_t output_size) {
-	for (size_t i = 0; i < output_size; ++i) {
-		// based on the encoding described in https://github.com/adobe/bin2c
-		if (output[i] == '!' || output[i] == '#' || (output[i] >= '%' && output[i] <= '>') || (output[i] >= 'A' && output[i] <= '[') ||
-		    (output[i] >= ']' && output[i] <= '~')) {
-			fprintf(file, "%c", output[i]);
-		}
-		else if (output[i] == '\a') {
-			fprintf(file, "\\a");
-		}
-		else if (output[i] == '\b') {
-			fprintf(file, "\\b");
-		}
-		else if (output[i] == '\t') {
-			fprintf(file, "\\t");
-		}
-		else if (output[i] == '\v') {
-			fprintf(file, "\\v");
-		}
-		else if (output[i] == '\f') {
-			fprintf(file, "\\f");
-		}
-		else if (output[i] == '\r') {
-			fprintf(file, "\\r");
-		}
-		else if (output[i] == '\"') {
-			fprintf(file, "\\\"");
-		}
-		else if (output[i] == '\\') {
-			fprintf(file, "\\\\");
-		}
-		else {
-			fprintf(file, "\\%03o", output[i]);
-		}
-	}
-}
-
-static void write_bytecode(char *directory, const char *filename, const char *name, instructions_buffer *header, instructions_buffer *decorations,
-                           instructions_buffer *base_types, instructions_buffer *constants, instructions_buffer *aggregate_types,
-                           instructions_buffer *global_vars, instructions_buffer *instructions, bool debug) {
-	uint8_t *output_header      = (uint8_t *)header->instructions;
-	size_t   output_header_size = header->offset * 4;
-
-	uint8_t *output_decorations      = (uint8_t *)decorations->instructions;
-	size_t   output_decorations_size = decorations->offset * 4;
-
-	uint8_t *output_base_types      = (uint8_t *)base_types->instructions;
-	size_t   output_base_types_size = base_types->offset * 4;
-
-	uint8_t *output_constants      = (uint8_t *)constants->instructions;
-	size_t   output_constants_size = constants->offset * 4;
-
-	uint8_t *output_aggregate_types      = (uint8_t *)aggregate_types->instructions;
-	size_t   output_aggregate_types_size = aggregate_types->offset * 4;
-
-	uint8_t *output_global_vars      = (uint8_t *)global_vars->instructions;
-	size_t   output_global_vars_size = global_vars->offset * 4;
-
-	uint8_t *output_instructions      = (uint8_t *)instructions->instructions;
-	size_t   output_instructions_size = instructions->offset * 4;
-
-	char full_filename[512];
-
-	{
-		sprintf(full_filename, "%s/%s.h", directory, filename);
-		FILE *file = fopen(full_filename, "wb");
-		fprintf(file, "#include <stddef.h>\n");
-		fprintf(file, "#include <stdint.h>\n\n");
-		fprintf(file, "extern uint8_t *%s;\n", name);
-		fprintf(file, "extern size_t %s_size;\n", name);
-		fclose(file);
-	}
-
-	{
-		sprintf(full_filename, "%s/%s.c", directory, filename);
-
-		FILE *file = fopen(full_filename, "wb");
-		fprintf(file, "#include \"%s.h\"\n\n", filename);
-
-		fprintf(file, "uint8_t *%s = \"", name);
-		write_buffer(file, output_header, output_header_size);
-		write_buffer(file, output_decorations, output_decorations_size);
-		write_buffer(file, output_base_types, output_base_types_size);
-		write_buffer(file, output_constants, output_constants_size);
-		write_buffer(file, output_aggregate_types, output_aggregate_types_size);
-		write_buffer(file, output_global_vars, output_global_vars_size);
-		write_buffer(file, output_instructions, output_instructions_size);
-		fprintf(file, "\";\n");
-
-		fprintf(file, "size_t %s_size = %zu;\n\n", name,
-		        output_header_size + output_decorations_size + output_base_types_size + output_constants_size + output_aggregate_types_size +
-		            output_global_vars_size + output_instructions_size);
-
-		fclose(file);
-	}
-
-#ifndef NDEBUG
-	debug = true;
-#endif
-
-	if (debug) {
-		sprintf(full_filename, "%s/%s.spirv", directory, filename);
-
-		FILE *file = fopen(full_filename, "wb");
-		fwrite(output_header, 1, output_header_size, file);
-		fwrite(output_decorations, 1, output_decorations_size, file);
-		fwrite(output_base_types, 1, output_base_types_size, file);
-		fwrite(output_constants, 1, output_constants_size, file);
-		fwrite(output_aggregate_types, 1, output_aggregate_types_size, file);
-		fwrite(output_global_vars, 1, output_global_vars_size, file);
-		fwrite(output_instructions, 1, output_instructions_size, file);
-		fclose(file);
-
-		char command[1024];
-		snprintf(command, 1024, "spirv-val %s", full_filename);
-
-		uint32_t exit_code = 0;
-		bool     executed  = execute_sync(command, &exit_code);
-
-		if (!executed) {
-			kong_log(LOG_LEVEL_WARNING, "Could not run spirv_val.");
-		}
-		else if (exit_code != 0) {
-			debug_context context = {0};
-			error(context, "spirv_val check of %s failed with exit code %u.", filename, exit_code);
-		}
-	}
-}
-
 typedef enum spirv_opcode {
-	SPIRV_OPCODE_EXT_INST_IMPORT           = 11,
-	SPIRV_OPCODE_EXT_INST                  = 12,
-	SPIRV_OPCODE_MEMORY_MODEL              = 14,
-	SPIRV_OPCODE_ENTRY_POINT               = 15,
-	SPIRV_OPCODE_EXECUTION_MODE            = 16,
-	SPIRV_OPCODE_CAPABILITY                = 17,
-	SPIRV_OPCODE_TYPE_VOID                 = 19,
-	SPIRV_OPCODE_TYPE_BOOL                 = 20,
-	SPIRV_OPCODE_TYPE_INT                  = 21,
-	SPIRV_OPCODE_TYPE_FLOAT                = 22,
-	SPIRV_OPCODE_TYPE_VECTOR               = 23,
-	SPIRV_OPCODE_TYPE_MATRIX               = 24,
-	SPIRV_OPCODE_TYPE_IMAGE                = 25,
-	SPIRV_OPCODE_TYPE_SAMPLER              = 26,
-	SPIRV_OPCODE_TYPE_SAMPLED_IMAGE        = 27,
-	SPIRV_OPCODE_TYPE_ARRAY                = 28,
-	SPIRV_OPCODE_TYPE_STRUCT               = 30,
-	SPIRV_OPCODE_TYPE_POINTER              = 32,
-	SPIRV_OPCODE_TYPE_FUNCTION             = 33,
-	SPIRV_OPCODE_CONSTANT                  = 43,
-	SPIRV_OPCODE_CONSTANT_COMPOSITE        = 44,
-	SPIRV_OPCODE_FUNCTION                  = 54,
-	SPIRV_OPCODE_FUNCTION_PARAMETER        = 55,
-	SPIRV_OPCODE_FUNCTION_END              = 56,
-	SPIRV_OPCODE_FUNCTION_CALL             = 57,
-	SPIRV_OPCODE_VARIABLE                  = 59,
-	SPIRV_OPCODE_LOAD                      = 61,
-	SPIRV_OPCODE_STORE                     = 62,
-	SPIRV_OPCODE_ACCESS_CHAIN              = 65,
-	SPIRV_OPCODE_DECORATE                  = 71,
-	SPIRV_OPCODE_MEMBER_DECORATE           = 72,
-	SPIRV_OPCODE_COMPOSITE_CONSTRUCT       = 80,
-	SPIRV_OPCODE_COMPOSITE_EXTRACT         = 81,
+	SPIRV_OPCODE_EXT_INST_IMPORT     = 11,
+	SPIRV_OPCODE_EXT_INST            = 12,
+	SPIRV_OPCODE_MEMORY_MODEL        = 14,
+	SPIRV_OPCODE_ENTRY_POINT         = 15,
+	SPIRV_OPCODE_EXECUTION_MODE      = 16,
+	SPIRV_OPCODE_CAPABILITY          = 17,
+	SPIRV_OPCODE_TYPE_VOID           = 19,
+	SPIRV_OPCODE_TYPE_BOOL           = 20,
+	SPIRV_OPCODE_TYPE_INT            = 21,
+	SPIRV_OPCODE_TYPE_FLOAT          = 22,
+	SPIRV_OPCODE_TYPE_VECTOR         = 23,
+	SPIRV_OPCODE_TYPE_MATRIX         = 24,
+	SPIRV_OPCODE_TYPE_IMAGE          = 25,
+	SPIRV_OPCODE_TYPE_SAMPLER        = 26,
+	SPIRV_OPCODE_TYPE_SAMPLED_IMAGE  = 27,
+	SPIRV_OPCODE_TYPE_ARRAY          = 28,
+	SPIRV_OPCODE_TYPE_STRUCT         = 30,
+	SPIRV_OPCODE_TYPE_POINTER        = 32,
+	SPIRV_OPCODE_TYPE_FUNCTION       = 33,
+	SPIRV_OPCODE_CONSTANT            = 43,
+	SPIRV_OPCODE_CONSTANT_COMPOSITE  = 44,
+	SPIRV_OPCODE_FUNCTION            = 54,
+	SPIRV_OPCODE_FUNCTION_PARAMETER  = 55,
+	SPIRV_OPCODE_FUNCTION_END        = 56,
+	SPIRV_OPCODE_FUNCTION_CALL       = 57,
+	SPIRV_OPCODE_VARIABLE            = 59,
+	SPIRV_OPCODE_LOAD                = 61,
+	SPIRV_OPCODE_STORE               = 62,
+	SPIRV_OPCODE_ACCESS_CHAIN        = 65,
+	SPIRV_OPCODE_DECORATE            = 71,
+	SPIRV_OPCODE_MEMBER_DECORATE     = 72,
+	SPIRV_OPCODE_COMPOSITE_CONSTRUCT = 80,
+	SPIRV_OPCODE_COMPOSITE_EXTRACT   = 81,
 	////
-	SPIRV_OPCODE_TRANSPOSE                 = 84,
+	SPIRV_OPCODE_TRANSPOSE = 84,
 	////
 	SPIRV_OPCODE_SAMPLED_IMAGE             = 86,
 	SPIRV_OPCODE_IMAGE_SAMPLE_IMPLICIT_LOD = 87,
 	SPIRV_OPCODE_IMAGE_SAMPLE_EXPLICIT_LOD = 88,
 	////
-	SPIRV_OPCODE_IMAGE_FETCH               = 95,
+	SPIRV_OPCODE_IMAGE_FETCH = 95,
 	////
-	SPIRV_OPCODE_IMAGE_READ                = 98,
-	SPIRV_OPCODE_IMAGE_WRITE               = 99,
-	SPIRV_OPCODE_CONVERT_F_TO_U            = 109,
-	SPIRV_OPCODE_CONVERT_F_TO_S            = 110,
-	SPIRV_OPCODE_CONVERT_S_TO_F            = 111,
-	SPIRV_OPCODE_CONVERT_U_TO_F            = 112,
-	SPIRV_OPCODE_BITCAST                   = 124,
-	SPIRV_OPCODE_S_NEGATE                  = 126,
-	SPIRV_OPCODE_F_NEGATE                  = 127,
-	SPIRV_OPCODE_I_ADD                     = 128,
-	SPIRV_OPCODE_F_ADD                     = 129,
-	SPIRV_OPCODE_I_SUB                     = 130,
-	SPIRV_OPCODE_F_SUB                     = 131,
-	SPIRV_OPCODE_F_MUL                     = 133,
-	SPIRV_OPCODE_F_DIV                     = 136,
-	SPIRV_OPCODE_F_MOD                     = 141,
-	SPIRV_OPCODE_VECTOR_TIMES_MATRIX       = 144,
-	SPIRV_OPCODE_MATRIX_TIMES_VECTOR       = 145,
-	SPIRV_OPCODE_MATRIX_TIMES_MATRIX       = 146,
-	SPIRV_OPCODE_DOT                       = 148,
-	SPIRV_OPCODE_LOGICAL_OR                = 166,
-	SPIRV_OPCODE_LOGICAL_AND               = 167,
-	SPIRV_OPCODE_LOGICAL_NOT               = 168,
-	SPIRV_OPCODE_I_EQUAL                   = 170,
-	SPIRV_OPCODE_I_NOT_EQUAL               = 171,
-	SPIRV_OPCODE_U_GREATER_THAN            = 172,
-	SPIRV_OPCODE_S_GREATER_THAN            = 173,
-	SPIRV_OPCODE_U_GREATER_THAN_EQUAL      = 174,
-	SPIRV_OPCODE_S_GREATER_THAN_EQUAL      = 175,
-	SPIRV_OPCODE_U_LESS_THAN               = 176,
-	SPIRV_OPCODE_S_LESS_THAN               = 177,
-	SPIRV_OPCODE_U_LESS_THAN_EQUAL         = 178,
-	SPIRV_OPCODE_S_LESS_THAN_EQUAL         = 179,
-	SPIRV_OPCODE_F_ORD_EQUAL               = 180,
-	SPIRV_OPCODE_F_ORD_NOT_EQUAL           = 182,
-	SPIRV_OPCODE_F_ORD_LESS_THAN           = 184,
-	SPIRV_OPCODE_F_ORD_GREATER_THAN        = 186,
-	SPIRV_OPCODE_F_ORD_LESS_THAN_EQUAL     = 188,
-	SPIRV_OPCODE_F_ORD_GREATER_THAN_EQUAL  = 190,
-	SPIRV_OPCODE_SHIFT_RIGHT_LOGICAL       = 194,
-	SPIRV_OPCODE_SHIFT_LEFT_LOGICAL        = 196,
-	SPIRV_OPCODE_BITWISE_OR                = 197,
-	SPIRV_OPCODE_BITWISE_XOR               = 198,
-	SPIRV_OPCODE_BITWISE_AND               = 199,
-	SPIRV_OPCODE_DPDX                      = 207,
-	SPIRV_OPCODE_DPDY                      = 208,
-	SPIRV_OPCODE_LOOP_MERGE                = 246,
-	SPIRV_OPCODE_SELECTION_MERGE           = 247,
-	SPIRV_OPCODE_LABEL                     = 248,
-	SPIRV_OPCODE_BRANCH                    = 249,
-	SPIRV_OPCODE_BRANCH_CONDITIONAL        = 250,
-	SPIRV_OPCODE_KILL                      = 252,
-	SPIRV_OPCODE_RETURN                    = 253,
-	SPIRV_OPCODE_RETURN_VALUE              = 254,
+	SPIRV_OPCODE_IMAGE_READ               = 98,
+	SPIRV_OPCODE_IMAGE_WRITE              = 99,
+	SPIRV_OPCODE_CONVERT_F_TO_U           = 109,
+	SPIRV_OPCODE_CONVERT_F_TO_S           = 110,
+	SPIRV_OPCODE_CONVERT_S_TO_F           = 111,
+	SPIRV_OPCODE_CONVERT_U_TO_F           = 112,
+	SPIRV_OPCODE_BITCAST                  = 124,
+	SPIRV_OPCODE_S_NEGATE                 = 126,
+	SPIRV_OPCODE_F_NEGATE                 = 127,
+	SPIRV_OPCODE_I_ADD                    = 128,
+	SPIRV_OPCODE_F_ADD                    = 129,
+	SPIRV_OPCODE_I_SUB                    = 130,
+	SPIRV_OPCODE_F_SUB                    = 131,
+	SPIRV_OPCODE_F_MUL                    = 133,
+	SPIRV_OPCODE_F_DIV                    = 136,
+	SPIRV_OPCODE_F_MOD                    = 141,
+	SPIRV_OPCODE_VECTOR_TIMES_MATRIX      = 144,
+	SPIRV_OPCODE_MATRIX_TIMES_VECTOR      = 145,
+	SPIRV_OPCODE_MATRIX_TIMES_MATRIX      = 146,
+	SPIRV_OPCODE_DOT                      = 148,
+	SPIRV_OPCODE_LOGICAL_OR               = 166,
+	SPIRV_OPCODE_LOGICAL_AND              = 167,
+	SPIRV_OPCODE_LOGICAL_NOT              = 168,
+	SPIRV_OPCODE_I_EQUAL                  = 170,
+	SPIRV_OPCODE_I_NOT_EQUAL              = 171,
+	SPIRV_OPCODE_U_GREATER_THAN           = 172,
+	SPIRV_OPCODE_S_GREATER_THAN           = 173,
+	SPIRV_OPCODE_U_GREATER_THAN_EQUAL     = 174,
+	SPIRV_OPCODE_S_GREATER_THAN_EQUAL     = 175,
+	SPIRV_OPCODE_U_LESS_THAN              = 176,
+	SPIRV_OPCODE_S_LESS_THAN              = 177,
+	SPIRV_OPCODE_U_LESS_THAN_EQUAL        = 178,
+	SPIRV_OPCODE_S_LESS_THAN_EQUAL        = 179,
+	SPIRV_OPCODE_F_ORD_EQUAL              = 180,
+	SPIRV_OPCODE_F_ORD_NOT_EQUAL          = 182,
+	SPIRV_OPCODE_F_ORD_LESS_THAN          = 184,
+	SPIRV_OPCODE_F_ORD_GREATER_THAN       = 186,
+	SPIRV_OPCODE_F_ORD_LESS_THAN_EQUAL    = 188,
+	SPIRV_OPCODE_F_ORD_GREATER_THAN_EQUAL = 190,
+	SPIRV_OPCODE_SHIFT_RIGHT_LOGICAL      = 194,
+	SPIRV_OPCODE_SHIFT_LEFT_LOGICAL       = 196,
+	SPIRV_OPCODE_BITWISE_OR               = 197,
+	SPIRV_OPCODE_BITWISE_XOR              = 198,
+	SPIRV_OPCODE_BITWISE_AND              = 199,
+	SPIRV_OPCODE_DPDX                     = 207,
+	SPIRV_OPCODE_DPDY                     = 208,
+	SPIRV_OPCODE_LOOP_MERGE               = 246,
+	SPIRV_OPCODE_SELECTION_MERGE          = 247,
+	SPIRV_OPCODE_LABEL                    = 248,
+	SPIRV_OPCODE_BRANCH                   = 249,
+	SPIRV_OPCODE_BRANCH_CONDITIONAL       = 250,
+	SPIRV_OPCODE_KILL                     = 252,
+	SPIRV_OPCODE_RETURN                   = 253,
+	SPIRV_OPCODE_RETURN_VALUE             = 254,
 } spirv_opcode;
 
 typedef enum spirv_glsl_std {
-	SPIRV_GLSL_STD_ROUND        = 1,
-	SPIRV_GLSL_STD_FABS         = 4,
-	SPIRV_GLSL_STD_FLOOR        = 8,
-	SPIRV_GLSL_STD_CEIL         = 9,
-	SPIRV_GLSL_STD_FRACT        = 10,
-	SPIRV_GLSL_STD_SIN          = 13,
-	SPIRV_GLSL_STD_COS          = 14,
+	SPIRV_GLSL_STD_ROUND = 1,
+	SPIRV_GLSL_STD_FABS  = 4,
+	SPIRV_GLSL_STD_FLOOR = 8,
+	SPIRV_GLSL_STD_CEIL  = 9,
+	SPIRV_GLSL_STD_FRACT = 10,
+	SPIRV_GLSL_STD_SIN   = 13,
+	SPIRV_GLSL_STD_COS   = 14,
 	////
-	SPIRV_GLSL_STD_TRUNC        = 3,
-	SPIRV_GLSL_STD_FSIGN        = 6,
-	SPIRV_GLSL_STD_RADIANS      = 11,
-	SPIRV_GLSL_STD_DEGREES      = 12,
-	SPIRV_GLSL_STD_TAN          = 15,
-	SPIRV_GLSL_STD_SINH         = 19,
-	SPIRV_GLSL_STD_COSH         = 20,
-	SPIRV_GLSL_STD_TANH         = 21,
-	SPIRV_GLSL_STD_EXP          = 27,
-	SPIRV_GLSL_STD_LOG          = 28,
+	SPIRV_GLSL_STD_TRUNC   = 3,
+	SPIRV_GLSL_STD_FSIGN   = 6,
+	SPIRV_GLSL_STD_RADIANS = 11,
+	SPIRV_GLSL_STD_DEGREES = 12,
+	SPIRV_GLSL_STD_TAN     = 15,
+	SPIRV_GLSL_STD_SINH    = 19,
+	SPIRV_GLSL_STD_COSH    = 20,
+	SPIRV_GLSL_STD_TANH    = 21,
+	SPIRV_GLSL_STD_EXP     = 27,
+	SPIRV_GLSL_STD_LOG     = 28,
 	////
 	SPIRV_GLSL_STD_ASIN         = 16,
 	SPIRV_GLSL_STD_ACOS         = 17,
@@ -296,56 +144,14 @@ typedef enum spirv_glsl_std {
 	SPIRV_GLSL_STD_REFLECT      = 71,
 } spirv_glsl_std;
 
-static type_id find_access_type(int *indices, access_kind *access_kinds, int indices_size, type_id base_type) {
-	if (get_type(base_type)->tex_kind == TEXTURE_KIND_2D) {
-		assert(indices_size == 1);
-		return float4_id;
-	}
+typedef enum addressing_model {
+	ADDRESSING_MODEL_LOGICAL = 0
+} addressing_model;
 
-	if (indices_size == 1) {
-		switch (access_kinds[0]) {
-		case ACCESS_ELEMENT: {
-			type *t = get_type(base_type);
-			return t->base;
-		}
-		case ACCESS_SWIZZLE:
-			return vector_base_type(base_type);
-		case ACCESS_MEMBER: {
-			type *t = get_type(base_type);
-			assert(indices[0] < t->members.size);
-			return t->members.m[indices[0]].type.type;
-		}
-		}
-
-		assert(false);
-		return base_type;
-	}
-	else {
-		switch (access_kinds[0]) {
-		case ACCESS_ELEMENT: {
-			type *t = get_type(base_type);
-			return find_access_type(&indices[1], &access_kinds[1], indices_size - 1, t->base);
-		}
-		case ACCESS_SWIZZLE:
-			////
-			// assert(false);
-			////
-			return base_type;
-		case ACCESS_MEMBER: {
-			type *t = get_type(base_type);
-			assert(indices[0] < t->members.size);
-			return find_access_type(&indices[1], &access_kinds[1], indices_size - 1, t->members.m[indices[0]].type.type);
-		}
-		}
-
-		assert(false);
-		return base_type;
-	}
-}
-
-typedef enum addressing_model { ADDRESSING_MODEL_LOGICAL = 0 } addressing_model;
-
-typedef enum memory_model { MEMORY_MODEL_SIMPLE = 0, MEMORY_MODEL_GLSL450 = 1 } memory_model;
+typedef enum memory_model {
+	MEMORY_MODEL_SIMPLE  = 0,
+	MEMORY_MODEL_GLSL450 = 1
+} memory_model;
 
 typedef enum capability {
 	CAPABILITY_SHADER                             = 1,
@@ -353,7 +159,11 @@ typedef enum capability {
 	CAPABILITY_STORAGE_IMAGE_WRITE_WITHOUT_FORMAT = 56,
 } capability;
 
-typedef enum execution_model { EXECUTION_MODEL_VERTEX = 0, EXECUTION_MODEL_FRAGMENT = 4, EXECUTION_MODEL_GLCOMPUTE = 5 } execution_model;
+typedef enum execution_model {
+	EXECUTION_MODEL_VERTEX    = 0,
+	EXECUTION_MODEL_FRAGMENT  = 4,
+	EXECUTION_MODEL_GLCOMPUTE = 5
+} execution_model;
 
 typedef enum decoration {
 	DECORATION_BLOCK          = 2,
@@ -397,7 +207,9 @@ typedef enum loop_control {
 	LOOP_CONTROL_DONT_UNROLL = 2,
 } loop_control;
 
-typedef enum function_control { FUNCTION_CONTROL_NONE } function_control;
+typedef enum function_control {
+	FUNCTION_CONTROL_NONE
+} function_control;
 
 typedef enum execution_mode {
 	EXECUTION_MODE_ORIGIN_UPPER_LEFT = 7,
@@ -420,7 +232,145 @@ typedef enum image_format {
 	IMAGE_FORMAT_RGBA8_SNORM = 5,
 } image_format;
 
+typedef struct spirv_id {
+	uint32_t id;
+} spirv_id;
+
+typedef struct instructions_buffer {
+	uint32_t *instructions;
+	size_t    offset;
+} instructions_buffer;
+
 static uint32_t operands_buffer[4096];
+
+typedef struct pointer_relation {
+	spirv_id non_pointer_type_id;
+	spirv_id pointer_type_id;
+} pointer_relation;
+
+static_array(pointer_relation, written_pointers, 256);
+static written_pointers written_pointer_relations;
+static spirv_id         output_struct_pointer_type = {0};
+
+typedef struct int_constant_container {
+	struct container container;
+	spirv_id         value;
+} int_constant_container;
+
+static struct hash_map *int_constants = NULL;
+
+static struct {
+	uint32_t key;
+	spirv_id value;
+} *uint_constants = NULL;
+
+static struct {
+	float    key;
+	spirv_id value;
+} *float_constants = NULL;
+
+static struct {
+	bool     key;
+	spirv_id value;
+} *bool_constants = NULL;
+
+static struct {
+	name_id  key;
+	spirv_id value;
+} *function_map = NULL;
+
+static spirv_id per_vertex_var    = {0};
+static spirv_id output_vars[256]  = {0};
+static type_id  output_types[256] = {0};
+static size_t   output_vars_count = 0;
+
+static spirv_id input_vars[256]  = {0};
+static type_id  input_types[256] = {0};
+static size_t   input_vars_count = 0;
+
+static uint32_t vertex_parameter_indices[256];
+static uint32_t vertex_parameter_member_indices[256];
+
+static void write_buffer(FILE *file, uint8_t *output, size_t output_size) {
+	for (size_t i = 0; i < output_size; ++i) {
+		// based on the encoding described in https://github.com/adobe/bin2c
+		if (output[i] == '!' || output[i] == '#' || (output[i] >= '%' && output[i] <= '>') || (output[i] >= 'A' && output[i] <= '[') ||
+		    (output[i] >= ']' && output[i] <= '~')) {
+			fprintf(file, "%c", output[i]);
+		}
+		else if (output[i] == '\a') {
+			fprintf(file, "\\a");
+		}
+		else if (output[i] == '\b') {
+			fprintf(file, "\\b");
+		}
+		else if (output[i] == '\t') {
+			fprintf(file, "\\t");
+		}
+		else if (output[i] == '\v') {
+			fprintf(file, "\\v");
+		}
+		else if (output[i] == '\f') {
+			fprintf(file, "\\f");
+		}
+		else if (output[i] == '\r') {
+			fprintf(file, "\\r");
+		}
+		else if (output[i] == '\"') {
+			fprintf(file, "\\\"");
+		}
+		else if (output[i] == '\\') {
+			fprintf(file, "\\\\");
+		}
+		else {
+			fprintf(file, "\\%03o", output[i]);
+		}
+	}
+}
+
+static type_id find_access_type(int *indices, access_kind *access_kinds, int indices_size, type_id base_type) {
+	if (get_type(base_type)->tex_kind == TEXTURE_KIND_2D) {
+		assert(indices_size == 1);
+		return float4_id;
+	}
+
+	if (indices_size == 1) {
+		switch (access_kinds[0]) {
+		case ACCESS_ELEMENT: {
+			type *t = get_type(base_type);
+			return t->base;
+		}
+		case ACCESS_SWIZZLE:
+			return vector_base_type(base_type);
+		case ACCESS_MEMBER: {
+			type *t = get_type(base_type);
+			assert(indices[0] < t->members.size);
+			return t->members.m[indices[0]].type.type;
+		}
+		}
+
+		assert(false);
+		return base_type;
+	}
+	else {
+		switch (access_kinds[0]) {
+		case ACCESS_ELEMENT: {
+			type *t = get_type(base_type);
+			return find_access_type(&indices[1], &access_kinds[1], indices_size - 1, t->base);
+		}
+		case ACCESS_SWIZZLE:
+			return base_type;
+		case ACCESS_MEMBER: {
+			type *t = get_type(base_type);
+			assert(indices[0] < t->members.size);
+			return find_access_type(&indices[1], &access_kinds[1], indices_size - 1, t->members.m[indices[0]].type.type);
+		}
+		}
+
+		assert(false);
+		return base_type;
+	}
+}
 
 static void write_simple_instruction(instructions_buffer *instructions, spirv_opcode o) {
 	instructions->instructions[instructions->offset++] = (1 << 16) | (uint16_t)o;
@@ -470,8 +420,8 @@ static spirv_id allocate_index(void) {
 }
 
 static uint16_t write_string(uint32_t *operands, const char *string) {
-	uint16_t length = (uint16_t)strlen(string);
-	uint16_t word_count = (length + 1) / 4 + 1;
+	uint16_t length          = (uint16_t)strlen(string);
+	uint16_t word_count      = (length + 1) / 4 + 1;
 	operands[word_count - 1] = 0;
 	memcpy(&operands[0], string, length + 1);
 	return word_count;
@@ -523,14 +473,6 @@ static void write_op_execution_mode3(instructions_buffer *instructions, spirv_id
 
 static void write_capabilities(instructions_buffer *instructions, const capabilities *caps) {
 	write_capability(instructions, CAPABILITY_SHADER);
-	////
-	// if (caps->image_read) {
-		// write_capability(instructions, CAPABILITY_STORAGE_IMAGE_READ_WITHOUT_FORMAT);
-	// }
-	// if (caps->image_write) {
-		// write_capability(instructions, CAPABILITY_STORAGE_IMAGE_WRITE_WITHOUT_FORMAT);
-	// }
-	////
 }
 
 static spirv_id write_type_void(instructions_buffer *instructions) {
@@ -558,14 +500,6 @@ static spirv_id write_type_float(instructions_buffer *instructions, uint32_t wid
 	write_instruction(instructions, WORD_COUNT(operands), SPIRV_OPCODE_TYPE_FLOAT, operands);
 	return float_type;
 }
-
-// static spirv_id write_type_vector(instructions_buffer *instructions, spirv_id component_type, uint32_t component_count) {
-//	spirv_id vector_type = allocate_index();
-//
-//	uint32_t operands[] = {vector_type.id, component_type.id, component_count};
-//	write_instruction(instructions, WORD_COUNT(operands), SPIRV_OPCODE_TYPE_VECTOR, operands);
-//	return vector_type;
-// }
 
 static spirv_id write_type_vector_preallocated(instructions_buffer *instructions, spirv_id component_type, uint32_t component_count, spirv_id vector_type) {
 	uint32_t operands[] = {vector_type.id, component_type.id, component_count};
@@ -753,11 +687,8 @@ static spirv_id convert_pointer_type_to_spirv_id(type_id type, storage_class sto
 	return spirv_index;
 }
 
-static spirv_id output_struct_pointer_type = {0};
-
 static void write_base_types(instructions_buffer *buffer) {
-	void_type = write_type_void(buffer);
-
+	void_type          = write_type_void(buffer);
 	void_function_type = write_type_function(buffer, void_type, NULL, 0);
 
 	spirv_float_type = write_type_float(buffer, 32);
@@ -808,31 +739,19 @@ static void write_base_types(instructions_buffer *buffer) {
 	spirv_bool_type = write_type_bool(buffer);
 	add_to_type_map(bool_id, spirv_bool_type, false, STORAGE_CLASS_NONE);
 
-	spirv_sampler_type = write_type_sampler(buffer);
-
-	spirv_sampler_pointer_type = allocate_index();
-
-	spirv_image_type = write_type_image(buffer, spirv_float_type, DIM_2D, 0, 0, 0, 1, IMAGE_FORMAT_UNKNOWN);
-
-	spirv_image_pointer_type = allocate_index();
-
-	spirv_image2darray_type = write_type_image(buffer, spirv_float_type, DIM_2D, 0, 1, 0, 1, IMAGE_FORMAT_UNKNOWN);
-
-	spirv_image2darray_pointer_type = allocate_index();
-
-	spirv_imagecube_type = write_type_image(buffer, spirv_float_type, DIM_CUBE, 0, 0, 0, 1, IMAGE_FORMAT_UNKNOWN);
-
-	spirv_imagecube_pointer_type = allocate_index();
-
-	spirv_readwrite_image_type = write_type_image(buffer, spirv_float_type, DIM_2D, 0, 0, 0, 2, IMAGE_FORMAT_UNKNOWN);
-
+	spirv_sampler_type                 = write_type_sampler(buffer);
+	spirv_sampler_pointer_type         = allocate_index();
+	spirv_image_type                   = write_type_image(buffer, spirv_float_type, DIM_2D, 0, 0, 0, 1, IMAGE_FORMAT_UNKNOWN);
+	spirv_image_pointer_type           = allocate_index();
+	spirv_image2darray_type            = write_type_image(buffer, spirv_float_type, DIM_2D, 0, 1, 0, 1, IMAGE_FORMAT_UNKNOWN);
+	spirv_image2darray_pointer_type    = allocate_index();
+	spirv_imagecube_type               = write_type_image(buffer, spirv_float_type, DIM_CUBE, 0, 0, 0, 1, IMAGE_FORMAT_UNKNOWN);
+	spirv_imagecube_pointer_type       = allocate_index();
+	spirv_readwrite_image_type         = write_type_image(buffer, spirv_float_type, DIM_2D, 0, 0, 0, 2, IMAGE_FORMAT_UNKNOWN);
 	spirv_readwrite_image_pointer_type = allocate_index();
-
-	spirv_sampled_image_type = write_type_sampled_image(buffer, spirv_image_type);
-
-	spirv_sampled_image2darray_type = write_type_sampled_image(buffer, spirv_image2darray_type);
-
-	spirv_sampled_imagecube_type = write_type_sampled_image(buffer, spirv_imagecube_type);
+	spirv_sampled_image_type           = write_type_sampled_image(buffer, spirv_image_type);
+	spirv_sampled_image2darray_type    = write_type_sampled_image(buffer, spirv_image2darray_type);
+	spirv_sampled_imagecube_type       = write_type_sampled_image(buffer, spirv_imagecube_type);
 
 	add_to_type_map(float2x2_id, write_type_matrix(buffer, spirv_float2_type, 2), false, STORAGE_CLASS_NONE);
 	add_to_type_map(float2x3_id, write_type_matrix(buffer, spirv_float3_type, 2), false, STORAGE_CLASS_NONE);
@@ -848,14 +767,6 @@ static void write_base_types(instructions_buffer *buffer) {
 }
 
 static spirv_id get_int_constant(int value);
-
-typedef struct pointer_relation {
-	spirv_id non_pointer_type_id;
-	spirv_id pointer_type_id;
-} pointer_relation;
-
-static_array(pointer_relation, written_pointers, 256);
-static written_pointers written_pointer_relations;
 
 static void write_types(instructions_buffer *buffer, function *main) {
 	type_id types[256];
@@ -1017,12 +928,6 @@ static spirv_id write_op_function_preallocated(instructions_buffer *instructions
 	return result;
 }
 
-// static spirv_id write_op_function(instructions_buffer *instructions, spirv_id result_type, function_control control, spirv_id function_type) {
-//	spirv_id result = allocate_index();
-//	write_op_function_preallocated(instructions, result_type, control, function_type, result);
-//	return result;
-// }
-
 static spirv_id write_op_function_call(instructions_buffer *instructions, spirv_id return_type, spirv_id fun_id, spirv_id *arguments, uint16_t arguments_size) {
 	spirv_id result = allocate_index();
 
@@ -1077,13 +982,6 @@ static void write_op_function_end(instructions_buffer *instructions) {
 	write_simple_instruction(instructions, SPIRV_OPCODE_FUNCTION_END);
 }
 
-typedef struct int_constant_container {
-	struct container container;
-	spirv_id         value;
-} int_constant_container;
-
-static struct hash_map *int_constants = NULL;
-
 static spirv_id get_int_constant(int value) {
 	int_constant_container *container = (int_constant_container *)hash_map_get(int_constants, value);
 
@@ -1098,11 +996,6 @@ static spirv_id get_int_constant(int value) {
 	return container->value;
 }
 
-static struct {
-	uint32_t key;
-	spirv_id value;
-} *uint_constants = NULL;
-
 static spirv_id get_uint_constant(uint32_t value) {
 	spirv_id index = hmget(uint_constants, value);
 	if (index.id == 0) {
@@ -1112,11 +1005,6 @@ static spirv_id get_uint_constant(uint32_t value) {
 	return index;
 }
 
-static struct {
-	float    key;
-	spirv_id value;
-} *float_constants = NULL;
-
 static spirv_id get_float_constant(float value) {
 	spirv_id index = hmget(float_constants, value);
 	if (index.id == 0) {
@@ -1125,11 +1013,6 @@ static spirv_id get_float_constant(float value) {
 	}
 	return index;
 }
-
-static struct {
-	bool     key;
-	spirv_id value;
-} *bool_constants = NULL;
 
 static spirv_id get_bool_constant(bool value) {
 	spirv_id index = hmget(bool_constants, value);
@@ -1587,14 +1470,6 @@ static void write_op_variable_preallocated(instructions_buffer *instructions, sp
 	write_instruction(instructions, WORD_COUNT(operands), SPIRV_OPCODE_VARIABLE, operands);
 }
 
-// static spirv_id write_op_variable_with_initializer(instructions_buffer *instructions, uint32_t result_type, storage_class storage, uint32_t initializer) {
-//	spirv_id result = allocate_index();
-//
-//	uint32_t operands[] = {result_type, result.id, (uint32_t)storage, initializer};
-//	write_instruction(instructions, WORD_COUNT(operands), SPIRV_OPCODE_VARIABLE, operands);
-//	return result;
-// }
-
 static spirv_id write_op_f_ord_equal(instructions_buffer *instructions, spirv_id type, spirv_id operand1, spirv_id operand2) {
 	spirv_id result = allocate_index();
 
@@ -1773,23 +1648,6 @@ static spirv_id get_var(instructions_buffer *instructions, variable param) {
 	return id;
 }
 
-static struct {
-	name_id  key;
-	spirv_id value;
-} *function_map = NULL;
-
-static spirv_id per_vertex_var    = {0};
-static spirv_id output_vars[256]  = {0};
-static type_id  output_types[256] = {0};
-static size_t   output_vars_count = 0;
-
-static spirv_id input_vars[256]  = {0};
-static type_id  input_types[256] = {0};
-static size_t   input_vars_count = 0;
-
-static uint32_t vertex_parameter_indices[256];
-static uint32_t vertex_parameter_member_indices[256];
-
 static void write_function(instructions_buffer *instructions, function *f, spirv_id result_type, spirv_id fun_type, spirv_id fun_id, shader_stage stage,
                            bool main, type_id output) {
 	write_op_function_preallocated(instructions, result_type, FUNCTION_CONTROL_NONE, fun_type, fun_id);
@@ -1889,7 +1747,7 @@ static void write_function(instructions_buffer *instructions, function *f, spirv
 			for (size_t i = 0; i < input_vars_count; ++i) {
 				////
 				// spirv_id index   = get_int_constant((int)vertex_parameter_member_indices[i]);
-				spirv_id index   = get_int_constant((int)i);
+				spirv_id index = get_int_constant((int)i);
 				////
 				spirv_id loaded  = write_op_load(instructions, convert_type_to_spirv_id(input_types[i]), input_vars[i]);
 				spirv_id pointer = write_op_access_chain(instructions, convert_pointer_type_to_spirv_id(input_types[i], STORAGE_CLASS_FUNCTION),
@@ -2095,22 +1953,8 @@ static void write_function(instructions_buffer *instructions, function *f, spirv
 				spirv_id sampled_image_type;
 
 				if (get_type(image_var.type.type)->tex_kind != TEXTURE_KIND_NONE) {
-					if (get_type(image_var.type.type)->tex_kind == TEXTURE_KIND_2D) {
-						image_type         = spirv_image_type;
-						sampled_image_type = spirv_sampled_image_type;
-					}
-					else if (get_type(image_var.type.type)->tex_kind == TEXTURE_KIND_2D_ARRAY) {
-						image_type         = spirv_image2darray_type;
-						sampled_image_type = spirv_sampled_image2darray_type;
-					}
-					else if (get_type(image_var.type.type)->tex_kind == TEXTURE_KIND_CUBE) {
-						image_type         = spirv_imagecube_type;
-						sampled_image_type = spirv_sampled_imagecube_type;
-					}
-					else {
-						// TODO
-						assert(false);
-					}
+					image_type         = spirv_image_type;
+					sampled_image_type = spirv_sampled_image_type;
 				}
 
 				spirv_id image         = write_op_load(instructions, image_type, convert_kong_index_to_spirv_id(image_var.index));
@@ -2119,12 +1963,6 @@ static void write_function(instructions_buffer *instructions, function *f, spirv
 				spirv_id coordinate    = get_var(instructions, o->op_call.parameters[2]);
 
 				spirv_id id = write_op_image_sample_implicit_lod(instructions, spirv_float4_type, sampled_image, coordinate);
-
-				if (is_depth(get_type(image_var.type.type)->tex_format)) {
-					uint32_t index = 0;
-
-					id = write_op_composite_extract(instructions, spirv_float_type, id, &index, 1);
-				}
 
 				hmput(index_map, o->op_call.var.index, id);
 			}
@@ -2135,22 +1973,8 @@ static void write_function(instructions_buffer *instructions, function *f, spirv
 				spirv_id sampled_image_type;
 
 				if (get_type(image_var.type.type)->tex_kind != TEXTURE_KIND_NONE) {
-					if (get_type(image_var.type.type)->tex_kind == TEXTURE_KIND_2D) {
-						image_type         = spirv_image_type;
-						sampled_image_type = spirv_sampled_image_type;
-					}
-					else if (get_type(image_var.type.type)->tex_kind == TEXTURE_KIND_2D_ARRAY) {
-						image_type         = spirv_image2darray_type;
-						sampled_image_type = spirv_sampled_image2darray_type;
-					}
-					else if (get_type(image_var.type.type)->tex_kind == TEXTURE_KIND_CUBE) {
-						image_type         = spirv_imagecube_type;
-						sampled_image_type = spirv_sampled_imagecube_type;
-					}
-					else {
-						// TODO
-						assert(false);
-					}
+					image_type         = spirv_image_type;
+					sampled_image_type = spirv_sampled_image_type;
 				}
 
 				spirv_id image         = write_op_load(instructions, image_type, convert_kong_index_to_spirv_id(image_var.index));
@@ -2553,80 +2377,80 @@ static void write_function(instructions_buffer *instructions, function *f, spirv
 			}
 			else if (func == add_name("ddx2")) {
 				spirv_id operand = get_var(instructions, o->op_call.parameters[0]);
-				spirv_id id = write_op_dpdx(instructions, spirv_float2_type, operand);
+				spirv_id id      = write_op_dpdx(instructions, spirv_float2_type, operand);
 				hmput(index_map, o->op_call.var.index, id);
 			}
 			else if (func == add_name("ddy2")) {
 				spirv_id operand = get_var(instructions, o->op_call.parameters[0]);
-				spirv_id id = write_op_dpdy(instructions, spirv_float2_type, operand);
+				spirv_id id      = write_op_dpdy(instructions, spirv_float2_type, operand);
 				hmput(index_map, o->op_call.var.index, id);
 			}
 
 			else if (func == add_name("ddx3")) {
 				spirv_id operand = get_var(instructions, o->op_call.parameters[0]);
-				spirv_id id = write_op_dpdx(instructions, spirv_float3_type, operand);
+				spirv_id id      = write_op_dpdx(instructions, spirv_float3_type, operand);
 				hmput(index_map, o->op_call.var.index, id);
 			}
 			else if (func == add_name("ddy3")) {
 				spirv_id operand = get_var(instructions, o->op_call.parameters[0]);
-				spirv_id id = write_op_dpdy(instructions, spirv_float3_type, operand);
+				spirv_id id      = write_op_dpdy(instructions, spirv_float3_type, operand);
 				hmput(index_map, o->op_call.var.index, id);
 			}
 			else if (func == add_name("clamp3")) {
 				spirv_id operand1 = get_var(instructions, o->op_call.parameters[0]);
 				spirv_id operand2 = get_var(instructions, o->op_call.parameters[1]);
 				spirv_id operand3 = get_var(instructions, o->op_call.parameters[2]);
-				spirv_id id = write_op_ext_inst3(instructions, spirv_float3_type, glsl_import, SPIRV_GLSL_STD_FCLAMP, operand1, operand2, operand3);
+				spirv_id id       = write_op_ext_inst3(instructions, spirv_float3_type, glsl_import, SPIRV_GLSL_STD_FCLAMP, operand1, operand2, operand3);
 				hmput(index_map, o->op_call.var.index, id);
 			}
 			else if (func == add_name("min3")) {
 				spirv_id operand1 = get_var(instructions, o->op_call.parameters[0]);
 				spirv_id operand2 = get_var(instructions, o->op_call.parameters[1]);
-				spirv_id id = write_op_ext_inst2(instructions, spirv_float3_type, glsl_import, SPIRV_GLSL_STD_FMIN, operand1, operand2);
+				spirv_id id       = write_op_ext_inst2(instructions, spirv_float3_type, glsl_import, SPIRV_GLSL_STD_FMIN, operand1, operand2);
 				hmput(index_map, o->op_call.var.index, id);
 			}
 			else if (func == add_name("max3")) {
 				spirv_id operand1 = get_var(instructions, o->op_call.parameters[0]);
 				spirv_id operand2 = get_var(instructions, o->op_call.parameters[1]);
-				spirv_id id = write_op_ext_inst2(instructions, spirv_float3_type, glsl_import, SPIRV_GLSL_STD_FMAX, operand1, operand2);
+				spirv_id id       = write_op_ext_inst2(instructions, spirv_float3_type, glsl_import, SPIRV_GLSL_STD_FMAX, operand1, operand2);
 				hmput(index_map, o->op_call.var.index, id);
 			}
 			else if (func == add_name("max4")) {
 				spirv_id operand1 = get_var(instructions, o->op_call.parameters[0]);
 				spirv_id operand2 = get_var(instructions, o->op_call.parameters[1]);
-				spirv_id id = write_op_ext_inst2(instructions, spirv_float4_type, glsl_import, SPIRV_GLSL_STD_FMAX, operand1, operand2);
+				spirv_id id       = write_op_ext_inst2(instructions, spirv_float4_type, glsl_import, SPIRV_GLSL_STD_FMAX, operand1, operand2);
 				hmput(index_map, o->op_call.var.index, id);
 			}
 			else if (func == add_name("step3")) {
 				spirv_id operand1 = get_var(instructions, o->op_call.parameters[0]);
 				spirv_id operand2 = get_var(instructions, o->op_call.parameters[1]);
-				spirv_id id = write_op_ext_inst2(instructions, spirv_float3_type, glsl_import, SPIRV_GLSL_STD_STEP, operand1, operand2);
+				spirv_id id       = write_op_ext_inst2(instructions, spirv_float3_type, glsl_import, SPIRV_GLSL_STD_STEP, operand1, operand2);
 				hmput(index_map, o->op_call.var.index, id);
 			}
 			else if (func == add_name("pow3")) {
 				spirv_id operand1 = get_var(instructions, o->op_call.parameters[0]);
 				spirv_id operand2 = get_var(instructions, o->op_call.parameters[1]);
-				spirv_id id = write_op_ext_inst2(instructions, spirv_float3_type, glsl_import, SPIRV_GLSL_STD_POW, operand1, operand2);
+				spirv_id id       = write_op_ext_inst2(instructions, spirv_float3_type, glsl_import, SPIRV_GLSL_STD_POW, operand1, operand2);
 				hmput(index_map, o->op_call.var.index, id);
 			}
 			else if (func == add_name("floor3")) {
 				spirv_id operand = get_var(instructions, o->op_call.parameters[0]);
-				spirv_id id = write_op_ext_inst(instructions, spirv_float3_type, glsl_import, SPIRV_GLSL_STD_FLOOR, operand);
+				spirv_id id      = write_op_ext_inst(instructions, spirv_float3_type, glsl_import, SPIRV_GLSL_STD_FLOOR, operand);
 				hmput(index_map, o->op_call.var.index, id);
 			}
 			else if (func == add_name("ceil3")) {
 				spirv_id operand = get_var(instructions, o->op_call.parameters[0]);
-				spirv_id id = write_op_ext_inst(instructions, spirv_float3_type, glsl_import, SPIRV_GLSL_STD_CEIL, operand);
+				spirv_id id      = write_op_ext_inst(instructions, spirv_float3_type, glsl_import, SPIRV_GLSL_STD_CEIL, operand);
 				hmput(index_map, o->op_call.var.index, id);
 			}
 			else if (func == add_name("abs3")) {
 				spirv_id operand = get_var(instructions, o->op_call.parameters[0]);
-				spirv_id id = write_op_ext_inst(instructions, spirv_float3_type, glsl_import, SPIRV_GLSL_STD_FABS, operand);
+				spirv_id id      = write_op_ext_inst(instructions, spirv_float3_type, glsl_import, SPIRV_GLSL_STD_FABS, operand);
 				hmput(index_map, o->op_call.var.index, id);
 			}
 			else if (func == add_name("frac3")) {
 				spirv_id operand = get_var(instructions, o->op_call.parameters[0]);
-				spirv_id id = write_op_ext_inst(instructions, spirv_float3_type, glsl_import, SPIRV_GLSL_STD_FRACT, operand);
+				spirv_id id      = write_op_ext_inst(instructions, spirv_float3_type, glsl_import, SPIRV_GLSL_STD_FRACT, operand);
 				hmput(index_map, o->op_call.var.index, id);
 			}
 			else if (func == add_name("lerp3")) {
@@ -2636,7 +2460,7 @@ static void write_function(instructions_buffer *instructions, function *f, spirv
 
 				if (o->op_call.parameters[2].type.type == float_id) {
 					spirv_id operands[3] = {operand3, operand3, operand3};
-					operand3 = write_op_composite_construct(instructions, spirv_float3_type, operands, 3);
+					operand3             = write_op_composite_construct(instructions, spirv_float3_type, operands, 3);
 				}
 
 				spirv_id id = write_op_ext_inst3(instructions, spirv_float3_type, glsl_import, SPIRV_GLSL_STD_FMIX, operand1, operand2, operand3);
@@ -2649,7 +2473,7 @@ static void write_function(instructions_buffer *instructions, function *f, spirv
 
 				if (o->op_call.parameters[2].type.type == float_id) {
 					spirv_id operands[4] = {operand3, operand3, operand3, operand3};
-					operand3 = write_op_composite_construct(instructions, spirv_float4_type, operands, 4);
+					operand3             = write_op_composite_construct(instructions, spirv_float4_type, operands, 4);
 				}
 
 				spirv_id id = write_op_ext_inst3(instructions, spirv_float4_type, glsl_import, SPIRV_GLSL_STD_FMIX, operand1, operand2, operand3);
@@ -2826,36 +2650,36 @@ static void write_function(instructions_buffer *instructions, function *f, spirv
 			break;
 		}
 		case OPCODE_BITWISE_XOR: {
-			spirv_id left  = get_var(instructions, o->op_binary.left);
-			spirv_id right = get_var(instructions, o->op_binary.right);
+			spirv_id left   = get_var(instructions, o->op_binary.left);
+			spirv_id right  = get_var(instructions, o->op_binary.right);
 			spirv_id result = write_op_bitwise_xor(instructions, convert_type_to_spirv_id(o->op_binary.result.type.type), left, right);
 			hmput(index_map, o->op_binary.result.index, result);
 			break;
 		}
 		case OPCODE_BITWISE_AND: {
-			spirv_id left  = get_var(instructions, o->op_binary.left);
-			spirv_id right = get_var(instructions, o->op_binary.right);
+			spirv_id left   = get_var(instructions, o->op_binary.left);
+			spirv_id right  = get_var(instructions, o->op_binary.right);
 			spirv_id result = write_op_bitwise_and(instructions, convert_type_to_spirv_id(o->op_binary.result.type.type), left, right);
 			hmput(index_map, o->op_binary.result.index, result);
 			break;
 		}
 		case OPCODE_BITWISE_OR: {
-			spirv_id left  = get_var(instructions, o->op_binary.left);
-			spirv_id right = get_var(instructions, o->op_binary.right);
+			spirv_id left   = get_var(instructions, o->op_binary.left);
+			spirv_id right  = get_var(instructions, o->op_binary.right);
 			spirv_id result = write_op_bitwise_or(instructions, convert_type_to_spirv_id(o->op_binary.result.type.type), left, right);
 			hmput(index_map, o->op_binary.result.index, result);
 			break;
 		}
 		case OPCODE_LEFT_SHIFT: {
-			spirv_id left  = get_var(instructions, o->op_binary.left);
-			spirv_id right = get_var(instructions, o->op_binary.right);
+			spirv_id left   = get_var(instructions, o->op_binary.left);
+			spirv_id right  = get_var(instructions, o->op_binary.right);
 			spirv_id result = write_op_left_shift(instructions, convert_type_to_spirv_id(o->op_binary.result.type.type), left, right);
 			hmput(index_map, o->op_binary.result.index, result);
 			break;
 		}
 		case OPCODE_RIGHT_SHIFT: {
-			spirv_id left  = get_var(instructions, o->op_binary.left);
-			spirv_id right = get_var(instructions, o->op_binary.right);
+			spirv_id left   = get_var(instructions, o->op_binary.left);
+			spirv_id right  = get_var(instructions, o->op_binary.right);
 			spirv_id result = write_op_right_shift(instructions, convert_type_to_spirv_id(o->op_binary.result.type.type), left, right);
 			hmput(index_map, o->op_binary.result.index, result);
 			break;
@@ -3543,80 +3367,28 @@ static void write_globals(instructions_buffer *decorations, instructions_buffer 
 			write_op_decorate_value(decorations, spirv_var_id, DECORATION_BINDING, binding);
 		}
 		else if (get_type(base_type)->tex_kind != TEXTURE_KIND_NONE) {
-			if (get_type(base_type)->tex_kind == TEXTURE_KIND_2D) {
-				if (t->array_size == UINT32_MAX) {
-					assert(false);
-				}
-				else {
-					spirv_id image_pointer_type;
-
-					if (readable || writable) {
-						add_to_type_map(g->type, spirv_readwrite_image_type, true, STORAGE_CLASS_NONE);
-						image_pointer_type = spirv_readwrite_image_pointer_type;
-					}
-					else {
-						add_to_type_map(g->type, spirv_image_type, false, STORAGE_CLASS_NONE);
-						image_pointer_type = spirv_image_pointer_type;
-					}
-
-					add_to_type_map(g->type, image_pointer_type, readable || writable, STORAGE_CLASS_UNIFORM_CONSTANT);
-
-					spirv_id spirv_var_id = convert_kong_index_to_spirv_id(g->var_index);
-					write_op_variable_preallocated(global_vars_block, image_pointer_type, spirv_var_id, STORAGE_CLASS_UNIFORM_CONSTANT);
-
-					write_op_decorate_value(decorations, spirv_var_id, DECORATION_DESCRIPTOR_SET, 0);
-					write_op_decorate_value(decorations, spirv_var_id, DECORATION_BINDING, binding);
-				}
-			}
-			else if (get_type(base_type)->tex_kind == TEXTURE_KIND_2D_ARRAY) {
-				if (t->array_size == UINT32_MAX) {
-					assert(false);
-				}
-				else {
-					spirv_id image_pointer_type;
-
-					if (writable) {
-						assert(false);
-					}
-					else {
-						add_to_type_map(g->type, spirv_image2darray_type, false, STORAGE_CLASS_NONE);
-						add_to_type_map(g->type, spirv_image2darray_pointer_type, false, STORAGE_CLASS_UNIFORM_CONSTANT);
-						image_pointer_type = spirv_image2darray_pointer_type;
-					}
-
-					spirv_id spirv_var_id = convert_kong_index_to_spirv_id(g->var_index);
-					write_op_variable_preallocated(global_vars_block, image_pointer_type, spirv_var_id, STORAGE_CLASS_UNIFORM_CONSTANT);
-
-					write_op_decorate_value(decorations, spirv_var_id, DECORATION_DESCRIPTOR_SET, 0);
-					write_op_decorate_value(decorations, spirv_var_id, DECORATION_BINDING, binding);
-				}
-			}
-			else if (get_type(base_type)->tex_kind == TEXTURE_KIND_CUBE) {
-				if (t->array_size == UINT32_MAX) {
-					assert(false);
-				}
-				else {
-					spirv_id image_pointer_type;
-
-					if (writable) {
-						assert(false);
-					}
-					else {
-						add_to_type_map(g->type, spirv_imagecube_type, false, STORAGE_CLASS_NONE);
-						add_to_type_map(g->type, spirv_imagecube_pointer_type, false, STORAGE_CLASS_UNIFORM_CONSTANT);
-						image_pointer_type = spirv_imagecube_pointer_type;
-					}
-
-					spirv_id spirv_var_id = convert_kong_index_to_spirv_id(g->var_index);
-					write_op_variable_preallocated(global_vars_block, image_pointer_type, spirv_var_id, STORAGE_CLASS_UNIFORM_CONSTANT);
-
-					write_op_decorate_value(decorations, spirv_var_id, DECORATION_DESCRIPTOR_SET, 0);
-					write_op_decorate_value(decorations, spirv_var_id, DECORATION_BINDING, binding);
-				}
+			if (t->array_size == UINT32_MAX) {
+				assert(false);
 			}
 			else {
-				// TODO
-				assert(false);
+				spirv_id image_pointer_type;
+
+				if (readable || writable) {
+					add_to_type_map(g->type, spirv_readwrite_image_type, true, STORAGE_CLASS_NONE);
+					image_pointer_type = spirv_readwrite_image_pointer_type;
+				}
+				else {
+					add_to_type_map(g->type, spirv_image_type, false, STORAGE_CLASS_NONE);
+					image_pointer_type = spirv_image_pointer_type;
+				}
+
+				add_to_type_map(g->type, image_pointer_type, readable || writable, STORAGE_CLASS_UNIFORM_CONSTANT);
+
+				spirv_id spirv_var_id = convert_kong_index_to_spirv_id(g->var_index);
+				write_op_variable_preallocated(global_vars_block, image_pointer_type, spirv_var_id, STORAGE_CLASS_UNIFORM_CONSTANT);
+
+				write_op_decorate_value(decorations, spirv_var_id, DECORATION_DESCRIPTOR_SET, 0);
+				write_op_decorate_value(decorations, spirv_var_id, DECORATION_BINDING, binding);
 			}
 		}
 		else if (base_type == bvh_type_id) {
@@ -3774,514 +3546,9 @@ void init_maps(void) {
 	init_float_constants();
 }
 
-static void spirv_export_vertex(char *directory, function *main, bool debug) {
-	next_index = 1;
-	init_maps();
-
-	find_used_builtins(main);
-	find_used_capabilities(main);
-
-	instructions_buffer header = {
-	    .instructions = (uint32_t *)calloc(1024 * 1024, 1),
-	};
-
-	instructions_buffer decorations = {
-	    .instructions = (uint32_t *)calloc(1024 * 1024, 1),
-	};
-
-	instructions_buffer base_types = {
-	    .instructions = (uint32_t *)calloc(1024 * 1024, 1),
-	};
-
-	instructions_buffer constants = {
-	    .instructions = (uint32_t *)calloc(1024 * 1024, 1),
-	};
-
-	instructions_buffer aggregate_types = {
-	    .instructions = (uint32_t *)calloc(1024 * 1024, 1),
-	};
-
-	instructions_buffer global_vars = {
-	    .instructions = (uint32_t *)calloc(1024 * 1024, 1),
-	};
-
-	instructions_buffer instructions = {
-	    .instructions = (uint32_t *)calloc(1024 * 1024, 1),
-	};
-
-	assert(main->parameters_size > 0);
-	type_id vertex_output = main->return_type.type;
-
-	debug_context context = {0};
-	check(vertex_output != NO_TYPE, context, "vertex output missing");
-
-	write_capabilities(&decorations, &main->used_capabilities);
-	glsl_import = write_op_ext_inst_import(&decorations, "GLSL.std.450");
-	write_op_memory_model(&decorations, ADDRESSING_MODEL_LOGICAL, MEMORY_MODEL_GLSL450);
-
-	type *output = get_type(vertex_output);
-
-	spirv_id entry_point = allocate_index();
-
-	size_t input_type_index = 0;
-
-	for (uint32_t input_index = 0; input_index < main->parameters_size; ++input_index) {
-		type *input = get_type(main->parameter_types[input_index].type);
-
-		input_vars_count += input->members.size;
-
-		for (size_t member_index = 0; member_index < input->members.size; ++member_index) {
-			input_types[input_type_index] = input->members.m[member_index].type.type;
-
-			vertex_parameter_indices[input_type_index]        = input_index;
-			vertex_parameter_member_indices[input_type_index] = (uint32_t)member_index;
-
-			++input_type_index;
-		}
-	}
-
-	for (size_t input_var_index = 0; input_var_index < input_vars_count; ++input_var_index) {
-		input_vars[input_var_index] = allocate_index();
-	}
-
-	output_vars_count = output->members.size;
-	for (size_t output_var_index = 0; output_var_index < output_vars_count; ++output_var_index) {
-		output_vars[output_var_index] = allocate_index();
-	}
-	per_vertex_var = output_vars[0];
-
-	spirv_id interfaces[256];
-	size_t   interfaces_count = 0;
-
-	for (size_t input_var_index = 0; input_var_index < input_vars_count; ++input_var_index) {
-		interfaces[interfaces_count] = input_vars[input_var_index];
-		interfaces_count += 1;
-	}
-
-	for (size_t output_var_index = 0; output_var_index < output_vars_count; ++output_var_index) {
-		interfaces[interfaces_count] = output_vars[output_var_index];
-		interfaces_count += 1;
-	}
-
-	if (main->used_builtins.vertex_id) {
-		vertex_id_variable           = allocate_index();
-		interfaces[interfaces_count] = vertex_id_variable;
-		interfaces_count += 1;
-	}
-
-	write_op_entry_point(&decorations, EXECUTION_MODEL_VERTEX, entry_point, "main", interfaces, (uint16_t)interfaces_count);
-
-	write_vertex_input_decorations(&decorations, input_vars, (uint32_t)input_vars_count);
-
-	write_base_types(&base_types);
-
-	write_globals(&decorations, &aggregate_types, &global_vars, main, SHADER_STAGE_VERTEX);
-
-	for (size_t i = 0; i < input_vars_count; ++i) {
-		if (input_types[i] == float2_id) {
-			write_op_variable_preallocated(&instructions, convert_pointer_type_to_spirv_id(float2_id, STORAGE_CLASS_INPUT), input_vars[i], STORAGE_CLASS_INPUT);
-		}
-		else if (input_types[i] == float3_id) {
-			write_op_variable_preallocated(&instructions, convert_pointer_type_to_spirv_id(float3_id, STORAGE_CLASS_INPUT), input_vars[i], STORAGE_CLASS_INPUT);
-		}
-		else if (input_types[i] == float4_id) {
-			write_op_variable_preallocated(&instructions, convert_pointer_type_to_spirv_id(float4_id, STORAGE_CLASS_INPUT), input_vars[i], STORAGE_CLASS_INPUT);
-		}
-		else {
-			debug_context context = {0};
-			error(context, "Type unsupported for input in SPIR-V");
-		}
-	}
-
-	spirv_id types[]       = {spirv_float4_type};
-	spirv_id output_struct = write_type_struct(&aggregate_types, types, 1);
-	write_vertex_output_decorations(&decorations, output_struct, output_vars, (uint32_t)output_vars_count);
-
-	output_struct_pointer_type = write_type_pointer(&aggregate_types, STORAGE_CLASS_OUTPUT, output_struct);
-	write_op_variable_preallocated(&instructions, output_struct_pointer_type, per_vertex_var, STORAGE_CLASS_OUTPUT);
-
-	// special handling for the first one (position) via per_vertex_var
-	for (size_t i = 1; i < output_vars_count; ++i) {
-		member m        = output->members.m[i];
-		output_types[i] = m.type.type;
-
-		if (m.type.type == float2_id) {
-			write_op_variable_preallocated(&instructions, convert_pointer_type_to_spirv_id(float2_id, STORAGE_CLASS_OUTPUT), output_vars[i],
-			                               STORAGE_CLASS_OUTPUT);
-		}
-		else if (m.type.type == float3_id) {
-			write_op_variable_preallocated(&instructions, convert_pointer_type_to_spirv_id(float3_id, STORAGE_CLASS_OUTPUT), output_vars[i],
-			                               STORAGE_CLASS_OUTPUT);
-		}
-		else if (m.type.type == float4_id) {
-			write_op_variable_preallocated(&instructions, convert_pointer_type_to_spirv_id(float4_id, STORAGE_CLASS_OUTPUT), output_vars[i],
-			                               STORAGE_CLASS_OUTPUT);
-		}
-		else {
-			debug_context context = {0};
-			error(context, "Type unsupported for input in SPIR-V");
-		}
-	}
-
-	write_functions(&instructions, main, entry_point, SHADER_STAGE_VERTEX, vertex_output);
-
-	write_types(&aggregate_types, main);
-
-	// header
-	write_magic_number(&header);
-	write_version_number(&header);
-	write_generator_magic_number(&header);
-	write_bound(&header);
-	write_instruction_schema(&header);
-
-	write_constants(&constants);
-
-	char *name = get_name(main->name);
-
-	char filename[512];
-	sprintf(filename, "kong_%s", name);
-
-	char var_name[256];
-	sprintf(var_name, "%s_code", name);
-
-	write_bytecode(directory, filename, var_name, &header, &decorations, &base_types, &constants, &aggregate_types, &global_vars, &instructions, debug);
-}
-
-static void spirv_export_fragment(char *directory, function *main, bool debug) {
-	next_index = 1;
-	init_maps();
-
-	find_used_builtins(main);
-	find_used_capabilities(main);
-
-	instructions_buffer header = {
-	    .instructions = (uint32_t *)calloc(1024 * 1024, 1),
-	};
-
-	instructions_buffer decorations = {
-	    .instructions = (uint32_t *)calloc(1024 * 1024, 1),
-	};
-
-	instructions_buffer base_types = {
-	    .instructions = (uint32_t *)calloc(1024 * 1024, 1),
-	};
-
-	instructions_buffer constants = {
-	    .instructions = (uint32_t *)calloc(1024 * 1024, 1),
-	};
-
-	instructions_buffer aggregate_types = {
-	    .instructions = (uint32_t *)calloc(1024 * 1024, 1),
-	};
-
-	instructions_buffer global_vars = {
-	    .instructions = (uint32_t *)calloc(1024 * 1024, 1),
-	};
-
-	instructions_buffer instructions = {
-	    .instructions = (uint32_t *)calloc(1024 * 1024, 1),
-	};
-
-	assert(main->parameters_size > 0);
-	type_id pixel_input  = main->parameter_types[0].type;
-	type_id pixel_output = main->return_type.type;
-
-	debug_context context = {0};
-	check(pixel_input != NO_TYPE, context, "fragment input missing");
-	check(pixel_output != NO_TYPE, context, "fragment output missing");
-
-	write_capabilities(&decorations, &main->used_capabilities);
-	glsl_import = write_op_ext_inst_import(&decorations, "GLSL.std.450");
-	write_op_memory_model(&decorations, ADDRESSING_MODEL_LOGICAL, MEMORY_MODEL_GLSL450);
-
-	type *input  = get_type(pixel_input);
-	type *output = get_type(pixel_output);
-
-	spirv_id entry_point = allocate_index();
-
-	input_vars_count = input->members.size - 1; // jump over pos input
-	for (size_t input_var_index = 0; input_var_index < input_vars_count; ++input_var_index) {
-		input_vars[input_var_index] = allocate_index();
-	}
-
-	assert(output->built_in); // has to be a float4 or a float4[]
-
-	if (output->array_size > 0) {
-		output_vars_count = output->array_size;
-		for (size_t output_var_index = 0; output_var_index < output->array_size; ++output_var_index) {
-			output_vars[output_var_index] = allocate_index();
-		}
-	}
-	else {
-		output_vars_count = 1;
-		output_vars[0]    = allocate_index();
-	}
-
-	spirv_id interfaces[256];
-	size_t   interfaces_count = 0;
-
-	for (size_t input_var_index = 0; input_var_index < input_vars_count; ++input_var_index) {
-		interfaces[interfaces_count] = input_vars[input_var_index];
-		interfaces_count += 1;
-	}
-
-	for (size_t output_var_index = 0; output_var_index < output_vars_count; ++output_var_index) {
-		interfaces[interfaces_count] = output_vars[output_var_index];
-		interfaces_count += 1;
-	}
-
-	write_op_entry_point(&decorations, EXECUTION_MODEL_FRAGMENT, entry_point, "main", interfaces, (uint16_t)interfaces_count);
-
-	write_op_execution_mode(&decorations, entry_point, EXECUTION_MODE_ORIGIN_UPPER_LEFT);
-
-	write_fragment_input_decorations(&decorations, input_vars, (uint32_t)input_vars_count);
-
-	write_base_types(&base_types);
-
-	write_globals(&decorations, &aggregate_types, &global_vars, main, SHADER_STAGE_FRAGMENT);
-
-	for (size_t i = 0; i < input_vars_count; ++i) {
-		member m       = input->members.m[i + 1]; // jump over pos input
-		input_types[i] = m.type.type;
-
-		if (m.type.type == float2_id) {
-			write_op_variable_preallocated(&instructions, convert_pointer_type_to_spirv_id(float2_id, STORAGE_CLASS_INPUT), input_vars[i], STORAGE_CLASS_INPUT);
-		}
-		else if (m.type.type == float3_id) {
-			write_op_variable_preallocated(&instructions, convert_pointer_type_to_spirv_id(float3_id, STORAGE_CLASS_INPUT), input_vars[i], STORAGE_CLASS_INPUT);
-		}
-		else if (m.type.type == float4_id) {
-			write_op_variable_preallocated(&instructions, convert_pointer_type_to_spirv_id(float4_id, STORAGE_CLASS_INPUT), input_vars[i], STORAGE_CLASS_INPUT);
-		}
-		else {
-			debug_context context = {0};
-			error(context, "Type unsupported for input in SPIR-V");
-		}
-	}
-
-	write_fragment_output_decorations(&decorations, output_vars, (uint32_t)output_vars_count);
-
-	type_id output_type = output->array_size > 0 ? output->base : pixel_output;
-
-	for (size_t i = 0; i < output_vars_count; ++i) {
-		write_op_variable_preallocated(&instructions, convert_pointer_type_to_spirv_id(output_type, STORAGE_CLASS_OUTPUT), output_vars[i],
-		                               STORAGE_CLASS_OUTPUT);
-	}
-
-	write_functions(&instructions, main, entry_point, SHADER_STAGE_FRAGMENT, NO_TYPE);
-
-	write_types(&aggregate_types, main);
-
-	// header
-	write_magic_number(&header);
-	write_version_number(&header);
-	write_generator_magic_number(&header);
-	write_bound(&header);
-	write_instruction_schema(&header);
-
-	write_constants(&constants);
-
-	char *name = get_name(main->name);
-
-	char filename[512];
-	sprintf(filename, "kong_%s", name);
-
-	char var_name[256];
-	sprintf(var_name, "%s_code", name);
-
-	write_bytecode(directory, filename, var_name, &header, &decorations, &base_types, &constants, &aggregate_types, &global_vars, &instructions, debug);
-}
-
-static void spirv_export_compute(char *directory, function *main, bool debug) {
-	next_index = 1;
-	init_maps();
-
-	find_used_builtins(main);
-	find_used_capabilities(main);
-
-	instructions_buffer header = {
-	    .instructions = (uint32_t *)calloc(1024 * 1024, 1),
-	};
-
-	instructions_buffer decorations = {
-	    .instructions = (uint32_t *)calloc(1024 * 1024, 1),
-	};
-
-	instructions_buffer base_types = {
-	    .instructions = (uint32_t *)calloc(1024 * 1024, 1),
-	};
-
-	instructions_buffer constants = {
-	    .instructions = (uint32_t *)calloc(1024 * 1024, 1),
-	};
-
-	instructions_buffer aggregate_types = {
-	    .instructions = (uint32_t *)calloc(1024 * 1024, 1),
-	};
-
-	instructions_buffer global_vars = {
-	    .instructions = (uint32_t *)calloc(1024 * 1024, 1),
-	};
-
-	instructions_buffer instructions = {
-	    .instructions = (uint32_t *)calloc(1024 * 1024, 1),
-	};
-
-	assert(main->parameters_size == 0);
-
-	write_capabilities(&decorations, &main->used_capabilities);
-	glsl_import = write_op_ext_inst_import(&decorations, "GLSL.std.450");
-	write_op_memory_model(&decorations, ADDRESSING_MODEL_LOGICAL, MEMORY_MODEL_GLSL450);
-
-	spirv_id entry_point = allocate_index();
-
-	input_vars_count  = 0;
-	output_vars_count = 0;
-
-	work_group_size_variable = allocate_index();
-
-	spirv_id interfaces[256];
-	size_t   interfaces_count = 0;
-
-	if (main->used_builtins.dispatch_thread_id) {
-		dispatch_thread_id_variable = allocate_index();
-
-		interfaces[interfaces_count] = dispatch_thread_id_variable;
-		interfaces_count += 1;
-	}
-
-	if (main->used_builtins.group_thread_id) {
-		group_thread_id_variable = allocate_index();
-
-		interfaces[interfaces_count] = group_thread_id_variable;
-		interfaces_count += 1;
-	}
-
-	if (main->used_builtins.group_id) {
-		group_id_variable = allocate_index();
-
-		interfaces[interfaces_count] = group_id_variable;
-		interfaces_count += 1;
-	}
-
-	write_op_entry_point(&decorations, EXECUTION_MODEL_GLCOMPUTE, entry_point, "main", interfaces, (uint16_t)interfaces_count);
-
-	attribute *threads_attribute = find_attribute(&main->attributes, add_name("threads"));
-	if (threads_attribute == NULL || threads_attribute->paramters_count != 3) {
-		debug_context context = {0};
-		error(context, "Compute function requires a threads attribute with three parameters");
-	}
-
-	assert(threads_attribute != NULL);
-	write_op_execution_mode3(&decorations, entry_point, EXECUTION_MODE_LOCAL_SIZE, (uint32_t)threads_attribute->parameters[0],
-	                         (uint32_t)threads_attribute->parameters[1], (uint32_t)threads_attribute->parameters[2]);
-
-	write_base_types(&base_types);
-
-	write_globals(&decorations, &aggregate_types, &global_vars, main, SHADER_STAGE_COMPUTE);
-
-	write_functions(&instructions, main, entry_point, SHADER_STAGE_COMPUTE, NO_TYPE);
-
-	write_types(&aggregate_types, main);
-
-	spirv_id work_group_x = get_uint_constant((uint32_t)threads_attribute->parameters[0]);
-	spirv_id work_group_y = get_uint_constant((uint32_t)threads_attribute->parameters[1]);
-	spirv_id work_group_z = get_uint_constant((uint32_t)threads_attribute->parameters[2]);
-
-	// header
-	write_magic_number(&header);
-	write_version_number(&header);
-	write_generator_magic_number(&header);
-	write_bound(&header);
-	write_instruction_schema(&header);
-
-	write_constants(&constants);
-
-	write_constant_composite_preallocated3(&constants, spirv_uint3_type, work_group_size_variable, work_group_x, work_group_y, work_group_z);
-
-	char *name = get_name(main->name);
-
-	char filename[512];
-	sprintf(filename, "kong_%s", name);
-
-	char var_name[256];
-	sprintf(var_name, "%s_code", name);
-
-	write_bytecode(directory, filename, var_name, &header, &decorations, &base_types, &constants, &aggregate_types, &global_vars, &instructions, debug);
-}
-
-void spirv_export(char *directory, bool debug) {
-	function *vertex_shaders[256];
-	size_t    vertex_shaders_size = 0;
-
-	function *fragment_shaders[256];
-	size_t    fragment_shaders_size = 0;
-
-	function *compute_shaders[256];
-	size_t    compute_shaders_size = 0;
-
-	for (type_id i = 0; get_type(i) != NULL; ++i) {
-		type *t = get_type(i);
-		if (!t->built_in && has_attribute(&t->attributes, add_name("pipe"))) {
-			name_id vertex_shader_name   = NO_NAME;
-			name_id fragment_shader_name = NO_NAME;
-
-			for (size_t j = 0; j < t->members.size; ++j) {
-				if (t->members.m[j].name == add_name("vertex")) {
-					vertex_shader_name = t->members.m[j].value.identifier;
-				}
-				else if (t->members.m[j].name == add_name("fragment")) {
-					fragment_shader_name = t->members.m[j].value.identifier;
-				}
-			}
-
-			debug_context context = {0};
-			check(vertex_shader_name != NO_NAME, context, "vertex shader missing");
-			check(fragment_shader_name != NO_NAME, context, "fragment shader missing");
-
-			for (function_id i = 0; get_function(i) != NULL; ++i) {
-				function *f = get_function(i);
-				if (f->name == vertex_shader_name) {
-					vertex_shaders[vertex_shaders_size] = f;
-					vertex_shaders_size += 1;
-				}
-				else if (f->name == fragment_shader_name) {
-					fragment_shaders[fragment_shaders_size] = f;
-					fragment_shaders_size += 1;
-				}
-			}
-		}
-	}
-
-	for (function_id i = 0; get_function(i) != NULL; ++i) {
-		function *f = get_function(i);
-		if (has_attribute(&f->attributes, add_name("compute"))) {
-			compute_shaders[compute_shaders_size] = f;
-			compute_shaders_size += 1;
-		}
-	}
-
-	for (size_t i = 0; i < vertex_shaders_size; ++i) {
-		input_vars_count = 0;
-		spirv_export_vertex(directory, vertex_shaders[i], debug);
-	}
-
-	for (size_t i = 0; i < fragment_shaders_size; ++i) {
-		input_vars_count = 0;
-		spirv_export_fragment(directory, fragment_shaders[i], debug);
-	}
-
-	for (size_t i = 0; i < compute_shaders_size; ++i) {
-		input_vars_count = 0;
-		spirv_export_compute(directory, compute_shaders[i], debug);
-	}
-}
-
-////
-
-static char *write_bytecode2(char *buffer, int *size_out, instructions_buffer *header, instructions_buffer *decorations,
-	instructions_buffer *base_types, instructions_buffer *constants, instructions_buffer *aggregate_types,
-	instructions_buffer *global_vars, instructions_buffer *instructions, bool debug) {
+static char *write_bytecode2(char *buffer, int *size_out, instructions_buffer *header, instructions_buffer *decorations, instructions_buffer *base_types,
+                             instructions_buffer *constants, instructions_buffer *aggregate_types, instructions_buffer *global_vars,
+                             instructions_buffer *instructions, bool debug) {
 	uint8_t *output_header      = (uint8_t *)header->instructions;
 	size_t   output_header_size = header->offset * 4;
 
@@ -4303,7 +3570,6 @@ static char *write_bytecode2(char *buffer, int *size_out, instructions_buffer *h
 	uint8_t *output_instructions      = (uint8_t *)instructions->instructions;
 	size_t   output_instructions_size = instructions->offset * 4;
 
-
 	{
 		int pos = 0;
 		memcpy(buffer + pos, output_header, output_header_size);
@@ -4321,9 +3587,8 @@ static char *write_bytecode2(char *buffer, int *size_out, instructions_buffer *h
 		memcpy(buffer + pos, output_instructions, output_instructions_size);
 		pos += output_instructions_size;
 
-		*size_out =
-			output_header_size + output_decorations_size + output_base_types_size + output_constants_size + output_aggregate_types_size +
-			output_global_vars_size + output_instructions_size;
+		*size_out = output_header_size + output_decorations_size + output_base_types_size + output_constants_size + output_aggregate_types_size +
+		            output_global_vars_size + output_instructions_size;
 
 		return buffer;
 	}
@@ -4406,7 +3671,7 @@ static char *spirv_export_vertex2(function *main, bool debug, int *size_out) {
 	}
 
 	if (main->used_builtins.vertex_id) {
-		vertex_id_variable = allocate_index();
+		vertex_id_variable           = allocate_index();
 		interfaces[interfaces_count] = vertex_id_variable;
 		interfaces_count += 1;
 	}
@@ -4610,7 +3875,8 @@ static char *spirv_export_fragment2(function *main, bool debug, int *size_out) {
 	type_id output_type = output->array_size > 0 ? output->base : pixel_output;
 
 	for (size_t i = 0; i < output_vars_count; ++i) {
-		write_op_variable_preallocated(&instructions, convert_pointer_type_to_spirv_id(output_type, STORAGE_CLASS_OUTPUT), output_vars[i], STORAGE_CLASS_OUTPUT);
+		write_op_variable_preallocated(&instructions, convert_pointer_type_to_spirv_id(output_type, STORAGE_CLASS_OUTPUT), output_vars[i],
+		                               STORAGE_CLASS_OUTPUT);
 	}
 
 	write_functions(&instructions, main, entry_point, SHADER_STAGE_FRAGMENT, NO_TYPE);
@@ -4681,5 +3947,3 @@ void spirv_export2(char **vs, char **fs, int *vs_size, int *fs_size, bool debug)
 	*vs = spirv_export_vertex2(vertex_shaders[0], debug, vs_size);
 	*fs = spirv_export_fragment2(fragment_shaders[0], debug, fs_size);
 }
-
-////

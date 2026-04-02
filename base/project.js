@@ -130,9 +130,7 @@ if (graphics == "metal" || (graphics == "vulkan" && platform != "android")) {
 
 if (flags.with_kong) {
 	project.add_define("WITH_KONG");
-	project.add_cfiles("sources/kong/libs/*.c");
 	project.add_cfiles("sources/kong/*.c");
-	project.add_cfiles("sources/kong/backends/*.c");
 }
 
 if (flags.with_plugins) {

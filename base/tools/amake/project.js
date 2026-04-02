@@ -15,9 +15,7 @@ project.add_cfiles("main.c");
 project.add_cfiles("aimage.c");
 
 project.add_cfiles("ashader.c");
-project.add_cfiles('../../sources/kong/libs/*.c');
 project.add_cfiles('../../sources/kong/*.c');
-project.add_cfiles('../../sources/kong/backends/*.c');
 
 if (platform === "windows") {
 	project.add_define('_CRT_SECURE_NO_WARNINGS');
