@@ -1616,7 +1616,7 @@ void gpu_shader_destroy(gpu_shader_t *shader) {
 #ifdef WITH_BC7
 #include <libs/bc7enc.h>
 #include <iron_thread.h>
-#define BC7_THREAD_COUNT 8
+#define BC7_THREAD_COUNT 16
 
 typedef struct {
 	uint8_t                     *src;
@@ -1672,7 +1672,7 @@ void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, 
 
 #ifdef WITH_BC7
 	void *bc7_data = NULL;
-	if (format == GPU_TEXTURE_FORMAT_RGBA32) {
+	if (format == GPU_TEXTURE_FORMAT_RGBA32 && width >= 2048 && height >= 2048) {
 		vk_format                       = VK_FORMAT_BC7_UNORM_BLOCK;
 		int blocks_x                    = (width + 3) / 4;
 		int blocks_y                    = (height + 3) / 4;
@@ -1693,6 +1693,9 @@ void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, 
 		            .next_block   = &next_block,
         };
 		bc7enc_compress_block_params_init(&tp.params);
+		tp.params.m_max_partitions_mode = 0;
+		tp.params.m_try_least_squares = false;
+
 		iron_thread_t threads[BC7_THREAD_COUNT];
 		for (int i = 0; i < BC7_THREAD_COUNT; i++) {
 			iron_thread_init(&threads[i], bc7_thread_func, &tp);
