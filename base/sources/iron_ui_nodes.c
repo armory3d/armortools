@@ -442,13 +442,13 @@ void ui_node_draw_body(ui_node_t *node, ui_node_canvas_t *canvas, float nx, floa
 	ny -= lineh / 3.0; // Fix align
 	for (int buti = 0; buti < node->buttons->length; ++buti) {
 		ui_node_button_t *but = node->buttons->buffer[buti];
+		float            *val = but->output == -1 ? but->default_value->buffer : node->outputs->buffer[but->output]->default_value->buffer;
 
 		if (strcmp(but->type, "RGBA") == 0) {
 			ny += lineh;             // 18 + 2 separator
 			current->_x    = nx + 1; // Offset for node selection border
 			current->_y    = ny;
 			current->_w    = w;
-			float *val     = node->outputs->buffer[but->output]->default_value->buffer;
 			nhandle->color = ui_color(val[0] * 255.0, val[1] * 255.0, val[2] * 255.0, 255.0);
 			ui_color_wheel(nhandle, false, -1, -1, true, &ui_color_wheel_picker, val);
 			val[0] = ui_color_r(nhandle->color) / 255.0f;
@@ -465,7 +465,6 @@ void ui_node_draw_body(ui_node_t *node, ui_node_canvas_t *canvas, float nx, floa
 			float text_off                   = current->ops->theme->TEXT_OFFSET;
 			current->ops->theme->TEXT_OFFSET = 6;
 			ui_text(ui_tr(but->name), UI_ALIGN_LEFT, 0);
-			float *val = (float *)but->default_value->buffer;
 
 			ui_handle_t *h  = ui_nest(nhandle, buti);
 			ui_handle_t *h0 = ui_nest(h, 0);
@@ -485,9 +484,6 @@ void ui_node_draw_body(ui_node_t *node, ui_node_canvas_t *canvas, float nx, floa
 			val[1]                           = ui_slider(h1, "Y", min, max, true, 100, true, UI_ALIGN_LEFT, true);
 			val[2]                           = ui_slider(h2, "Z", min, max, true, 100, true, UI_ALIGN_LEFT, true);
 			current->ops->theme->TEXT_OFFSET = text_off;
-			if (but->output >= 0) {
-				node->outputs->buffer[but->output]->default_value->buffer = but->default_value->buffer;
-			}
 			ny += lineh * 3.0;
 		}
 		else if (strcmp(but->type, "VALUE") == 0) {
@@ -495,32 +491,27 @@ void ui_node_draw_body(ui_node_t *node, ui_node_canvas_t *canvas, float nx, floa
 			current->_x                      = nx;
 			current->_y                      = ny;
 			current->_w                      = w;
-			ui_node_socket_t *soc            = node->outputs->buffer[but->output];
-			float             min            = but->min;
-			float             max            = but->max;
-			float             prec           = but->precision;
-			float             text_off       = current->ops->theme->TEXT_OFFSET;
+			float min                        = but->min;
+			float max                        = but->max;
+			float prec                       = but->precision;
+			float text_off                   = current->ops->theme->TEXT_OFFSET;
 			current->ops->theme->TEXT_OFFSET = 6;
 			ui_handle_t *soc_handle          = ui_nest(nhandle, buti);
 			if (soc_handle->init) {
-				soc_handle->f = ((float *)soc->default_value->buffer)[0];
+				soc_handle->f = val[0];
 			}
-			((float *)soc->default_value->buffer)[0] = ui_slider(soc_handle, ui_tr(but->name), min, max, true, prec, true, UI_ALIGN_LEFT, true);
-			current->ops->theme->TEXT_OFFSET         = text_off;
+			val[0]                           = ui_slider(soc_handle, ui_tr(but->name), min, max, true, prec, true, UI_ALIGN_LEFT, true);
+			current->ops->theme->TEXT_OFFSET = text_off;
 		}
 		else if (strcmp(but->type, "STRING") == 0) {
 			ny += lineh;
 			current->_x           = nx;
 			current->_y           = ny;
 			current->_w           = w;
-			ui_node_socket_t *soc = but->output >= 0 ? node->outputs->buffer[but->output] : NULL;
 			ui_handle_t      *h   = ui_nest(nhandle, buti);
-			h->text = soc != NULL ? (char *)soc->default_value->buffer : but->default_value->buffer != NULL ? (char *)but->default_value->buffer : "";
+			h->text = val != NULL ? (char *)val : "";
 			but->default_value->buffer = ui_text_input(h, ui_tr(but->name), UI_ALIGN_LEFT, true, false);
 			but->default_value->length = strlen(but->default_value->buffer) + 1;
-			if (soc != NULL) {
-				soc->default_value->buffer = but->default_value->buffer;
-			}
 		}
 		else if (strcmp(but->type, "ENUM") == 0) {
 			ny += lineh;
