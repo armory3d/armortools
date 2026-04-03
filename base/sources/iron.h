@@ -870,8 +870,12 @@ gpu_texture_t *gpu_create_texture_from_encoded_bytes(buffer_t *data, char *forma
 		texture_format = GPU_TEXTURE_FORMAT_RGBA32;
 	}
 
+	// double t = iron_time(); ////
+
 	gpu_texture_init_from_bytes(texture, texture_data, width, height, texture_format);
 	free(texture_data);
+
+	// iron_log("gpu_texture_init_from_bytes in %fs\n", iron_time() - t); ////
 
 	return texture;
 }
