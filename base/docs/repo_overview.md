@@ -23,6 +23,6 @@ Small stand-alone projects for testing.
 
 This file adds C source files, include directories, libraries and defines to the project, depending on the selected platform, graphics api and build flags.
 
-## `/armorpaint`
+## `/paint`
 
 Contains armorpaint specific code & assets only. The `project.js` file adds this specific code to the final project.
