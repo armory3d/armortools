@@ -26,7 +26,7 @@ void value_node_init() {
 	                                               1),
 	                                           .buttons = any_array_create_from_raw(
 	                                               (void *[]){
-	                                                   GC_ALLOC_INIT(ui_node_button_t, {.name          = _tr("default_value"),
+	                                                   GC_ALLOC_INIT(ui_node_button_t, {.name          = _tr("Value"),
 	                                                                                    .type          = "VALUE",
 	                                                                                    .output        = 0,
 	                                                                                    .default_value = f32_array_create_x(0),

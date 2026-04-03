@@ -4,12 +4,12 @@
 void math2_node_init() {
 
 	char *math_operation_data =
-	    string("%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s",
+	    string("%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s",
 	           _tr("Add"), _tr("Subtract"), _tr("Multiply"), _tr("Divide"), _tr("Power"), _tr("Logarithm"), _tr("Square Root"), _tr("Inverse Square Root"),
 	           _tr("Absolute"), _tr("Exponent"), _tr("Minimum"), _tr("Maximum"), _tr("Less Than"), _tr("Greater Than"), _tr("Sign"), _tr("Round"), _tr("Floor"),
-	           _tr("Ceil"), _tr("Truncate"), _tr("Fraction"), _tr("Modulo"), _tr("Snap"), _tr("Ping-Pong"), _tr("Sine"), _tr("Cosine"), _tr("Tangent"),
-	           _tr("Arcsine"), _tr("Arccosine"), _tr("Arctangent"), _tr("Arctan2"), _tr("Hyperbolic Sine"), _tr("Hyperbolic Cosine"), _tr("Hyperbolic Tangent"),
-	           _tr("To Radians"), _tr("To Degrees"));
+	           _tr("Ceil"), _tr("Truncate"), _tr("Fraction"), _tr("Truncated Modulo"), _tr("Floored Modulo"), _tr("Snap"), _tr("Ping-Pong"), _tr("Sine"),
+	           _tr("Cosine"), _tr("Tangent"), _tr("Arcsine"), _tr("Arccosine"), _tr("Arctangent"), _tr("Arctan2"), _tr("Hyperbolic Sine"),
+	           _tr("Hyperbolic Cosine"), _tr("Hyperbolic Tangent"), _tr("To Radians"), _tr("To Degrees"));
 	math2_node_def = GC_ALLOC_INIT(ui_node_t, {.id     = 0,
 	                                           .name   = _tr("Math"),
 	                                           .type   = "MATH",
@@ -166,8 +166,14 @@ char *math2_node_value(ui_node_t *node, ui_node_socket_t *socket) {
 	else if (string_equals(op, "FRACTION")) {
 		out_val = string("frac(%s)", val1);
 	}
-	else if (string_equals(op, "MODULO")) {
+	else if (string_equals(op, "TRUNCATED_MODULO")) {
 		out_val = string("(%s %% %s)", val1, val2);
+	}
+	else if (string_equals(op, "FLOORED_MODULO")) {
+		char *store = string("%s_flooredmod", parser_material_store_var_name(node));
+		parser_material_write(parser_material_kong, string("var %s: float = 0.0;", store));
+		parser_material_write(parser_material_kong, string("if (%s != 0.0) { %s = %s - %s * floor(%s / %s); }", val2, store, val1, val2, val1, val2));
+		out_val = string_copy(store);
 	}
 	else if (string_equals(op, "PING-PONG")) {
 		char *store = string("%s_pingpong", parser_material_store_var_name(node));

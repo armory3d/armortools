@@ -135,7 +135,7 @@ void magic_texture_node_init() {
 	                                  (void *[]){
 	                                      GC_ALLOC_INIT(ui_node_button_t, {.name          = _tr("Depth"),
 	                                                                       .type          = "VALUE",
-	                                                                       .output        = 0,
+	                                                                       .output        = -1,
 	                                                                       .default_value = f32_array_create_x(2),
 	                                                                       .data          = NULL,
 	                                                                       .min           = 0.0,

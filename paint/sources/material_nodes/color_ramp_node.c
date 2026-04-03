@@ -66,7 +66,7 @@ void color_ramp_node_init() {
 	     .flags = 0});
 	gc_root(color_ramp_node_def);
 
-	any_array_push(nodes_material_utilities, color_ramp_node_def);
+	any_array_push(nodes_material_color, color_ramp_node_def);
 	any_map_set(parser_material_node_vectors, "VALTORGB", color_ramp_node_vector);
 	any_map_set(parser_material_node_values, "VALTORGB", color_ramp_node_value);
 	any_map_set(ui_nodes_custom_buttons, "nodes_material_color_ramp_button", nodes_material_color_ramp_button);

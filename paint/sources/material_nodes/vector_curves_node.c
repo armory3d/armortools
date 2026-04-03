@@ -94,7 +94,7 @@ static void vector_curves_sort(i32 *sorted, i32 num, f32 *points) {
 	}
 }
 
-static f32 vector_curves_eval_cpu(f32 *points, i32 num, f32 t) {
+f32 vector_curves_eval_cpu(f32 *points, i32 num, f32 t) {
 	if (num <= 0)
 		return t;
 	if (num == 1)

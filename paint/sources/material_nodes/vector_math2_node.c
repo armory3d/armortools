@@ -4,10 +4,10 @@
 void vector_math2_node_init() {
 
 	char *vector_math_operation_data =
-	    string("%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s", _tr("Add"), _tr("Subtract"), _tr("Multiply"),
+	    string("%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s", _tr("Add"), _tr("Subtract"), _tr("Multiply"),
 	           _tr("Divide"), _tr("Average"), _tr("Cross Product"), _tr("Project"), _tr("Reflect"), _tr("Dot Product"), _tr("Distance"), _tr("Length"),
-	           _tr("Scale"), _tr("Normalize"), _tr("Absolute"), _tr("Minimum"), _tr("Maximum"), _tr("Floor"), _tr("Ceil"), _tr("Fraction"), _tr("Modulo"),
-	           _tr("Snap"), _tr("Sine"), _tr("Cosine"), _tr("Tangent"));
+	           _tr("Scale"), _tr("Normalize"), _tr("Absolute"), _tr("Power"), _tr("Sign"), _tr("Minimum"), _tr("Maximum"), _tr("Floor"), _tr("Ceil"),
+	           _tr("Fraction"), _tr("Modulo"), _tr("Snap"), _tr("Sine"), _tr("Cosine"), _tr("Tangent"));
 	vector_math2_node_def =
 	    GC_ALLOC_INIT(ui_node_t, {.id     = 0,
 	                              .name   = _tr("Vector Math"),
@@ -137,6 +137,12 @@ char *vector_math2_node_vector(ui_node_t *node, ui_node_socket_t *socket) {
 	}
 	else if (string_equals(op, "ABSOLUTE")) {
 		return string("abs3(%s)", vec1);
+	}
+	else if (string_equals(op, "POWER")) {
+		return string("float3(pow(%s.x, %s.x), pow(%s.y, %s.y), pow(%s.z, %s.z))", vec1, vec2, vec1, vec2, vec1, vec2);
+	}
+	else if (string_equals(op, "SIGN")) {
+		return string("float3(sign(%s.x), sign(%s.y), sign(%s.z))", vec1, vec1, vec1);
 	}
 	else if (string_equals(op, "MINIMUM")) {
 		return string("min3(%s, %s)", vec1, vec2);

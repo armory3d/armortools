@@ -146,10 +146,10 @@ void ui_viewnodes_on_socket_released_group_edit_box() {
 		default_value      = f32_array_create_xyz(_ui_nodes_hval0->f, _ui_nodes_hval1->f, _ui_nodes_hval2->f);
 	}
 	else {
-		f32 f         = ui_float_input(_ui_nodes_hval0, tr("default_value"), UI_ALIGN_LEFT, 1000.0);
+		f32 f         = ui_float_input(_ui_nodes_hval0, tr("Value"), UI_ALIGN_LEFT, 1000.0);
 		default_value = f32_array_create_x(f);
 	}
-	if (ui_icon_button(tr("OK"), ICON_CHECK, UI_ALIGN_CENTER)) { // || ui.isReturnDown
+	if (ui_icon_button(tr("OK"), ICON_CHECK, UI_ALIGN_CENTER)) {
 		socket->name          = string_copy(name);
 		socket->type          = type == 0 ? "RGBA" : type == 1 ? "VECTOR" : "VALUE";
 		socket->color         = nodes_material_get_socket_color(socket->type);

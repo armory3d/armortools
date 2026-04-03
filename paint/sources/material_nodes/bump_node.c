@@ -67,7 +67,15 @@ void bump_node_init() {
 	                                                                                   .display       = 0}),
 	                                              },
 	                                              1),
-	                                          .buttons = any_array_create_from_raw((void *[]){}, 0),
+	                                          .buttons = any_array_create_from_raw(
+                                              (void *[]){
+                                                  GC_ALLOC_INIT(ui_node_button_t, {.name          = _tr("Invert"),
+                                                                                   .type          = "BOOL",
+                                                                                   .output        = 0,
+                                                                                   .default_value = f32_array_create_x(0),
+                                                                                   .height        = 0}),
+                                              },
+                                              1),
 	                                          .width   = 0,
 	                                          .flags   = 0});
 	gc_root(bump_node_def);
@@ -81,8 +89,10 @@ char *bump_node_vector(ui_node_t *node, ui_node_socket_t *socket) {
 	// char *distance = parser_material_parse_value_input(node->inputs->buffer[1], false);
 	char *height          = parser_material_parse_value_input(node->inputs->buffer[2], false);
 	char *nor             = parser_material_parse_vector_input(node->inputs->buffer[3]);
+	bool  invert          = node->buttons->buffer[0]->default_value->buffer[0] > 0;
+	char *sign            = invert ? "-" : "";
 	char *sample_bump_res = string("%s_bump", parser_material_store_var_name(node));
-	parser_material_write(parser_material_kong, string("var %s_x: float = ddx(float(%s)) * (%s) * 16.0;", sample_bump_res, height, strength));
-	parser_material_write(parser_material_kong, string("var %s_y: float = ddy(float(%s)) * (%s) * 16.0;", sample_bump_res, height, strength));
+	parser_material_write(parser_material_kong, string("var %s_x: float = %sddx(float(%s)) * (%s) * 16.0;", sample_bump_res, sign, height, strength));
+	parser_material_write(parser_material_kong, string("var %s_y: float = %sddy(float(%s)) * (%s) * 16.0;", sample_bump_res, sign, height, strength));
 	return string("(normalize(float3(%s_x, %s_y, 1.0) + %s) * float3(0.5, 0.5, 0.5) + float3(0.5, 0.5, 0.5))", sample_bump_res, sample_bump_res, nor);
 }

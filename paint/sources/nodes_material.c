@@ -45,12 +45,18 @@ void nodes_material_init() {
 	gc_root(nodes_material_color);
 	blur_node_init();
 	brightness_contrast_node_init();
+	color_mask_node_init();
+	color_ramp_node_init();
+	combine_color_node_init();
 	gamma_node_init();
 	hue_saturation_value_node_init();
 	invert_color_node_init();
 	mix_color_node_init();
 	quantize_node_init();
+	rgb_curves_node_init();
+	rgb_to_bw_node_init();
 	replace_color_node_init();
+	separate_color_node_init();
 	warp_node_init();
 
 	gc_unroot(nodes_material_utilities);
@@ -58,19 +64,19 @@ void nodes_material_init() {
 	gc_root(nodes_material_utilities);
 	bump_node_init();
 	clamp_node_init();
-	color_mask_node_init();
-	color_ramp_node_init();
 	combine_xyz_node_init();
+	float_curve_node_init();
 	map_range_node_init();
 	mapping_node_init();
 	math2_node_init();
 	mix_normal_map_node_init();
 	normal_node_init();
 	normal_map_node_init();
-	rgb_to_bw_node_init();
 	separate_xyz_node_init();
 	vector_curves_node_init();
 	vector_math2_node_init();
+	vector_rotate_node_init();
+	vector_transform_node_init();
 
 	#if defined(IRON_WINDOWS) || defined(IRON_LINUX) || defined(IRON_MACOS)
 

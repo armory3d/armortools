@@ -4,9 +4,9 @@
 void mix_color_node_init() {
 
 	char *mix_color_blend_type_data =
-	    string("%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s", _tr("Mix"), _tr("Darken"), _tr("Multiply"), _tr("Burn"),
+	    string("%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s", _tr("Mix"), _tr("Darken"), _tr("Multiply"), _tr("Burn"),
 	           _tr("Lighten"), _tr("Screen"), _tr("Dodge"), _tr("Add"), _tr("Overlay"), _tr("Soft Light"), _tr("Linear Light"), _tr("Difference"),
-	           _tr("Subtract"), _tr("Divide"), _tr("Hue"), _tr("Saturation"), _tr("Color"), _tr("Value"));
+	           _tr("Exclusion"), _tr("Subtract"), _tr("Divide"), _tr("Hue"), _tr("Saturation"), _tr("Color"), _tr("Value"));
 	mix_color_node_def = GC_ALLOC_INIT(ui_node_t, {.id     = 0,
 	                                               .name   = _tr("Mix Color"),
 	                                               .type   = "MIX_RGB",
@@ -72,7 +72,16 @@ void mix_color_node_init() {
 	                                                                                        .max       = 1.0,
 	                                                                                        .precision = 100,
 	                                                                                        .height    = 0}),
-	                                                       GC_ALLOC_INIT(ui_node_button_t, {.name          = _tr("Clamp"),
+	                                                       GC_ALLOC_INIT(ui_node_button_t, {.name          = _tr("Clamp Factor"),
+	                                                                                        .type          = "BOOL",
+	                                                                                        .output        = 0,
+	                                                                                        .default_value = f32_array_create_x(0),
+	                                                                                        .data          = NULL,
+	                                                                                        .min           = 0.0,
+	                                                                                        .max           = 1.0,
+	                                                                                        .precision     = 100,
+	                                                                                        .height        = 0}),
+	                                                       GC_ALLOC_INIT(ui_node_button_t, {.name          = _tr("Clamp Result"),
 	                                                                                        .type          = "BOOL",
 	                                                                                        .output        = 0,
 	                                                                                        .default_value = f32_array_create_x(0),
@@ -82,7 +91,7 @@ void mix_color_node_init() {
 	                                                                                        .precision     = 100,
 	                                                                                        .height        = 0}),
 	                                                   },
-	                                                   2),
+	                                                   3),
 	                                               .width = 0,
 	                                               .flags = 0});
 	gc_root(mix_color_node_def);
@@ -97,11 +106,15 @@ char *mix_color_node_vector(ui_node_t *node, ui_node_socket_t *socket) {
 	parser_material_write(parser_material_kong, string("var %s: float = %s;", fac_var, fac));
 	char             *col1  = parser_material_parse_vector_input(node->inputs->buffer[1]);
 	char             *col2  = parser_material_parse_vector_input(node->inputs->buffer[2]);
-	ui_node_button_t *but   = node->buttons->buffer[0]; // blend_type
-	char             *blend = to_upper_case(u8_array_string_at(but->data, but->default_value->buffer[0]));
-	blend                   = string_copy(string_replace_all(blend, " ", "_"));
-	bool  use_clamp         = node->buttons->buffer[1]->default_value->buffer[0] > 0;
-	char *out_col           = "";
+	ui_node_button_t *but          = node->buttons->buffer[0]; // blend_type
+	char             *blend        = to_upper_case(u8_array_string_at(but->data, but->default_value->buffer[0]));
+	blend                          = string_copy(string_replace_all(blend, " ", "_"));
+	bool  clamp_factor             = node->buttons->buffer[1]->default_value->buffer[0] > 0;
+	bool  clamp_result             = node->buttons->buffer[2]->default_value->buffer[0] > 0;
+	if (clamp_factor) {
+		parser_material_write(parser_material_kong, string("%s = clamp(%s, 0.0, 1.0);", fac_var, fac_var));
+	}
+	char *out_col = "";
 	if (string_equals(blend, "MIX")) {
 		out_col = string("lerp3(%s, %s, %s)", col1, col2, fac_var);
 	}
@@ -159,6 +172,9 @@ char *mix_color_node_vector(ui_node_t *node, ui_node_socket_t *socket) {
 	else if (string_equals(blend, "DIFFERENCE")) {
 		out_col = string("lerp3(%s, abs3(%s - %s), %s)", col1, col1, col2, fac_var);
 	}
+	else if (string_equals(blend, "EXCLUSION")) {
+		out_col = string("lerp3(%s, %s + %s - 2.0 * %s * %s, %s)", col1, col1, col2, col1, col2, fac_var);
+	}
 	else if (string_equals(blend, "SUBTRACT")) {
 		out_col = string("lerp3(%s, %s - %s, %s)", col1, col1, col2, fac_var);
 	}
@@ -186,7 +202,7 @@ char *mix_color_node_vector(ui_node_t *node, ui_node_socket_t *socket) {
 		node_shader_add_function(parser_material_kong, str_hue_sat);
 		out_col = string("lerp3(%s, hsv_to_rgb(float3(rgb_to_hsv(%s).r, rgb_to_hsv(%s).g, rgb_to_hsv(%s).b)), %s)", col1, col1, col1, col2, fac_var);
 	}
-	if (use_clamp) {
+	if (clamp_result) {
 		return string("clamp3(%s, float3(0.0, 0.0, 0.0), float3(1.0, 1.0, 1.0))", out_col);
 	}
 	else {

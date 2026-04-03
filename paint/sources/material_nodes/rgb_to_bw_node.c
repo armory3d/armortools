@@ -42,7 +42,7 @@ void rgb_to_bw_node_init() {
 	                                               .flags   = 0});
 	gc_root(rgb_to_bw_node_def);
 
-	any_array_push(nodes_material_utilities, rgb_to_bw_node_def);
+	any_array_push(nodes_material_color, rgb_to_bw_node_def);
 	any_map_set(parser_material_node_values, "RGBTOBW", rgb_to_bw_node_value);
 }
 

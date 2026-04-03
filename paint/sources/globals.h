@@ -726,6 +726,8 @@ ui_node_t                   *invert_color_node_def;
 ui_node_t                   *wireframe_node_def;
 ui_node_t                   *gamma_node_def;
 ui_node_t                   *vector_math2_node_def;
+ui_node_t                   *vector_rotate_node_def;
+ui_node_t                   *vector_transform_node_def;
 ui_node_t                   *checker_texture_node_def;
 char                        *str_hue_sat = "\
 fun hsv_to_rgb(c: float3): float3 { \
@@ -750,12 +752,14 @@ fun hue_sat(col: float3, shift: float4): float3 { \
 } \
 ";
 ui_node_t                   *hue_saturation_value_node_def;
+ui_node_t                   *separate_color_node_def;
 ui_node_t                   *separate_xyz_node_def;
 ui_node_t                   *math2_node_def;
 ui_node_t                   *geometry_node_def;
 ui_node_t                   *mix_color_node_def;
 ui_node_t                   *quantize_node_def;
 ui_node_t                   *layer_node_def;
+ui_node_t                   *float_curve_node_def;
 ui_node_t                   *map_range_node_def;
 ui_node_t                   *voronoi_texture_node_def;
 ui_node_t                   *color_ramp_node_def;
@@ -765,6 +769,7 @@ ui_node_t                   *bump_node_def;
 ui_node_t                   *gabor_texture_node_def;
 ui_node_t                   *mix_normal_map_node_def;
 ui_node_t                   *script_node_def;
+ui_node_t                   *combine_color_node_def;
 ui_node_t                   *combine_xyz_node_def;
 ui_node_t                   *noise_texture_node_def;
 char                        *str_brightcontrast = "\
@@ -776,6 +781,7 @@ fun brightcontrast(col: float3, bright: float, contr: float): float3 { \
 ";
 ui_node_t                   *brightness_contrast_node_def;
 ui_node_t                   *color_mask_node_def;
+ui_node_t                   *rgb_curves_node_def;
 ui_node_t                   *vector_curves_node_def;
 ui_node_t                   *layer_mask_node_def;
 ui_node_t                   *camera_texture_node_def;

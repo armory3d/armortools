@@ -47,6 +47,8 @@ fun tex_noise(p: float3, scale: float, detail: float, roughness: float, lacunari
 
 void noise_texture_node_init() {
 
+	char *noise_dimensions_data = string("%s", _tr("3D"));
+	char *noise_feature_data    = string("%s", _tr("fBM"));
 	noise_texture_node_def =
 	    GC_ALLOC_INIT(ui_node_t, {.id     = 0,
 	                              .name   = _tr("Noise Texture"),
@@ -142,7 +144,37 @@ void noise_texture_node_init() {
 	                                                                       .display       = 0}),
 	                                  },
 	                                  2),
-	                              .buttons = any_array_create_from_raw((void *[]){}, 0),
+	                              .buttons = any_array_create_from_raw(
+	                                  (void *[]){
+	                                      GC_ALLOC_INIT(ui_node_button_t, {.name          = _tr("Dimensions"),
+	                                                                       .type          = "ENUM",
+	                                                                       .output        = -1,
+	                                                                       .default_value = f32_array_create_x(0),
+	                                                                       .data          = u8_array_create_from_string(noise_dimensions_data),
+	                                                                       .min           = 0.0,
+	                                                                       .max           = 3.0,
+	                                                                       .precision     = 100,
+	                                                                       .height        = 0}),
+	                                      GC_ALLOC_INIT(ui_node_button_t, {.name          = _tr("Type"),
+	                                                                       .type          = "ENUM",
+	                                                                       .output        = -1,
+	                                                                       .default_value = f32_array_create_x(0),
+	                                                                       .data          = u8_array_create_from_string(noise_feature_data),
+	                                                                       .min           = 0.0,
+	                                                                       .max           = 1.0,
+	                                                                       .precision     = 100,
+	                                                                       .height        = 0}),
+	                                      GC_ALLOC_INIT(ui_node_button_t, {.name          = _tr("Normalize"),
+	                                                                       .type          = "BOOL",
+	                                                                       .output        = -1,
+	                                                                       .default_value = f32_array_create_x(0),
+	                                                                       .data          = NULL,
+	                                                                       .min           = 0.0,
+	                                                                       .max           = 1.0,
+	                                                                       .precision     = 100,
+	                                                                       .height        = 0}),
+	                                  },
+	                                  3),
 	                              .width   = 0,
 	                              .flags   = 0});
 	gc_root(noise_texture_node_def);
