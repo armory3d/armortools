@@ -1212,4 +1212,5 @@ IMPORT("wgpuSurfaceConfigure") void wgpuSurfaceConfigure(WGPUSurface surface, WG
 
 IMPORT("wgpuInstanceRequestAdapterSync") WGPUAdapter wgpuInstanceRequestAdapterSync();
 IMPORT("wgpuAdapterRequestDeviceSync") WGPUDevice wgpuAdapterRequestDeviceSync();
+IMPORT("wgpuDeviceHasFeature") WGPUBool wgpuDeviceHasFeature(WGPUDevice device, WGPUFeatureName feature);
 IMPORT("wgpuBufferUnmap2") void wgpuBufferUnmap2(WGPUBuffer buffer, void *data, int start, int count);

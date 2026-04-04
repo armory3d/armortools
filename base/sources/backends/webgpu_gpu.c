@@ -135,9 +135,9 @@ static void create_descriptors(void) {
 	};
 	descriptor_layout = wgpuDeviceCreateBindGroupLayout(device, &layout_create_info);
 
-	bindings[1].sampler.type = WGPUSamplerBindingType_NonFiltering;
+	bindings[1].sampler.type       = WGPUSamplerBindingType_NonFiltering;
 	bindings[2].texture.sampleType = WGPUTextureSampleType_UnfilterableFloat;
-	descriptor_layout_depth = wgpuDeviceCreateBindGroupLayout(device, &layout_create_info);
+	descriptor_layout_depth        = wgpuDeviceCreateBindGroupLayout(device, &layout_create_info);
 
 	WGPUTextureDescriptor dummy_desc = {
 	    .size          = {1, 1, 1},
@@ -318,10 +318,10 @@ void gpu_begin_internal(gpu_clear_t flags, unsigned color, float depth) {
 		wgpuSurfaceGetCurrentTexture(surface, &surface_texture);
 		framebuffers[0].impl.texture        = surface_texture.texture;
 		WGPUTextureViewDescriptor view_info = {
-			.dimension       = WGPUTextureViewDimension_2D,
-			.format          = WGPUTextureFormat_RGBA8Unorm,
-			.mipLevelCount   = 1,
-			.arrayLayerCount = 1,
+		    .dimension       = WGPUTextureViewDimension_2D,
+		    .format          = WGPUTextureFormat_RGBA8Unorm,
+		    .mipLevelCount   = 1,
+		    .arrayLayerCount = 1,
 		};
 		framebuffers[0].impl.view = wgpuTextureCreateView(surface_texture.texture, &view_info);
 		framebuffers[0].width     = width;
@@ -531,7 +531,7 @@ void gpu_pipeline_compile(gpu_pipeline_t *pipeline) {
 	pipeline->impl.pipeline_layout = wgpuDeviceCreatePipelineLayout(device, &pipeline_layout_create_info);
 
 	pipeline_layout_create_info.bindGroupLayouts = &descriptor_layout_depth;
-	pipeline->impl.pipeline_layout_depth = wgpuDeviceCreatePipelineLayout(device, &pipeline_layout_create_info);
+	pipeline->impl.pipeline_layout_depth         = wgpuDeviceCreatePipelineLayout(device, &pipeline_layout_create_info);
 
 	WGPURenderPipelineDescriptor pipeline_desc = {0};
 	pipeline_desc.layout                       = pipeline->impl.pipeline_layout;
@@ -625,7 +625,7 @@ void gpu_pipeline_compile(gpu_pipeline_t *pipeline) {
 
 	pipeline->impl.pipeline = wgpuDeviceCreateRenderPipeline(device, &pipeline_desc);
 
-	pipeline_desc.layout = pipeline->impl.pipeline_layout_depth;
+	pipeline_desc.layout          = pipeline->impl.pipeline_layout_depth;
 	pipeline->impl.pipeline_depth = wgpuDeviceCreateRenderPipeline(device, &pipeline_desc);
 
 	wgpuShaderModuleRelease(pipeline_desc.vertex.module);
@@ -650,12 +650,29 @@ void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, 
 	texture->format = format;
 	texture->state  = GPU_TEXTURE_STATE_SHADER_RESOURCE;
 
-	WGPUTextureFormat wgpu_format = convert_image_format(format);
-	int               bpp         = gpu_texture_format_size(format);
-	int               aligned_bpr = bytes_per_row_align(width * bpp);
-	size_t            upload_size = width * height * bpp;
-	void             *upload_data = data;
+	WGPUTextureFormat wgpu_format   = convert_image_format(format);
+	int               bpp           = gpu_texture_format_size(format);
+	void             *original_data = data;
 
+#ifdef WITH_BC7
+	if (gpu_bc7_supported(width, height, format)) {
+		texture->format = GPU_TEXTURE_FORMAT_RGBA32_BC7;
+		wgpu_format     = WGPUTextureFormat_BC7RGBAUnorm;
+		data            = gpu_bc7_compress(data, width, height);
+	}
+#endif
+
+	int    aligned_bpr = bytes_per_row_align(width * bpp);
+	size_t upload_size = width * height * bpp;
+	void  *upload_data = data;
+
+#ifdef WITH_BC7
+	if (data != original_data) {
+		aligned_bpr = ((width + 3) / 4) * 16; // BC7ENC_BLOCK_SIZE
+		upload_size = (size_t)aligned_bpr * ((height + 3) / 4);
+	}
+	else
+#endif
 	if (aligned_bpr != width * bpp) {
 		upload_size = (size_t)aligned_bpr * height;
 		upload_data = malloc(upload_size);
@@ -685,6 +702,11 @@ void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, 
 	if (upload_data != data) {
 		free(upload_data);
 	}
+#ifdef WITH_BC7
+	if (data != original_data) {
+		free(data);
+	}
+#endif
 
 	WGPUTextureDescriptor image_info = {
 	    .size          = {(uint32_t)width, (uint32_t)height, 1},
@@ -800,7 +822,18 @@ char *gpu_device_name() {
 	return device_name;
 }
 
-bool gpu_raytrace_supported(void) { return false; }
+bool gpu_bc7_supported(int width, int height, gpu_texture_format_t format) {
+	bool bc7_supported = false;
+#ifdef WITH_BC7
+	bc7_supported = wgpuDeviceHasFeature(device, WGPUFeatureName_TextureCompressionBC);
+#endif
+	return bc7_supported && format == GPU_TEXTURE_FORMAT_RGBA32 && width >= 2048 && height >= 2048 && (width & (width - 1)) == 0 &&
+	       (height & (height - 1)) == 0;
+}
+
+bool gpu_raytrace_supported(void) {
+	return false;
+}
 void gpu_raytrace_pipeline_init(gpu_raytrace_pipeline_t *pipeline, void *shader, int shader_size, gpu_buffer_t *constant_buffer) {}
 void gpu_raytrace_pipeline_destroy(gpu_raytrace_pipeline_t *pipeline) {}
 void gpu_raytrace_acceleration_structure_init(gpu_acceleration_structure_t *accel) {}

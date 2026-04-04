@@ -1613,48 +1613,6 @@ void gpu_shader_destroy(gpu_shader_t *shader) {
 	shader->impl.source = NULL;
 }
 
-#ifdef WITH_BC7
-#include <libs/bc7enc.h>
-#include <iron_thread.h>
-#define BC7_THREAD_COUNT 16
-
-typedef struct {
-	uint8_t                     *src;
-	uint8_t                     *dst;
-	int                          width;
-	int                          height;
-	int                          blocks_x;
-	int                          total_blocks;
-	volatile int32_t            *next_block;
-	bc7enc_compress_block_params params;
-} bc7_thread_params_t;
-
-static void bc7_thread_func(void *arg) {
-	bc7_thread_params_t *p = (bc7_thread_params_t *)arg;
-	for (;;) {
-		int bi = iron_atomic_increment(p->next_block);
-		if (bi >= p->total_blocks)
-			break;
-		int     bx = bi % p->blocks_x;
-		int     by = bi / p->blocks_x;
-		uint8_t block[64];
-		for (int py = 0; py < 4; py++) {
-			for (int px = 0; px < 4; px++) {
-				int sx             = bx * 4 + px < p->width ? bx * 4 + px : p->width - 1;
-				int sy             = by * 4 + py < p->height ? by * 4 + py : p->height - 1;
-				int src_idx        = (sy * p->width + sx) * 4;
-				int dst_idx        = (py * 4 + px) * 4;
-				block[dst_idx + 0] = p->src[src_idx + 0];
-				block[dst_idx + 1] = p->src[src_idx + 1];
-				block[dst_idx + 2] = p->src[src_idx + 2];
-				block[dst_idx + 3] = p->src[src_idx + 3];
-			}
-		}
-		bc7enc_compress_block(p->dst + (size_t)bi * BC7ENC_BLOCK_SIZE, block, &p->params);
-	}
-}
-#endif
-
 void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, int height, gpu_texture_format_t format) {
 	texture->width  = width;
 	texture->height = height;
@@ -1671,40 +1629,11 @@ void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, 
 	void        *original_data = data;
 
 #ifdef WITH_BC7
-	void *bc7_data = NULL;
-	if (format == GPU_TEXTURE_FORMAT_RGBA32 && width >= 2048 && height >= 2048) {
-		vk_format                       = VK_FORMAT_BC7_UNORM_BLOCK;
-		int blocks_x                    = (width + 3) / 4;
-		int blocks_y                    = (height + 3) / 4;
-		bc7_data                        = malloc(blocks_x * blocks_y * BC7ENC_BLOCK_SIZE);
-		static bc7enc_bool bc7enc_ready = BC7ENC_FALSE;
-		if (!bc7enc_ready) {
-			bc7enc_compress_block_init();
-			bc7enc_ready = BC7ENC_TRUE;
-		}
-		volatile int32_t    next_block = 0;
-		bc7_thread_params_t tp         = {
-		            .src          = (uint8_t *)data,
-		            .dst          = (uint8_t *)bc7_data,
-		            .width        = width,
-		            .height       = height,
-		            .blocks_x     = blocks_x,
-		            .total_blocks = blocks_x * blocks_y,
-		            .next_block   = &next_block,
-        };
-		bc7enc_compress_block_params_init(&tp.params);
-		tp.params.m_max_partitions_mode = 0;
-		tp.params.m_try_least_squares = false;
-
-		iron_thread_t threads[BC7_THREAD_COUNT];
-		for (int i = 0; i < BC7_THREAD_COUNT; i++) {
-			iron_thread_init(&threads[i], bc7_thread_func, &tp);
-		}
-		for (int i = 0; i < BC7_THREAD_COUNT; i++) {
-			iron_thread_wait_and_destroy(&threads[i]);
-		}
-		data         = bc7_data;
-		_upload_size = (VkDeviceSize)((width + 3) / 4) * ((height + 3) / 4) * BC7ENC_BLOCK_SIZE;
+	if (gpu_bc7_supported(width, height, format)) {
+		texture->format = GPU_TEXTURE_FORMAT_RGBA32_BC7;
+		vk_format       = VK_FORMAT_BC7_UNORM_BLOCK;
+		data            = gpu_bc7_compress(data, width, height);
+		_upload_size    = (VkDeviceSize)((width + 3) / 4) * ((height + 3) / 4) * 16; // BC7ENC_BLOCK_SIZE
 	}
 #endif
 
@@ -1773,7 +1702,9 @@ void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, 
 		gpu_cleanup_internal();
 		gpu_cleanup();
 #ifdef WITH_BC7
-		free(bc7_data);
+		if (data != original_data) {
+			free(data);
+		}
 #endif
 		gpu_texture_init_from_bytes(texture, original_data, width, height, format);
 		return;
@@ -1846,7 +1777,9 @@ void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, 
 	gpu_execute_and_wait(); ////
 
 #ifdef WITH_BC7
-	free(bc7_data);
+	if (data != original_data) {
+		free(data);
+	}
 #endif
 }
 
@@ -1997,6 +1930,21 @@ void gpu_buffer_destroy_internal(gpu_buffer_t *buffer) {
 
 char *gpu_device_name() {
 	return device_name;
+}
+
+bool gpu_bc7_supported(int width, int height, gpu_texture_format_t format) {
+	static bool bc7_supported = false;
+#ifdef WITH_BC7
+	static bool bc7_checked = false;
+	if (!bc7_checked) {
+		bc7_checked = true;
+		VkFormatProperties props;
+		vkGetPhysicalDeviceFormatProperties(gpu, VK_FORMAT_BC7_UNORM_BLOCK, &props);
+		bc7_supported = (props.optimalTilingFeatures & VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT) != 0;
+	}
+#endif
+	return bc7_supported && format == GPU_TEXTURE_FORMAT_RGBA32 && width >= 2048 && height >= 2048 && (width & (width - 1)) == 0 &&
+	       (height & (height - 1)) == 0;
 }
 
 typedef struct inst {

@@ -1,6 +1,6 @@
 #include "iron_gpu.h"
-#include "iron_system.h"
 #include "iron_math.h"
+#include "iron_system.h"
 #include <string.h>
 
 static gpu_buffer_t   constant_buffer;
@@ -255,8 +255,8 @@ void gpu_vertex_structure_add(gpu_vertex_structure_t *structure, const char *nam
 void gpu_vertex_struct_add(gpu_vertex_structure_t *raw, char *name, gpu_vertex_data_t data) {
 	gpu_vertex_element_t *e = &raw->elements[raw->size];
 	// e->name                 = string_copy(name);
-	e->name                 = name;
-	e->data                 = data;
+	e->name = name;
+	e->data = data;
 	raw->size++;
 }
 
@@ -373,12 +373,12 @@ int gpu_texture_format_size(gpu_texture_format_t format) {
 	}
 }
 
-static gpu_buffer_t                          rt_constant_buffer;
-static gpu_raytrace_pipeline_t               rt_pipeline;
-static gpu_acceleration_structure_t          rt_accel;
-static bool                                  rt_created              = false;
-static bool                                  rt_accel_created        = false;
-static const int                             rt_constant_buffer_size = 24;
+static gpu_buffer_t                 rt_constant_buffer;
+static gpu_raytrace_pipeline_t      rt_pipeline;
+static gpu_acceleration_structure_t rt_accel;
+static bool                         rt_created              = false;
+static bool                         rt_accel_created        = false;
+static const int                    rt_constant_buffer_size = 24;
 
 void _gpu_raytrace_init(buffer_t *shader) {
 	if (rt_created) {
@@ -420,3 +420,80 @@ void _gpu_raytrace_dispatch_rays(gpu_texture_t *render_target, buffer_t *buffer)
 	gpu_raytrace_set_target(render_target);
 	gpu_raytrace_dispatch_rays();
 }
+
+#ifdef WITH_BC7
+
+#include <iron_thread.h>
+#include <libs/bc7enc.h>
+#define BC7_THREAD_COUNT 16
+
+typedef struct {
+	uint8_t                     *src;
+	uint8_t                     *dst;
+	int                          width;
+	int                          height;
+	int                          blocks_x;
+	int                          total_blocks;
+	volatile int32_t            *next_block;
+	bc7enc_compress_block_params params;
+} bc7_thread_params_t;
+
+static void bc7_thread_func(void *arg) {
+	bc7_thread_params_t *p = (bc7_thread_params_t *)arg;
+	for (;;) {
+		int bi = iron_atomic_increment(p->next_block);
+		if (bi >= p->total_blocks)
+			break;
+		int     bx = bi % p->blocks_x;
+		int     by = bi / p->blocks_x;
+		uint8_t block[64];
+		for (int py = 0; py < 4; py++) {
+			for (int px = 0; px < 4; px++) {
+				int sx             = bx * 4 + px < p->width ? bx * 4 + px : p->width - 1;
+				int sy             = by * 4 + py < p->height ? by * 4 + py : p->height - 1;
+				int src_idx        = (sy * p->width + sx) * 4;
+				int dst_idx        = (py * 4 + px) * 4;
+				block[dst_idx + 0] = p->src[src_idx + 0];
+				block[dst_idx + 1] = p->src[src_idx + 1];
+				block[dst_idx + 2] = p->src[src_idx + 2];
+				block[dst_idx + 3] = p->src[src_idx + 3];
+			}
+		}
+		bc7enc_compress_block(p->dst + (size_t)bi * BC7ENC_BLOCK_SIZE, block, &p->params);
+	}
+}
+
+void *gpu_bc7_compress(void *data, int width, int height) {
+	int                blocks_x     = (width + 3) / 4;
+	int                blocks_y     = (height + 3) / 4;
+	void              *bc7_data     = malloc(blocks_x * blocks_y * BC7ENC_BLOCK_SIZE);
+	static bc7enc_bool bc7enc_ready = BC7ENC_FALSE;
+	if (!bc7enc_ready) {
+		bc7enc_compress_block_init();
+		bc7enc_ready = BC7ENC_TRUE;
+	}
+	volatile int32_t    next_block = 0;
+	bc7_thread_params_t tp         = {
+	            .src          = (uint8_t *)data,
+	            .dst          = (uint8_t *)bc7_data,
+	            .width        = width,
+	            .height       = height,
+	            .blocks_x     = blocks_x,
+	            .total_blocks = blocks_x * blocks_y,
+	            .next_block   = &next_block,
+    };
+	bc7enc_compress_block_params_init(&tp.params);
+	tp.params.m_max_partitions_mode = 0;
+	tp.params.m_try_least_squares   = false;
+
+	iron_thread_t threads[BC7_THREAD_COUNT];
+	for (int i = 0; i < BC7_THREAD_COUNT; i++) {
+		iron_thread_init(&threads[i], bc7_thread_func, &tp);
+	}
+	for (int i = 0; i < BC7_THREAD_COUNT; i++) {
+		iron_thread_wait_and_destroy(&threads[i]);
+	}
+	return bc7_data;
+}
+
+#endif

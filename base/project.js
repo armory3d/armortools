@@ -208,7 +208,6 @@ if (flags.with_eval) {
 	project.add_cfiles("sources/libs/minic_tests.c");
 }
 
-flags.with_bc7 = false;
 if (flags.with_bc7) {
 	project.add_define("WITH_BC7");
 	project.add_cfiles("sources/libs/bc7enc.c");

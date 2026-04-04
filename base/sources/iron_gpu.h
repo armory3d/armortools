@@ -55,7 +55,8 @@ typedef enum {
 	GPU_TEXTURE_FORMAT_R8,
 	GPU_TEXTURE_FORMAT_R16,
 	GPU_TEXTURE_FORMAT_R32,
-	GPU_TEXTURE_FORMAT_D32
+	GPU_TEXTURE_FORMAT_D32,
+	GPU_TEXTURE_FORMAT_RGBA32_BC7
 } gpu_texture_format_t;
 
 typedef enum {
@@ -226,6 +227,11 @@ void  gpu_get_render_target_pixels(gpu_texture_t *render_target, uint8_t *data);
 void  gpu_set_texture(int unit, gpu_texture_t *texture);
 void  gpu_use_linear_sampling(bool b);
 char *gpu_device_name();
+bool  gpu_bc7_supported(int width, int height, gpu_texture_format_t format);
+
+#ifdef WITH_BC7
+void *gpu_bc7_compress(void *data, int width, int height);
+#endif
 
 bool gpu_raytrace_supported(void);
 void gpu_raytrace_pipeline_init(gpu_raytrace_pipeline_t *pipeline, void *shader, int shader_size, gpu_buffer_t *constant_buffer);

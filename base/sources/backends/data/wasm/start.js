@@ -141,7 +141,10 @@ async function init() {
 		throw new Error('WebGPU not supported');
 	}
 	let adapter = await navigator.gpu.requestAdapter();
-	let device  = await adapter.requestDevice();
+	let bc7_supported = adapter.features.has('texture-compression-bc');
+	let device  = await adapter.requestDevice({
+		requiredFeatures: bc7_supported ? ['texture-compression-bc'] : [],
+	});
 
 	let canvas    = document.getElementById('iron');
 	canvas.width  = window.innerWidth;
@@ -181,6 +184,11 @@ async function init() {
 			// },
 			wgpuAdapterRequestDeviceSync : function() {
 				return ptr_to_id(device);
+			},
+			wgpuDeviceHasFeature : function(pdevice, feature) {
+				// WGPUFeatureName_TextureCompressionBC = 4
+				if (feature === 4) { return bc7_supported ? 1 : 0; }
+				return 0;
 			},
 			wgpuDeviceCreateTexture : function(pdevice, pdescriptor) {
 				let device = id_to_ptr(pdevice);

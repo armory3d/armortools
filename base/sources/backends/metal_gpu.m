@@ -378,7 +378,7 @@ void gpu_get_render_target_pixels(gpu_texture_t *render_target, uint8_t *data) {
 
 	// Read buffer
 	id<MTLBuffer> buffer = (__bridge id<MTLBuffer>)readback_buffer;
-	memcpy(data, [buffer contents], render_target -> width * render_target -> height *gpu_texture_format_size(render_target->format));
+	memcpy(data, [buffer contents], render_target->width * render_target->height * gpu_texture_format_size(render_target->format));
 }
 
 void gpu_set_constant_buffer(gpu_buffer_t *buffer, int offset, size_t size) {
@@ -543,6 +543,21 @@ void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, 
 	if (mtlformat == MTLPixelFormatBGRA8Unorm) {
 		mtlformat = MTLPixelFormatRGBA8Unorm;
 	}
+
+	void *original_data   = data;
+	int   bytes_per_row   = width * gpu_texture_format_size(format);
+	int   bytes_per_image = bytes_per_row * height;
+
+#ifdef WITH_BC7
+	if (gpu_bc7_supported(width, height, format)) {
+		texture->format = GPU_TEXTURE_FORMAT_RGBA32_BC7;
+		mtlformat       = MTLPixelFormatBC7_RGBAUnorm;
+		data            = gpu_bc7_compress(data, width, height);
+		bytes_per_row   = ((width + 3) / 4) * 16; // BC7ENC_BLOCK_SIZE
+		bytes_per_image = bytes_per_row * ((height + 3) / 4);
+	}
+#endif
+
 	MTLTextureDescriptor *descriptor = [MTLTextureDescriptor texture2DDescriptorWithPixelFormat:mtlformat width:width height:height mipmapped:NO];
 	descriptor.textureType           = MTLTextureType2D;
 	descriptor.width                 = width;
@@ -557,15 +572,22 @@ void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, 
 	id<MTLTexture> tex    = [device newTextureWithDescriptor:descriptor];
 	if (tex == nil) {
 		gpu_cleanup();
-		tex = [device newTextureWithDescriptor:descriptor];
+#ifdef WITH_BC7
+		if (data != original_data) {
+			free(data);
+		}
+#endif
+		gpu_texture_init_from_bytes(texture, original_data, width, height, format);
+		return;
 	}
-	texture->impl._tex    = (__bridge_retained void *)tex;
-	[tex replaceRegion:MTLRegionMake2D(0, 0, width, height)
-	       mipmapLevel:0
-	             slice:0
-	         withBytes:data
-	       bytesPerRow:width * gpu_texture_format_size(format)
-	     bytesPerImage:width * gpu_texture_format_size(format) * height];
+	texture->impl._tex = (__bridge_retained void *)tex;
+	[tex replaceRegion:MTLRegionMake2D(0, 0, width, height) mipmapLevel:0 slice:0 withBytes:data bytesPerRow:bytes_per_row bytesPerImage:bytes_per_image];
+
+#ifdef WITH_BC7
+	if (data != original_data) {
+		free(data);
+	}
+#endif
 }
 
 void gpu_texture_destroy_internal(gpu_texture_t *target) {
@@ -651,33 +673,43 @@ char *gpu_device_name() {
 	return (char *)[device.name UTF8String];
 }
 
+bool gpu_bc7_supported(int width, int height, gpu_texture_format_t format) {
+#ifdef WITH_BC7
+	id<MTLDevice> device = get_metal_device();
+	return [device supportsBCTextureCompression] && format == GPU_TEXTURE_FORMAT_RGBA32 && width >= 2048 && height >= 2048 && (width & (width - 1)) == 0 &&
+	       (height & (height - 1)) == 0;
+#else
+	return false;
+#endif
+}
+
 typedef struct inst {
 	mat4_t m;
-	int              i;
+	int    i;
 } inst_t;
 
-static gpu_acceleration_structure_t          *accel;
-static gpu_raytrace_pipeline_t               *pipeline;
-static gpu_texture_t                         *output = NULL;
-static gpu_buffer_t                          *constant_buf;
-static id<MTLComputePipelineState>            _raytracing_pipeline;
-static NSMutableArray                        *_primitive_accels;
-static id<MTLAccelerationStructure>           _instance_accel;
-static dispatch_semaphore_t                   _semaphore;
-static gpu_texture_t                         *_texpaint0;
-static gpu_texture_t                         *_texpaint1;
-static gpu_texture_t                         *_texpaint2;
-static gpu_texture_t                         *_texenv;
-static gpu_texture_t                         *_texsobol;
-static gpu_texture_t                         *_texscramble;
-static gpu_texture_t                         *_texrank;
-static gpu_buffer_t                          *vb[16];
-static gpu_buffer_t                          *vb_last[16];
-static gpu_buffer_t                          *ib[16];
-static int                                    vb_count      = 0;
-static int                                    vb_count_last = 0;
-static inst_t                                 instances[1024];
-static int                                    instances_count = 0;
+static gpu_acceleration_structure_t *accel;
+static gpu_raytrace_pipeline_t      *pipeline;
+static gpu_texture_t                *output = NULL;
+static gpu_buffer_t                 *constant_buf;
+static id<MTLComputePipelineState>   _raytracing_pipeline;
+static NSMutableArray               *_primitive_accels;
+static id<MTLAccelerationStructure>  _instance_accel;
+static dispatch_semaphore_t          _semaphore;
+static gpu_texture_t                *_texpaint0;
+static gpu_texture_t                *_texpaint1;
+static gpu_texture_t                *_texpaint2;
+static gpu_texture_t                *_texenv;
+static gpu_texture_t                *_texsobol;
+static gpu_texture_t                *_texscramble;
+static gpu_texture_t                *_texrank;
+static gpu_buffer_t                 *vb[16];
+static gpu_buffer_t                 *vb_last[16];
+static gpu_buffer_t                 *ib[16];
+static int                           vb_count      = 0;
+static int                           vb_count_last = 0;
+static inst_t                        instances[1024];
+static int                           instances_count = 0;
 
 void gpu_raytrace_pipeline_init(gpu_raytrace_pipeline_t *pipeline, void *shader, int ray_shader_size, gpu_buffer_t *constant_buffer) {
 	id<MTLDevice> device = get_metal_device();

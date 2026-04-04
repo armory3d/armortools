@@ -180,12 +180,16 @@ void tab_textures_draw(ui_handle_t *htab) {
 
 					if (ui->is_hovered) {
 						ui_tooltip_image(img, 256);
+						char *tooltip = asset->name;
 						if (is_packed) {
-							ui_tooltip(string("%s %s", asset->name, tr("(packed)")));
+							tooltip = string("%s %s", tooltip, tr("(packed)"));
 						}
-						else {
-							ui_tooltip(asset->name);
+						#ifdef WITH_BC7
+						if (img->format == GPU_TEXTURE_FORMAT_RGBA32_BC7) {
+							tooltip = string("%s %s", tooltip, tr("(compressed)"));
 						}
+						#endif
+						ui_tooltip(tooltip);
 					}
 
 					if (ui->is_hovered && ui->input_released_r) {
