@@ -462,6 +462,7 @@ typedef struct node_shader_context {
 
 typedef struct history_step {
 	char                  *name;
+	history_action_t       action;
 	struct ui_node_canvas *canvas; // Node history
 	i32                    canvas_group;
 	i32                    layer;
