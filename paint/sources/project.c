@@ -533,6 +533,20 @@ string_array_t *project_get_unwrap_plugins() {
 	return unwrap_plugins;
 }
 
+void project_unwrap_mesh(raw_mesh_t *mesh, void (*done)(raw_mesh_t *)) {
+	string_array_t *unwrap_plugins = project_get_unwrap_plugins();
+
+	if (_project_unwrap_by == unwrap_plugins->length - 1) {
+		util_mesh_equirect_unwrap(mesh);
+	}
+	else {
+		char *f                = unwrap_plugins->buffer[_project_unwrap_by];
+		void (*cb)(void *mesh) = any_map_get(util_mesh_unwrappers, f);
+		cb(mesh);
+	}
+	done(mesh);
+}
+
 void project_unwrap_mesh_box_draw() {
 	raw_mesh_t *mesh           = _project_unwrap_mesh_box_mesh;
 	void (*done)(raw_mesh_t *) = _project_unwrap_mesh_box_done;
@@ -569,20 +583,6 @@ void project_unwrap_mesh_box(raw_mesh_t *mesh, void (*done)(raw_mesh_t *), bool 
 	}
 
 	ui_box_show_custom(&project_unwrap_mesh_box_draw, 400, 200, NULL, true, tr("Unwrap Mesh"));
-}
-
-void project_unwrap_mesh(raw_mesh_t *mesh, void (*done)(raw_mesh_t *)) {
-	string_array_t *unwrap_plugins = project_get_unwrap_plugins();
-
-	if (_project_unwrap_by == unwrap_plugins->length - 1) {
-		util_mesh_equirect_unwrap(mesh);
-	}
-	else {
-		char *f                = unwrap_plugins->buffer[_project_unwrap_by];
-		void (*cb)(void *mesh) = any_map_get(util_mesh_unwrappers, f);
-		cb(mesh);
-	}
-	done(mesh);
 }
 
 void project_import_asset_on_file_picked(char *path) {

@@ -167,33 +167,6 @@ void _import_mesh_make_mesh(raw_mesh_t *mesh) {
 	sys_notify_on_next_frame(&_import_mesh_make_mesh_finish_import, NULL);
 }
 
-void import_mesh_first_unwrap_done(raw_mesh_t *mesh) {
-	_import_mesh_make_mesh(mesh);
-	for (i32 i = 0; i < import_mesh_meshes_to_unwrap->length; ++i) {
-		raw_mesh_t *mesh = import_mesh_meshes_to_unwrap->buffer[i];
-		project_unwrap_mesh_box(mesh, _import_mesh_add_mesh, true);
-	}
-}
-
-void import_mesh_make_mesh(raw_mesh_t *mesh) {
-	if (mesh == NULL || mesh->posa == NULL || mesh->nora == NULL || mesh->inda == NULL || mesh->posa->length == 0) {
-		console_error(strings_failed_to_read_mesh_data());
-		return;
-	}
-
-	if (mesh->texa == NULL) {
-		if (import_mesh_meshes_to_unwrap == NULL) {
-			gc_unroot(import_mesh_meshes_to_unwrap);
-			import_mesh_meshes_to_unwrap = any_array_create_from_raw((void *[]){}, 0);
-			gc_root(import_mesh_meshes_to_unwrap);
-		}
-		project_unwrap_mesh_box(mesh, import_mesh_first_unwrap_done, false);
-	}
-	else {
-		_import_mesh_make_mesh(mesh);
-	}
-}
-
 bool _import_mesh_is_unique_name(char *s) {
 	for (i32 i = 0; i < project_paint_objects->length; ++i) {
 		mesh_object_t *p = project_paint_objects->buffer[i];
@@ -247,6 +220,33 @@ void _import_mesh_add_mesh(raw_mesh_t *mesh) {
 	util_uv_uvmap_cached                              = false;
 	util_uv_trianglemap_cached                        = false;
 	util_uv_dilatemap_cached                          = false;
+}
+
+void import_mesh_first_unwrap_done(raw_mesh_t *mesh) {
+	_import_mesh_make_mesh(mesh);
+	for (i32 i = 0; i < import_mesh_meshes_to_unwrap->length; ++i) {
+		raw_mesh_t *mesh = import_mesh_meshes_to_unwrap->buffer[i];
+		project_unwrap_mesh_box(mesh, _import_mesh_add_mesh, true);
+	}
+}
+
+void import_mesh_make_mesh(raw_mesh_t *mesh) {
+	if (mesh == NULL || mesh->posa == NULL || mesh->nora == NULL || mesh->inda == NULL || mesh->posa->length == 0) {
+		console_error(strings_failed_to_read_mesh_data());
+		return;
+	}
+
+	if (mesh->texa == NULL) {
+		if (import_mesh_meshes_to_unwrap == NULL) {
+			gc_unroot(import_mesh_meshes_to_unwrap);
+			import_mesh_meshes_to_unwrap = any_array_create_from_raw((void *[]){}, 0);
+			gc_root(import_mesh_meshes_to_unwrap);
+		}
+		project_unwrap_mesh_box(mesh, import_mesh_first_unwrap_done, false);
+	}
+	else {
+		_import_mesh_make_mesh(mesh);
+	}
 }
 
 void import_mesh_add_mesh(raw_mesh_t *mesh) {

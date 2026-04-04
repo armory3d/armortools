@@ -30,10 +30,4 @@ physics_pair_t_array_t *physics_world_get_contact_pairs(physics_world_t *world, 
 	return pairs;
 }
 
-void physics_world_destroy() {
-	if (physics_world_active != NULL) {
-		asim_world_destroy();
-	}
-}
-
 #endif

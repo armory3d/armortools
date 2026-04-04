@@ -30,6 +30,22 @@ fun tex_checker_f(co: float3, scale: float): float { \
 } \
 ";
 
+char *checker_texture_node_vector(ui_node_t *node, ui_node_socket_t *socket) {
+	node_shader_add_function(parser_material_kong, str_tex_checker);
+	char *co    = parser_material_get_coord(node);
+	char *col1  = parser_material_parse_vector_input(node->inputs->buffer[1]);
+	char *col2  = parser_material_parse_vector_input(node->inputs->buffer[2]);
+	char *scale = parser_material_parse_value_input(node->inputs->buffer[3], false);
+	return string("tex_checker(%s, %s, %s, %s)", co, col1, col2, scale);
+}
+
+char *checker_texture_node_value(ui_node_t *node, ui_node_socket_t *socket) {
+	node_shader_add_function(parser_material_kong, str_tex_checker);
+	char *co    = parser_material_get_coord(node);
+	char *scale = parser_material_parse_value_input(node->inputs->buffer[3], false);
+	return string("tex_checker_f(%s, %s)", co, scale);
+}
+
 void checker_texture_node_init() {
 
 	checker_texture_node_def =
@@ -115,20 +131,4 @@ void checker_texture_node_init() {
 	any_array_push(nodes_material_texture, checker_texture_node_def);
 	any_map_set(parser_material_node_vectors, "TEX_CHECKER", checker_texture_node_vector);
 	any_map_set(parser_material_node_values, "TEX_CHECKER", checker_texture_node_value);
-}
-
-char *checker_texture_node_vector(ui_node_t *node, ui_node_socket_t *socket) {
-	node_shader_add_function(parser_material_kong, str_tex_checker);
-	char *co    = parser_material_get_coord(node);
-	char *col1  = parser_material_parse_vector_input(node->inputs->buffer[1]);
-	char *col2  = parser_material_parse_vector_input(node->inputs->buffer[2]);
-	char *scale = parser_material_parse_value_input(node->inputs->buffer[3], false);
-	return string("tex_checker(%s, %s, %s, %s)", co, col1, col2, scale);
-}
-
-char *checker_texture_node_value(ui_node_t *node, ui_node_socket_t *socket) {
-	node_shader_add_function(parser_material_kong, str_tex_checker);
-	char *co    = parser_material_get_coord(node);
-	char *scale = parser_material_parse_value_input(node->inputs->buffer[3], false);
-	return string("tex_checker_f(%s, %s)", co, scale);
 }

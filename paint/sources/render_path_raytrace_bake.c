@@ -5,6 +5,13 @@ void render_path_raytrace_bake_commands_parse_paint_material(void (*parse_paint_
 	parse_paint_material(true);
 }
 
+char *render_path_raytrace_bake_get_bake_shader_name() {
+	return context_raw->bake_type == BAKE_TYPE_AO            ? string("raytrace_bake_ao%s", render_path_raytrace_ext)
+	       : context_raw->bake_type == BAKE_TYPE_LIGHTMAP    ? string("raytrace_bake_light%s", render_path_raytrace_ext)
+	       : context_raw->bake_type == BAKE_TYPE_BENT_NORMAL ? string("raytrace_bake_bent%s", render_path_raytrace_ext)
+	                                                         : string("raytrace_bake_thick%s", render_path_raytrace_ext);
+}
+
 bool render_path_raytrace_bake_commands(void (*parse_paint_material)(bool)) {
 
 	if (!render_path_raytrace_ready || !render_path_raytrace_is_bake || render_path_raytrace_bake_last_bake_type != context_raw->bake_type) {
@@ -161,11 +168,4 @@ bool render_path_raytrace_bake_commands(void (*parse_paint_material)(bool)) {
 		render_path_raytrace_bake_current_sample = 0;
 		return false;
 	}
-}
-
-char *render_path_raytrace_bake_get_bake_shader_name() {
-	return context_raw->bake_type == BAKE_TYPE_AO            ? string("raytrace_bake_ao%s", render_path_raytrace_ext)
-	       : context_raw->bake_type == BAKE_TYPE_LIGHTMAP    ? string("raytrace_bake_light%s", render_path_raytrace_ext)
-	       : context_raw->bake_type == BAKE_TYPE_BENT_NORMAL ? string("raytrace_bake_bent%s", render_path_raytrace_ext)
-	                                                         : string("raytrace_bake_thick%s", render_path_raytrace_ext);
 }

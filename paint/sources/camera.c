@@ -147,6 +147,24 @@ static void camera_rotate_action(bool modif, bool default_keymap) {
 	}
 }
 
+f32 camera_get_zoom_speed() {
+	i32 sign = config_raw->zoom_direction == ZOOM_DIRECTION_VERTICAL_INVERTED || config_raw->zoom_direction == ZOOM_DIRECTION_HORIZONTAL_INVERTED ||
+	                   config_raw->zoom_direction == ZOOM_DIRECTION_VERTICAL_HORIZONTAL_INVERTED
+	               ? -1
+	               : 1;
+	camera_object_t *camera     = scene_camera;
+	f32              fov_adjust = camera->data->fov;
+	return (config_raw->camera_zoom_speed * sign) / (float)fov_adjust;
+}
+
+f32 camera_get_zoom_delta() {
+	return config_raw->zoom_direction == ZOOM_DIRECTION_VERTICAL              ? -mouse_movement_y
+	       : config_raw->zoom_direction == ZOOM_DIRECTION_VERTICAL_INVERTED   ? -mouse_movement_y
+	       : config_raw->zoom_direction == ZOOM_DIRECTION_HORIZONTAL          ? mouse_movement_x
+	       : config_raw->zoom_direction == ZOOM_DIRECTION_HORIZONTAL_INVERTED ? mouse_movement_x
+	                                                                          : -(mouse_movement_y - mouse_movement_x);
+}
+
 static void camera_zoom_action(bool modif_key) {
 	camera_object_t *camera = scene_camera;
 
@@ -230,6 +248,47 @@ void camera_init() {
 	camera_reset(-1);
 }
 
+i32 camera_index() {
+	return context_raw->view_index_last > 0 ? 1 : 0;
+}
+
+void camera_pan_action(bool modif, bool default_keymap) {
+	camera_object_t *camera = scene_camera;
+	if (operator_shortcut(any_map_get(config_keymap, "action_pan"), SHORTCUT_TYPE_DOWN) || (mouse_down("middle") && !modif && default_keymap)) {
+		camera_redraws               = 2;
+		f32    f                     = 150 * (1.0 / (float)(camera_distance() / 4.0));
+		vec4_t look                  = vec4_mult(transform_look(camera->base->transform), mouse_movement_y / (float)f * config_raw->camera_pan_speed);
+		vec4_t right                 = vec4_mult(transform_right(camera->base->transform), -mouse_movement_x / (float)f * config_raw->camera_pan_speed);
+		camera->base->transform->loc = vec4_add(camera->base->transform->loc, look);
+		camera->base->transform->loc = vec4_add(camera->base->transform->loc, right);
+		camera_origins->buffer[camera_index()]->v = vec4_add(camera_origins->buffer[camera_index()]->v, look);
+		camera_origins->buffer[camera_index()]->v = vec4_add(camera_origins->buffer[camera_index()]->v, right);
+		camera_object_build_mat(camera);
+	}
+}
+
+void camera_set_pivot_center_to_mouse() {
+	util_render_pick_pos_nor_tex();
+	bool is_mesh = math_abs(context_raw->posx_picked) < 50 && math_abs(context_raw->posy_picked) < 50 && math_abs(context_raw->posz_picked) < 50;
+	if (!is_mesh) {
+		return;
+	}
+
+	vec4_box_t *o = camera_origins->buffer[camera_index()];
+	o->v.x        = context_raw->posx_picked;
+	o->v.y        = context_raw->posy_picked;
+	o->v.z        = context_raw->posz_picked;
+
+	camera_redraws                 = 2;
+	camera_object_t *camera        = scene_camera;
+	vec4_t           up            = vec4_mult(transform_up(camera->base->transform), camera_distance());
+	camera->base->transform->loc.x = context_raw->posx_picked;
+	camera->base->transform->loc.y = context_raw->posy_picked;
+	camera->base->transform->loc.z = context_raw->posz_picked;
+	camera->base->transform->loc   = vec4_add(camera->base->transform->loc, up);
+	camera_object_build_mat(camera);
+}
+
 void camera_update(void *_) {
 	if (!camera_wrap_mouse()) {
 		return;
@@ -301,20 +360,6 @@ f32 camera_distance() {
 	return vec4_dist(camera_origins->buffer[camera_index()]->v, camera->base->transform->loc);
 }
 
-i32 camera_index() {
-	return context_raw->view_index_last > 0 ? 1 : 0;
-}
-
-f32 camera_get_zoom_speed() {
-	i32 sign = config_raw->zoom_direction == ZOOM_DIRECTION_VERTICAL_INVERTED || config_raw->zoom_direction == ZOOM_DIRECTION_HORIZONTAL_INVERTED ||
-	                   config_raw->zoom_direction == ZOOM_DIRECTION_VERTICAL_HORIZONTAL_INVERTED
-	               ? -1
-	               : 1;
-	camera_object_t *camera     = scene_camera;
-	f32              fov_adjust = camera->data->fov;
-	return (config_raw->camera_zoom_speed * sign) / (float)fov_adjust;
-}
-
 void camera_reset(i32 view_index) {
 	camera_object_t *camera = scene_camera;
 	if (view_index == -1) {
@@ -353,49 +398,4 @@ void camera_reset(i32 view_index) {
 		camera_object_build_mat(camera);
 	}
 #endif
-}
-
-void camera_pan_action(bool modif, bool default_keymap) {
-	camera_object_t *camera = scene_camera;
-	if (operator_shortcut(any_map_get(config_keymap, "action_pan"), SHORTCUT_TYPE_DOWN) || (mouse_down("middle") && !modif && default_keymap)) {
-		camera_redraws               = 2;
-		f32    f                     = 150 * (1.0 / (float)(camera_distance() / 4.0));
-		vec4_t look                  = vec4_mult(transform_look(camera->base->transform), mouse_movement_y / (float)f * config_raw->camera_pan_speed);
-		vec4_t right                 = vec4_mult(transform_right(camera->base->transform), -mouse_movement_x / (float)f * config_raw->camera_pan_speed);
-		camera->base->transform->loc = vec4_add(camera->base->transform->loc, look);
-		camera->base->transform->loc = vec4_add(camera->base->transform->loc, right);
-		camera_origins->buffer[camera_index()]->v = vec4_add(camera_origins->buffer[camera_index()]->v, look);
-		camera_origins->buffer[camera_index()]->v = vec4_add(camera_origins->buffer[camera_index()]->v, right);
-		camera_object_build_mat(camera);
-	}
-}
-
-f32 camera_get_zoom_delta() {
-	return config_raw->zoom_direction == ZOOM_DIRECTION_VERTICAL              ? -mouse_movement_y
-	       : config_raw->zoom_direction == ZOOM_DIRECTION_VERTICAL_INVERTED   ? -mouse_movement_y
-	       : config_raw->zoom_direction == ZOOM_DIRECTION_HORIZONTAL          ? mouse_movement_x
-	       : config_raw->zoom_direction == ZOOM_DIRECTION_HORIZONTAL_INVERTED ? mouse_movement_x
-	                                                                          : -(mouse_movement_y - mouse_movement_x);
-}
-
-void camera_set_pivot_center_to_mouse() {
-	util_render_pick_pos_nor_tex();
-	bool is_mesh = math_abs(context_raw->posx_picked) < 50 && math_abs(context_raw->posy_picked) < 50 && math_abs(context_raw->posz_picked) < 50;
-	if (!is_mesh) {
-		return;
-	}
-
-	vec4_box_t *o = camera_origins->buffer[camera_index()];
-	o->v.x        = context_raw->posx_picked;
-	o->v.y        = context_raw->posy_picked;
-	o->v.z        = context_raw->posz_picked;
-
-	camera_redraws                 = 2;
-	camera_object_t *camera        = scene_camera;
-	vec4_t           up            = vec4_mult(transform_up(camera->base->transform), camera_distance());
-	camera->base->transform->loc.x = context_raw->posx_picked;
-	camera->base->transform->loc.y = context_raw->posy_picked;
-	camera->base->transform->loc.z = context_raw->posz_picked;
-	camera->base->transform->loc   = vec4_add(camera->base->transform->loc, up);
-	camera_object_build_mat(camera);
 }

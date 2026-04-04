@@ -59,129 +59,6 @@ void ui_menubar_render_ui_save_project(void *_) {
 	sys_notify_on_end_frame(&ui_menubar_render_ui_save_project_on_next_frame, NULL);
 }
 
-void ui_menubar_render_ui() {
-	if (config_raw->touch_ui && !base_view3d_show) {
-		return;
-	}
-
-	i32 item_w  = ui_toolbar_w(false);
-	i32 panel_x = ui_menu_panel_x();
-	i32 panel_y = ui_menu_panel_y();
-
-	if (ui_window(ui_menubar_menu_handle, panel_x, panel_y, ui_menubar_w, ui_header_h, false)) {
-
-		if (!base_view3d_show) {
-			ui->_x += 1;
-		}
-
-		ui_begin_menu();
-
-		if (config_raw->touch_ui) {
-			ui->_w = item_w;
-
-			if (ui_menubar_icon_button(ICON_MENU)) {
-				box_preferences_show();
-			}
-			if (ui_menubar_icon_button(ICON_PROJECTS)) {
-				// Save project icon in lit mode
-				context_set_viewport_mode(VIEWPORT_MODE_LIT);
-				console_toast(tr("Saving project"));
-				sys_notify_on_next_frame(&ui_menubar_render_ui_save_project, NULL);
-			}
-			if (ui_menubar_icon_button(ICON_IMPORT)) {
-				project_import_asset(NULL, true);
-			}
-			if (ui_menubar_icon_button(ICON_EXPORT)) {
-				box_export_show_textures();
-			}
-			i32 size = math_floor(ui->_w / (float)UI_SCALE());
-			if (ui_menu_show && ui_menubar_category == MENUBAR_CATEGORY_VIEWPORT) {
-				ui_fill(0, -6, size, size - 4, ui->ops->theme->HIGHLIGHT_COL);
-			}
-			if (ui_menubar_icon_button(ICON_IMAGE)) {
-				ui_menubar_show_menu(MENUBAR_CATEGORY_VIEWPORT);
-			}
-			if (ui_menu_show && ui_menubar_category == MENUBAR_CATEGORY_MODE) {
-				ui_fill(0, -6, size, size - 4, ui->ops->theme->HIGHLIGHT_COL);
-			}
-			if (ui_menubar_icon_button(ICON_SUN)) {
-				ui_menubar_show_menu(MENUBAR_CATEGORY_MODE);
-			}
-			if (ui_menu_show && ui_menubar_category == MENUBAR_CATEGORY_CAMERA) {
-				ui_fill(0, -6, size, size - 4, ui->ops->theme->HIGHLIGHT_COL);
-			}
-			if (ui_menubar_icon_button(ICON_CAMERA)) {
-				ui_menubar_show_menu(MENUBAR_CATEGORY_CAMERA);
-			}
-			// if (ui_menubar_icon_button(ICON_WINDOW)) {
-			// ui_menubar_show_menu(MENUBAR_CATEGORY_WORKSPACE);
-			// }
-			if (ui_menu_show && ui_menubar_category == MENUBAR_CATEGORY_HELP) {
-				ui_fill(0, -6, size, size - 4, ui->ops->theme->HIGHLIGHT_COL);
-			}
-
-			bool full = true;
-#ifdef IRON_IOS
-			if (config_is_iphone()) {
-				full = false;
-			}
-#endif
-
-			if (full && ui_menubar_icon_button(ICON_HELP)) {
-				ui_menubar_show_menu(MENUBAR_CATEGORY_HELP);
-			}
-
-			ui->enabled = history_undos > 0;
-			if (ui_menubar_icon_button(ICON_UNDO)) {
-				history_undo();
-			}
-			ui->enabled = history_redos > 0;
-			if (full && ui_menubar_icon_button(ICON_REDO)) {
-				history_redo();
-			}
-			ui->enabled = true;
-		}
-		else {
-			string_array_t *categories = any_array_create_from_raw(
-			    (void *[]){
-			        tr("File"),
-			        tr("Edit"),
-			        tr("Viewport"),
-			        tr("Mode"),
-			        tr("Camera"),
-			        tr("Workspace"),
-			        tr("Help"),
-			    },
-			    7);
-
-			for (i32 i = 0; i < categories->length; ++i) {
-				if (ui_menubar_button(categories->buffer[i]) || (ui_menu_show && ui_menu_commands == ui_menubar_draw_category_items && ui->is_hovered)) {
-					ui_menubar_show_menu(i);
-				}
-			}
-		}
-
-		// Store real menubar w
-		if (ui_menubar_w < ui->_x + 10) {
-			ui_menubar_w               = math_floor(ui->_x + 10);
-			ui_toolbar_handle->redraws = 2;
-		}
-		// Crop menubar if sidebar + nodes are overlapping
-		i32 nodesw = (ui_nodes_show || ui_view2d_show) ? config_raw->layout->buffer[LAYOUT_SIZE_NODES_W] : 0;
-		if (ui_menubar_w > iron_window_width() - config_raw->layout->buffer[LAYOUT_SIZE_SIDEBAR_W] - nodesw) {
-			ui_menubar_w               = iron_window_width() - config_raw->layout->buffer[LAYOUT_SIZE_SIDEBAR_W] - nodesw;
-			ui_toolbar_handle->redraws = 2;
-		}
-
-		ui_end_menu();
-	}
-
-	if (config_raw->layout->buffer[LAYOUT_SIZE_HEADER] == 1) {
-		// Non-floating header
-		ui_menubar_draw_tab_header();
-	}
-}
-
 void ui_menubar_draw_tab_header() {
 	i32 item_w  = ui_toolbar_w(false);
 	i32 nodesw  = (ui_nodes_show || ui_view2d_show) ? config_raw->layout->buffer[LAYOUT_SIZE_NODES_W] : 0;
@@ -947,6 +824,129 @@ void ui_menubar_show_menu(i32 category) {
 		ui_menu_x += math_floor(2 * UI_SCALE());
 		ui_menu_y -= math_floor(2 * UI_SCALE());
 		ui_menu_keep_open = true;
+	}
+}
+
+void ui_menubar_render_ui() {
+	if (config_raw->touch_ui && !base_view3d_show) {
+		return;
+	}
+
+	i32 item_w  = ui_toolbar_w(false);
+	i32 panel_x = ui_menu_panel_x();
+	i32 panel_y = ui_menu_panel_y();
+
+	if (ui_window(ui_menubar_menu_handle, panel_x, panel_y, ui_menubar_w, ui_header_h, false)) {
+
+		if (!base_view3d_show) {
+			ui->_x += 1;
+		}
+
+		ui_begin_menu();
+
+		if (config_raw->touch_ui) {
+			ui->_w = item_w;
+
+			if (ui_menubar_icon_button(ICON_MENU)) {
+				box_preferences_show();
+			}
+			if (ui_menubar_icon_button(ICON_PROJECTS)) {
+				// Save project icon in lit mode
+				context_set_viewport_mode(VIEWPORT_MODE_LIT);
+				console_toast(tr("Saving project"));
+				sys_notify_on_next_frame(&ui_menubar_render_ui_save_project, NULL);
+			}
+			if (ui_menubar_icon_button(ICON_IMPORT)) {
+				project_import_asset(NULL, true);
+			}
+			if (ui_menubar_icon_button(ICON_EXPORT)) {
+				box_export_show_textures();
+			}
+			i32 size = math_floor(ui->_w / (float)UI_SCALE());
+			if (ui_menu_show && ui_menubar_category == MENUBAR_CATEGORY_VIEWPORT) {
+				ui_fill(0, -6, size, size - 4, ui->ops->theme->HIGHLIGHT_COL);
+			}
+			if (ui_menubar_icon_button(ICON_IMAGE)) {
+				ui_menubar_show_menu(MENUBAR_CATEGORY_VIEWPORT);
+			}
+			if (ui_menu_show && ui_menubar_category == MENUBAR_CATEGORY_MODE) {
+				ui_fill(0, -6, size, size - 4, ui->ops->theme->HIGHLIGHT_COL);
+			}
+			if (ui_menubar_icon_button(ICON_SUN)) {
+				ui_menubar_show_menu(MENUBAR_CATEGORY_MODE);
+			}
+			if (ui_menu_show && ui_menubar_category == MENUBAR_CATEGORY_CAMERA) {
+				ui_fill(0, -6, size, size - 4, ui->ops->theme->HIGHLIGHT_COL);
+			}
+			if (ui_menubar_icon_button(ICON_CAMERA)) {
+				ui_menubar_show_menu(MENUBAR_CATEGORY_CAMERA);
+			}
+			// if (ui_menubar_icon_button(ICON_WINDOW)) {
+			// ui_menubar_show_menu(MENUBAR_CATEGORY_WORKSPACE);
+			// }
+			if (ui_menu_show && ui_menubar_category == MENUBAR_CATEGORY_HELP) {
+				ui_fill(0, -6, size, size - 4, ui->ops->theme->HIGHLIGHT_COL);
+			}
+
+			bool full = true;
+#ifdef IRON_IOS
+			if (config_is_iphone()) {
+				full = false;
+			}
+#endif
+
+			if (full && ui_menubar_icon_button(ICON_HELP)) {
+				ui_menubar_show_menu(MENUBAR_CATEGORY_HELP);
+			}
+
+			ui->enabled = history_undos > 0;
+			if (ui_menubar_icon_button(ICON_UNDO)) {
+				history_undo();
+			}
+			ui->enabled = history_redos > 0;
+			if (full && ui_menubar_icon_button(ICON_REDO)) {
+				history_redo();
+			}
+			ui->enabled = true;
+		}
+		else {
+			string_array_t *categories = any_array_create_from_raw(
+			    (void *[]){
+			        tr("File"),
+			        tr("Edit"),
+			        tr("Viewport"),
+			        tr("Mode"),
+			        tr("Camera"),
+			        tr("Workspace"),
+			        tr("Help"),
+			    },
+			    7);
+
+			for (i32 i = 0; i < categories->length; ++i) {
+				if (ui_menubar_button(categories->buffer[i]) || (ui_menu_show && ui_menu_commands == ui_menubar_draw_category_items && ui->is_hovered)) {
+					ui_menubar_show_menu(i);
+				}
+			}
+		}
+
+		// Store real menubar w
+		if (ui_menubar_w < ui->_x + 10) {
+			ui_menubar_w               = math_floor(ui->_x + 10);
+			ui_toolbar_handle->redraws = 2;
+		}
+		// Crop menubar if sidebar + nodes are overlapping
+		i32 nodesw = (ui_nodes_show || ui_view2d_show) ? config_raw->layout->buffer[LAYOUT_SIZE_NODES_W] : 0;
+		if (ui_menubar_w > iron_window_width() - config_raw->layout->buffer[LAYOUT_SIZE_SIDEBAR_W] - nodesw) {
+			ui_menubar_w               = iron_window_width() - config_raw->layout->buffer[LAYOUT_SIZE_SIDEBAR_W] - nodesw;
+			ui_toolbar_handle->redraws = 2;
+		}
+
+		ui_end_menu();
+	}
+
+	if (config_raw->layout->buffer[LAYOUT_SIZE_HEADER] == 1) {
+		// Non-floating header
+		ui_menubar_draw_tab_header();
 	}
 }
 

@@ -103,11 +103,6 @@ void render_path_deferred_init() {
 	render_path_raytrace_init();
 }
 
-void render_path_deferred_commands() {
-	render_path_paint_live_brush_dirty();
-	render_path_base_commands(render_path_deferred_draw_deferred);
-}
-
 void render_path_deferred_draw_deferred() {
 	render_path_base_draw_ssao();
 	render_path_base_draw_deferred_light();
@@ -123,4 +118,9 @@ void render_path_deferred_draw_deferred() {
 	render_path_base_draw_compass();
 	render_path_draw_meshes("overlay");
 	render_path_base_draw_taa("gbuffer1", "buf");
+}
+
+void render_path_deferred_commands() {
+	render_path_paint_live_brush_dirty();
+	render_path_base_commands(render_path_deferred_draw_deferred);
 }

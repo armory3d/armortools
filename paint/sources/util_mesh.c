@@ -1,6 +1,36 @@
 
 #include "global.h"
 
+void util_mesh_remove_merged() {
+	if (context_raw->merged_object != NULL) {
+		mesh_data_delete(context_raw->merged_object->data);
+		mesh_object_remove(context_raw->merged_object);
+		context_raw->merged_object = NULL;
+	}
+}
+
+mesh_object_t_array_t *util_mesh_get_unique() {
+	mesh_object_t_array_t *ar = any_array_create_from_raw((void *[]){}, 0);
+
+	for (i32 i = 0; i < project_paint_objects->length; ++i) {
+		if (!project_paint_objects->buffer[i]->base->visible) {
+			continue;
+		}
+		bool found = false;
+		for (i32 j = 0; j < i; ++j) {
+			if (project_paint_objects->buffer[i]->data == project_paint_objects->buffer[j]->data) {
+				found = true;
+				break;
+			}
+		}
+		if (!found) {
+			any_array_push(ar, project_paint_objects->buffer[i]);
+		}
+	}
+
+	return ar;
+}
+
 void util_mesh_merge(mesh_object_t_array_t *paint_objects) {
 	if (paint_objects == NULL) {
 		if (context_raw->tool == TOOL_TYPE_GIZMO) {
@@ -114,14 +144,6 @@ void util_mesh_merge(mesh_object_t_array_t *paint_objects) {
 	context_raw->merged_object->force_context = "paint";
 	object_set_parent(context_raw->merged_object->base, context_main_object()->base);
 	render_path_raytrace_ready = false;
-}
-
-void util_mesh_remove_merged() {
-	if (context_raw->merged_object != NULL) {
-		mesh_data_delete(context_raw->merged_object->data);
-		mesh_object_remove(context_raw->merged_object);
-		context_raw->merged_object = NULL;
-	}
 }
 
 void util_mesh_swap_axis(i32 a, i32 b) {
@@ -414,29 +436,6 @@ void util_mesh_equirect_unwrap(raw_mesh_t *mesh) {
 	}
 }
 
-bool util_mesh_pnpoly(f32 v0x, f32 v0y, f32 v1x, f32 v1y, f32 v2x, f32 v2y, f32 px, f32 py) {
-	// https://wrf.ecse.rpi.edu//Research/Short_Notes/pnpoly.html
-	bool c = false;
-	if (((v0y > py) != (v2y > py)) && (px < (v2x - v0x) * (py - v0y) / (float)(v2y - v0y) + v0x)) {
-		c = !c;
-	}
-	if (((v1y > py) != (v0y > py)) && (px < (v0x - v1x) * (py - v1y) / (float)(v0y - v1y) + v1x)) {
-		c = !c;
-	}
-	if (((v2y > py) != (v1y > py)) && (px < (v1x - v2x) * (py - v2y) / (float)(v1y - v2y) + v2x)) {
-		c = !c;
-	}
-	return c;
-}
-
-vec4_t util_mesh_calc_normal(vec4_t p0, vec4_t p1, vec4_t p2) {
-	vec4_t cb = vec4_sub(p2, p1);
-	vec4_t ab = vec4_sub(p0, p1);
-	cb        = vec4_cross(cb, ab);
-	cb        = vec4_norm(cb);
-	return cb;
-}
-
 i32 util_mesh_decimate_sort(i32 *pa, i32 *pb) {
 	i32 a    = *(pa);
 	i32 b    = *(pb);
@@ -599,26 +598,4 @@ void util_mesh_pack_uvs(i16_array_t *texa) {
 		texa->buffer[i * 2]     = texa->buffer[i * 2] / (float)atlas_stride + item_x;
 		texa->buffer[i * 2 + 1] = texa->buffer[i * 2 + 1] / (float)atlas_stride + item_y;
 	}
-}
-
-mesh_object_t_array_t *util_mesh_get_unique() {
-	mesh_object_t_array_t *ar = any_array_create_from_raw((void *[]){}, 0);
-
-	for (i32 i = 0; i < project_paint_objects->length; ++i) {
-		if (!project_paint_objects->buffer[i]->base->visible) {
-			continue;
-		}
-		bool found = false;
-		for (i32 j = 0; j < i; ++j) {
-			if (project_paint_objects->buffer[i]->data == project_paint_objects->buffer[j]->data) {
-				found = true;
-				break;
-			}
-		}
-		if (!found) {
-			any_array_push(ar, project_paint_objects->buffer[i]);
-		}
-	}
-
-	return ar;
 }

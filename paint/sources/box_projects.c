@@ -1,40 +1,6 @@
 
 #include "global.h"
 
-void box_projects_show_box() {
-#if defined(IRON_ANDROID) || defined(IRON_IOS)
-	box_projects_align_to_fullscreen();
-#endif
-
-#if defined(IRON_ANDROID) || defined(IRON_IOS)
-	box_projects_tab();
-	box_projects_get_started_tab();
-#else
-	box_projects_recent_tab();
-#endif
-}
-
-void box_projects_show() {
-	if (box_projects_icon_map != NULL) {
-		string_array_t *keys = map_keys(box_projects_icon_map);
-		for (i32 i = 0; i < keys->length; ++i) {
-			char *handle = keys->buffer[i];
-			data_delete_image(handle);
-		}
-		gc_unroot(box_projects_icon_map);
-		box_projects_icon_map = NULL;
-	}
-
-	bool draggable;
-#if defined(IRON_ANDROID) || defined(IRON_IOS)
-	draggable = false;
-#else
-	draggable = true;
-#endif
-
-	ui_box_show_custom(&box_projects_show_box, 600, 400, NULL, draggable, "");
-}
-
 void box_projects_tab_menu_on_next_frame(void *_) {
 	iron_delete_file(_box_projects_path);
 	iron_delete_file(_box_projects_icon_path);
@@ -54,6 +20,12 @@ void box_projects_tab_menu() {
 void box_projects_tab_on_next_frame(char *path) {
 	ui_box_hide();
 	import_arm_run_project(path);
+}
+
+void box_projects_draw_badge() {
+	gpu_texture_t *img = data_get_image("badge.k");
+	ui_image(img, 0xffffffff, -1.0);
+	ui_end_element();
 }
 
 void box_projects_tab() {
@@ -195,6 +167,68 @@ void box_projects_tab() {
 	}
 }
 
+void box_projects_get_started_tab() {
+	if (ui_tab(box_projects_htab, tr("Get Started"), true, -1, false)) {
+
+		ui_separator(UI_ELEMENT_H(), false);
+
+		if (ui_icon_button(tr("Manual"), ICON_HELP, UI_ALIGN_CENTER)) {
+			iron_load_url(string("%s/manual", manifest_url));
+		}
+		if (ui_icon_button(tr("How To"), ICON_HELP, UI_ALIGN_CENTER)) {
+			iron_load_url(string("%s/howto", manifest_url));
+		}
+		if (ui_icon_button(tr("What's New"), ICON_LINK, UI_ALIGN_CENTER)) {
+			iron_load_url(string("%s/notes", manifest_url));
+		}
+	}
+}
+
+void box_projects_align_to_fullscreen() {
+	ui_box_modalw       = math_floor(iron_window_width() / (float)UI_SCALE());
+	ui_box_modalh       = math_floor(iron_window_height() / (float)UI_SCALE());
+	i32 appw            = iron_window_width();
+	i32 apph            = iron_window_height();
+	i32 mw              = appw;
+	i32 mh              = apph;
+	ui_box_hwnd->drag_x = math_floor(-appw / 2.0 + mw / 2.0);
+	ui_box_hwnd->drag_y = math_floor(-apph / 2.0 + mh / 2.0);
+}
+
+void box_projects_show_box() {
+#if defined(IRON_ANDROID) || defined(IRON_IOS)
+	box_projects_align_to_fullscreen();
+#endif
+
+#if defined(IRON_ANDROID) || defined(IRON_IOS)
+	box_projects_tab();
+	box_projects_get_started_tab();
+#else
+	box_projects_recent_tab();
+#endif
+}
+
+void box_projects_show() {
+	if (box_projects_icon_map != NULL) {
+		string_array_t *keys = map_keys(box_projects_icon_map);
+		for (i32 i = 0; i < keys->length; ++i) {
+			char *handle = keys->buffer[i];
+			data_delete_image(handle);
+		}
+		gc_unroot(box_projects_icon_map);
+		box_projects_icon_map = NULL;
+	}
+
+	bool draggable;
+#if defined(IRON_ANDROID) || defined(IRON_IOS)
+	draggable = false;
+#else
+	draggable = true;
+#endif
+
+	ui_box_show_custom(&box_projects_show_box, 600, 400, NULL, draggable, "");
+}
+
 void box_projects_recent_tab() {
 	if (ui_tab(box_projects_htab, tr("Recent"), true, -1, false)) {
 
@@ -247,38 +281,4 @@ void box_projects_recent_tab() {
 			project_open();
 		}
 	}
-}
-
-void box_projects_draw_badge() {
-	gpu_texture_t *img = data_get_image("badge.k");
-	ui_image(img, 0xffffffff, -1.0);
-	ui_end_element();
-}
-
-void box_projects_get_started_tab() {
-	if (ui_tab(box_projects_htab, tr("Get Started"), true, -1, false)) {
-
-		ui_separator(UI_ELEMENT_H(), false);
-
-		if (ui_icon_button(tr("Manual"), ICON_HELP, UI_ALIGN_CENTER)) {
-			iron_load_url(string("%s/manual", manifest_url));
-		}
-		if (ui_icon_button(tr("How To"), ICON_HELP, UI_ALIGN_CENTER)) {
-			iron_load_url(string("%s/howto", manifest_url));
-		}
-		if (ui_icon_button(tr("What's New"), ICON_LINK, UI_ALIGN_CENTER)) {
-			iron_load_url(string("%s/notes", manifest_url));
-		}
-	}
-}
-
-void box_projects_align_to_fullscreen() {
-	ui_box_modalw       = math_floor(iron_window_width() / (float)UI_SCALE());
-	ui_box_modalh       = math_floor(iron_window_height() / (float)UI_SCALE());
-	i32 appw            = iron_window_width();
-	i32 apph            = iron_window_height();
-	i32 mw              = appw;
-	i32 mh              = apph;
-	ui_box_hwnd->drag_x = math_floor(-appw / 2.0 + mw / 2.0);
-	ui_box_hwnd->drag_y = math_floor(-apph / 2.0 + mh / 2.0);
 }

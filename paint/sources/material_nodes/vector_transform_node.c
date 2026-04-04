@@ -1,6 +1,34 @@
 
 #include "../global.h"
 
+char *vector_transform_node_vector(ui_node_t *node, ui_node_socket_t *socket) {
+	char *vec  = parser_material_parse_vector_input(node->inputs->buffer[0]);
+	char *type = to_upper_case(u8_array_string_at(node->buttons->buffer[0]->data, node->buttons->buffer[0]->default_value->buffer[0]));
+	char *from = to_upper_case(u8_array_string_at(node->buttons->buffer[1]->data, node->buttons->buffer[1]->default_value->buffer[0]));
+	char *to   = to_upper_case(u8_array_string_at(node->buttons->buffer[2]->data, node->buttons->buffer[2]->default_value->buffer[0]));
+
+	if (string_equals(from, "OBJECT") && string_equals(to, "WORLD")) {
+		if (string_equals(type, "NORMAL")) {
+			node_shader_add_constant(parser_material_kong, "N: float3x3", "_normal_matrix");
+			return string("normalize(constants.N * %s)", vec);
+		}
+		node_shader_add_constant(parser_material_kong, "W: float4x4", "_world_matrix");
+		char *w = string_equals(type, "POINT") ? "1.0" : "0.0";
+		return string("(constants.W * float4(%s, %s)).xyz", vec, w);
+	}
+
+	if (string_equals(from, "OBJECT") && string_equals(to, "CAMERA")) {
+		node_shader_add_constant(parser_material_kong, "WV: float4x4", "_world_view_matrix");
+		if (string_equals(type, "NORMAL")) {
+			return string("normalize((constants.WV * float4(%s, 0.0)).xyz)", vec);
+		}
+		char *w = string_equals(type, "POINT") ? "1.0" : "0.0";
+		return string("(constants.WV * float4(%s, %s)).xyz", vec, w);
+	}
+
+	return string_copy(vec);
+}
+
 void vector_transform_node_init() {
 
 	char *type_data  = string("%s\n%s\n%s", _tr("Vector"), _tr("Point"), _tr("Normal"));
@@ -78,32 +106,4 @@ void vector_transform_node_init() {
 
 	any_array_push(nodes_material_utilities, vector_transform_node_def);
 	any_map_set(parser_material_node_vectors, "VECT_TRANSFORM", vector_transform_node_vector);
-}
-
-char *vector_transform_node_vector(ui_node_t *node, ui_node_socket_t *socket) {
-	char *vec  = parser_material_parse_vector_input(node->inputs->buffer[0]);
-	char *type = to_upper_case(u8_array_string_at(node->buttons->buffer[0]->data, node->buttons->buffer[0]->default_value->buffer[0]));
-	char *from = to_upper_case(u8_array_string_at(node->buttons->buffer[1]->data, node->buttons->buffer[1]->default_value->buffer[0]));
-	char *to   = to_upper_case(u8_array_string_at(node->buttons->buffer[2]->data, node->buttons->buffer[2]->default_value->buffer[0]));
-
-	if (string_equals(from, "OBJECT") && string_equals(to, "WORLD")) {
-		if (string_equals(type, "NORMAL")) {
-			node_shader_add_constant(parser_material_kong, "N: float3x3", "_normal_matrix");
-			return string("normalize(constants.N * %s)", vec);
-		}
-		node_shader_add_constant(parser_material_kong, "W: float4x4", "_world_matrix");
-		char *w = string_equals(type, "POINT") ? "1.0" : "0.0";
-		return string("(constants.W * float4(%s, %s)).xyz", vec, w);
-	}
-
-	if (string_equals(from, "OBJECT") && string_equals(to, "CAMERA")) {
-		node_shader_add_constant(parser_material_kong, "WV: float4x4", "_world_view_matrix");
-		if (string_equals(type, "NORMAL")) {
-			return string("normalize((constants.WV * float4(%s, 0.0)).xyz)", vec);
-		}
-		char *w = string_equals(type, "POINT") ? "1.0" : "0.0";
-		return string("(constants.WV * float4(%s, %s)).xyz", vec, w);
-	}
-
-	return string_copy(vec);
 }

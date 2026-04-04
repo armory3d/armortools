@@ -1,35 +1,6 @@
 
 #include "global.h"
 
-void import_blend_material_run_box() {
-	if (ui_tab(ui_handle(__ID__), tr("Import Material"), false, -1, false)) {
-		import_blend_mesh_ui();
-
-		ui_row2();
-		if (ui_icon_button(tr("Cancel"), ICON_CLOSE, UI_ALIGN_CENTER)) {
-			ui_box_hide();
-		}
-		if (ui_icon_button(tr("Import"), ICON_CHECK, UI_ALIGN_CENTER) || ui->is_return_down) {
-
-			ui_box_hide();
-
-			if (config_raw->blender == NULL || string_equals(config_raw->blender, "")) {
-				console_error(tr("Blender executable path not set"));
-				return;
-			}
-			_import_blend_material();
-		}
-	}
-}
-
-void import_blend_material_run(char *path) {
-	gc_unroot(_import_blend_material_path);
-	_import_blend_material_path = string_copy(path);
-	gc_root(_import_blend_material_path);
-
-	ui_box_show_custom(&import_blend_material_run_box, 400, 200, NULL, true, "");
-}
-
 void _import_blend_material_on_next_frame(void *_) {
 	char *save;
 	if (path_is_protected()) {
@@ -76,4 +47,33 @@ for mat in bpy.data.materials:\n\
 void _import_blend_material() {
 	console_toast(tr("Baking material"));
 	sys_notify_on_next_frame(&_import_blend_material_on_next_frame, NULL);
+}
+
+void import_blend_material_run_box() {
+	if (ui_tab(ui_handle(__ID__), tr("Import Material"), false, -1, false)) {
+		import_blend_mesh_ui();
+
+		ui_row2();
+		if (ui_icon_button(tr("Cancel"), ICON_CLOSE, UI_ALIGN_CENTER)) {
+			ui_box_hide();
+		}
+		if (ui_icon_button(tr("Import"), ICON_CHECK, UI_ALIGN_CENTER) || ui->is_return_down) {
+
+			ui_box_hide();
+
+			if (config_raw->blender == NULL || string_equals(config_raw->blender, "")) {
+				console_error(tr("Blender executable path not set"));
+				return;
+			}
+			_import_blend_material();
+		}
+	}
+}
+
+void import_blend_material_run(char *path) {
+	gc_unroot(_import_blend_material_path);
+	_import_blend_material_path = string_copy(path);
+	gc_root(_import_blend_material_path);
+
+	ui_box_show_custom(&import_blend_material_run_box, 400, 200, NULL, true, "");
 }

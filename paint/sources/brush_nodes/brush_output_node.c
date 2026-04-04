@@ -1,17 +1,6 @@
 
 #include "../global.h"
 
-brush_output_node_t *brush_output_node_create(ui_node_t *raw, f32_array_t *args) {
-	context_raw->run_brush          = brush_output_node_run;
-	context_raw->parse_brush_inputs = brush_output_node_parse_inputs;
-
-	brush_output_node_t *n = GC_ALLOC_INIT(brush_output_node_t, {0});
-	n->base                = logic_node_create(n);
-	n->raw                 = raw;
-	context_raw->brush_output_node_inst = n;
-	return n;
-}
-
 void brush_output_node_parse_inputs(brush_output_node_t *self) {
 	gpu_texture_t *last_mask    = context_raw->brush_mask_image;
 	gpu_texture_t *last_stencil = context_raw->brush_stencil_image;
@@ -72,6 +61,42 @@ void brush_output_node_parse_inputs(brush_output_node_t *self) {
 	}
 
 	context_raw->brush_directional = self->raw->buttons->buffer[0]->default_value->buffer[0] > 0.0;
+}
+
+void brush_output_paint(brush_output_node_t *self) {
+	bool down = mouse_down("left") || pen_down("tip");
+
+	// Set color pick
+	if (down && context_raw->tool == TOOL_TYPE_COLORID && project_assets->length > 0) {
+		context_raw->colorid_picked = true;
+		ui_toolbar_handle->redraws  = 1;
+	}
+
+	// Prevent painting the same spot
+	bool same_spot = context_raw->paint_vec.x == context_raw->last_paint_x && context_raw->paint_vec.y == context_raw->last_paint_y;
+	bool lazy      = context_raw->tool == TOOL_TYPE_BRUSH && context_raw->brush_lazy_radius > 0;
+	if (down && (same_spot || lazy)) {
+		context_raw->painted++;
+	}
+	else {
+		context_raw->painted = 0;
+	}
+	context_raw->last_paint_x = context_raw->paint_vec.x;
+	context_raw->last_paint_y = context_raw->paint_vec.y;
+
+	if (context_raw->tool == TOOL_TYPE_PARTICLE) {
+		context_raw->painted = 0; // Always paint particles
+	}
+
+	if (context_raw->painted == 0) {
+		brush_output_node_parse_inputs(self);
+	}
+
+	if (context_raw->painted <= 1) {
+		context_raw->pdirty = 1;
+		context_raw->rdirty = 2;
+		sculpt_push_undo    = true;
+	}
 }
 
 void brush_output_node_run(brush_output_node_t *self, i32 from) {
@@ -136,40 +161,15 @@ void brush_output_node_run(brush_output_node_t *self, i32 from) {
 	brush_output_paint(self);
 }
 
-void brush_output_paint(brush_output_node_t *self) {
-	bool down = mouse_down("left") || pen_down("tip");
+brush_output_node_t *brush_output_node_create(ui_node_t *raw, f32_array_t *args) {
+	context_raw->run_brush          = brush_output_node_run;
+	context_raw->parse_brush_inputs = brush_output_node_parse_inputs;
 
-	// Set color pick
-	if (down && context_raw->tool == TOOL_TYPE_COLORID && project_assets->length > 0) {
-		context_raw->colorid_picked = true;
-		ui_toolbar_handle->redraws  = 1;
-	}
-
-	// Prevent painting the same spot
-	bool same_spot = context_raw->paint_vec.x == context_raw->last_paint_x && context_raw->paint_vec.y == context_raw->last_paint_y;
-	bool lazy      = context_raw->tool == TOOL_TYPE_BRUSH && context_raw->brush_lazy_radius > 0;
-	if (down && (same_spot || lazy)) {
-		context_raw->painted++;
-	}
-	else {
-		context_raw->painted = 0;
-	}
-	context_raw->last_paint_x = context_raw->paint_vec.x;
-	context_raw->last_paint_y = context_raw->paint_vec.y;
-
-	if (context_raw->tool == TOOL_TYPE_PARTICLE) {
-		context_raw->painted = 0; // Always paint particles
-	}
-
-	if (context_raw->painted == 0) {
-		brush_output_node_parse_inputs(self);
-	}
-
-	if (context_raw->painted <= 1) {
-		context_raw->pdirty = 1;
-		context_raw->rdirty = 2;
-		sculpt_push_undo    = true;
-	}
+	brush_output_node_t *n = GC_ALLOC_INIT(brush_output_node_t, {0});
+	n->base                = logic_node_create(n);
+	n->raw                 = raw;
+	context_raw->brush_output_node_inst = n;
+	return n;
 }
 
 // let brush_output_node_def: node_t = {

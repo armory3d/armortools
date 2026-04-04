@@ -50,6 +50,42 @@ fun tex_brick_f(co: float3, scale: float, mortar_size: float, mortar_smooth: flo
 } \
 ";
 
+char *brick_texture_node_vector(ui_node_t *node, ui_node_socket_t *socket) {
+	node_shader_add_function(parser_material_kong, str_tex_brick);
+	char *co            = parser_material_get_coord(node);
+	char *col1          = parser_material_parse_vector_input(node->inputs->buffer[1]);
+	char *col2          = parser_material_parse_vector_input(node->inputs->buffer[2]);
+	char *col3          = parser_material_parse_vector_input(node->inputs->buffer[3]);
+	char *scale         = parser_material_parse_value_input(node->inputs->buffer[4], false);
+	char *mortar_size   = parser_material_parse_value_input(node->inputs->buffer[5], false);
+	char *mortar_smooth = parser_material_parse_value_input(node->inputs->buffer[6], false);
+	char *bias          = parser_material_parse_value_input(node->inputs->buffer[7], false);
+	char *brick_width   = parser_material_parse_value_input(node->inputs->buffer[8], false);
+	char *row_height    = parser_material_parse_value_input(node->inputs->buffer[9], false);
+	char *offset        = parser_material_parse_value_input(node->inputs->buffer[10], false);
+	char *offset_freq   = parser_material_parse_value_input(node->inputs->buffer[11], false);
+	char *squash        = parser_material_parse_value_input(node->inputs->buffer[12], false);
+	char *squash_freq   = parser_material_parse_value_input(node->inputs->buffer[13], false);
+	return string("tex_brick(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", co, col1, col2, col3, scale, mortar_size, mortar_smooth, bias,
+	              brick_width, row_height, offset, offset_freq, squash, squash_freq);
+}
+
+char *brick_texture_node_value(ui_node_t *node, ui_node_socket_t *socket) {
+	node_shader_add_function(parser_material_kong, str_tex_brick);
+	char *co            = parser_material_get_coord(node);
+	char *scale         = parser_material_parse_value_input(node->inputs->buffer[4], false);
+	char *mortar_size   = parser_material_parse_value_input(node->inputs->buffer[5], false);
+	char *mortar_smooth = parser_material_parse_value_input(node->inputs->buffer[6], false);
+	char *brick_width   = parser_material_parse_value_input(node->inputs->buffer[8], false);
+	char *row_height    = parser_material_parse_value_input(node->inputs->buffer[9], false);
+	char *offset        = parser_material_parse_value_input(node->inputs->buffer[10], false);
+	char *offset_freq   = parser_material_parse_value_input(node->inputs->buffer[11], false);
+	char *squash        = parser_material_parse_value_input(node->inputs->buffer[12], false);
+	char *squash_freq   = parser_material_parse_value_input(node->inputs->buffer[13], false);
+	return string("tex_brick_f(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", co, scale, mortar_size, mortar_smooth, brick_width, row_height, offset, offset_freq,
+	              squash, squash_freq);
+}
+
 void brick_texture_node_init() {
 
 	brick_texture_node_def =
@@ -235,40 +271,4 @@ void brick_texture_node_init() {
 	any_array_push(nodes_material_texture, brick_texture_node_def);
 	any_map_set(parser_material_node_vectors, "TEX_BRICK", brick_texture_node_vector);
 	any_map_set(parser_material_node_values, "TEX_BRICK", brick_texture_node_value);
-}
-
-char *brick_texture_node_vector(ui_node_t *node, ui_node_socket_t *socket) {
-	node_shader_add_function(parser_material_kong, str_tex_brick);
-	char *co            = parser_material_get_coord(node);
-	char *col1          = parser_material_parse_vector_input(node->inputs->buffer[1]);
-	char *col2          = parser_material_parse_vector_input(node->inputs->buffer[2]);
-	char *col3          = parser_material_parse_vector_input(node->inputs->buffer[3]);
-	char *scale         = parser_material_parse_value_input(node->inputs->buffer[4], false);
-	char *mortar_size   = parser_material_parse_value_input(node->inputs->buffer[5], false);
-	char *mortar_smooth = parser_material_parse_value_input(node->inputs->buffer[6], false);
-	char *bias          = parser_material_parse_value_input(node->inputs->buffer[7], false);
-	char *brick_width   = parser_material_parse_value_input(node->inputs->buffer[8], false);
-	char *row_height    = parser_material_parse_value_input(node->inputs->buffer[9], false);
-	char *offset        = parser_material_parse_value_input(node->inputs->buffer[10], false);
-	char *offset_freq   = parser_material_parse_value_input(node->inputs->buffer[11], false);
-	char *squash        = parser_material_parse_value_input(node->inputs->buffer[12], false);
-	char *squash_freq   = parser_material_parse_value_input(node->inputs->buffer[13], false);
-	return string("tex_brick(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", co, col1, col2, col3, scale, mortar_size, mortar_smooth, bias,
-	              brick_width, row_height, offset, offset_freq, squash, squash_freq);
-}
-
-char *brick_texture_node_value(ui_node_t *node, ui_node_socket_t *socket) {
-	node_shader_add_function(parser_material_kong, str_tex_brick);
-	char *co            = parser_material_get_coord(node);
-	char *scale         = parser_material_parse_value_input(node->inputs->buffer[4], false);
-	char *mortar_size   = parser_material_parse_value_input(node->inputs->buffer[5], false);
-	char *mortar_smooth = parser_material_parse_value_input(node->inputs->buffer[6], false);
-	char *brick_width   = parser_material_parse_value_input(node->inputs->buffer[8], false);
-	char *row_height    = parser_material_parse_value_input(node->inputs->buffer[9], false);
-	char *offset        = parser_material_parse_value_input(node->inputs->buffer[10], false);
-	char *offset_freq   = parser_material_parse_value_input(node->inputs->buffer[11], false);
-	char *squash        = parser_material_parse_value_input(node->inputs->buffer[12], false);
-	char *squash_freq   = parser_material_parse_value_input(node->inputs->buffer[13], false);
-	return string("tex_brick_f(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", co, scale, mortar_size, mortar_smooth, brick_width, row_height, offset, offset_freq,
-	              squash, squash_freq);
 }

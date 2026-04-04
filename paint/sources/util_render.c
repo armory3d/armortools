@@ -418,68 +418,6 @@ void util_render_make_brush_preview() {
 		draw_begin(current, false, 0);
 }
 
-void util_render_make_node_preview(ui_node_canvas_t *canvas, ui_node_t *node, gpu_texture_t *image, ui_node_canvas_t *group, ui_node_t_array_t *parents) {
-	parse_node_preview_result_t *res = make_material_parse_node_preview_material(node, group, parents);
-	if (res == NULL || res->scon == NULL) {
-		return;
-	}
-
-	if (util_render_screen_aligned_full_vb == NULL) {
-		util_render_create_screen_aligned_full_data();
-	}
-
-	f32 _scale_world                                        = context_raw->paint_object->base->transform->scale_world;
-	context_raw->paint_object->base->transform->scale_world = 3.0;
-	transform_build_matrix(context_raw->paint_object->base->transform);
-
-	_gpu_begin(image, NULL, NULL, GPU_CLEAR_NONE, 0, 0.0);
-	gpu_set_pipeline(res->scon->_->pipe);
-	string_array_t *empty = any_array_create_from_raw(
-	    (void *[]){
-	        "",
-	    },
-	    1);
-	uniforms_set_context_consts(res->scon, empty);
-	uniforms_set_obj_consts(res->scon, context_raw->paint_object->base);
-	uniforms_set_material_consts(res->scon, res->mcon);
-	gpu_set_vertex_buffer(util_render_screen_aligned_full_vb);
-	gpu_set_index_buffer(util_render_screen_aligned_full_ib);
-	gpu_draw();
-	gpu_end();
-
-	context_raw->paint_object->base->transform->scale_world = _scale_world;
-	transform_build_matrix(context_raw->paint_object->base->transform);
-}
-
-void util_render_pick_pos_nor_tex() {
-	context_raw->pick_pos_nor_tex = true;
-	context_raw->pdirty           = 1;
-	tool_type_t _tool             = context_raw->tool;
-	context_raw->tool             = TOOL_TYPE_PICKER;
-	make_material_parse_paint_material(true);
-	if (context_raw->paint2d) {
-		render_path_paint_set_plane_mesh();
-	}
-	render_path_paint_commands_paint(false);
-	if (context_raw->paint2d) {
-		render_path_paint_restore_plane_mesh();
-	}
-	context_raw->tool             = _tool;
-	context_raw->pick_pos_nor_tex = false;
-	make_material_parse_paint_material(true);
-	context_raw->pdirty = 0;
-}
-
-mat4_t util_render_get_decal_mat() {
-	util_render_pick_pos_nor_tex();
-	mat4_t decal_mat = mat4_identity();
-	vec4_t loc       = vec4_create(context_raw->posx_picked, context_raw->posy_picked, context_raw->posz_picked, 1.0);
-	quat_t rot = quat_from_to(vec4_create(0.0, 0.0, -1.0, 1.0), vec4_create(context_raw->norx_picked, context_raw->nory_picked, context_raw->norz_picked, 1.0));
-	vec4_t scale = vec4_create(context_raw->brush_radius * 0.5, context_raw->brush_radius * 0.5, context_raw->brush_radius * 0.5, 1.0);
-	decal_mat    = mat4_compose(loc, rot, scale);
-	return decal_mat;
-}
-
 void util_render_create_screen_aligned_full_data() {
 	// Over-sized triangle
 	i16_array_t *data = i16_array_create_from_raw(
@@ -554,4 +492,66 @@ void util_render_create_screen_aligned_full_data() {
 		id->buffer[i] = indices->buffer[i];
 	}
 	gpu_index_buffer_unlock(util_render_screen_aligned_full_ib);
+}
+
+void util_render_make_node_preview(ui_node_canvas_t *canvas, ui_node_t *node, gpu_texture_t *image, ui_node_canvas_t *group, ui_node_t_array_t *parents) {
+	parse_node_preview_result_t *res = make_material_parse_node_preview_material(node, group, parents);
+	if (res == NULL || res->scon == NULL) {
+		return;
+	}
+
+	if (util_render_screen_aligned_full_vb == NULL) {
+		util_render_create_screen_aligned_full_data();
+	}
+
+	f32 _scale_world                                        = context_raw->paint_object->base->transform->scale_world;
+	context_raw->paint_object->base->transform->scale_world = 3.0;
+	transform_build_matrix(context_raw->paint_object->base->transform);
+
+	_gpu_begin(image, NULL, NULL, GPU_CLEAR_NONE, 0, 0.0);
+	gpu_set_pipeline(res->scon->_->pipe);
+	string_array_t *empty = any_array_create_from_raw(
+	    (void *[]){
+	        "",
+	    },
+	    1);
+	uniforms_set_context_consts(res->scon, empty);
+	uniforms_set_obj_consts(res->scon, context_raw->paint_object->base);
+	uniforms_set_material_consts(res->scon, res->mcon);
+	gpu_set_vertex_buffer(util_render_screen_aligned_full_vb);
+	gpu_set_index_buffer(util_render_screen_aligned_full_ib);
+	gpu_draw();
+	gpu_end();
+
+	context_raw->paint_object->base->transform->scale_world = _scale_world;
+	transform_build_matrix(context_raw->paint_object->base->transform);
+}
+
+void util_render_pick_pos_nor_tex() {
+	context_raw->pick_pos_nor_tex = true;
+	context_raw->pdirty           = 1;
+	tool_type_t _tool             = context_raw->tool;
+	context_raw->tool             = TOOL_TYPE_PICKER;
+	make_material_parse_paint_material(true);
+	if (context_raw->paint2d) {
+		render_path_paint_set_plane_mesh();
+	}
+	render_path_paint_commands_paint(false);
+	if (context_raw->paint2d) {
+		render_path_paint_restore_plane_mesh();
+	}
+	context_raw->tool             = _tool;
+	context_raw->pick_pos_nor_tex = false;
+	make_material_parse_paint_material(true);
+	context_raw->pdirty = 0;
+}
+
+mat4_t util_render_get_decal_mat() {
+	util_render_pick_pos_nor_tex();
+	mat4_t decal_mat = mat4_identity();
+	vec4_t loc       = vec4_create(context_raw->posx_picked, context_raw->posy_picked, context_raw->posz_picked, 1.0);
+	quat_t rot = quat_from_to(vec4_create(0.0, 0.0, -1.0, 1.0), vec4_create(context_raw->norx_picked, context_raw->nory_picked, context_raw->norz_picked, 1.0));
+	vec4_t scale = vec4_create(context_raw->brush_radius * 0.5, context_raw->brush_radius * 0.5, context_raw->brush_radius * 0.5, 1.0);
+	decal_mat    = mat4_compose(loc, rot, scale);
+	return decal_mat;
 }

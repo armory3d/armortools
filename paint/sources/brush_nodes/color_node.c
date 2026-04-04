@@ -1,20 +1,6 @@
 
 #include "../global.h"
 
-color_node_t *color_node_create(ui_node_t *raw, f32_array_t *args) {
-	f32           r       = args == NULL ? 0.8 : args->buffer[0];
-	f32           g       = args == NULL ? 0.8 : args->buffer[1];
-	f32           b       = args == NULL ? 0.8 : args->buffer[2];
-	f32           a       = args == NULL ? 1.0 : args->buffer[3];
-	color_node_t *n       = GC_ALLOC_INIT(color_node_t, {0});
-	n->base               = logic_node_create(n);
-	n->base->get          = color_node_get;
-	n->base->get_as_image = color_node_get_as_image;
-	n->base->set          = color_node_set;
-	n->value              = vec4_create(r, g, b, a);
-	return n;
-}
-
 logic_node_value_t *color_node_get(color_node_t *self, i32 from) {
 	if (self->base->inputs->length > 0) {
 		return logic_node_input_get(self->base->inputs->buffer[0]);
@@ -51,4 +37,18 @@ void color_node_set(color_node_t *self, f32_array_t *value) {
 		self->value.z = value->buffer[2];
 		self->value.w = value->buffer[3];
 	}
+}
+
+color_node_t *color_node_create(ui_node_t *raw, f32_array_t *args) {
+	f32           r       = args == NULL ? 0.8 : args->buffer[0];
+	f32           g       = args == NULL ? 0.8 : args->buffer[1];
+	f32           b       = args == NULL ? 0.8 : args->buffer[2];
+	f32           a       = args == NULL ? 1.0 : args->buffer[3];
+	color_node_t *n       = GC_ALLOC_INIT(color_node_t, {0});
+	n->base               = logic_node_create(n);
+	n->base->get          = color_node_get;
+	n->base->get_as_image = color_node_get_as_image;
+	n->base->set          = color_node_set;
+	n->value              = vec4_create(r, g, b, a);
+	return n;
 }

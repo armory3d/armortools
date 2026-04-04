@@ -8,6 +8,17 @@ void box_preferences_interface_tab_reset_layout_menu() {
 	}
 }
 
+void box_preferences_set_scale() {
+	f32 scale = config_raw->window_scale;
+	ui_set_scale(scale);
+	ui_header_h                                      = math_floor(ui_header_default_h * scale);
+	config_raw->layout->buffer[LAYOUT_SIZE_STATUS_H] = math_floor(ui_statusbar_default_h * scale);
+	ui_menubar_w                                     = math_floor(ui_menubar_default_w * scale);
+	ui_base_set_icon_scale();
+	base_resize();
+	config_raw->layout->buffer[LAYOUT_SIZE_SIDEBAR_W] = math_floor(ui_sidebar_default_w * scale);
+}
+
 void box_preferences_interface_tab_restore_menu_import_on_next_frame(config_t *raw) {
 	ui->ops->theme->ELEMENT_H = base_default_element_h;
 	config_import_from(raw);
@@ -165,6 +176,17 @@ void box_preferences_theme_tab_theme_field_menu() {
 	if (ui->changed) {
 		ui_menu_keep_open = true;
 	}
+}
+
+char *box_preferences_theme_to_json(ui_theme_t *theme) {
+	json_encode_begin();
+	u32 *u32_theme = theme;
+	for (i32 i = 0; i < ui_theme_keys_count; ++i) {
+		char *key = ui_theme_keys[i];
+		u32   val = *(u32_theme + i);
+		json_encode_i32(key, val);
+	}
+	return json_encode_end();
 }
 
 void box_preferences_theme_tab_export(char *path) {
@@ -668,6 +690,75 @@ void box_preferences_keymap_tab_new_box() {
 	}
 }
 
+bool box_preferences_model_exists(char *file_name) {
+	return iron_file_exists(string("%s%s%s", neural_node_dir(), PATH_SEP, file_name));
+}
+
+char *box_preferences_file_name_from_url(char *url) {
+	return substring(url, string_last_index_of(url, "/") + 1, string_length(url));
+}
+
+char *box_preferneces_model_url_from_name(char *name) {
+	if (neural_node_models == NULL) {
+		neural_node_models_init();
+	}
+
+	for (i32 i = 0; i < neural_node_models->length; ++i) {
+		if (string_equals(neural_node_models->buffer[i]->name, name)) {
+			return neural_node_models->buffer[i]->urls->buffer[0];
+		}
+	}
+	return NULL;
+}
+
+void box_preferences_model_panel(neural_node_model_t *m) {
+	if (ui_panel(ui_handle(m->name), m->name, false, true, false)) {
+		if (ui_text(string("%s: %s (%s)", tr("source"), m->web, m->license), UI_ALIGN_LEFT, 0x00000000) == UI_STATE_RELEASED) {
+			iron_load_url(m->web);
+		}
+		ui_text(string("%s: %s", tr("gpu memory"), m->memory), UI_ALIGN_LEFT, 0x00000000);
+		ui_text(string("%s: %s", tr("nodes"), m->nodes), UI_ALIGN_LEFT, 0x00000000);
+
+		char *url       = m->urls->buffer[0];
+		char *file_name = box_preferences_file_name_from_url(url);
+		bool  found     = box_preferences_model_exists(file_name);
+
+		if (neural_node_downloading > 0) {
+			ui->enabled = false;
+
+			u64   u                       = iron_net_bytes_downloaded;
+			i32   i                       = (u / 1000000000.0) * 100;
+			f32   f                       = i / 100.0;
+			char *downloaded              = string("%sGB", f32_to_string(f));
+			ui_box_hwnd->redraws          = 2;
+			box_preferences_htab->redraws = 2;
+			iron_delay_idle_sleep();
+
+			i32 _BUTTON_COL            = ui->ops->theme->BUTTON_COL;
+			ui->ops->theme->BUTTON_COL = ui->ops->theme->HIGHLIGHT_COL;
+
+			ui_handle_t *h = ui_handle(__ID__);
+			h->f           = f / (float)parse_float(m->size);
+			ui_slider(h, string("%s / %s", downloaded, m->size), 0.0, 1.0, true, 100, false, UI_ALIGN_CENTER, true);
+
+			ui->ops->theme->BUTTON_COL = _BUTTON_COL;
+
+			ui->enabled = true;
+		}
+		else if (!found && ui_icon_button(string("%s (%s)", tr("Download"), m->size), ICON_ARROW_DOWN, UI_ALIGN_CENTER)) {
+			neural_node_download_models(m->urls);
+			console_info(tr("Downloading"));
+		}
+		else if (found && ui_icon_button(string("%s (%s)", tr("Remove"), m->size), ICON_DELETE, UI_ALIGN_CENTER)) {
+			for (i32 i = 0; i < m->urls->length; ++i) {
+				char *url       = m->urls->buffer[i];
+				char *file_name = box_preferences_file_name_from_url(url);
+				iron_delete_file(string("%s%s%s", neural_node_dir(), PATH_SEP, file_name));
+			}
+		}
+	}
+}
+
 void box_preferences_keymap_tab() {
 	if (box_preferences_files_keymap == NULL) {
 		box_preferences_fetch_keymaps();
@@ -766,75 +857,6 @@ void box_preferences_neural_tab() {
 			iron_create_directory(neural_node_dir());
 		}
 		file_start(neural_node_dir());
-	}
-}
-
-bool box_preferences_model_exists(char *file_name) {
-	return iron_file_exists(string("%s%s%s", neural_node_dir(), PATH_SEP, file_name));
-}
-
-char *box_preferences_file_name_from_url(char *url) {
-	return substring(url, string_last_index_of(url, "/") + 1, string_length(url));
-}
-
-char *box_preferneces_model_url_from_name(char *name) {
-	if (neural_node_models == NULL) {
-		neural_node_models_init();
-	}
-
-	for (i32 i = 0; i < neural_node_models->length; ++i) {
-		if (string_equals(neural_node_models->buffer[i]->name, name)) {
-			return neural_node_models->buffer[i]->urls->buffer[0];
-		}
-	}
-	return NULL;
-}
-
-void box_preferences_model_panel(neural_node_model_t *m) {
-	if (ui_panel(ui_handle(m->name), m->name, false, true, false)) {
-		if (ui_text(string("%s: %s (%s)", tr("source"), m->web, m->license), UI_ALIGN_LEFT, 0x00000000) == UI_STATE_RELEASED) {
-			iron_load_url(m->web);
-		}
-		ui_text(string("%s: %s", tr("gpu memory"), m->memory), UI_ALIGN_LEFT, 0x00000000);
-		ui_text(string("%s: %s", tr("nodes"), m->nodes), UI_ALIGN_LEFT, 0x00000000);
-
-		char *url       = m->urls->buffer[0];
-		char *file_name = box_preferences_file_name_from_url(url);
-		bool  found     = box_preferences_model_exists(file_name);
-
-		if (neural_node_downloading > 0) {
-			ui->enabled = false;
-
-			u64   u                       = iron_net_bytes_downloaded;
-			i32   i                       = (u / 1000000000.0) * 100;
-			f32   f                       = i / 100.0;
-			char *downloaded              = string("%sGB", f32_to_string(f));
-			ui_box_hwnd->redraws          = 2;
-			box_preferences_htab->redraws = 2;
-			iron_delay_idle_sleep();
-
-			i32 _BUTTON_COL            = ui->ops->theme->BUTTON_COL;
-			ui->ops->theme->BUTTON_COL = ui->ops->theme->HIGHLIGHT_COL;
-
-			ui_handle_t *h = ui_handle(__ID__);
-			h->f           = f / (float)parse_float(m->size);
-			ui_slider(h, string("%s / %s", downloaded, m->size), 0.0, 1.0, true, 100, false, UI_ALIGN_CENTER, true);
-
-			ui->ops->theme->BUTTON_COL = _BUTTON_COL;
-
-			ui->enabled = true;
-		}
-		else if (!found && ui_icon_button(string("%s (%s)", tr("Download"), m->size), ICON_ARROW_DOWN, UI_ALIGN_CENTER)) {
-			neural_node_download_models(m->urls);
-			console_info(tr("Downloading"));
-		}
-		else if (found && ui_icon_button(string("%s (%s)", tr("Remove"), m->size), ICON_DELETE, UI_ALIGN_CENTER)) {
-			for (i32 i = 0; i < m->urls->length; ++i) {
-				char *url       = m->urls->buffer[i];
-				char *file_name = box_preferences_file_name_from_url(url);
-				iron_delete_file(string("%s%s%s", neural_node_dir(), PATH_SEP, file_name));
-			}
-		}
 	}
 }
 
@@ -1044,26 +1066,4 @@ i32 box_preferences_get_theme_index() {
 
 i32 box_preferences_get_preset_index() {
 	return string_array_index_of(box_preferences_files_keymap, substring(config_raw->keymap, 0, string_length(config_raw->keymap) - 5)); // Strip .json
-}
-
-void box_preferences_set_scale() {
-	f32 scale = config_raw->window_scale;
-	ui_set_scale(scale);
-	ui_header_h                                      = math_floor(ui_header_default_h * scale);
-	config_raw->layout->buffer[LAYOUT_SIZE_STATUS_H] = math_floor(ui_statusbar_default_h * scale);
-	ui_menubar_w                                     = math_floor(ui_menubar_default_w * scale);
-	ui_base_set_icon_scale();
-	base_resize();
-	config_raw->layout->buffer[LAYOUT_SIZE_SIDEBAR_W] = math_floor(ui_sidebar_default_w * scale);
-}
-
-char *box_preferences_theme_to_json(ui_theme_t *theme) {
-	json_encode_begin();
-	u32 *u32_theme = theme;
-	for (i32 i = 0; i < ui_theme_keys_count; ++i) {
-		char *key = ui_theme_keys[i];
-		u32   val = *(u32_theme + i);
-		json_encode_i32(key, val);
-	}
-	return json_encode_end();
 }

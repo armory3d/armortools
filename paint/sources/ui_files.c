@@ -1,6 +1,15 @@
 
 #include "global.h"
 
+void ui_files_release_keys() {
+	// File dialog may prevent firing key up events
+	keyboard_up_listener(KEY_CODE_SHIFT);
+	keyboard_up_listener(KEY_CODE_CONTROL);
+#ifdef IRON_MACOS
+	keyboard_up_listener(KEY_CODE_META);
+#endif
+}
+
 void ui_files_show(char *filters, bool is_save, bool open_multiple, void (*files_done)(char *)) {
 	if (is_save) {
 		gc_unroot(ui_files_path);
@@ -45,15 +54,6 @@ void ui_files_show(char *filters, bool is_save, bool open_multiple, void (*files
 	}
 
 	ui_files_release_keys();
-}
-
-void ui_files_release_keys() {
-	// File dialog may prevent firing key up events
-	keyboard_up_listener(KEY_CODE_SHIFT);
-	keyboard_up_listener(KEY_CODE_CONTROL);
-#ifdef IRON_MACOS
-	keyboard_up_listener(KEY_CODE_META);
-#endif
 }
 
 draw_cloud_icon_data_t *make_draw_cloud_icon_data(char *f, gpu_texture_t *image) {

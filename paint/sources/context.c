@@ -232,13 +232,6 @@ void context_set_brush(slot_brush_t *b) {
 	ui_nodes_hwnd->redraws                            = 2;
 }
 
-void context_select_font(i32 i) {
-	if (project_fonts->length <= i) {
-		return;
-	}
-	context_set_font(project_fonts->buffer[i]);
-}
-
 void context_set_font(slot_font_t *f) {
 	if (array_index_of(project_fonts, f) == -1) {
 		return;
@@ -248,6 +241,13 @@ void context_set_font(slot_font_t *f) {
 	util_render_make_decal_preview();
 	ui_base_hwnds->buffer[TAB_AREA_STATUS]->redraws = 2;
 	ui_view2d_hwnd->redraws                         = 2;
+}
+
+void context_select_font(i32 i) {
+	if (project_fonts->length <= i) {
+		return;
+	}
+	context_set_font(project_fonts->buffer[i]);
 }
 
 void context_select_layer(i32 i) {
@@ -398,10 +398,6 @@ bool context_in_browser() {
 	return string_equals(tab, tr("Browser"));
 }
 
-bool context_is_picker() {
-	return context_raw->tool == TOOL_TYPE_PICKER || context_raw->tool == TOOL_TYPE_MATERIAL;
-}
-
 bool context_is_decal() {
 	return context_raw->tool == TOOL_TYPE_DECAL || context_raw->tool == TOOL_TYPE_TEXT;
 }
@@ -418,28 +414,6 @@ bool context_is_decal_mask_paint() {
 bool context_is_floating_toolbar() {
 	// Header is off -> floating toolbar
 	return config_raw->layout->buffer[LAYOUT_SIZE_HEADER] == 0 || (!base_view3d_show && ui_view2d_show);
-}
-
-area_type_t context_get_area_type() {
-	if (context_in_3d_view()) {
-		return AREA_TYPE_VIEW3D;
-	}
-	if (context_in_nodes()) {
-		return AREA_TYPE_NODES;
-	}
-	if (context_in_browser()) {
-		return AREA_TYPE_BROWSER;
-	}
-	if (context_in_2d_view(VIEW_2D_TYPE_LAYER)) {
-		return AREA_TYPE_VIEW2D;
-	}
-	if (context_in_layers()) {
-		return AREA_TYPE_LAYERS;
-	}
-	if (context_in_materials()) {
-		return AREA_TYPE_MATERIALS;
-	}
-	return AREA_TYPE_MINUS_ONE;
 }
 
 void context_set_viewport_mode(viewport_mode_t mode) {

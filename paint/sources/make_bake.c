@@ -1,6 +1,15 @@
 
 #include "global.h"
 
+char *make_bake_axis_string(i32 i) {
+	return i == BAKE_AXIS_X    ? "float3(1,0,0)"
+	       : i == BAKE_AXIS_Y  ? "float3(0,1,0)"
+	       : i == BAKE_AXIS_Z  ? "float3(0,0,1)"
+	       : i == BAKE_AXIS_MX ? "float3(-1,0,0)"
+	       : i == BAKE_AXIS_MY ? "float3(0,-1,0)"
+	                           : "float3(0,0,-1)";
+}
+
 void make_bake_run(node_shader_context_t *con, node_shader_t *kong) {
 	if (context_raw->bake_type == BAKE_TYPE_CURVATURE) {
 		bool  pass     = parser_material_bake_passthrough;
@@ -116,13 +125,4 @@ void make_bake_set_color_writes(node_shader_context_t *con_paint) {
 	con_paint->data->color_writes_green->buffer[2] = false;
 	con_paint->data->color_writes_blue->buffer[2]  = false;
 	con_paint->data->color_writes_alpha->buffer[2] = false;
-}
-
-char *make_bake_axis_string(i32 i) {
-	return i == BAKE_AXIS_X    ? "float3(1,0,0)"
-	       : i == BAKE_AXIS_Y  ? "float3(0,1,0)"
-	       : i == BAKE_AXIS_Z  ? "float3(0,0,1)"
-	       : i == BAKE_AXIS_MX ? "float3(-1,0,0)"
-	       : i == BAKE_AXIS_MY ? "float3(0,-1,0)"
-	                           : "float3(0,0,-1)";
 }

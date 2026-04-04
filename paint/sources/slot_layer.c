@@ -236,6 +236,31 @@ void slot_layer_invert_mask(slot_layer_t *raw) {
 	context_raw->ddirty              = 3;
 }
 
+void layers_apply_mask(slot_layer_t *l, slot_layer_t *m) {
+	if (!slot_layer_is_layer(l) || !slot_layer_is_mask(m)) {
+		return;
+	}
+
+	layers_make_temp_img();
+
+	// Copy layer to temp
+	draw_begin(layers_temp_image, false, 0);
+	draw_set_pipeline(pipes_copy);
+	draw_image(l->texpaint, 0, 0);
+	draw_set_pipeline(NULL);
+	draw_end();
+
+	// Apply mask
+	_gpu_begin(l->texpaint, NULL, NULL, GPU_CLEAR_NONE, 0, 0.0);
+	gpu_set_pipeline(pipes_apply_mask);
+	gpu_set_texture(pipes_tex0_mask, layers_temp_image);
+	gpu_set_texture(pipes_texa_mask, m->texpaint);
+	gpu_set_vertex_buffer(const_data_screen_aligned_vb);
+	gpu_set_index_buffer(const_data_screen_aligned_ib);
+	gpu_draw();
+	gpu_end();
+}
+
 void slot_layer_apply_mask(slot_layer_t *raw) {
 	if (raw->parent->fill_layer != NULL) {
 		slot_layer_to_paint_layer(raw->parent);
@@ -900,31 +925,6 @@ void layers_make_export_img() {
 			gc_root(layers_expc);
 		}
 	}
-}
-
-void layers_apply_mask(slot_layer_t *l, slot_layer_t *m) {
-	if (!slot_layer_is_layer(l) || !slot_layer_is_mask(m)) {
-		return;
-	}
-
-	layers_make_temp_img();
-
-	// Copy layer to temp
-	draw_begin(layers_temp_image, false, 0);
-	draw_set_pipeline(pipes_copy);
-	draw_image(l->texpaint, 0, 0);
-	draw_set_pipeline(NULL);
-	draw_end();
-
-	// Apply mask
-	_gpu_begin(l->texpaint, NULL, NULL, GPU_CLEAR_NONE, 0, 0.0);
-	gpu_set_pipeline(pipes_apply_mask);
-	gpu_set_texture(pipes_tex0_mask, layers_temp_image);
-	gpu_set_texture(pipes_texa_mask, m->texpaint);
-	gpu_set_vertex_buffer(const_data_screen_aligned_vb);
-	gpu_set_index_buffer(const_data_screen_aligned_ib);
-	gpu_draw();
-	gpu_end();
 }
 
 void layers_commands_merge_pack(gpu_pipeline_t *pipe, gpu_texture_t *i0, gpu_texture_t *i1, gpu_texture_t *i1pack, f32 i1mask_opacity, gpu_texture_t *i1texmask,

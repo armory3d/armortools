@@ -1,6 +1,52 @@
 
 #include "global.h"
 
+i32 util_encode_mesh_data_size(mesh_data_t_array_t *datas) {
+	if (datas == NULL) {
+		return 0;
+	}
+	i32 size = 0;
+	for (i32 i = 0; i < datas->length; ++i) {
+		for (i32 j = 0; j < datas->buffer[i]->vertex_arrays->length; ++j) {
+			size += datas->buffer[i]->vertex_arrays->buffer[j]->values->length * 2;
+		}
+		size += datas->buffer[i]->index_array->length * 4;
+	}
+	return size;
+}
+
+void util_encode_mesh_datas(mesh_data_t_array_t *datas) {
+	armpack_encode_string("mesh_datas");
+	if (datas == NULL) {
+		armpack_encode_null();
+		return;
+	}
+
+	armpack_encode_array(datas->length);
+	for (i32 i = 0; i < datas->length; ++i) {
+		armpack_encode_map(5);
+		armpack_encode_string("name");
+		armpack_encode_string(datas->buffer[i]->name);
+		armpack_encode_string("scale_pos");
+		armpack_encode_f32(datas->buffer[i]->scale_pos);
+		armpack_encode_string("scale_tex");
+		armpack_encode_f32(datas->buffer[i]->scale_tex);
+		armpack_encode_string("vertex_arrays");
+		armpack_encode_array(datas->buffer[i]->vertex_arrays->length);
+		for (i32 j = 0; j < datas->buffer[i]->vertex_arrays->length; ++j) {
+			armpack_encode_map(3);
+			armpack_encode_string("attrib");
+			armpack_encode_string(datas->buffer[i]->vertex_arrays->buffer[j]->attrib);
+			armpack_encode_string("data");
+			armpack_encode_string(datas->buffer[i]->vertex_arrays->buffer[j]->data);
+			armpack_encode_string("values");
+			armpack_encode_array_i16(datas->buffer[i]->vertex_arrays->buffer[j]->values);
+		}
+		armpack_encode_string("index_array");
+		armpack_encode_array_i32(datas->buffer[i]->index_array);
+	}
+}
+
 buffer_t *util_encode_scene(scene_t *raw) {
 	i32       size    = 8 * 1024 * 1024 + util_encode_mesh_data_size(raw->mesh_datas);
 	buffer_t *encoded = buffer_create(size);
@@ -34,20 +80,6 @@ buffer_t *util_encode_scene(scene_t *raw) {
 
 void util_encode_node_canvas(ui_node_canvas_t *c) {
 	ui_node_canvas_encode(c);
-}
-
-i32 util_encode_mesh_data_size(mesh_data_t_array_t *datas) {
-	if (datas == NULL) {
-		return 0;
-	}
-	i32 size = 0;
-	for (i32 i = 0; i < datas->length; ++i) {
-		for (i32 j = 0; j < datas->buffer[i]->vertex_arrays->length; ++j) {
-			size += datas->buffer[i]->vertex_arrays->buffer[j]->values->length * 2;
-		}
-		size += datas->buffer[i]->index_array->length * 4;
-	}
-	return size;
 }
 
 i32 util_encode_packed_assets_size(packed_asset_t_array_t *assets) {
@@ -96,38 +128,6 @@ i32 util_encode_layer_data_size(layer_data_t_array_t *datas) {
 		}
 	}
 	return size;
-}
-
-void util_encode_mesh_datas(mesh_data_t_array_t *datas) {
-	armpack_encode_string("mesh_datas");
-	if (datas == NULL) {
-		armpack_encode_null();
-		return;
-	}
-
-	armpack_encode_array(datas->length);
-	for (i32 i = 0; i < datas->length; ++i) {
-		armpack_encode_map(5);
-		armpack_encode_string("name");
-		armpack_encode_string(datas->buffer[i]->name);
-		armpack_encode_string("scale_pos");
-		armpack_encode_f32(datas->buffer[i]->scale_pos);
-		armpack_encode_string("scale_tex");
-		armpack_encode_f32(datas->buffer[i]->scale_tex);
-		armpack_encode_string("vertex_arrays");
-		armpack_encode_array(datas->buffer[i]->vertex_arrays->length);
-		for (i32 j = 0; j < datas->buffer[i]->vertex_arrays->length; ++j) {
-			armpack_encode_map(3);
-			armpack_encode_string("attrib");
-			armpack_encode_string(datas->buffer[i]->vertex_arrays->buffer[j]->attrib);
-			armpack_encode_string("data");
-			armpack_encode_string(datas->buffer[i]->vertex_arrays->buffer[j]->data);
-			armpack_encode_string("values");
-			armpack_encode_array_i16(datas->buffer[i]->vertex_arrays->buffer[j]->values);
-		}
-		armpack_encode_string("index_array");
-		armpack_encode_array_i32(datas->buffer[i]->index_array);
-	}
 }
 
 buffer_t *util_encode_project(project_format_t *raw) {

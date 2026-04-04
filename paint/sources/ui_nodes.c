@@ -1,32 +1,6 @@
 
 #include "global.h"
 
-void ui_viewnodes_init() {
-	ui_nodes_preview_image = ui_nodes_get_node_preview_image;
-	gc_root(ui_nodes_preview_image);
-
-	ui_nodes_on_link_drag = ui_viewnodes_on_link_drag;
-	gc_root(ui_nodes_on_link_drag);
-
-	ui_nodes_on_node_remove = ui_viewnodes_on_node_remove;
-	gc_root(ui_nodes_on_node_remove);
-
-	ui_nodes_on_node_changed = ui_viewnodes_on_node_changed;
-	gc_root(ui_nodes_on_node_changed);
-
-	ui_nodes_on_socket_released = ui_viewnodes_on_socket_released;
-	gc_root(ui_nodes_on_socket_released);
-
-	ui_nodes_on_canvas_released = ui_viewnodes_on_canvas_released;
-	gc_root(ui_nodes_on_canvas_released);
-
-	ui_nodes_on_canvas_control = ui_viewnodes_on_canvas_control;
-	gc_root(ui_nodes_on_canvas_control);
-
-	ui_nodes_grid_snap = config_raw->grid_snap;
-	nodes_material_init();
-}
-
 void ui_viewnodes_on_node_remove(ui_node_t *n) {
 	gpu_texture_t *img = any_imap_get(context_raw->node_preview_map, n->id);
 	if (img != NULL) {
@@ -72,6 +46,104 @@ void ui_viewnodes_on_link_drag_on_node_search_done() {
 		link_drag->from_socket = 0;
 		any_array_push(ui_nodes_get_canvas(true)->links, link_drag);
 	}
+}
+
+void ui_nodes_push_undo(ui_node_canvas_t *last_canvas) {
+	if (last_canvas == NULL) {
+		last_canvas = ui_nodes_get_canvas(true);
+	}
+	i32 canvas_group = -1;
+	if (ui_nodes_group_stack->length > 0) {
+		canvas_group = array_index_of(project_material_groups, ui_nodes_group_stack->buffer[ui_nodes_group_stack->length - 1]);
+	}
+	ui_base_hwnds->buffer[TAB_AREA_SIDEBAR0]->redraws = 2;
+	history_edit_nodes(last_canvas, ui_nodes_canvas_type, canvas_group);
+}
+
+void ui_nodes_node_search_menu() {
+	ui_menu_h                  = UI_ELEMENT_H() * 8;
+	ui_handle_t *search_handle = ui_handle(__ID__);
+	char        *search        = to_lower_case(ui_text_input(search_handle, "", UI_ALIGN_LEFT, true, true));
+	ui->changed                = false;
+	if (_ui_nodes_node_search_first) {
+		_ui_nodes_node_search_first = false;
+		search_handle->text         = "";
+		ui_start_text_edit(search_handle, UI_ALIGN_LEFT); // Focus search bar
+	}
+
+	if (search_handle->changed) {
+		ui_nodes_node_search_offset = 0;
+	}
+
+	if (ui->is_key_pressed) { // Move selection
+		if (ui->key_code == KEY_CODE_DOWN && ui_nodes_node_search_offset < 6) {
+			ui_nodes_node_search_offset++;
+		}
+		if (ui->key_code == KEY_CODE_UP && ui_nodes_node_search_offset > 0) {
+			ui_nodes_node_search_offset--;
+		}
+	}
+	bool enter                     = keyboard_down("enter");
+	i32  count                     = 0;
+	i32  BUTTON_COL                = ui->ops->theme->BUTTON_COL;
+	bool FILL_BUTTON_BG            = ui->ops->theme->FILL_BUTTON_BG;
+	ui->ops->theme->FILL_BUTTON_BG = true;
+
+	node_list_t_array_t *node_list = ui_nodes_canvas_type == CANVAS_TYPE_MATERIAL ? nodes_material_list : nodes_brush_list;
+
+	for (i32 i = 0; i < node_list->length; ++i) {
+		ui_node_t_array_t *list = node_list->buffer[i];
+		for (i32 i = 0; i < list->length; ++i) {
+			ui_node_t *n = list->buffer[i];
+			if (string_index_of(to_lower_case(tr(n->name)), search) >= 0) {
+				ui->ops->theme->BUTTON_COL = count == ui_nodes_node_search_offset ? ui->ops->theme->HIGHLIGHT_COL : ui->ops->theme->SEPARATOR_COL;
+				if (ui_button(tr(n->name), UI_ALIGN_LEFT, "") || (enter && count == ui_nodes_node_search_offset)) {
+					ui_nodes_push_undo(NULL);
+					ui_nodes_t       *nodes  = ui_nodes_get_nodes();
+					ui_node_canvas_t *canvas = ui_nodes_get_canvas(true);
+					gc_unroot(ui_nodes_node_search_spawn);
+					ui_nodes_node_search_spawn = ui_nodes_make_node(n, nodes, canvas); // Spawn selected node
+					gc_root(ui_nodes_node_search_spawn);
+					any_array_push(canvas->nodes, ui_nodes_node_search_spawn);
+					nodes->nodes_selected_id = i32_array_create_from_raw(
+					    (i32[]){
+					        ui_nodes_node_search_spawn->id,
+					    },
+					    1);
+					nodes->nodes_drag = true;
+
+					ui_nodes_hwnd->redraws = 2;
+					if (enter) {
+						ui->changed = true;
+						count       = 6; // Trigger break
+					}
+					if (_ui_nodes_node_search_done != NULL) {
+						_ui_nodes_node_search_done();
+					}
+				}
+				if (++count > 6) {
+					break;
+				}
+			}
+		}
+		if (count > 6) {
+			break;
+		}
+	}
+	if (enter && count == 0) { // Hide popup on enter when node is not found
+		ui->changed         = true;
+		search_handle->text = "";
+	}
+	ui->ops->theme->BUTTON_COL     = BUTTON_COL;
+	ui->ops->theme->FILL_BUTTON_BG = FILL_BUTTON_BG;
+}
+
+void ui_nodes_node_search(i32 x, i32 y, void (*done)(void)) {
+	_ui_nodes_node_search_first = true;
+	gc_unroot(_ui_nodes_node_search_done);
+	_ui_nodes_node_search_done = done;
+	gc_root(_ui_nodes_node_search_done);
+	ui_menu_draw(&ui_nodes_node_search_menu, x, y);
 }
 
 void ui_viewnodes_on_link_drag(i32 link_drag_id, bool is_new_link) {
@@ -213,33 +285,34 @@ void ui_viewnodes_on_socket_released_group_menu(void *_) {
 	ui_menu_draw(&ui_viewnodes_on_socket_released_group_menu_draw, -1, -1);
 }
 
-void ui_viewnodes_on_socket_released(i32 socket_id) {
-	ui_node_canvas_t *canvas = ui_nodes_get_canvas(true);
-	ui_node_socket_t *socket = ui_get_socket(canvas->nodes, socket_id);
-	ui_node_t        *node   = ui_get_node(canvas->nodes, socket->node_id);
-	if (ui->input_released_r) {
-		if (string_equals(node->type, "GROUP_INPUT") || string_equals(node->type, "GROUP_OUTPUT")) {
+void ui_nodes_capture_output() {
+	ui_nodes_t       *ui_nodes = ui_nodes_get_nodes();
+	ui_node_canvas_t *c        = ui_nodes_get_canvas(true);
+	ui_node_t        *sel      = ui_get_node(c->nodes, ui_nodes->nodes_selected_id->buffer[0]);
+	gpu_texture_t    *img      = ui_nodes_get_node_preview_image(sel);
+	if (img == NULL) {
+		return;
+	}
 
-			gc_unroot(_ui_nodes_on_socket_released_socket);
-			_ui_nodes_on_socket_released_socket = socket;
-			gc_root(_ui_nodes_on_socket_released_socket);
-			gc_unroot(_ui_nodes_on_socket_released_node);
-			_ui_nodes_on_socket_released_node = node;
-			gc_root(_ui_nodes_on_socket_released_node);
-			sys_notify_on_next_frame(&ui_viewnodes_on_socket_released_group_menu, NULL);
-		}
-		else {
-			ui_viewnodes_on_canvas_released();
+	if (project_raw->packed_assets == NULL) {
+		project_raw->packed_assets = any_array_create_from_raw((void *[]){}, 0);
+	}
+
+	i32   num = 0;
+	char *abs = "/packed/node_preview0.png";
+	for (i32 i = 0; i < project_raw->packed_assets->length; ++i) {
+		packed_asset_t *pa = project_raw->packed_assets->buffer[i];
+		if (string_equals(pa->name, abs)) {
+			i = 0;
+			num++;
+			abs = string("/packed/node_preview%d.png", num);
 		}
 	}
-	// Selecting which node socket to preview
-	// else {
-	// 	let i: i32 = array_index_of(node.outputs, socket);
-	// 	if (i > -1) {
-	// 		i32_imap_set(context_raw.node_preview_socket_map, node.id, i);
-	// 		ui_nodes_node_changed = node;
-	// 	}
-	// }
+
+	packed_asset_t *pa = GC_ALLOC_INIT(packed_asset_t, {.name = abs, .bytes = iron_encode_png(gpu_get_texture_pixels(img), img->width, img->height, 0)});
+	any_array_push(project_raw->packed_assets, pa);
+	any_map_set(data_cached_images, abs, img);
+	import_texture_run(abs, true);
 }
 
 void ui_viewnodes_on_canvas_capture_output(void *_) {
@@ -378,10 +451,47 @@ void ui_viewnodes_on_canvas_released() {
 	}
 }
 
+void ui_viewnodes_on_socket_released(i32 socket_id) {
+	ui_node_canvas_t *canvas = ui_nodes_get_canvas(true);
+	ui_node_socket_t *socket = ui_get_socket(canvas->nodes, socket_id);
+	ui_node_t        *node   = ui_get_node(canvas->nodes, socket->node_id);
+	if (ui->input_released_r) {
+		if (string_equals(node->type, "GROUP_INPUT") || string_equals(node->type, "GROUP_OUTPUT")) {
+
+			gc_unroot(_ui_nodes_on_socket_released_socket);
+			_ui_nodes_on_socket_released_socket = socket;
+			gc_root(_ui_nodes_on_socket_released_socket);
+			gc_unroot(_ui_nodes_on_socket_released_node);
+			_ui_nodes_on_socket_released_node = node;
+			gc_root(_ui_nodes_on_socket_released_node);
+			sys_notify_on_next_frame(&ui_viewnodes_on_socket_released_group_menu, NULL);
+		}
+		else {
+			ui_viewnodes_on_canvas_released();
+		}
+	}
+	// Selecting which node socket to preview
+	// else {
+	// 	let i: i32 = array_index_of(node.outputs, socket);
+	// 	if (i > -1) {
+	// 		i32_imap_set(context_raw.node_preview_socket_map, node.id, i);
+	// 		ui_nodes_node_changed = node;
+	// 	}
+	// }
+}
+
 ui_canvas_control_t *ui_viewnodes_on_canvas_control() {
 	ui_canvas_control_t *control = ui_nodes_get_canvas_control(ui_nodes_controls_down, true);
 	ui_nodes_controls_down       = control->controls_down;
 	return control;
+}
+
+f32 ui_nodes_get_zoom_delta() {
+	return config_raw->zoom_direction == ZOOM_DIRECTION_VERTICAL              ? -ui->input_dy
+	       : config_raw->zoom_direction == ZOOM_DIRECTION_VERTICAL_INVERTED   ? -ui->input_dy
+	       : config_raw->zoom_direction == ZOOM_DIRECTION_HORIZONTAL          ? ui->input_dx
+	       : config_raw->zoom_direction == ZOOM_DIRECTION_HORIZONTAL_INVERTED ? ui->input_dx
+	                                                                          : -(ui->input_dy - ui->input_dx);
 }
 
 ui_canvas_control_t *ui_nodes_get_canvas_control(bool controls_down, bool is_node_view) {
@@ -438,14 +548,6 @@ ui_canvas_control_t *ui_nodes_get_canvas_control(bool controls_down, bool is_nod
 	}
 
 	return control;
-}
-
-f32 ui_nodes_get_zoom_delta() {
-	return config_raw->zoom_direction == ZOOM_DIRECTION_VERTICAL              ? -ui->input_dy
-	       : config_raw->zoom_direction == ZOOM_DIRECTION_VERTICAL_INVERTED   ? -ui->input_dy
-	       : config_raw->zoom_direction == ZOOM_DIRECTION_HORIZONTAL          ? ui->input_dx
-	       : config_raw->zoom_direction == ZOOM_DIRECTION_HORIZONTAL_INVERTED ? ui->input_dx
-	                                                                          : -(ui->input_dy - ui->input_dx);
 }
 
 bool ui_nodes_is_tab_selected() {
@@ -583,92 +685,6 @@ void ui_nodes_canvas_changed() {
 	ui_nodes_recompile_mat_final = true;
 }
 
-void ui_nodes_node_search_menu() {
-	ui_menu_h                  = UI_ELEMENT_H() * 8;
-	ui_handle_t *search_handle = ui_handle(__ID__);
-	char        *search        = to_lower_case(ui_text_input(search_handle, "", UI_ALIGN_LEFT, true, true));
-	ui->changed                = false;
-	if (_ui_nodes_node_search_first) {
-		_ui_nodes_node_search_first = false;
-		search_handle->text         = "";
-		ui_start_text_edit(search_handle, UI_ALIGN_LEFT); // Focus search bar
-	}
-
-	if (search_handle->changed) {
-		ui_nodes_node_search_offset = 0;
-	}
-
-	if (ui->is_key_pressed) { // Move selection
-		if (ui->key_code == KEY_CODE_DOWN && ui_nodes_node_search_offset < 6) {
-			ui_nodes_node_search_offset++;
-		}
-		if (ui->key_code == KEY_CODE_UP && ui_nodes_node_search_offset > 0) {
-			ui_nodes_node_search_offset--;
-		}
-	}
-	bool enter                     = keyboard_down("enter");
-	i32  count                     = 0;
-	i32  BUTTON_COL                = ui->ops->theme->BUTTON_COL;
-	bool FILL_BUTTON_BG            = ui->ops->theme->FILL_BUTTON_BG;
-	ui->ops->theme->FILL_BUTTON_BG = true;
-
-	node_list_t_array_t *node_list = ui_nodes_canvas_type == CANVAS_TYPE_MATERIAL ? nodes_material_list : nodes_brush_list;
-
-	for (i32 i = 0; i < node_list->length; ++i) {
-		ui_node_t_array_t *list = node_list->buffer[i];
-		for (i32 i = 0; i < list->length; ++i) {
-			ui_node_t *n = list->buffer[i];
-			if (string_index_of(to_lower_case(tr(n->name)), search) >= 0) {
-				ui->ops->theme->BUTTON_COL = count == ui_nodes_node_search_offset ? ui->ops->theme->HIGHLIGHT_COL : ui->ops->theme->SEPARATOR_COL;
-				if (ui_button(tr(n->name), UI_ALIGN_LEFT, "") || (enter && count == ui_nodes_node_search_offset)) {
-					ui_nodes_push_undo(NULL);
-					ui_nodes_t       *nodes  = ui_nodes_get_nodes();
-					ui_node_canvas_t *canvas = ui_nodes_get_canvas(true);
-					gc_unroot(ui_nodes_node_search_spawn);
-					ui_nodes_node_search_spawn = ui_nodes_make_node(n, nodes, canvas); // Spawn selected node
-					gc_root(ui_nodes_node_search_spawn);
-					any_array_push(canvas->nodes, ui_nodes_node_search_spawn);
-					nodes->nodes_selected_id = i32_array_create_from_raw(
-					    (i32[]){
-					        ui_nodes_node_search_spawn->id,
-					    },
-					    1);
-					nodes->nodes_drag = true;
-
-					ui_nodes_hwnd->redraws = 2;
-					if (enter) {
-						ui->changed = true;
-						count       = 6; // Trigger break
-					}
-					if (_ui_nodes_node_search_done != NULL) {
-						_ui_nodes_node_search_done();
-					}
-				}
-				if (++count > 6) {
-					break;
-				}
-			}
-		}
-		if (count > 6) {
-			break;
-		}
-	}
-	if (enter && count == 0) { // Hide popup on enter when node is not found
-		ui->changed         = true;
-		search_handle->text = "";
-	}
-	ui->ops->theme->BUTTON_COL     = BUTTON_COL;
-	ui->ops->theme->FILL_BUTTON_BG = FILL_BUTTON_BG;
-}
-
-void ui_nodes_node_search(i32 x, i32 y, void (*done)(void)) {
-	_ui_nodes_node_search_first = true;
-	gc_unroot(_ui_nodes_node_search_done);
-	_ui_nodes_node_search_done = done;
-	gc_root(_ui_nodes_node_search_done);
-	ui_menu_draw(&ui_nodes_node_search_menu, x, y);
-}
-
 i32 ui_nodes_get_node_x() {
 	return math_floor((mouse_x - ui_nodes_wx - UI_NODES_PAN_X()) / (float)UI_NODES_SCALE());
 }
@@ -795,6 +811,224 @@ void ui_nodes_render_color_picker_callback(swatch_color_t *color) {
 	if (material_live) {
 		ui_nodes_canvas_changed();
 	}
+}
+
+void ui_nodes_draw_menubar_search(void *_) {
+	ui_nodes_node_search(math_floor(ui_nodes_node_search_x), math_floor(ui_nodes_node_search_y), NULL);
+}
+
+void ui_nodes_draw_menubar() {
+	ui_node_canvas_t *c     = ui_nodes_get_canvas(true);
+	i32               ew    = math_floor(UI_ELEMENT_W() * 0.7);
+	i32               top_y = ui_menu_top_y();
+	draw_set_color(ui->ops->theme->WINDOW_BG_COL);
+	draw_filled_rect(0, top_y, ui_nodes_ww, UI_ELEMENT_H() + UI_ELEMENT_OFFSET() * 2);
+	draw_set_color(0xffffffff);
+
+	i32 start_y = top_y + UI_ELEMENT_OFFSET();
+	ui->_x      = 0;
+	ui->_y      = 2 + start_y;
+	ui->_w      = ew;
+
+	// Editable canvas name
+	ui_handle_t *h = ui_handle(__ID__);
+	h->text        = string_copy(c->name);
+	ui->_w         = math_floor(math_min(draw_string_width(ui->ops->font, ui->font_size, h->text) + 15 * UI_SCALE(), 100 * UI_SCALE()));
+	char *new_name = ui_text_input(h, "", UI_ALIGN_LEFT, true, false);
+	ui->_x += ui->_w + 3;
+	ui->_y = 2 + start_y;
+	ui->_w = ew;
+	if (h->changed) { // Check whether renaming is possible and update group links
+		if (ui_nodes_group_stack->length > 0) {
+			bool can_rename = true;
+			for (i32 i = 0; i < project_material_groups->length; ++i) {
+				node_group_t *m = project_material_groups->buffer[i];
+				if (string_equals(m->canvas->name, new_name)) {
+					can_rename = false; // Name already used
+				}
+			}
+			if (can_rename) {
+				char *old_name                     = c->name;
+				c->name                            = string_copy(new_name);
+				ui_node_canvas_t_array_t *canvases = any_array_create_from_raw((void *[]){}, 0);
+				for (i32 i = 0; i < project_materials->length; ++i) {
+					slot_material_t *m = project_materials->buffer[i];
+					any_array_push(canvases, m->canvas);
+				}
+				for (i32 i = 0; i < project_material_groups->length; ++i) {
+					node_group_t *m = project_material_groups->buffer[i];
+					any_array_push(canvases, m->canvas);
+				}
+				for (i32 i = 0; i < canvases->length; ++i) {
+					ui_node_canvas_t *canvas = canvases->buffer[i];
+					for (i32 i = 0; i < canvas->nodes->length; ++i) {
+						ui_node_t *n = canvas->nodes->buffer[i];
+						if (string_equals(n->type, "GROUP") && string_equals(n->name, old_name)) {
+							n->name = string_copy(c->name);
+						}
+					}
+				}
+			}
+		}
+		else {
+			c->name = string_copy(new_name);
+		}
+	}
+	i32  _BUTTON_COL           = ui->ops->theme->BUTTON_COL;
+	bool _SHADOWS              = ui->ops->theme->SHADOWS;
+	ui->ops->theme->BUTTON_COL = ui->ops->theme->WINDOW_BG_COL;
+	ui->ops->theme->SHADOWS    = false;
+	string_array_t *cats     = ui_nodes_canvas_type == CANVAS_TYPE_MATERIAL ? nodes_material_categories : nodes_brush_categories;
+	for (i32 i = 0; i < cats->length; ++i) {
+		if ((ui_menubar_button(tr(cats->buffer[i]))) || (ui->is_hovered && ui_nodes_show_menu)) {
+			ui_nodes_show_menu     = true;
+			ui_nodes_menu_category = i;
+			ui_nodes_popup_x       = ui_nodes_wx + ui->_x;
+			ui_nodes_popup_y       = ui_nodes_wy + ui->_y;
+			if (config_raw->touch_ui) {
+				ui_nodes_show_menu_first = true;
+				i32 menuw                = math_floor(ew * 2.3);
+				ui_nodes_popup_x -= menuw / 2.0;
+				ui_nodes_popup_x += ui->_w / 2.0;
+			}
+		}
+		ui->_x += ui->_w + 3;
+		ui->_y = 2 + start_y;
+	}
+	if (config_raw->touch_ui) {
+		i32 _w = ui->_w;
+		ui->_w = math_floor(36 * UI_SCALE());
+		ui->_y = 4 * UI_SCALE() + start_y;
+		if (ui_menubar_icon_button(ICON_SEARCH)) {
+			ui_nodes_node_search(math_floor(ui->_window_x + ui->_x), math_floor(ui->_window_y + ui->_y), NULL);
+		}
+		ui->_w = _w;
+	}
+	else {
+		if (ui_menubar_button(tr("Search"))) {
+			ui_nodes_node_search_x = ui->_window_x + ui->_x;
+			ui_nodes_node_search_y = ui->_window_y + ui->_y;
+			// Allow for node menu to be closed first
+			sys_notify_on_next_frame(&ui_nodes_draw_menubar_search, NULL);
+		}
+	}
+	if (ui->is_hovered) {
+		ui_tooltip(string("%s (%s)", tr("Search for nodes"), any_map_get(config_keymap, "node_search")));
+	}
+	ui->_x += ui->_w + 3;
+	ui->_y                     = 2 + start_y;
+	ui->ops->theme->BUTTON_COL = _BUTTON_COL;
+	ui->ops->theme->SHADOWS    = _SHADOWS;
+	// Close node group
+	if (ui_nodes_group_stack->length > 0 && ui_menubar_button(tr("Close"))) {
+		array_pop(ui_nodes_group_stack);
+	}
+}
+
+bool ui_nodes_contains_node_group_recursive(node_group_t *group, char *group_name) {
+	if (string_equals(group->canvas->name, group_name)) {
+		return true;
+	}
+	for (i32 i = 0; i < group->canvas->nodes->length; ++i) {
+		ui_node_t *n = group->canvas->nodes->buffer[i];
+		if (string_equals(n->type, "GROUP")) {
+			node_group_t *g = project_get_material_group_by_name(n->name);
+			if (g != NULL && ui_nodes_contains_node_group_recursive(g, group_name)) {
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+bool ui_nodes_can_place_group(char *group_name) {
+	// Prevent Recursive node groups
+	// The group to place must not contain the current group or a group that contains the current group
+	if (ui_nodes_group_stack->length > 0) {
+		for (i32 i = 0; i < ui_nodes_group_stack->length; ++i) {
+			node_group_t *g = ui_nodes_group_stack->buffer[i];
+			if (ui_nodes_contains_node_group_recursive(project_get_material_group_by_name(group_name), g->canvas->name))
+				return false;
+		}
+	}
+	// Group was deleted / renamed
+	bool group_exists = false;
+	for (i32 i = 0; i < project_material_groups->length; ++i) {
+		node_group_t *group = project_material_groups->buffer[i];
+		if (string_equals(group_name, group->canvas->name)) {
+			group_exists = true;
+		}
+	}
+	if (!group_exists) {
+		return false;
+	}
+	return true;
+}
+
+ui_node_t *ui_nodes_make_group_node(ui_node_canvas_t *group_canvas, ui_nodes_t *nodes, ui_node_canvas_t *canvas) {
+	ui_node_t_array_t *category = nodes_material_list->buffer[5];
+	ui_node_t         *n        = category->buffer[0];
+	ui_node_t         *node     = util_clone_canvas_node(n);
+	node->name                  = string_copy(group_canvas->name);
+	node->id                    = ui_next_node_id(canvas->nodes);
+	node->x                     = ui_nodes_get_node_x();
+	node->y                     = ui_nodes_get_node_y();
+	ui_node_t *group_input      = NULL;
+	ui_node_t *group_output     = NULL;
+	for (i32 i = 0; i < project_material_groups->length; ++i) {
+		node_group_t *g     = project_material_groups->buffer[i];
+		char         *cname = g->canvas->name;
+		if (string_equals(cname, node->name)) {
+			for (i32 i = 0; i < g->canvas->nodes->length; ++i) {
+				ui_node_t *n = g->canvas->nodes->buffer[i];
+				if (string_equals(n->type, "GROUP_INPUT")) {
+					group_input = n;
+				}
+				else if (string_equals(n->type, "GROUP_OUTPUT")) {
+					group_output = n;
+				}
+			}
+			break;
+		}
+	}
+	if (group_input != NULL && group_output != NULL) {
+		for (i32 i = 0; i < group_input->outputs->length; ++i) {
+			ui_node_socket_t *soc = group_input->outputs->buffer[i];
+			any_array_push(node->inputs, nodes_material_create_socket(nodes, node, soc->name, soc->type, canvas, soc->min, soc->max, soc->default_value));
+		}
+		for (i32 i = 0; i < group_output->inputs->length; ++i) {
+			ui_node_socket_t *soc = group_output->inputs->buffer[i];
+			any_array_push(node->outputs, nodes_material_create_socket(nodes, node, soc->name, soc->type, canvas, soc->min, soc->max, soc->default_value));
+		}
+	}
+	return node;
+}
+
+void ui_nodes_make_node_preview(ui_node_t *node) {
+	context_raw->node_preview_name = string_copy(node->name);
+
+	if (string_equals(node->type, "LAYER") || string_equals(node->type, "LAYER_MASK") || string_equals(node->type, "MATERIAL") ||
+	    string_equals(node->type, "OUTPUT_MATERIAL_PBR")) {
+		return;
+	}
+
+	if (ui_nodes_canvas_type == CANVAS_TYPE_BRUSH) {
+		return;
+	}
+
+	ui_node_t_array_t *nodes = ui_nodes_get_canvas(false)->nodes;
+	if (array_index_of(nodes, node) == -1) {
+		return;
+	}
+
+	gpu_texture_t *img = any_imap_get(context_raw->node_preview_map, node->id);
+	if (img == NULL) {
+		img = gpu_create_render_target(util_render_node_preview_size, util_render_node_preview_size, GPU_TEXTURE_FORMAT_RGBA32);
+		any_imap_set(context_raw->node_preview_map, node->id, img);
+	}
+
+	ui_nodes_hwnd->redraws = 2;
+	util_render_make_node_preview(ui_nodes_get_canvas(false), node, img, NULL, NULL);
 }
 
 void ui_nodes_render(void *_) {
@@ -1215,170 +1449,6 @@ gpu_texture_t *ui_nodes_get_node_preview_image(ui_node_t *n) {
 	return img;
 }
 
-void ui_nodes_draw_menubar_search(void *_) {
-	ui_nodes_node_search(math_floor(ui_nodes_node_search_x), math_floor(ui_nodes_node_search_y), NULL);
-}
-
-void ui_nodes_draw_menubar() {
-	ui_node_canvas_t *c     = ui_nodes_get_canvas(true);
-	i32               ew    = math_floor(UI_ELEMENT_W() * 0.7);
-	i32               top_y = ui_menu_top_y();
-	draw_set_color(ui->ops->theme->WINDOW_BG_COL);
-	draw_filled_rect(0, top_y, ui_nodes_ww, UI_ELEMENT_H() + UI_ELEMENT_OFFSET() * 2);
-	draw_set_color(0xffffffff);
-
-	i32 start_y = top_y + UI_ELEMENT_OFFSET();
-	ui->_x      = 0;
-	ui->_y      = 2 + start_y;
-	ui->_w      = ew;
-
-	// Editable canvas name
-	ui_handle_t *h = ui_handle(__ID__);
-	h->text        = string_copy(c->name);
-	ui->_w         = math_floor(math_min(draw_string_width(ui->ops->font, ui->font_size, h->text) + 15 * UI_SCALE(), 100 * UI_SCALE()));
-	char *new_name = ui_text_input(h, "", UI_ALIGN_LEFT, true, false);
-	ui->_x += ui->_w + 3;
-	ui->_y = 2 + start_y;
-	ui->_w = ew;
-	if (h->changed) { // Check whether renaming is possible and update group links
-		if (ui_nodes_group_stack->length > 0) {
-			bool can_rename = true;
-			for (i32 i = 0; i < project_material_groups->length; ++i) {
-				node_group_t *m = project_material_groups->buffer[i];
-				if (string_equals(m->canvas->name, new_name)) {
-					can_rename = false; // Name already used
-				}
-			}
-			if (can_rename) {
-				char *old_name                     = c->name;
-				c->name                            = string_copy(new_name);
-				ui_node_canvas_t_array_t *canvases = any_array_create_from_raw((void *[]){}, 0);
-				for (i32 i = 0; i < project_materials->length; ++i) {
-					slot_material_t *m = project_materials->buffer[i];
-					any_array_push(canvases, m->canvas);
-				}
-				for (i32 i = 0; i < project_material_groups->length; ++i) {
-					node_group_t *m = project_material_groups->buffer[i];
-					any_array_push(canvases, m->canvas);
-				}
-				for (i32 i = 0; i < canvases->length; ++i) {
-					ui_node_canvas_t *canvas = canvases->buffer[i];
-					for (i32 i = 0; i < canvas->nodes->length; ++i) {
-						ui_node_t *n = canvas->nodes->buffer[i];
-						if (string_equals(n->type, "GROUP") && string_equals(n->name, old_name)) {
-							n->name = string_copy(c->name);
-						}
-					}
-				}
-			}
-		}
-		else {
-			c->name = string_copy(new_name);
-		}
-	}
-	i32  _BUTTON_COL           = ui->ops->theme->BUTTON_COL;
-	bool _SHADOWS              = ui->ops->theme->SHADOWS;
-	ui->ops->theme->BUTTON_COL = ui->ops->theme->WINDOW_BG_COL;
-	ui->ops->theme->SHADOWS    = false;
-	string_array_t *cats     = ui_nodes_canvas_type == CANVAS_TYPE_MATERIAL ? nodes_material_categories : nodes_brush_categories;
-	for (i32 i = 0; i < cats->length; ++i) {
-		if ((ui_menubar_button(tr(cats->buffer[i]))) || (ui->is_hovered && ui_nodes_show_menu)) {
-			ui_nodes_show_menu     = true;
-			ui_nodes_menu_category = i;
-			ui_nodes_popup_x       = ui_nodes_wx + ui->_x;
-			ui_nodes_popup_y       = ui_nodes_wy + ui->_y;
-			if (config_raw->touch_ui) {
-				ui_nodes_show_menu_first = true;
-				i32 menuw                = math_floor(ew * 2.3);
-				ui_nodes_popup_x -= menuw / 2.0;
-				ui_nodes_popup_x += ui->_w / 2.0;
-			}
-		}
-		ui->_x += ui->_w + 3;
-		ui->_y = 2 + start_y;
-	}
-	if (config_raw->touch_ui) {
-		i32 _w = ui->_w;
-		ui->_w = math_floor(36 * UI_SCALE());
-		ui->_y = 4 * UI_SCALE() + start_y;
-		if (ui_menubar_icon_button(ICON_SEARCH)) {
-			ui_nodes_node_search(math_floor(ui->_window_x + ui->_x), math_floor(ui->_window_y + ui->_y), NULL);
-		}
-		ui->_w = _w;
-	}
-	else {
-		if (ui_menubar_button(tr("Search"))) {
-			ui_nodes_node_search_x = ui->_window_x + ui->_x;
-			ui_nodes_node_search_y = ui->_window_y + ui->_y;
-			// Allow for node menu to be closed first
-			sys_notify_on_next_frame(&ui_nodes_draw_menubar_search, NULL);
-		}
-	}
-	if (ui->is_hovered) {
-		ui_tooltip(string("%s (%s)", tr("Search for nodes"), any_map_get(config_keymap, "node_search")));
-	}
-	ui->_x += ui->_w + 3;
-	ui->_y                     = 2 + start_y;
-	ui->ops->theme->BUTTON_COL = _BUTTON_COL;
-	ui->ops->theme->SHADOWS    = _SHADOWS;
-	// Close node group
-	if (ui_nodes_group_stack->length > 0 && ui_menubar_button(tr("Close"))) {
-		array_pop(ui_nodes_group_stack);
-	}
-}
-
-bool ui_nodes_contains_node_group_recursive(node_group_t *group, char *group_name) {
-	if (string_equals(group->canvas->name, group_name)) {
-		return true;
-	}
-	for (i32 i = 0; i < group->canvas->nodes->length; ++i) {
-		ui_node_t *n = group->canvas->nodes->buffer[i];
-		if (string_equals(n->type, "GROUP")) {
-			node_group_t *g = project_get_material_group_by_name(n->name);
-			if (g != NULL && ui_nodes_contains_node_group_recursive(g, group_name)) {
-				return true;
-			}
-		}
-	}
-	return false;
-}
-
-bool ui_nodes_can_place_group(char *group_name) {
-	// Prevent Recursive node groups
-	// The group to place must not contain the current group or a group that contains the current group
-	if (ui_nodes_group_stack->length > 0) {
-		for (i32 i = 0; i < ui_nodes_group_stack->length; ++i) {
-			node_group_t *g = ui_nodes_group_stack->buffer[i];
-			if (ui_nodes_contains_node_group_recursive(project_get_material_group_by_name(group_name), g->canvas->name))
-				return false;
-		}
-	}
-	// Group was deleted / renamed
-	bool group_exists = false;
-	for (i32 i = 0; i < project_material_groups->length; ++i) {
-		node_group_t *group = project_material_groups->buffer[i];
-		if (string_equals(group_name, group->canvas->name)) {
-			group_exists = true;
-		}
-	}
-	if (!group_exists) {
-		return false;
-	}
-	return true;
-}
-
-void ui_nodes_push_undo(ui_node_canvas_t *last_canvas) {
-	if (last_canvas == NULL) {
-		last_canvas = ui_nodes_get_canvas(true);
-	}
-	i32 canvas_group = -1;
-	if (ui_nodes_group_stack->length > 0) {
-		canvas_group = array_index_of(project_material_groups, ui_nodes_group_stack->buffer[ui_nodes_group_stack->length - 1]);
-	}
-	ui_base_hwnds->buffer[TAB_AREA_SIDEBAR0]->redraws = 2;
-	history_edit_nodes(last_canvas, ui_nodes_canvas_type, canvas_group);
-}
-
 void ui_nodes_accept_asset_drop(i32 index) {
 	ui_nodes_push_undo(NULL);
 	node_group_t *g = ui_nodes_group_stack->length > 0 ? ui_nodes_group_stack->buffer[ui_nodes_group_stack->length - 1] : NULL;
@@ -1496,72 +1566,6 @@ ui_node_t *ui_nodes_make_node(ui_node_t *n, ui_nodes_t *nodes, ui_node_canvas_t 
 	return node;
 }
 
-ui_node_t *ui_nodes_make_group_node(ui_node_canvas_t *group_canvas, ui_nodes_t *nodes, ui_node_canvas_t *canvas) {
-	ui_node_t_array_t *category = nodes_material_list->buffer[5];
-	ui_node_t         *n        = category->buffer[0];
-	ui_node_t         *node     = util_clone_canvas_node(n);
-	node->name                  = string_copy(group_canvas->name);
-	node->id                    = ui_next_node_id(canvas->nodes);
-	node->x                     = ui_nodes_get_node_x();
-	node->y                     = ui_nodes_get_node_y();
-	ui_node_t *group_input      = NULL;
-	ui_node_t *group_output     = NULL;
-	for (i32 i = 0; i < project_material_groups->length; ++i) {
-		node_group_t *g     = project_material_groups->buffer[i];
-		char         *cname = g->canvas->name;
-		if (string_equals(cname, node->name)) {
-			for (i32 i = 0; i < g->canvas->nodes->length; ++i) {
-				ui_node_t *n = g->canvas->nodes->buffer[i];
-				if (string_equals(n->type, "GROUP_INPUT")) {
-					group_input = n;
-				}
-				else if (string_equals(n->type, "GROUP_OUTPUT")) {
-					group_output = n;
-				}
-			}
-			break;
-		}
-	}
-	if (group_input != NULL && group_output != NULL) {
-		for (i32 i = 0; i < group_input->outputs->length; ++i) {
-			ui_node_socket_t *soc = group_input->outputs->buffer[i];
-			any_array_push(node->inputs, nodes_material_create_socket(nodes, node, soc->name, soc->type, canvas, soc->min, soc->max, soc->default_value));
-		}
-		for (i32 i = 0; i < group_output->inputs->length; ++i) {
-			ui_node_socket_t *soc = group_output->inputs->buffer[i];
-			any_array_push(node->outputs, nodes_material_create_socket(nodes, node, soc->name, soc->type, canvas, soc->min, soc->max, soc->default_value));
-		}
-	}
-	return node;
-}
-
-void ui_nodes_make_node_preview(ui_node_t *node) {
-	context_raw->node_preview_name = string_copy(node->name);
-
-	if (string_equals(node->type, "LAYER") || string_equals(node->type, "LAYER_MASK") || string_equals(node->type, "MATERIAL") ||
-	    string_equals(node->type, "OUTPUT_MATERIAL_PBR")) {
-		return;
-	}
-
-	if (ui_nodes_canvas_type == CANVAS_TYPE_BRUSH) {
-		return;
-	}
-
-	ui_node_t_array_t *nodes = ui_nodes_get_canvas(false)->nodes;
-	if (array_index_of(nodes, node) == -1) {
-		return;
-	}
-
-	gpu_texture_t *img = any_imap_get(context_raw->node_preview_map, node->id);
-	if (img == NULL) {
-		img = gpu_create_render_target(util_render_node_preview_size, util_render_node_preview_size, GPU_TEXTURE_FORMAT_RGBA32);
-		any_imap_set(context_raw->node_preview_map, node->id, img);
-	}
-
-	ui_nodes_hwnd->redraws = 2;
-	util_render_make_node_preview(ui_nodes_get_canvas(false), node, img, NULL, NULL);
-}
-
 bool ui_nodes_has_group(ui_node_canvas_t *c) {
 	for (i32 i = 0; i < c->nodes->length; ++i) {
 		ui_node_t *n = c->nodes->buffer[i];
@@ -1570,6 +1574,16 @@ bool ui_nodes_has_group(ui_node_canvas_t *c) {
 		}
 	}
 	return false;
+}
+
+ui_node_canvas_t *ui_nodes_get_group(ui_node_canvas_t_array_t *canvases, char *name) {
+	for (i32 i = 0; i < canvases->length; ++i) {
+		ui_node_canvas_t *c = canvases->buffer[i];
+		if (string_equals(c->name, name)) {
+			return c;
+		}
+	}
+	return NULL;
 }
 
 void ui_nodes_traverse_group(ui_node_canvas_t_array_t *mgroups, ui_node_canvas_t *c) {
@@ -1590,42 +1604,28 @@ void ui_nodes_traverse_group(ui_node_canvas_t_array_t *mgroups, ui_node_canvas_t
 	}
 }
 
-ui_node_canvas_t *ui_nodes_get_group(ui_node_canvas_t_array_t *canvases, char *name) {
-	for (i32 i = 0; i < canvases->length; ++i) {
-		ui_node_canvas_t *c = canvases->buffer[i];
-		if (string_equals(c->name, name)) {
-			return c;
-		}
-	}
-	return NULL;
-}
+void ui_viewnodes_init() {
+	ui_nodes_preview_image = ui_nodes_get_node_preview_image;
+	gc_root(ui_nodes_preview_image);
 
-void ui_nodes_capture_output() {
-	ui_nodes_t       *ui_nodes = ui_nodes_get_nodes();
-	ui_node_canvas_t *c        = ui_nodes_get_canvas(true);
-	ui_node_t        *sel      = ui_get_node(c->nodes, ui_nodes->nodes_selected_id->buffer[0]);
-	gpu_texture_t    *img      = ui_nodes_get_node_preview_image(sel);
-	if (img == NULL) {
-		return;
-	}
+	ui_nodes_on_link_drag = ui_viewnodes_on_link_drag;
+	gc_root(ui_nodes_on_link_drag);
 
-	if (project_raw->packed_assets == NULL) {
-		project_raw->packed_assets = any_array_create_from_raw((void *[]){}, 0);
-	}
+	ui_nodes_on_node_remove = ui_viewnodes_on_node_remove;
+	gc_root(ui_nodes_on_node_remove);
 
-	i32   num = 0;
-	char *abs = "/packed/node_preview0.png";
-	for (i32 i = 0; i < project_raw->packed_assets->length; ++i) {
-		packed_asset_t *pa = project_raw->packed_assets->buffer[i];
-		if (string_equals(pa->name, abs)) {
-			i = 0;
-			num++;
-			abs = string("/packed/node_preview%d.png", num);
-		}
-	}
+	ui_nodes_on_node_changed = ui_viewnodes_on_node_changed;
+	gc_root(ui_nodes_on_node_changed);
 
-	packed_asset_t *pa = GC_ALLOC_INIT(packed_asset_t, {.name = abs, .bytes = iron_encode_png(gpu_get_texture_pixels(img), img->width, img->height, 0)});
-	any_array_push(project_raw->packed_assets, pa);
-	any_map_set(data_cached_images, abs, img);
-	import_texture_run(abs, true);
+	ui_nodes_on_socket_released = ui_viewnodes_on_socket_released;
+	gc_root(ui_nodes_on_socket_released);
+
+	ui_nodes_on_canvas_released = ui_viewnodes_on_canvas_released;
+	gc_root(ui_nodes_on_canvas_released);
+
+	ui_nodes_on_canvas_control = ui_viewnodes_on_canvas_control;
+	gc_root(ui_nodes_on_canvas_control);
+
+	ui_nodes_grid_snap = config_raw->grid_snap;
+	nodes_material_init();
 }

@@ -1,19 +1,7 @@
 
 #include "../global.h"
 
-random_node_t *random_node_create(ui_node_t *raw, f32_array_t *args) {
-	random_node_t *n = GC_ALLOC_INIT(random_node_t, {0});
-	n->base          = logic_node_create(n);
-	n->base->get     = random_node_get;
-	return n;
-}
-
-logic_node_value_t *random_node_get(random_node_t *self, i32 from) {
-	f32                 min = logic_node_input_get(self->base->inputs->buffer[0])->_f32;
-	f32                 max = logic_node_input_get(self->base->inputs->buffer[1])->_f32;
-	logic_node_value_t *v   = GC_ALLOC_INIT(logic_node_value_t, {._f32 = min + random_node_get_float() * (max - min)});
-	return v;
-}
+void random_node_set_seed(i32 seed);
 
 i32 random_node_get_int() {
 	if (random_node_d == -1) {
@@ -49,4 +37,18 @@ i32 random_node_get_seed() {
 
 f32 random_node_get_float() {
 	return random_node_get_int() / (float)0x7fffffff;
+}
+
+logic_node_value_t *random_node_get(random_node_t *self, i32 from) {
+	f32                 min = logic_node_input_get(self->base->inputs->buffer[0])->_f32;
+	f32                 max = logic_node_input_get(self->base->inputs->buffer[1])->_f32;
+	logic_node_value_t *v   = GC_ALLOC_INIT(logic_node_value_t, {._f32 = min + random_node_get_float() * (max - min)});
+	return v;
+}
+
+random_node_t *random_node_create(ui_node_t *raw, f32_array_t *args) {
+	random_node_t *n = GC_ALLOC_INIT(random_node_t, {0});
+	n->base          = logic_node_create(n);
+	n->base->get     = random_node_get;
+	return n;
 }

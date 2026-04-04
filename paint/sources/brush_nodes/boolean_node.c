@@ -1,15 +1,6 @@
 
 #include "../global.h"
 
-boolean_node_t *boolean_node_create(ui_node_t *raw, f32_array_t *args) {
-	boolean_node_t *n = GC_ALLOC_INIT(boolean_node_t, {0});
-	n->base           = logic_node_create(n);
-	n->base->get      = boolean_node_get;
-	n->base->set      = boolean_node_set;
-	n->value          = args == NULL ? false : args->buffer[0] > 0.0;
-	return n;
-}
-
 logic_node_value_t *boolean_node_get(boolean_node_t *self, i32 from) {
 	if (self->base->inputs->length > 0) {
 		return logic_node_input_get(self->base->inputs->buffer[0]);
@@ -27,4 +18,13 @@ void boolean_node_set(boolean_node_t *self, f32_array_t *value) {
 	else {
 		self->value = value->buffer[0] > 0.0;
 	}
+}
+
+boolean_node_t *boolean_node_create(ui_node_t *raw, f32_array_t *args) {
+	boolean_node_t *n = GC_ALLOC_INIT(boolean_node_t, {0});
+	n->base           = logic_node_create(n);
+	n->base->get      = boolean_node_get;
+	n->base->set      = boolean_node_set;
+	n->value          = args == NULL ? false : args->buffer[0] > 0.0;
+	return n;
 }

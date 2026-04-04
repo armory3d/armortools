@@ -1,23 +1,6 @@
 
 #include "../global.h"
 
-vector_node_t *vector_node_create(ui_node_t *raw, f32_array_t *args) {
-	vector_node_t *n      = GC_ALLOC_INIT(vector_node_t, {0});
-	n->base               = logic_node_create(n);
-	n->base->get          = vector_node_get;
-	n->base->get_as_image = vector_node_get_as_image;
-	n->base->set          = vector_node_set;
-	n->value              = vec4_create(0.0, 0.0, 0.0, 1.0);
-
-	if (args != NULL) {
-		logic_node_add_input(n->base, float_node_create(NULL, f32_array_create_x(args->buffer[0])), 0);
-		logic_node_add_input(n->base, float_node_create(NULL, f32_array_create_x(args->buffer[1])), 0);
-		logic_node_add_input(n->base, float_node_create(NULL, f32_array_create_x(args->buffer[2])), 0);
-	}
-
-	return n;
-}
-
 logic_node_value_t *vector_node_get(vector_node_t *self, i32 from) {
 	f32 x                 = logic_node_input_get(self->base->inputs->buffer[0])->_f32;
 	f32 y                 = logic_node_input_get(self->base->inputs->buffer[1])->_f32;
@@ -52,4 +35,21 @@ void vector_node_set(vector_node_t *self, f32_array_t *value) {
 	logic_node_input_set(self->base->inputs->buffer[0], f32_array_create_x(value->buffer[0]));
 	logic_node_input_set(self->base->inputs->buffer[1], f32_array_create_x(value->buffer[1]));
 	logic_node_input_set(self->base->inputs->buffer[2], f32_array_create_x(value->buffer[2]));
+}
+
+vector_node_t *vector_node_create(ui_node_t *raw, f32_array_t *args) {
+	vector_node_t *n      = GC_ALLOC_INIT(vector_node_t, {0});
+	n->base               = logic_node_create(n);
+	n->base->get          = vector_node_get;
+	n->base->get_as_image = vector_node_get_as_image;
+	n->base->set          = vector_node_set;
+	n->value              = vec4_create(0.0, 0.0, 0.0, 1.0);
+
+	if (args != NULL) {
+		logic_node_add_input(n->base, float_node_create(NULL, f32_array_create_x(args->buffer[0])), 0);
+		logic_node_add_input(n->base, float_node_create(NULL, f32_array_create_x(args->buffer[1])), 0);
+		logic_node_add_input(n->base, float_node_create(NULL, f32_array_create_x(args->buffer[2])), 0);
+	}
+
+	return n;
 }

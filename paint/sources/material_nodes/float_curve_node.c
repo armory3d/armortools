@@ -5,75 +5,6 @@
 //         buffer[32] = number of points
 // Max 16 points (32 floats / 2 per point)
 
-void float_curve_node_init() {
-
-	float_curve_node_def =
-	    GC_ALLOC_INIT(ui_node_t, {.id     = 0,
-	                              .name   = _tr("Float Curve"),
-	                              .type   = "FLOAT_CURVE",
-	                              .x      = 0,
-	                              .y      = 0,
-	                              .color  = 0xff62676d,
-	                              .inputs = any_array_create_from_raw(
-	                                  (void *[]){
-	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
-	                                                                       .node_id       = 0,
-	                                                                       .name          = _tr("Factor"),
-	                                                                       .type          = "VALUE",
-	                                                                       .color         = 0xffa1a1a1,
-	                                                                       .default_value = f32_array_create_x(1.0),
-	                                                                       .min           = 0.0,
-	                                                                       .max           = 1.0,
-	                                                                       .precision     = 100,
-	                                                                       .display       = 0}),
-	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
-	                                                                       .node_id       = 0,
-	                                                                       .name          = _tr("Value"),
-	                                                                       .type          = "VALUE",
-	                                                                       .color         = 0xffa1a1a1,
-	                                                                       .default_value = f32_array_create_x(1.0),
-	                                                                       .min           = 0.0,
-	                                                                       .max           = 1.0,
-	                                                                       .precision     = 100,
-	                                                                       .display       = 0}),
-	                                  },
-	                                  2),
-	                              .outputs = any_array_create_from_raw(
-	                                  (void *[]){
-	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
-	                                                                       .node_id       = 0,
-	                                                                       .name          = _tr("Value"),
-	                                                                       .type          = "VALUE",
-	                                                                       .color         = 0xffa1a1a1,
-	                                                                       .default_value = f32_array_create_x(0.0),
-	                                                                       .min           = 0.0,
-	                                                                       .max           = 1.0,
-	                                                                       .precision     = 100,
-	                                                                       .display       = 0}),
-	                                  },
-	                                  1),
-	                              .buttons = any_array_create_from_raw(
-	                                  (void *[]){
-	                                      GC_ALLOC_INIT(ui_node_button_t, {.name          = "nodes_material_float_curve_button",
-	                                                                       .type          = "CUSTOM",
-	                                                                       .output        = 0,
-	                                                                       .default_value = f32_array_create(33),
-	                                                                       .data          = NULL,
-	                                                                       .min           = 0.0,
-	                                                                       .max           = 1.0,
-	                                                                       .precision     = 100,
-	                                                                       .height        = 7.2}),
-	                                  },
-	                                  1),
-	                              .width = 0,
-	                              .flags = 0});
-	gc_root(float_curve_node_def);
-
-	any_array_push(nodes_material_utilities, float_curve_node_def);
-	any_map_set(parser_material_node_values, "FLOAT_CURVE", float_curve_node_value);
-	any_map_set(ui_nodes_custom_buttons, "nodes_material_float_curve_button", nodes_material_float_curve_button);
-}
-
 static void float_curve_init(f32_array_t *val) {
 	val->buffer[0]  = 0.0f;
 	val->buffer[1]  = 0.0f;
@@ -177,4 +108,73 @@ void nodes_material_float_curve_button(i32 node_id) {
 	h2->f                  = val->buffer[i * 2 + 1];
 	val->buffer[i * 2 + 0] = ui_slider(h1, "X", 0, 1, true, 100, true, UI_ALIGN_LEFT, true);
 	val->buffer[i * 2 + 1] = ui_slider(h2, "Y", 0, 1, true, 100, true, UI_ALIGN_LEFT, true);
+}
+
+void float_curve_node_init() {
+
+	float_curve_node_def =
+	    GC_ALLOC_INIT(ui_node_t, {.id     = 0,
+	                              .name   = _tr("Float Curve"),
+	                              .type   = "FLOAT_CURVE",
+	                              .x      = 0,
+	                              .y      = 0,
+	                              .color  = 0xff62676d,
+	                              .inputs = any_array_create_from_raw(
+	                                  (void *[]){
+	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
+	                                                                       .node_id       = 0,
+	                                                                       .name          = _tr("Factor"),
+	                                                                       .type          = "VALUE",
+	                                                                       .color         = 0xffa1a1a1,
+	                                                                       .default_value = f32_array_create_x(1.0),
+	                                                                       .min           = 0.0,
+	                                                                       .max           = 1.0,
+	                                                                       .precision     = 100,
+	                                                                       .display       = 0}),
+	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
+	                                                                       .node_id       = 0,
+	                                                                       .name          = _tr("Value"),
+	                                                                       .type          = "VALUE",
+	                                                                       .color         = 0xffa1a1a1,
+	                                                                       .default_value = f32_array_create_x(1.0),
+	                                                                       .min           = 0.0,
+	                                                                       .max           = 1.0,
+	                                                                       .precision     = 100,
+	                                                                       .display       = 0}),
+	                                  },
+	                                  2),
+	                              .outputs = any_array_create_from_raw(
+	                                  (void *[]){
+	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
+	                                                                       .node_id       = 0,
+	                                                                       .name          = _tr("Value"),
+	                                                                       .type          = "VALUE",
+	                                                                       .color         = 0xffa1a1a1,
+	                                                                       .default_value = f32_array_create_x(0.0),
+	                                                                       .min           = 0.0,
+	                                                                       .max           = 1.0,
+	                                                                       .precision     = 100,
+	                                                                       .display       = 0}),
+	                                  },
+	                                  1),
+	                              .buttons = any_array_create_from_raw(
+	                                  (void *[]){
+	                                      GC_ALLOC_INIT(ui_node_button_t, {.name          = "nodes_material_float_curve_button",
+	                                                                       .type          = "CUSTOM",
+	                                                                       .output        = 0,
+	                                                                       .default_value = f32_array_create(33),
+	                                                                       .data          = NULL,
+	                                                                       .min           = 0.0,
+	                                                                       .max           = 1.0,
+	                                                                       .precision     = 100,
+	                                                                       .height        = 7.2}),
+	                                  },
+	                                  1),
+	                              .width = 0,
+	                              .flags = 0});
+	gc_root(float_curve_node_def);
+
+	any_array_push(nodes_material_utilities, float_curve_node_def);
+	any_map_set(parser_material_node_values, "FLOAT_CURVE", float_curve_node_value);
+	any_map_set(ui_nodes_custom_buttons, "nodes_material_float_curve_button", nodes_material_float_curve_button);
 }

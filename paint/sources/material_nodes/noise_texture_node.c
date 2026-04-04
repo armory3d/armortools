@@ -45,6 +45,25 @@ fun tex_noise(p: float3, scale: float, detail: float, roughness: float, lacunari
 } \
 ";
 
+static char *noise_texture_node_result(ui_node_t *node) {
+	node_shader_add_function(parser_material_kong, str_tex_noise);
+	char *co         = parser_material_get_coord(node);
+	char *scale      = parser_material_parse_value_input(node->inputs->buffer[1], false);
+	char *detail     = parser_material_parse_value_input(node->inputs->buffer[2], false);
+	char *roughness  = parser_material_parse_value_input(node->inputs->buffer[3], false);
+	char *lacunarity = parser_material_parse_value_input(node->inputs->buffer[4], false);
+	char *distortion = parser_material_parse_value_input(node->inputs->buffer[5], false);
+	return string("tex_noise(%s, %s, %s, %s, %s, %s)", co, scale, detail, roughness, lacunarity, distortion);
+}
+
+char *noise_texture_node_vector(ui_node_t *node, ui_node_socket_t *socket) {
+	return noise_texture_node_result(node);
+}
+
+char *noise_texture_node_value(ui_node_t *node, ui_node_socket_t *socket) {
+	return string("%s.x", noise_texture_node_result(node));
+}
+
 void noise_texture_node_init() {
 
 	char *noise_dimensions_data = string("%s", _tr("3D"));
@@ -182,23 +201,4 @@ void noise_texture_node_init() {
 	any_array_push(nodes_material_texture, noise_texture_node_def);
 	any_map_set(parser_material_node_vectors, "TEX_NOISE", noise_texture_node_vector);
 	any_map_set(parser_material_node_values, "TEX_NOISE", noise_texture_node_value);
-}
-
-static char *noise_texture_node_result(ui_node_t *node) {
-	node_shader_add_function(parser_material_kong, str_tex_noise);
-	char *co         = parser_material_get_coord(node);
-	char *scale      = parser_material_parse_value_input(node->inputs->buffer[1], false);
-	char *detail     = parser_material_parse_value_input(node->inputs->buffer[2], false);
-	char *roughness  = parser_material_parse_value_input(node->inputs->buffer[3], false);
-	char *lacunarity = parser_material_parse_value_input(node->inputs->buffer[4], false);
-	char *distortion = parser_material_parse_value_input(node->inputs->buffer[5], false);
-	return string("tex_noise(%s, %s, %s, %s, %s, %s)", co, scale, detail, roughness, lacunarity, distortion);
-}
-
-char *noise_texture_node_vector(ui_node_t *node, ui_node_socket_t *socket) {
-	return noise_texture_node_result(node);
-}
-
-char *noise_texture_node_value(ui_node_t *node, ui_node_socket_t *socket) {
-	return string("%s.x", noise_texture_node_result(node));
 }

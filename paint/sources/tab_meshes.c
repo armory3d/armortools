@@ -1,187 +1,6 @@
 
 #include "global.h"
 
-void tab_meshes_draw_context_menu() {
-	i32            i = _tab_meshes_draw_i;
-	mesh_object_t *o = project_paint_objects->buffer[i];
-
-	if (ui_menu_button(tr("Export"), "", ICON_EXPORT)) {
-		context_raw->export_mesh_index = i + 1;
-		box_export_show_mesh();
-	}
-	if (project_paint_objects->length > 1 && ui_menu_button(tr("Delete"), "", ICON_DELETE)) {
-		array_remove(project_paint_objects, o);
-		while (o->base->children->length > 0) {
-			object_t *child = o->base->children->buffer[0];
-			object_set_parent(child, NULL);
-			if (project_paint_objects->buffer[0]->base != child) {
-				object_set_parent(child, project_paint_objects->buffer[0]->base);
-			}
-			if (o->base->children->length == 0) {
-				project_paint_objects->buffer[0]->base->transform->scale = vec4_clone(o->base->transform->scale);
-				transform_build_matrix(project_paint_objects->buffer[0]->base->transform);
-			}
-		}
-		data_delete_mesh(o->data->_->handle);
-		mesh_object_remove(o);
-		context_raw->paint_object = context_main_object();
-		util_mesh_merge(NULL);
-		context_raw->ddirty = 2;
-	}
-	if (ui_menu_button(tr("Duplicate"), "", ICON_DUPLICATE)) {
-		sim_duplicate();
-	}
-
-	if (config_raw->experimental) {
-		tab_meshes_draw_properties(o);
-	}
-}
-
-void tab_meshes_draw_edit() {
-	if (ui_menu_button(tr("Flip Normals"), "", ICON_NONE)) {
-		util_mesh_flip_normals();
-		context_raw->ddirty = 2;
-	}
-
-	if (ui_menu_sub_button(ui_handle(__ID__), tr("Calculate Normals"))) {
-		ui_menu_sub_begin(2);
-		if (ui_menu_button(tr("Smooth"), "", ICON_NONE)) {
-			util_mesh_calc_normals(true);
-			context_raw->ddirty = 2;
-		}
-		if (ui_menu_button(tr("Flat"), "", ICON_NONE)) {
-			util_mesh_calc_normals(false);
-			context_raw->ddirty = 2;
-		}
-		ui_menu_sub_end();
-	}
-
-	if (ui_menu_button(tr("Geometry to Origin"), "", ICON_NONE)) {
-		util_mesh_to_origin();
-		context_raw->ddirty = 2;
-	}
-
-	if (ui_menu_button(tr("Apply Displacement"), "", ICON_NONE)) {
-		util_mesh_apply_displacement(project_layers->buffer[0]->texpaint_pack, 0.1, 1.0);
-		util_mesh_calc_normals(false);
-		context_raw->ddirty = 2;
-	}
-
-	if (ui_menu_sub_button(ui_handle(__ID__), tr("Rotate"))) {
-		ui_menu_sub_begin(3);
-		if (ui_menu_button(tr("X"), "", ICON_NONE)) {
-			util_mesh_swap_axis(1, 2);
-			context_raw->ddirty = 2;
-		}
-		if (ui_menu_button(tr("Y"), "", ICON_NONE)) {
-			util_mesh_swap_axis(2, 0);
-			context_raw->ddirty = 2;
-		}
-		if (ui_menu_button(tr("Z"), "", ICON_NONE)) {
-			util_mesh_swap_axis(0, 1);
-			context_raw->ddirty = 2;
-		}
-		ui_menu_sub_end();
-	}
-
-#ifdef WITH_PLUGINS
-	if (ui_menu_button(tr("UV Unwrap"), "", ICON_NONE)) {
-		plugin_uv_unwrap_button();
-	}
-#endif
-
-	if (config_raw->experimental && ui_menu_button(tr("Decimate"), "", ICON_NONE)) {
-		util_mesh_decimate(0.5);
-	}
-}
-
-void tab_meshes_draw_append_shape() {
-	for (i32 i = 0; i < project_mesh_list->length; ++i) {
-		if (ui_menu_button(project_mesh_list->buffer[i], "", ICON_NONE)) {
-			tab_meshes_append_shape(project_mesh_list->buffer[i]);
-		}
-	}
-}
-
-void tab_meshes_draw_import() {
-	if (ui_menu_button(tr("Replace Existing"), any_map_get(config_keymap, "file_import_assets"), ICON_NONE)) {
-		project_import_mesh(true, NULL);
-	}
-	if (ui_menu_button(tr("Append File"), "", ICON_NONE)) {
-		project_append_mesh();
-	}
-
-	if (config_raw->experimental) {
-		project_fetch_default_meshes();
-		if (ui_menu_button(tr("Append Shape"), "", ICON_NONE)) {
-			ui_menu_draw(&tab_meshes_draw_append_shape, -1, -1);
-		}
-	}
-}
-
-void tab_meshes_draw(ui_handle_t *htab) {
-	if (ui_tab(htab, tr("Meshes"), false, -1, false) && ui->_window_h > ui_statusbar_default_h * UI_SCALE()) {
-
-		ui_begin_sticky();
-		f32_array_t *row = f32_array_create_from_raw(
-		    (f32[]){
-		        -100,
-		        -100,
-		    },
-		    2);
-		ui_row(row);
-
-		if (ui_icon_button(tr("Import"), ICON_IMPORT, UI_ALIGN_CENTER)) {
-			ui_menu_draw(&tab_meshes_draw_import, -1, -1);
-		}
-		if (ui->is_hovered)
-			ui_tooltip(tr("Import mesh file"));
-
-		if (ui_icon_button(tr("Edit"), ICON_EDIT, UI_ALIGN_CENTER)) {
-			ui_menu_draw(&tab_meshes_draw_edit, -1, -1);
-		}
-
-		ui_end_sticky();
-
-		for (i32 i = 0; i < project_paint_objects->length; ++i) {
-
-			f32_array_t *row = f32_array_create_from_raw(
-			    (f32[]){
-			        -30,
-			        1.0,
-			    },
-			    2);
-			ui_row(row);
-			gpu_texture_t *icons  = resource_get("icons05x.k");
-			rect_t        *rect   = resource_tile50(icons, ICON_CUBE);
-			i32            icon_h = 25 * UI_SCALE();
-			ui_sub_image(icons, ui->ops->theme->LABEL_COL - 0x00333333, icon_h, rect->x / 2.0, rect->y / 2.0, rect->w / 2.0, rect->h / 2.0);
-
-			mesh_object_t *o = project_paint_objects->buffer[i];
-			ui_handle_t   *h = ui_handle(__ID__);
-			h->b             = o->base->visible;
-			o->base->visible = ui_check(h, o->base->name, "");
-
-			if (ui->is_hovered && ui->input_released_r) {
-				_tab_meshes_draw_i = i;
-
-				ui_menu_draw(&tab_meshes_draw_context_menu, -1, -1);
-			}
-			if (h->changed) {
-				mesh_object_t_array_t *visibles = any_array_create_from_raw((void *[]){}, 0);
-				for (i32 i = 0; i < project_paint_objects->length; ++i) {
-					mesh_object_t *p = project_paint_objects->buffer[i];
-					if (p->base->visible) {
-						any_array_push(visibles, p);
-					}
-				}
-				util_mesh_merge(visibles);
-				context_raw->ddirty = 2;
-			}
-		}
-	}
-}
-
 void tab_meshes_draw_properties(mesh_object_t *o) {
 	context_raw->selected_object = o->base;
 	ui_handle_t *h               = ui_handle(__ID__);
@@ -376,6 +195,100 @@ void tab_meshes_draw_properties(mesh_object_t *o) {
 	}
 }
 
+void tab_meshes_draw_context_menu() {
+	i32            i = _tab_meshes_draw_i;
+	mesh_object_t *o = project_paint_objects->buffer[i];
+
+	if (ui_menu_button(tr("Export"), "", ICON_EXPORT)) {
+		context_raw->export_mesh_index = i + 1;
+		box_export_show_mesh();
+	}
+	if (project_paint_objects->length > 1 && ui_menu_button(tr("Delete"), "", ICON_DELETE)) {
+		array_remove(project_paint_objects, o);
+		while (o->base->children->length > 0) {
+			object_t *child = o->base->children->buffer[0];
+			object_set_parent(child, NULL);
+			if (project_paint_objects->buffer[0]->base != child) {
+				object_set_parent(child, project_paint_objects->buffer[0]->base);
+			}
+			if (o->base->children->length == 0) {
+				project_paint_objects->buffer[0]->base->transform->scale = vec4_clone(o->base->transform->scale);
+				transform_build_matrix(project_paint_objects->buffer[0]->base->transform);
+			}
+		}
+		data_delete_mesh(o->data->_->handle);
+		mesh_object_remove(o);
+		context_raw->paint_object = context_main_object();
+		util_mesh_merge(NULL);
+		context_raw->ddirty = 2;
+	}
+	if (ui_menu_button(tr("Duplicate"), "", ICON_DUPLICATE)) {
+		sim_duplicate();
+	}
+
+	if (config_raw->experimental) {
+		tab_meshes_draw_properties(o);
+	}
+}
+
+void tab_meshes_draw_edit() {
+	if (ui_menu_button(tr("Flip Normals"), "", ICON_NONE)) {
+		util_mesh_flip_normals();
+		context_raw->ddirty = 2;
+	}
+
+	if (ui_menu_sub_button(ui_handle(__ID__), tr("Calculate Normals"))) {
+		ui_menu_sub_begin(2);
+		if (ui_menu_button(tr("Smooth"), "", ICON_NONE)) {
+			util_mesh_calc_normals(true);
+			context_raw->ddirty = 2;
+		}
+		if (ui_menu_button(tr("Flat"), "", ICON_NONE)) {
+			util_mesh_calc_normals(false);
+			context_raw->ddirty = 2;
+		}
+		ui_menu_sub_end();
+	}
+
+	if (ui_menu_button(tr("Geometry to Origin"), "", ICON_NONE)) {
+		util_mesh_to_origin();
+		context_raw->ddirty = 2;
+	}
+
+	if (ui_menu_button(tr("Apply Displacement"), "", ICON_NONE)) {
+		util_mesh_apply_displacement(project_layers->buffer[0]->texpaint_pack, 0.1, 1.0);
+		util_mesh_calc_normals(false);
+		context_raw->ddirty = 2;
+	}
+
+	if (ui_menu_sub_button(ui_handle(__ID__), tr("Rotate"))) {
+		ui_menu_sub_begin(3);
+		if (ui_menu_button(tr("X"), "", ICON_NONE)) {
+			util_mesh_swap_axis(1, 2);
+			context_raw->ddirty = 2;
+		}
+		if (ui_menu_button(tr("Y"), "", ICON_NONE)) {
+			util_mesh_swap_axis(2, 0);
+			context_raw->ddirty = 2;
+		}
+		if (ui_menu_button(tr("Z"), "", ICON_NONE)) {
+			util_mesh_swap_axis(0, 1);
+			context_raw->ddirty = 2;
+		}
+		ui_menu_sub_end();
+	}
+
+#ifdef WITH_PLUGINS
+	if (ui_menu_button(tr("UV Unwrap"), "", ICON_NONE)) {
+		plugin_uv_unwrap_button();
+	}
+#endif
+
+	if (config_raw->experimental && ui_menu_button(tr("Decimate"), "", ICON_NONE)) {
+		util_mesh_decimate(0.5);
+	}
+}
+
 void tab_meshes_append_shape(char *mesh_name) {
 	scene_t     *scene_raw = NULL;
 	mesh_data_t *raw       = NULL;
@@ -408,4 +321,91 @@ void tab_meshes_append_shape(char *mesh_name) {
 	// sys_notify_on_next_frame(function(mo: mesh_object_t) {
 	// 	tab_scene_select_object(mo);
 	// }, mo);
+}
+
+void tab_meshes_draw_append_shape() {
+	for (i32 i = 0; i < project_mesh_list->length; ++i) {
+		if (ui_menu_button(project_mesh_list->buffer[i], "", ICON_NONE)) {
+			tab_meshes_append_shape(project_mesh_list->buffer[i]);
+		}
+	}
+}
+
+void tab_meshes_draw_import() {
+	if (ui_menu_button(tr("Replace Existing"), any_map_get(config_keymap, "file_import_assets"), ICON_NONE)) {
+		project_import_mesh(true, NULL);
+	}
+	if (ui_menu_button(tr("Append File"), "", ICON_NONE)) {
+		project_append_mesh();
+	}
+
+	if (config_raw->experimental) {
+		project_fetch_default_meshes();
+		if (ui_menu_button(tr("Append Shape"), "", ICON_NONE)) {
+			ui_menu_draw(&tab_meshes_draw_append_shape, -1, -1);
+		}
+	}
+}
+
+void tab_meshes_draw(ui_handle_t *htab) {
+	if (ui_tab(htab, tr("Meshes"), false, -1, false) && ui->_window_h > ui_statusbar_default_h * UI_SCALE()) {
+
+		ui_begin_sticky();
+		f32_array_t *row = f32_array_create_from_raw(
+		    (f32[]){
+		        -100,
+		        -100,
+		    },
+		    2);
+		ui_row(row);
+
+		if (ui_icon_button(tr("Import"), ICON_IMPORT, UI_ALIGN_CENTER)) {
+			ui_menu_draw(&tab_meshes_draw_import, -1, -1);
+		}
+		if (ui->is_hovered)
+			ui_tooltip(tr("Import mesh file"));
+
+		if (ui_icon_button(tr("Edit"), ICON_EDIT, UI_ALIGN_CENTER)) {
+			ui_menu_draw(&tab_meshes_draw_edit, -1, -1);
+		}
+
+		ui_end_sticky();
+
+		for (i32 i = 0; i < project_paint_objects->length; ++i) {
+
+			f32_array_t *row = f32_array_create_from_raw(
+			    (f32[]){
+			        -30,
+			        1.0,
+			    },
+			    2);
+			ui_row(row);
+			gpu_texture_t *icons  = resource_get("icons05x.k");
+			rect_t        *rect   = resource_tile50(icons, ICON_CUBE);
+			i32            icon_h = 25 * UI_SCALE();
+			ui_sub_image(icons, ui->ops->theme->LABEL_COL - 0x00333333, icon_h, rect->x / 2.0, rect->y / 2.0, rect->w / 2.0, rect->h / 2.0);
+
+			mesh_object_t *o = project_paint_objects->buffer[i];
+			ui_handle_t   *h = ui_handle(__ID__);
+			h->b             = o->base->visible;
+			o->base->visible = ui_check(h, o->base->name, "");
+
+			if (ui->is_hovered && ui->input_released_r) {
+				_tab_meshes_draw_i = i;
+
+				ui_menu_draw(&tab_meshes_draw_context_menu, -1, -1);
+			}
+			if (h->changed) {
+				mesh_object_t_array_t *visibles = any_array_create_from_raw((void *[]){}, 0);
+				for (i32 i = 0; i < project_paint_objects->length; ++i) {
+					mesh_object_t *p = project_paint_objects->buffer[i];
+					if (p->base->visible) {
+						any_array_push(visibles, p);
+					}
+				}
+				util_mesh_merge(visibles);
+				context_raw->ddirty = 2;
+			}
+		}
+	}
 }

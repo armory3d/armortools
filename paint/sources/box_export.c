@@ -1,47 +1,6 @@
 
 #include "global.h"
 
-void box_export_show_textures_box() {
-	if (box_export_files == NULL) {
-		box_export_fetch_presets();
-		box_export_hpreset->i = string_array_index_of(box_export_files, "generic");
-	}
-	if (box_export_preset == NULL) {
-		box_export_parse_preset();
-		box_export_hpreset->children = NULL;
-	}
-
-	box_export_tab_export_textures(tr("Export Textures"), false);
-	box_export_tab_presets();
-
-	box_export_tab_atlases();
-#if defined(IRON_ANDROID) || defined(IRON_IOS)
-	box_export_tab_export_mesh(box_export_htab);
-#endif
-}
-
-void box_export_show_textures() {
-	ui_box_show_custom(&box_export_show_textures_box, 600, 400, NULL, true, tr("Export"));
-}
-
-void box_export_show_bake_material_box() {
-	if (box_export_files == NULL) {
-		box_export_fetch_presets();
-		box_export_hpreset->i = string_array_index_of(box_export_files, "generic");
-	}
-	if (box_export_preset == NULL) {
-		box_export_parse_preset();
-		box_export_hpreset->children = NULL;
-	}
-
-	box_export_tab_export_textures(tr("Bake to Textures"), true);
-	box_export_tab_presets();
-}
-
-void box_export_show_bake_material() {
-	ui_box_show_custom(&box_export_show_bake_material_box, 600, 400, NULL, true, tr("Export"));
-}
-
 void box_export_tab_export_textures_run(void *_) {
 	export_texture_run(context_raw->texture_export_path, _box_export_bake_material);
 }
@@ -212,10 +171,43 @@ void box_export_tab_export_textures(char *title, bool bake_material) {
 	}
 }
 
+char *box_export_preset_to_json(export_preset_t *p) {
+	json_encode_begin();
+	json_encode_begin_array("textures");
+	for (i32 i = 0; i < p->textures->length; ++i) {
+		json_encode_begin_object();
+		json_encode_string("name", p->textures->buffer[i]->name);
+		json_encode_string_array("channels", p->textures->buffer[i]->channels);
+		json_encode_string("color_space", p->textures->buffer[i]->color_space);
+		json_encode_end_object();
+	}
+	json_encode_end_array();
+	return json_encode_end();
+}
+
+void box_export_save_preset() {
+	char *name = box_export_files->buffer[box_export_hpreset->i];
+	if (string_equals(name, "generic")) {
+		return; // generic is const
+	}
+	char *path = string("%s%sexport_presets%s%s.json", path_data(), PATH_SEP, PATH_SEP, name);
+	iron_file_save_bytes(path, sys_string_to_buffer(box_export_preset_to_json(box_export_preset)), 0);
+}
+
 void box_export_tab_presets_menu_draw() {
 	if (ui_menu_button(tr("Delete"), "", ICON_DELETE)) {
 		array_remove(box_export_preset->textures, _box_export_t);
 		box_export_save_preset();
+	}
+}
+
+void box_export_fetch_presets() {
+	gc_unroot(box_export_files);
+	box_export_files = file_read_directory(string("%s%sexport_presets", path_data(), PATH_SEP));
+	gc_root(box_export_files);
+	for (i32 i = 0; i < box_export_files->length; ++i) {
+		char *s                     = box_export_files->buffer[i];
+		box_export_files->buffer[i] = substring(s, 0, string_length(s) - 5); // Strip .json
 	}
 }
 
@@ -234,6 +226,20 @@ void box_export_tab_presets_import(char *path) {
 	else {
 		console_error(strings_unknown_asset_format());
 	}
+}
+
+void box_export_new_preset(char *name) {
+	char *template = "{\
+\"textures\": [\
+	{ \"name\": \"base\", \"channels\": [\"base_r\", \"base_g\", \"base_b\", \"1.0\"], \"color_space\": \"linear\" }\
+]\
+}\
+";
+	if (!ends_with(name, ".json")) {
+		name = string("%s.json", name);
+	}
+	char *path = string("%s%sexport_presets%s%s", path_data(), PATH_SEP, PATH_SEP, name);
+	iron_file_save_bytes(path, sys_string_to_buffer(template), 0);
 }
 
 void box_export_tab_presets_new_box() {
@@ -256,6 +262,15 @@ void box_export_tab_presets_new_box() {
 			box_export_show_textures();
 		}
 	}
+}
+
+void box_export_parse_preset() {
+	char     *file = string("export_presets/%s.json", box_export_files->buffer[box_export_hpreset->i]);
+	buffer_t *blob = data_get_blob(file);
+	gc_unroot(box_export_preset);
+	box_export_preset = json_parse(sys_buffer_to_string(blob));
+	gc_root(box_export_preset);
+	data_delete_blob(file);
 }
 
 void box_export_tab_presets() {
@@ -402,16 +417,6 @@ void box_export_tab_atlases() {
 	}
 }
 
-void box_export_show_mesh_box() {
-	ui_handle_t *htab = ui_handle(__ID__);
-	box_export_tab_export_mesh(htab);
-}
-
-void box_export_show_mesh() {
-	box_export_mesh_handle->i = context_raw->export_mesh_index;
-	ui_box_show_custom(&box_export_show_mesh_box, 420, 260, NULL, true, tr("Export"));
-}
-
 void box_export_tab_export_mesh_path_picked(char *path) {
 #if defined(IRON_ANDROID) || defined(IRON_IOS)
 	char *f = sys_title();
@@ -510,6 +515,57 @@ void box_export_tab_export_mesh(ui_handle_t *htab) {
 	}
 }
 
+void box_export_show_textures_box() {
+	if (box_export_files == NULL) {
+		box_export_fetch_presets();
+		box_export_hpreset->i = string_array_index_of(box_export_files, "generic");
+	}
+	if (box_export_preset == NULL) {
+		box_export_parse_preset();
+		box_export_hpreset->children = NULL;
+	}
+
+	box_export_tab_export_textures(tr("Export Textures"), false);
+	box_export_tab_presets();
+
+	box_export_tab_atlases();
+#if defined(IRON_ANDROID) || defined(IRON_IOS)
+	box_export_tab_export_mesh(box_export_htab);
+#endif
+}
+
+void box_export_show_textures() {
+	ui_box_show_custom(&box_export_show_textures_box, 600, 400, NULL, true, tr("Export"));
+}
+
+void box_export_show_bake_material_box() {
+	if (box_export_files == NULL) {
+		box_export_fetch_presets();
+		box_export_hpreset->i = string_array_index_of(box_export_files, "generic");
+	}
+	if (box_export_preset == NULL) {
+		box_export_parse_preset();
+		box_export_hpreset->children = NULL;
+	}
+
+	box_export_tab_export_textures(tr("Bake to Textures"), true);
+	box_export_tab_presets();
+}
+
+void box_export_show_bake_material() {
+	ui_box_show_custom(&box_export_show_bake_material_box, 600, 400, NULL, true, tr("Export"));
+}
+
+void box_export_show_mesh_box() {
+	ui_handle_t *htab = ui_handle(__ID__);
+	box_export_tab_export_mesh(htab);
+}
+
+void box_export_show_mesh() {
+	box_export_mesh_handle->i = context_raw->export_mesh_index;
+	ui_box_show_custom(&box_export_show_mesh_box, 420, 260, NULL, true, tr("Export"));
+}
+
 void box_export_show_material_export_on_next_frame(char *path) {
 	export_arm_run_material(path);
 }
@@ -581,62 +637,6 @@ void box_export_show_brush_box() {
 
 void box_export_show_brush() {
 	ui_box_show_custom(&box_export_show_brush_box, 400, 200, NULL, true, "");
-}
-
-void box_export_fetch_presets() {
-	gc_unroot(box_export_files);
-	box_export_files = file_read_directory(string("%s%sexport_presets", path_data(), PATH_SEP));
-	gc_root(box_export_files);
-	for (i32 i = 0; i < box_export_files->length; ++i) {
-		char *s                     = box_export_files->buffer[i];
-		box_export_files->buffer[i] = substring(s, 0, string_length(s) - 5); // Strip .json
-	}
-}
-
-void box_export_parse_preset() {
-	char     *file = string("export_presets/%s.json", box_export_files->buffer[box_export_hpreset->i]);
-	buffer_t *blob = data_get_blob(file);
-	gc_unroot(box_export_preset);
-	box_export_preset = json_parse(sys_buffer_to_string(blob));
-	gc_root(box_export_preset);
-	data_delete_blob(file);
-}
-
-void box_export_new_preset(char *name) {
-	char *template = "{\
-\"textures\": [\
-	{ \"name\": \"base\", \"channels\": [\"base_r\", \"base_g\", \"base_b\", \"1.0\"], \"color_space\": \"linear\" }\
-]\
-}\
-";
-	if (!ends_with(name, ".json")) {
-		name = string("%s.json", name);
-	}
-	char *path = string("%s%sexport_presets%s%s", path_data(), PATH_SEP, PATH_SEP, name);
-	iron_file_save_bytes(path, sys_string_to_buffer(template), 0);
-}
-
-void box_export_save_preset() {
-	char *name = box_export_files->buffer[box_export_hpreset->i];
-	if (string_equals(name, "generic")) {
-		return; // generic is const
-	}
-	char *path = string("%s%sexport_presets%s%s.json", path_data(), PATH_SEP, PATH_SEP, name);
-	iron_file_save_bytes(path, sys_string_to_buffer(box_export_preset_to_json(box_export_preset)), 0);
-}
-
-char *box_export_preset_to_json(export_preset_t *p) {
-	json_encode_begin();
-	json_encode_begin_array("textures");
-	for (i32 i = 0; i < p->textures->length; ++i) {
-		json_encode_begin_object();
-		json_encode_string("name", p->textures->buffer[i]->name);
-		json_encode_string_array("channels", p->textures->buffer[i]->channels);
-		json_encode_string("color_space", p->textures->buffer[i]->color_space);
-		json_encode_end_object();
-	}
-	json_encode_end_array();
-	return json_encode_end();
 }
 
 void box_export_show_player_box_path_picked(char *path) {

@@ -11,6 +11,15 @@ bool make_material_get_mout() {
 	return false;
 }
 
+void make_material_delete_context_on_next_frame(shader_context_t *c) {
+	shader_context_delete(c);
+}
+
+void make_material_delete_context(shader_context_t *c) {
+	// Ensure pipeline is no longer in use
+	sys_notify_on_next_frame(&make_material_delete_context_on_next_frame, c);
+}
+
 void make_material_parse_mesh_material() {
 	material_data_t *m = project_materials->buffer[0]->data;
 
@@ -122,110 +131,6 @@ void make_material_parse_mesh_preview_material(material_data_t *md) {
 	any_array_push(m->_->shader->contexts, scon);
 }
 
-void make_material_parse_paint_material(bool bake_previews) {
-	if (!make_material_get_mout()) {
-		return;
-	}
-
-	if (bake_previews) {
-		gpu_texture_t *current = _draw_current;
-		bool           in_use  = gpu_in_use;
-		if (in_use)
-			draw_end();
-		make_material_bake_node_previews();
-		if (in_use)
-			draw_begin(current, false, 0);
-	}
-
-	material_data_t *m = project_materials->buffer[0]->data;
-	for (i32 i = 0; i < m->_->shader->contexts->length; ++i) {
-		shader_context_t *c = m->_->shader->contexts->buffer[i];
-		if (string_equals(c->name, "paint")) {
-			array_remove(m->_->shader->contexts, c);
-			if (c != make_material_default_scon) {
-				make_material_delete_context(c);
-			}
-			break;
-		}
-	}
-	for (i32 i = 0; i < m->contexts->length; ++i) {
-		material_context_t *c = m->contexts->buffer[i];
-		if (string_equals(c->name, "paint")) {
-			array_remove(m->contexts, c);
-			break;
-		}
-	}
-
-	material_t            *sdata = GC_ALLOC_INIT(material_t, {.name = "Material", .canvas = context_raw->material->canvas});
-	material_context_t    *tmcon = GC_ALLOC_INIT(material_context_t, {.name = "paint", .bind_textures = any_array_create_from_raw((void *[]){}, 0)});
-	node_shader_context_t *con   = make_paint_run(sdata, tmcon);
-
-	bool              compile_error = false;
-	shader_context_t *scon;
-	shader_context_load(con->data);
-	if (con->data == NULL) {
-		compile_error = true;
-	}
-	scon = con->data;
-	if (compile_error) {
-		return;
-	}
-	material_context_load(tmcon);
-	material_context_t *mcon = tmcon;
-
-	any_array_push(m->_->shader->contexts, scon);
-	any_array_push(m->contexts, mcon);
-
-	if (make_material_default_scon == NULL) {
-		gc_unroot(make_material_default_scon);
-		make_material_default_scon = scon;
-		gc_root(make_material_default_scon);
-	}
-	if (make_material_default_mcon == NULL) {
-		gc_unroot(make_material_default_mcon);
-		make_material_default_mcon = mcon;
-		gc_root(make_material_default_mcon);
-	}
-}
-
-void make_material_bake_node_previews() {
-	context_raw->node_previews_used = any_array_create_from_raw((void *[]){}, 0);
-	if (context_raw->node_previews == NULL) {
-		context_raw->node_previews = any_map_create();
-	}
-	ui_node_t_array_t *empty = any_array_create_from_raw((void *[]){}, 0);
-	make_material_traverse_nodes(context_raw->material->canvas->nodes, NULL, empty);
-
-	string_array_t *keys = map_keys(context_raw->node_previews);
-	for (i32 i = 0; i < keys->length; ++i) {
-		char *key = keys->buffer[i];
-		if (string_array_index_of(context_raw->node_previews_used, key) == -1) {
-			gpu_texture_t *image = any_map_get(context_raw->node_previews, key);
-			gpu_delete_texture(image);
-			map_delete(context_raw->node_previews, key);
-		}
-	}
-}
-
-void make_material_traverse_nodes(ui_node_t_array_t *nodes, ui_node_canvas_t *group, ui_node_t_array_t *parents) {
-	for (i32 i = 0; i < nodes->length; ++i) {
-		ui_node_t *node = nodes->buffer[i];
-		make_material_bake_node_preview(node, group, parents);
-		if (string_equals(node->type, "GROUP")) {
-			for (i32 j = 0; j < project_material_groups->length; ++j) {
-				node_group_t *g     = project_material_groups->buffer[j];
-				char         *cname = g->canvas->name;
-				if (string_equals(cname, node->name)) {
-					any_array_push(parents, node);
-					make_material_traverse_nodes(g->canvas->nodes, g->canvas, parents);
-					array_pop(parents);
-					break;
-				}
-			}
-		}
-	}
-}
-
 void make_material_bake_node_preview(ui_node_t *node, ui_node_canvas_t *group, ui_node_t_array_t *parents) {
 	if (string_equals(node->type, "BLUR")) {
 		char          *id    = parser_material_node_name(node, parents);
@@ -322,6 +227,110 @@ void make_material_bake_node_preview(ui_node_t *node, ui_node_canvas_t *group, u
 		draw_begin(image, false, 0);
 		draw_image(texpaint_live->_image, 0, 0);
 		draw_end();
+	}
+}
+
+void make_material_traverse_nodes(ui_node_t_array_t *nodes, ui_node_canvas_t *group, ui_node_t_array_t *parents) {
+	for (i32 i = 0; i < nodes->length; ++i) {
+		ui_node_t *node = nodes->buffer[i];
+		make_material_bake_node_preview(node, group, parents);
+		if (string_equals(node->type, "GROUP")) {
+			for (i32 j = 0; j < project_material_groups->length; ++j) {
+				node_group_t *g     = project_material_groups->buffer[j];
+				char         *cname = g->canvas->name;
+				if (string_equals(cname, node->name)) {
+					any_array_push(parents, node);
+					make_material_traverse_nodes(g->canvas->nodes, g->canvas, parents);
+					array_pop(parents);
+					break;
+				}
+			}
+		}
+	}
+}
+
+void make_material_bake_node_previews() {
+	context_raw->node_previews_used = any_array_create_from_raw((void *[]){}, 0);
+	if (context_raw->node_previews == NULL) {
+		context_raw->node_previews = any_map_create();
+	}
+	ui_node_t_array_t *empty = any_array_create_from_raw((void *[]){}, 0);
+	make_material_traverse_nodes(context_raw->material->canvas->nodes, NULL, empty);
+
+	string_array_t *keys = map_keys(context_raw->node_previews);
+	for (i32 i = 0; i < keys->length; ++i) {
+		char *key = keys->buffer[i];
+		if (string_array_index_of(context_raw->node_previews_used, key) == -1) {
+			gpu_texture_t *image = any_map_get(context_raw->node_previews, key);
+			gpu_delete_texture(image);
+			map_delete(context_raw->node_previews, key);
+		}
+	}
+}
+
+void make_material_parse_paint_material(bool bake_previews) {
+	if (!make_material_get_mout()) {
+		return;
+	}
+
+	if (bake_previews) {
+		gpu_texture_t *current = _draw_current;
+		bool           in_use  = gpu_in_use;
+		if (in_use)
+			draw_end();
+		make_material_bake_node_previews();
+		if (in_use)
+			draw_begin(current, false, 0);
+	}
+
+	material_data_t *m = project_materials->buffer[0]->data;
+	for (i32 i = 0; i < m->_->shader->contexts->length; ++i) {
+		shader_context_t *c = m->_->shader->contexts->buffer[i];
+		if (string_equals(c->name, "paint")) {
+			array_remove(m->_->shader->contexts, c);
+			if (c != make_material_default_scon) {
+				make_material_delete_context(c);
+			}
+			break;
+		}
+	}
+	for (i32 i = 0; i < m->contexts->length; ++i) {
+		material_context_t *c = m->contexts->buffer[i];
+		if (string_equals(c->name, "paint")) {
+			array_remove(m->contexts, c);
+			break;
+		}
+	}
+
+	material_t            *sdata = GC_ALLOC_INIT(material_t, {.name = "Material", .canvas = context_raw->material->canvas});
+	material_context_t    *tmcon = GC_ALLOC_INIT(material_context_t, {.name = "paint", .bind_textures = any_array_create_from_raw((void *[]){}, 0)});
+	node_shader_context_t *con   = make_paint_run(sdata, tmcon);
+
+	bool              compile_error = false;
+	shader_context_t *scon;
+	shader_context_load(con->data);
+	if (con->data == NULL) {
+		compile_error = true;
+	}
+	scon = con->data;
+	if (compile_error) {
+		return;
+	}
+	material_context_load(tmcon);
+	material_context_t *mcon = tmcon;
+
+	any_array_push(m->_->shader->contexts, scon);
+	any_array_push(m->contexts, mcon);
+
+	if (make_material_default_scon == NULL) {
+		gc_unroot(make_material_default_scon);
+		make_material_default_scon = scon;
+		gc_root(make_material_default_scon);
+	}
+	if (make_material_default_mcon == NULL) {
+		gc_unroot(make_material_default_mcon);
+		make_material_default_mcon = mcon;
+		gc_root(make_material_default_mcon);
 	}
 }
 
@@ -499,13 +508,4 @@ char *make_material_blend_mode_mask(node_shader_t *kong, i32 blending, char *col
 f32 make_material_get_displace_strength() {
 	vec4_t sc = context_main_object()->base->transform->scale;
 	return config_raw->displace_strength * 0.02 * sc.x;
-}
-
-void make_material_delete_context_on_next_frame(shader_context_t *c) {
-	shader_context_delete(c);
-}
-
-void make_material_delete_context(shader_context_t *c) {
-	// Ensure pipeline is no longer in use
-	sys_notify_on_next_frame(&make_material_delete_context_on_next_frame, c);
 }

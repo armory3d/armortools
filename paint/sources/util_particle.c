@@ -49,16 +49,6 @@ void util_particle_init() {
 	mo->base->raw     = util_clone_obj(mo->base->raw);
 }
 
-void util_particle_init_physics() {
-	if (physics_world_active != NULL) {
-		util_particle_init_mesh();
-		return;
-	}
-
-	physics_world_create();
-	util_particle_init_mesh();
-}
-
 void util_particle_init_mesh() {
 	if (context_raw->paint_body != NULL) {
 		return;
@@ -75,4 +65,14 @@ void util_particle_init_mesh() {
 	context_raw->paint_body        = physics_body_create();
 	context_raw->paint_body->shape = PHYSICS_SHAPE_MESH;
 	physics_body_init(context_raw->paint_body, po->base);
+}
+
+void util_particle_init_physics() {
+	if (physics_world_active != NULL) {
+		util_particle_init_mesh();
+		return;
+	}
+
+	physics_world_create();
+	util_particle_init_mesh();
 }

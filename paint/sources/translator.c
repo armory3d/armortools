@@ -41,6 +41,54 @@ char *tr(char *id) {
 	return vtr(id, NULL);
 }
 
+void translator_init_font_on_next_frame(void *_) {
+	bool  cjk        = _translator_init_font_cjk;
+	char *font_path  = _translator_init_font_font_path;
+	f32   font_scale = _translator_init_font_font_scale;
+
+	draw_font_t *f = data_get_font(font_path);
+	if (cjk) {
+		i32 font_index = i32_map_get(translator_cjk_font_indices, config_raw->locale) != -1 ? i32_map_get(translator_cjk_font_indices, config_raw->locale) : 0;
+		f->index       = font_index;
+		f->glyphs_version = 0;
+		draw_font_init(f);
+	}
+	gc_unroot(base_font);
+	base_font = f;
+
+	// Scale up the font size and elements width a bit
+	gc_root(base_font);
+	base_theme->FONT_SIZE = math_floor(base_default_font_size * font_scale);
+	base_theme->ELEMENT_W = math_floor(base_default_element_w * (!string_equals(config_raw->locale, "en") ? 1.4 : 1.0));
+
+	ui_set_font(ui, f);
+	ui_set_scale(UI_SCALE());
+}
+
+void translator_init_font(bool cjk, char *font_path, f32 font_scale) {
+	_translator_init_font_cjk = cjk;
+	gc_unroot(_translator_init_font_font_path);
+	_translator_init_font_font_path = string_copy(font_path);
+	gc_root(_translator_init_font_font_path);
+	_translator_init_font_font_scale = font_scale;
+
+	// Load and assign font with cjk characters
+	sys_notify_on_next_frame(&translator_init_font_on_next_frame, NULL);
+}
+
+void translator_extended_glyphs() {
+	// Basic Latin + Latin-1 Supplement + Latin Extended-A
+	draw_font_init_glyphs(32, 383);
+	// + Greek
+	for (i32 i = 880; i < 1023; ++i) {
+		draw_font_add_glyph(i);
+	}
+	// + Cyrillic
+	for (i32 i = 1024; i < 1119; ++i) {
+		draw_font_add_glyph(i);
+	}
+}
+
 void translator_load_translations_on_cjk_downloaded(char *url) {
 	if (!iron_file_exists(_translator_load_translations_cjk_font_disk_path)) {
 		// Fall back to English
@@ -159,54 +207,6 @@ void translator_load_translations(char *new_locale) {
 	}
 	else {
 		translator_init_font(false, "font.ttf", 1.0);
-	}
-}
-
-void translator_init_font_on_next_frame(void *_) {
-	bool  cjk        = _translator_init_font_cjk;
-	char *font_path  = _translator_init_font_font_path;
-	f32   font_scale = _translator_init_font_font_scale;
-
-	draw_font_t *f = data_get_font(font_path);
-	if (cjk) {
-		i32 font_index = i32_map_get(translator_cjk_font_indices, config_raw->locale) != -1 ? i32_map_get(translator_cjk_font_indices, config_raw->locale) : 0;
-		f->index       = font_index;
-		f->glyphs_version = 0;
-		draw_font_init(f);
-	}
-	gc_unroot(base_font);
-	base_font = f;
-
-	// Scale up the font size and elements width a bit
-	gc_root(base_font);
-	base_theme->FONT_SIZE = math_floor(base_default_font_size * font_scale);
-	base_theme->ELEMENT_W = math_floor(base_default_element_w * (!string_equals(config_raw->locale, "en") ? 1.4 : 1.0));
-
-	ui_set_font(ui, f);
-	ui_set_scale(UI_SCALE());
-}
-
-void translator_init_font(bool cjk, char *font_path, f32 font_scale) {
-	_translator_init_font_cjk = cjk;
-	gc_unroot(_translator_init_font_font_path);
-	_translator_init_font_font_path = string_copy(font_path);
-	gc_root(_translator_init_font_font_path);
-	_translator_init_font_font_scale = font_scale;
-
-	// Load and assign font with cjk characters
-	sys_notify_on_next_frame(&translator_init_font_on_next_frame, NULL);
-}
-
-void translator_extended_glyphs() {
-	// Basic Latin + Latin-1 Supplement + Latin Extended-A
-	draw_font_init_glyphs(32, 383);
-	// + Greek
-	for (i32 i = 880; i < 1023; ++i) {
-		draw_font_add_glyph(i);
-	}
-	// + Cyrillic
-	for (i32 i = 1024; i < 1119; ++i) {
-		draw_font_add_glyph(i);
 	}
 }
 

@@ -354,6 +354,53 @@ void render_path_paint_use_live_layer(bool use) {
 	render_path_paint_live_layer_locked = use;
 }
 
+void render_path_paint_commands_symmetry() {
+	if (context_raw->sym_x || context_raw->sym_y || context_raw->sym_z) {
+		context_raw->ddirty = 2;
+		transform_t *t      = context_raw->paint_object->base->transform;
+		f32          sx     = t->scale.x;
+		f32          sy     = t->scale.y;
+		f32          sz     = t->scale.z;
+		if (context_raw->sym_x) {
+			t->scale = vec4_create(-sx, sy, sz, 1.0);
+			transform_build_matrix(t);
+			render_path_paint_commands_paint(false);
+		}
+		if (context_raw->sym_y) {
+			t->scale = vec4_create(sx, -sy, sz, 1.0);
+			transform_build_matrix(t);
+			render_path_paint_commands_paint(false);
+		}
+		if (context_raw->sym_z) {
+			t->scale = vec4_create(sx, sy, -sz, 1.0);
+			transform_build_matrix(t);
+			render_path_paint_commands_paint(false);
+		}
+		if (context_raw->sym_x && context_raw->sym_y) {
+			t->scale = vec4_create(-sx, -sy, sz, 1.0);
+			transform_build_matrix(t);
+			render_path_paint_commands_paint(false);
+		}
+		if (context_raw->sym_x && context_raw->sym_z) {
+			t->scale = vec4_create(-sx, sy, -sz, 1.0);
+			transform_build_matrix(t);
+			render_path_paint_commands_paint(false);
+		}
+		if (context_raw->sym_y && context_raw->sym_z) {
+			t->scale = vec4_create(sx, -sy, -sz, 1.0);
+			transform_build_matrix(t);
+			render_path_paint_commands_paint(false);
+		}
+		if (context_raw->sym_x && context_raw->sym_y && context_raw->sym_z) {
+			t->scale = vec4_create(-sx, -sy, -sz, 1.0);
+			transform_build_matrix(t);
+			render_path_paint_commands_paint(false);
+		}
+		t->scale = vec4_create(sx, sy, sz, 1.0);
+		transform_build_matrix(t);
+	}
+}
+
 void render_path_paint_commands_live_brush() {
 	tool_type_t tool = context_raw->tool;
 	if (tool != TOOL_TYPE_BRUSH && tool != TOOL_TYPE_ERASER && tool != TOOL_TYPE_CLONE && tool != TOOL_TYPE_DECAL && tool != TOOL_TYPE_TEXT &&
@@ -422,27 +469,6 @@ void render_path_paint_commands_live_brush() {
 	context_raw->brush_blend_dirty = true;
 }
 
-void render_path_paint_commands_cursor() {
-	bool        decal_mask = context_is_decal_mask();
-	tool_type_t tool       = context_raw->tool;
-	if (tool != TOOL_TYPE_BRUSH && tool != TOOL_TYPE_ERASER && tool != TOOL_TYPE_CLONE && tool != TOOL_TYPE_BLUR && tool != TOOL_TYPE_SMUDGE &&
-	    tool != TOOL_TYPE_PARTICLE && !decal_mask) {
-		return;
-	}
-
-	bool fill_layer  = context_raw->layer->fill_layer != NULL;
-	bool group_layer = slot_layer_is_group(context_raw->layer);
-	if (!base_ui_enabled || base_is_dragging || fill_layer || group_layer) {
-		return;
-	}
-
-	f32 mx = context_raw->paint_vec.x;
-	f32 my = 1.0 - context_raw->paint_vec.y;
-
-	f32 radius = decal_mask ? context_raw->brush_decal_mask_radius : context_raw->brush_radius;
-	render_path_paint_draw_cursor(mx, my, context_raw->brush_nodes_radius * radius / 3.4, 1.0, 1.0, 1.0);
-}
-
 void render_path_paint_draw_cursor(f32 mx, f32 my, f32 radius, f32 tint_r, f32 tint_g, f32 tint_b) {
 	mesh_object_t *plane = scene_get_child(".Plane")->ext;
 	mesh_data_t   *geom  = plane->data;
@@ -467,51 +493,25 @@ void render_path_paint_draw_cursor(f32 mx, f32 my, f32 radius, f32 tint_r, f32 t
 	render_path_end();
 }
 
-void render_path_paint_commands_symmetry() {
-	if (context_raw->sym_x || context_raw->sym_y || context_raw->sym_z) {
-		context_raw->ddirty = 2;
-		transform_t *t      = context_raw->paint_object->base->transform;
-		f32          sx     = t->scale.x;
-		f32          sy     = t->scale.y;
-		f32          sz     = t->scale.z;
-		if (context_raw->sym_x) {
-			t->scale = vec4_create(-sx, sy, sz, 1.0);
-			transform_build_matrix(t);
-			render_path_paint_commands_paint(false);
-		}
-		if (context_raw->sym_y) {
-			t->scale = vec4_create(sx, -sy, sz, 1.0);
-			transform_build_matrix(t);
-			render_path_paint_commands_paint(false);
-		}
-		if (context_raw->sym_z) {
-			t->scale = vec4_create(sx, sy, -sz, 1.0);
-			transform_build_matrix(t);
-			render_path_paint_commands_paint(false);
-		}
-		if (context_raw->sym_x && context_raw->sym_y) {
-			t->scale = vec4_create(-sx, -sy, sz, 1.0);
-			transform_build_matrix(t);
-			render_path_paint_commands_paint(false);
-		}
-		if (context_raw->sym_x && context_raw->sym_z) {
-			t->scale = vec4_create(-sx, sy, -sz, 1.0);
-			transform_build_matrix(t);
-			render_path_paint_commands_paint(false);
-		}
-		if (context_raw->sym_y && context_raw->sym_z) {
-			t->scale = vec4_create(sx, -sy, -sz, 1.0);
-			transform_build_matrix(t);
-			render_path_paint_commands_paint(false);
-		}
-		if (context_raw->sym_x && context_raw->sym_y && context_raw->sym_z) {
-			t->scale = vec4_create(-sx, -sy, -sz, 1.0);
-			transform_build_matrix(t);
-			render_path_paint_commands_paint(false);
-		}
-		t->scale = vec4_create(sx, sy, sz, 1.0);
-		transform_build_matrix(t);
+void render_path_paint_commands_cursor() {
+	bool        decal_mask = context_is_decal_mask();
+	tool_type_t tool       = context_raw->tool;
+	if (tool != TOOL_TYPE_BRUSH && tool != TOOL_TYPE_ERASER && tool != TOOL_TYPE_CLONE && tool != TOOL_TYPE_BLUR && tool != TOOL_TYPE_SMUDGE &&
+	    tool != TOOL_TYPE_PARTICLE && !decal_mask) {
+		return;
 	}
+
+	bool fill_layer  = context_raw->layer->fill_layer != NULL;
+	bool group_layer = slot_layer_is_group(context_raw->layer);
+	if (!base_ui_enabled || base_is_dragging || fill_layer || group_layer) {
+		return;
+	}
+
+	f32 mx = context_raw->paint_vec.x;
+	f32 my = 1.0 - context_raw->paint_vec.y;
+
+	f32 radius = decal_mask ? context_raw->brush_decal_mask_radius : context_raw->brush_radius;
+	render_path_paint_draw_cursor(mx, my, context_raw->brush_nodes_radius * radius / 3.4, 1.0, 1.0, 1.0);
 }
 
 bool render_path_paint_paint_enabled() {
@@ -580,6 +580,13 @@ void render_path_paint_end() {
 	context_raw->pdirty--;
 }
 
+void render_path_paint_update_bake_layer(texture_bits_t bits) {
+	if (base_bits_handle->i != bits) {
+		base_bits_handle->i = bits;
+		layers_set_bits();
+	}
+}
+
 void _render_path_paint_final() {
 	context_raw->bake_type = _render_path_paint_bake_type;
 	make_material_parse_paint_material(true);
@@ -610,13 +617,6 @@ void _render_path_paint_deriv() {
 bool render_path_paint_is_rt_bake() {
 	return (context_raw->bake_type == BAKE_TYPE_AO || context_raw->bake_type == BAKE_TYPE_LIGHTMAP || context_raw->bake_type == BAKE_TYPE_BENT_NORMAL ||
 	        context_raw->bake_type == BAKE_TYPE_THICKNESS);
-}
-
-void render_path_paint_update_bake_layer(texture_bits_t bits) {
-	if (base_bits_handle->i != bits) {
-		base_bits_handle->i = bits;
-		layers_set_bits();
-	}
 }
 
 void render_path_paint_draw_bake(void *_) {

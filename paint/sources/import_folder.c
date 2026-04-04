@@ -1,6 +1,16 @@
 
 #include "global.h"
 
+void import_folder_place_image_node(ui_nodes_t *nodes, ui_node_canvas_t *canvas, char *asset, i32 ny, i32 to_id, i32 to_socket) {
+	ui_node_t *n                         = nodes_material_create_node("TEX_IMAGE", NULL);
+	n->buttons->buffer[0]->default_value = f32_array_create_x(base_get_asset_index(asset));
+	n->x                                 = 72;
+	n->y                                 = ny;
+	ui_node_link_t *l =
+	    GC_ALLOC_INIT(ui_node_link_t, {.id = ui_next_link_id(canvas->links), .from_id = n->id, .from_socket = 0, .to_id = to_id, .to_socket = to_socket});
+	any_array_push(canvas->links, l);
+}
+
 void import_folder_run(char *path) {
 	string_array_t *files     = file_read_directory(path);
 	char             *mapbase   = "";
@@ -123,14 +133,4 @@ void import_folder_run(char *path) {
 	util_render_make_material_preview();
 	ui_base_hwnds->buffer[1]->redraws = 2;
 	history_new_material();
-}
-
-void import_folder_place_image_node(ui_nodes_t *nodes, ui_node_canvas_t *canvas, char *asset, i32 ny, i32 to_id, i32 to_socket) {
-	ui_node_t *n                         = nodes_material_create_node("TEX_IMAGE", NULL);
-	n->buttons->buffer[0]->default_value = f32_array_create_x(base_get_asset_index(asset));
-	n->x                                 = 72;
-	n->y                                 = ny;
-	ui_node_link_t *l =
-	    GC_ALLOC_INIT(ui_node_link_t, {.id = ui_next_link_id(canvas->links), .from_id = n->id, .from_socket = 0, .to_id = to_id, .to_socket = to_socket});
-	any_array_push(canvas->links, l);
 }

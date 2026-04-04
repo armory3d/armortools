@@ -1,6 +1,10 @@
 
 #include "global.h"
 
+gpu_texture_t *import_texture_default_importer(char *path) {
+	return data_get_image(path);
+}
+
 void import_texture_run_on_next_frame(import_texture_data_t *itd) {
 	import_envmap_run(itd->path, itd->image);
 }
@@ -62,8 +66,4 @@ void import_texture_run(char *path, bool hdr_as_envmap) {
 		import_texture_data_t *itd = GC_ALLOC_INIT(import_texture_data_t, {.path = path, .image = image});
 		sys_notify_on_next_frame(&import_texture_run_on_next_frame, itd); // Make sure file browser process did finish
 	}
-}
-
-gpu_texture_t *import_texture_default_importer(char *path) {
-	return data_get_image(path);
 }

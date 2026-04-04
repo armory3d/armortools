@@ -1,6 +1,11 @@
 
 #include "../global.h"
 
+char *rgb_to_bw_node_value(ui_node_t *node, ui_node_socket_t *socket) {
+	char *col = parser_material_parse_vector_input(node->inputs->buffer[0]);
+	return string("(((%s.r * 0.3 + %s.g * 0.59 + %s.b * 0.11) / 3.0) * 2.5)", col, col, col);
+}
+
 void rgb_to_bw_node_init() {
 
 	rgb_to_bw_node_def = GC_ALLOC_INIT(ui_node_t, {.id     = 0,
@@ -44,9 +49,4 @@ void rgb_to_bw_node_init() {
 
 	any_array_push(nodes_material_color, rgb_to_bw_node_def);
 	any_map_set(parser_material_node_values, "RGBTOBW", rgb_to_bw_node_value);
-}
-
-char *rgb_to_bw_node_value(ui_node_t *node, ui_node_socket_t *socket) {
-	char *col = parser_material_parse_vector_input(node->inputs->buffer[0]);
-	return string("(((%s.r * 0.3 + %s.g * 0.59 + %s.b * 0.11) / 3.0) * 2.5)", col, col, col);
 }

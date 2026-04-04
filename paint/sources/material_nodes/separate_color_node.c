@@ -1,6 +1,19 @@
 
 #include "../global.h"
 
+char *separate_color_node_value(ui_node_t *node, ui_node_socket_t *socket) {
+	char *col = parser_material_parse_vector_input(node->inputs->buffer[0]);
+	if (socket == node->outputs->buffer[0]) {
+		return string("%s.x", col);
+	}
+	else if (socket == node->outputs->buffer[1]) {
+		return string("%s.y", col);
+	}
+	else {
+		return string("%s.z", col);
+	}
+}
+
 void separate_color_node_init() {
 
 	separate_color_node_def =
@@ -65,17 +78,4 @@ void separate_color_node_init() {
 
 	any_array_push(nodes_material_color, separate_color_node_def);
 	any_map_set(parser_material_node_values, "SEPARATE_COLOR", separate_color_node_value);
-}
-
-char *separate_color_node_value(ui_node_t *node, ui_node_socket_t *socket) {
-	char *col = parser_material_parse_vector_input(node->inputs->buffer[0]);
-	if (socket == node->outputs->buffer[0]) {
-		return string("%s.x", col);
-	}
-	else if (socket == node->outputs->buffer[1]) {
-		return string("%s.y", col);
-	}
-	else {
-		return string("%s.z", col);
-	}
 }

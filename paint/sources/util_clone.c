@@ -223,16 +223,6 @@ shader_context_t_array_t *util_clone_shader_contexts(shader_context_t_array_t *c
 	return r;
 }
 
-shader_data_t *util_clone_shader_data(shader_data_t *s) {
-	if (s == NULL) {
-		return NULL;
-	}
-	shader_data_t *r = GC_ALLOC_INIT(shader_data_t, {0});
-	r->name          = string_copy(s->name);
-	r->contexts      = util_clone_shader_contexts(s->contexts);
-	return r;
-}
-
 bind_const_t_array_t *util_clone_bind_constants(bind_const_t_array_t *consts) {
 	if (consts == NULL) {
 		return NULL;

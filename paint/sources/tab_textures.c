@@ -41,6 +41,71 @@ void tab_textures_draw_export(char *path) {
 	sys_notify_on_next_frame(&tab_textures_draw_export_on_next_frame, NULL);
 }
 
+void tab_textures_update_texture_pointers(ui_node_t_array_t *nodes, i32 index) {
+	for (i32 i = 0; i < nodes->length; ++i) {
+		ui_node_t *n = nodes->buffer[i];
+		if (string_equals(n->type, "TEX_IMAGE")) {
+			if (n->buttons->buffer[0]->default_value->buffer[0] == index) {
+				n->buttons->buffer[0]->default_value->buffer[0] = 9999; // Texture deleted, use pink now
+			}
+			else if (n->buttons->buffer[0]->default_value->buffer[0] > index) {
+				n->buttons->buffer[0]->default_value->buffer[0]--; // Offset by deleted texture
+			}
+		}
+	}
+}
+
+void tab_textures_delete_texture_on_next_frame(void *_) {
+	make_material_parse_paint_material(true);
+	util_render_make_material_preview();
+	ui_base_hwnds->buffer[TAB_AREA_SIDEBAR1]->redraws = 2;
+}
+
+void tab_textures_delete_texture(asset_t *asset) {
+	i32 index = array_index_of(project_assets, asset);
+	if (project_assets->length > 1) {
+		context_raw->texture = project_assets->buffer[index == project_assets->length - 1 ? index - 1 : index + 1];
+	}
+	ui_base_hwnds->buffer[TAB_AREA_STATUS]->redraws = 2;
+
+	if (context_raw->tool == TOOL_TYPE_COLORID && index == context_raw->colorid_handle->i) {
+		ui_header_handle->redraws   = 2;
+		context_raw->ddirty         = 2;
+		context_raw->colorid_picked = false;
+		ui_toolbar_handle->redraws  = 1;
+	}
+
+	if (data_get_image(asset->file) == scene_world->_->envmap) {
+		project_set_default_envmap();
+	}
+
+	if (project_raw->packed_assets != NULL) {
+		for (i32 i = 0; i < project_raw->packed_assets->length; ++i) {
+			packed_asset_t *pa = project_raw->packed_assets->buffer[i];
+			if (string_equals(pa->name, asset->file)) {
+				array_splice(project_raw->packed_assets, i, 1);
+				break;
+			}
+		}
+	}
+
+	data_delete_image(asset->file);
+	imap_delete(project_asset_map, asset->id);
+	array_splice(project_assets, index, 1);
+	array_splice(project_asset_names, index, 1);
+	sys_notify_on_next_frame(&tab_textures_delete_texture_on_next_frame, NULL);
+
+	for (i32 i = 0; i < project_materials->length; ++i) {
+		slot_material_t *m = project_materials->buffer[i];
+		tab_textures_update_texture_pointers(m->canvas->nodes, index);
+	}
+
+	for (i32 i = 0; i < project_brushes->length; ++i) {
+		slot_brush_t *b = project_brushes->buffer[i];
+		tab_textures_update_texture_pointers(b->canvas->nodes, index);
+	}
+}
+
 void tab_textures_draw_context_menu() {
 	if (ui_menu_button(tr("Export"), "", ICON_EXPORT)) {
 		ui_files_show("png", true, false, &tab_textures_draw_export);
@@ -236,70 +301,5 @@ void tab_textures_draw(ui_handle_t *htab) {
 			ui->is_delete_down = false;
 			tab_textures_delete_texture(context_raw->texture);
 		}
-	}
-}
-
-void tab_textures_update_texture_pointers(ui_node_t_array_t *nodes, i32 index) {
-	for (i32 i = 0; i < nodes->length; ++i) {
-		ui_node_t *n = nodes->buffer[i];
-		if (string_equals(n->type, "TEX_IMAGE")) {
-			if (n->buttons->buffer[0]->default_value->buffer[0] == index) {
-				n->buttons->buffer[0]->default_value->buffer[0] = 9999; // Texture deleted, use pink now
-			}
-			else if (n->buttons->buffer[0]->default_value->buffer[0] > index) {
-				n->buttons->buffer[0]->default_value->buffer[0]--; // Offset by deleted texture
-			}
-		}
-	}
-}
-
-void tab_textures_delete_texture_on_next_frame(void *_) {
-	make_material_parse_paint_material(true);
-	util_render_make_material_preview();
-	ui_base_hwnds->buffer[TAB_AREA_SIDEBAR1]->redraws = 2;
-}
-
-void tab_textures_delete_texture(asset_t *asset) {
-	i32 index = array_index_of(project_assets, asset);
-	if (project_assets->length > 1) {
-		context_raw->texture = project_assets->buffer[index == project_assets->length - 1 ? index - 1 : index + 1];
-	}
-	ui_base_hwnds->buffer[TAB_AREA_STATUS]->redraws = 2;
-
-	if (context_raw->tool == TOOL_TYPE_COLORID && index == context_raw->colorid_handle->i) {
-		ui_header_handle->redraws   = 2;
-		context_raw->ddirty         = 2;
-		context_raw->colorid_picked = false;
-		ui_toolbar_handle->redraws  = 1;
-	}
-
-	if (data_get_image(asset->file) == scene_world->_->envmap) {
-		project_set_default_envmap();
-	}
-
-	if (project_raw->packed_assets != NULL) {
-		for (i32 i = 0; i < project_raw->packed_assets->length; ++i) {
-			packed_asset_t *pa = project_raw->packed_assets->buffer[i];
-			if (string_equals(pa->name, asset->file)) {
-				array_splice(project_raw->packed_assets, i, 1);
-				break;
-			}
-		}
-	}
-
-	data_delete_image(asset->file);
-	imap_delete(project_asset_map, asset->id);
-	array_splice(project_assets, index, 1);
-	array_splice(project_asset_names, index, 1);
-	sys_notify_on_next_frame(&tab_textures_delete_texture_on_next_frame, NULL);
-
-	for (i32 i = 0; i < project_materials->length; ++i) {
-		slot_material_t *m = project_materials->buffer[i];
-		tab_textures_update_texture_pointers(m->canvas->nodes, index);
-	}
-
-	for (i32 i = 0; i < project_brushes->length; ++i) {
-		slot_brush_t *b = project_brushes->buffer[i];
-		tab_textures_update_texture_pointers(b->canvas->nodes, index);
 	}
 }

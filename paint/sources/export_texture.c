@@ -1,163 +1,122 @@
 
 #include "global.h"
 
-void export_texture_run(char *path, bool bake_material) {
-
-	if (bake_material) {
-		export_texture_run_bake_material(path);
+void export_texture_write_texture(char *file, buffer_t *pixels, i32 type, i32 off) {
+	i32 res_x       = config_get_texture_res_x();
+	i32 res_y       = config_get_texture_res_y();
+	i32 bits_handle = base_bits_handle->i;
+	i32 bits        = bits_handle == TEXTURE_BITS_BITS8 ? 8 : bits_handle == TEXTURE_BITS_BITS16 ? 16 : 32;
+	i32 format      = 0; // RGBA
+	if (type == 1) {
+		format = 2; // RGB1
 	}
-	else if (context_raw->layers_export == EXPORT_MODE_PER_UDIM_TILE) {
-		string_array_t *udim_tiles = any_array_create_from_raw((void *[]){}, 0);
-		for (i32 i = 0; i < project_layers->length; ++i) {
-			slot_layer_t *l = project_layers->buffer[i];
-			if (slot_layer_get_object_mask(l) > 0) {
-				char *name = project_paint_objects->buffer[slot_layer_get_object_mask(l) - 1]->base->name;
-				if (string_equals(substring(name, string_length(name) - 5, 2), ".1")) { // tile.1001
-					any_array_push(udim_tiles, substring(name, string_length(name) - 5, string_length(name)));
-				}
-			}
-		}
-		if (udim_tiles->length > 0) {
-			for (i32 i = 0; i < udim_tiles->length; ++i) {
-				char *udim_tile = udim_tiles->buffer[i];
-				export_texture_run_layers(path, project_layers, udim_tile, false);
-			}
-		}
-		else {
-			export_texture_run_layers(path, project_layers, "", false);
-		}
+	if (type == 2 && off == 0) {
+		format = 3; // RRR1
 	}
-	else if (context_raw->layers_export == EXPORT_MODE_PER_OBJECT) {
-		string_array_t *object_names = any_array_create_from_raw((void *[]){}, 0);
-		for (i32 i = 0; i < project_layers->length; ++i) {
-			slot_layer_t *l = project_layers->buffer[i];
-			if (slot_layer_get_object_mask(l) > 0) {
-				char *name = project_paint_objects->buffer[slot_layer_get_object_mask(l) - 1]->base->name;
-				if (string_array_index_of(object_names, name) == -1) {
-					any_array_push(object_names, name);
-				}
-			}
-		}
-		if (object_names->length > 0) {
-			for (i32 i = 0; i < object_names->length; ++i) {
-				char *name = object_names->buffer[i];
-				export_texture_run_layers(path, project_layers, name, false);
-			}
-		}
-		else {
-			export_texture_run_layers(path, project_layers, "", false);
-		}
+	if (type == 2 && off == 1) {
+		format = 4; // GGG1
 	}
-	else { // Visible or selected
-		bool atlas_export = false;
-		if (project_atlas_objects != NULL) {
-			for (i32 i = 1; i < project_atlas_objects->length; ++i) {
-				if (project_atlas_objects->buffer[i - 1] != project_atlas_objects->buffer[i]) {
-					atlas_export = true;
-					break;
-				}
-			}
-		}
-		if (atlas_export) {
-			for (i32 atlas_index = 0; atlas_index < project_atlas_objects->length; ++atlas_index) {
-				slot_layer_t_array_t *layers = any_array_create_from_raw((void *[]){}, 0);
-				for (i32 object_index = 0; object_index < project_atlas_objects->length; ++object_index) {
-					if (project_atlas_objects->buffer[object_index] == atlas_index) {
-						for (i32 i = 0; i < project_layers->length; ++i) {
-							slot_layer_t *l = project_layers->buffer[i];
-							if (slot_layer_get_object_mask(l) == 0 || // shared object
-							    slot_layer_get_object_mask(l) - 1 == object_index) {
-								any_array_push(layers, l);
-							}
-						}
-					}
-				}
-				if (layers->length > 0) {
-					export_texture_run_layers(path, layers, project_atlas_names->buffer[atlas_index], false);
-				}
-			}
-		}
-		else {
-			slot_layer_t_array_t *layers;
-			if (context_raw->layers_export == EXPORT_MODE_SELECTED) {
-				if (slot_layer_is_group(context_raw->layer)) {
-					layers = slot_layer_get_children(context_raw->layer);
-				}
-				else {
-					layers = any_array_create_from_raw(
-					    (void *[]){
-					        context_raw->layer,
-					    },
-					    1);
-				}
-			}
-			else {
-				layers = project_layers;
-			}
-			export_texture_run_layers(path, layers, "", false);
-		}
+	if (type == 2 && off == 2) {
+		format = 5; // BBB1
+	}
+	if (type == 2 && off == 3) {
+		format = 6; // AAA1
 	}
 
-#ifdef IRON_IOS
-	if (config_is_iphone()) {
-		console_info(string("%s (\"Files/On My iPhone/%s\")", tr("Textures exported"), manifest_title));
-	}
-	else {
-		console_info(string("%s (\"Files/On My iPad/%s\")", tr("Textures exported"), manifest_title));
-	}
-#elif defined(IRON_ANDROID)
-	console_info(string("%s (\"Files/Internal storage/Pictures/%s\")", tr("Textures exported"), manifest_title));
-#else
-	console_info(tr("Textures exported"));
+	if (context_raw->layers_destination == EXPORT_DESTINATION_PACK_INTO_PROJECT) {
+#ifdef IRON_BGRA
+		if (format == 2) { // RGB1
+			export_arm_bgra_swap(pixels);
+		}
 #endif
-	gc_unroot(ui_files_last_path);
-	ui_files_last_path = "";
-	gc_root(ui_files_last_path);
+		gpu_texture_t *image = gpu_create_texture_from_bytes(pixels, res_x, res_y, GPU_TEXTURE_FORMAT_RGBA32);
+		any_map_set(data_cached_images, file, image);
+		string_array_t *ar    = string_split(file, PATH_SEP);
+		char             *name  = ar->buffer[ar->length - 1];
+		asset_t          *asset = GC_ALLOC_INIT(asset_t, {.name = name, .file = file, .id = project_asset_id++});
+		any_array_push(project_assets, asset);
+		if (project_raw->assets == NULL) {
+			project_raw->assets = any_array_create_from_raw((void *[]){}, 0);
+		}
+		any_array_push(project_raw->assets, asset->file);
+		any_array_push(project_asset_names, asset->name);
+		any_imap_set(project_asset_map, asset->id, image);
+		asset_t_array_t *assets = any_array_create_from_raw(
+		    (void *[]){
+		        asset,
+		    },
+		    1);
+		export_arm_pack_assets(project_raw, assets);
+		return;
+	}
+
+	if (bits == 8 && context_raw->format_type == TEXTURE_LDR_FORMAT_PNG) {
+		iron_write_png(file, pixels, res_x, res_y, format);
+	}
+	else if (bits == 8 && context_raw->format_type == TEXTURE_LDR_FORMAT_JPG) {
+		iron_write_jpg(file, pixels, res_x, res_y, format, math_floor(context_raw->format_quality));
+	}
+	else { // Exr
+		buffer_t *b = export_exr_run(res_x, res_y, pixels, bits, type, off);
+		iron_file_save_bytes(file, b, b->length);
+	}
 }
 
-void export_texture_run_bake_material(char *path) {
-	if (render_path_paint_live_layer == NULL) {
-		gc_unroot(render_path_paint_live_layer);
-		render_path_paint_live_layer = slot_layer_create("_live", LAYER_SLOT_TYPE_LAYER, NULL);
-		gc_root(render_path_paint_live_layer);
+void export_texture_to_srgb(buffer_t *to, i32 to_channel) {
+	for (i32 i = 0; i < math_floor((to->length) / 4.0); ++i) {
+		buffer_set_u8(to, i * 4 + to_channel, math_floor(math_pow(buffer_get_u8(to, i * 4 + to_channel) / 255.0, export_texture_gamma) * 255));
 	}
+}
 
-	tool_type_t _tool = context_raw->tool;
-	context_raw->tool = TOOL_TYPE_FILL;
-	make_material_parse_paint_material(true);
-	mesh_object_t *_paint_object = context_raw->paint_object;
-	mesh_object_t *planeo        = scene_get_child(".Plane")->ext;
-	planeo->base->visible        = true;
-	context_raw->paint_object    = planeo;
-	context_raw->pdirty          = 1;
+#ifdef IRON_BGRA
+i32 _export_texture_channel_bgra_swap(i32 c) {
+	return c == 0 ? 2 : c == 2 ? 0 : c;
+}
+#endif
 
-	u8_array_t *_visibles = u8_array_create_from_raw((u8[]){}, 0);
-	for (i32 i = 0; i < project_paint_objects->length; ++i) {
-		mesh_object_t *p = project_paint_objects->buffer[i];
-		u8_array_push(_visibles, p->base->visible);
-		p->base->visible = false;
+void export_texture_copy_channel(buffer_t *from, i32 from_channel, buffer_t *to, i32 to_channel, bool linear) {
+#ifdef IRON_BGRA
+	from_channel = _export_texture_channel_bgra_swap(from_channel);
+#endif
+	for (i32 i = 0; i < math_floor((to->length) / 4.0); ++i) {
+		buffer_set_u8(to, i * 4 + to_channel, buffer_get_u8(from, i * 4 + from_channel));
 	}
-
-	render_path_paint_use_live_layer(true);
-	render_path_paint_commands_paint(false);
-	render_path_paint_use_live_layer(false);
-
-	context_raw->tool = _tool;
-	make_material_parse_paint_material(true);
-	context_raw->pdirty       = 0;
-	planeo->base->visible     = false;
-	context_raw->paint_object = _paint_object;
-
-	for (i32 i = 0; i < project_paint_objects->length; ++i) {
-		project_paint_objects->buffer[i]->base->visible = _visibles->buffer[i];
+	if (!linear) {
+		export_texture_to_srgb(to, to_channel);
 	}
+}
 
-	slot_layer_t_array_t *layers = any_array_create_from_raw(
-	    (void *[]){
-	        render_path_paint_live_layer,
-	    },
-	    1);
-	export_texture_run_layers(path, layers, "", true);
+void export_texture_copy_channel_inv(buffer_t *from, i32 from_channel, buffer_t *to, i32 to_channel, bool linear) {
+#ifdef IRON_BGRA
+	from_channel = _export_texture_channel_bgra_swap(from_channel);
+#endif
+	for (i32 i = 0; i < math_floor((to->length) / 4.0); ++i) {
+		buffer_set_u8(to, i * 4 + to_channel, 255 - buffer_get_u8(from, i * 4 + from_channel));
+	}
+	if (!linear) {
+		export_texture_to_srgb(to, to_channel);
+	}
+}
+
+void export_texture_extract_channel(buffer_t *from, i32 from_channel, buffer_t *to, i32 to_channel, i32 step, i32 mask, bool linear) {
+#ifdef IRON_BGRA
+	from_channel = _export_texture_channel_bgra_swap(from_channel);
+#endif
+	for (i32 i = 0; i < math_floor((to->length) / 4.0); ++i) {
+		buffer_set_u8(to, i * 4 + to_channel, buffer_get_u8(from, i * 4 + from_channel) % step == mask ? 255 : 0);
+	}
+	if (!linear) {
+		export_texture_to_srgb(to, to_channel);
+	}
+}
+
+void export_texture_set_channel(i32 value, buffer_t *to, i32 to_channel, bool linear) {
+	for (i32 i = 0; i < math_floor((to->length) / 4.0); ++i) {
+		buffer_set_u8(to, i * 4 + to_channel, value);
+	}
+	if (!linear) {
+		export_texture_to_srgb(to, to_channel);
+	}
 }
 
 void export_texture_run_layers(char *path, slot_layer_t_array_t *layers, char *object_name, bool bake_material) {
@@ -441,120 +400,161 @@ void export_texture_run_layers(char *path, slot_layer_t_array_t *layers, char *o
 	// texpaint_pack->pixels = NULL;
 }
 
-void export_texture_write_texture(char *file, buffer_t *pixels, i32 type, i32 off) {
-	i32 res_x       = config_get_texture_res_x();
-	i32 res_y       = config_get_texture_res_y();
-	i32 bits_handle = base_bits_handle->i;
-	i32 bits        = bits_handle == TEXTURE_BITS_BITS8 ? 8 : bits_handle == TEXTURE_BITS_BITS16 ? 16 : 32;
-	i32 format      = 0; // RGBA
-	if (type == 1) {
-		format = 2; // RGB1
-	}
-	if (type == 2 && off == 0) {
-		format = 3; // RRR1
-	}
-	if (type == 2 && off == 1) {
-		format = 4; // GGG1
-	}
-	if (type == 2 && off == 2) {
-		format = 5; // BBB1
-	}
-	if (type == 2 && off == 3) {
-		format = 6; // AAA1
+void export_texture_run_bake_material(char *path) {
+	if (render_path_paint_live_layer == NULL) {
+		gc_unroot(render_path_paint_live_layer);
+		render_path_paint_live_layer = slot_layer_create("_live", LAYER_SLOT_TYPE_LAYER, NULL);
+		gc_root(render_path_paint_live_layer);
 	}
 
-	if (context_raw->layers_destination == EXPORT_DESTINATION_PACK_INTO_PROJECT) {
-#ifdef IRON_BGRA
-		if (format == 2) { // RGB1
-			export_arm_bgra_swap(pixels);
+	tool_type_t _tool = context_raw->tool;
+	context_raw->tool = TOOL_TYPE_FILL;
+	make_material_parse_paint_material(true);
+	mesh_object_t *_paint_object = context_raw->paint_object;
+	mesh_object_t *planeo        = scene_get_child(".Plane")->ext;
+	planeo->base->visible        = true;
+	context_raw->paint_object    = planeo;
+	context_raw->pdirty          = 1;
+
+	u8_array_t *_visibles = u8_array_create_from_raw((u8[]){}, 0);
+	for (i32 i = 0; i < project_paint_objects->length; ++i) {
+		mesh_object_t *p = project_paint_objects->buffer[i];
+		u8_array_push(_visibles, p->base->visible);
+		p->base->visible = false;
+	}
+
+	render_path_paint_use_live_layer(true);
+	render_path_paint_commands_paint(false);
+	render_path_paint_use_live_layer(false);
+
+	context_raw->tool = _tool;
+	make_material_parse_paint_material(true);
+	context_raw->pdirty       = 0;
+	planeo->base->visible     = false;
+	context_raw->paint_object = _paint_object;
+
+	for (i32 i = 0; i < project_paint_objects->length; ++i) {
+		project_paint_objects->buffer[i]->base->visible = _visibles->buffer[i];
+	}
+
+	slot_layer_t_array_t *layers = any_array_create_from_raw(
+	    (void *[]){
+	        render_path_paint_live_layer,
+	    },
+	    1);
+	export_texture_run_layers(path, layers, "", true);
+}
+
+void export_texture_run(char *path, bool bake_material) {
+
+	if (bake_material) {
+		export_texture_run_bake_material(path);
+	}
+	else if (context_raw->layers_export == EXPORT_MODE_PER_UDIM_TILE) {
+		string_array_t *udim_tiles = any_array_create_from_raw((void *[]){}, 0);
+		for (i32 i = 0; i < project_layers->length; ++i) {
+			slot_layer_t *l = project_layers->buffer[i];
+			if (slot_layer_get_object_mask(l) > 0) {
+				char *name = project_paint_objects->buffer[slot_layer_get_object_mask(l) - 1]->base->name;
+				if (string_equals(substring(name, string_length(name) - 5, 2), ".1")) { // tile.1001
+					any_array_push(udim_tiles, substring(name, string_length(name) - 5, string_length(name)));
+				}
+			}
 		}
-#endif
-		gpu_texture_t *image = gpu_create_texture_from_bytes(pixels, res_x, res_y, GPU_TEXTURE_FORMAT_RGBA32);
-		any_map_set(data_cached_images, file, image);
-		string_array_t *ar    = string_split(file, PATH_SEP);
-		char             *name  = ar->buffer[ar->length - 1];
-		asset_t          *asset = GC_ALLOC_INIT(asset_t, {.name = name, .file = file, .id = project_asset_id++});
-		any_array_push(project_assets, asset);
-		if (project_raw->assets == NULL) {
-			project_raw->assets = any_array_create_from_raw((void *[]){}, 0);
+		if (udim_tiles->length > 0) {
+			for (i32 i = 0; i < udim_tiles->length; ++i) {
+				char *udim_tile = udim_tiles->buffer[i];
+				export_texture_run_layers(path, project_layers, udim_tile, false);
+			}
 		}
-		any_array_push(project_raw->assets, asset->file);
-		any_array_push(project_asset_names, asset->name);
-		any_imap_set(project_asset_map, asset->id, image);
-		asset_t_array_t *assets = any_array_create_from_raw(
-		    (void *[]){
-		        asset,
-		    },
-		    1);
-		export_arm_pack_assets(project_raw, assets);
-		return;
+		else {
+			export_texture_run_layers(path, project_layers, "", false);
+		}
+	}
+	else if (context_raw->layers_export == EXPORT_MODE_PER_OBJECT) {
+		string_array_t *object_names = any_array_create_from_raw((void *[]){}, 0);
+		for (i32 i = 0; i < project_layers->length; ++i) {
+			slot_layer_t *l = project_layers->buffer[i];
+			if (slot_layer_get_object_mask(l) > 0) {
+				char *name = project_paint_objects->buffer[slot_layer_get_object_mask(l) - 1]->base->name;
+				if (string_array_index_of(object_names, name) == -1) {
+					any_array_push(object_names, name);
+				}
+			}
+		}
+		if (object_names->length > 0) {
+			for (i32 i = 0; i < object_names->length; ++i) {
+				char *name = object_names->buffer[i];
+				export_texture_run_layers(path, project_layers, name, false);
+			}
+		}
+		else {
+			export_texture_run_layers(path, project_layers, "", false);
+		}
+	}
+	else { // Visible or selected
+		bool atlas_export = false;
+		if (project_atlas_objects != NULL) {
+			for (i32 i = 1; i < project_atlas_objects->length; ++i) {
+				if (project_atlas_objects->buffer[i - 1] != project_atlas_objects->buffer[i]) {
+					atlas_export = true;
+					break;
+				}
+			}
+		}
+		if (atlas_export) {
+			for (i32 atlas_index = 0; atlas_index < project_atlas_objects->length; ++atlas_index) {
+				slot_layer_t_array_t *layers = any_array_create_from_raw((void *[]){}, 0);
+				for (i32 object_index = 0; object_index < project_atlas_objects->length; ++object_index) {
+					if (project_atlas_objects->buffer[object_index] == atlas_index) {
+						for (i32 i = 0; i < project_layers->length; ++i) {
+							slot_layer_t *l = project_layers->buffer[i];
+							if (slot_layer_get_object_mask(l) == 0 || // shared object
+							    slot_layer_get_object_mask(l) - 1 == object_index) {
+								any_array_push(layers, l);
+							}
+						}
+					}
+				}
+				if (layers->length > 0) {
+					export_texture_run_layers(path, layers, project_atlas_names->buffer[atlas_index], false);
+				}
+			}
+		}
+		else {
+			slot_layer_t_array_t *layers;
+			if (context_raw->layers_export == EXPORT_MODE_SELECTED) {
+				if (slot_layer_is_group(context_raw->layer)) {
+					layers = slot_layer_get_children(context_raw->layer);
+				}
+				else {
+					layers = any_array_create_from_raw(
+					    (void *[]){
+					        context_raw->layer,
+					    },
+					    1);
+				}
+			}
+			else {
+				layers = project_layers;
+			}
+			export_texture_run_layers(path, layers, "", false);
+		}
 	}
 
-	if (bits == 8 && context_raw->format_type == TEXTURE_LDR_FORMAT_PNG) {
-		iron_write_png(file, pixels, res_x, res_y, format);
+#ifdef IRON_IOS
+	if (config_is_iphone()) {
+		console_info(string("%s (\"Files/On My iPhone/%s\")", tr("Textures exported"), manifest_title));
 	}
-	else if (bits == 8 && context_raw->format_type == TEXTURE_LDR_FORMAT_JPG) {
-		iron_write_jpg(file, pixels, res_x, res_y, format, math_floor(context_raw->format_quality));
+	else {
+		console_info(string("%s (\"Files/On My iPad/%s\")", tr("Textures exported"), manifest_title));
 	}
-	else { // Exr
-		buffer_t *b = export_exr_run(res_x, res_y, pixels, bits, type, off);
-		iron_file_save_bytes(file, b, b->length);
-	}
-}
-
-#ifdef IRON_BGRA
-i32 _export_texture_channel_bgra_swap(i32 c) {
-	return c == 0 ? 2 : c == 2 ? 0 : c;
-}
+#elif defined(IRON_ANDROID)
+	console_info(string("%s (\"Files/Internal storage/Pictures/%s\")", tr("Textures exported"), manifest_title));
+#else
+	console_info(tr("Textures exported"));
 #endif
-
-void export_texture_copy_channel(buffer_t *from, i32 from_channel, buffer_t *to, i32 to_channel, bool linear) {
-#ifdef IRON_BGRA
-	from_channel = _export_texture_channel_bgra_swap(from_channel);
-#endif
-	for (i32 i = 0; i < math_floor((to->length) / 4.0); ++i) {
-		buffer_set_u8(to, i * 4 + to_channel, buffer_get_u8(from, i * 4 + from_channel));
-	}
-	if (!linear) {
-		export_texture_to_srgb(to, to_channel);
-	}
-}
-
-void export_texture_copy_channel_inv(buffer_t *from, i32 from_channel, buffer_t *to, i32 to_channel, bool linear) {
-#ifdef IRON_BGRA
-	from_channel = _export_texture_channel_bgra_swap(from_channel);
-#endif
-	for (i32 i = 0; i < math_floor((to->length) / 4.0); ++i) {
-		buffer_set_u8(to, i * 4 + to_channel, 255 - buffer_get_u8(from, i * 4 + from_channel));
-	}
-	if (!linear) {
-		export_texture_to_srgb(to, to_channel);
-	}
-}
-
-void export_texture_extract_channel(buffer_t *from, i32 from_channel, buffer_t *to, i32 to_channel, i32 step, i32 mask, bool linear) {
-#ifdef IRON_BGRA
-	from_channel = _export_texture_channel_bgra_swap(from_channel);
-#endif
-	for (i32 i = 0; i < math_floor((to->length) / 4.0); ++i) {
-		buffer_set_u8(to, i * 4 + to_channel, buffer_get_u8(from, i * 4 + from_channel) % step == mask ? 255 : 0);
-	}
-	if (!linear) {
-		export_texture_to_srgb(to, to_channel);
-	}
-}
-
-void export_texture_set_channel(i32 value, buffer_t *to, i32 to_channel, bool linear) {
-	for (i32 i = 0; i < math_floor((to->length) / 4.0); ++i) {
-		buffer_set_u8(to, i * 4 + to_channel, value);
-	}
-	if (!linear) {
-		export_texture_to_srgb(to, to_channel);
-	}
-}
-
-void export_texture_to_srgb(buffer_t *to, i32 to_channel) {
-	for (i32 i = 0; i < math_floor((to->length) / 4.0); ++i) {
-		buffer_set_u8(to, i * 4 + to_channel, math_floor(math_pow(buffer_get_u8(to, i * 4 + to_channel) / 255.0, export_texture_gamma) * 255));
-	}
+	gc_unroot(ui_files_last_path);
+	ui_files_last_path = "";
+	gc_root(ui_files_last_path);
 }

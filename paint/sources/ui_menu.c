@@ -1,6 +1,33 @@
 
 #include "global.h"
 
+void ui_menu_hide() {
+	ui_menu_show = false;
+	base_redraw_ui();
+}
+
+void ui_menu_fit_to_screen() {
+	// Prevent the menu going out of screen
+	f32 menu_w = base_default_element_w * UI_SCALE() * 2.3;
+	if (ui_menu_x + menu_w > iron_window_width()) {
+		if (ui_menu_x - menu_w > 0) {
+			ui_menu_x = math_floor(ui_menu_x - menu_w);
+		}
+		else {
+			ui_menu_x = math_floor(iron_window_width() - menu_w);
+		}
+	}
+	if (ui_menu_y + ui_menu_h > iron_window_height()) {
+		if (ui_menu_y - ui_menu_h > 0) {
+			ui_menu_y = math_floor(ui_menu_y - ui_menu_h);
+		}
+		else {
+			ui_menu_y = iron_window_height() - ui_menu_h;
+		}
+		ui_menu_x += 1; // Move out of mouse focus
+	}
+}
+
 void ui_menu_render() {
 	i32 menu_w = ui_menu_commands != NULL ? math_floor(base_default_element_w * UI_SCALE() * 2.3) : math_floor(UI_ELEMENT_W() * 2.3);
 
@@ -61,11 +88,6 @@ void ui_menu_render() {
 	}
 }
 
-void ui_menu_hide() {
-	ui_menu_show = false;
-	base_redraw_ui();
-}
-
 void ui_menu_draw(void (*commands)(void), i32 x, i32 y) {
 	ui_end_input();
 	if (ui_menu_show) {
@@ -79,28 +101,6 @@ void ui_menu_draw(void (*commands)(void), i32 x, i32 y) {
 	ui_menu_x = x > -1 ? x : math_floor(mouse_x + 1);
 	ui_menu_y = y > -1 ? y : math_floor(mouse_y + 1);
 	ui_menu_h = 0;
-}
-
-void ui_menu_fit_to_screen() {
-	// Prevent the menu going out of screen
-	f32 menu_w = base_default_element_w * UI_SCALE() * 2.3;
-	if (ui_menu_x + menu_w > iron_window_width()) {
-		if (ui_menu_x - menu_w > 0) {
-			ui_menu_x = math_floor(ui_menu_x - menu_w);
-		}
-		else {
-			ui_menu_x = math_floor(iron_window_width() - menu_w);
-		}
-	}
-	if (ui_menu_y + ui_menu_h > iron_window_height()) {
-		if (ui_menu_y - ui_menu_h > 0) {
-			ui_menu_y = math_floor(ui_menu_y - ui_menu_h);
-		}
-		else {
-			ui_menu_y = iron_window_height() - ui_menu_h;
-		}
-		ui_menu_x += 1; // Move out of mouse focus
-	}
 }
 
 void ui_menu_separator() {

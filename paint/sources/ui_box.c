@@ -10,6 +10,18 @@ void ui_box_init() {
 	ui_box_click_to_hide = true;
 }
 
+void ui_box_window_border() {
+	if (ui->scissor) {
+		ui->scissor = false;
+		gpu_disable_scissor();
+	}
+	// Border
+	draw_set_color(ui->ops->theme->SEPARATOR_COL);
+	draw_filled_rect(0, 0, 1, ui->_window_h);
+	draw_filled_rect(0 + ui->_window_w - 1, 0, 1, ui->_window_h);
+	draw_filled_rect(0, 0 + ui->_window_h - 1, ui->_window_w, 1);
+}
+
 void ui_box_render() {
 	if (!ui_menu_show) {
 		bool in_use    = ui->combo_selected_handle != NULL;
@@ -122,6 +134,38 @@ void ui_box_render() {
 	ui_box_draws++;
 }
 
+void ui_box_tween_tick() {
+	base_redraw_ui();
+}
+
+void ui_box_tween_in() {
+	tween_reset();
+
+	tween_anim_t *a = GC_ALLOC_INIT(tween_anim_t, {.target = &ui_box_tween_alpha, .to = 0.5, .duration = 0.2, .ease = EASE_EXPO_OUT});
+	tween_to(a);
+
+	ui_box_hwnd->drag_y = math_floor(iron_window_height() / 2.0);
+	a = GC_ALLOC_INIT(tween_anim_t, {.target = &ui_box_hwnd->drag_y, .to = 0.0, .duration = 0.2, .ease = EASE_EXPO_OUT, .tick = ui_box_tween_tick});
+	tween_to(a);
+}
+
+void ui_box_hide_internal() {
+	if (ui_box_modal_on_hide != NULL) {
+		ui_box_modal_on_hide();
+	}
+	ui_box_show = false;
+	base_redraw_ui();
+}
+
+void ui_box_tween_out() {
+	tween_anim_t *a =
+	    GC_ALLOC_INIT(tween_anim_t, {.target = &ui_box_tween_alpha, .to = 0.0, .duration = 0.2, .ease = EASE_EXPO_IN, .done = ui_box_hide_internal});
+	tween_to(a);
+
+	a = GC_ALLOC_INIT(tween_anim_t, {.target = &ui_box_hwnd->drag_y, .to = iron_window_height() / 2, .duration = 0.2, .ease = EASE_EXPO_IN});
+	tween_to(a);
+}
+
 void ui_box_show_message(char *title, char *text, bool copyable) {
 	ui_box_init();
 	ui_box_modalw = 400;
@@ -166,48 +210,4 @@ void ui_box_hide() {
 	#else
 	ui_box_hide_internal();
 	#endif
-}
-
-void ui_box_hide_internal() {
-	if (ui_box_modal_on_hide != NULL) {
-		ui_box_modal_on_hide();
-	}
-	ui_box_show = false;
-	base_redraw_ui();
-}
-
-void ui_box_tween_in() {
-	tween_reset();
-
-	tween_anim_t *a = GC_ALLOC_INIT(tween_anim_t, {.target = &ui_box_tween_alpha, .to = 0.5, .duration = 0.2, .ease = EASE_EXPO_OUT});
-	tween_to(a);
-
-	ui_box_hwnd->drag_y = math_floor(iron_window_height() / 2.0);
-	a = GC_ALLOC_INIT(tween_anim_t, {.target = &ui_box_hwnd->drag_y, .to = 0.0, .duration = 0.2, .ease = EASE_EXPO_OUT, .tick = ui_box_tween_tick});
-	tween_to(a);
-}
-
-void ui_box_tween_out() {
-	tween_anim_t *a =
-	    GC_ALLOC_INIT(tween_anim_t, {.target = &ui_box_tween_alpha, .to = 0.0, .duration = 0.2, .ease = EASE_EXPO_IN, .done = ui_box_hide_internal});
-	tween_to(a);
-
-	a = GC_ALLOC_INIT(tween_anim_t, {.target = &ui_box_hwnd->drag_y, .to = iron_window_height() / 2, .duration = 0.2, .ease = EASE_EXPO_IN});
-	tween_to(a);
-}
-
-void ui_box_tween_tick() {
-	base_redraw_ui();
-}
-
-void ui_box_window_border() {
-	if (ui->scissor) {
-		ui->scissor = false;
-		gpu_disable_scissor();
-	}
-	// Border
-	draw_set_color(ui->ops->theme->SEPARATOR_COL);
-	draw_filled_rect(0, 0, 1, ui->_window_h);
-	draw_filled_rect(0 + ui->_window_w - 1, 0, 1, ui->_window_h);
-	draw_filled_rect(0, 0 + ui->_window_h - 1, ui->_window_w, 1);
 }

@@ -1,105 +1,6 @@
 
 #include "../global.h"
 
-void mix_color_node_init() {
-
-	char *mix_color_blend_type_data =
-	    string("%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s", _tr("Mix"), _tr("Darken"), _tr("Multiply"), _tr("Burn"),
-	           _tr("Lighten"), _tr("Screen"), _tr("Dodge"), _tr("Add"), _tr("Overlay"), _tr("Soft Light"), _tr("Linear Light"), _tr("Difference"),
-	           _tr("Exclusion"), _tr("Subtract"), _tr("Divide"), _tr("Hue"), _tr("Saturation"), _tr("Color"), _tr("Value"));
-	mix_color_node_def = GC_ALLOC_INIT(ui_node_t, {.id     = 0,
-	                                               .name   = _tr("Mix Color"),
-	                                               .type   = "MIX_RGB",
-	                                               .x      = 0,
-	                                               .y      = 0,
-	                                               .color  = 0xff448c6d,
-	                                               .inputs = any_array_create_from_raw(
-	                                                   (void *[]){
-	                                                       GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
-	                                                                                        .node_id       = 0,
-	                                                                                        .name          = _tr("Factor"),
-	                                                                                        .type          = "VALUE",
-	                                                                                        .color         = 0xffa1a1a1,
-	                                                                                        .default_value = f32_array_create_x(0.5),
-	                                                                                        .min           = 0.0,
-	                                                                                        .max           = 1.0,
-	                                                                                        .precision     = 100,
-	                                                                                        .display       = 0}),
-	                                                       GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
-	                                                                                        .node_id       = 0,
-	                                                                                        .name          = _tr("Color 1"),
-	                                                                                        .type          = "RGBA",
-	                                                                                        .color         = 0xffc7c729,
-	                                                                                        .default_value = f32_array_create_xyzw(0.5, 0.5, 0.5, 1.0),
-	                                                                                        .min           = 0.0,
-	                                                                                        .max           = 1.0,
-	                                                                                        .precision     = 100,
-	                                                                                        .display       = 0}),
-	                                                       GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
-	                                                                                        .node_id       = 0,
-	                                                                                        .name          = _tr("Color 2"),
-	                                                                                        .type          = "RGBA",
-	                                                                                        .color         = 0xffc7c729,
-	                                                                                        .default_value = f32_array_create_xyzw(0.5, 0.5, 0.5, 1.0),
-	                                                                                        .min           = 0.0,
-	                                                                                        .max           = 1.0,
-	                                                                                        .precision     = 100,
-	                                                                                        .display       = 0}),
-	                                                   },
-	                                                   3),
-	                                               .outputs = any_array_create_from_raw(
-	                                                   (void *[]){
-	                                                       GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
-	                                                                                        .node_id       = 0,
-	                                                                                        .name          = _tr("Color"),
-	                                                                                        .type          = "RGBA",
-	                                                                                        .color         = 0xffc7c729,
-	                                                                                        .default_value = f32_array_create_xyzw(0.8, 0.8, 0.8, 1.0),
-	                                                                                        .min           = 0.0,
-	                                                                                        .max           = 1.0,
-	                                                                                        .precision     = 100,
-	                                                                                        .display       = 0}),
-	                                                   },
-	                                                   1),
-	                                               .buttons = any_array_create_from_raw(
-	                                                   (void *[]){
-	                                                       GC_ALLOC_INIT(ui_node_button_t, {.name          = _tr("blend_type"),
-	                                                                                        .type          = "ENUM",
-	                                                                                        .output        = 0,
-	                                                                                        .default_value = f32_array_create_x(0),
-	                                                                                        .data      = u8_array_create_from_string(mix_color_blend_type_data),
-	                                                                                        .min       = 0.0,
-	                                                                                        .max       = 1.0,
-	                                                                                        .precision = 100,
-	                                                                                        .height    = 0}),
-	                                                       GC_ALLOC_INIT(ui_node_button_t, {.name          = _tr("Clamp Factor"),
-	                                                                                        .type          = "BOOL",
-	                                                                                        .output        = 0,
-	                                                                                        .default_value = f32_array_create_x(0),
-	                                                                                        .data          = NULL,
-	                                                                                        .min           = 0.0,
-	                                                                                        .max           = 1.0,
-	                                                                                        .precision     = 100,
-	                                                                                        .height        = 0}),
-	                                                       GC_ALLOC_INIT(ui_node_button_t, {.name          = _tr("Clamp Result"),
-	                                                                                        .type          = "BOOL",
-	                                                                                        .output        = 0,
-	                                                                                        .default_value = f32_array_create_x(0),
-	                                                                                        .data          = NULL,
-	                                                                                        .min           = 0.0,
-	                                                                                        .max           = 1.0,
-	                                                                                        .precision     = 100,
-	                                                                                        .height        = 0}),
-	                                                   },
-	                                                   3),
-	                                               .width = 0,
-	                                               .flags = 0});
-	gc_root(mix_color_node_def);
-
-	any_array_push(nodes_material_color, mix_color_node_def);
-	any_map_set(parser_material_node_vectors, "MIX_RGB", mix_color_node_vector);
-}
-
 char *mix_color_node_vector(ui_node_t *node, ui_node_socket_t *socket) {
 	char *fac     = parser_material_parse_value_input(node->inputs->buffer[0], false);
 	char *fac_var = string("%s_fac", parser_material_node_name(node, NULL));
@@ -208,4 +109,103 @@ char *mix_color_node_vector(ui_node_t *node, ui_node_socket_t *socket) {
 	else {
 		return out_col;
 	}
+}
+
+void mix_color_node_init() {
+
+	char *mix_color_blend_type_data =
+	    string("%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s", _tr("Mix"), _tr("Darken"), _tr("Multiply"), _tr("Burn"),
+	           _tr("Lighten"), _tr("Screen"), _tr("Dodge"), _tr("Add"), _tr("Overlay"), _tr("Soft Light"), _tr("Linear Light"), _tr("Difference"),
+	           _tr("Exclusion"), _tr("Subtract"), _tr("Divide"), _tr("Hue"), _tr("Saturation"), _tr("Color"), _tr("Value"));
+	mix_color_node_def = GC_ALLOC_INIT(ui_node_t, {.id     = 0,
+	                                               .name   = _tr("Mix Color"),
+	                                               .type   = "MIX_RGB",
+	                                               .x      = 0,
+	                                               .y      = 0,
+	                                               .color  = 0xff448c6d,
+	                                               .inputs = any_array_create_from_raw(
+	                                                   (void *[]){
+	                                                       GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
+	                                                                                        .node_id       = 0,
+	                                                                                        .name          = _tr("Factor"),
+	                                                                                        .type          = "VALUE",
+	                                                                                        .color         = 0xffa1a1a1,
+	                                                                                        .default_value = f32_array_create_x(0.5),
+	                                                                                        .min           = 0.0,
+	                                                                                        .max           = 1.0,
+	                                                                                        .precision     = 100,
+	                                                                                        .display       = 0}),
+	                                                       GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
+	                                                                                        .node_id       = 0,
+	                                                                                        .name          = _tr("Color 1"),
+	                                                                                        .type          = "RGBA",
+	                                                                                        .color         = 0xffc7c729,
+	                                                                                        .default_value = f32_array_create_xyzw(0.5, 0.5, 0.5, 1.0),
+	                                                                                        .min           = 0.0,
+	                                                                                        .max           = 1.0,
+	                                                                                        .precision     = 100,
+	                                                                                        .display       = 0}),
+	                                                       GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
+	                                                                                        .node_id       = 0,
+	                                                                                        .name          = _tr("Color 2"),
+	                                                                                        .type          = "RGBA",
+	                                                                                        .color         = 0xffc7c729,
+	                                                                                        .default_value = f32_array_create_xyzw(0.5, 0.5, 0.5, 1.0),
+	                                                                                        .min           = 0.0,
+	                                                                                        .max           = 1.0,
+	                                                                                        .precision     = 100,
+	                                                                                        .display       = 0}),
+	                                                   },
+	                                                   3),
+	                                               .outputs = any_array_create_from_raw(
+	                                                   (void *[]){
+	                                                       GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
+	                                                                                        .node_id       = 0,
+	                                                                                        .name          = _tr("Color"),
+	                                                                                        .type          = "RGBA",
+	                                                                                        .color         = 0xffc7c729,
+	                                                                                        .default_value = f32_array_create_xyzw(0.8, 0.8, 0.8, 1.0),
+	                                                                                        .min           = 0.0,
+	                                                                                        .max           = 1.0,
+	                                                                                        .precision     = 100,
+	                                                                                        .display       = 0}),
+	                                                   },
+	                                                   1),
+	                                               .buttons = any_array_create_from_raw(
+	                                                   (void *[]){
+	                                                       GC_ALLOC_INIT(ui_node_button_t, {.name          = _tr("blend_type"),
+	                                                                                        .type          = "ENUM",
+	                                                                                        .output        = 0,
+	                                                                                        .default_value = f32_array_create_x(0),
+	                                                                                        .data      = u8_array_create_from_string(mix_color_blend_type_data),
+	                                                                                        .min       = 0.0,
+	                                                                                        .max       = 1.0,
+	                                                                                        .precision = 100,
+	                                                                                        .height    = 0}),
+	                                                       GC_ALLOC_INIT(ui_node_button_t, {.name          = _tr("Clamp Factor"),
+	                                                                                        .type          = "BOOL",
+	                                                                                        .output        = 0,
+	                                                                                        .default_value = f32_array_create_x(0),
+	                                                                                        .data          = NULL,
+	                                                                                        .min           = 0.0,
+	                                                                                        .max           = 1.0,
+	                                                                                        .precision     = 100,
+	                                                                                        .height        = 0}),
+	                                                       GC_ALLOC_INIT(ui_node_button_t, {.name          = _tr("Clamp Result"),
+	                                                                                        .type          = "BOOL",
+	                                                                                        .output        = 0,
+	                                                                                        .default_value = f32_array_create_x(0),
+	                                                                                        .data          = NULL,
+	                                                                                        .min           = 0.0,
+	                                                                                        .max           = 1.0,
+	                                                                                        .precision     = 100,
+	                                                                                        .height        = 0}),
+	                                                   },
+	                                                   3),
+	                                               .width = 0,
+	                                               .flags = 0});
+	gc_root(mix_color_node_def);
+
+	any_array_push(nodes_material_color, mix_color_node_def);
+	any_map_set(parser_material_node_vectors, "MIX_RGB", mix_color_node_vector);
 }

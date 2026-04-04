@@ -7,6 +7,41 @@ void ui_toolbar_draw_tool_select_tool(void *_) {
 	context_select_tool(_ui_toolbar_i);
 }
 
+void ui_toolbar_tool_properties_menu_draw() {
+	ui->changed = false;
+	ui_header_draw_tool_properties();
+	if (ui->changed || ui->is_typing) {
+		ui_menu_keep_open = true;
+	}
+	if (base_view3d_show && ui_button(tr("Pin to Header"), UI_ALIGN_LEFT, "")) {
+		config_raw->layout->buffer[LAYOUT_SIZE_HEADER] = 1;
+	}
+	if (base_view3d_show && ui_button(tr("Hide 3D View"), UI_ALIGN_LEFT, "")) {
+		ui_base_show_3d_view();
+	}
+}
+
+void ui_toolbar_tool_properties_menu() {
+	i32 y = ui->_y - 2 * UI_SCALE();
+	if (!base_view3d_show) {
+		y += ui_toolbar_w(false);
+	}
+
+#ifdef IRON_IOS
+	if (config_is_iphone() && base_view3d_show) {
+		y += ui_toolbar_w(false);
+	}
+#endif
+
+	ui_menu_draw(&ui_toolbar_tool_properties_menu_draw, ui->_x + ui->_w + 6 * UI_SCALE(), y);
+}
+
+void ui_toolbar_draw_highlight() {
+	i32 size = ui_toolbar_w(false) - 4;
+	draw_set_color(ui->ops->theme->HIGHLIGHT_COL);
+	ui_draw_rect(true, ui->_x + -1, ui->_y + 2, size + 2, size + 2);
+}
+
 void ui_toolbar_draw_tool(i32 tool, gpu_texture_t *img, i32 icon_accent) {
 	ui->_x += 2;
 	if (context_raw->tool == tool) {
@@ -211,39 +246,4 @@ void ui_toolbar_render_ui() {
 		ui_end_window();
 		ui->ops->theme->SCROLL_W = _SCROLL_W;
 	}
-}
-
-void ui_toolbar_tool_properties_menu_draw() {
-	ui->changed = false;
-	ui_header_draw_tool_properties();
-	if (ui->changed || ui->is_typing) {
-		ui_menu_keep_open = true;
-	}
-	if (base_view3d_show && ui_button(tr("Pin to Header"), UI_ALIGN_LEFT, "")) {
-		config_raw->layout->buffer[LAYOUT_SIZE_HEADER] = 1;
-	}
-	if (base_view3d_show && ui_button(tr("Hide 3D View"), UI_ALIGN_LEFT, "")) {
-		ui_base_show_3d_view();
-	}
-}
-
-void ui_toolbar_tool_properties_menu() {
-	i32 y = ui->_y - 2 * UI_SCALE();
-	if (!base_view3d_show) {
-		y += ui_toolbar_w(false);
-	}
-
-#ifdef IRON_IOS
-	if (config_is_iphone() && base_view3d_show) {
-		y += ui_toolbar_w(false);
-	}
-#endif
-
-	ui_menu_draw(&ui_toolbar_tool_properties_menu_draw, ui->_x + ui->_w + 6 * UI_SCALE(), y);
-}
-
-void ui_toolbar_draw_highlight() {
-	i32 size = ui_toolbar_w(false) - 4;
-	draw_set_color(ui->ops->theme->HIGHLIGHT_COL);
-	ui_draw_rect(true, ui->_x + -1, ui->_y + 2, size + 2, size + 2);
 }

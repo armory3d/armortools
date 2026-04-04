@@ -1,6 +1,23 @@
 
 #include "../global.h"
 
+char *vector_rotate_node_vector(ui_node_t *node, ui_node_socket_t *socket) {
+	char *vec    = parser_material_parse_vector_input(node->inputs->buffer[0]);
+	char *center = parser_material_parse_vector_input(node->inputs->buffer[1]);
+	char *axis   = parser_material_parse_vector_input(node->inputs->buffer[2]);
+	char *angle  = parser_material_parse_value_input(node->inputs->buffer[3], false);
+	char *name   = parser_material_store_var_name(node);
+	char *v      = string("%s_v", name);
+	char *ax     = string("%s_ax", name);
+	char *cosA   = string("%s_cosA", name);
+	char *sinA   = string("%s_sinA", name);
+	parser_material_write(parser_material_kong, string("var %s: float3 = %s - %s;", v, vec, center));
+	parser_material_write(parser_material_kong, string("var %s: float3 = normalize(%s);", ax, axis));
+	parser_material_write(parser_material_kong, string("var %s: float = cos(%s);", cosA, angle));
+	parser_material_write(parser_material_kong, string("var %s: float = sin(%s);", sinA, angle));
+	return string("(%s * %s + cross(%s, %s) * %s + %s * dot(%s, %s) * (1.0 - %s) + %s)", v, cosA, ax, v, sinA, ax, ax, v, cosA, center);
+}
+
 void vector_rotate_node_init() {
 
 	vector_rotate_node_def =
@@ -75,21 +92,4 @@ void vector_rotate_node_init() {
 
 	any_array_push(nodes_material_utilities, vector_rotate_node_def);
 	any_map_set(parser_material_node_vectors, "VECT_ROTATE", vector_rotate_node_vector);
-}
-
-char *vector_rotate_node_vector(ui_node_t *node, ui_node_socket_t *socket) {
-	char *vec    = parser_material_parse_vector_input(node->inputs->buffer[0]);
-	char *center = parser_material_parse_vector_input(node->inputs->buffer[1]);
-	char *axis   = parser_material_parse_vector_input(node->inputs->buffer[2]);
-	char *angle  = parser_material_parse_value_input(node->inputs->buffer[3], false);
-	char *name   = parser_material_store_var_name(node);
-	char *v      = string("%s_v", name);
-	char *ax     = string("%s_ax", name);
-	char *cosA   = string("%s_cosA", name);
-	char *sinA   = string("%s_sinA", name);
-	parser_material_write(parser_material_kong, string("var %s: float3 = %s - %s;", v, vec, center));
-	parser_material_write(parser_material_kong, string("var %s: float3 = normalize(%s);", ax, axis));
-	parser_material_write(parser_material_kong, string("var %s: float = cos(%s);", cosA, angle));
-	parser_material_write(parser_material_kong, string("var %s: float = sin(%s);", sinA, angle));
-	return string("(%s * %s + cross(%s, %s) * %s + %s * dot(%s, %s) * (1.0 - %s) + %s)", v, cosA, ax, v, sinA, ax, ax, v, cosA, center);
 }

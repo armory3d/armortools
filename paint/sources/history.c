@@ -49,6 +49,45 @@ void history_undo_delete_layer_group(void *_) {
 	history_undo();
 }
 
+ui_node_canvas_t *history_get_canvas(history_step_t *step) {
+	if (step->canvas_group == -1) {
+		return project_materials->buffer[step->material]->canvas;
+	}
+	else {
+		return project_material_groups->buffer[step->canvas_group]->canvas;
+	}
+}
+
+void history_set_canvas(history_step_t *step, ui_node_canvas_t *canvas) {
+	if (step->canvas_group == -1) {
+		project_materials->buffer[step->material]->canvas = canvas;
+	}
+	else {
+		project_material_groups->buffer[step->canvas_group]->canvas = canvas;
+	}
+}
+
+void history_swap_canvas(history_step_t *step) {
+	if (step->canvas_type == 0) {
+		ui_node_canvas_t *_canvas = history_get_canvas(step);
+		history_set_canvas(step, step->canvas);
+		step->canvas          = _canvas;
+		context_raw->material = project_materials->buffer[step->material];
+	}
+	else {
+		ui_node_canvas_t *_canvas                    = project_brushes->buffer[step->brush]->canvas;
+		project_brushes->buffer[step->brush]->canvas = step->canvas;
+		step->canvas                                 = _canvas;
+		context_raw->brush                           = project_brushes->buffer[step->brush];
+	}
+
+	ui_nodes_t *nodes                = ui_nodes_get_nodes();
+	nodes->nodes_selected_id->length = 0;
+
+	ui_nodes_canvas_changed();
+	ui_nodes_hwnd->redraws = 2;
+}
+
 void history_undo() {
 	if (history_undos > 0) {
 		i32             active = history_steps->length - 1 - history_redos;
@@ -279,6 +318,60 @@ void history_redo_merge_layers2(void *_) {
 	layers_merge_down();
 }
 
+void history_copy_to_undo(i32 from_id, i32 to_id, bool is_mask) {
+	char *to_id_s   = i32_to_string(to_id);
+	char *from_id_s = i32_to_string(from_id);
+	if (is_mask) {
+		render_path_set_target(string("texpaint_undo%s", to_id_s), NULL, NULL, GPU_CLEAR_NONE, 0, 0.0);
+		render_path_bind_target(string("texpaint%s", from_id_s), "tex");
+		// render_path_draw_shader("Scene/copy_pass/copyR8_pass");
+		render_path_draw_shader("Scene/copy_pass/copy_pass");
+	}
+	else if (context_raw->layer->texpaint_sculpt != NULL) {
+		render_path_set_target(string("texpaint_sculpt_undo%s", to_id_s), NULL, NULL, GPU_CLEAR_NONE, 0, 0.0);
+		render_path_bind_target(string("texpaint_sculpt%s", from_id_s), "tex");
+		render_path_draw_shader("Scene/copy_pass/copyRGBA128_pass");
+	}
+	else {
+		string_array_t *additional = any_array_create_from_raw(
+		    (void *[]){
+		        string("texpaint_nor_undo%s", to_id_s),
+		        string("texpaint_pack_undo%s", to_id_s),
+		    },
+		    2);
+		render_path_set_target(string("texpaint_undo%s", to_id_s), additional, NULL, GPU_CLEAR_NONE, 0, 0.0);
+		render_path_bind_target(string("texpaint%s", from_id_s), "tex0");
+		render_path_bind_target(string("texpaint_nor%s", from_id_s), "tex1");
+		render_path_bind_target(string("texpaint_pack%s", from_id_s), "tex2");
+
+		gpu_texture_format_t format = base_bits_handle->i == TEXTURE_BITS_BITS8    ? GPU_TEXTURE_FORMAT_RGBA32
+		                              : base_bits_handle->i == TEXTURE_BITS_BITS16 ? GPU_TEXTURE_FORMAT_RGBA64
+		                                                                           : GPU_TEXTURE_FORMAT_RGBA128;
+
+		char *pipe = format == GPU_TEXTURE_FORMAT_RGBA32   ? "copy_mrt3_pass"
+		             : format == GPU_TEXTURE_FORMAT_RGBA64 ? "copy_mrt3RGBA64_pass"
+		                                                   : "copy_mrt3RGBA128_pass";
+		render_path_draw_shader(string("Scene/copy_mrt3_pass/%s", pipe));
+	}
+	history_undo_i = (history_undo_i + 1) % config_raw->undo_steps;
+}
+
+void history_copy_merging_layers() {
+	slot_layer_t *lay = context_raw->layer;
+	history_copy_to_undo(lay->id, history_undo_i, slot_layer_is_mask(context_raw->layer));
+
+	i32 below = array_index_of(project_layers, lay) - 1;
+	lay       = project_layers->buffer[below];
+	history_copy_to_undo(lay->id, history_undo_i, slot_layer_is_mask(context_raw->layer));
+}
+
+void history_copy_merging_layers2(slot_layer_t_array_t *layers) {
+	for (i32 i = 0; i < layers->length; ++i) {
+		slot_layer_t *layer = layers->buffer[i];
+		history_copy_to_undo(layer->id, history_undo_i, slot_layer_is_mask(layer));
+	}
+}
+
 void history_redo_merge_layers(void *_) {
 	history_copy_merging_layers();
 }
@@ -308,6 +401,12 @@ void history_redo_new_white_mask(slot_layer_t *l) {
 
 void history_redo_new_black_mask(slot_layer_t *l) {
 	slot_layer_clear(l, 0x00000000, NULL, 1.0, layers_default_rough, 0.0);
+}
+
+void history_swap_active() {
+	slot_layer_t *undo_layer = history_undo_layers->buffer[history_undo_i];
+	slot_layer_swap(undo_layer, context_raw->layer);
+	history_undo_i = (history_undo_i + 1) % config_raw->undo_steps;
 }
 
 void history_redo() {
@@ -499,6 +598,58 @@ void history_reset() {
 	history_undo_i = 0;
 }
 
+history_step_t *history_push(history_action_t action) {
+	char *name = history_action_to_string(action);
+#if defined(IRON_WINDOWS) || defined(IRON_LINUX) || defined(IRON_MACOS)
+	char *filename = string_equals(project_filepath, "")
+	                     ? ui_files_filename
+	                     : substring(project_filepath, string_last_index_of(project_filepath, PATH_SEP) + 1, string_length(project_filepath) - 4);
+	sys_title_set(string("%s* - %s", filename, manifest_title));
+#endif
+
+	if (config_raw->touch_ui) {
+		// Refresh undo & redo buttons
+		ui_menubar_menu_handle->redraws = 2;
+	}
+
+	if (history_undos < config_raw->undo_steps) {
+		history_undos++;
+	}
+	if (history_redos > 0) {
+		for (i32 i = 0; i < history_redos; ++i) {
+			array_pop(history_steps);
+		}
+		history_redos = 0;
+	}
+
+	i32 opos = array_index_of(project_paint_objects, context_raw->paint_object);
+	i32 lpos = array_index_of(project_layers, context_raw->layer);
+	i32 mpos = array_index_of(project_materials, context_raw->material);
+	i32 bpos = array_index_of(project_brushes, context_raw->brush);
+
+	history_step_t *step =
+	    GC_ALLOC_INIT(history_step_t, {.name           = name,
+	                                   .action         = action,
+	                                   .layer          = lpos,
+	                                   .layer_type     = slot_layer_is_mask(context_raw->layer)    ? LAYER_SLOT_TYPE_MASK
+	                                                     : slot_layer_is_group(context_raw->layer) ? LAYER_SLOT_TYPE_GROUP
+	                                                                                               : LAYER_SLOT_TYPE_LAYER,
+	                                   .layer_parent   = context_raw->layer->parent == NULL ? -1 : array_index_of(project_layers, context_raw->layer->parent),
+	                                   .object         = opos,
+	                                   .material       = mpos,
+	                                   .brush          = bpos,
+	                                   .layer_opacity  = context_raw->layer->mask_opacity,
+	                                   .layer_object   = context_raw->layer->object_mask,
+	                                   .layer_blending = context_raw->layer->blending});
+
+	any_array_push(history_steps, step);
+
+	while (history_steps->length > config_raw->undo_steps + 1) {
+		array_shift(history_steps);
+	}
+	return history_steps->buffer[history_steps->length - 1];
+}
+
 void history_edit_nodes(ui_node_canvas_t *canvas, i32 canvas_type, i32 canvas_group) {
 	history_step_t *step = history_push(HISTORY_ACTION_EDIT_NODES);
 	step->canvas_group   = canvas_group;
@@ -590,11 +741,6 @@ void history_invert_mask() {
 	history_push(HISTORY_ACTION_INVERT_MASK);
 }
 
-void history_apply_filter() {
-	history_copy_to_undo(context_raw->layer->id, history_undo_i, true);
-	history_push(HISTORY_ACTION_APPLY_FILTER);
-}
-
 void history_to_fill_layer() {
 	history_copy_to_undo(context_raw->layer->id, history_undo_i, false);
 	history_push(HISTORY_ACTION_TO_FILL_LAYER);
@@ -646,155 +792,4 @@ void history_delete_material_group(node_group_t *group) {
 	step->canvas_type    = CANVAS_TYPE_MATERIAL;
 	step->canvas_group   = array_index_of(project_material_groups, group);
 	step->canvas         = util_clone_canvas(group->canvas);
-}
-
-history_step_t *history_push(history_action_t action) {
-	char *name = history_action_to_string(action);
-#if defined(IRON_WINDOWS) || defined(IRON_LINUX) || defined(IRON_MACOS)
-	char *filename = string_equals(project_filepath, "")
-	                     ? ui_files_filename
-	                     : substring(project_filepath, string_last_index_of(project_filepath, PATH_SEP) + 1, string_length(project_filepath) - 4);
-	sys_title_set(string("%s* - %s", filename, manifest_title));
-#endif
-
-	if (config_raw->touch_ui) {
-		// Refresh undo & redo buttons
-		ui_menubar_menu_handle->redraws = 2;
-	}
-
-	if (history_undos < config_raw->undo_steps) {
-		history_undos++;
-	}
-	if (history_redos > 0) {
-		for (i32 i = 0; i < history_redos; ++i) {
-			array_pop(history_steps);
-		}
-		history_redos = 0;
-	}
-
-	i32 opos = array_index_of(project_paint_objects, context_raw->paint_object);
-	i32 lpos = array_index_of(project_layers, context_raw->layer);
-	i32 mpos = array_index_of(project_materials, context_raw->material);
-	i32 bpos = array_index_of(project_brushes, context_raw->brush);
-
-	history_step_t *step =
-	    GC_ALLOC_INIT(history_step_t, {.name           = name,
-	                                   .action         = action,
-	                                   .layer          = lpos,
-	                                   .layer_type     = slot_layer_is_mask(context_raw->layer)    ? LAYER_SLOT_TYPE_MASK
-	                                                     : slot_layer_is_group(context_raw->layer) ? LAYER_SLOT_TYPE_GROUP
-	                                                                                               : LAYER_SLOT_TYPE_LAYER,
-	                                   .layer_parent   = context_raw->layer->parent == NULL ? -1 : array_index_of(project_layers, context_raw->layer->parent),
-	                                   .object         = opos,
-	                                   .material       = mpos,
-	                                   .brush          = bpos,
-	                                   .layer_opacity  = context_raw->layer->mask_opacity,
-	                                   .layer_object   = context_raw->layer->object_mask,
-	                                   .layer_blending = context_raw->layer->blending});
-
-	any_array_push(history_steps, step);
-
-	while (history_steps->length > config_raw->undo_steps + 1) {
-		array_shift(history_steps);
-	}
-	return history_steps->buffer[history_steps->length - 1];
-}
-
-void history_copy_merging_layers() {
-	slot_layer_t *lay = context_raw->layer;
-	history_copy_to_undo(lay->id, history_undo_i, slot_layer_is_mask(context_raw->layer));
-
-	i32 below = array_index_of(project_layers, lay) - 1;
-	lay       = project_layers->buffer[below];
-	history_copy_to_undo(lay->id, history_undo_i, slot_layer_is_mask(context_raw->layer));
-}
-
-void history_copy_merging_layers2(slot_layer_t_array_t *layers) {
-	for (i32 i = 0; i < layers->length; ++i) {
-		slot_layer_t *layer = layers->buffer[i];
-		history_copy_to_undo(layer->id, history_undo_i, slot_layer_is_mask(layer));
-	}
-}
-
-void history_swap_active() {
-	slot_layer_t *undo_layer = history_undo_layers->buffer[history_undo_i];
-	slot_layer_swap(undo_layer, context_raw->layer);
-	history_undo_i = (history_undo_i + 1) % config_raw->undo_steps;
-}
-
-void history_copy_to_undo(i32 from_id, i32 to_id, bool is_mask) {
-	char *to_id_s   = i32_to_string(to_id);
-	char *from_id_s = i32_to_string(from_id);
-	if (is_mask) {
-		render_path_set_target(string("texpaint_undo%s", to_id_s), NULL, NULL, GPU_CLEAR_NONE, 0, 0.0);
-		render_path_bind_target(string("texpaint%s", from_id_s), "tex");
-		// render_path_draw_shader("Scene/copy_pass/copyR8_pass");
-		render_path_draw_shader("Scene/copy_pass/copy_pass");
-	}
-	else if (context_raw->layer->texpaint_sculpt != NULL) {
-		render_path_set_target(string("texpaint_sculpt_undo%s", to_id_s), NULL, NULL, GPU_CLEAR_NONE, 0, 0.0);
-		render_path_bind_target(string("texpaint_sculpt%s", from_id_s), "tex");
-		render_path_draw_shader("Scene/copy_pass/copyRGBA128_pass");
-	}
-	else {
-		string_array_t *additional = any_array_create_from_raw(
-		    (void *[]){
-		        string("texpaint_nor_undo%s", to_id_s),
-		        string("texpaint_pack_undo%s", to_id_s),
-		    },
-		    2);
-		render_path_set_target(string("texpaint_undo%s", to_id_s), additional, NULL, GPU_CLEAR_NONE, 0, 0.0);
-		render_path_bind_target(string("texpaint%s", from_id_s), "tex0");
-		render_path_bind_target(string("texpaint_nor%s", from_id_s), "tex1");
-		render_path_bind_target(string("texpaint_pack%s", from_id_s), "tex2");
-
-		gpu_texture_format_t format = base_bits_handle->i == TEXTURE_BITS_BITS8    ? GPU_TEXTURE_FORMAT_RGBA32
-		                              : base_bits_handle->i == TEXTURE_BITS_BITS16 ? GPU_TEXTURE_FORMAT_RGBA64
-		                                                                           : GPU_TEXTURE_FORMAT_RGBA128;
-
-		char *pipe = format == GPU_TEXTURE_FORMAT_RGBA32   ? "copy_mrt3_pass"
-		             : format == GPU_TEXTURE_FORMAT_RGBA64 ? "copy_mrt3RGBA64_pass"
-		                                                   : "copy_mrt3RGBA128_pass";
-		render_path_draw_shader(string("Scene/copy_mrt3_pass/%s", pipe));
-	}
-	history_undo_i = (history_undo_i + 1) % config_raw->undo_steps;
-}
-
-ui_node_canvas_t *history_get_canvas(history_step_t *step) {
-	if (step->canvas_group == -1) {
-		return project_materials->buffer[step->material]->canvas;
-	}
-	else {
-		return project_material_groups->buffer[step->canvas_group]->canvas;
-	}
-}
-
-void history_set_canvas(history_step_t *step, ui_node_canvas_t *canvas) {
-	if (step->canvas_group == -1) {
-		project_materials->buffer[step->material]->canvas = canvas;
-	}
-	else {
-		project_material_groups->buffer[step->canvas_group]->canvas = canvas;
-	}
-}
-
-void history_swap_canvas(history_step_t *step) {
-	if (step->canvas_type == 0) {
-		ui_node_canvas_t *_canvas = history_get_canvas(step);
-		history_set_canvas(step, step->canvas);
-		step->canvas          = _canvas;
-		context_raw->material = project_materials->buffer[step->material];
-	}
-	else {
-		ui_node_canvas_t *_canvas                    = project_brushes->buffer[step->brush]->canvas;
-		project_brushes->buffer[step->brush]->canvas = step->canvas;
-		step->canvas                                 = _canvas;
-		context_raw->brush                           = project_brushes->buffer[step->brush];
-	}
-
-	ui_nodes_t *nodes                = ui_nodes_get_nodes();
-	nodes->nodes_selected_id->length = 0;
-
-	ui_nodes_canvas_changed();
-	ui_nodes_hwnd->redraws = 2;
 }

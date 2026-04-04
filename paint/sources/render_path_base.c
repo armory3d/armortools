@@ -130,6 +130,28 @@ bool render_path_base_is_cached() {
 	return false;
 }
 
+void render_path_base_draw_split(void (*draw_commands)(void)) {
+	if (context_raw->split_view && !context_raw->paint2d_view) {
+		context_raw->ddirty  = 2;
+		camera_object_t *cam = scene_camera;
+
+		context_raw->view_index = context_raw->view_index == 0 ? 1 : 0;
+		transform_set_matrix(cam->base->transform, camera_views->buffer[context_raw->view_index]->v);
+		camera_object_build_mat(cam);
+		camera_object_build_proj(cam, -1.0);
+
+		render_path_base_draw_gbuffer();
+
+		bool use_live_layer = context_raw->tool == TOOL_TYPE_MATERIAL;
+		context_raw->viewport_mode == VIEWPORT_MODE_PATH_TRACE ? render_path_raytrace_draw(use_live_layer) : draw_commands();
+
+		context_raw->view_index = context_raw->view_index == 0 ? 1 : 0;
+		transform_set_matrix(cam->base->transform, camera_views->buffer[context_raw->view_index]->v);
+		camera_object_build_mat(cam);
+		camera_object_build_proj(cam, -1.0);
+	}
+}
+
 void render_path_base_commands(void (*draw_commands)(void)) {
 	if (render_path_base_is_cached()) {
 		return;
@@ -200,28 +222,6 @@ void render_path_base_draw_bloom(char *source, char *target) {
 		render_path_set_target(mip_level == 0 ? target : render_path_base_bloom_mipmaps->buffer[mip_level - 1]->name, NULL, NULL, GPU_CLEAR_NONE, 0, 0.0);
 		render_path_bind_target(render_path_base_bloom_mipmaps->buffer[mip_level]->name, "tex");
 		render_path_draw_shader("Scene/bloom_pass/bloom_upsample_pass");
-	}
-}
-
-void render_path_base_draw_split(void (*draw_commands)(void)) {
-	if (context_raw->split_view && !context_raw->paint2d_view) {
-		context_raw->ddirty  = 2;
-		camera_object_t *cam = scene_camera;
-
-		context_raw->view_index = context_raw->view_index == 0 ? 1 : 0;
-		transform_set_matrix(cam->base->transform, camera_views->buffer[context_raw->view_index]->v);
-		camera_object_build_mat(cam);
-		camera_object_build_proj(cam, -1.0);
-
-		render_path_base_draw_gbuffer();
-
-		bool use_live_layer = context_raw->tool == TOOL_TYPE_MATERIAL;
-		context_raw->viewport_mode == VIEWPORT_MODE_PATH_TRACE ? render_path_raytrace_draw(use_live_layer) : draw_commands();
-
-		context_raw->view_index = context_raw->view_index == 0 ? 1 : 0;
-		transform_set_matrix(cam->base->transform, camera_views->buffer[context_raw->view_index]->v);
-		camera_object_build_mat(cam);
-		camera_object_build_proj(cam, -1.0);
 	}
 }
 
@@ -351,6 +351,54 @@ void render_path_base_swap_buf(char *bufb) {
 	render_path_base_buf_swapped = !render_path_base_buf_swapped;
 }
 
+void render_path_base_make_gbuffer_copy_textures() {
+	render_target_t *copy = any_map_get(render_path_render_targets, "gbuffer0_copy");
+	render_target_t *g0   = any_map_get(render_path_render_targets, "gbuffer0");
+	if (copy == NULL || copy->_image->width != g0->_image->width || copy->_image->height != g0->_image->height) {
+		{
+			render_target_t *t = render_target_create();
+			t->name            = "gbuffer0_copy";
+			t->width           = 0;
+			t->height          = 0;
+			t->format          = "RGBA64";
+			t->scale           = render_path_base_get_super_sampling();
+			render_path_create_render_target(t);
+		}
+		{
+			render_target_t *t = render_target_create();
+			t->name            = "gbuffer1_copy";
+			t->width           = 0;
+			t->height          = 0;
+			t->format          = "RGBA64";
+			t->scale           = render_path_base_get_super_sampling();
+			render_path_create_render_target(t);
+		}
+		{
+			render_target_t *t = render_target_create();
+			t->name            = "gbuffer2_copy";
+			t->width           = 0;
+			t->height          = 0;
+			t->format          = "RGBA64";
+			t->scale           = render_path_base_get_super_sampling();
+			render_path_create_render_target(t);
+		}
+	}
+}
+
+void render_path_base_copy_to_gbuffer() {
+	string_array_t *additional = any_array_create_from_raw(
+	    (void *[]){
+	        "gbuffer1",
+	        "gbuffer2",
+	    },
+	    2);
+	render_path_set_target("gbuffer0", additional, NULL, GPU_CLEAR_NONE, 0, 0.0);
+	render_path_bind_target("gbuffer0_copy", "tex0");
+	render_path_bind_target("gbuffer1_copy", "tex1");
+	render_path_bind_target("gbuffer2_copy", "tex2");
+	render_path_draw_shader("Scene/copy_mrt3_pass/copy_mrt3RGBA64_pass");
+}
+
 void render_path_base_draw_gbuffer() {
 	render_path_set_target("gbuffer0", NULL, "main", GPU_CLEAR_DEPTH, 0, 1.0); // Only clear gbuffer0
 	string_array_t *additional = any_array_create_from_raw(
@@ -406,52 +454,4 @@ void render_path_base_draw_gbuffer() {
 		line_draw_render(context_raw->layer->decal_mat);
 		render_path_end();
 	}
-}
-
-void render_path_base_make_gbuffer_copy_textures() {
-	render_target_t *copy = any_map_get(render_path_render_targets, "gbuffer0_copy");
-	render_target_t *g0   = any_map_get(render_path_render_targets, "gbuffer0");
-	if (copy == NULL || copy->_image->width != g0->_image->width || copy->_image->height != g0->_image->height) {
-		{
-			render_target_t *t = render_target_create();
-			t->name            = "gbuffer0_copy";
-			t->width           = 0;
-			t->height          = 0;
-			t->format          = "RGBA64";
-			t->scale           = render_path_base_get_super_sampling();
-			render_path_create_render_target(t);
-		}
-		{
-			render_target_t *t = render_target_create();
-			t->name            = "gbuffer1_copy";
-			t->width           = 0;
-			t->height          = 0;
-			t->format          = "RGBA64";
-			t->scale           = render_path_base_get_super_sampling();
-			render_path_create_render_target(t);
-		}
-		{
-			render_target_t *t = render_target_create();
-			t->name            = "gbuffer2_copy";
-			t->width           = 0;
-			t->height          = 0;
-			t->format          = "RGBA64";
-			t->scale           = render_path_base_get_super_sampling();
-			render_path_create_render_target(t);
-		}
-	}
-}
-
-void render_path_base_copy_to_gbuffer() {
-	string_array_t *additional = any_array_create_from_raw(
-	    (void *[]){
-	        "gbuffer1",
-	        "gbuffer2",
-	    },
-	    2);
-	render_path_set_target("gbuffer0", additional, NULL, GPU_CLEAR_NONE, 0, 0.0);
-	render_path_bind_target("gbuffer0_copy", "tex0");
-	render_path_bind_target("gbuffer1_copy", "tex1");
-	render_path_bind_target("gbuffer2_copy", "tex2");
-	render_path_draw_shader("Scene/copy_mrt3_pass/copy_mrt3RGBA64_pass");
 }

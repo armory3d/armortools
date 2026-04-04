@@ -9,6 +9,13 @@ logic_node_t *logic_node_create(logic_node_ext_t *ext) {
 	return n;
 }
 
+logic_node_input_t *logic_node_input_create(logic_node_ext_t *node, i32 from) {
+	logic_node_input_t *inp = GC_ALLOC_INIT(logic_node_input_t, {0});
+	inp->node               = node;
+	inp->from               = from;
+	return inp;
+}
+
 void logic_node_add_input(logic_node_t *self, logic_node_ext_t *node, i32 from) {
 	any_array_push(self->inputs, logic_node_input_create(node, from));
 }
@@ -31,24 +38,10 @@ gpu_texture_t *logic_node_get_as_image(logic_node_t *self, i32 from) {
 	return NULL;
 }
 
-gpu_texture_t *logic_node_get_cached_image(logic_node_t *self) {
-	if (self->get_cached_image != NULL) {
-		return self->get_cached_image(self->ext);
-	}
-	return NULL;
-}
-
 void logic_node_set(logic_node_t *self, void * value) {
 	if (self->set != NULL) {
 		self->set(self->ext, value);
 	}
-}
-
-logic_node_input_t *logic_node_input_create(logic_node_ext_t *node, i32 from) {
-	logic_node_input_t *inp = GC_ALLOC_INIT(logic_node_input_t, {0});
-	inp->node               = node;
-	inp->from               = from;
-	return inp;
 }
 
 logic_node_value_t *logic_node_input_get(logic_node_input_t *self) {

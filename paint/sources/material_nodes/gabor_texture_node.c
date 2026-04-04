@@ -105,6 +105,34 @@ fun tex_gabor_3d(co: float3, scale: float, frequency: float, anisotropy: float, 
 } \
 ";
 
+char *gabor_texture_node_value(ui_node_t *node, ui_node_socket_t *socket) {
+	node_shader_add_function(parser_material_kong, str_tex_gabor);
+	char             *co         = parser_material_get_coord(node);
+	char             *scale      = parser_material_parse_value_input(node->inputs->buffer[1], false);
+	char             *frequency  = parser_material_parse_value_input(node->inputs->buffer[2], false);
+	char             *anisotropy = parser_material_parse_value_input(node->inputs->buffer[3], false);
+	ui_node_button_t *but        = node->buttons->buffer[0];
+	i32               is_2d      = (i32)but->default_value->buffer[0] == 0;
+	char             *res;
+	if (is_2d) {
+		char *ori2d = parser_material_parse_value_input(node->inputs->buffer[5], false);
+		res         = string("tex_gabor_2d(%s, %s, %s, %s, %s)", co, scale, frequency, anisotropy, ori2d);
+	}
+	else {
+		char *ori3d = parser_material_parse_vector_input(node->inputs->buffer[4]);
+		res         = string("tex_gabor_3d(%s, %s, %s, %s, %s)", co, scale, frequency, anisotropy, ori3d);
+	}
+	if (socket == node->outputs->buffer[0]) {
+		return string("%s.x", res);
+	}
+	else if (socket == node->outputs->buffer[1]) {
+		return string("%s.y", res);
+	}
+	else {
+		return string("%s.z", res);
+	}
+}
+
 void gabor_texture_node_init() {
 
 	char *gabor_dimensions_data = string("%s\n%s", _tr("2D"), _tr("3D"));
@@ -232,32 +260,4 @@ void gabor_texture_node_init() {
 
 	any_array_push(nodes_material_texture, gabor_texture_node_def);
 	any_map_set(parser_material_node_values, "TEX_GABOR", gabor_texture_node_value);
-}
-
-char *gabor_texture_node_value(ui_node_t *node, ui_node_socket_t *socket) {
-	node_shader_add_function(parser_material_kong, str_tex_gabor);
-	char             *co         = parser_material_get_coord(node);
-	char             *scale      = parser_material_parse_value_input(node->inputs->buffer[1], false);
-	char             *frequency  = parser_material_parse_value_input(node->inputs->buffer[2], false);
-	char             *anisotropy = parser_material_parse_value_input(node->inputs->buffer[3], false);
-	ui_node_button_t *but        = node->buttons->buffer[0];
-	i32               is_2d      = (i32)but->default_value->buffer[0] == 0;
-	char             *res;
-	if (is_2d) {
-		char *ori2d = parser_material_parse_value_input(node->inputs->buffer[5], false);
-		res         = string("tex_gabor_2d(%s, %s, %s, %s, %s)", co, scale, frequency, anisotropy, ori2d);
-	}
-	else {
-		char *ori3d = parser_material_parse_vector_input(node->inputs->buffer[4]);
-		res         = string("tex_gabor_3d(%s, %s, %s, %s, %s)", co, scale, frequency, anisotropy, ori3d);
-	}
-	if (socket == node->outputs->buffer[0]) {
-		return string("%s.x", res);
-	}
-	else if (socket == node->outputs->buffer[1]) {
-		return string("%s.y", res);
-	}
-	else {
-		return string("%s.z", res);
-	}
 }

@@ -1,30 +1,6 @@
 
 #include "global.h"
 
-void uniforms_ext_init() {
-	gc_unroot(uniforms_i32_links);
-	uniforms_i32_links = uniforms_ext_i32_link;
-	gc_root(uniforms_i32_links);
-	gc_unroot(uniforms_f32_links);
-	uniforms_f32_links = uniforms_ext_f32_link;
-	gc_root(uniforms_f32_links);
-	gc_unroot(uniforms_vec2_links);
-	uniforms_vec2_links = uniforms_ext_vec2_link;
-	gc_root(uniforms_vec2_links);
-	gc_unroot(uniforms_vec3_links);
-	uniforms_vec3_links = uniforms_ext_vec3_link;
-	gc_root(uniforms_vec3_links);
-	gc_unroot(uniforms_vec4_links);
-	uniforms_vec4_links = uniforms_ext_vec4_link;
-	gc_root(uniforms_vec4_links);
-	gc_unroot(uniforms_mat4_links);
-	uniforms_mat4_links = uniforms_ext_mat4_link;
-	gc_root(uniforms_mat4_links);
-	gc_unroot(uniforms_tex_links);
-	uniforms_tex_links = uniforms_ext_tex_link;
-	gc_root(uniforms_tex_links);
-}
-
 i32 uniforms_ext_i32_link(object_t *object, material_data_t *mat, char *link) {
 	if (string_equals(link, "_bloom_current_mip")) {
 		return render_path_base_bloom_current_mip;
@@ -186,6 +162,14 @@ vec2_t uniforms_ext_vec2_link(object_t *object, material_data_t *mat, char *link
 	return vec2_nan();
 }
 
+f32 uniforms_ext_vec2d(f32 x) {
+	// Transform from 3d viewport coord to 2d view coord
+	context_raw->paint2d_view = false;
+	f32 res                   = (x * base_w() - base_w()) / (float)ui_view2d_ww;
+	context_raw->paint2d_view = true;
+	return res;
+}
+
 vec4_t uniforms_ext_vec3_link(object_t *object, material_data_t *mat, char *link) {
 	vec4_t v = vec4_nan();
 	if (string_equals(link, "_brush_direction")) {
@@ -241,14 +225,6 @@ vec4_t uniforms_ext_vec3_link(object_t *object, material_data_t *mat, char *link
 		return v;
 	}
 	return v;
-}
-
-f32 uniforms_ext_vec2d(f32 x) {
-	// Transform from 3d viewport coord to 2d view coord
-	context_raw->paint2d_view = false;
-	f32 res                   = (x * base_w() - base_w()) / (float)ui_view2d_ww;
-	context_raw->paint2d_view = true;
-	return res;
 }
 
 vec4_t uniforms_ext_vec4_link(object_t *object, material_data_t *mat, char *link) {
@@ -453,4 +429,28 @@ gpu_texture_t *uniforms_ext_tex_link(object_t *object, material_data_t *mat, cha
 		return rt->_image;
 	}
 	return NULL;
+}
+
+void uniforms_ext_init() {
+	gc_unroot(uniforms_i32_links);
+	uniforms_i32_links = uniforms_ext_i32_link;
+	gc_root(uniforms_i32_links);
+	gc_unroot(uniforms_f32_links);
+	uniforms_f32_links = uniforms_ext_f32_link;
+	gc_root(uniforms_f32_links);
+	gc_unroot(uniforms_vec2_links);
+	uniforms_vec2_links = uniforms_ext_vec2_link;
+	gc_root(uniforms_vec2_links);
+	gc_unroot(uniforms_vec3_links);
+	uniforms_vec3_links = uniforms_ext_vec3_link;
+	gc_root(uniforms_vec3_links);
+	gc_unroot(uniforms_vec4_links);
+	uniforms_vec4_links = uniforms_ext_vec4_link;
+	gc_root(uniforms_vec4_links);
+	gc_unroot(uniforms_mat4_links);
+	uniforms_mat4_links = uniforms_ext_mat4_link;
+	gc_root(uniforms_mat4_links);
+	gc_unroot(uniforms_tex_links);
+	uniforms_tex_links = uniforms_ext_tex_link;
+	gc_root(uniforms_tex_links);
 }

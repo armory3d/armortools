@@ -1,14 +1,6 @@
 
 #include "../global.h"
 
-vector_math_node_t *vector_math_node_create(ui_node_t *raw, f32_array_t *args) {
-	vector_math_node_t *n = GC_ALLOC_INIT(vector_math_node_t, {0});
-	n->base               = logic_node_create(n);
-	n->base->get          = vector_math_node_get;
-	n->v                  = vec4_create(0.0, 0.0, 0.0, 1.0);
-	return n;
-}
-
 logic_node_value_t *vector_math_node_get(vector_math_node_t *self, i32 from) {
 	vec4_t v1    = logic_node_input_get(self->base->inputs->buffer[0])->_vec4;
 	vec4_t v2    = logic_node_input_get(self->base->inputs->buffer[1])->_vec4;
@@ -134,4 +126,12 @@ logic_node_value_t *vector_math_node_get(vector_math_node_t *self, i32 from) {
 		logic_node_value_t *v = GC_ALLOC_INIT(logic_node_value_t, {._f32 = f});
 		return v;
 	}
+}
+
+vector_math_node_t *vector_math_node_create(ui_node_t *raw, f32_array_t *args) {
+	vector_math_node_t *n = GC_ALLOC_INIT(vector_math_node_t, {0});
+	n->base               = logic_node_create(n);
+	n->base->get          = vector_math_node_get;
+	n->v                  = vec4_create(0.0, 0.0, 0.0, 1.0);
+	return n;
 }

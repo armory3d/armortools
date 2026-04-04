@@ -1,6 +1,16 @@
 
 #include "../global.h"
 
+char *normal_node_vector(ui_node_t *node, ui_node_socket_t *socket) {
+	return parser_material_vec3(node->outputs->buffer[0]->default_value);
+}
+
+char *normal_node_value(ui_node_t *node, ui_node_socket_t *socket) {
+	char *nor    = parser_material_parse_vector_input(node->inputs->buffer[0]);
+	char *norout = parser_material_vec3(node->outputs->buffer[0]->default_value);
+	return string("dot(%s, %s)", norout, nor);
+}
+
 void normal_node_init() {
 	normal_node_def = GC_ALLOC_INIT(ui_node_t, {.id     = 0,
 	                                            .name   = _tr("Normal"),
@@ -66,14 +76,4 @@ void normal_node_init() {
 	any_array_push(nodes_material_utilities, normal_node_def);
 	any_map_set(parser_material_node_vectors, "NORMAL", normal_node_vector);
 	any_map_set(parser_material_node_values, "NORMAL", normal_node_value);
-}
-
-char *normal_node_vector(ui_node_t *node, ui_node_socket_t *socket) {
-	return parser_material_vec3(node->outputs->buffer[0]->default_value);
-}
-
-char *normal_node_value(ui_node_t *node, ui_node_socket_t *socket) {
-	char *nor    = parser_material_parse_vector_input(node->inputs->buffer[0]);
-	char *norout = parser_material_vec3(node->outputs->buffer[0]->default_value);
-	return string("dot(%s, %s)", norout, nor);
 }

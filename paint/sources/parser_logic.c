@@ -1,25 +1,11 @@
 
 #include "global.h"
 
-logic_node_ext_t *parser_logic_get_logic_node(ui_node_t *node) {
-	return any_map_get(parser_logic_node_map, parser_logic_node_name(node));
-}
-
 ui_node_t *parser_logic_get_node(i32 id) {
 	for (i32 i = 0; i < parser_logic_nodes->length; ++i) {
 		ui_node_t *n = parser_logic_nodes->buffer[i];
 		if (n->id == id) {
 			return n;
-		}
-	}
-	return NULL;
-}
-
-ui_node_link_t *parser_logic_get_link(i32 id) {
-	for (i32 i = 0; i < parser_logic_links->length; ++i) {
-		ui_node_link_t *l = parser_logic_links->buffer[i];
-		if (l->id == id) {
-			return l;
 		}
 	}
 	return NULL;
@@ -69,28 +55,57 @@ char *parser_logic_node_name(ui_node_t *node) {
 	return s;
 }
 
-void parser_logic_parse(ui_node_canvas_t *canvas) {
-	gc_unroot(parser_logic_nodes);
-	parser_logic_nodes = canvas->nodes;
-	gc_root(parser_logic_nodes);
-
-	gc_unroot(parser_logic_links);
-	parser_logic_links = canvas->links;
-	gc_root(parser_logic_links);
-
-	gc_unroot(parser_logic_parsed_nodes);
-	parser_logic_parsed_nodes = any_array_create_from_raw((void *[]){}, 0);
-	gc_root(parser_logic_parsed_nodes);
-
-	gc_unroot(parser_logic_node_map);
-	parser_logic_node_map = any_map_create();
-	gc_root(parser_logic_node_map);
-
-	ui_node_t_array_t *root_nodes = parser_logic_get_root_nodes(canvas);
-	for (i32 i = 0; i < root_nodes->length; ++i) {
-		ui_node_t *node = root_nodes->buffer[i];
-		parser_logic_build_node(node);
+logic_node_ext_t *parser_logic_create_node_instance(char *node_type, ui_node_t *raw, f32_array_t *args) {
+	if (any_map_get(parser_logic_custom_nodes, node_type) != NULL) {
+		logic_node_t *node = logic_node_create(NULL);
+		node->get          = any_map_get(parser_logic_custom_nodes, node_type);
+		node->ext          = GC_ALLOC_INIT(logic_node_ext_t, {.base = node});
+		return node->ext;
 	}
+	if (nodes_brush_creates == NULL) {
+		nodes_brush_init();
+	}
+	logic_node_ext_t *(*create)(ui_node_t *, f32_array_t *) = any_map_get(nodes_brush_creates, node_type);
+	return create(raw, args);
+}
+
+logic_node_ext_t *parser_logic_build_default_node(ui_node_socket_t *inp) {
+	logic_node_ext_t *v = NULL;
+
+	if (string_equals(inp->type, "VECTOR")) {
+		if (inp->default_value == NULL) {
+			inp->default_value = f32_array_create_xyz(0, 0, 0);
+		}
+		v = parser_logic_create_node_instance("vector_node", NULL, inp->default_value);
+	}
+	else if (string_equals(inp->type, "RGBA")) {
+		if (inp->default_value == NULL) {
+			inp->default_value = f32_array_create_xyzw(0, 0, 0, 0);
+		}
+		v = parser_logic_create_node_instance("color_node", NULL, inp->default_value);
+	}
+	else if (string_equals(inp->type, "RGB")) {
+		if (inp->default_value == NULL) {
+			inp->default_value = f32_array_create_xyzw(0, 0, 0, 0);
+		}
+		v = parser_logic_create_node_instance("color_node", NULL, inp->default_value);
+	}
+	else if (string_equals(inp->type, "VALUE")) {
+		v = parser_logic_create_node_instance("float_node", NULL, inp->default_value);
+	}
+	else if (string_equals(inp->type, "INT")) {
+		v = parser_logic_create_node_instance("integer_node", NULL, inp->default_value);
+	}
+	else if (string_equals(inp->type, "BOOLEAN")) {
+		v = parser_logic_create_node_instance("boolean_node", NULL, inp->default_value);
+	}
+	else if (string_equals(inp->type, "STRING")) {
+		v = parser_logic_create_node_instance("string_node", NULL, inp->default_value);
+	}
+	else {
+		v = parser_logic_create_node_instance("null_node", NULL, NULL);
+	}
+	return v;
 }
 
 char *parser_logic_build_node(ui_node_t *node) {
@@ -174,55 +189,26 @@ ui_node_t_array_t *parser_logic_get_root_nodes(ui_node_canvas_t *node_group) {
 	return roots;
 }
 
-logic_node_ext_t *parser_logic_build_default_node(ui_node_socket_t *inp) {
-	logic_node_ext_t *v = NULL;
+void parser_logic_parse(ui_node_canvas_t *canvas) {
+	gc_unroot(parser_logic_nodes);
+	parser_logic_nodes = canvas->nodes;
+	gc_root(parser_logic_nodes);
 
-	if (string_equals(inp->type, "VECTOR")) {
-		if (inp->default_value == NULL) {
-			inp->default_value = f32_array_create_xyz(0, 0, 0);
-		}
-		v = parser_logic_create_node_instance("vector_node", NULL, inp->default_value);
-	}
-	else if (string_equals(inp->type, "RGBA")) {
-		if (inp->default_value == NULL) {
-			inp->default_value = f32_array_create_xyzw(0, 0, 0, 0);
-		}
-		v = parser_logic_create_node_instance("color_node", NULL, inp->default_value);
-	}
-	else if (string_equals(inp->type, "RGB")) {
-		if (inp->default_value == NULL) {
-			inp->default_value = f32_array_create_xyzw(0, 0, 0, 0);
-		}
-		v = parser_logic_create_node_instance("color_node", NULL, inp->default_value);
-	}
-	else if (string_equals(inp->type, "VALUE")) {
-		v = parser_logic_create_node_instance("float_node", NULL, inp->default_value);
-	}
-	else if (string_equals(inp->type, "INT")) {
-		v = parser_logic_create_node_instance("integer_node", NULL, inp->default_value);
-	}
-	else if (string_equals(inp->type, "BOOLEAN")) {
-		v = parser_logic_create_node_instance("boolean_node", NULL, inp->default_value);
-	}
-	else if (string_equals(inp->type, "STRING")) {
-		v = parser_logic_create_node_instance("string_node", NULL, inp->default_value);
-	}
-	else {
-		v = parser_logic_create_node_instance("null_node", NULL, NULL);
-	}
-	return v;
-}
+	gc_unroot(parser_logic_links);
+	parser_logic_links = canvas->links;
+	gc_root(parser_logic_links);
 
-logic_node_ext_t *parser_logic_create_node_instance(char *node_type, ui_node_t *raw, f32_array_t *args) {
-	if (any_map_get(parser_logic_custom_nodes, node_type) != NULL) {
-		logic_node_t *node = logic_node_create(NULL);
-		node->get          = any_map_get(parser_logic_custom_nodes, node_type);
-		node->ext          = GC_ALLOC_INIT(logic_node_ext_t, {.base = node});
-		return node->ext;
+	gc_unroot(parser_logic_parsed_nodes);
+	parser_logic_parsed_nodes = any_array_create_from_raw((void *[]){}, 0);
+	gc_root(parser_logic_parsed_nodes);
+
+	gc_unroot(parser_logic_node_map);
+	parser_logic_node_map = any_map_create();
+	gc_root(parser_logic_node_map);
+
+	ui_node_t_array_t *root_nodes = parser_logic_get_root_nodes(canvas);
+	for (i32 i = 0; i < root_nodes->length; ++i) {
+		ui_node_t *node = root_nodes->buffer[i];
+		parser_logic_build_node(node);
 	}
-	if (nodes_brush_creates == NULL) {
-		nodes_brush_init();
-	}
-	logic_node_ext_t *(*create)(ui_node_t *, f32_array_t *) = any_map_get(nodes_brush_creates, node_type);
-	return create(raw, args);
 }

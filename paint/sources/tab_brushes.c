@@ -20,6 +20,13 @@ void tab_brushes_draw_duplicate(void * _) {
 	util_render_make_brush_preview();
 }
 
+void tab_brushes_delete_brush(slot_brush_t *b) {
+	i32 i = array_index_of(project_brushes, b);
+	context_select_brush(i == project_brushes->length - 1 ? i - 1 : i + 1);
+	array_splice(project_brushes, i, 1);
+	ui_base_hwnds->buffer[1]->redraws = 2;
+}
+
 void tab_brushes_draw_context_menu() {
 	i32 i = _tab_brushes_draw_i;
 	// let b: slot_brush_t = brushes[i];
@@ -170,11 +177,4 @@ void tab_brushes_draw(ui_handle_t *htab) {
 			tab_brushes_delete_brush(context_raw->brush);
 		}
 	}
-}
-
-void tab_brushes_delete_brush(slot_brush_t *b) {
-	i32 i = array_index_of(project_brushes, b);
-	context_select_brush(i == project_brushes->length - 1 ? i - 1 : i + 1);
-	array_splice(project_brushes, i, 1);
-	ui_base_hwnds->buffer[1]->redraws = 2;
 }

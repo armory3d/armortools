@@ -1,12 +1,6 @@
 
 #include "global.h"
 
-void tab_swatches_empty_set(gpu_texture_t *image) {
-	gc_unroot(_tab_swatches_empty);
-	_tab_swatches_empty = image;
-	gc_root(_tab_swatches_empty);
-}
-
 gpu_texture_t *tab_swatches_empty_get() {
 	if (_tab_swatches_empty == NULL) {
 		u8_array_t *b = u8_array_create(4);
@@ -21,7 +15,14 @@ gpu_texture_t *tab_swatches_empty_get() {
 	return _tab_swatches_empty;
 }
 
-void tab_swatches_draw_16719() {
+void tab_swatches_delete_swatch(swatch_color_t *swatch) {
+	i32 i = array_index_of(project_raw->swatches, swatch);
+	context_set_swatch(project_raw->swatches->buffer[i == project_raw->swatches->length - 1 ? i - 1 : i + 1]);
+	array_splice(project_raw->swatches, i, 1);
+	ui_base_hwnds->buffer[TAB_AREA_STATUS]->redraws = 2;
+}
+
+void tab_swatches_draw_menu() {
 	i32 i = _tab_swatches_draw_i;
 
 	if (ui_menu_button(tr("Duplicate"), "", ICON_DUPLICATE)) {
@@ -236,7 +237,7 @@ void tab_swatches_draw(ui_handle_t *htab) {
 
 					_tab_swatches_draw_i = i;
 
-					ui_menu_draw(&tab_swatches_draw_16719, -1, -1);
+					ui_menu_draw(&tab_swatches_draw_menu, -1, -1);
 				}
 				if (ui->is_hovered) {
 					i32 color = project_raw->swatches->buffer[i]->base;
@@ -285,11 +286,4 @@ void tab_swatches_accept_swatch_drop(swatch_color_t *swatch) {
 		i32 new_pos = tab_swatches_drag_pos - swatch_pos > 0 ? tab_swatches_drag_pos - 1 : tab_swatches_drag_pos;
 		array_insert(project_raw->swatches, new_pos, swatch);
 	}
-}
-
-void tab_swatches_delete_swatch(swatch_color_t *swatch) {
-	i32 i = array_index_of(project_raw->swatches, swatch);
-	context_set_swatch(project_raw->swatches->buffer[i == project_raw->swatches->length - 1 ? i - 1 : i + 1]);
-	array_splice(project_raw->swatches, i, 1);
-	ui_base_hwnds->buffer[TAB_AREA_STATUS]->redraws = 2;
 }

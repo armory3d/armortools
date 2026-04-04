@@ -52,6 +52,31 @@ fun tex_wave(co: float3, scale: float, distortion: float, detail_scale: float, d
 } \
 ";
 
+static char *wave_texture_node_result(ui_node_t *node) {
+	node_shader_add_function(parser_material_kong, str_tex_wave);
+	char             *co           = parser_material_get_coord(node);
+	char             *scale        = parser_material_parse_value_input(node->inputs->buffer[1], false);
+	char             *distortion   = parser_material_parse_value_input(node->inputs->buffer[2], false);
+	char             *detail_scale = parser_material_parse_value_input(node->inputs->buffer[3], false);
+	char             *detail_rough = parser_material_parse_value_input(node->inputs->buffer[4], false);
+	char             *phase        = parser_material_parse_value_input(node->inputs->buffer[5], false);
+	ui_node_button_t *but_type     = node->buttons->buffer[0];
+	ui_node_button_t *but_dir      = node->buttons->buffer[1];
+	ui_node_button_t *but_prof     = node->buttons->buffer[2];
+	i32               wave_type    = (i32)but_type->default_value->buffer[0];
+	i32               direction    = (i32)but_dir->default_value->buffer[0];
+	i32               profile      = (i32)but_prof->default_value->buffer[0];
+	return string("tex_wave(%s, %s, %s, %s, %s, %s, %d, %d, %d)", co, scale, distortion, detail_scale, detail_rough, phase, wave_type, direction, profile);
+}
+
+char *wave_texture_node_vector(ui_node_t *node, ui_node_socket_t *socket) {
+	return parser_material_to_vec3(wave_texture_node_result(node));
+}
+
+char *wave_texture_node_value(ui_node_t *node, ui_node_socket_t *socket) {
+	return wave_texture_node_result(node);
+}
+
 void wave_texture_node_init() {
 
 	char *wave_type_data      = string("%s\n%s", _tr("Bands"), _tr("Rings"));
@@ -191,29 +216,4 @@ void wave_texture_node_init() {
 	any_array_push(nodes_material_texture, wave_texture_node_def);
 	any_map_set(parser_material_node_vectors, "TEX_WAVE", wave_texture_node_vector);
 	any_map_set(parser_material_node_values, "TEX_WAVE", wave_texture_node_value);
-}
-
-static char *wave_texture_node_result(ui_node_t *node) {
-	node_shader_add_function(parser_material_kong, str_tex_wave);
-	char             *co           = parser_material_get_coord(node);
-	char             *scale        = parser_material_parse_value_input(node->inputs->buffer[1], false);
-	char             *distortion   = parser_material_parse_value_input(node->inputs->buffer[2], false);
-	char             *detail_scale = parser_material_parse_value_input(node->inputs->buffer[3], false);
-	char             *detail_rough = parser_material_parse_value_input(node->inputs->buffer[4], false);
-	char             *phase        = parser_material_parse_value_input(node->inputs->buffer[5], false);
-	ui_node_button_t *but_type     = node->buttons->buffer[0];
-	ui_node_button_t *but_dir      = node->buttons->buffer[1];
-	ui_node_button_t *but_prof     = node->buttons->buffer[2];
-	i32               wave_type    = (i32)but_type->default_value->buffer[0];
-	i32               direction    = (i32)but_dir->default_value->buffer[0];
-	i32               profile      = (i32)but_prof->default_value->buffer[0];
-	return string("tex_wave(%s, %s, %s, %s, %s, %s, %d, %d, %d)", co, scale, distortion, detail_scale, detail_rough, phase, wave_type, direction, profile);
-}
-
-char *wave_texture_node_vector(ui_node_t *node, ui_node_socket_t *socket) {
-	return parser_material_to_vec3(wave_texture_node_result(node));
-}
-
-char *wave_texture_node_value(ui_node_t *node, ui_node_socket_t *socket) {
-	return wave_texture_node_result(node);
 }

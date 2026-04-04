@@ -47,6 +47,112 @@ void parser_material_init() {
 	parser_material_parsing_basecolor = false;
 }
 
+void parse_normal_map_color_input(ui_node_socket_t *inp) {
+	parser_material_kong->frag_write_normal++;
+	gc_unroot(parser_material_out_normaltan);
+	parser_material_out_normaltan = string_copy(parser_material_parse_vector_input(inp));
+	gc_root(parser_material_out_normaltan);
+	bool _parser_material_is_frag = parser_material_is_frag;
+	parser_material_is_frag       = true;
+	if (!parser_material_arm_export_tangents) {
+		parser_material_write(parser_material_kong, string("var texn: float3 = (%s) * 2.0 - 1.0;", parser_material_out_normaltan));
+		parser_material_write(parser_material_kong, "texn.y = -texn.y;");
+		if (!parser_material_cotangent_frame_written) {
+			parser_material_cotangent_frame_written = true;
+			node_shader_add_function(parser_material_kong, str_cotangent_frame);
+		}
+		parser_material_kong->frag_n = true;
+		parser_material_write(parser_material_kong, "var TBN: float3x3 = cotangent_frame(n, vvec, tex_coord);");
+		parser_material_write(parser_material_kong, "n = TBN * normalize(texn);");
+	}
+	parser_material_is_frag = _parser_material_is_frag;
+	parser_material_kong->frag_write_normal--;
+}
+
+shader_out_t *parser_material_parse_shader(ui_node_t *node, ui_node_socket_t *socket) {
+	shader_out_t *sout = GC_ALLOC_INIT(shader_out_t, {.out_basecol    = "float3(0.8, 0.8, 0.8)",
+	                                                  .out_roughness  = "0.0",
+	                                                  .out_metallic   = "0.0",
+	                                                  .out_occlusion  = "1.0",
+	                                                  .out_opacity    = "1.0",
+	                                                  .out_height     = "0.0",
+	                                                  .out_emission   = "0.0",
+	                                                  .out_subsurface = "0.0"});
+	if (string_equals(node->type, "OUTPUT_MATERIAL_PBR")) {
+		if (parser_material_parse_surface) {
+			// Normal - parsed first to retrieve uv coords
+			parse_normal_map_color_input(node->inputs->buffer[5]);
+			// Base color
+			parser_material_parsing_basecolor = true;
+			sout->out_basecol                 = string_copy(parser_material_parse_vector_input(node->inputs->buffer[0]));
+			parser_material_parsing_basecolor = false;
+			// Occlusion
+			sout->out_occlusion = string_copy(parser_material_parse_value_input(node->inputs->buffer[2], false));
+			// Roughness
+			sout->out_roughness = string_copy(parser_material_parse_value_input(node->inputs->buffer[3], false));
+			// Metallic
+			sout->out_metallic = string_copy(parser_material_parse_value_input(node->inputs->buffer[4], false));
+			// Emission
+			if (parser_material_parse_emission) {
+				sout->out_emission = string_copy(parser_material_parse_value_input(node->inputs->buffer[6], false));
+			}
+			// Subsurface
+			if (parser_material_parse_subsurface) {
+				sout->out_subsurface = string_copy(parser_material_parse_value_input(node->inputs->buffer[8], false));
+			}
+		}
+
+		if (parser_material_parse_opacity) {
+			sout->out_opacity = string_copy(parser_material_parse_value_input(node->inputs->buffer[1], false));
+		}
+
+		// Displacement / Height
+		if (parser_material_parse_height) {
+			if (!parser_material_parse_height_as_channel) {
+				parser_material_is_frag = false;
+			}
+			sout->out_height = string_copy(parser_material_parse_value_input(node->inputs->buffer[7], false));
+			if (!parser_material_parse_height_as_channel) {
+				parser_material_is_frag = true;
+			}
+		}
+	}
+	return sout;
+}
+
+shader_out_t *parser_material_parse_shader_input(ui_node_socket_t *inp) {
+	ui_node_link_t *l         = parser_material_get_input_link(inp);
+	ui_node_t      *from_node = l != NULL ? parser_material_get_node(l->from_id) : NULL;
+	if (from_node != NULL) {
+		return parser_material_parse_shader(from_node, from_node->outputs->buffer[l->from_socket]);
+	}
+	else {
+		shader_out_t *sout = GC_ALLOC_INIT(shader_out_t, {.out_basecol    = "float3(0.8, 0.8, 0.8)",
+		                                                  .out_roughness  = "0.0",
+		                                                  .out_metallic   = "0.0",
+		                                                  .out_occlusion  = "1.0",
+		                                                  .out_opacity    = "1.0",
+		                                                  .out_height     = "0.0",
+		                                                  .out_emission   = "0.0",
+		                                                  .out_subsurface = "0.0"});
+		return sout;
+	}
+}
+
+shader_out_t *parser_material_parse_output(ui_node_t *node) {
+	if (parser_material_parse_surface || parser_material_parse_opacity) {
+		return parser_material_parse_shader_input(node->inputs->buffer[0]);
+	}
+	return NULL;
+}
+
+shader_out_t *parser_material_parse_output_pbr(ui_node_t *node) {
+	if (parser_material_parse_surface || parser_material_parse_opacity) {
+		return parser_material_parse_shader(node, NULL);
+	}
+	return NULL;
+}
+
 shader_out_t *parser_material_parse(ui_node_canvas_t *canvas, node_shader_context_t *_con, node_shader_t *_kong, material_context_t *_matcon) {
 	parser_material_init();
 	gc_unroot(parser_material_canvases);
@@ -199,20 +305,6 @@ void parser_material_finalize(node_shader_context_t *con) {
 	}
 }
 
-shader_out_t *parser_material_parse_output(ui_node_t *node) {
-	if (parser_material_parse_surface || parser_material_parse_opacity) {
-		return parser_material_parse_shader_input(node->inputs->buffer[0]);
-	}
-	return NULL;
-}
-
-shader_out_t *parser_material_parse_output_pbr(ui_node_t *node) {
-	if (parser_material_parse_surface || parser_material_parse_opacity) {
-		return parser_material_parse_shader(node, NULL);
-	}
-	return NULL;
-}
-
 ui_node_canvas_t *parser_material_get_group(char *name) {
 	for (i32 i = 0; i < project_material_groups->length; ++i) {
 		node_group_t *g = project_material_groups->buffer[i];
@@ -244,6 +336,31 @@ void parser_material_pop_group() {
 	gc_root(parser_material_links);
 }
 
+char *parser_material_parse_input(ui_node_socket_t *inp) {
+	if (string_equals(inp->type, "RGB")) {
+		return parser_material_parse_vector_input(inp);
+	}
+	else if (string_equals(inp->type, "RGBA")) {
+		return parser_material_parse_vector_input(inp);
+	}
+	else if (string_equals(inp->type, "VECTOR")) {
+		return parser_material_parse_vector_input(inp);
+	}
+	else if (string_equals(inp->type, "VALUE")) {
+		return parser_material_parse_value_input(inp, false);
+	}
+	return NULL;
+}
+
+i32 parser_material_socket_index(ui_node_t *node, ui_node_socket_t *socket) {
+	for (i32 i = 0; i < node->outputs->length; ++i) {
+		if (node->outputs->buffer[i] == socket) {
+			return i;
+		}
+	}
+	return -1;
+}
+
 char *parser_material_parse_group(ui_node_t *node, ui_node_socket_t *socket) {
 	any_array_push(parser_material_parents, node); // Entering group
 	parser_material_push_group(parser_material_get_group(node->name));
@@ -268,92 +385,6 @@ char *parser_material_parse_group_input(ui_node_t *node, ui_node_socket_t *socke
 	any_array_push(parser_material_parents, parent); // Return to group
 	parser_material_push_group(parser_material_get_group(parent->name));
 	return res;
-}
-
-char *parser_material_parse_input(ui_node_socket_t *inp) {
-	if (string_equals(inp->type, "RGB")) {
-		return parser_material_parse_vector_input(inp);
-	}
-	else if (string_equals(inp->type, "RGBA")) {
-		return parser_material_parse_vector_input(inp);
-	}
-	else if (string_equals(inp->type, "VECTOR")) {
-		return parser_material_parse_vector_input(inp);
-	}
-	else if (string_equals(inp->type, "VALUE")) {
-		return parser_material_parse_value_input(inp, false);
-	}
-	return NULL;
-}
-
-shader_out_t *parser_material_parse_shader_input(ui_node_socket_t *inp) {
-	ui_node_link_t *l         = parser_material_get_input_link(inp);
-	ui_node_t      *from_node = l != NULL ? parser_material_get_node(l->from_id) : NULL;
-	if (from_node != NULL) {
-		return parser_material_parse_shader(from_node, from_node->outputs->buffer[l->from_socket]);
-	}
-	else {
-		shader_out_t *sout = GC_ALLOC_INIT(shader_out_t, {.out_basecol    = "float3(0.8, 0.8, 0.8)",
-		                                                  .out_roughness  = "0.0",
-		                                                  .out_metallic   = "0.0",
-		                                                  .out_occlusion  = "1.0",
-		                                                  .out_opacity    = "1.0",
-		                                                  .out_height     = "0.0",
-		                                                  .out_emission   = "0.0",
-		                                                  .out_subsurface = "0.0"});
-		return sout;
-	}
-}
-
-shader_out_t *parser_material_parse_shader(ui_node_t *node, ui_node_socket_t *socket) {
-	shader_out_t *sout = GC_ALLOC_INIT(shader_out_t, {.out_basecol    = "float3(0.8, 0.8, 0.8)",
-	                                                  .out_roughness  = "0.0",
-	                                                  .out_metallic   = "0.0",
-	                                                  .out_occlusion  = "1.0",
-	                                                  .out_opacity    = "1.0",
-	                                                  .out_height     = "0.0",
-	                                                  .out_emission   = "0.0",
-	                                                  .out_subsurface = "0.0"});
-	if (string_equals(node->type, "OUTPUT_MATERIAL_PBR")) {
-		if (parser_material_parse_surface) {
-			// Normal - parsed first to retrieve uv coords
-			parse_normal_map_color_input(node->inputs->buffer[5]);
-			// Base color
-			parser_material_parsing_basecolor = true;
-			sout->out_basecol                 = string_copy(parser_material_parse_vector_input(node->inputs->buffer[0]));
-			parser_material_parsing_basecolor = false;
-			// Occlusion
-			sout->out_occlusion = string_copy(parser_material_parse_value_input(node->inputs->buffer[2], false));
-			// Roughness
-			sout->out_roughness = string_copy(parser_material_parse_value_input(node->inputs->buffer[3], false));
-			// Metallic
-			sout->out_metallic = string_copy(parser_material_parse_value_input(node->inputs->buffer[4], false));
-			// Emission
-			if (parser_material_parse_emission) {
-				sout->out_emission = string_copy(parser_material_parse_value_input(node->inputs->buffer[6], false));
-			}
-			// Subsurface
-			if (parser_material_parse_subsurface) {
-				sout->out_subsurface = string_copy(parser_material_parse_value_input(node->inputs->buffer[8], false));
-			}
-		}
-
-		if (parser_material_parse_opacity) {
-			sout->out_opacity = string_copy(parser_material_parse_value_input(node->inputs->buffer[1], false));
-		}
-
-		// Displacement / Height
-		if (parser_material_parse_height) {
-			if (!parser_material_parse_height_as_channel) {
-				parser_material_is_frag = false;
-			}
-			sout->out_height = string_copy(parser_material_parse_value_input(node->inputs->buffer[7], false));
-			if (!parser_material_parse_height_as_channel) {
-				parser_material_is_frag = true;
-			}
-		}
-	}
-	return sout;
 }
 
 void parser_material_write(node_shader_t *raw, char *s) {
@@ -397,28 +428,6 @@ char *parser_material_parse_vector(ui_node_t *node, ui_node_socket_t *socket) {
 		return minic_call_fn(cb, args, 2).p;
 	}
 	return "float3(0.0, 0.0, 0.0)";
-}
-
-void parse_normal_map_color_input(ui_node_socket_t *inp) {
-	parser_material_kong->frag_write_normal++;
-	gc_unroot(parser_material_out_normaltan);
-	parser_material_out_normaltan = string_copy(parser_material_parse_vector_input(inp));
-	gc_root(parser_material_out_normaltan);
-	bool _parser_material_is_frag = parser_material_is_frag;
-	parser_material_is_frag       = true;
-	if (!parser_material_arm_export_tangents) {
-		parser_material_write(parser_material_kong, string("var texn: float3 = (%s) * 2.0 - 1.0;", parser_material_out_normaltan));
-		parser_material_write(parser_material_kong, "texn.y = -texn.y;");
-		if (!parser_material_cotangent_frame_written) {
-			parser_material_cotangent_frame_written = true;
-			node_shader_add_function(parser_material_kong, str_cotangent_frame);
-		}
-		parser_material_kong->frag_n = true;
-		parser_material_write(parser_material_kong, "var TBN: float3x3 = cotangent_frame(n, vvec, tex_coord);");
-		parser_material_write(parser_material_kong, "n = TBN * normalize(texn);");
-	}
-	parser_material_is_frag = _parser_material_is_frag;
-	parser_material_kong->frag_write_normal--;
 }
 
 char *parser_material_parse_value_input(ui_node_socket_t *inp, bool vector_as_grayscale) {
@@ -468,6 +477,21 @@ char *parser_material_get_coord(ui_node_t *node) {
 		parser_material_kong->frag_bposition = true;
 		return "bposition";
 	}
+}
+
+char *parser_material_safesrc(char *s) {
+	for (i32 i = 0; i < string_length(s); ++i) {
+		i32  code   = char_code_at(s, i);
+		bool letter = (code >= 65 && code <= 90) || (code >= 97 && code <= 122);
+		bool digit  = code >= 48 && code <= 57;
+		if (!letter && !digit) {
+			s = string_copy(string_replace_all(s, char_at(s, i), "_"));
+		}
+		if (i == 0 && digit) {
+			s = string("_%s", s);
+		}
+	}
+	return s;
 }
 
 char *parser_material_res_var_name(ui_node_t *node, ui_node_socket_t *socket) {
@@ -536,15 +560,6 @@ ui_node_t *parser_material_node_by_type(ui_node_t_array_t *nodes, char *ntype) {
 	return NULL;
 }
 
-i32 parser_material_socket_index(ui_node_t *node, ui_node_socket_t *socket) {
-	for (i32 i = 0; i < node->outputs->length; ++i) {
-		if (node->outputs->buffer[i] == socket) {
-			return i;
-		}
-	}
-	return -1;
-}
-
 char *parser_material_node_name(ui_node_t *node, ui_node_t_array_t *_parents) {
 	if (_parents == NULL) {
 		_parents = parser_material_parents;
@@ -557,21 +572,6 @@ char *parser_material_node_name(ui_node_t *node, ui_node_t_array_t *_parents) {
 	s       = string_copy(parser_material_safesrc(s));
 	i32 nid = node->id;
 	s       = string("%s%s", s, i32_to_string(nid));
-	return s;
-}
-
-char *parser_material_safesrc(char *s) {
-	for (i32 i = 0; i < string_length(s); ++i) {
-		i32  code   = char_code_at(s, i);
-		bool letter = (code >= 65 && code <= 90) || (code >= 97 && code <= 122);
-		bool digit  = code >= 48 && code <= 57;
-		if (!letter && !digit) {
-			s = string_copy(string_replace_all(s, char_at(s, i), "_"));
-		}
-		if (i == 0 && digit) {
-			s = string("_%s", s);
-		}
-	}
 	return s;
 }
 

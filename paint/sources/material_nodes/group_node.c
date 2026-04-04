@@ -1,41 +1,6 @@
 
 #include "../global.h"
 
-void group_node_init() {
-
-	group_node_def = GC_ALLOC_INIT(ui_node_t, {.id      = 0,
-	                                           .name    = _tr("New Group"),
-	                                           .type    = "GROUP",
-	                                           .x       = 0,
-	                                           .y       = 0,
-	                                           .color   = 0xffb34f5a,
-	                                           .inputs  = any_array_create_from_raw((void *[]){}, 0),
-	                                           .outputs = any_array_create_from_raw((void *[]){}, 0),
-	                                           .buttons = any_array_create_from_raw(
-	                                               (void *[]){
-	                                                   GC_ALLOC_INIT(ui_node_button_t, {.name          = "nodes_material_new_group_button",
-	                                                                                    .type          = "CUSTOM",
-	                                                                                    .output        = -1,
-	                                                                                    .default_value = f32_array_create_x(0),
-	                                                                                    .data          = NULL,
-	                                                                                    .min           = 0.0,
-	                                                                                    .max           = 1.0,
-	                                                                                    .precision     = 100,
-	                                                                                    .height        = 1}),
-	                                               },
-	                                               1),
-	                                           .width = 0,
-	                                           .flags = 0});
-	gc_root(group_node_def);
-
-	any_array_push(nodes_material_group, group_node_def);
-	any_map_set(parser_material_node_vectors, "GROUP", group_node_vector);
-	any_map_set(parser_material_node_values, "GROUP", group_node_value);
-	any_map_set(ui_nodes_custom_buttons, "nodes_material_new_group_button", nodes_material_new_group_button);
-	any_map_set(ui_nodes_custom_buttons, "nodes_material_group_input_button", nodes_material_group_input_button);
-	any_map_set(ui_nodes_custom_buttons, "nodes_material_group_output_button", nodes_material_group_output_button);
-}
-
 char *group_node_vector(ui_node_t *node, ui_node_socket_t *socket) {
 	return parser_material_parse_group(node, socket);
 }
@@ -119,18 +84,6 @@ void nodes_material_new_group_button(i32 node_id) {
 	}
 }
 
-void nodes_material_group_input_button(i32 node_id) {
-	ui_nodes_t *nodes = ui_nodes_get_nodes();
-	ui_node_t  *node  = ui_get_node(ui_nodes_get_canvas(true)->nodes, node_id);
-	nodes_material_add_socket_button(nodes, node, node->outputs);
-}
-
-void nodes_material_group_output_button(i32 node_id) {
-	ui_nodes_t *nodes = ui_nodes_get_nodes();
-	ui_node_t  *node  = ui_get_node(ui_nodes_get_canvas(true)->nodes, node_id);
-	nodes_material_add_socket_button(nodes, node, node->inputs);
-}
-
 void nodes_material_add_socket_menu_draw() {
 	ui_nodes_t               *nodes       = _nodes_material_nodes;
 	ui_node_t                *node        = _nodes_material_node;
@@ -166,17 +119,16 @@ void nodes_material_add_socket_button(ui_nodes_t *nodes, ui_node_t *node, ui_nod
 	}
 }
 
-void nodes_material_sync_sockets(ui_node_t *node) {
-	node_group_t_array_t *group_stack = ui_nodes_group_stack;
-	ui_node_canvas_t     *c           = group_stack->buffer[group_stack->length - 1]->canvas;
-	for (i32 i = 0; i < project_materials->length; ++i) {
-		slot_material_t *m = project_materials->buffer[i];
-		nodes_material_sync_group_sockets(m->canvas, c->name, node);
-	}
-	for (i32 i = 0; i < project_material_groups->length; ++i) {
-		node_group_t *g = project_material_groups->buffer[i];
-		nodes_material_sync_group_sockets(g->canvas, c->name, node);
-	}
+void nodes_material_group_input_button(i32 node_id) {
+	ui_nodes_t *nodes = ui_nodes_get_nodes();
+	ui_node_t  *node  = ui_get_node(ui_nodes_get_canvas(true)->nodes, node_id);
+	nodes_material_add_socket_button(nodes, node, node->outputs);
+}
+
+void nodes_material_group_output_button(i32 node_id) {
+	ui_nodes_t *nodes = ui_nodes_get_nodes();
+	ui_node_t  *node  = ui_get_node(ui_nodes_get_canvas(true)->nodes, node_id);
+	nodes_material_add_socket_button(nodes, node, node->inputs);
 }
 
 void nodes_material_sync_group_sockets(ui_node_canvas_t *canvas, char *group_name, ui_node_t *node) {
@@ -203,6 +155,19 @@ void nodes_material_sync_group_sockets(ui_node_canvas_t *canvas, char *group_nam
 				}
 			}
 		}
+	}
+}
+
+void nodes_material_sync_sockets(ui_node_t *node) {
+	node_group_t_array_t *group_stack = ui_nodes_group_stack;
+	ui_node_canvas_t     *c           = group_stack->buffer[group_stack->length - 1]->canvas;
+	for (i32 i = 0; i < project_materials->length; ++i) {
+		slot_material_t *m = project_materials->buffer[i];
+		nodes_material_sync_group_sockets(m->canvas, c->name, node);
+	}
+	for (i32 i = 0; i < project_material_groups->length; ++i) {
+		node_group_t *g = project_material_groups->buffer[i];
+		nodes_material_sync_group_sockets(g->canvas, c->name, node);
 	}
 }
 
@@ -233,4 +198,39 @@ ui_node_socket_t *nodes_material_create_socket(ui_nodes_t *nodes, ui_node_t *nod
 	                                     .max           = max,
 	                                     .precision     = 100});
 	return soc;
+}
+
+void group_node_init() {
+
+	group_node_def = GC_ALLOC_INIT(ui_node_t, {.id      = 0,
+	                                           .name    = _tr("New Group"),
+	                                           .type    = "GROUP",
+	                                           .x       = 0,
+	                                           .y       = 0,
+	                                           .color   = 0xffb34f5a,
+	                                           .inputs  = any_array_create_from_raw((void *[]){}, 0),
+	                                           .outputs = any_array_create_from_raw((void *[]){}, 0),
+	                                           .buttons = any_array_create_from_raw(
+	                                               (void *[]){
+	                                                   GC_ALLOC_INIT(ui_node_button_t, {.name          = "nodes_material_new_group_button",
+	                                                                                    .type          = "CUSTOM",
+	                                                                                    .output        = -1,
+	                                                                                    .default_value = f32_array_create_x(0),
+	                                                                                    .data          = NULL,
+	                                                                                    .min           = 0.0,
+	                                                                                    .max           = 1.0,
+	                                                                                    .precision     = 100,
+	                                                                                    .height        = 1}),
+	                                               },
+	                                               1),
+	                                           .width = 0,
+	                                           .flags = 0});
+	gc_root(group_node_def);
+
+	any_array_push(nodes_material_group, group_node_def);
+	any_map_set(parser_material_node_vectors, "GROUP", group_node_vector);
+	any_map_set(parser_material_node_values, "GROUP", group_node_value);
+	any_map_set(ui_nodes_custom_buttons, "nodes_material_new_group_button", nodes_material_new_group_button);
+	any_map_set(ui_nodes_custom_buttons, "nodes_material_group_input_button", nodes_material_group_input_button);
+	any_map_set(ui_nodes_custom_buttons, "nodes_material_group_output_button", nodes_material_group_output_button);
 }

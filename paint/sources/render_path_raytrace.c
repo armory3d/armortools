@@ -111,6 +111,34 @@ void render_path_raytrace_commands(bool use_live_layer) {
 	}
 }
 
+void render_path_raytrace_build_data() {
+	if (context_raw->merged_object == NULL) {
+		util_mesh_merge(NULL);
+	}
+
+	mesh_object_t *mo = !context_layer_filter_used() ? context_raw->merged_object : context_raw->paint_object;
+
+	if (context_raw->tool == TOOL_TYPE_GIZMO) {
+		render_path_raytrace_transform = mo->base->transform->world_unpack;
+	}
+	else {
+		render_path_raytrace_transform = mat4_identity();
+	}
+
+	f32 sc = mo->base->transform->scale.x * mo->data->scale_pos;
+	if (mo->base->parent != NULL) {
+		sc *= mo->base->parent->transform->scale.x;
+	}
+	render_path_raytrace_transform = mat4_scale(render_path_raytrace_transform, vec4_create(sc, sc, sc, 1.0));
+
+	gc_unroot(render_path_raytrace_vb);
+	render_path_raytrace_vb = mo->data->_->vertex_buffer;
+	gc_root(render_path_raytrace_vb);
+	gc_unroot(render_path_raytrace_ib);
+	render_path_raytrace_ib = mo->data->_->index_buffer;
+	gc_root(render_path_raytrace_ib);
+}
+
 void render_path_raytrace_raytrace_init(char *shader_name, bool build) {
 	if (render_path_raytrace_init_shader) {
 		render_path_raytrace_init_shader = false;
@@ -147,34 +175,6 @@ void render_path_raytrace_raytrace_init(char *shader_name, bool build) {
 
 		_gpu_raytrace_as_build(vb_full, ib_full);
 	}
-}
-
-void render_path_raytrace_build_data() {
-	if (context_raw->merged_object == NULL) {
-		util_mesh_merge(NULL);
-	}
-
-	mesh_object_t *mo = !context_layer_filter_used() ? context_raw->merged_object : context_raw->paint_object;
-
-	if (context_raw->tool == TOOL_TYPE_GIZMO) {
-		render_path_raytrace_transform = mo->base->transform->world_unpack;
-	}
-	else {
-		render_path_raytrace_transform = mat4_identity();
-	}
-
-	f32 sc = mo->base->transform->scale.x * mo->data->scale_pos;
-	if (mo->base->parent != NULL) {
-		sc *= mo->base->parent->transform->scale.x;
-	}
-	render_path_raytrace_transform = mat4_scale(render_path_raytrace_transform, vec4_create(sc, sc, sc, 1.0));
-
-	gc_unroot(render_path_raytrace_vb);
-	render_path_raytrace_vb = mo->data->_->vertex_buffer;
-	gc_root(render_path_raytrace_vb);
-	gc_unroot(render_path_raytrace_ib);
-	render_path_raytrace_ib = mo->data->_->index_buffer;
-	gc_root(render_path_raytrace_ib);
 }
 
 void render_path_raytrace_draw(bool use_live_layer) {

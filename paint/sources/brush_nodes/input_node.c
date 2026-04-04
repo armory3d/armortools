@@ -1,19 +1,6 @@
 
 #include "../global.h"
 
-input_node_t *input_node_create(ui_node_t *raw, f32_array_t *args) {
-	float_node_t *n = GC_ALLOC_INIT(float_node_t, {0});
-	n->base         = logic_node_create(n);
-	n->base->get    = input_node_get;
-
-	if (!input_node_registered) {
-		input_node_registered = true;
-		sys_notify_on_update(input_node_update, n);
-	}
-
-	return n;
-}
-
 void input_node_update(float_node_t *self) {
 	if (context_raw->split_view) {
 		context_raw->view_index = mouse_view_x() > base_w() / 2.0 ? 1 : 0;
@@ -115,4 +102,17 @@ logic_node_value_t *input_node_get(input_node_t *self, i32 from) {
 	context_raw->brush_lazy_step   = logic_node_input_get(self->base->inputs->buffer[1])->_f32;
 	logic_node_value_t *v          = GC_ALLOC_INIT(logic_node_value_t, {._vec4 = input_node_coords});
 	return v;
+}
+
+input_node_t *input_node_create(ui_node_t *raw, f32_array_t *args) {
+	float_node_t *n = GC_ALLOC_INIT(float_node_t, {0});
+	n->base         = logic_node_create(n);
+	n->base->get    = input_node_get;
+
+	if (!input_node_registered) {
+		input_node_registered = true;
+		sys_notify_on_update(input_node_update, n);
+	}
+
+	return n;
 }

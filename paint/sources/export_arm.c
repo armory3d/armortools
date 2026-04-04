@@ -17,6 +17,99 @@ void export_arm_run_mesh(char *path, mesh_object_t_array_t *paint_objects) {
 	iron_file_save_bytes(path, b, b->length + 1);
 }
 
+void export_arm_export_node(ui_node_t *n, asset_t_array_t *assets) {
+	if (string_equals(n->type, "TEX_IMAGE")) {
+		i32 index = n->buttons->buffer[0]->default_value->buffer[0];
+		if (index > 9000) { // 9999 - Texture deleted
+			n->buttons->buffer[0]->data = u8_array_create_from_string("");
+		}
+		else {
+			n->buttons->buffer[0]->data = u8_array_create_from_string(base_combo_enum_texts(n->type)->buffer[index]);
+		}
+		if (assets != NULL) {
+			asset_t *asset = project_assets->buffer[index];
+			if (array_index_of(assets, asset) == -1) {
+				any_array_push(assets, asset);
+			}
+		}
+	}
+}
+
+string_array_t *export_arm_assets_to_files(char *project_path, asset_t_array_t *assets) {
+	string_array_t *texture_files = any_array_create_from_raw((void *[]){}, 0);
+	for (i32 i = 0; i < assets->length; ++i) {
+		asset_t *a = assets->buffer[i];
+#ifdef IRON_IOS
+		bool same_drive = false;
+#else
+		bool same_drive = char_at(project_path, 0) == char_at(a->file, 0);
+#endif
+		// Convert image path from absolute to relative
+		if (same_drive) {
+			any_array_push(texture_files, path_to_relative(project_path, a->file));
+		}
+		else {
+			any_array_push(texture_files, a->file);
+		}
+	}
+	return texture_files;
+}
+
+string_array_t *export_arm_meshes_to_files(char *project_path) {
+	string_array_t *mesh_files = any_array_create_from_raw((void *[]){}, 0);
+	for (i32 i = 0; i < project_mesh_assets->length; ++i) {
+		char *file = project_mesh_assets->buffer[i];
+#ifdef IRON_IOS
+		bool same_drive = false;
+#else
+		bool same_drive = char_at(project_path, 0) == char_at(file, 0);
+#endif
+		// Convert mesh path from absolute to relative
+		if (same_drive) {
+			any_array_push(mesh_files, path_to_relative(project_path, file));
+		}
+		else {
+			any_array_push(mesh_files, file);
+		}
+	}
+	return mesh_files;
+}
+
+string_array_t *export_arm_fonts_to_files(char *project_path, slot_font_t_array_t *fonts) {
+	string_array_t *font_files = any_array_create_from_raw((void *[]){}, 0);
+	for (i32 i = 1; i < fonts->length; ++i) {
+		slot_font_t *f = fonts->buffer[i];
+#ifdef IRON_IOS
+		bool same_drive = false;
+#else
+		bool same_drive = char_at(project_path, 0) == char_at(f->file, 0);
+#endif
+		// Convert font path from absolute to relative
+		if (same_drive) {
+			any_array_push(font_files, path_to_relative(project_path, f->file));
+		}
+		else {
+			any_array_push(font_files, f->file);
+		}
+	}
+	return font_files;
+}
+
+f32_array_t *export_arm_vec3f32(vec4_t v) {
+	f32_array_t *res = f32_array_create(3);
+	res->buffer[0]   = v.x;
+	res->buffer[1]   = v.y;
+	res->buffer[2]   = v.z;
+	return res;
+}
+
+buffer_t *export_arm_rgba64_to_rgba32(buffer_t *buffer) {
+	for (i32 i = 0; i < buffer->length / 2.0; ++i) {
+		buffer->buffer[i] = half_to_u8_fast(buffer_get_u16(buffer, i * 2));
+	}
+	return buffer;
+}
+
 void export_arm_run_project() {
 	ui_node_canvas_t_array_t *mnodes = any_array_create_from_raw((void *[]){}, 0);
 	for (i32 i = 0; i < project_materials->length; ++i) {
@@ -190,22 +283,31 @@ void export_arm_run_project() {
 	console_info(tr("Project saved"));
 }
 
-void export_arm_export_node(ui_node_t *n, asset_t_array_t *assets) {
-	if (string_equals(n->type, "TEX_IMAGE")) {
-		i32 index = n->buttons->buffer[0]->default_value->buffer[0];
-		if (index > 9000) { // 9999 - Texture deleted
-			n->buttons->buffer[0]->data = u8_array_create_from_string("");
-		}
-		else {
-			n->buttons->buffer[0]->data = u8_array_create_from_string(base_combo_enum_texts(n->type)->buffer[index]);
-		}
-		if (assets != NULL) {
-			asset_t *asset = project_assets->buffer[index];
-			if (array_index_of(assets, asset) == -1) {
-				any_array_push(assets, asset);
+packed_asset_t_array_t *export_arm_get_packed_assets(char *project_path, string_array_t *texture_files) {
+	packed_asset_t_array_t *packed_assets = NULL;
+	if (project_raw->packed_assets != NULL) {
+		for (i32 i = 0; i < project_raw->packed_assets->length; ++i) {
+			packed_asset_t *pa = project_raw->packed_assets->buffer[i];
+#ifdef IRON_IOS
+			bool same_drive = false;
+#else
+			bool same_drive = char_at(project_path, 0) == char_at(pa->name, 0);
+#endif
+			// Convert path from absolute to relative
+			pa->name = same_drive ? path_to_relative(project_path, pa->name) : pa->name;
+			for (i32 i = 0; i < texture_files->length; ++i) {
+				char *tf = texture_files->buffer[i];
+				if (string_equals(pa->name, tf)) {
+					if (packed_assets == NULL) {
+						packed_assets = any_array_create_from_raw((void *[]){}, 0);
+					}
+					any_array_push(packed_assets, pa);
+					break;
+				}
 			}
 		}
 	}
+	return packed_assets;
 }
 
 void export_arm_run_material(char *path) {
@@ -359,93 +461,6 @@ void export_arm_run_brush(char *path) {
 	iron_file_save_bytes(path, buffer, buffer->length + 1);
 }
 
-string_array_t *export_arm_assets_to_files(char *project_path, asset_t_array_t *assets) {
-	string_array_t *texture_files = any_array_create_from_raw((void *[]){}, 0);
-	for (i32 i = 0; i < assets->length; ++i) {
-		asset_t *a = assets->buffer[i];
-#ifdef IRON_IOS
-		bool same_drive = false;
-#else
-		bool same_drive = char_at(project_path, 0) == char_at(a->file, 0);
-#endif
-		// Convert image path from absolute to relative
-		if (same_drive) {
-			any_array_push(texture_files, path_to_relative(project_path, a->file));
-		}
-		else {
-			any_array_push(texture_files, a->file);
-		}
-	}
-	return texture_files;
-}
-
-string_array_t *export_arm_meshes_to_files(char *project_path) {
-	string_array_t *mesh_files = any_array_create_from_raw((void *[]){}, 0);
-	for (i32 i = 0; i < project_mesh_assets->length; ++i) {
-		char *file = project_mesh_assets->buffer[i];
-#ifdef IRON_IOS
-		bool same_drive = false;
-#else
-		bool same_drive = char_at(project_path, 0) == char_at(file, 0);
-#endif
-		// Convert mesh path from absolute to relative
-		if (same_drive) {
-			any_array_push(mesh_files, path_to_relative(project_path, file));
-		}
-		else {
-			any_array_push(mesh_files, file);
-		}
-	}
-	return mesh_files;
-}
-
-string_array_t *export_arm_fonts_to_files(char *project_path, slot_font_t_array_t *fonts) {
-	string_array_t *font_files = any_array_create_from_raw((void *[]){}, 0);
-	for (i32 i = 1; i < fonts->length; ++i) {
-		slot_font_t *f = fonts->buffer[i];
-#ifdef IRON_IOS
-		bool same_drive = false;
-#else
-		bool same_drive = char_at(project_path, 0) == char_at(f->file, 0);
-#endif
-		// Convert font path from absolute to relative
-		if (same_drive) {
-			any_array_push(font_files, path_to_relative(project_path, f->file));
-		}
-		else {
-			any_array_push(font_files, f->file);
-		}
-	}
-	return font_files;
-}
-
-packed_asset_t_array_t *export_arm_get_packed_assets(char *project_path, string_array_t *texture_files) {
-	packed_asset_t_array_t *packed_assets = NULL;
-	if (project_raw->packed_assets != NULL) {
-		for (i32 i = 0; i < project_raw->packed_assets->length; ++i) {
-			packed_asset_t *pa = project_raw->packed_assets->buffer[i];
-#ifdef IRON_IOS
-			bool same_drive = false;
-#else
-			bool same_drive = char_at(project_path, 0) == char_at(pa->name, 0);
-#endif
-			// Convert path from absolute to relative
-			pa->name = same_drive ? path_to_relative(project_path, pa->name) : pa->name;
-			for (i32 i = 0; i < texture_files->length; ++i) {
-				char *tf = texture_files->buffer[i];
-				if (string_equals(pa->name, tf)) {
-					if (packed_assets == NULL) {
-						packed_assets = any_array_create_from_raw((void *[]){}, 0);
-					}
-					any_array_push(packed_assets, pa);
-					break;
-				}
-			}
-		}
-	}
-	return packed_assets;
-}
-
 void export_arm_pack_assets(project_format_t *raw, asset_t_array_t *assets) {
 	if (raw->packed_assets == NULL) {
 		raw->packed_assets = any_array_create_from_raw((void *[]){}, 0);
@@ -480,19 +495,4 @@ void export_arm_run_swatches(char *path) {
 	project_format_t *raw    = GC_ALLOC_INIT(project_format_t, {.version = manifest_version_project, .swatches = project_raw->swatches});
 	buffer_t         *buffer = util_encode_project(raw);
 	iron_file_save_bytes(path, buffer, buffer->length + 1);
-}
-
-f32_array_t *export_arm_vec3f32(vec4_t v) {
-	f32_array_t *res = f32_array_create(3);
-	res->buffer[0]   = v.x;
-	res->buffer[1]   = v.y;
-	res->buffer[2]   = v.z;
-	return res;
-}
-
-buffer_t *export_arm_rgba64_to_rgba32(buffer_t *buffer) {
-	for (i32 i = 0; i < buffer->length / 2.0; ++i) {
-		buffer->buffer[i] = half_to_u8_fast(buffer_get_u16(buffer, i * 2));
-	}
-	return buffer;
 }

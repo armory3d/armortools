@@ -34,6 +34,22 @@ void node_shader_add_out(node_shader_t *raw, char *s) {
 	any_array_push(raw->outs, s);
 }
 
+void node_shader_context_add_constant(node_shader_context_t *raw, char *ctype, char *name, char *link) {
+	for (i32 i = 0; i < raw->data->constants->length; ++i) {
+		shader_const_t *c = raw->data->constants->buffer[i];
+		if (string_equals(c->name, name)) {
+			return;
+		}
+	}
+
+	shader_const_t *c = GC_ALLOC_INIT(shader_const_t, {.name = name, .type = ctype});
+	if (link != NULL) {
+		c->link = string_copy(link);
+	}
+	shader_const_t_array_t *consts = raw->data->constants;
+	any_array_push(consts, c);
+}
+
 void node_shader_add_constant(node_shader_t *raw, char *s, char *link) {
 	// inp: float4
 	if (string_array_index_of(raw->consts, s) == -1) {
@@ -57,6 +73,18 @@ void node_shader_add_constant(node_shader_t *raw, char *s, char *link) {
 		any_array_push(raw->consts, s);
 		node_shader_context_add_constant(raw->context, utype, uname, link);
 	}
+}
+
+void node_shader_context_add_texture_unit(node_shader_context_t *raw, char *name, char *link) {
+	for (i32 i = 0; i < raw->data->texture_units->length; ++i) {
+		tex_unit_t *c = raw->data->texture_units->buffer[i];
+		if (string_equals(c->name, name)) {
+			return;
+		}
+	}
+
+	tex_unit_t *c = GC_ALLOC_INIT(tex_unit_t, {.name = name, .link = link});
+	any_array_push(raw->data->texture_units, c);
 }
 
 void node_shader_add_texture(node_shader_t *raw, char *name, char *link) {
@@ -274,44 +302,6 @@ bool node_shader_context_is_elem(node_shader_context_t *raw, char *name) {
 		}
 	}
 	return false;
-}
-
-vertex_element_t *node_shader_context_get_elem(node_shader_context_t *raw, char *name) {
-	for (i32 i = 0; i < raw->data->vertex_elements->length; ++i) {
-		vertex_element_t *elem = raw->data->vertex_elements->buffer[i];
-		if (string_equals(elem->name, name)) {
-			return elem;
-		}
-	}
-	return NULL;
-}
-
-void node_shader_context_add_constant(node_shader_context_t *raw, char *ctype, char *name, char *link) {
-	for (i32 i = 0; i < raw->data->constants->length; ++i) {
-		shader_const_t *c = raw->data->constants->buffer[i];
-		if (string_equals(c->name, name)) {
-			return;
-		}
-	}
-
-	shader_const_t *c = GC_ALLOC_INIT(shader_const_t, {.name = name, .type = ctype});
-	if (link != NULL) {
-		c->link = string_copy(link);
-	}
-	shader_const_t_array_t *consts = raw->data->constants;
-	any_array_push(consts, c);
-}
-
-void node_shader_context_add_texture_unit(node_shader_context_t *raw, char *name, char *link) {
-	for (i32 i = 0; i < raw->data->texture_units->length; ++i) {
-		tex_unit_t *c = raw->data->texture_units->buffer[i];
-		if (string_equals(c->name, name)) {
-			return;
-		}
-	}
-
-	tex_unit_t *c = GC_ALLOC_INIT(tex_unit_t, {.name = name, .link = link});
-	any_array_push(raw->data->texture_units, c);
 }
 
 node_shader_t *node_shader_context_make_kong(node_shader_context_t *raw) {

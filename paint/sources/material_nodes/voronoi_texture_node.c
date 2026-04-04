@@ -231,6 +231,77 @@ fun voronoi_3d_f2_fbm(p: float3, detail: float, roughness: float, lacunarity: fl
 } \
 ";
 
+// Euclidean normalization constants per dimension (sqrt(N)/2, approximate F1 max distance)
+static const char *voronoi_norm_const(i32 dim) {
+	if (dim == 0) // 2D: sqrt(2)/2
+		return "0.7071";
+	else // 3D: sqrt(3)/2
+		return "0.8660";
+}
+
+char *voronoi_texture_node_vector(ui_node_t *node, ui_node_socket_t *socket) {
+	node_shader_add_function(parser_material_kong, str_tex_voronoi);
+	char             *co         = parser_material_get_coord(node);
+	char             *scale      = parser_material_parse_value_input(node->inputs->buffer[1], false);
+	char             *randomness = parser_material_parse_value_input(node->inputs->buffer[5], false);
+	char             *p3s        = string("%s * %s", co, scale);
+	ui_node_button_t *but_dim    = node->buttons->buffer[0];
+	ui_node_button_t *but_feat   = node->buttons->buffer[1];
+	i32               dim        = (i32)but_dim->default_value->buffer[0];
+	i32               is_f2      = (i32)but_feat->default_value->buffer[0] == 1;
+	char             *fn         = is_f2 ? "f2" : "f1";
+
+	if (socket == node->outputs->buffer[1]) { // Color
+		if (dim == 0) {                       //  2D
+			return string("voronoi_2d_%s((%s).x, (%s).y, %s).yzw", fn, p3s, p3s, randomness);
+		}
+		else { // 3D
+			return string("voronoi_3d_%s(%s, %s).yzw", fn, p3s, randomness);
+		}
+	}
+	else {              // Position
+		if (dim == 0) { // 2D
+			return string("voronoi_2d_%s_pos((%s).x, (%s).y, %s)", fn, p3s, p3s, randomness);
+		}
+		else { // 3D
+			return string("voronoi_3d_%s_pos(%s, %s)", fn, p3s, randomness);
+		}
+	}
+}
+
+char *voronoi_texture_node_value(ui_node_t *node, ui_node_socket_t *socket) {
+	node_shader_add_function(parser_material_kong, str_tex_voronoi);
+	char             *co         = parser_material_get_coord(node);
+	char             *scale      = parser_material_parse_value_input(node->inputs->buffer[1], false);
+	char             *detail     = parser_material_parse_value_input(node->inputs->buffer[2], false);
+	char             *roughness  = parser_material_parse_value_input(node->inputs->buffer[3], false);
+	char             *lacunarity = parser_material_parse_value_input(node->inputs->buffer[4], false);
+	char             *randomness = parser_material_parse_value_input(node->inputs->buffer[5], false);
+	char             *p3s        = string("%s * %s", co, scale);
+	ui_node_button_t *but_dim    = node->buttons->buffer[0];
+	ui_node_button_t *but_feat   = node->buttons->buffer[1];
+	ui_node_button_t *but_norm   = node->buttons->buffer[2];
+	i32               dim        = (i32)but_dim->default_value->buffer[0];
+	i32               is_f2      = (i32)but_feat->default_value->buffer[0] == 1;
+	i32               normalize  = (i32)but_norm->default_value->buffer[0] == 1;
+	char             *fn         = is_f2 ? "f2" : "f1";
+
+	// Distance output
+	char *dist;
+	if (dim == 0) { // 2D
+		dist = string("voronoi_2d_%s_fbm((%s).x, (%s).y, %s, %s, %s, %s)", fn, p3s, p3s, detail, roughness, lacunarity, randomness);
+	}
+	else { // 3D
+		dist = string("voronoi_3d_%s_fbm(%s, %s, %s, %s, %s)", fn, p3s, detail, roughness, lacunarity, randomness);
+	}
+
+	if (normalize) {
+		dist = string("clamp(%s / (%s * max(%s, 0.0001)), 0.0, 1.0)", dist, voronoi_norm_const(dim), randomness);
+	}
+
+	return dist;
+}
+
 void voronoi_texture_node_init() {
 
 	char *voronoi_dimensions_data = string("%s\n%s", _tr("2D"), _tr("3D"));
@@ -378,75 +449,4 @@ void voronoi_texture_node_init() {
 	any_array_push(nodes_material_texture, voronoi_texture_node_def);
 	any_map_set(parser_material_node_vectors, "TEX_VORONOI", voronoi_texture_node_vector);
 	any_map_set(parser_material_node_values, "TEX_VORONOI", voronoi_texture_node_value);
-}
-
-// Euclidean normalization constants per dimension (sqrt(N)/2, approximate F1 max distance)
-static const char *voronoi_norm_const(i32 dim) {
-	if (dim == 0) // 2D: sqrt(2)/2
-		return "0.7071";
-	else // 3D: sqrt(3)/2
-		return "0.8660";
-}
-
-char *voronoi_texture_node_vector(ui_node_t *node, ui_node_socket_t *socket) {
-	node_shader_add_function(parser_material_kong, str_tex_voronoi);
-	char             *co         = parser_material_get_coord(node);
-	char             *scale      = parser_material_parse_value_input(node->inputs->buffer[1], false);
-	char             *randomness = parser_material_parse_value_input(node->inputs->buffer[5], false);
-	char             *p3s        = string("%s * %s", co, scale);
-	ui_node_button_t *but_dim    = node->buttons->buffer[0];
-	ui_node_button_t *but_feat   = node->buttons->buffer[1];
-	i32               dim        = (i32)but_dim->default_value->buffer[0];
-	i32               is_f2      = (i32)but_feat->default_value->buffer[0] == 1;
-	char             *fn         = is_f2 ? "f2" : "f1";
-
-	if (socket == node->outputs->buffer[1]) { // Color
-		if (dim == 0) {                       //  2D
-			return string("voronoi_2d_%s((%s).x, (%s).y, %s).yzw", fn, p3s, p3s, randomness);
-		}
-		else { // 3D
-			return string("voronoi_3d_%s(%s, %s).yzw", fn, p3s, randomness);
-		}
-	}
-	else {              // Position
-		if (dim == 0) { // 2D
-			return string("voronoi_2d_%s_pos((%s).x, (%s).y, %s)", fn, p3s, p3s, randomness);
-		}
-		else { // 3D
-			return string("voronoi_3d_%s_pos(%s, %s)", fn, p3s, randomness);
-		}
-	}
-}
-
-char *voronoi_texture_node_value(ui_node_t *node, ui_node_socket_t *socket) {
-	node_shader_add_function(parser_material_kong, str_tex_voronoi);
-	char             *co         = parser_material_get_coord(node);
-	char             *scale      = parser_material_parse_value_input(node->inputs->buffer[1], false);
-	char             *detail     = parser_material_parse_value_input(node->inputs->buffer[2], false);
-	char             *roughness  = parser_material_parse_value_input(node->inputs->buffer[3], false);
-	char             *lacunarity = parser_material_parse_value_input(node->inputs->buffer[4], false);
-	char             *randomness = parser_material_parse_value_input(node->inputs->buffer[5], false);
-	char             *p3s        = string("%s * %s", co, scale);
-	ui_node_button_t *but_dim    = node->buttons->buffer[0];
-	ui_node_button_t *but_feat   = node->buttons->buffer[1];
-	ui_node_button_t *but_norm   = node->buttons->buffer[2];
-	i32               dim        = (i32)but_dim->default_value->buffer[0];
-	i32               is_f2      = (i32)but_feat->default_value->buffer[0] == 1;
-	i32               normalize  = (i32)but_norm->default_value->buffer[0] == 1;
-	char             *fn         = is_f2 ? "f2" : "f1";
-
-	// Distance output
-	char *dist;
-	if (dim == 0) { // 2D
-		dist = string("voronoi_2d_%s_fbm((%s).x, (%s).y, %s, %s, %s, %s)", fn, p3s, p3s, detail, roughness, lacunarity, randomness);
-	}
-	else { // 3D
-		dist = string("voronoi_3d_%s_fbm(%s, %s, %s, %s, %s)", fn, p3s, detail, roughness, lacunarity, randomness);
-	}
-
-	if (normalize) {
-		dist = string("clamp(%s / (%s * max(%s, 0.0001)), 0.0, 1.0)", dist, voronoi_norm_const(dim), randomness);
-	}
-
-	return dist;
 }

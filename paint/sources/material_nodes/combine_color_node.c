@@ -1,6 +1,13 @@
 
 #include "../global.h"
 
+char *combine_color_node_vector(ui_node_t *node, ui_node_socket_t *socket) {
+	char *r = parser_material_parse_value_input(node->inputs->buffer[0], false);
+	char *g = parser_material_parse_value_input(node->inputs->buffer[1], false);
+	char *b = parser_material_parse_value_input(node->inputs->buffer[2], false);
+	return string("float3(%s, %s, %s)", r, g, b);
+}
+
 void combine_color_node_init() {
 
 	combine_color_node_def =
@@ -65,11 +72,4 @@ void combine_color_node_init() {
 
 	any_array_push(nodes_material_color, combine_color_node_def);
 	any_map_set(parser_material_node_vectors, "COMBINE_COLOR", combine_color_node_vector);
-}
-
-char *combine_color_node_vector(ui_node_t *node, ui_node_socket_t *socket) {
-	char *r = parser_material_parse_value_input(node->inputs->buffer[0], false);
-	char *g = parser_material_parse_value_input(node->inputs->buffer[1], false);
-	char *b = parser_material_parse_value_input(node->inputs->buffer[2], false);
-	return string("float3(%s, %s, %s)", r, g, b);
 }
