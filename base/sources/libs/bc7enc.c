@@ -21,10 +21,24 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "bc7enc.h"
+#include "../iron_simd.h"
 #include <math.h>
 #include <memory.h>
 #include <limits.h>
 #include <stdio.h>
+
+#ifndef IRON_NOSIMD
+static inline float iron_float32x4_hsum(iron_float32x4_t v) {
+#if defined(IRON_SSE)
+	iron_float32x4_t t = iron_float32x4_shuffle_custom(v, v, 1, 0, 3, 2);
+	t = iron_float32x4_add(v, t);
+	iron_float32x4_t s = iron_float32x4_shuffle_custom(t, t, 2, 3, 0, 1);
+	return iron_float32x4_get(iron_float32x4_add(t, s), 0);
+#elif defined(IRON_NEON)
+	return vaddvq_f32(v);
+#endif
+}
+#endif
 
 void bc7enc_compress_block_params_init(bc7enc_compress_block_params *p)
 {
@@ -59,9 +73,10 @@ static inline color_quad_u8 *color_quad_u8_set(color_quad_u8 *pRes, int32_t r, i
 static inline bc7enc_bool color_quad_u8_notequals(const color_quad_u8 *pLHS, const color_quad_u8 *pRHS) { return (pLHS->m_c[0] != pRHS->m_c[0]) || (pLHS->m_c[1] != pRHS->m_c[1]) || (pLHS->m_c[2] != pRHS->m_c[2]) || (pLHS->m_c[3] != pRHS->m_c[3]); }
 static inline vec4F *vec4F_set_scalar(vec4F *pV, float x) {	pV->m_c[0] = x; pV->m_c[1] = x; pV->m_c[2] = x;	pV->m_c[3] = x;	return pV; }
 static inline vec4F *vec4F_set(vec4F *pV, float x, float y, float z, float w) {	pV->m_c[0] = x;	pV->m_c[1] = y;	pV->m_c[2] = z;	pV->m_c[3] = w;	return pV; }
+static inline vec4F vec4F_from_color(const color_quad_u8 *pC) { vec4F res; vec4F_set(&res, pC->m_c[0], pC->m_c[1], pC->m_c[2], pC->m_c[3]); return res; }
+
 static inline vec4F *vec4F_saturate_in_place(vec4F *pV) { pV->m_c[0] = saturate(pV->m_c[0]); pV->m_c[1] = saturate(pV->m_c[1]); pV->m_c[2] = saturate(pV->m_c[2]); pV->m_c[3] = saturate(pV->m_c[3]); return pV; }
 static inline vec4F vec4F_saturate(const vec4F *pV) { vec4F res; res.m_c[0] = saturate(pV->m_c[0]); res.m_c[1] = saturate(pV->m_c[1]); res.m_c[2] = saturate(pV->m_c[2]); res.m_c[3] = saturate(pV->m_c[3]); return res; }
-static inline vec4F vec4F_from_color(const color_quad_u8 *pC) { vec4F res; vec4F_set(&res, pC->m_c[0], pC->m_c[1], pC->m_c[2], pC->m_c[3]); return res; }
 static inline vec4F vec4F_add(const vec4F *pLHS, const vec4F *pRHS) { vec4F res; vec4F_set(&res, pLHS->m_c[0] + pRHS->m_c[0], pLHS->m_c[1] + pRHS->m_c[1], pLHS->m_c[2] + pRHS->m_c[2], pLHS->m_c[3] + pRHS->m_c[3]); return res; }
 static inline vec4F vec4F_sub(const vec4F *pLHS, const vec4F *pRHS) { vec4F res; vec4F_set(&res, pLHS->m_c[0] - pRHS->m_c[0], pLHS->m_c[1] - pRHS->m_c[1], pLHS->m_c[2] - pRHS->m_c[2], pLHS->m_c[3] - pRHS->m_c[3]); return res; }
 static inline float vec4F_dot(const vec4F *pLHS, const vec4F *pRHS) { return pLHS->m_c[0] * pRHS->m_c[0] + pLHS->m_c[1] * pRHS->m_c[1] + pLHS->m_c[2] * pRHS->m_c[2] + pLHS->m_c[3] * pRHS->m_c[3]; }
@@ -256,41 +271,150 @@ static uint64_t evaluate_solution(const color_quad_u8 *pLow, const color_quad_u8
 
 	uint64_t total_err = 0;
 
-		// TODO: This could be improved.
-		for (uint32_t i = 0; i < pParams->m_num_pixels; i++)
+	// Precompute perceptual luma/chroma for all N candidates once.
+	// Values fit exactly in float32 (max luma = 255*512 = 130560 < 2^24).
+	float cand_l_f[16], cand_cr_f[16], cand_cb_f[16], cand_a_f[16];
+	for (uint32_t j = 0; j < N; j++)
+	{
+		const int l = weightedColors[j].m_c[0] * 109 + weightedColors[j].m_c[1] * 366 + weightedColors[j].m_c[2] * 37;
+		cand_l_f[j]  = (float)l;
+		cand_cr_f[j] = (float)(((int)weightedColors[j].m_c[0] << 9) - l);
+		cand_cb_f[j] = (float)(((int)weightedColors[j].m_c[2] << 9) - l);
+		cand_a_f[j]  = (float)weightedColors[j].m_c[3];
+	}
+
+#ifndef IRON_NOSIMD
+	// Precompute pixel luma/chroma so the inner loop is pure SIMD with no branching or extraction.
+	float pix_l_f[16], pix_cr_f[16], pix_cb_f[16];
+	for (uint32_t i = 0; i < pParams->m_num_pixels; i++)
+	{
+		const color_quad_u8 *pPix = &pParams->m_pPixels[i];
+		const int l = pPix->m_c[0] * 109 + pPix->m_c[1] * 366 + pPix->m_c[2] * 37;
+		pix_l_f[i]  = (float)l;
+		pix_cr_f[i] = (float)(((int)pPix->m_c[0] << 9) - l);
+		pix_cb_f[i] = (float)(((int)pPix->m_c[2] << 9) - l);
+	}
+
+	// Per-pixel best error and selector stored as floats.
+	// Outer=candidates, inner=pixels: replaces 256 scalar extractions with 16 at the end.
+	float best_err_f[16], best_sel_f[16];
+	{
+		const iron_float32x4_t inf4 = iron_float32x4_load_all(1e30f);
+		const iron_float32x4_t zer4 = iron_float32x4_load_all(0.0f);
+		for (uint32_t i = 0; i < 16; i += 4)
 		{
-			uint64_t best_err = UINT64_MAX;
-			uint32_t best_sel = 0;
-
-			if (pParams->m_has_alpha)
-			{
-				for (uint32_t j = 0; j < N; j++)
-				{
-					uint64_t err = compute_color_distance_rgba(&weightedColors[j], &pParams->m_pPixels[i], BC7ENC_TRUE, pParams->m_weights);
-					if (err < best_err)
-					{
-						best_err = err;
-						best_sel = j;
-					}
-				}
-			}
-			else
-			{
-				for (uint32_t j = 0; j < N; j++)
-				{
-					uint64_t err = compute_color_distance_rgb(&weightedColors[j], &pParams->m_pPixels[i], BC7ENC_TRUE, pParams->m_weights);
-					if (err < best_err)
-					{
-						best_err = err;
-						best_sel = j;
-					}
-				}
-			}
-
-			total_err += best_err;
-
-			pResults->m_pSelectors_temp[i] = (uint8_t)best_sel;
+			iron_float32x4_store_unaligned(&best_err_f[i], inf4);
+			iron_float32x4_store_unaligned(&best_sel_f[i], zer4);
 		}
+	}
+
+	const iron_float32x4_t inv256 = iron_float32x4_load_all(1.0f / 256.0f);
+	const iron_float32x4_t w0v    = iron_float32x4_load_all((float)pParams->m_weights[0]);
+	const iron_float32x4_t w1v    = iron_float32x4_load_all((float)pParams->m_weights[1]);
+	const iron_float32x4_t w2v    = iron_float32x4_load_all((float)pParams->m_weights[2]);
+
+	if (pParams->m_has_alpha)
+	{
+		float pix_a_f[16];
+		for (uint32_t i = 0; i < pParams->m_num_pixels; i++)
+			pix_a_f[i] = (float)pParams->m_pPixels[i].m_c[3];
+		const iron_float32x4_t w3v = iron_float32x4_load_all((float)pParams->m_weights[3]);
+
+		for (uint32_t j = 0; j < N; j++)
+		{
+			const iron_float32x4_t l1v  = iron_float32x4_load_all(cand_l_f[j]);
+			const iron_float32x4_t cr1v = iron_float32x4_load_all(cand_cr_f[j]);
+			const iron_float32x4_t cb1v = iron_float32x4_load_all(cand_cb_f[j]);
+			const iron_float32x4_t a1v  = iron_float32x4_load_all(cand_a_f[j]);
+			const iron_float32x4_t jv   = iron_float32x4_load_all((float)j);
+			for (uint32_t i = 0; i < 16; i += 4)
+			{
+				const iron_float32x4_t drv = iron_float32x4_mul(iron_float32x4_sub(l1v,  iron_float32x4_intrin_load_unaligned(&pix_l_f[i])),  inv256);
+				const iron_float32x4_t dgv = iron_float32x4_mul(iron_float32x4_sub(cr1v, iron_float32x4_intrin_load_unaligned(&pix_cr_f[i])), inv256);
+				const iron_float32x4_t dbv = iron_float32x4_mul(iron_float32x4_sub(cb1v, iron_float32x4_intrin_load_unaligned(&pix_cb_f[i])), inv256);
+				const iron_float32x4_t dav = iron_float32x4_sub(a1v, iron_float32x4_intrin_load_unaligned(&pix_a_f[i]));
+				iron_float32x4_t errv = iron_float32x4_mul(w0v, iron_float32x4_mul(drv, drv));
+				errv = iron_float32x4_add(errv, iron_float32x4_mul(w1v, iron_float32x4_mul(dgv, dgv)));
+				errv = iron_float32x4_add(errv, iron_float32x4_mul(w2v, iron_float32x4_mul(dbv, dbv)));
+				errv = iron_float32x4_add(errv, iron_float32x4_mul(w3v, iron_float32x4_mul(dav, dav)));
+				iron_float32x4_t best_v  = iron_float32x4_intrin_load_unaligned(&best_err_f[i]);
+				iron_float32x4_t best_sv = iron_float32x4_intrin_load_unaligned(&best_sel_f[i]);
+				const iron_float32x4_mask_t better = iron_float32x4_cmplt(errv, best_v);
+				iron_float32x4_store_unaligned(&best_err_f[i], iron_float32x4_min(errv, best_v));
+				iron_float32x4_store_unaligned(&best_sel_f[i], iron_float32x4_sel(jv, best_sv, better));
+			}
+		}
+	}
+	else
+	{
+		for (uint32_t j = 0; j < N; j++)
+		{
+			const iron_float32x4_t l1v  = iron_float32x4_load_all(cand_l_f[j]);
+			const iron_float32x4_t cr1v = iron_float32x4_load_all(cand_cr_f[j]);
+			const iron_float32x4_t cb1v = iron_float32x4_load_all(cand_cb_f[j]);
+			const iron_float32x4_t jv   = iron_float32x4_load_all((float)j);
+			for (uint32_t i = 0; i < 16; i += 4)
+			{
+				const iron_float32x4_t drv = iron_float32x4_mul(iron_float32x4_sub(l1v,  iron_float32x4_intrin_load_unaligned(&pix_l_f[i])),  inv256);
+				const iron_float32x4_t dgv = iron_float32x4_mul(iron_float32x4_sub(cr1v, iron_float32x4_intrin_load_unaligned(&pix_cr_f[i])), inv256);
+				const iron_float32x4_t dbv = iron_float32x4_mul(iron_float32x4_sub(cb1v, iron_float32x4_intrin_load_unaligned(&pix_cb_f[i])), inv256);
+				iron_float32x4_t errv = iron_float32x4_mul(w0v, iron_float32x4_mul(drv, drv));
+				errv = iron_float32x4_add(errv, iron_float32x4_mul(w1v, iron_float32x4_mul(dgv, dgv)));
+				errv = iron_float32x4_add(errv, iron_float32x4_mul(w2v, iron_float32x4_mul(dbv, dbv)));
+				iron_float32x4_t best_v  = iron_float32x4_intrin_load_unaligned(&best_err_f[i]);
+				iron_float32x4_t best_sv = iron_float32x4_intrin_load_unaligned(&best_sel_f[i]);
+				const iron_float32x4_mask_t better = iron_float32x4_cmplt(errv, best_v);
+				iron_float32x4_store_unaligned(&best_err_f[i], iron_float32x4_min(errv, best_v));
+				iron_float32x4_store_unaligned(&best_sel_f[i], iron_float32x4_sel(jv, best_sv, better));
+			}
+		}
+	}
+
+	// 16 scalar extractions — only done once per evaluate_solution call.
+	for (uint32_t i = 0; i < pParams->m_num_pixels; i++)
+	{
+		total_err += (uint64_t)best_err_f[i];
+		pResults->m_pSelectors_temp[i] = (uint8_t)(int)best_sel_f[i];
+	}
+
+#else // IRON_NOSIMD
+
+	for (uint32_t i = 0; i < pParams->m_num_pixels; i++)
+	{
+		uint64_t best_err = UINT64_MAX;
+		uint32_t best_sel = 0;
+		const color_quad_u8 *pPix = &pParams->m_pPixels[i];
+		const int l2  = pPix->m_c[0] * 109 + pPix->m_c[1] * 366 + pPix->m_c[2] * 37;
+		const int cr2 = ((int)pPix->m_c[0] << 9) - l2;
+		const int cb2 = ((int)pPix->m_c[2] << 9) - l2;
+		if (pParams->m_has_alpha)
+		{
+			const int a2 = (int)pPix->m_c[3];
+			for (uint32_t j = 0; j < N; j++)
+			{
+				const int dr = ((int)cand_l_f[j]  - l2)  >> 8;
+				const int dg = ((int)cand_cr_f[j] - cr2) >> 8;
+				const int db = ((int)cand_cb_f[j] - cb2) >> 8;
+				const int da = (int)cand_a_f[j] - a2;
+				const uint64_t err = pParams->m_weights[0] * (uint32_t)(dr * dr) + pParams->m_weights[1] * (uint32_t)(dg * dg) + pParams->m_weights[2] * (uint32_t)(db * db) + pParams->m_weights[3] * (uint32_t)(da * da);
+				if (err < best_err) { best_err = err; best_sel = j; }
+			}
+		}
+		else
+		{
+			for (uint32_t j = 0; j < N; j++)
+			{
+				const int dr = ((int)cand_l_f[j]  - l2)  >> 8;
+				const int dg = ((int)cand_cr_f[j] - cr2) >> 8;
+				const int db = ((int)cand_cb_f[j] - cb2) >> 8;
+				const uint64_t err = pParams->m_weights[0] * (uint32_t)(dr * dr) + pParams->m_weights[1] * (uint32_t)(dg * dg) + pParams->m_weights[2] * (uint32_t)(db * db);
+				if (err < best_err) { best_err = err; best_sel = j; }
+			}
+		}
+		total_err += best_err;
+		pResults->m_pSelectors_temp[i] = (uint8_t)best_sel;
+	}
+#endif
 
 	if (total_err < pResults->m_best_overall_err)
 	{
@@ -448,6 +572,17 @@ static uint64_t color_cell_compression(uint32_t mode, const color_cell_compresso
 	meanColor = vec4F_mul(&meanColor, 1.0f / (float)(pParams->m_num_pixels * 255.0f));
 	vec4F_saturate_in_place(&meanColor);
 
+#ifndef IRON_NOSIMD
+	// Precompute per-channel float arrays for SIMD covariance and projection loops below.
+	float pix_r_f[16], pix_g_f[16], pix_b_f[16];
+	for (uint32_t i = 0; i < pParams->m_num_pixels; i++)
+	{
+		pix_r_f[i] = (float)pParams->m_pPixels[i].m_c[0];
+		pix_g_f[i] = (float)pParams->m_pPixels[i].m_c[1];
+		pix_b_f[i] = (float)pParams->m_pPixels[i].m_c[2];
+	}
+#endif
+
 	if (pParams->m_has_alpha)
 	{
 		// Use incremental PCA for RGBA PCA, because it's simple.
@@ -474,6 +609,31 @@ static uint64_t color_cell_compression(uint32_t mode, const color_cell_compresso
 		// Use covar technique for RGB PCA, because it doesn't require per-pixel normalization.
 		float cov[6] = { 0, 0, 0, 0, 0, 0 };
 
+#ifndef IRON_NOSIMD
+		{
+			const iron_float32x4_t mr4 = iron_float32x4_load_all(meanColorScaled.m_c[0]);
+			const iron_float32x4_t mg4 = iron_float32x4_load_all(meanColorScaled.m_c[1]);
+			const iron_float32x4_t mb4 = iron_float32x4_load_all(meanColorScaled.m_c[2]);
+			iron_float32x4_t c0v = iron_float32x4_load_all(0.0f), c1v = iron_float32x4_load_all(0.0f);
+			iron_float32x4_t c2v = iron_float32x4_load_all(0.0f), c3v = iron_float32x4_load_all(0.0f);
+			iron_float32x4_t c4v = iron_float32x4_load_all(0.0f), c5v = iron_float32x4_load_all(0.0f);
+			for (uint32_t i = 0; i < 16; i += 4)
+			{
+				const iron_float32x4_t rv = iron_float32x4_sub(iron_float32x4_intrin_load_unaligned(&pix_r_f[i]), mr4);
+				const iron_float32x4_t gv = iron_float32x4_sub(iron_float32x4_intrin_load_unaligned(&pix_g_f[i]), mg4);
+				const iron_float32x4_t bv = iron_float32x4_sub(iron_float32x4_intrin_load_unaligned(&pix_b_f[i]), mb4);
+				c0v = iron_float32x4_add(c0v, iron_float32x4_mul(rv, rv));
+				c1v = iron_float32x4_add(c1v, iron_float32x4_mul(rv, gv));
+				c2v = iron_float32x4_add(c2v, iron_float32x4_mul(rv, bv));
+				c3v = iron_float32x4_add(c3v, iron_float32x4_mul(gv, gv));
+				c4v = iron_float32x4_add(c4v, iron_float32x4_mul(gv, bv));
+				c5v = iron_float32x4_add(c5v, iron_float32x4_mul(bv, bv));
+			}
+			cov[0] = iron_float32x4_hsum(c0v); cov[1] = iron_float32x4_hsum(c1v);
+			cov[2] = iron_float32x4_hsum(c2v); cov[3] = iron_float32x4_hsum(c3v);
+			cov[4] = iron_float32x4_hsum(c4v); cov[5] = iron_float32x4_hsum(c5v);
+		}
+#else
 		for (uint32_t i = 0; i < pParams->m_num_pixels; i++)
 		{
 			const color_quad_u8 *pV = &pParams->m_pPixels[i];
@@ -482,6 +642,7 @@ static uint64_t color_cell_compression(uint32_t mode, const color_cell_compresso
 			float b = pV->m_c[2] - meanColorScaled.m_c[2];
 			cov[0] += r*r; cov[1] += r*g; cov[2] += r*b; cov[3] += g*g; cov[4] += g*b; cov[5] += b*b;
 		}
+#endif
 
 		float vfr = .9f, vfg = 1.0f, vfb = .7f;
 		for (uint32_t iter = 0; iter < 3; iter++)
@@ -524,13 +685,41 @@ static uint64_t color_cell_compression(uint32_t mode, const color_cell_compresso
 
 	float l = 1e+9f, h = -1e+9f;
 
+#ifndef IRON_NOSIMD
+	if (!pParams->m_has_alpha)
+	{
+		// RGB path: axis.m_c[3] == 0 so only R,G,B contribute to the dot product.
+		const iron_float32x4_t mr4 = iron_float32x4_load_all(meanColorScaled.m_c[0]);
+		const iron_float32x4_t mg4 = iron_float32x4_load_all(meanColorScaled.m_c[1]);
+		const iron_float32x4_t mb4 = iron_float32x4_load_all(meanColorScaled.m_c[2]);
+		const iron_float32x4_t axv = iron_float32x4_load_all(axis.m_c[0]);
+		const iron_float32x4_t ayv = iron_float32x4_load_all(axis.m_c[1]);
+		const iron_float32x4_t azv = iron_float32x4_load_all(axis.m_c[2]);
+		iron_float32x4_t lv = iron_float32x4_load_all(1e+9f);
+		iron_float32x4_t hv = iron_float32x4_load_all(-1e+9f);
+		for (uint32_t i = 0; i < 16; i += 4)
+		{
+			const iron_float32x4_t rv = iron_float32x4_sub(iron_float32x4_intrin_load_unaligned(&pix_r_f[i]), mr4);
+			const iron_float32x4_t gv = iron_float32x4_sub(iron_float32x4_intrin_load_unaligned(&pix_g_f[i]), mg4);
+			const iron_float32x4_t bv = iron_float32x4_sub(iron_float32x4_intrin_load_unaligned(&pix_b_f[i]), mb4);
+			iron_float32x4_t dv = iron_float32x4_mul(rv, axv);
+			dv = iron_float32x4_add(dv, iron_float32x4_mul(gv, ayv));
+			dv = iron_float32x4_add(dv, iron_float32x4_mul(bv, azv));
+			lv = iron_float32x4_min(lv, dv);
+			hv = iron_float32x4_max(hv, dv);
+		}
+		l = minimumf(minimumf(iron_float32x4_get(lv, 0), iron_float32x4_get(lv, 1)),
+		             minimumf(iron_float32x4_get(lv, 2), iron_float32x4_get(lv, 3)));
+		h = maximumf(maximumf(iron_float32x4_get(hv, 0), iron_float32x4_get(hv, 1)),
+		             maximumf(iron_float32x4_get(hv, 2), iron_float32x4_get(hv, 3)));
+	}
+	else
+#endif
 	for (uint32_t i = 0; i < pParams->m_num_pixels; i++)
 	{
 		vec4F color = vec4F_from_color(&pParams->m_pPixels[i]);
-
 		vec4F q = vec4F_sub(&color, &meanColorScaled);
 		float d = vec4F_dot(&q, &axis);
-
 		l = minimumf(l, d);
 		h = maximumf(h, d);
 	}
