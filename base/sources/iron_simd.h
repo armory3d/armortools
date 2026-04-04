@@ -3,64 +3,24 @@
 #include "iron_global.h"
 #include <string.h>
 
-/*! \file float32x4.h
-    \brief Provides 128bit four-element floating point SIMD operations which are mapped to equivalent SSE or Neon operations.
-*/
-
-// Any level of AVX Capability (Could be AVX, AVX2, AVX512, etc.)
-//(Currently) only used for checking existence of earlier SSE instruction sets
-#if defined(__AVX__)
-// Unfortunate situation here
-// MSVC does not provide compiletime macros for the following instruction sets
-// but their existence is implied by AVX and higher
-#define IRON_SSE4_2
-#define IRON_SSE4_1
-#define IRON_SSSE3
-#define IRON_SSE3
-#endif
-
-// SSE2 Capability check
-// Note for Windows:
-//	_M_IX86_FP checks SSE2 and SSE for 32bit Windows programs only, and is unset if not a 32bit program.
-//	SSE2 and earlier is --guaranteed-- to be active for any 64bit Windows program
-#if defined(__SSE2__) || (_M_IX86_FP == 2) || (defined(IRON_WINDOWS) && defined(IRON_64))
-#define IRON_SSE2
-#endif
-
-// SSE Capability check
-#if defined(__SSE__) || _M_IX86_FP == 2 || _M_IX86_FP == 1 || (defined(IRON_WINDOWS) && !defined(__aarch64__)) || \
-    (defined(IRON_WINDOWSAPP) && !defined(__aarch64__)) || (defined(IRON_MACOS) && __x86_64)
-
+#if defined(__SSE2__) || defined(IRON_WINDOWS)
 #define IRON_SSE
 #endif
 
-// NEON Capability check
-#if (defined(IRON_IOS) || defined(__aarch64__)) && !defined(IRON_NOSIMD)
+#if defined(__aarch64__)
 #define IRON_NEON
 #endif
 
-// No SIMD Capabilities
-#if !defined(IRON_SSE4_2) && !defined(IRON_SSE4_1) && !defined(IRON_SSSE3) && !defined(IRON_SSE3) && !defined(IRON_SSE2) && !defined(IRON_SSE) && \
-    !defined(IRON_NEON) && !defined(IRON_NOSIMD)
-
+#if !defined(IRON_SSE) && !defined(IRON_NEON) && !defined(IRON_NOSIMD)
 #define IRON_NOSIMD
 #endif
 
 #define IRON_SHUFFLE_TABLE(LANE_A1, LANE_A2, LANE_B1, LANE_B2) \
 	((((LANE_B2) & 0x3) << 6) | (((LANE_B1) & 0x3) << 4) | (((LANE_A2) & 0x3) << 2) | (((LANE_A1) & 0x3) << 0))
 
-#if defined(IRON_SSE2)
+#if defined(IRON_SSE)
 
-// SSE_## related headers include earlier revisions, IE
-// SSE2 contains all of SSE
 #include <emmintrin.h>
-
-typedef __m128 iron_float32x4_t;
-typedef __m128 iron_float32x4_mask_t;
-
-#elif defined(IRON_SSE)
-
-#include <xmmintrin.h>
 
 typedef __m128 iron_float32x4_t;
 typedef __m128 iron_float32x4_mask_t;
@@ -272,14 +232,7 @@ static inline iron_float32x4_t iron_float32x4_add(iron_float32x4_t a, iron_float
 }
 
 static inline iron_float32x4_t iron_float32x4_div(iron_float32x4_t a, iron_float32x4_t b) {
-#if defined(__aarch64__)
 	return vdivq_f32(a, b);
-#else
-	float32x4_t inv    = vrecpeq_f32(b);
-	float32x4_t restep = vrecpsq_f32(b, inv);
-	inv                = vmulq_f32(restep, inv);
-	return vmulq_f32(a, inv);
-#endif
 }
 
 static inline iron_float32x4_t iron_float32x4_mul(iron_float32x4_t a, iron_float32x4_t b) {
@@ -303,11 +256,7 @@ static inline iron_float32x4_t iron_float32x4_sub(iron_float32x4_t a, iron_float
 }
 
 static inline iron_float32x4_t iron_float32x4_sqrt(iron_float32x4_t t) {
-#if defined(__aarch64__)
 	return vsqrtq_f32(t);
-#else
-	return vmulq_f32(t, vrsqrteq_f32(t));
-#endif
 }
 
 static inline iron_float32x4_t iron_float32x4_max(iron_float32x4_t a, iron_float32x4_t b) {
@@ -380,37 +329,11 @@ static inline iron_float32x4_t iron_float32x4_not(iron_float32x4_t t) {
 	}
 
 static inline iron_float32x4_t iron_float32x4_shuffle_aebf(iron_float32x4_t abcd, iron_float32x4_t efgh) {
-#if defined(__aarch64__)
-
 	return vzip1q_f32(abcd, efgh);
-
-#else
-
-	float a = vgetq_lane_f32(abcd, 0);
-	float b = vgetq_lane_f32(abcd, 1);
-	float e = vgetq_lane_f32(efgh, 0);
-	float f = vgetq_lane_f32(efgh, 1);
-
-	return (iron_float32x4_t){a, e, b, f};
-
-#endif
 }
 
 static inline iron_float32x4_t iron_float32x4_shuffle_cgdh(iron_float32x4_t abcd, iron_float32x4_t efgh) {
-#if defined(__aarch64__)
-
 	return vzip2q_f32(abcd, efgh);
-
-#else
-
-	float c = vgetq_lane_f32(abcd, 2);
-	float d = vgetq_lane_f32(abcd, 3);
-	float g = vgetq_lane_f32(efgh, 2);
-	float h = vgetq_lane_f32(efgh, 3);
-
-	return (iron_float32x4_t){c, g, d, h};
-
-#endif
 }
 
 static inline iron_float32x4_t iron_float32x4_shuffle_abef(iron_float32x4_t abcd, iron_float32x4_t efgh) {
