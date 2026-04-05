@@ -241,6 +241,8 @@ minic_val_t minic_dispatch(minic_ext_func_t *ef, minic_val_t *args, int argc) {
 				a[i].p = (dv == 0.0) ? NULL : (void *)(uintptr_t)(uint64_t)dv;
 			}
 			break;
+		case MINIC_T_VOID:
+			break;
 		}
 	}
 
