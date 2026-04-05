@@ -208,30 +208,22 @@ void gpu_set_bool(int location, bool value) {
 	ints[0]   = value ? 1 : 0;
 }
 
-static void gpu_internal_set_mat3(int offset, mat3_t *value) {
-	float *floats = (float *)(&constant_buffer.data[offset]);
+void gpu_set_mat3(int location, mat3_t value) {
+	float *floats = (float *)(&constant_buffer.data[location]);
 	for (int y = 0; y < 3; ++y) {
 		for (int x = 0; x < 3; ++x) {
-			floats[x + y * 4] = value->m[x + y * 3];
+			floats[x + y * 4] = value.m[x + y * 3];
 		}
 	}
-}
-
-static void gpu_internal_set_mat4(int offset, mat4_t *value) {
-	float *floats = (float *)(&constant_buffer.data[offset]);
-	for (int y = 0; y < 4; ++y) {
-		for (int x = 0; x < 4; ++x) {
-			floats[x + y * 4] = value->m[x + y * 4];
-		}
-	}
-}
-
-void gpu_set_mat3(int location, mat3_t value) {
-	gpu_internal_set_mat3(location, &value);
 }
 
 void gpu_set_mat4(int location, mat4_t value) {
-	gpu_internal_set_mat4(location, &value);
+	float *floats = (float *)(&constant_buffer.data[location]);
+	for (int y = 0; y < 4; ++y) {
+		for (int x = 0; x < 4; ++x) {
+			floats[x + y * 4] = value.m[x + y * 4];
+		}
+	}
 }
 
 void gpu_vertex_structure_add(gpu_vertex_structure_t *structure, const char *name, gpu_vertex_data_t data) {
