@@ -1,6 +1,9 @@
 
 #include "global.h"
 
+gpu_buffer_t *util_render_screen_aligned_full_vb = NULL;
+gpu_buffer_t *util_render_screen_aligned_full_ib = NULL;
+
 void util_render_make_material_preview() {
 	context_raw->material_preview = true;
 

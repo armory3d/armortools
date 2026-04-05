@@ -135,8 +135,8 @@ char *gabor_texture_node_value(ui_node_t *node, ui_node_socket_t *socket) {
 
 void gabor_texture_node_init() {
 
-	char *gabor_dimensions_data = string("%s\n%s", _tr("2D"), _tr("3D"));
-	gabor_texture_node_def =
+	char      *gabor_dimensions_data = string("%s\n%s", _tr("2D"), _tr("3D"));
+	ui_node_t *gabor_texture_node_def =
 	    GC_ALLOC_INIT(ui_node_t, {.id     = 0,
 	                              .name   = _tr("Gabor Texture"),
 	                              .type   = "TEX_GABOR",
@@ -256,7 +256,6 @@ void gabor_texture_node_init() {
 	                                  1),
 	                              .width = 0,
 	                              .flags = 0});
-	gc_root(gabor_texture_node_def);
 
 	any_array_push(nodes_material_texture, gabor_texture_node_def);
 	any_map_set(parser_material_node_values, "TEX_GABOR", gabor_texture_node_value);

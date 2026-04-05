@@ -1,6 +1,8 @@
 
 #include "global.h"
 
+scene_t *scene_raw_gc;
+
 void import_arm_run_project_on_next_frame(void *_) {
 	// Once envmap is imported
 	scene_world->strength         = project_raw->envmap_strength;

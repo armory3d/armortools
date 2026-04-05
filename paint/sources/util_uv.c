@@ -1,6 +1,9 @@
 
 #include "global.h"
 
+buffer_t       *util_uv_dilate_bytes = NULL;
+gpu_pipeline_t *util_uv_pipe_dilate  = NULL;
+
 void util_uv_cache_uv_map() {
 	if (util_uv_uvmap != NULL && (util_uv_uvmap->width != config_get_texture_res_x() || util_uv_uvmap->height != config_get_texture_res_y())) {
 		gpu_delete_texture(util_uv_uvmap);
@@ -26,8 +29,8 @@ void util_uv_cache_uv_map() {
 	mesh_object_t *merged = mask > 0 ? project_paint_objects->buffer[mask - 1] : context_raw->merged_object;
 	mesh_data_t   *mesh   = (context_raw->layer_filter == 0 && merged != NULL) ? merged->data : context_raw->paint_object->data;
 
-	i16_array_t   *texa   = mesh->vertex_arrays->buffer[2]->values;
-	u32_array_t   *inda   = mesh->index_array;
+	i16_array_t *texa = mesh->vertex_arrays->buffer[2]->values;
+	u32_array_t *inda = mesh->index_array;
 	draw_begin(util_uv_uvmap, true, 0x00000000);
 	draw_set_color(0xffffffff);
 	f32 strength = res_x > 2048 ? 2.0 : 1.0;
@@ -116,9 +119,9 @@ void util_uv_cache_dilate_map() {
 		gpu_vertex_struct_add(vs, "pos", GPU_VERTEX_DATA_I16_4X_NORM);
 		gpu_vertex_struct_add(vs, "nor", GPU_VERTEX_DATA_I16_2X_NORM);
 		gpu_vertex_struct_add(vs, "tex", GPU_VERTEX_DATA_I16_2X_NORM);
-		util_uv_pipe_dilate->input_layout                      = vs;
-		util_uv_pipe_dilate->depth_write                       = false;
-		util_uv_pipe_dilate->depth_mode                        = GPU_COMPARE_MODE_ALWAYS;
+		util_uv_pipe_dilate->input_layout        = vs;
+		util_uv_pipe_dilate->depth_write         = false;
+		util_uv_pipe_dilate->depth_mode          = GPU_COMPARE_MODE_ALWAYS;
 		util_uv_pipe_dilate->color_attachment[0] = GPU_TEXTURE_FORMAT_R8;
 		gpu_pipeline_compile(util_uv_pipe_dilate);
 		// dilate_tex_unpack = getConstantLocation(pipeDilate, "tex_unpack");

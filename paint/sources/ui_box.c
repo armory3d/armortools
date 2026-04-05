@@ -1,6 +1,15 @@
 
 #include "global.h"
 
+bool  ui_box_draggable             = true;
+char *ui_box_title                 = "";
+char *ui_box_text                  = "";
+void (*ui_box_commands)(void)      = NULL;
+void (*ui_box_modal_on_hide)(void) = NULL;
+i32  ui_box_draws                  = 0;
+bool ui_box_copyable               = false;
+f32  ui_box_tween_alpha            = 0.0;
+
 void ui_box_init() {
 	ui_box_hwnd->redraws = 2;
 	ui_box_hwnd->drag_x  = 0;
@@ -45,11 +54,11 @@ void ui_box_render() {
 
 	if (config_raw->touch_ui) { // Darken bg
 		draw_begin(NULL, false, 0);
-		#if defined(IRON_ANDROID) || defined(IRON_IOS)
+#if defined(IRON_ANDROID) || defined(IRON_IOS)
 		draw_set_color(color_from_floats(0, 0, 0, ui_box_tween_alpha));
-		#else
+#else
 		draw_set_color(color_from_floats(0, 0, 0, 0.5));
-		#endif
+#endif
 		draw_filled_rect(0, 0, iron_window_width(), iron_window_height());
 		draw_end();
 	}
@@ -82,7 +91,7 @@ void ui_box_render() {
 			}
 			ui_end_element();
 
-			#if defined(IRON_WINDOWS) || defined(IRON_LINUX) || defined(IRON_MACOS)
+#if defined(IRON_WINDOWS) || defined(IRON_LINUX) || defined(IRON_MACOS)
 			if (ui_box_copyable) {
 				ui_row3();
 			}
@@ -95,7 +104,7 @@ void ui_box_render() {
 				    2);
 				ui_row(row);
 			}
-			#else
+#else
 			f32_array_t *row = f32_array_create_from_raw(
 			    (f32[]){
 			        2 / 3.0,
@@ -103,15 +112,15 @@ void ui_box_render() {
 			    },
 			    2);
 			ui_row(row);
-			#endif
+#endif
 
 			ui_end_element();
 
-			#if defined(IRON_WINDOWS) || defined(IRON_LINUX) || defined(IRON_MACOS)
+#if defined(IRON_WINDOWS) || defined(IRON_LINUX) || defined(IRON_MACOS)
 			if (ui_box_copyable && ui_icon_button(tr("Copy"), ICON_COPY, UI_ALIGN_CENTER)) {
 				iron_copy_to_clipboard(ui_box_text);
 			}
-			#endif
+#endif
 			if (ui_icon_button(tr("OK"), ICON_CHECK, UI_ALIGN_CENTER)) {
 				ui_box_hide();
 			}
@@ -180,9 +189,9 @@ void ui_box_show_message(char *title, char *text, bool copyable) {
 	ui_box_commands  = NULL;
 	ui_box_copyable  = copyable;
 	ui_box_draggable = true;
-	#if defined(IRON_ANDROID) || defined(IRON_IOS)
+#if defined(IRON_ANDROID) || defined(IRON_IOS)
 	ui_box_tween_in();
-	#endif
+#endif
 }
 
 void ui_box_show_custom(void (*commands)(void), i32 mw, i32 mh, void (*on_hide)(void), bool draggable, char *title) {
@@ -199,15 +208,15 @@ void ui_box_show_custom(void (*commands)(void), i32 mw, i32 mh, void (*on_hide)(
 	gc_unroot(ui_box_title);
 	ui_box_title = string_copy(title);
 	gc_root(ui_box_title);
-	#if defined(IRON_ANDROID) || defined(IRON_IOS)
+#if defined(IRON_ANDROID) || defined(IRON_IOS)
 	ui_box_tween_in();
-	#endif
+#endif
 }
 
 void ui_box_hide() {
-	#if defined(IRON_ANDROID) || defined(IRON_IOS)
+#if defined(IRON_ANDROID) || defined(IRON_IOS)
 	ui_box_tween_out();
-	#else
+#else
 	ui_box_hide_internal();
-	#endif
+#endif
 }

@@ -1,6 +1,8 @@
 
 #include "global.h"
 
+ui_text_coloring_t *tab_scripts_text_coloring = NULL;
+
 void tab_scripts_draw_export(char *path) {
 	char *str = tab_scripts_hscript->text;
 	char *f   = ui_files_filename;

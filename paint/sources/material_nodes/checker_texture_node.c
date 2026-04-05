@@ -1,7 +1,7 @@
 
 #include "../global.h"
 
-char                        *str_tex_checker = "\
+char *str_tex_checker = "\
 fun tex_checker(co: float3, col1: float3, col2: float3, scale: float): float3 { \
 	/* Prevent precision issues on unit coordinates */ \
 	var p: float3 = (co + 0.000001 * 0.999999) * scale; \
@@ -48,7 +48,7 @@ char *checker_texture_node_value(ui_node_t *node, ui_node_socket_t *socket) {
 
 void checker_texture_node_init() {
 
-	checker_texture_node_def =
+	ui_node_t *checker_texture_node_def =
 	    GC_ALLOC_INIT(ui_node_t, {.id     = 0,
 	                              .name   = _tr("Checker Texture"),
 	                              .type   = "TEX_CHECKER",
@@ -126,7 +126,6 @@ void checker_texture_node_init() {
 	                              .buttons = any_array_create_from_raw((void *[]){}, 0),
 	                              .width   = 0,
 	                              .flags   = 0});
-	gc_root(checker_texture_node_def);
 
 	any_array_push(nodes_material_texture, checker_texture_node_def);
 	any_map_set(parser_material_node_vectors, "TEX_CHECKER", checker_texture_node_vector);

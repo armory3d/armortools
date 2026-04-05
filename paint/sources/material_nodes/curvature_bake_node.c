@@ -23,7 +23,7 @@ char *curvature_bake_node_value(ui_node_t *node, ui_node_socket_t *socket) {
 
 void curvature_bake_node_init() {
 
-	curvature_bake_node_def =
+	ui_node_t *curvature_bake_node_def =
 	    GC_ALLOC_INIT(ui_node_t, {.id     = 0,
 	                              .name   = _tr("Curvature Texture"),
 	                              .type   = "BAKE_CURVATURE", // extension
@@ -81,7 +81,6 @@ void curvature_bake_node_init() {
 	                              .buttons = any_array_create_from_raw((void *[]){}, 0),
 	                              .width   = 0,
 	                              .flags   = 0});
-	gc_root(curvature_bake_node_def);
 
 	any_array_push(nodes_material_texture, curvature_bake_node_def);
 	any_map_set(parser_material_node_values, "BAKE_CURVATURE", curvature_bake_node_value);

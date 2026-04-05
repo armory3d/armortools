@@ -1,6 +1,8 @@
 
 #include "global.h"
 
+i32 tab_scene_line_counter = 0;
+
 void tab_scene_select_object(mesh_object_t *mo) {
 	if (mo == NULL) {
 		return;

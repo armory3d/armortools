@@ -1,6 +1,13 @@
 
 #include "../global.h"
 
+gpu_texture_t *image_to_pbr_node_result_base      = NULL;
+gpu_texture_t *image_to_pbr_node_result_normal    = NULL;
+gpu_texture_t *image_to_pbr_node_result_occlusion = NULL;
+gpu_texture_t *image_to_pbr_node_result_height    = NULL;
+gpu_texture_t *image_to_pbr_node_result_roughness = NULL;
+gpu_texture_t *image_to_pbr_node_result_metallic  = NULL;
+
 char *image_to_pbr_node_vector(ui_node_t *node, ui_node_socket_t *socket) {
 	gpu_texture_t *result = NULL;
 	if (socket == node->outputs->buffer[0]) { // base color
@@ -60,7 +67,7 @@ void image_to_pbr_node_check_result(void (*done)(gpu_texture_t *)) {
 }
 
 void image_to_pbr_node_run_sd(char *model, char *prompt, void (*done)(gpu_texture_t *)) {
-	char             *dir  = neural_node_dir();
+	char           *dir  = neural_node_dir();
 	string_array_t *argv = any_array_create_from_raw(
 	    (void *[]){
 	        string("%s/%s", dir, neural_node_sd_bin()),
@@ -165,7 +172,7 @@ void image_to_pbr_node_button(i32 node_id) {
 	ui_node_t        *node      = ui_get_node(canvas->nodes, node_id);
 	char             *node_name = parser_material_node_name(node, NULL);
 	ui_handle_t      *h         = ui_handle(node_name);
-	string_array_t *models    = any_array_create_from_raw(
+	string_array_t   *models    = any_array_create_from_raw(
         (void *[]){
             "Marigold",
         },
@@ -191,7 +198,7 @@ void image_to_pbr_node_button(i32 node_id) {
 
 void image_to_pbr_node_init() {
 
-	image_to_pbr_node_def =
+	ui_node_t *image_to_pbr_node_def =
 	    GC_ALLOC_INIT(ui_node_t, {.id     = 0,
 	                              .name   = _tr("Image to PBR"),
 	                              .type   = "NEURAL_IMAGE_TO_PBR",
@@ -291,7 +298,6 @@ void image_to_pbr_node_init() {
 	                                  1),
 	                              .width = 0,
 	                              .flags = 0});
-	gc_root(image_to_pbr_node_def);
 
 	any_array_push(nodes_material_neural, image_to_pbr_node_def);
 	any_map_set(parser_material_node_vectors, "NEURAL_IMAGE_TO_PBR", image_to_pbr_node_vector);

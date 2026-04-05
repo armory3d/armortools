@@ -9,7 +9,7 @@ char *invert_color_node_vector(ui_node_t *node, ui_node_socket_t *socket) {
 
 void invert_color_node_init() {
 
-	invert_color_node_def =
+	ui_node_t *invert_color_node_def =
 	    GC_ALLOC_INIT(ui_node_t, {.id     = 0,
 	                              .name   = _tr("Invert Color"),
 	                              .type   = "INVERT_COLOR",
@@ -57,7 +57,6 @@ void invert_color_node_init() {
 	                              .buttons = any_array_create_from_raw((void *[]){}, 0),
 	                              .width   = 0,
 	                              .flags   = 0});
-	gc_root(invert_color_node_def);
 
 	any_array_push(nodes_material_color, invert_color_node_def);
 	any_map_set(parser_material_node_vectors, "INVERT_COLOR", invert_color_node_vector);

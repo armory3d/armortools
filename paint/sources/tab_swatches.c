@@ -1,6 +1,10 @@
 
 #include "global.h"
 
+gpu_texture_t *_tab_swatches_empty;
+i32            tab_swatches_drag_pos = -1;
+i32            _tab_swatches_draw_i;
+
 gpu_texture_t *tab_swatches_empty_get() {
 	if (_tab_swatches_empty == NULL) {
 		u8_array_t *b = u8_array_create(4);
@@ -69,9 +73,9 @@ void tab_swatches_draw_edit_menu() {
 
 	context_raw->swatch->base = ui_color_wheel(h, false, -1, 11 * ui->ops->theme->ELEMENT_H * UI_SCALE(), true, &tab_swatches_draw_color_picker, NULL);
 
-	ui_handle_t *hopacity          = ui_handle(__ID__);
-	hopacity->f                    = context_raw->swatch->opacity;
-	context_raw->swatch->opacity   = ui_slider(hopacity, "Opacity", 0, 1, true, 100.0, true, UI_ALIGN_RIGHT, true);
+	ui_handle_t *hopacity        = ui_handle(__ID__);
+	hopacity->f                  = context_raw->swatch->opacity;
+	context_raw->swatch->opacity = ui_slider(hopacity, "Opacity", 0, 1, true, 100.0, true, UI_ALIGN_RIGHT, true);
 
 	if (config_raw->workflow == WORKFLOW_PBR) {
 		ui_handle_t *hocclusion        = ui_handle(__ID__);

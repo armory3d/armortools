@@ -1,6 +1,11 @@
 
 #include "global.h"
 
+i32           tab_layers_layer_name_edit   = -1;
+bool          tab_layers_show_context_menu = false;
+slot_layer_t *tab_layers_l;
+bool          tab_layers_mini;
+
 void tab_layers_button_2d_view() {
 	if (ui_button(tr("2D View"), UI_ALIGN_CENTER, "")) {
 		ui_base_show_2d_view(VIEW_2D_TYPE_LAYER);
@@ -265,8 +270,8 @@ ui_handle_t *tab_layers_combo_object(slot_layer_t *l, bool label) {
 }
 
 ui_handle_t *tab_layers_combo_blending(slot_layer_t *l, bool label) {
-	ui_handle_t *blending_handle     = ui_nest(ui_handle(__ID__), l->id);
-	blending_handle->i               = l->blending;
+	ui_handle_t *blending_handle   = ui_nest(ui_handle(__ID__), l->id);
+	blending_handle->i             = l->blending;
 	string_array_t *blending_combo = any_array_create_from_raw(
 	    (void *[]){
 	        tr("Mix"),
@@ -722,8 +727,8 @@ void tab_layers_draw_layer_context_menu_draw() {
 		}
 
 		ui_menu_align();
-		ui_handle_t *huv       = ui_handle(__ID__);
-		huv->i                 = l->uv_map;
+		ui_handle_t *huv     = ui_handle(__ID__);
+		huv->i               = l->uv_map;
 		string_array_t *aruv = any_array_create_from_raw(
 		    (void *[]){
 		        "uv0",
@@ -788,8 +793,8 @@ void tab_layers_draw_layer_context_menu_draw() {
 		}
 
 		ui_menu_align();
-		ui_handle_t *uv_type_handle     = ui_nest(ui_handle(__ID__), l->id);
-		uv_type_handle->i               = l->uv_type;
+		ui_handle_t *uv_type_handle   = ui_nest(ui_handle(__ID__), l->id);
+		uv_type_handle->i             = l->uv_type;
 		string_array_t *uv_type_items = any_array_create_from_raw(
 		    (void *[]){
 		        tr("UV Map"),
@@ -856,7 +861,7 @@ void tab_layers_draw_layer_context_menu_draw() {
 		}
 
 		if (base_handle->changed || opac_handle->changed || nor_handle->changed || nor_blend_handle->changed || occ_handle->changed || rough_handle->changed ||
-			met_handle->changed || height_handle->changed || height_blend_handle->changed || emis_handle->changed || subs_handle->changed) {
+		    met_handle->changed || height_handle->changed || height_blend_handle->changed || emis_handle->changed || subs_handle->changed) {
 			make_material_parse_mesh_material();
 			ui_menu_keep_open = true;
 		}
@@ -1180,7 +1185,7 @@ i32_map_t *tab_layers_init_layer_map() {
 }
 
 i32_imap_t *tab_layers_fill_layer_map(i32_map_t *map) {
-	i32_imap_t       *res  = any_map_create();
+	i32_imap_t     *res  = any_map_create();
 	string_array_t *keys = map_keys(map);
 	for (i32 i = 0; i < keys->length; ++i) {
 		char *l = keys->buffer[i];

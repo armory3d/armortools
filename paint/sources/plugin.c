@@ -1,6 +1,8 @@
 
 #include "global.h"
 
+char *_plugin_name;
+
 plugin_t *plugin_create() {
 	plugin_t *p = GC_ALLOC_INIT(plugin_t, {0});
 	p->name     = string_copy(_plugin_name);
@@ -17,7 +19,7 @@ void plugin_start(char *plugin) {
 	data_delete_blob(string("plugins/%s", plugin));
 	// Store context on the plugin so callbacks can use it and it can be freed on stop
 	plugin_t *p = any_map_get(plugin_map, plugin);
-	p->ctx = ctx;
+	p->ctx      = ctx;
 }
 
 void plugin_stop(char *plugin) {

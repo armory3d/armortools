@@ -115,11 +115,11 @@ char *vector_math2_node_value(ui_node_t *node, ui_node_socket_t *socket) {
 void vector_math2_node_init() {
 
 	char *vector_math_operation_data =
-	    string("%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s", _tr("Add"), _tr("Subtract"), _tr("Multiply"),
-	           _tr("Divide"), _tr("Average"), _tr("Cross Product"), _tr("Project"), _tr("Reflect"), _tr("Dot Product"), _tr("Distance"), _tr("Length"),
-	           _tr("Scale"), _tr("Normalize"), _tr("Absolute"), _tr("Power"), _tr("Sign"), _tr("Minimum"), _tr("Maximum"), _tr("Floor"), _tr("Ceil"),
-	           _tr("Fraction"), _tr("Modulo"), _tr("Snap"), _tr("Sine"), _tr("Cosine"), _tr("Tangent"));
-	vector_math2_node_def =
+	    string("%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s", _tr("Add"), _tr("Subtract"),
+	           _tr("Multiply"), _tr("Divide"), _tr("Average"), _tr("Cross Product"), _tr("Project"), _tr("Reflect"), _tr("Dot Product"), _tr("Distance"),
+	           _tr("Length"), _tr("Scale"), _tr("Normalize"), _tr("Absolute"), _tr("Power"), _tr("Sign"), _tr("Minimum"), _tr("Maximum"), _tr("Floor"),
+	           _tr("Ceil"), _tr("Fraction"), _tr("Modulo"), _tr("Snap"), _tr("Sine"), _tr("Cosine"), _tr("Tangent"));
+	ui_node_t *vector_math2_node_def =
 	    GC_ALLOC_INIT(ui_node_t, {.id     = 0,
 	                              .name   = _tr("Vector Math"),
 	                              .type   = "VECT_MATH",
@@ -189,7 +189,6 @@ void vector_math2_node_init() {
 	                                  1),
 	                              .width = 0,
 	                              .flags = 0});
-	gc_root(vector_math2_node_def);
 
 	any_array_push(nodes_material_utilities, vector_math2_node_def);
 	any_map_set(parser_material_node_vectors, "VECT_MATH", vector_math2_node_vector);

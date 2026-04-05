@@ -1,6 +1,8 @@
 
 #include "global.h"
 
+char *_import_blend_material_path;
+
 void _import_blend_material_on_next_frame(void *_) {
 	char *save;
 	if (path_is_protected()) {

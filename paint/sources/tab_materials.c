@@ -1,6 +1,8 @@
 
 #include "global.h"
 
+i32 _tab_materials_draw_slots;
+
 void tab_materials_button_nodes() {
 	if (ui_button(tr("Nodes"), UI_ALIGN_CENTER, "")) {
 		ui_base_show_material_nodes();

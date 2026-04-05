@@ -112,7 +112,7 @@ void nodes_material_float_curve_button(i32 node_id) {
 
 void float_curve_node_init() {
 
-	float_curve_node_def =
+	ui_node_t *float_curve_node_def =
 	    GC_ALLOC_INIT(ui_node_t, {.id     = 0,
 	                              .name   = _tr("Float Curve"),
 	                              .type   = "FLOAT_CURVE",
@@ -172,7 +172,6 @@ void float_curve_node_init() {
 	                                  1),
 	                              .width = 0,
 	                              .flags = 0});
-	gc_root(float_curve_node_def);
 
 	any_array_push(nodes_material_utilities, float_curve_node_def);
 	any_map_set(parser_material_node_values, "FLOAT_CURVE", float_curve_node_value);

@@ -13,7 +13,7 @@ char *hue_saturation_value_node_vector(ui_node_t *node, ui_node_socket_t *socket
 
 void hue_saturation_value_node_init() {
 
-	hue_saturation_value_node_def =
+	ui_node_t *hue_saturation_value_node_def =
 	    GC_ALLOC_INIT(ui_node_t, {.id     = 0,
 	                              .name   = _tr("Hue/Saturation/Value"),
 	                              .type   = "HUE_SAT",
@@ -91,7 +91,6 @@ void hue_saturation_value_node_init() {
 	                              .buttons = any_array_create_from_raw((void *[]){}, 0),
 	                              .width   = 0,
 	                              .flags   = 0});
-	gc_root(hue_saturation_value_node_def);
 
 	any_array_push(nodes_material_color, hue_saturation_value_node_def);
 	any_map_set(parser_material_node_vectors, "HUE_SAT", hue_saturation_value_node_vector);

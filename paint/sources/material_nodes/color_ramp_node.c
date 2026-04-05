@@ -242,7 +242,7 @@ void nodes_material_color_ramp_button(i32 node_id) {
 
 void color_ramp_node_init() {
 
-	color_ramp_node_def = GC_ALLOC_INIT(
+	ui_node_t *color_ramp_node_def = GC_ALLOC_INIT(
 	    ui_node_t,
 	    {.id     = 0,
 	     .name   = _tr("Color Ramp"),
@@ -303,7 +303,6 @@ void color_ramp_node_init() {
 	         1),
 	     .width = 0,
 	     .flags = 0});
-	gc_root(color_ramp_node_def);
 
 	any_array_push(nodes_material_color, color_ramp_node_def);
 	any_map_set(parser_material_node_vectors, "VALTORGB", color_ramp_node_vector);

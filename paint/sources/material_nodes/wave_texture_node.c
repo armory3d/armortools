@@ -83,7 +83,7 @@ void wave_texture_node_init() {
 	char *wave_direction_data = string("%s\n%s\n%s\n%s", _tr("X"), _tr("Y"), _tr("Z"), _tr("Diagonal"));
 	char *wave_profile_data   = string("%s\n%s\n%s", _tr("Sine"), _tr("Saw"), _tr("Triangle"));
 
-	wave_texture_node_def =
+	ui_node_t *wave_texture_node_def =
 	    GC_ALLOC_INIT(ui_node_t, {.id     = 0,
 	                              .name   = _tr("Wave Texture"),
 	                              .type   = "TEX_WAVE",
@@ -211,7 +211,6 @@ void wave_texture_node_init() {
 	                                  3),
 	                              .width = 0,
 	                              .flags = 0});
-	gc_root(wave_texture_node_def);
 
 	any_array_push(nodes_material_texture, wave_texture_node_def);
 	any_map_set(parser_material_node_vectors, "TEX_WAVE", wave_texture_node_vector);

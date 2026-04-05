@@ -1,6 +1,9 @@
 
 #include "global.h"
 
+i32 ui_toolbar_last_tool = 0;
+i32 _ui_toolbar_i;
+
 void ui_toolbar_init() {}
 
 void ui_toolbar_draw_tool_select_tool(void *_) {

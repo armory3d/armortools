@@ -1,6 +1,22 @@
 
 #include "global.h"
 
+bool _project_save_and_quit;
+bool _project_import_mesh_replace_existing;
+void (*_project_import_mesh_done)(void);
+char *_project_import_mesh_box_path;
+bool  _project_import_mesh_box_replace_existing;
+bool  _project_import_mesh_box_clear_layers;
+void (*_project_import_mesh_box_done)(void);
+raw_mesh_t *_project_unwrap_mesh_box_mesh;
+void (*_project_unwrap_mesh_box_done)(raw_mesh_t *);
+bool     _project_unwrap_mesh_box_skip_ui;
+bool     _project_import_asset_hdr_as_envmap;
+bool     _project_import_swatches_replace_existing;
+asset_t *_project_reimport_texture_asset;
+scene_t *_project_scene_mesh_gc;
+i32      _project_unwrap_by = 0;
+
 void project_open_on_file_picked(char *path) {
 	if (!ends_with(path, ".arm")) {
 		console_error(strings_arm_file_expected());
@@ -455,10 +471,10 @@ void project_import_mesh_box_draw() {
 
 	if (ends_with(to_lower_case(path), ".fbx") || ends_with(to_lower_case(path), ".gltf") || ends_with(to_lower_case(path), ".glb")) {
 		ui_row2();
-		bool b = ui_check(ui_handle(__ID__), tr("Apply Skinning"), "");
-		ui->enabled = b;
+		bool b                 = ui_check(ui_handle(__ID__), tr("Apply Skinning"), "");
+		ui->enabled            = b;
 		plugins_skinning_frame = ui_slider(ui_handle(__ID__), tr("Frame"), 1, 99, false, 1, true, UI_ALIGN_RIGHT, true);
-		ui->enabled = true;
+		ui->enabled            = true;
 		if (!b) {
 			plugins_skinning_frame = -1;
 		}
@@ -552,7 +568,7 @@ void project_unwrap_mesh_box_draw() {
 	void (*done)(raw_mesh_t *) = _project_unwrap_mesh_box_done;
 
 	string_array_t *unwrap_plugins = project_get_unwrap_plugins();
-	_project_unwrap_by               = ui_combo(ui_handle(__ID__), unwrap_plugins, tr("Plugin"), true, UI_ALIGN_LEFT, true);
+	_project_unwrap_by             = ui_combo(ui_handle(__ID__), unwrap_plugins, tr("Plugin"), true, UI_ALIGN_LEFT, true);
 
 	ui_row2();
 	if (ui_icon_button(tr("Cancel"), ICON_CLOSE, UI_ALIGN_CENTER)) {
@@ -695,7 +711,7 @@ bool project_is_atlas_object(mesh_object_t *p) {
 
 mesh_object_t_array_t *project_get_atlas_objects(i32 object_mask) {
 	string_array_t *atlases = project_get_used_atlases();
-	i32               i       = object_mask - project_paint_objects->length - 1;
+	i32             i       = object_mask - project_paint_objects->length - 1;
 	if (atlases == NULL || i >= atlases->length) {
 		return project_paint_objects;
 	}

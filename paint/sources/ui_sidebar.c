@@ -1,6 +1,9 @@
 
 #include "global.h"
 
+i32 ui_sidebar_tabx     = 0;
+i32 ui_sidebar_last_tab = 0;
+
 void ui_sidebar_render_ui() {
 
 	// Expand button

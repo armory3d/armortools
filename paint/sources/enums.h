@@ -84,15 +84,6 @@ typedef enum {
 } workflow_t;
 
 typedef enum {
-	CHANNEL_TYPE_BASE_COLOR = 0,
-	CHANNEL_TYPE_OCCLUSION  = 1,
-	CHANNEL_TYPE_ROUGHNESS  = 2,
-	CHANNEL_TYPE_METALLIC   = 3,
-	CHANNEL_TYPE_NORMAL_MAP = 4,
-	CHANNEL_TYPE_HEIGHT     = 5,
-} channel_type_t;
-
-typedef enum {
 	RENDER_MODE_DEFERRED   = 0,
 	RENDER_MODE_FORWARD    = 1,
 	RENDER_MODE_PATH_TRACE = 2,
@@ -109,13 +100,6 @@ typedef enum {
 	EXPORT_DESTINATION_DISK              = 0,
 	EXPORT_DESTINATION_PACK_INTO_PROJECT = 1,
 } export_destination_t;
-
-typedef enum {
-	PLAYER_TARGET_WEB     = 0,
-	PLAYER_TARGET_WINDOWS = 1,
-	PLAYER_TARGET_LINUX   = 2,
-	PLAYER_TARGET_MACOS   = 3,
-} player_target_t;
 
 typedef enum {
 	PATHTRACE_MODE_FAST    = 0,
@@ -189,23 +173,9 @@ typedef enum {
 } texture_ldr_format_t;
 
 typedef enum {
-	TEXTURE_HDR_FORMAT_EXR = 0,
-} texture_hdr_format_t;
-
-typedef enum {
 	MESH_FORMAT_OBJ = 0,
 	MESH_FORMAT_ARM = 1,
 } mesh_format_t;
-
-typedef enum {
-	MENUBAR_CATEGORY_FILE      = 0,
-	MENUBAR_CATEGORY_EDIT      = 1,
-	MENUBAR_CATEGORY_VIEWPORT  = 2,
-	MENUBAR_CATEGORY_MODE      = 3,
-	MENUBAR_CATEGORY_CAMERA    = 4,
-	MENUBAR_CATEGORY_WORKSPACE = 5,
-	MENUBAR_CATEGORY_HELP      = 6,
-} menubar_category_t;
 
 typedef enum {
 	CANVAS_TYPE_MATERIAL = 0,
@@ -223,13 +193,6 @@ typedef enum {
 	VIEW_2D_LAYER_MODE_VISIBLE  = 0,
 	VIEW_2D_LAYER_MODE_SELECTED = 1,
 } view_2d_layer_mode_t;
-
-typedef enum {
-	BORDER_SIDE_LEFT   = 0,
-	BORDER_SIDE_RIGHT  = 1,
-	BORDER_SIDE_TOP    = 2,
-	BORDER_SIDE_BOTTOm = 3,
-} border_side_t;
 
 typedef enum {
 	PAINT_TEX_BASE      = 0,
@@ -272,16 +235,6 @@ typedef enum {
 	TOOL_TYPE_MATERIAL = 12,
 	TOOL_TYPE_GIZMO    = 13,
 } tool_type_t;
-
-typedef enum {
-	AREA_TYPE_MINUS_ONE = -1,
-	AREA_TYPE_VIEW3D    = 0,
-	AREA_TYPE_VIEW2D    = 1,
-	AREA_TYPE_LAYERS    = 2,
-	AREA_TYPE_MATERIALS = 3,
-	AREA_TYPE_NODES     = 4,
-	AREA_TYPE_BROWSER   = 5,
-} area_type_t;
 
 typedef enum {
 	TAB_AREA_SIDEBAR0 = 0,

@@ -44,7 +44,7 @@ char *text_texture_node_value(ui_node_t *node, ui_node_socket_t *socket) {
 
 void text_texture_node_init() {
 
-	text_texture_node_def =
+	ui_node_t *text_texture_node_def =
 	    GC_ALLOC_INIT(ui_node_t, {.id     = 0,
 	                              .name   = _tr("Text Texture"),
 	                              .type   = "TEX_TEXT", // extension
@@ -104,7 +104,6 @@ void text_texture_node_init() {
 	                                  1),
 	                              .width = 0,
 	                              .flags = 0});
-	gc_root(text_texture_node_def);
 
 	any_array_push(nodes_material_texture, text_texture_node_def);
 	any_map_set(parser_material_node_vectors, "TEX_TEXT", text_texture_node_vector);

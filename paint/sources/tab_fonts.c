@@ -1,7 +1,9 @@
 
 #include "global.h"
 
-void tab_fonts_draw_make_font_preview(void * _) {
+i32 _tab_fonts_draw_i;
+
+void tab_fonts_draw_make_font_preview(void *_) {
 	i32          i     = _tab_fonts_draw_i;
 	slot_font_t *_font = context_raw->font;
 	context_raw->font  = project_fonts->buffer[i];
@@ -28,12 +30,12 @@ void tab_fonts_draw_context_menu_draw() {
 	}
 }
 
-void tab_fonts_draw_context_menu(void * _) {
+void tab_fonts_draw_context_menu(void *_) {
 	context_select_font(_tab_fonts_draw_i);
 	ui_menu_draw(&tab_fonts_draw_context_menu_draw, -1, -1);
 }
 
-void tab_fonts_draw_select_font(void * _) {
+void tab_fonts_draw_select_font(void *_) {
 	i32 i = _tab_fonts_draw_i;
 	context_select_font(i);
 }

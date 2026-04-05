@@ -30,8 +30,8 @@ char *mix_normal_map_node_vector(ui_node_t *node, ui_node_socket_t *socket) {
 
 void mix_normal_map_node_init() {
 
-	char *mix_normal_map_blend_type_data = string("%s\n%s\n%s", _tr("Partial Derivative"), _tr("Whiteout"), _tr("Reoriented"));
-	mix_normal_map_node_def =
+	char      *mix_normal_map_blend_type_data = string("%s\n%s\n%s", _tr("Partial Derivative"), _tr("Whiteout"), _tr("Reoriented"));
+	ui_node_t *mix_normal_map_node_def =
 	    GC_ALLOC_INIT(ui_node_t, {.id     = 0,
 	                              .name   = _tr("Mix Normal Map"),
 	                              .type   = "MIX_NORMAL_MAP", // extension
@@ -91,7 +91,6 @@ void mix_normal_map_node_init() {
 	                                  1),
 	                              .width = 0,
 	                              .flags = 0});
-	gc_root(mix_normal_map_node_def);
 
 	any_array_push(nodes_material_utilities, mix_normal_map_node_def);
 	any_map_set(parser_material_node_vectors, "MIX_NORMAL_MAP", mix_normal_map_node_vector);

@@ -5,6 +5,12 @@
 // https://github.com/aras-p/miniexr
 // https://www.openexr.com/documentation/openexrfilelayout.pdf
 
+i32         _export_exr_width;
+i32         _export_exr_stride;
+u8_array_t *_export_exr_out;
+buffer_t   *_export_exr_src_view;
+void (*_export_exr_write_line)(i32);
+
 void export_exr_write_string(u8_array_t *out, char *str) {
 	for (i32 i = 0; i < string_length(str); ++i) {
 		u8_array_push(out, char_code_at(str, i));
@@ -281,7 +287,7 @@ buffer_t *export_exr_run(i32 width, i32 height, buffer_t *src, i32 bits, i32 typ
 	i32 full_row_size         = pixel_row_size + 8;
 
 	// line offset table
-	i32 ofs                   = k_header_size + k_scanline_table_size;
+	i32 ofs = k_header_size + k_scanline_table_size;
 	for (i32 y = 0; y < height; ++y) {
 		u8_array_push(out, ofs & 0xff);
 		u8_array_push(out, (ofs >> 8) & 0xff);
@@ -295,8 +301,8 @@ buffer_t *export_exr_run(i32 width, i32 height, buffer_t *src, i32 bits, i32 typ
 	}
 
 	// scanline data
-	i32 stride         = channels * byte_size;
-	i32 pos            = 0;
+	i32 stride = channels * byte_size;
+	i32 pos    = 0;
 
 	_export_exr_width  = width;
 	_export_exr_stride = stride;

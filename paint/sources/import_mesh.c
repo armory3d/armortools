@@ -1,6 +1,9 @@
 
 #include "global.h"
 
+bool         import_mesh_clear_layers     = true;
+any_array_t *import_mesh_meshes_to_unwrap = NULL;
+
 void import_mesh_run(char *path, bool _clear_layers, bool replace_existing) {
 	if (!path_is_mesh(path)) {
 		if (!context_enable_import_plugin(path)) {

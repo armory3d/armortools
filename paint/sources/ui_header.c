@@ -1,6 +1,8 @@
 
 #include "global.h"
 
+ui_handle_t *_ui_header_draw_tool_properties_h;
+
 void ui_header_init() {
 	ui_header_handle->layout = UI_LAYOUT_HORIZONTAL;
 }
@@ -402,9 +404,10 @@ void ui_header_draw_tool_properties() {
 					any_map_set(vars, "brush_radius", any_map_get(config_keymap, "brush_radius"));
 					any_map_set(vars, "brush_radius_decrease", any_map_get(config_keymap, "brush_radius_decrease"));
 					any_map_set(vars, "brush_radius_increase", any_map_get(config_keymap, "brush_radius_increase"));
-					ui_tooltip(vtr("Hold {brush_radius} and move mouse to the left or press {brush_radius_decrease} to decrease the radius\nHold {brush_radius} "
-					              "and move mouse to the right or press {brush_radius_increase} to increase the radius",
-					              vars));
+					ui_tooltip(
+					    vtr("Hold {brush_radius} and move mouse to the left or press {brush_radius_decrease} to decrease the radius\nHold {brush_radius} "
+					        "and move mouse to the right or press {brush_radius_increase} to increase the radius",
+					        vars));
 				}
 			}
 			else {
@@ -414,9 +417,10 @@ void ui_header_draw_tool_properties() {
 					any_map_set(vars, "brush_radius", any_map_get(config_keymap, "brush_radius"));
 					any_map_set(vars, "brush_radius_decrease", any_map_get(config_keymap, "brush_radius_decrease"));
 					any_map_set(vars, "brush_radius_increase", any_map_get(config_keymap, "brush_radius_increase"));
-					ui_tooltip(vtr("Hold {brush_radius} and move mouse to the left or press {brush_radius_decrease} to decrease the radius\nHold {brush_radius} "
-					              "and move mouse to the right or press {brush_radius_increase} to increase the radius",
-					              vars));
+					ui_tooltip(
+					    vtr("Hold {brush_radius} and move mouse to the left or press {brush_radius_decrease} to decrease the radius\nHold {brush_radius} "
+					        "and move mouse to the right or press {brush_radius_increase} to increase the radius",
+					        vars));
 				}
 			}
 		}
@@ -460,8 +464,8 @@ void ui_header_draw_tool_properties() {
 			any_map_t *vars = any_map_create();
 			any_map_set(vars, "brush_opacity", any_map_get(config_keymap, "brush_opacity"));
 			ui_tooltip(vtr("Hold {brush_opacity} and move mouse to the left to decrease the opacity\nHold {brush_opacity} and move mouse to the right to "
-			              "increase the opacity",
-			              vars));
+			               "increase the opacity",
+			               vars));
 		}
 
 		if (context_raw->tool == TOOL_TYPE_BRUSH || context_raw->tool == TOOL_TYPE_ERASER || context_raw->tool == TOOL_TYPE_CLONE || decal_mask) {
@@ -506,7 +510,7 @@ void ui_header_draw_tool_properties() {
 		}
 
 		if (context_raw->tool == TOOL_TYPE_BRUSH || context_raw->tool == TOOL_TYPE_FILL) {
-			ui_handle_t      *paint_handle   = ui_handle(__ID__);
+			ui_handle_t    *paint_handle   = ui_handle(__ID__);
 			string_array_t *texcoord_combo = any_array_create_from_raw(
 			    (void *[]){
 			        tr("UV Map"),

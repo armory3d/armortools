@@ -112,7 +112,7 @@ void outpaint_image_node_button(i32 node_id) {
 	ui_node_t        *node      = ui_get_node(canvas->nodes, node_id);
 	char             *node_name = parser_material_node_name(node, NULL);
 	ui_handle_t      *h         = ui_handle(node_name);
-	string_array_t *models    = any_array_create_from_raw(
+	string_array_t   *models    = any_array_create_from_raw(
         (void *[]){
             "Stable Diffusion",
             "Qwen Image Edit",
@@ -129,7 +129,7 @@ void outpaint_image_node_button(i32 node_id) {
 
 void outpaint_image_node_init() {
 
-	outpaint_image_node_def =
+	ui_node_t *outpaint_image_node_def =
 	    GC_ALLOC_INIT(ui_node_t, {.id     = 0,
 	                              .name   = _tr("Outpaint Image"),
 	                              .type   = "NEURAL_OUTPAINT_IMAGE",
@@ -179,7 +179,6 @@ void outpaint_image_node_init() {
 	                                  1),
 	                              .width = 0,
 	                              .flags = 0});
-	gc_root(outpaint_image_node_def);
 
 	any_array_push(nodes_material_neural, outpaint_image_node_def);
 	any_map_set(parser_material_node_vectors, "NEURAL_OUTPAINT_IMAGE", neural_node_vector);

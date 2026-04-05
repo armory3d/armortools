@@ -34,7 +34,7 @@ char *mapping_node_vector(ui_node_t *node, ui_node_socket_t *socket) {
 
 void mapping_node_init() {
 
-	mapping_node_def =
+	ui_node_t *mapping_node_def =
 	    GC_ALLOC_INIT(ui_node_t, {.id     = 0,
 	                              .name   = _tr("Mapping"),
 	                              .type   = "MAPPING",
@@ -102,7 +102,6 @@ void mapping_node_init() {
 	                              .buttons = any_array_create_from_raw((void *[]){}, 0),
 	                              .width   = 0,
 	                              .flags   = 0});
-	gc_root(mapping_node_def);
 
 	any_array_push(nodes_material_utilities, mapping_node_def);
 	any_map_set(parser_material_node_vectors, "MAPPING", mapping_node_vector);

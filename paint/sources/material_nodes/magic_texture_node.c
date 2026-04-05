@@ -66,25 +66,25 @@ fun tex_magic_f(co: float3, distortion: float, depth: float): float { \
 
 char *magic_texture_node_vector(ui_node_t *node, ui_node_socket_t *socket) {
 	node_shader_add_function(parser_material_kong, str_tex_magic);
-	char             *co         = parser_material_get_coord(node);
-	char             *scale      = parser_material_parse_value_input(node->inputs->buffer[1], false);
-	char             *distortion = parser_material_parse_value_input(node->inputs->buffer[2], false);
-	i32 depth = (i32)node->outputs->buffer[0]->default_value->buffer[0];
+	char *co         = parser_material_get_coord(node);
+	char *scale      = parser_material_parse_value_input(node->inputs->buffer[1], false);
+	char *distortion = parser_material_parse_value_input(node->inputs->buffer[2], false);
+	i32   depth      = (i32)node->outputs->buffer[0]->default_value->buffer[0];
 	return string("tex_magic(%s * %s, %s, %d.0)", co, scale, distortion, depth);
 }
 
 char *magic_texture_node_value(ui_node_t *node, ui_node_socket_t *socket) {
 	node_shader_add_function(parser_material_kong, str_tex_magic);
-	char             *co         = parser_material_get_coord(node);
-	char             *scale      = parser_material_parse_value_input(node->inputs->buffer[1], false);
-	char             *distortion = parser_material_parse_value_input(node->inputs->buffer[2], false);
-	i32 depth = (i32)node->outputs->buffer[0]->default_value->buffer[0];
+	char *co         = parser_material_get_coord(node);
+	char *scale      = parser_material_parse_value_input(node->inputs->buffer[1], false);
+	char *distortion = parser_material_parse_value_input(node->inputs->buffer[2], false);
+	i32   depth      = (i32)node->outputs->buffer[0]->default_value->buffer[0];
 	return string("tex_magic_f(%s * %s, %s, %d.0)", co, scale, distortion, depth);
 }
 
 void magic_texture_node_init() {
 
-	magic_texture_node_def =
+	ui_node_t *magic_texture_node_def =
 	    GC_ALLOC_INIT(ui_node_t, {.id     = 0,
 	                              .name   = _tr("Magic Texture"),
 	                              .type   = "TEX_MAGIC",
@@ -162,9 +162,8 @@ void magic_texture_node_init() {
 	                                                                       .height        = 0}),
 	                                  },
 	                                  1),
-	                              .width   = 0,
-	                              .flags   = 0});
-	gc_root(magic_texture_node_def);
+	                              .width = 0,
+	                              .flags = 0});
 
 	any_array_push(nodes_material_texture, magic_texture_node_def);
 	any_map_set(parser_material_node_vectors, "TEX_MAGIC", magic_texture_node_vector);

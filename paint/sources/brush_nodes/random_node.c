@@ -1,6 +1,11 @@
 
 #include "../global.h"
 
+i32 random_node_a;
+i32 random_node_b;
+i32 random_node_c;
+i32 random_node_d = -1;
+
 void random_node_set_seed(i32 seed);
 
 i32 random_node_get_int() {

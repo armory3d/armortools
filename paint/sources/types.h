@@ -64,11 +64,6 @@ typedef struct slot_font {
 	char               *file;
 } slot_font_t;
 
-typedef struct version {
-	char *sha;
-	char *date;
-} version_t;
-
 typedef struct config {
 	char *version;
 	char *sha; // Commit id
@@ -170,22 +165,6 @@ typedef struct slot_material {
 	bool                   paint_emis;
 	bool                   paint_subs;
 } slot_material_t;
-
-typedef struct import_texture_data {
-	char               *path;
-	struct gpu_texture *image;
-} import_texture_data_t;
-
-typedef struct draw_cloud_icon_data {
-	char               *f;
-	struct gpu_texture *image;
-} draw_cloud_icon_data_t;
-
-typedef struct ui_files_make_icon {
-	struct gpu_texture *image;
-	char               *shandle;
-	i32                 w;
-} ui_files_make_icon_t;
 
 typedef struct tab_draw {
 	void (*f)(struct ui_handle *);
@@ -478,11 +457,6 @@ typedef struct history_step {
 	i32                    canvas_type;
 } history_step_t;
 
-typedef struct update_info {
-	i32   version;
-	char *version_name;
-} update_info_t;
-
 typedef struct logic_node {
 	struct logic_node_input_t_array *inputs;
 	struct logic_node_t_array       *outputs;
@@ -741,23 +715,12 @@ typedef struct neural_node_model_t_array {
 	int                   capacity;
 } neural_node_model_t_array_t;
 
-typedef struct material_data_t_array {
-	material_data_t **buffer;
-	int               length;
-	int               capacity;
-} material_data_t_array_t;
-
-typedef struct world_data_t_array {
-	world_data_t **buffer;
-	int            length;
-	int            capacity;
-} world_data_t_array_t;
-
 typedef struct buffer_t_array {
 	buffer_t **buffer;
 	int        length;
 	int        capacity;
 } buffer_t_array_t;
+
 typedef struct slot_material_t_array {
 	slot_material_t **buffer;
 	int               length;
@@ -812,23 +775,11 @@ typedef struct slot_font_t_array {
 	int           capacity;
 } slot_font_t_array_t;
 
-typedef struct ui_coloring_t_array {
-	ui_coloring_t **buffer;
-	int             length;
-	int             capacity;
-} ui_coloring_t_array_t;
-
 typedef struct slot_layer_t_array {
 	slot_layer_t **buffer;
 	int            length;
 	int            capacity;
 } slot_layer_t_array_t;
-
-typedef struct swatch_color_t_array {
-	swatch_color_t **buffer;
-	int              length;
-	int              capacity;
-} swatch_color_t_array_t;
 
 typedef struct gpu_texture_t_array {
 	gpu_texture_t **buffer;
@@ -872,12 +823,6 @@ typedef struct ui_node_button_t_array {
 	int                capacity;
 } ui_node_button_t_array_t;
 
-typedef struct tilesheet_action_t_array {
-	tilesheet_action_t **buffer;
-	int                  length;
-	int                  capacity;
-} tilesheet_action_t_array_t;
-
 typedef struct logic_node_input_t_array {
 	logic_node_input_t **buffer;
 	int                  length;
@@ -895,12 +840,6 @@ typedef struct vec4_box_t_array {
 	int          length;
 	int          capacity;
 } vec4_box_t_array_t;
-
-typedef struct u32_array_t_array {
-	u32_array_t **buffer;
-	int           length;
-	int           capacity;
-} u32_array_t_array_t;
 
 typedef struct tab_draw_array_t_array {
 	tab_draw_array_t **buffer;
@@ -925,12 +864,6 @@ typedef struct render_target_t_array {
 	int               length;
 	int               capacity;
 } render_target_t_array_t;
-
-typedef struct camera_data_t_array {
-	camera_data_t **buffer;
-	int             length;
-	int             capacity;
-} camera_data_t_array_t;
 
 typedef struct ui_node_link_t_array {
 	ui_node_link_t **buffer;
@@ -962,29 +895,11 @@ typedef struct export_preset_texture_t_array {
 	int                       capacity;
 } export_preset_texture_t_array_t;
 
-typedef struct camera_object_t_array {
-	camera_object_t **buffer;
-	int               length;
-	int               capacity;
-} camera_object_t_array_t;
-
-typedef struct frustum_plane_t_array {
-	frustum_plane_t **buffer;
-	int               length;
-	int               capacity;
-} frustum_plane_t_array_t;
-
 typedef struct layer_data_t_array {
 	layer_data_t **buffer;
 	int            length;
 	int            capacity;
 } layer_data_t_array_t;
-
-typedef struct tilesheet_data_t_array {
-	tilesheet_data_t **buffer;
-	int                length;
-	int                capacity;
-} tilesheet_data_t_array_t;
 
 typedef struct ui_node_t_array {
 	ui_node_t **buffer;
@@ -997,3 +912,9 @@ typedef struct packed_asset_t_array {
 	int              length;
 	int              capacity;
 } packed_asset_t_array_t;
+
+typedef struct swatch_color_t_array {
+	swatch_color_t **buffer;
+	int              length;
+	int              capacity;
+} swatch_color_t_array_t;

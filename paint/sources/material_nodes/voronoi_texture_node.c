@@ -304,9 +304,9 @@ char *voronoi_texture_node_value(ui_node_t *node, ui_node_socket_t *socket) {
 
 void voronoi_texture_node_init() {
 
-	char *voronoi_dimensions_data = string("%s\n%s", _tr("2D"), _tr("3D"));
-	char *voronoi_feature_data    = string("%s\n%s", _tr("F1"), _tr("F2"));
-	voronoi_texture_node_def =
+	char      *voronoi_dimensions_data = string("%s\n%s", _tr("2D"), _tr("3D"));
+	char      *voronoi_feature_data    = string("%s\n%s", _tr("F1"), _tr("F2"));
+	ui_node_t *voronoi_texture_node_def =
 	    GC_ALLOC_INIT(ui_node_t, {.id     = 0,
 	                              .name   = _tr("Voronoi Texture"),
 	                              .type   = "TEX_VORONOI",
@@ -444,7 +444,6 @@ void voronoi_texture_node_init() {
 	                                  3),
 	                              .width = 0,
 	                              .flags = 0});
-	gc_root(voronoi_texture_node_def);
 
 	any_array_push(nodes_material_texture, voronoi_texture_node_def);
 	any_map_set(parser_material_node_vectors, "TEX_VORONOI", voronoi_texture_node_vector);

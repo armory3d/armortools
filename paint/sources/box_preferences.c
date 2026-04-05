@@ -1,6 +1,13 @@
 
 #include "global.h"
 
+string_array_t *box_preferences_files_keymap = NULL;
+string_array_t *box_preferences_locales      = NULL;
+string_array_t *box_preferences_themes       = NULL;
+char           *_box_preferences_f;
+ui_handle_t    *_box_preferences_h;
+i32             _box_preferences_i;
+
 void box_preferences_interface_tab_reset_layout_menu() {
 	if (ui_menu_button(tr("Confirm"), "", ICON_CHECK)) {
 		config_init_layout();
@@ -320,7 +327,7 @@ void box_preferences_theme_tab() {
 		}
 		if (ui->changed) {
 			ui->elements_baked = false;
-			ui->font_size = ui->ops->theme->FONT_SIZE;
+			ui->font_size      = ui->ops->theme->FONT_SIZE;
 		}
 	}
 	ui->input_enabled = true;
@@ -452,8 +459,8 @@ void box_preferences_usage_tab() {
 }
 
 void box_preferences_camera_tab() {
-	ui_handle_t *h_camera_pivot          = ui_handle(__ID__);
-	h_camera_pivot->i                    = config_raw->camera_pivot;
+	ui_handle_t *h_camera_pivot        = ui_handle(__ID__);
+	h_camera_pivot->i                  = config_raw->camera_pivot;
 	string_array_t *camera_pivot_combo = any_array_create_from_raw(
 	    (void *[]){
 	        tr("Cursor"),
@@ -462,8 +469,8 @@ void box_preferences_camera_tab() {
 	    2);
 	config_raw->camera_pivot = ui_combo(h_camera_pivot, camera_pivot_combo, tr("Default Camera Pivot"), true, UI_ALIGN_LEFT, true);
 
-	ui_handle_t *h_camera_controls          = ui_handle(__ID__);
-	h_camera_controls->i                    = config_raw->camera_controls;
+	ui_handle_t *h_camera_controls        = ui_handle(__ID__);
+	h_camera_controls->i                  = config_raw->camera_controls;
 	string_array_t *camera_controls_combo = any_array_create_from_raw(
 	    (void *[]){
 	        tr("Orbit"),
@@ -489,8 +496,8 @@ void box_preferences_camera_tab() {
 	h_speed->f                   = config_raw->camera_pan_speed;
 	config_raw->camera_pan_speed = ui_slider(h_speed, tr("Camera Pan Speed"), 0.1, 4.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
 
-	ui_handle_t *h_zoom_direction          = ui_handle(__ID__);
-	h_zoom_direction->i                    = config_raw->zoom_direction;
+	ui_handle_t *h_zoom_direction        = ui_handle(__ID__);
+	h_zoom_direction->i                  = config_raw->zoom_direction;
 	string_array_t *zoom_direction_combo = any_array_create_from_raw(
 	    (void *[]){
 	        tr("Vertical"),
@@ -543,8 +550,8 @@ void box_preferences_pen_tab() {
 }
 
 void box_preferences_viewport_tab() {
-	ui_handle_t *h_mode          = ui_handle(__ID__);
-	h_mode->i                    = config_raw->viewport_mode;
+	ui_handle_t *h_mode        = ui_handle(__ID__);
+	h_mode->i                  = config_raw->viewport_mode;
 	string_array_t *mode_combo = any_array_create_from_raw(
 	    (void *[]){
 	        tr("Lit"),
@@ -556,8 +563,8 @@ void box_preferences_viewport_tab() {
 		config_raw->viewport_mode = h_mode->i;
 	}
 
-	ui_handle_t *h_pathtrace_mode          = ui_handle(__ID__);
-	h_pathtrace_mode->i                    = config_raw->pathtrace_mode;
+	ui_handle_t *h_pathtrace_mode        = ui_handle(__ID__);
+	h_pathtrace_mode->i                  = config_raw->pathtrace_mode;
 	string_array_t *pathtrace_mode_combo = any_array_create_from_raw(
 	    (void *[]){
 	        tr("Fast"),
@@ -571,8 +578,8 @@ void box_preferences_viewport_tab() {
 		context_raw->ddirty              = 2;
 	}
 
-	ui_handle_t *h_render_mode          = ui_handle(__ID__);
-	h_render_mode->i                    = config_raw->render_mode;
+	ui_handle_t *h_render_mode        = ui_handle(__ID__);
+	h_render_mode->i                  = config_raw->render_mode;
 	string_array_t *render_mode_combo = any_array_create_from_raw(
 	    (void *[]){
 	        tr("Desktop"),
@@ -584,8 +591,8 @@ void box_preferences_viewport_tab() {
 		context_set_render_path();
 	}
 
-	ui_handle_t *h_supersample          = ui_handle(__ID__);
-	h_supersample->i                    = config_get_super_sample_quality(config_raw->rp_supersample);
+	ui_handle_t *h_supersample        = ui_handle(__ID__);
+	h_supersample->i                  = config_get_super_sample_quality(config_raw->rp_supersample);
 	string_array_t *supersample_combo = any_array_create_from_raw(
 	    (void *[]){
 	        "0.25x",
@@ -794,8 +801,8 @@ void box_preferences_keymap_tab() {
 
 	ui_separator(8, false);
 
-	i32 index              = 0;
-	ui->changed            = false;
+	i32 index            = 0;
+	ui->changed          = false;
 	string_array_t *keys = map_keys(config_keymap);
 	array_sort(keys, NULL);
 	for (i32 i = 0; i < keys->length; ++i) {
@@ -910,7 +917,8 @@ void box_preferences_plugins_tab_new_box() {
 ui_handle_t *h1;\n\
 void on_ui() {\n\
 	if (ui_panel(h1, \"New Plugin\", false, false, false)) {\n\
-		if (ui_button(\"Button\", UI_ALIGN_CENTER, "")) {\n\
+		if (ui_button(\"Button\", UI_ALIGN_CENTER, "
+		                 ")) {\n\
 			console_info(\"Hello\");\n\
 		}\n\
 	}\n\
@@ -963,7 +971,7 @@ void box_preferences_plugins_tab() {
 		h->b = false;
 	}
 	for (i32 i = 0; i < box_preferences_files_plugin->length; ++i) {
-		char *f     = box_preferences_files_plugin->buffer[i];
+		char *f    = box_preferences_files_plugin->buffer[i];
 		bool  is_c = ends_with(f, ".c");
 		if (!is_c) {
 			continue;

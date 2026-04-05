@@ -1,6 +1,34 @@
 
 #include "global.h"
 
+typedef enum {
+	BORDER_SIDE_LEFT   = 0,
+	BORDER_SIDE_RIGHT  = 1,
+	BORDER_SIDE_TOP    = 2,
+	BORDER_SIDE_BOTTOm = 3,
+} border_side_t;
+
+i32            base_drag_tint  = 0xffffffff;
+i32            base_drag_size  = -1;
+rect_t        *base_drag_rect  = NULL;
+f32            base_drag_start = 0.0;
+f32            base_drop_x     = 0.0;
+f32            base_drop_y     = 0.0;
+gpu_texture_t *base_color_wheel;
+gpu_texture_t *base_color_wheel_gradient;
+i32            base_appx               = 0;
+i32            base_appy               = 0;
+i32            base_last_window_width  = 0;
+i32            base_last_window_height = 0;
+i32            _base_material_count;
+i32            ui_base_border_started         = 0;
+ui_handle_t   *ui_base_border_handle          = NULL;
+char          *ui_base_action_paint_remap     = "";
+i32            ui_base_operator_search_offset = 0;
+f32            ui_base_undo_tap_time          = 0.0;
+f32            ui_base_redo_tap_time          = 0.0;
+bool           _ui_base_operator_search_first;
+
 void base_on_shutdown() {
 #if defined(IRON_ANDROID) || defined(IRON_IOS)
 	project_save(false);

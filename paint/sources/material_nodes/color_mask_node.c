@@ -12,7 +12,7 @@ char *color_mask_node_value(ui_node_t *node, ui_node_socket_t *socket) {
 
 void color_mask_node_init() {
 
-	color_mask_node_def =
+	ui_node_t *color_mask_node_def =
 	    GC_ALLOC_INIT(ui_node_t, {.id     = 0,
 	                              .name   = _tr("Color Mask"),
 	                              .type   = "COLMASK", // extension
@@ -80,7 +80,6 @@ void color_mask_node_init() {
 	                              .buttons = any_array_create_from_raw((void *[]){}, 0),
 	                              .width   = 0,
 	                              .flags   = 0});
-	gc_root(color_mask_node_def);
 
 	any_array_push(nodes_material_color, color_mask_node_def);
 	any_map_set(parser_material_node_values, "COLMASK", color_mask_node_value);

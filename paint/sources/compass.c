@@ -1,32 +1,38 @@
 
 #include "global.h"
 
+object_t *_compass_hitbox_x;
+object_t *_compass_hitbox_y;
+object_t *_compass_hitbox_z;
+object_t *_compass_hovered      = NULL;
+object_t *_compass_hovered_last = NULL;
+
 void compass_render() {
 	if (!context_raw->show_compass || config_raw->workspace == WORKSPACE_PLAYER) {
 		return;
 	}
 
-	camera_object_t *cam      = scene_camera;
-	mesh_object_t   *compass  = scene_get_child(".Compass")->ext;
+	camera_object_t *cam     = scene_camera;
+	mesh_object_t   *compass = scene_get_child(".Compass")->ext;
 
-	bool             _visible = compass->base->visible;
-	object_t        *_parent  = compass->base->parent;
-	quat_t           crot     = cam->base->transform->rot;
-	f32              ratio    = sys_w() / (float)sys_h();
-	mat4_t           _P       = cam->p;
-	cam->p                    = mat4_ortho(-8 * ratio, 8 * ratio, -8, 8, -2, 2);
-	compass->base->visible    = true;
-	compass->base->parent     = cam->base;
+	bool      _visible     = compass->base->visible;
+	object_t *_parent      = compass->base->parent;
+	quat_t    crot         = cam->base->transform->rot;
+	f32       ratio        = sys_w() / (float)sys_h();
+	mat4_t    _P           = cam->p;
+	cam->p                 = mat4_ortho(-8 * ratio, 8 * ratio, -8, 8, -2, 2);
+	compass->base->visible = true;
+	compass->base->parent  = cam->base;
 
-	f32  compass_x            = 7.4;
-	f32  compass_y            = 7.0;
-	bool compass_down         = false;
+	f32  compass_x    = 7.4;
+	f32  compass_y    = 7.0;
+	bool compass_down = false;
 
-	#ifdef IRON_IOS
+#ifdef IRON_IOS
 	if (config_is_iphone()) {
 		compass_down = true;
 	}
-	#endif
+#endif
 
 	if (compass_down) {
 		compass_x = 6.0;
@@ -70,11 +76,11 @@ void compass_init_hitbox() {
 	_compass_hitbox_y->transform->scale = vec4_create(0.15, 0.15, 0.15, 1.0);
 	_compass_hitbox_z->transform->scale = vec4_create(0.15, 0.15, 0.15, 1.0);
 
-	_compass_hitbox_x->transform->loc   = vec4_create(1.5, 0, 0, 1.0);
-	_compass_hitbox_y->transform->loc   = vec4_create(0, 1.5, 0, 1.0);
-	_compass_hitbox_z->transform->loc   = vec4_create(0, 0, 1.5, 1.0);
+	_compass_hitbox_x->transform->loc = vec4_create(1.5, 0, 0, 1.0);
+	_compass_hitbox_y->transform->loc = vec4_create(0, 1.5, 0, 1.0);
+	_compass_hitbox_z->transform->loc = vec4_create(0, 0, 1.5, 1.0);
 
-	object_t *compass                   = scene_get_child(".Compass");
+	object_t *compass = scene_get_child(".Compass");
 	object_set_parent(_compass_hitbox_x, compass);
 	object_set_parent(_compass_hitbox_y, compass);
 	object_set_parent(_compass_hitbox_z, compass);
@@ -98,9 +104,9 @@ void compass_update() {
 	gc_unroot(_compass_hovered);
 	_compass_hovered = NULL;
 
-	f32  x           = mouse_view_x() / (float)sys_w();
-	f32  y           = mouse_view_y() / (float)sys_h();
-	bool hover       = x > 0.9 && x < 1.0 && y < 0.14 && y > 0.0;
+	f32  x     = mouse_view_x() / (float)sys_w();
+	f32  y     = mouse_view_y() / (float)sys_h();
+	bool hover = x > 0.9 && x < 1.0 && y < 0.14 && y > 0.0;
 	if (hover) {
 
 		compass_init_hitbox();
@@ -130,7 +136,7 @@ void compass_update() {
 					// Flip between left / right
 					_compass_compare_quat(quat_from_euler(math_pi() / 2.0, 0, math_pi() / 2.0), cq)
 					    ? viewport_set_view(-1, 0, 0, math_pi() / 2.0, 0, -math_pi() / 2.0) // Left
-					    : viewport_set_view(1, 0, 0, math_pi() / 2.0, 0, math_pi() / 2.0); // Right
+					    : viewport_set_view(1, 0, 0, math_pi() / 2.0, 0, math_pi() / 2.0);  // Right
 				}
 				gc_unroot(_compass_hovered);
 				_compass_hovered = _compass_hitbox_x;
@@ -140,7 +146,7 @@ void compass_update() {
 			else if (t == _compass_hitbox_y->transform) {
 				if (mouse_started("left")) {
 					_compass_compare_quat(quat_from_euler(math_pi() / 2.0, 0, math_pi()), cq)
-					    ? viewport_set_view(0, -1, 0, math_pi() / 2.0, 0, 0) // Front
+					    ? viewport_set_view(0, -1, 0, math_pi() / 2.0, 0, 0)         // Front
 					    : viewport_set_view(0, 1, 0, math_pi() / 2.0, 0, math_pi()); // Back
 				}
 				gc_unroot(_compass_hovered);
@@ -151,7 +157,7 @@ void compass_update() {
 			else {
 				if (mouse_started("left")) {
 					_compass_compare_quat(quat_from_euler(0, 0, 0), cq) ? viewport_set_view(0, 0, -1, math_pi(), 0, math_pi()) // Bottom
-					                                                    : viewport_set_view(0, 0, 1, 0, 0, 0); // Top
+					                                                    : viewport_set_view(0, 0, 1, 0, 0, 0);                 // Top
 				}
 				gc_unroot(_compass_hovered);
 				_compass_hovered = _compass_hitbox_z;

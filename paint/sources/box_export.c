@@ -1,6 +1,11 @@
 
 #include "global.h"
 
+bool                     _box_export_bake_material;
+export_preset_texture_t *_box_export_t;
+bool                     _box_export_apply_displacement;
+bool                     _box_export_merge_vertices;
+
 void box_export_tab_export_textures_run(void *_) {
 	export_texture_run(context_raw->texture_export_path, _box_export_bake_material);
 }
@@ -113,9 +118,9 @@ void box_export_tab_export_textures(char *title, bool bake_material) {
 		ui->enabled = true;
 
 		ui_row2();
-		ui->enabled                           = !bake_material;
-		ui_handle_t *layers_export_handle     = ui_handle(__ID__);
-		layers_export_handle->i               = context_raw->layers_export;
+		ui->enabled                         = !bake_material;
+		ui_handle_t *layers_export_handle   = ui_handle(__ID__);
+		layers_export_handle->i             = context_raw->layers_export;
 		string_array_t *layers_export_combo = any_array_create_from_raw(
 		    (void *[]){
 		        tr("Visible"),

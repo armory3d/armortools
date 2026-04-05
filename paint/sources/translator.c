@@ -1,6 +1,15 @@
 
 #include "global.h"
 
+// The font index is a value specific to font_cjk.ttc
+i32_map_t *translator_cjk_font_indices = NULL;
+char      *translator_last_locale      = "en";
+char      *_translator_load_translations_cjk_font_path;
+char      *_translator_load_translations_cjk_font_disk_path;
+bool       _translator_init_font_cjk;
+char      *_translator_init_font_font_path;
+f32        _translator_init_font_font_scale;
+
 // Mark strings as localizable in order to be parsed by the extract_locale script
 // The string will not be translated to the currently selected locale though
 char *_tr(char *s) {
@@ -155,7 +164,7 @@ void translator_load_translations(char *new_locale) {
 	translator_extended_glyphs();
 
 	// Push additional char codes contained in translation file
-	bool              cjk  = false;
+	bool            cjk  = false;
 	string_array_t *keys = map_keys(translator_translations);
 	for (i32 i = 0; i < keys->length; ++i) {
 		char *s = any_map_get(translator_translations, keys->buffer[i]);

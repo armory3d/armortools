@@ -1,6 +1,19 @@
 
 #include "global.h"
 
+bool  args_use                    = false;
+char *args_asset_path             = "";
+bool  args_background             = false;
+bool  args_export_textures        = false;
+char *args_export_textures_type   = "";
+char *args_export_textures_preset = "";
+char *args_export_textures_path   = "";
+bool  args_reimport_mesh          = false;
+bool  args_export_mesh            = false;
+char *args_export_mesh_path       = "";
+bool  args_export_material        = false;
+char *args_export_material_path   = "";
+
 void args_parse() {
 	if (iron_get_arg_count() > 1) {
 		args_use = true;

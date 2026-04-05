@@ -13,7 +13,7 @@ char *replace_color_node_vector(ui_node_t *node, ui_node_socket_t *socket) {
 
 void replace_color_node_init() {
 
-	replace_color_node_def =
+	ui_node_t *replace_color_node_def =
 	    GC_ALLOC_INIT(ui_node_t, {.id     = 0,
 	                              .name   = _tr("Replace Color"),
 	                              .type   = "REPLACECOL", // extension
@@ -73,7 +73,6 @@ void replace_color_node_init() {
 	                                  },
 	                                  1),
 	                              .buttons = any_array_create_from_raw((void *[]){}, 0)});
-	gc_root(replace_color_node_def);
 
 	any_array_push(nodes_material_color, replace_color_node_def);
 	any_map_set(parser_material_node_vectors, "REPLACECOL", replace_color_node_vector);

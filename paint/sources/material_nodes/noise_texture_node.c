@@ -66,9 +66,9 @@ char *noise_texture_node_value(ui_node_t *node, ui_node_socket_t *socket) {
 
 void noise_texture_node_init() {
 
-	char *noise_dimensions_data = string("%s", _tr("3D"));
-	char *noise_feature_data    = string("%s", _tr("fBM"));
-	noise_texture_node_def =
+	char      *noise_dimensions_data = string("%s", _tr("3D"));
+	char      *noise_feature_data    = string("%s", _tr("fBM"));
+	ui_node_t *noise_texture_node_def =
 	    GC_ALLOC_INIT(ui_node_t, {.id     = 0,
 	                              .name   = _tr("Noise Texture"),
 	                              .type   = "TEX_NOISE",
@@ -194,9 +194,8 @@ void noise_texture_node_init() {
 	                                                                       .height        = 0}),
 	                                  },
 	                                  3),
-	                              .width   = 0,
-	                              .flags   = 0});
-	gc_root(noise_texture_node_def);
+	                              .width = 0,
+	                              .flags = 0});
 
 	any_array_push(nodes_material_texture, noise_texture_node_def);
 	any_map_set(parser_material_node_vectors, "TEX_NOISE", noise_texture_node_vector);

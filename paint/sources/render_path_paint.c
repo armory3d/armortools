@@ -1,6 +1,23 @@
 
 #include "global.h"
 
+bool             render_path_paint_dilated               = true;
+mesh_object_t   *render_path_paint_painto                = NULL;
+mesh_object_t   *render_path_paint_planeo                = NULL;
+u8_array_t      *render_path_paint_visibles              = NULL;
+bool             render_path_paint_merged_object_visible = false;
+f32              render_path_paint_saved_fov             = 0.0;
+bool             render_path_paint_baking                = false;
+render_target_t *_render_path_paint_texpaint;
+render_target_t *_render_path_paint_texpaint_nor;
+render_target_t *_render_path_paint_texpaint_pack;
+render_target_t *_render_path_paint_texpaint_undo;
+render_target_t *_render_path_paint_texpaint_nor_undo;
+render_target_t *_render_path_paint_texpaint_pack_undo;
+f32              render_path_paint_last_x = -1.0;
+f32              render_path_paint_last_y = -1.0;
+bake_type_t      _render_path_paint_bake_type;
+
 void render_path_paint_init() {
 
 	{

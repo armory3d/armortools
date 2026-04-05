@@ -31,7 +31,7 @@ char *texture_coordinate_node_vector(ui_node_t *node, ui_node_socket_t *socket) 
 
 void texture_coordinate_node_init() {
 
-	texture_coordinate_node_def =
+	ui_node_t *texture_coordinate_node_def =
 	    GC_ALLOC_INIT(ui_node_t, {.id      = 0,
 	                              .name    = _tr("Texture Coordinate"),
 	                              .type    = "TEX_COORD",
@@ -104,7 +104,6 @@ void texture_coordinate_node_init() {
 	                                  },
 	                                  6),
 	                              .buttons = any_array_create_from_raw((void *[]){}, 0)});
-	gc_root(texture_coordinate_node_def);
 
 	any_array_push(nodes_material_input, texture_coordinate_node_def);
 	any_map_set(parser_material_node_vectors, "TEX_COORD", texture_coordinate_node_vector);

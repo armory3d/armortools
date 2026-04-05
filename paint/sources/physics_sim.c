@@ -1,6 +1,9 @@
 
 #include "global.h"
 
+mat4_box_t_array_t *sim_transforms;
+bool                sim_initialized = false;
+
 void sim_init() {
 	if (sim_initialized) {
 		return;

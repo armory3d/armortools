@@ -1,6 +1,11 @@
 
 #include "global.h"
 
+f32                      render_path_base_super_sample = 1.0;
+f32                      render_path_base_last_x       = -1.0;
+f32                      render_path_base_last_y       = -1.0;
+render_target_t_array_t *render_path_base_bloom_mipmaps;
+
 void render_path_base_init() {
 	pipes_init();
 	const_data_create_screen_aligned_data();
@@ -10,7 +15,7 @@ void render_path_base_init() {
 void render_path_base_apply_config() {
 	if (render_path_base_super_sample != config_raw->rp_supersample) {
 		render_path_base_super_sample = config_raw->rp_supersample;
-		string_array_t *keys        = map_keys(render_path_render_targets);
+		string_array_t *keys          = map_keys(render_path_render_targets);
 		for (i32 i = 0; i < keys->length; ++i) {
 			render_target_t *rt = any_map_get(render_path_render_targets, keys->buffer[i]);
 			if (rt->width == 0) {
@@ -419,8 +424,8 @@ void render_path_base_draw_gbuffer() {
 			if (i == make_mesh_layer_pass_count - 1) {
 				render_path_set_target(string("gbuffer2%s", ping), NULL, NULL, GPU_CLEAR_COLOR, 0xff000000, 0.0);
 			}
-			char             *g1ping     = string("gbuffer1%s", ping);
-			char             *g2ping     = string("gbuffer2%s", ping);
+			char           *g1ping     = string("gbuffer1%s", ping);
+			char           *g2ping     = string("gbuffer2%s", ping);
 			string_array_t *additional = any_array_create_from_raw(
 			    (void *[]){
 			        g1ping,
@@ -443,8 +448,8 @@ void render_path_base_draw_gbuffer() {
 	bool hide     = operator_shortcut(any_map_get(config_keymap, "stencil_hide"), SHORTCUT_TYPE_DOWN) || keyboard_down("control");
 	bool is_decal = base_is_decal_layer();
 	if (is_decal && !hide) {
-		line_draw_color              = 0xff000000;
-		line_draw_strength           = 0.002;
+		line_draw_color            = 0xff000000;
+		line_draw_strength         = 0.002;
 		string_array_t *additional = any_array_create_from_raw(
 		    (void *[]){
 		        "gbuffer1",

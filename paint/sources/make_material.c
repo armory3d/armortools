@@ -1,6 +1,9 @@
 
 #include "global.h"
 
+shader_context_t   *make_material_default_scon = NULL;
+material_context_t *make_material_default_mcon = NULL;
+
 bool make_material_get_mout() {
 	for (i32 i = 0; i < context_raw->material->canvas->nodes->length; ++i) {
 		ui_node_t *n = context_raw->material->canvas->nodes->buffer[i];

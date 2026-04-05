@@ -1,6 +1,11 @@
 
 #include "global.h"
 
+any_map_t *box_projects_icon_map = NULL;
+char      *_box_projects_path;
+char      *_box_projects_icon_path;
+i32        _box_projects_i;
+
 void box_projects_tab_menu_on_next_frame(void *_) {
 	iron_delete_file(_box_projects_path);
 	iron_delete_file(_box_projects_icon_path);
@@ -64,7 +69,7 @@ void box_projects_tab() {
 			return;
 		}
 		string_array_t *recent_projects  = config_raw->recent_projects;
-		bool              show_asset_names = true;
+		bool            show_asset_names = true;
 
 		for (i32 row = 0; row < math_ceil(recent_projects->length / (float)num); ++row) {
 			i32          mult = show_asset_names ? 2 : 1;

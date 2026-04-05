@@ -131,7 +131,6 @@ void                      import_blend_material_run(char *path);
 void                      import_texture_run(char *path, bool hdr_as_envmap);
 void                      ui_files_show(char *filters, bool is_save, bool open_multiple, void (*files_done)(char *));
 char                     *ui_files_file_browser(ui_handle_t *handle, bool drag_files, char *search, bool refresh, void (*context_menu)(char *));
-void                      ui_files_make_icon(ui_files_make_icon_t *args);
 void                      ui_files_go_up(ui_handle_t *handle);
 void                      base_init();
 i32                       base_w();

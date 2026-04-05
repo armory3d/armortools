@@ -1,15 +1,25 @@
 
 #include "../global.h"
 
+f32 input_node_start_x = 0.0;
+f32 input_node_start_y = 0.0;
+// Brush ruler
+bool input_node_lock_begin   = false;
+bool input_node_lock_x       = false;
+bool input_node_lock_y       = false;
+f32  input_node_lock_start_x = 0.0;
+f32  input_node_lock_start_y = 0.0;
+bool input_node_registered   = false;
+
 void input_node_update(float_node_t *self) {
 	if (context_raw->split_view) {
 		context_raw->view_index = mouse_view_x() > base_w() / 2.0 ? 1 : 0;
 	}
 
-	bool decal_mask = context_is_decal_mask_paint();
+	bool  decal_mask  = context_is_decal_mask_paint();
 	char *ruler_paint = string("%s+%s", any_map_get(config_keymap, "brush_ruler"), any_map_get(config_keymap, "action_paint"));
-	bool lazy_paint = context_raw->brush_lazy_radius > 0 && (operator_shortcut(any_map_get(config_keymap, "action_paint"), SHORTCUT_TYPE_DOWN) ||
-	                                                         operator_shortcut(ruler_paint, SHORTCUT_TYPE_DOWN) || decal_mask);
+	bool  lazy_paint  = context_raw->brush_lazy_radius > 0 && (operator_shortcut(any_map_get(config_keymap, "action_paint"), SHORTCUT_TYPE_DOWN) ||
+                                                             operator_shortcut(ruler_paint, SHORTCUT_TYPE_DOWN) || decal_mask);
 
 	f32 paint_x = mouse_view_x() / (float)sys_w();
 	f32 paint_y = mouse_view_y() / (float)sys_h();

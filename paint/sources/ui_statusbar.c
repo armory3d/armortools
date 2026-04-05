@@ -1,6 +1,8 @@
 
 #include "global.h"
 
+i32 ui_statusbar_last_tab = 0;
+
 void ui_statusbar_init() {}
 
 i32 ui_statusbar_width() {

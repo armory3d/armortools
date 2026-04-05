@@ -1,6 +1,11 @@
 
 #include "global.h"
 
+f32           render_path_raytrace_uv_scale = 1.0;
+mat4_t        render_path_raytrace_transform;
+gpu_buffer_t *render_path_raytrace_vb;
+gpu_buffer_t *render_path_raytrace_ib;
+
 void render_path_raytrace_init() {}
 
 void render_path_raytrace_commands(bool use_live_layer) {

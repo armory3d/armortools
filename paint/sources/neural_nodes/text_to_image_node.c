@@ -131,9 +131,9 @@ string_array_t *text_to_image_node_wan_args(char *dir, char *prompt) {
 }
 
 void text_to_image_node_button(i32 node_id) {
-	ui_node_t        *node      = ui_get_node(ui_nodes_get_canvas(true)->nodes, node_id);
-	char             *node_name = parser_material_node_name(node, NULL);
-	ui_handle_t      *h         = ui_handle(node_name);
+	ui_node_t      *node      = ui_get_node(ui_nodes_get_canvas(true)->nodes, node_id);
+	char           *node_name = parser_material_node_name(node, NULL);
+	ui_handle_t    *h         = ui_handle(node_name);
 	string_array_t *models    = any_array_create_from_raw(
         (void *[]){
             "Stable Diffusion",
@@ -178,52 +178,52 @@ void text_to_image_node_button(i32 node_id) {
 
 void text_to_image_node_init() {
 
-	text_to_image_node_def = GC_ALLOC_INIT(ui_node_t, {.id      = 0,
-	                                                   .name    = _tr("Text to Image"),
-	                                                   .type    = "NEURAL_TEXT_TO_IMAGE",
-	                                                   .x       = 0,
-	                                                   .y       = 0,
-	                                                   .color   = 0xff4982a0,
-	                                                   .inputs  = any_array_create_from_raw((void *[]){}, 0),
-	                                                   .outputs = any_array_create_from_raw(
-	                                                       (void *[]){
-	                                                           GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
-	                                                                                            .node_id       = 0,
-	                                                                                            .name          = _tr("Color"),
-	                                                                                            .type          = "RGBA",
-	                                                                                            .color         = 0xffc7c729,
-	                                                                                            .default_value = f32_array_create_xyzw(0.0, 0.0, 0.0, 1.0),
-	                                                                                            .min           = 0.0,
-	                                                                                            .max           = 1.0,
-	                                                                                            .precision     = 100,
-	                                                                                            .display       = 0}),
-	                                                       },
-	                                                       1),
-	                                                   .buttons = any_array_create_from_raw(
-	                                                       (void *[]){
-	                                                           GC_ALLOC_INIT(ui_node_button_t, {.name          = "text_to_image_node_button",
-	                                                                                            .type          = "CUSTOM",
-	                                                                                            .output        = -1,
-	                                                                                            .default_value = f32_array_create_x(0),
-	                                                                                            .data          = NULL,
-	                                                                                            .min           = 0.0,
-	                                                                                            .max           = 1.0,
-	                                                                                            .precision     = 100,
-	                                                                                            .height        = 1}),
-	                                                           GC_ALLOC_INIT(ui_node_button_t, {.name          = _tr("Tiled"),
-	                                                                                            .type          = "BOOL",
-	                                                                                            .output        = 0,
-	                                                                                            .default_value = f32_array_create_x(0),
-	                                                                                            .data          = NULL,
-	                                                                                            .min           = 0.0,
-	                                                                                            .max           = 1.0,
-	                                                                                            .precision     = 100,
-	                                                                                            .height        = 0}),
-	                                                       },
-	                                                       2),
-	                                                   .width = 0,
-	                                                   .flags = 0});
-	gc_root(text_to_image_node_def);
+	ui_node_t *text_to_image_node_def =
+	    GC_ALLOC_INIT(ui_node_t, {.id      = 0,
+	                              .name    = _tr("Text to Image"),
+	                              .type    = "NEURAL_TEXT_TO_IMAGE",
+	                              .x       = 0,
+	                              .y       = 0,
+	                              .color   = 0xff4982a0,
+	                              .inputs  = any_array_create_from_raw((void *[]){}, 0),
+	                              .outputs = any_array_create_from_raw(
+	                                  (void *[]){
+	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
+	                                                                       .node_id       = 0,
+	                                                                       .name          = _tr("Color"),
+	                                                                       .type          = "RGBA",
+	                                                                       .color         = 0xffc7c729,
+	                                                                       .default_value = f32_array_create_xyzw(0.0, 0.0, 0.0, 1.0),
+	                                                                       .min           = 0.0,
+	                                                                       .max           = 1.0,
+	                                                                       .precision     = 100,
+	                                                                       .display       = 0}),
+	                                  },
+	                                  1),
+	                              .buttons = any_array_create_from_raw(
+	                                  (void *[]){
+	                                      GC_ALLOC_INIT(ui_node_button_t, {.name          = "text_to_image_node_button",
+	                                                                       .type          = "CUSTOM",
+	                                                                       .output        = -1,
+	                                                                       .default_value = f32_array_create_x(0),
+	                                                                       .data          = NULL,
+	                                                                       .min           = 0.0,
+	                                                                       .max           = 1.0,
+	                                                                       .precision     = 100,
+	                                                                       .height        = 1}),
+	                                      GC_ALLOC_INIT(ui_node_button_t, {.name          = _tr("Tiled"),
+	                                                                       .type          = "BOOL",
+	                                                                       .output        = 0,
+	                                                                       .default_value = f32_array_create_x(0),
+	                                                                       .data          = NULL,
+	                                                                       .min           = 0.0,
+	                                                                       .max           = 1.0,
+	                                                                       .precision     = 100,
+	                                                                       .height        = 0}),
+	                                  },
+	                                  2),
+	                              .width = 0,
+	                              .flags = 0});
 
 	any_array_push(nodes_material_neural, text_to_image_node_def);
 	any_map_set(parser_material_node_vectors, "NEURAL_TEXT_TO_IMAGE", neural_node_vector);

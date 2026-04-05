@@ -1,6 +1,12 @@
 
 #include "global.h"
 
+f32  _import_asset_drop_x;
+f32  _import_asset_drop_y;
+bool _import_asset_show_box;
+bool _import_asset_hdr_as_envmap;
+void (*_import_asset_done)(void);
+
 void import_asset_run_cache_cloud_done(char *abs) {
 	if (abs == NULL) {
 		return;
@@ -10,11 +16,11 @@ void import_asset_run_cache_cloud_done(char *abs) {
 
 void import_asset_run(char *path, f32 drop_x, f32 drop_y, bool show_box, bool hdr_as_envmap, void (*done)(void)) {
 	if (starts_with(path, "cloud")) {
-		#ifdef IRON_ANDROID
+#ifdef IRON_ANDROID
 		console_toast(tr("Downloading"));
-		#else
+#else
 		console_info(tr("Downloading"));
-		#endif
+#endif
 
 		_import_asset_drop_x        = drop_x;
 		_import_asset_drop_y        = drop_y;

@@ -1,6 +1,8 @@
 
 #include "global.h"
 
+i32 _tab_meshes_draw_i;
+
 void tab_meshes_draw_properties(mesh_object_t *o) {
 	context_raw->selected_object = o->base;
 	ui_handle_t *h               = ui_handle(__ID__);
@@ -137,8 +139,8 @@ void tab_meshes_draw_properties(mesh_object_t *o) {
 		}
 	}
 
-	physics_body_t   *pb          = any_imap_get(physics_body_object_map, context_raw->selected_object->uid);
-	ui_handle_t      *hshape      = ui_handle(__ID__);
+	physics_body_t *pb          = any_imap_get(physics_body_object_map, context_raw->selected_object->uid);
+	ui_handle_t    *hshape      = ui_handle(__ID__);
 	string_array_t *shape_combo = any_array_create_from_raw(
 	    (void *[]){
 	        tr("None"),

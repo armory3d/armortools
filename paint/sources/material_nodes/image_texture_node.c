@@ -1,6 +1,8 @@
 
 #include "../global.h"
 
+char *parser_material_tex_coord = "tex_coord";
+
 bind_tex_t *parser_material_make_texture(ui_node_t *image_node, char *tex_name) {
 	i32 i = image_node->buttons->buffer[0]->default_value->buffer[0];
 	if (i > 9000) { // 9999 - Texture deleted, use pink now
@@ -114,8 +116,8 @@ char *image_texture_node_value(ui_node_t *node, ui_node_socket_t *socket) {
 
 void image_texture_node_init() {
 
-	char *image_texture_color_space_data = string("%s\n%s\n%s\n%s", _tr("Auto"), _tr("Linear"), _tr("sRGB"), _tr("DirectX Normal Map"));
-	image_texture_node_def =
+	char      *image_texture_color_space_data = string("%s\n%s\n%s\n%s", _tr("Auto"), _tr("Linear"), _tr("sRGB"), _tr("DirectX Normal Map"));
+	ui_node_t *image_texture_node_def =
 	    GC_ALLOC_INIT(ui_node_t, {.id     = 0,
 	                              .name   = _tr("Image Texture"),
 	                              .type   = "TEX_IMAGE",
@@ -184,7 +186,6 @@ void image_texture_node_init() {
 	                                  2),
 	                              .width = 0,
 	                              .flags = 0});
-	gc_root(image_texture_node_def);
 
 	any_array_push(nodes_material_texture, image_texture_node_def);
 	any_map_set(parser_material_node_vectors, "TEX_IMAGE", image_texture_node_vector);

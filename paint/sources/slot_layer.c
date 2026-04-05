@@ -1,6 +1,20 @@
 
 #include "global.h"
 
+#if defined(IRON_ANDROID) || defined(IRON_IOS)
+i32 layers_max_layers = 18;
+#else
+i32 layers_max_layers = 255;
+#endif
+
+uv_type_t _layers_uv_type;
+mat4_t    _layers_decal_mat;
+i32       _layers_position;
+i32       _layers_base_color;
+f32       _layers_occlusion;
+f32       _layers_roughness;
+f32       _layers_metallic;
+
 slot_layer_t *slot_layer_create(char *ext, layer_slot_type_t type, slot_layer_t *parent) {
 	slot_layer_t *raw       = GC_ALLOC_INIT(slot_layer_t, {0});
 	raw->id                 = 0;

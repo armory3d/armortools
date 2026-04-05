@@ -1,6 +1,11 @@
 
 #include "global.h"
 
+typedef struct import_texture_data {
+	char               *path;
+	struct gpu_texture *image;
+} import_texture_data_t;
+
 gpu_texture_t *import_texture_default_importer(char *path) {
 	return data_get_image(path);
 }

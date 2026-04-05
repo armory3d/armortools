@@ -17,12 +17,6 @@ typedef struct config {
 	char *server;
 } config_t;
 
-typedef struct ui_coloring_t_array {
-	ui_coloring_t **buffer;
-	int             length;
-	int             capacity;
-} ui_coloring_t_array_t;
-
 extern any_map_t *ui_children;
 
 ui_t        *ui_create(ui_options_t *ops);

@@ -33,7 +33,7 @@ void image_to_3d_mesh_node_button(i32 node_id) {
 	ui_node_t        *node      = ui_get_node(canvas->nodes, node_id);
 	char             *node_name = parser_material_node_name(node, NULL);
 	ui_handle_t      *h         = ui_handle(node_name);
-	string_array_t *models    = any_array_create_from_raw(
+	string_array_t   *models    = any_array_create_from_raw(
         (void *[]){
             "Hunyuan3D",
         },
@@ -52,7 +52,7 @@ void image_to_3d_mesh_node_button(i32 node_id) {
 #endif
 			iron_write_png(string("%s%sinput.png", dir, PATH_SEP), input_buf, input->width, input->height, 0);
 
-			dir                    = string_copy(string_replace_all(dir, "\\", "/"));
+			dir                  = string_copy(string_replace_all(dir, "\\", "/"));
 			string_array_t *argv = any_array_create_from_raw(
 			    (void *[]){
 			        string("%s/Hunyuan3D_win64/python/python.exe", dir),
@@ -76,7 +76,7 @@ void image_to_3d_mesh_node_button(i32 node_id) {
 
 void image_to_3d_mesh_node_init() {
 
-	image_to_3d_mesh_node_def =
+	ui_node_t *image_to_3d_mesh_node_def =
 	    GC_ALLOC_INIT(ui_node_t, {.id     = 0,
 	                              .name   = _tr("Image to 3D Mesh"),
 	                              .type   = "NEURAL_IMAGE_TO_3D_MESH",
@@ -126,7 +126,6 @@ void image_to_3d_mesh_node_init() {
 	                                  1),
 	                              .width = 0,
 	                              .flags = 0});
-	gc_root(image_to_3d_mesh_node_def);
 
 	any_array_push(nodes_material_neural, image_to_3d_mesh_node_def);
 	any_map_set(parser_material_node_values, "NEURAL_IMAGE_TO_3D_MESH", neural_node_value);

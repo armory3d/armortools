@@ -1,6 +1,8 @@
 
 #include "global.h"
 
+char *console_progress_text = NULL;
+
 void console_draw_toast(char *s) {
 	draw_begin(NULL, false, 0);
 	draw_set_color(0x55000000);

@@ -1,6 +1,8 @@
 
 #include "global.h"
 
+buffer_t      *slot_brush_default_canvas = NULL;
+
 slot_brush_t *slot_brush_create(ui_node_canvas_t *c) {
 	slot_brush_t *raw  = GC_ALLOC_INIT(slot_brush_t, {0});
 	raw->nodes         = ui_nodes_create();

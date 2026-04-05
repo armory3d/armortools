@@ -1,6 +1,19 @@
 
 #include "global.h"
 
+bool                 ui_view2d_text_input_hover = false;
+bool                 ui_view2d_uvmap_show       = false;
+paint_tex_t          ui_view2d_tex_type         = PAINT_TEX_BASE;
+view_2d_layer_mode_t ui_view2d_layer_mode       = VIEW_2D_LAYER_MODE_SELECTED;
+bool                 ui_view2d_controls_down    = false;
+gpu_texture_t       *_ui_view2d_render_tex;
+f32                  _ui_view2d_render_x;
+f32                  _ui_view2d_render_y;
+f32                  _ui_view2d_render_tw;
+f32                  _ui_view2d_render_th;
+gpu_texture_t       *ui_view2d_grid          = NULL;
+bool                 ui_view2d_layer_touched = false;
+
 void ui_view2d_init() {
 	ui_view2d_pipe = gpu_create_pipeline();
 	gc_root(ui_view2d_pipe);
@@ -277,10 +290,10 @@ void ui_view2d_render(void *_) {
 			asset_t *asset = context_raw->texture;
 			if (asset != NULL) {
 				string_array_t *asset_names = project_asset_names;
-				i32               i           = string_array_index_of(asset_names, asset->name);
-				h->text                       = string_copy(asset->name);
-				asset->name                   = string_copy(ui_text_input(h, "", UI_ALIGN_LEFT, true, false));
-				asset_names->buffer[i]        = asset->name;
+				i32             i           = string_array_index_of(asset_names, asset->name);
+				h->text                     = string_copy(asset->name);
+				asset->name                 = string_copy(ui_text_input(h, "", UI_ALIGN_LEFT, true, false));
+				asset_names->buffer[i]      = asset->name;
 			}
 		}
 		else if (ui_view2d_type == VIEW_2D_TYPE_NODE) {

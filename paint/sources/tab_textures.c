@@ -1,6 +1,12 @@
 
 #include "global.h"
 
+gpu_texture_t *_tab_textures_draw_img;
+char          *_tab_textures_draw_path;
+asset_t       *_tab_textures_draw_asset;
+i32            _tab_textures_draw_i;
+bool           _tab_textures_draw_is_packed;
+
 void tab_textures_draw_set_as_envmap(void *_) {
 	import_envmap_run(_tab_textures_draw_asset->file, _tab_textures_draw_img);
 }
@@ -249,11 +255,11 @@ void tab_textures_draw(ui_handle_t *htab) {
 						if (is_packed) {
 							tooltip = string("%s %s", tooltip, tr("(packed)"));
 						}
-						#ifdef WITH_BC7
+#ifdef WITH_BC7
 						if (img->format == GPU_TEXTURE_FORMAT_RGBA32_BC7) {
 							tooltip = string("%s %s", tooltip, tr("(compressed)"));
 						}
-						#endif
+#endif
 						ui_tooltip(tooltip);
 					}
 

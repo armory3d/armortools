@@ -1,6 +1,12 @@
 
 #include "global.h"
 
+bool         ui_menu_hide_flag  = false;
+i32          ui_menu_sub_x      = 0;
+i32          ui_menu_sub_y      = 0;
+ui_handle_t *ui_menu_sub_handle = NULL;
+char        *_ui_menu_render_msg;
+
 void ui_menu_hide() {
 	ui_menu_show = false;
 	base_redraw_ui();

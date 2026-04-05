@@ -1,6 +1,8 @@
 
 #include "global.h"
 
+f32 export_texture_gamma = 1.0 / 2.2;
+
 void export_texture_write_texture(char *file, buffer_t *pixels, i32 type, i32 off) {
 	i32 res_x       = config_get_texture_res_x();
 	i32 res_y       = config_get_texture_res_y();
@@ -32,8 +34,8 @@ void export_texture_write_texture(char *file, buffer_t *pixels, i32 type, i32 of
 		gpu_texture_t *image = gpu_create_texture_from_bytes(pixels, res_x, res_y, GPU_TEXTURE_FORMAT_RGBA32);
 		any_map_set(data_cached_images, file, image);
 		string_array_t *ar    = string_split(file, PATH_SEP);
-		char             *name  = ar->buffer[ar->length - 1];
-		asset_t          *asset = GC_ALLOC_INIT(asset_t, {.name = name, .file = file, .id = project_asset_id++});
+		char           *name  = ar->buffer[ar->length - 1];
+		asset_t        *asset = GC_ALLOC_INIT(asset_t, {.name = name, .file = file, .id = project_asset_id++});
 		any_array_push(project_assets, asset);
 		if (project_raw->assets == NULL) {
 			project_raw->assets = any_array_create_from_raw((void *[]){}, 0);
@@ -301,7 +303,7 @@ void export_texture_run_layers(char *path, slot_layer_t_array_t *layers, char *o
 
 	for (i32 i = 0; i < preset->textures->length; ++i) {
 		export_preset_texture_t *t              = preset->textures->buffer[i];
-		string_array_t        *c              = t->channels;
+		string_array_t          *c              = t->channels;
 		char                    *tex_name       = !string_equals(t->name, "") ? string("_%s", t->name) : "";
 		bool                     single_channel = c->buffer[0] == c->buffer[1] && c->buffer[1] == c->buffer[2] && string_equals(c->buffer[3], "1.0");
 		char                    *out_path       = string("%s%s%s%s%s", path, PATH_SEP, f, tex_name, ext);

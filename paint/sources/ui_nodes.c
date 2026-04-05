@@ -1,6 +1,36 @@
 
 #include "global.h"
 
+bool                     ui_nodes_show_menu       = false;
+bool                     ui_nodes_show_menu_first = true;
+bool                     ui_nodes_hide_menu       = false;
+i32                      ui_nodes_menu_category   = 0;
+f32                      ui_nodes_popup_x         = 0.0;
+f32                      ui_nodes_popup_y         = 0.0;
+i32                      ui_nodes_node_search_x;
+i32                      ui_nodes_node_search_y;
+bool                     ui_nodes_uichanged_last        = false;
+bool                     ui_nodes_recompile_mat         = false; // Mat preview
+bool                     ui_nodes_recompile_mat_final   = false;
+ui_node_t               *ui_nodes_node_search_spawn     = NULL;
+i32                      ui_nodes_node_search_offset    = 0;
+ui_node_canvas_t        *ui_nodes_last_canvas           = NULL;
+i32                      ui_nodes_last_node_selected_id = -1;
+bool                     ui_nodes_release_link          = false;
+bool                     ui_nodes_is_node_menu_op       = false;
+gpu_texture_t           *ui_nodes_grid                  = NULL;
+bool                     ui_nodes_controls_down         = false;
+slot_material_t_array_t *ui_nodes_tabs                  = NULL;
+ui_node_link_t          *_ui_nodes_on_link_drag_link_drag;
+ui_node_t               *_ui_nodes_on_link_drag_node;
+ui_node_socket_t        *_ui_nodes_on_socket_released_socket;
+ui_node_t               *_ui_nodes_on_socket_released_node;
+ui_node_t               *_ui_nodes_on_canvas_released_selected;
+bool                     _ui_nodes_node_search_first;
+void (*_ui_nodes_node_search_done)(void);
+ui_node_t *ui_nodes_node_changed = NULL;
+void (*_ui_nodes_render_tmp)(i32);
+
 void ui_viewnodes_on_node_remove(ui_node_t *n) {
 	gpu_texture_t *img = any_imap_get(context_raw->node_preview_map, n->id);
 	if (img != NULL) {
@@ -187,13 +217,13 @@ void ui_viewnodes_on_link_drag(i32 link_drag_id, bool is_new_link) {
 void ui_viewnodes_on_socket_released_group_edit_box() {
 	ui_node_socket_t *socket     = _ui_nodes_on_socket_released_socket;
 	ui_node_t        *node       = _ui_nodes_on_socket_released_node;
-	string_array_t *type_combo = any_array_create_from_raw(
-	    (void *[]){
-	        tr("Color"),
-	        tr("Vector"),
-	        tr("Value"),
-	    },
-	    3);
+	string_array_t   *type_combo = any_array_create_from_raw(
+        (void *[]){
+            tr("Color"),
+            tr("Vector"),
+            tr("Value"),
+        },
+        3);
 	i32 type = ui_combo(_ui_nodes_htype, type_combo, tr("Type"), true, UI_ALIGN_LEFT, true);
 	if (_ui_nodes_htype->changed) {
 		_ui_nodes_hname->text = type == 0 ? tr("Color") : type == 1 ? tr("Vector") : tr("Value");
@@ -527,8 +557,8 @@ ui_canvas_control_t *ui_nodes_get_canvas_control(bool controls_down, bool is_nod
 		return cc;
 	}
 
-	bool pan        = ui->input_down_r || operator_shortcut(any_map_get(config_keymap, "action_pan"), SHORTCUT_TYPE_DOWN);
-	f32  zoom_delta = operator_shortcut(any_map_get(config_keymap, "action_zoom"), SHORTCUT_TYPE_DOWN) ? ui_nodes_get_zoom_delta() / 100.0 : 0.0;
+	bool pan                     = ui->input_down_r || operator_shortcut(any_map_get(config_keymap, "action_pan"), SHORTCUT_TYPE_DOWN);
+	f32  zoom_delta              = operator_shortcut(any_map_get(config_keymap, "action_zoom"), SHORTCUT_TYPE_DOWN) ? ui_nodes_get_zoom_delta() / 100.0 : 0.0;
 	ui_canvas_control_t *control = GC_ALLOC_INIT(ui_canvas_control_t, {.pan_x         = pan ? ui->input_dx : 0.0,
 	                                                                   .pan_y         = pan ? ui->input_dy : 0.0,
 	                                                                   .zoom          = ui->input_wheel_delta != 0.0 ? -ui->input_wheel_delta / 10 : zoom_delta,
@@ -537,7 +567,7 @@ ui_canvas_control_t *ui_nodes_get_canvas_control(bool controls_down, bool is_nod
 	if (is_node_view && ui->input_x < ui->_window_x) {
 		control->pan_x = 0.0;
 		control->pan_y = 0.0;
-		control->zoom = 0.0;
+		control->zoom  = 0.0;
 	}
 
 	if (ui->combo_selected_handle != NULL) {
@@ -878,7 +908,7 @@ void ui_nodes_draw_menubar() {
 	bool _SHADOWS              = ui->ops->theme->SHADOWS;
 	ui->ops->theme->BUTTON_COL = ui->ops->theme->WINDOW_BG_COL;
 	ui->ops->theme->SHADOWS    = false;
-	string_array_t *cats     = ui_nodes_canvas_type == CANVAS_TYPE_MATERIAL ? nodes_material_categories : nodes_brush_categories;
+	string_array_t *cats       = ui_nodes_canvas_type == CANVAS_TYPE_MATERIAL ? nodes_material_categories : nodes_brush_categories;
 	for (i32 i = 0; i < cats->length; ++i) {
 		if ((ui_menubar_button(tr(cats->buffer[i]))) || (ui->is_hovered && ui_nodes_show_menu)) {
 			ui_nodes_show_menu     = true;
@@ -1083,7 +1113,7 @@ void ui_nodes_render(void *_) {
 		}
 		if (has_script_node) {
 			ui_nodes_last_node_selected_id = -1;
-			ui_view2d_hwnd->redraws = 2;
+			ui_view2d_hwnd->redraws        = 2;
 			iron_delay_idle_sleep();
 		}
 	}

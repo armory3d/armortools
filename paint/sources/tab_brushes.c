@@ -1,7 +1,9 @@
 
 #include "global.h"
 
-void tab_brushes_draw_make_brush_preview(void * _) {
+i32 _tab_brushes_draw_i;
+
+void tab_brushes_draw_make_brush_preview(void *_) {
 	i32           i      = _tab_brushes_draw_i;
 	slot_brush_t *_brush = context_raw->brush;
 	context_raw->brush   = project_brushes->buffer[i];
@@ -10,11 +12,11 @@ void tab_brushes_draw_make_brush_preview(void * _) {
 	context_raw->brush = _brush;
 }
 
-void tab_brushes_draw_duplicate(void * _) {
+void tab_brushes_draw_duplicate(void *_) {
 	i32 i              = _tab_brushes_draw_i;
 	context_raw->brush = slot_brush_create(NULL);
 	any_array_push(project_brushes, context_raw->brush);
-	void * cloned                 = util_clone_canvas(project_brushes->buffer[i]->canvas);
+	void *cloned               = util_clone_canvas(project_brushes->buffer[i]->canvas);
 	context_raw->brush->canvas = cloned;
 	context_set_brush(context_raw->brush);
 	util_render_make_brush_preview();
@@ -117,7 +119,7 @@ void tab_brushes_draw(ui_handle_t *htab) {
 					ui_fill(w + 1, -2, 2, w + 4, ui->ops->theme->HIGHLIGHT_COL);
 				}
 
-				f32        uix   = ui->_x;
+				f32 uix = ui->_x;
 				// let uiy: f32 = ui._y;
 				i32        tile  = UI_SCALE() > 1 ? 100 : 50;
 				ui_state_t state = project_brushes->buffer[i]->preview_ready ? ui_image(img, 0xffffffff, -1.0)

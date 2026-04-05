@@ -1,6 +1,13 @@
 
 #include "global.h"
 
+typedef struct version {
+	char *sha;
+	char *date;
+} version_t;
+
+bool config_loaded = false;
+
 void config_load() {
 	char *path = "";
 	if (path_is_protected()) {
@@ -273,8 +280,8 @@ void config_init_layout() {
 	i32_array_t *new_layout = i32_array_create_from_raw((i32[]){}, 0);
 
 	i32_array_push(new_layout, math_floor(ui_sidebar_default_w * raw->window_scale)); // LayoutSidebarW
-	i32_array_push(new_layout, math_floor(iron_window_height() / 2.0));          // LayoutSidebarH0
-	i32_array_push(new_layout, math_floor(iron_window_height() / 2.0));          // LayoutSidebarH1
+	i32_array_push(new_layout, math_floor(iron_window_height() / 2.0));               // LayoutSidebarH0
+	i32_array_push(new_layout, math_floor(iron_window_height() / 2.0));               // LayoutSidebarH1
 
 #ifdef IRON_IOS
 	i32_array_push(new_layout, show2d ? math_floor((sys_w() + raw->layout->buffer[LAYOUT_SIZE_NODES_W]) * 0.473) : math_floor(sys_w() * 0.473)); // LayoutNodesW
@@ -286,7 +293,7 @@ void config_init_layout() {
 	                      : math_floor(sys_w() * 0.515)); // Align with ui header controls
 #endif
 
-	i32_array_push(new_layout, math_floor(sys_h() / 2.0));                         // LayoutNodesH
+	i32_array_push(new_layout, math_floor(sys_h() / 2.0));                              // LayoutNodesH
 	i32_array_push(new_layout, math_floor(ui_statusbar_default_h * raw->window_scale)); // LayoutStatusH
 
 #if defined(IRON_ANDROID) || defined(IRON_IOS)

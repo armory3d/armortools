@@ -1,6 +1,26 @@
 
 #include "global.h"
 
+typedef struct draw_cloud_icon_data {
+	char               *f;
+	struct gpu_texture *image;
+} draw_cloud_icon_data_t;
+
+typedef struct ui_files_make_icon {
+	struct gpu_texture *image;
+	char               *shandle;
+	i32                 w;
+} ui_files_make_icon_t;
+
+char           *ui_files_last_search     = "";
+string_array_t *ui_files_files           = NULL;
+any_map_t      *ui_files_icon_map        = NULL;
+any_map_t      *ui_files_icon_file_map   = NULL;
+i32             ui_files_selected        = -1;
+bool            ui_files_show_extensions = false;
+bool            ui_files_offline         = false;
+ui_handle_t    *_ui_files_file_browser_handle;
+
 void ui_files_release_keys() {
 	// File dialog may prevent firing key up events
 	keyboard_up_listener(KEY_CODE_SHIFT);
@@ -139,6 +159,34 @@ static void ui_files_clear_icon_map(void) {
 	}
 	gc_unroot(ui_files_icon_file_map);
 	ui_files_icon_file_map = NULL;
+}
+
+void ui_files_make_icon(ui_files_make_icon_t *args) {
+	i32            w     = args->w;
+	gpu_texture_t *image = args->image;
+	i32            sw    = image->width > image->height ? w : math_floor(1.0 * image->width / (float)image->height * w);
+	i32            sh    = image->width > image->height ? math_floor(1.0 * image->height / (float)image->width * w) : w;
+	gpu_texture_t *icon  = gpu_create_render_target(sw, sh, GPU_TEXTURE_FORMAT_RGBA32);
+	draw_begin(icon, true, 0xffffffff);
+	draw_set_pipeline(pipes_copy_rgb);
+	draw_scaled_image(image, 0, 0, sw, sh);
+	draw_set_pipeline(NULL);
+	draw_end();
+	any_map_set(ui_files_icon_map, args->shandle, icon);
+	ui_base_hwnds->buffer[TAB_AREA_STATUS]->redraws = 3;
+
+	bool found = false;
+	for (i32 i = 0; i < project_assets->length; ++i) {
+		asset_t *a = project_assets->buffer[i];
+		if (string_equals(a->file, args->shandle)) {
+			found = true;
+			break;
+		}
+	}
+
+	if (!found) {
+		data_delete_image(args->shandle); // The big image is not needed anymore
+	}
 }
 
 char *ui_files_file_browser(ui_handle_t *handle, bool drag_files, char *search, bool refresh, void (*context_menu)(char *)) {
@@ -503,34 +551,6 @@ char *ui_files_file_browser(ui_handle_t *handle, bool drag_files, char *search, 
 	}
 	ui->_y += slotw * 0.8;
 	return handle->text;
-}
-
-void ui_files_make_icon(ui_files_make_icon_t *args) {
-	i32            w     = args->w;
-	gpu_texture_t *image = args->image;
-	i32            sw    = image->width > image->height ? w : math_floor(1.0 * image->width / (float)image->height * w);
-	i32            sh    = image->width > image->height ? math_floor(1.0 * image->height / (float)image->width * w) : w;
-	gpu_texture_t *icon  = gpu_create_render_target(sw, sh, GPU_TEXTURE_FORMAT_RGBA32);
-	draw_begin(icon, true, 0xffffffff);
-	draw_set_pipeline(pipes_copy_rgb);
-	draw_scaled_image(image, 0, 0, sw, sh);
-	draw_set_pipeline(NULL);
-	draw_end();
-	any_map_set(ui_files_icon_map, args->shandle, icon);
-	ui_base_hwnds->buffer[TAB_AREA_STATUS]->redraws = 3;
-
-	bool found = false;
-	for (i32 i = 0; i < project_assets->length; ++i) {
-		asset_t *a = project_assets->buffer[i];
-		if (string_equals(a->file, args->shandle)) {
-			found = true;
-			break;
-		}
-	}
-
-	if (!found) {
-		data_delete_image(args->shandle); // The big image is not needed anymore
-	}
 }
 
 void ui_files_go_up(ui_handle_t *handle) {

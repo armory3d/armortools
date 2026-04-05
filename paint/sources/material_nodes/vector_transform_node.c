@@ -34,7 +34,7 @@ void vector_transform_node_init() {
 	char *type_data  = string("%s\n%s\n%s", _tr("Vector"), _tr("Point"), _tr("Normal"));
 	char *space_data = string("%s\n%s\n%s", _tr("World"), _tr("Object"), _tr("Camera"));
 
-	vector_transform_node_def =
+	ui_node_t *vector_transform_node_def =
 	    GC_ALLOC_INIT(ui_node_t, {.id     = 0,
 	                              .name   = _tr("Vector Transform"),
 	                              .type   = "VECT_TRANSFORM",
@@ -102,7 +102,6 @@ void vector_transform_node_init() {
 	                                  3),
 	                              .width = 0,
 	                              .flags = 0});
-	gc_root(vector_transform_node_def);
 
 	any_array_push(nodes_material_utilities, vector_transform_node_def);
 	any_map_set(parser_material_node_vectors, "VECT_TRANSFORM", vector_transform_node_vector);

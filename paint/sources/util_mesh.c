@@ -1,6 +1,9 @@
 
 #include "global.h"
 
+i16_array_t *util_mesh_va0;
+i32_array_t *util_mesh_quantized;
+
 void util_mesh_remove_merged() {
 	if (context_raw->merged_object != NULL) {
 		mesh_data_delete(context_raw->merged_object->data);
@@ -424,8 +427,7 @@ void util_mesh_equirect_unwrap(raw_mesh_t *mesh) {
 	mesh->texa = i16_array_create(verts * 2);
 	vec4_t n   = vec4_create(0.0, 0.0, 0.0, 1.0);
 	for (i32 i = 0; i < verts; ++i) {
-		n = vec4_create(mesh->posa->buffer[i * 4] / 32767.0, mesh->posa->buffer[i * 4 + 1] / 32767.0, mesh->posa->buffer[i * 4 + 2] / 32767.0,
-		                1.0);
+		n = vec4_create(mesh->posa->buffer[i * 4] / 32767.0, mesh->posa->buffer[i * 4 + 1] / 32767.0, mesh->posa->buffer[i * 4 + 2] / 32767.0, 1.0);
 		n = vec4_norm(n);
 		// Sphere projection
 		// mesh.texa[i * 2    ] = math_atan2(n.x, n.y) / (math_pi() * 2) + 0.5;

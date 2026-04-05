@@ -1,6 +1,23 @@
 
 #include "global.h"
 
+typedef enum {
+	MENUBAR_CATEGORY_FILE      = 0,
+	MENUBAR_CATEGORY_EDIT      = 1,
+	MENUBAR_CATEGORY_VIEWPORT  = 2,
+	MENUBAR_CATEGORY_MODE      = 3,
+	MENUBAR_CATEGORY_CAMERA    = 4,
+	MENUBAR_CATEGORY_WORKSPACE = 5,
+	MENUBAR_CATEGORY_HELP      = 6,
+} menubar_category_t;
+
+typedef struct update_info {
+	i32   version;
+	char *version_name;
+} update_info_t;
+
+i32 ui_menubar_category = 0;
+
 void ui_menubar_init() {
 	ui_menubar_hwnd->layout        = UI_LAYOUT_HORIZONTAL;
 	ui_menubar_menu_handle->layout = UI_LAYOUT_HORIZONTAL;
@@ -480,7 +497,7 @@ void ui_menubar_draw_category_items() {
 	else if (ui_menubar_category == MENUBAR_CATEGORY_MODE) {
 		ui_handle_t *mode_handle = ui_handle(__ID__);
 		mode_handle->i           = context_raw->viewport_mode;
-		string_array_t *modes  = any_array_create_from_raw(
+		string_array_t *modes    = any_array_create_from_raw(
             (void *[]){
                 tr("Lit"),
                 tr("Base Color"),
@@ -635,8 +652,8 @@ void ui_menubar_draw_category_items() {
 		ui_menu_align();
 		ui_menu_label(tr("Pivot"), any_map_get(config_keymap, "view_pivot_center"));
 		ui_menu_align();
-		ui_handle_t *camera_pivot_handle     = ui_handle(__ID__);
-		camera_pivot_handle->i               = context_raw->camera_pivot;
+		ui_handle_t *camera_pivot_handle   = ui_handle(__ID__);
+		camera_pivot_handle->i             = context_raw->camera_pivot;
 		string_array_t *pivot_center_items = any_array_create_from_raw(
 		    (void *[]){
 		        tr("Cursor"),
@@ -649,8 +666,8 @@ void ui_menubar_draw_category_items() {
 		ui_menu_align();
 		ui_menu_label(tr("Mode"), NULL);
 		ui_menu_align();
-		ui_handle_t *camera_controls_handle     = ui_handle(__ID__);
-		camera_controls_handle->i               = context_raw->camera_controls;
+		ui_handle_t *camera_controls_handle   = ui_handle(__ID__);
+		camera_controls_handle->i             = context_raw->camera_controls;
 		string_array_t *camera_controls_items = any_array_create_from_raw(
 		    (void *[]){
 		        tr("Orbit"),
@@ -757,7 +774,7 @@ void ui_menubar_draw_category_items() {
 	else if (ui_menubar_category == MENUBAR_CATEGORY_WORKSPACE) {
 		ui_handle_t *workspace_handle = ui_handle(__ID__);
 		workspace_handle->i           = config_raw->workspace;
-		string_array_t *modes       = any_array_create_from_raw(
+		string_array_t *modes         = any_array_create_from_raw(
             (void *[]){
                 tr("Paint 3D"),
                 tr("Paint 2D"),
@@ -785,8 +802,8 @@ void ui_menubar_draw_category_items() {
 		ui_menu_align();
 		ui_menu_label(tr("Workflow"), NULL);
 		ui_menu_align();
-		ui_handle_t *workflow_handle     = ui_handle(__ID__);
-		workflow_handle->i               = config_raw->workflow;
+		ui_handle_t *workflow_handle   = ui_handle(__ID__);
+		workflow_handle->i             = config_raw->workflow;
 		string_array_t *workflow_items = any_array_create_from_raw(
 		    (void *[]){
 		        tr("PBR"),

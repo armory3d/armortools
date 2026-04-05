@@ -1,6 +1,11 @@
 
 #include "global.h"
 
+ui_node_t_array_t      *parser_logic_nodes;
+ui_node_link_t_array_t *parser_logic_links;
+string_array_t         *parser_logic_parsed_nodes = NULL;
+any_map_t              *parser_logic_node_map;
+
 ui_node_t *parser_logic_get_node(i32 id) {
 	for (i32 i = 0; i < parser_logic_nodes->length; ++i) {
 		ui_node_t *n = parser_logic_nodes->buffer[i];

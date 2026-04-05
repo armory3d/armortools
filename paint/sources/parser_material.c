@@ -1,6 +1,11 @@
 
 #include "global.h"
 
+bool parser_material_cotangent_frame_written;
+bool parser_material_parse_surface       = true;
+bool parser_material_parse_opacity       = true;
+bool parser_material_arm_export_tangents = true;
+
 ui_node_t *parser_material_get_node(i32 id) {
 	for (i32 i = 0; i < parser_material_nodes->length; ++i) {
 		ui_node_t *n = parser_material_nodes->buffer[i];
@@ -423,7 +428,7 @@ char *parser_material_parse_vector(ui_node_t *node, ui_node_socket_t *socket) {
 		return parser_material_parse_group_input(node, socket);
 	}
 	else if (any_map_get(parser_material_custom_nodes, node->type) != NULL) {
-		void *cb = any_map_get(parser_material_custom_nodes, node->type);
+		void       *cb      = any_map_get(parser_material_custom_nodes, node->type);
 		minic_val_t args[2] = {minic_val_ptr(node), minic_val_ptr(socket->name)};
 		return minic_call_fn(cb, args, 2).p;
 	}
@@ -462,7 +467,7 @@ char *parser_material_parse_value(ui_node_t *node, ui_node_socket_t *socket) {
 		return parser_material_parse_group_input(node, socket);
 	}
 	else if (any_map_get(parser_material_custom_nodes, node->type) != NULL) {
-		void *cb = any_map_get(parser_material_custom_nodes, node->type);
+		void       *cb      = any_map_get(parser_material_custom_nodes, node->type);
 		minic_val_t args[2] = {minic_val_ptr(node), minic_val_ptr(socket->name)};
 		return minic_call_fn(cb, args, 2).p;
 	}
@@ -591,7 +596,7 @@ bind_tex_t *parser_material_make_bind_tex(char *tex_name, char *file) {
 }
 
 char *u8_array_string_at(u8_array_t *a, i32 i) {
-	char             *s  = u8_array_to_string(a);
+	char           *s  = u8_array_to_string(a);
 	string_array_t *ss = string_split(s, "\n");
 	return ss->buffer[i];
 }

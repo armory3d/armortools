@@ -1,6 +1,12 @@
 
 #include "global.h"
 
+f32            render_path_raytrace_bake_rays_timer      = 0.0;
+i32            render_path_raytrace_bake_rays_counter    = 0;
+gpu_texture_t *render_path_raytrace_bake_last_layer      = NULL;
+i32            render_path_raytrace_bake_last_bake_type  = 0;
+i32            render_path_raytrace_bake_last_bake_type2 = 0;
+
 void render_path_raytrace_bake_commands_parse_paint_material(void (*parse_paint_material)(bool)) {
 	parse_paint_material(true);
 }
