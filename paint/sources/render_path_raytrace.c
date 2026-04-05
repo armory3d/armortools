@@ -69,20 +69,20 @@ void render_path_raytrace_commands(bool use_live_layer) {
 // render_path_raytrace_frame = render_path_raytrace_frame + 1; // _RENDER
 #endif
 	render_path_raytrace_f32a->buffer[4]  = render_path_raytrace_help_mat.m00;
-	render_path_raytrace_f32a->buffer[5]  = render_path_raytrace_help_mat.m10;
-	render_path_raytrace_f32a->buffer[6]  = render_path_raytrace_help_mat.m20;
-	render_path_raytrace_f32a->buffer[7]  = render_path_raytrace_help_mat.m30;
-	render_path_raytrace_f32a->buffer[8]  = render_path_raytrace_help_mat.m01;
+	render_path_raytrace_f32a->buffer[5]  = render_path_raytrace_help_mat.m01;
+	render_path_raytrace_f32a->buffer[6]  = render_path_raytrace_help_mat.m02;
+	render_path_raytrace_f32a->buffer[7]  = render_path_raytrace_help_mat.m03;
+	render_path_raytrace_f32a->buffer[8]  = render_path_raytrace_help_mat.m10;
 	render_path_raytrace_f32a->buffer[9]  = render_path_raytrace_help_mat.m11;
-	render_path_raytrace_f32a->buffer[10] = render_path_raytrace_help_mat.m21;
-	render_path_raytrace_f32a->buffer[11] = render_path_raytrace_help_mat.m31;
-	render_path_raytrace_f32a->buffer[12] = render_path_raytrace_help_mat.m02;
-	render_path_raytrace_f32a->buffer[13] = render_path_raytrace_help_mat.m12;
+	render_path_raytrace_f32a->buffer[10] = render_path_raytrace_help_mat.m12;
+	render_path_raytrace_f32a->buffer[11] = render_path_raytrace_help_mat.m13;
+	render_path_raytrace_f32a->buffer[12] = render_path_raytrace_help_mat.m20;
+	render_path_raytrace_f32a->buffer[13] = render_path_raytrace_help_mat.m21;
 	render_path_raytrace_f32a->buffer[14] = render_path_raytrace_help_mat.m22;
-	render_path_raytrace_f32a->buffer[15] = render_path_raytrace_help_mat.m32;
-	render_path_raytrace_f32a->buffer[16] = render_path_raytrace_help_mat.m03;
-	render_path_raytrace_f32a->buffer[17] = render_path_raytrace_help_mat.m13;
-	render_path_raytrace_f32a->buffer[18] = render_path_raytrace_help_mat.m23;
+	render_path_raytrace_f32a->buffer[15] = render_path_raytrace_help_mat.m23;
+	render_path_raytrace_f32a->buffer[16] = render_path_raytrace_help_mat.m30;
+	render_path_raytrace_f32a->buffer[17] = render_path_raytrace_help_mat.m31;
+	render_path_raytrace_f32a->buffer[18] = render_path_raytrace_help_mat.m32;
 	render_path_raytrace_f32a->buffer[19] = render_path_raytrace_help_mat.m33;
 	render_path_raytrace_f32a->buffer[20] = scene_world->strength;
 	if (!g_context->show_envmap) {
