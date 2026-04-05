@@ -16,22 +16,22 @@ void render_path_raytrace_commands(bool use_live_layer) {
 			render_path_raytrace_init_shader = true;
 		}
 		char *ext = "";
-		if (context_raw->tool == TOOL_TYPE_GIZMO) {
+		if (g_context->tool == TOOL_TYPE_GIZMO) {
 			ext = "forge_";
 		}
-		char *mode = config_raw->pathtrace_mode == PATHTRACE_MODE_FAST ? "core" : "full";
+		char *mode = g_config->pathtrace_mode == PATHTRACE_MODE_FAST ? "core" : "full";
 		render_path_raytrace_raytrace_init(string("raytrace_brute_%s%s%s", ext, mode, render_path_raytrace_ext), true);
 		gc_unroot(render_path_raytrace_last_envmap);
 		render_path_raytrace_last_envmap = NULL;
 	}
 
-	if (!context_raw->envmap_loaded) {
+	if (!g_context->envmap_loaded) {
 		context_load_envmap();
 		context_update_envmap();
 	}
 
 	world_data_t  *probe        = scene_world;
-	gpu_texture_t *saved_envmap = context_raw->show_envmap_blur ? probe->_->radiance_mipmaps->buffer[0] : context_raw->saved_envmap;
+	gpu_texture_t *saved_envmap = g_context->show_envmap_blur ? probe->_->radiance_mipmaps->buffer[0] : g_context->saved_envmap;
 
 	////
 	if (render_path_raytrace_last_envmap != saved_envmap) {
@@ -48,7 +48,7 @@ void render_path_raytrace_commands(bool use_live_layer) {
 	}
 	////
 
-	if (context_raw->pdirty > 0 || render_path_raytrace_dirty > 0) {
+	if (g_context->pdirty > 0 || render_path_raytrace_dirty > 0) {
 		layers_flatten(true, NULL);
 	}
 
@@ -85,10 +85,10 @@ void render_path_raytrace_commands(bool use_live_layer) {
 	render_path_raytrace_f32a->buffer[18] = render_path_raytrace_help_mat.m32;
 	render_path_raytrace_f32a->buffer[19] = render_path_raytrace_help_mat.m33;
 	render_path_raytrace_f32a->buffer[20] = scene_world->strength;
-	if (!context_raw->show_envmap) {
+	if (!g_context->show_envmap) {
 		render_path_raytrace_f32a->buffer[20] = -render_path_raytrace_f32a->buffer[20];
 	}
-	render_path_raytrace_f32a->buffer[21] = context_raw->envmap_angle;
+	render_path_raytrace_f32a->buffer[21] = g_context->envmap_angle;
 	render_path_raytrace_f32a->buffer[22] = render_path_raytrace_uv_scale;
 
 	if (render_path_base_buf_swapped) {
@@ -98,32 +98,32 @@ void render_path_raytrace_commands(bool use_live_layer) {
 	render_target_t *framebuffer = any_map_get(render_path_render_targets, "buf");
 	_gpu_raytrace_dispatch_rays(framebuffer->_image, render_path_raytrace_f32a);
 
-	if (context_raw->ddirty == 1 || context_raw->pdirty == 1) {
+	if (g_context->ddirty == 1 || g_context->pdirty == 1) {
 #ifdef IRON_METAL
-		context_raw->rdirty = 128;
+		g_context->rdirty = 128;
 #else
-		context_raw->rdirty = 4;
+		g_context->rdirty = 4;
 #endif
 	}
-	context_raw->ddirty--;
-	context_raw->pdirty--;
-	context_raw->rdirty--;
+	g_context->ddirty--;
+	g_context->pdirty--;
+	g_context->rdirty--;
 
-	// context_raw->ddirty = 1; // _RENDER
+	// g_context->ddirty = 1; // _RENDER
 
-	if (context_raw->tool == TOOL_TYPE_GIZMO) {
-		context_raw->ddirty = 1;
+	if (g_context->tool == TOOL_TYPE_GIZMO) {
+		g_context->ddirty = 1;
 	}
 }
 
 void render_path_raytrace_build_data() {
-	if (context_raw->merged_object == NULL) {
+	if (g_context->merged_object == NULL) {
 		util_mesh_merge(NULL);
 	}
 
-	mesh_object_t *mo = !context_layer_filter_used() ? context_raw->merged_object : context_raw->paint_object;
+	mesh_object_t *mo = !context_layer_filter_used() ? g_context->merged_object : g_context->paint_object;
 
-	if (context_raw->tool == TOOL_TYPE_GIZMO) {
+	if (g_context->tool == TOOL_TYPE_GIZMO) {
 		render_path_raytrace_transform = mo->base->transform->world_unpack;
 	}
 	else {
@@ -162,7 +162,7 @@ void render_path_raytrace_raytrace_init(char *shader_name, bool build) {
 	{
 		_gpu_raytrace_as_init();
 
-		if (context_raw->tool == TOOL_TYPE_GIZMO) {
+		if (g_context->tool == TOOL_TYPE_GIZMO) {
 			for (i32 i = 0; i < project_paint_objects->length; ++i) {
 				mesh_object_t *po = project_paint_objects->buffer[i];
 				if (!po->base->visible) {
@@ -175,16 +175,16 @@ void render_path_raytrace_raytrace_init(char *shader_name, bool build) {
 			_gpu_raytrace_as_add(render_path_raytrace_vb, render_path_raytrace_ib, render_path_raytrace_transform);
 		}
 
-		gpu_buffer_t *vb_full = context_raw->merged_object->data->_->vertex_buffer;
-		gpu_buffer_t *ib_full = context_raw->merged_object->data->_->index_buffer;
+		gpu_buffer_t *vb_full = g_context->merged_object->data->_->vertex_buffer;
+		gpu_buffer_t *ib_full = g_context->merged_object->data->_->index_buffer;
 
 		_gpu_raytrace_as_build(vb_full, ib_full);
 	}
 }
 
 void render_path_raytrace_draw(bool use_live_layer) {
-	bool is_live = config_raw->brush_live && render_path_paint_live_layer_drawn > 0;
-	if (context_raw->ddirty > 1 || context_raw->pdirty > 0 || is_live) {
+	bool is_live = g_config->brush_live && render_path_paint_live_layer_drawn > 0;
+	if (g_context->ddirty > 1 || g_context->pdirty > 0 || is_live) {
 		render_path_raytrace_frame = 0;
 	}
 

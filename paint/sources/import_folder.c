@@ -74,10 +74,10 @@ void import_folder_run(char *path) {
 	}
 
 	// Create material
-	context_raw->material = slot_material_create(project_materials->buffer[0]->data, NULL);
-	any_array_push(project_materials, context_raw->material);
-	ui_nodes_t       *nodes  = context_raw->material->nodes;
-	ui_node_canvas_t *canvas = context_raw->material->canvas;
+	g_context->material = slot_material_create(project_materials->buffer[0]->data, NULL);
+	any_array_push(project_materials, g_context->material);
+	ui_nodes_t       *nodes  = g_context->material->nodes;
+	ui_node_canvas_t *canvas = g_context->material->canvas;
 	string_array_t *dirs   = string_split(path, PATH_SEP);
 	canvas->name             = string_copy(dirs->buffer[dirs->length - 1]);
 	ui_node_t *nout          = NULL;

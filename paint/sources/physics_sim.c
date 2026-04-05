@@ -102,7 +102,7 @@ void sim_remove_body(i32 uid) {
 
 void sim_duplicate() {
 	// Mesh
-	mesh_object_t *so  = context_raw->selected_object->ext;
+	mesh_object_t *so  = g_context->selected_object->ext;
 	mesh_object_t *dup = scene_add_mesh_object(so->data, so->material, so->base->parent);
 	transform_set_matrix(dup->base->transform, so->base->transform->local);
 	any_array_push(project_paint_objects, dup);
@@ -122,7 +122,7 @@ void sim_duplicate() {
 }
 
 void sim_delete() {
-	mesh_object_t *so = context_raw->selected_object->ext;
+	mesh_object_t *so = g_context->selected_object->ext;
 	array_remove(project_paint_objects, so);
 	mesh_object_remove(so);
 	sim_remove_body(so->base->uid);

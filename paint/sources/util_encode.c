@@ -130,7 +130,7 @@ i32 util_encode_layer_data_size(layer_data_t_array_t *datas) {
 	return size;
 }
 
-buffer_t *util_encode_project(project_format_t *raw) {
+buffer_t *util_encode_project(project_t *raw) {
 	i32 size = 32 * 1024 * 1024 + util_encode_layer_data_size(raw->layer_datas) + util_encode_mesh_data_size(raw->mesh_datas) +
 	           util_encode_packed_assets_size(raw->packed_assets) + util_encode_buffers_size(raw->brush_icons) + util_encode_buffers_size(raw->material_icons) +
 	           util_encode_buffers_size(raw->mesh_icons);

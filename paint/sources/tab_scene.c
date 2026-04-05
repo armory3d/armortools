@@ -8,15 +8,15 @@ void tab_scene_select_object(mesh_object_t *mo) {
 		return;
 	}
 
-	context_raw->selected_object = mo->base;
+	g_context->selected_object = mo->base;
 
 	if (!string_equals(mo->base->ext_type, "mesh_object_t")) {
 		return;
 	}
 
-	context_raw->paint_object = mo;
-	if (context_raw->merged_object != NULL) {
-		context_raw->merged_object->base->visible = false;
+	g_context->paint_object = mo;
+	if (g_context->merged_object != NULL) {
+		g_context->merged_object->base->visible = false;
 	}
 	context_select_paint_object(mo);
 }
@@ -34,7 +34,7 @@ void tab_scene_sort() {
 
 void tab_scene_import_mesh_done_on_next_frame(void *_) {
 	util_mesh_merge(NULL);
-	tab_scene_select_object(context_raw->selected_object->ext);
+	tab_scene_select_object(g_context->selected_object->ext);
 	tab_scene_sort();
 }
 
@@ -75,7 +75,7 @@ void tab_scene_draw_list(ui_handle_t *list_handle, object_t *current_object) {
 	}
 
 	// Highlight selected line
-	if (current_object == context_raw->selected_object) {
+	if (current_object == g_context->selected_object) {
 		draw_set_color(0xff205d9c);
 		draw_filled_rect(0, ui->_y, ui->_window_w, UI_ELEMENT_H());
 		draw_set_color(0xffffffff);
@@ -151,13 +151,13 @@ void tab_scene_draw(ui_handle_t *htab) {
 
 		// Select object with arrow keys
 		if (ui->is_key_pressed && ui->key_code == KEY_CODE_DOWN) {
-			i32 i = array_index_of(project_paint_objects, context_raw->selected_object->ext);
+			i32 i = array_index_of(project_paint_objects, g_context->selected_object->ext);
 			if (i < project_paint_objects->length - 1) {
 				tab_scene_select_object(project_paint_objects->buffer[i + 1]);
 			}
 		}
 		if (ui->is_key_pressed && ui->key_code == KEY_CODE_UP) {
-			i32 i = array_index_of(project_paint_objects, context_raw->selected_object->ext);
+			i32 i = array_index_of(project_paint_objects, g_context->selected_object->ext);
 			if (i > 1) {
 				tab_scene_select_object(project_paint_objects->buffer[i - 1]);
 			}

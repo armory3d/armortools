@@ -26,7 +26,7 @@ context_t *context_create() {
 	c->layers_destination      = EXPORT_DESTINATION_DISK;
 	c->split_by                = SPLIT_TYPE_OBJECT;
 	c->select_time             = 0.0;
-	c->viewport_mode           = config_raw->viewport_mode == 0 ? VIEWPORT_MODE_LIT : VIEWPORT_MODE_PATH_TRACE;
+	c->viewport_mode           = g_config->viewport_mode == 0 ? VIEWPORT_MODE_LIT : VIEWPORT_MODE_PATH_TRACE;
 	c->hscale_was_changed      = false;
 	c->export_mesh_format      = MESH_FORMAT_OBJ;
 	c->export_mesh_index       = 0;
@@ -170,19 +170,19 @@ context_t *context_create() {
 }
 
 void context_init() {
-	context_raw = context_create();
-	gc_root(context_raw);
-	context_raw->tool                       = TOOL_TYPE_BRUSH;
-	context_raw->color_picker_previous_tool = TOOL_TYPE_BRUSH;
-	context_raw->brush_radius               = 0.5;
-	context_raw->brush_radius_handle->f     = 0.5;
-	context_raw->brush_hardness             = 1.0;
+	g_context = context_create();
+	gc_root(g_context);
+	g_context->tool                       = TOOL_TYPE_BRUSH;
+	g_context->color_picker_previous_tool = TOOL_TYPE_BRUSH;
+	g_context->brush_radius               = 0.5;
+	g_context->brush_radius_handle->f     = 0.5;
+	g_context->brush_hardness             = 1.0;
 }
 
 bool context_use_deferred() {
-	return config_raw->render_mode != RENDER_MODE_FORWARD &&
-	       (context_raw->viewport_mode == VIEWPORT_MODE_LIT || context_raw->viewport_mode == VIEWPORT_MODE_PATH_TRACE) &&
-	       context_raw->tool != TOOL_TYPE_COLORID;
+	return g_config->render_mode != RENDER_MODE_FORWARD &&
+	       (g_context->viewport_mode == VIEWPORT_MODE_LIT || g_context->viewport_mode == VIEWPORT_MODE_PATH_TRACE) &&
+	       g_context->tool != TOOL_TYPE_COLORID;
 }
 
 void context_select_material(i32 i) {
@@ -200,7 +200,7 @@ void context_set_material(slot_material_t *m) {
 	if (array_index_of(project_materials, m) == -1) {
 		return;
 	}
-	context_raw->material = m;
+	g_context->material = m;
 	make_material_parse_paint_material(true);
 	ui_base_hwnds->buffer[TAB_AREA_SIDEBAR1]->redraws = 2;
 	ui_header_handle->redraws                         = 2;
@@ -226,7 +226,7 @@ void context_set_brush(slot_brush_t *b) {
 	if (array_index_of(project_brushes, b) == -1) {
 		return;
 	}
-	context_raw->brush = b;
+	g_context->brush = b;
 	make_material_parse_brush();
 	ui_base_hwnds->buffer[TAB_AREA_SIDEBAR1]->redraws = 2;
 	ui_nodes_hwnd->redraws                            = 2;
@@ -236,7 +236,7 @@ void context_set_font(slot_font_t *f) {
 	if (array_index_of(project_fonts, f) == -1) {
 		return;
 	}
-	context_raw->font = f;
+	g_context->font = f;
 	util_render_make_text_preview();
 	util_render_make_decal_preview();
 	ui_base_hwnds->buffer[TAB_AREA_STATUS]->redraws = 2;
@@ -258,10 +258,10 @@ void context_select_layer(i32 i) {
 }
 
 void context_set_layer(slot_layer_t *l) {
-	if (l == context_raw->layer) {
+	if (l == g_context->layer) {
 		return;
 	}
-	context_raw->layer        = l;
+	g_context->layer        = l;
 	ui_header_handle->redraws = 2;
 
 	gpu_texture_t *current = _draw_current;
@@ -281,12 +281,12 @@ void context_set_layer(slot_layer_t *l) {
 }
 
 void context_select_tool(i32 i) {
-	context_raw->tool = i;
+	g_context->tool = i;
 	make_material_parse_paint_material(true);
 	make_material_parse_mesh_material();
-	context_raw->ddirty            = 3;
-	viewport_mode_t _viewport_mode = context_raw->viewport_mode;
-	context_raw->viewport_mode     = VIEWPORT_MODE_MINUS_ONE;
+	g_context->ddirty            = 3;
+	viewport_mode_t _viewport_mode = g_context->viewport_mode;
+	g_context->viewport_mode     = VIEWPORT_MODE_MINUS_ONE;
 	context_set_viewport_mode(_viewport_mode);
 
 	context_init_tool();
@@ -297,21 +297,21 @@ void context_select_tool(i32 i) {
 void context_init_tool() {
 	bool decal = context_is_decal();
 	if (decal) {
-		if (context_raw->tool == TOOL_TYPE_TEXT) {
+		if (g_context->tool == TOOL_TYPE_TEXT) {
 			util_render_make_text_preview();
 		}
 		util_render_make_decal_preview();
 	}
-	else if (context_raw->tool == TOOL_TYPE_PARTICLE) {
+	else if (g_context->tool == TOOL_TYPE_PARTICLE) {
 		util_particle_init();
 	}
-	else if (context_raw->tool == TOOL_TYPE_BAKE) {
+	else if (g_context->tool == TOOL_TYPE_BAKE) {
 		// Bake in lit mode for now
-		if (context_raw->viewport_mode == VIEWPORT_MODE_PATH_TRACE) {
-			context_raw->viewport_mode = VIEWPORT_MODE_LIT;
+		if (g_context->viewport_mode == VIEWPORT_MODE_PATH_TRACE) {
+			g_context->viewport_mode = VIEWPORT_MODE_LIT;
 		}
 	}
-	else if (context_raw->tool == TOOL_TYPE_MATERIAL) {
+	else if (g_context->tool == TOOL_TYPE_MATERIAL) {
 		layers_update_fill_layers();
 		context_main_object()->skip_context = NULL;
 	}
@@ -325,18 +325,18 @@ void context_select_paint_object(mesh_object_t *o) {
 	}
 
 	// #ifdef is_forge
-	// context_raw->paint_object->skip_context = "";
+	// g_context->paint_object->skip_context = "";
 	// #endif
 
-	context_raw->paint_object = o;
+	g_context->paint_object = o;
 
-	i32 mask = slot_layer_get_object_mask(context_raw->layer);
+	i32 mask = slot_layer_get_object_mask(g_context->layer);
 	if (context_layer_filter_used()) {
-		mask = context_raw->layer_filter;
+		mask = g_context->layer_filter;
 	}
 
-	if (context_raw->merged_object == NULL || mask > 0) {
-		context_raw->paint_object->skip_context = "";
+	if (g_context->merged_object == NULL || mask > 0) {
+		g_context->paint_object->skip_context = "";
 	}
 	util_uv_uvmap_cached       = false;
 	util_uv_trianglemap_cached = false;
@@ -354,15 +354,15 @@ mesh_object_t *context_main_object() {
 }
 
 bool context_layer_filter_used() {
-	return context_raw->layer_filter > 0 && context_raw->layer_filter <= project_paint_objects->length;
+	return g_context->layer_filter > 0 && g_context->layer_filter <= project_paint_objects->length;
 }
 
 bool context_object_mask_used() {
-	return slot_layer_get_object_mask(context_raw->layer) > 0 && slot_layer_get_object_mask(context_raw->layer) <= project_paint_objects->length;
+	return slot_layer_get_object_mask(g_context->layer) > 0 && slot_layer_get_object_mask(g_context->layer) <= project_paint_objects->length;
 }
 
 bool context_in_3d_view() {
-	return context_raw->paint_vec.x < 1 && context_raw->paint_vec.x > 0 && context_raw->paint_vec.y < 1 && context_raw->paint_vec.y > 0;
+	return g_context->paint_vec.x < 1 && g_context->paint_vec.x > 0 && g_context->paint_vec.y < 1 && g_context->paint_vec.y > 0;
 }
 
 bool context_in_paint_area() {
@@ -399,7 +399,7 @@ bool context_in_browser() {
 }
 
 bool context_is_decal() {
-	return context_raw->tool == TOOL_TYPE_DECAL || context_raw->tool == TOOL_TYPE_TEXT;
+	return g_context->tool == TOOL_TYPE_DECAL || g_context->tool == TOOL_TYPE_TEXT;
 }
 
 bool context_is_decal_mask() {
@@ -413,15 +413,15 @@ bool context_is_decal_mask_paint() {
 
 bool context_is_floating_toolbar() {
 	// Header is off -> floating toolbar
-	return config_raw->layout->buffer[LAYOUT_SIZE_HEADER] == 0 || (!base_view3d_show && ui_view2d_show);
+	return g_config->layout->buffer[LAYOUT_SIZE_HEADER] == 0 || (!base_view3d_show && ui_view2d_show);
 }
 
 void context_set_viewport_mode(viewport_mode_t mode) {
-	if (mode == context_raw->viewport_mode) {
+	if (mode == g_context->viewport_mode) {
 		return;
 	}
 
-	context_raw->viewport_mode = mode;
+	g_context->viewport_mode = mode;
 	if (context_use_deferred()) {
 		gc_unroot(render_path_commands);
 		render_path_commands = render_path_deferred_commands;
@@ -435,40 +435,40 @@ void context_set_viewport_mode(viewport_mode_t mode) {
 	make_material_parse_mesh_material();
 
 	// Rotate mode is not supported for path tracing yet
-	if (context_raw->viewport_mode == VIEWPORT_MODE_PATH_TRACE && context_raw->camera_controls == CAMERA_CONTROLS_ROTATE) {
-		context_raw->camera_controls = CAMERA_CONTROLS_ORBIT;
+	if (g_context->viewport_mode == VIEWPORT_MODE_PATH_TRACE && g_context->camera_controls == CAMERA_CONTROLS_ROTATE) {
+		g_context->camera_controls = CAMERA_CONTROLS_ORBIT;
 		viewport_reset();
 	}
 
 	// Bake in lit mode for now
-	if (context_raw->viewport_mode == VIEWPORT_MODE_PATH_TRACE && context_raw->tool == TOOL_TYPE_BAKE) {
-		context_raw->viewport_mode = VIEWPORT_MODE_LIT;
+	if (g_context->viewport_mode == VIEWPORT_MODE_PATH_TRACE && g_context->tool == TOOL_TYPE_BAKE) {
+		g_context->viewport_mode = VIEWPORT_MODE_LIT;
 	}
 }
 
 void context_load_envmap() {
-	if (!context_raw->envmap_loaded) {
+	if (!g_context->envmap_loaded) {
 		// TODO: Unable to share texture for both radiance and envmap - reload image
-		context_raw->envmap_loaded = true;
+		g_context->envmap_loaded = true;
 		map_delete(data_cached_images, "World_radiance.k");
 	}
 	world_data_load_envmap(scene_world);
-	if (context_raw->saved_envmap == NULL) {
-		context_raw->saved_envmap = scene_world->_->envmap;
+	if (g_context->saved_envmap == NULL) {
+		g_context->saved_envmap = scene_world->_->envmap;
 	}
 }
 
 void context_update_envmap() {
-	if (context_raw->show_envmap) {
-		scene_world->_->envmap = context_raw->show_envmap_blur ? scene_world->_->radiance_mipmaps->buffer[0] : context_raw->saved_envmap;
+	if (g_context->show_envmap) {
+		scene_world->_->envmap = g_context->show_envmap_blur ? scene_world->_->radiance_mipmaps->buffer[0] : g_context->saved_envmap;
 	}
 	else {
-		scene_world->_->envmap = context_raw->empty_envmap;
+		scene_world->_->envmap = g_context->empty_envmap;
 	}
 }
 
 void context_set_viewport_shader(void *viewport_shader) {
-	context_raw->viewport_shader = viewport_shader;
+	g_context->viewport_shader = viewport_shader;
 	context_set_render_path();
 }
 
@@ -477,7 +477,7 @@ void context_set_render_path_on_next_frame(void *_) {
 }
 
 void context_set_render_path() {
-	if (config_raw->render_mode == RENDER_MODE_FORWARD || context_raw->viewport_shader != NULL) {
+	if (g_config->render_mode == RENDER_MODE_FORWARD || g_context->viewport_shader != NULL) {
 		gc_unroot(render_path_commands);
 		render_path_commands = render_path_forward_commands;
 		gc_root(render_path_commands);
@@ -508,5 +508,5 @@ bool context_enable_import_plugin(char *file) {
 }
 
 void context_set_swatch(swatch_color_t *s) {
-	context_raw->swatch = s;
+	g_context->swatch = s;
 }

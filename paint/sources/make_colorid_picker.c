@@ -30,14 +30,14 @@ void make_colorid_picker_run(node_shader_t *kong) {
 	    "var tex_coord_inp4: float4 = gbuffer2[uint2(uint(constants.inp.x * constants.gbuffer_size.x), uint(constants.inp.y * constants.gbuffer_size.y))];");
 	node_shader_write_frag(kong, "var tex_coord_inp: float2 = tex_coord_inp4.ba;");
 
-	if (context_raw->tool == TOOL_TYPE_COLORID) {
+	if (g_context->tool == TOOL_TYPE_COLORID) {
 		kong->frag_out = "float4";
 		node_shader_add_texture(kong, "texcolorid", "_texcolorid");
 		node_shader_write_frag(kong, "var idcol: float3 = sample_lod(texcolorid, sampler_linear, tex_coord_inp, 0.0).rgb;");
 		node_shader_write_frag(kong, "output = float4(idcol, 1.0);");
 	}
-	else if (context_raw->tool == TOOL_TYPE_PICKER || context_raw->tool == TOOL_TYPE_MATERIAL) {
-		if (context_raw->pick_pos_nor_tex) {
+	else if (g_context->tool == TOOL_TYPE_PICKER || g_context->tool == TOOL_TYPE_MATERIAL) {
+		if (g_context->pick_pos_nor_tex) {
 			kong->frag_out = "float4[2]";
 			node_shader_add_texture(kong, "gbufferD", NULL);
 			node_shader_add_constant(kong, "invVP: float4x4", "_inv_view_proj_matrix");

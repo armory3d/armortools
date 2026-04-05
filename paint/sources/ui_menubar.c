@@ -29,7 +29,7 @@ i32 ui_menu_panel_x() {
 	}
 
 	i32 panel_x = base_x();
-	if (config_raw->layout->buffer[LAYOUT_SIZE_HEADER] == 1) {
+	if (g_config->layout->buffer[LAYOUT_SIZE_HEADER] == 1) {
 		i32 item_w = ui_toolbar_w(false);
 		panel_x    = base_x() - item_w;
 	}
@@ -46,7 +46,7 @@ i32 ui_menu_top_y() {
 	}
 #endif
 
-	if (config_raw->touch_ui) {
+	if (g_config->touch_ui) {
 		return 0;
 	}
 
@@ -61,7 +61,7 @@ i32 ui_menu_panel_y() {
 #endif
 
 	i32 panel_y = 0;
-	if (config_raw->layout->buffer[LAYOUT_SIZE_HEADER] == 0) { // Floating
+	if (g_config->layout->buffer[LAYOUT_SIZE_HEADER] == 0) { // Floating
 		panel_y += 5 * UI_SCALE();
 	}
 	return panel_y;
@@ -78,8 +78,8 @@ void ui_menubar_render_ui_save_project(void *_) {
 
 void ui_menubar_draw_tab_header() {
 	i32 item_w  = ui_toolbar_w(false);
-	i32 nodesw  = (ui_nodes_show || ui_view2d_show) ? config_raw->layout->buffer[LAYOUT_SIZE_NODES_W] : 0;
-	i32 ww      = iron_window_width() - config_raw->layout->buffer[LAYOUT_SIZE_SIDEBAR_W] - ui_menubar_w - nodesw;
+	i32 nodesw  = (ui_nodes_show || ui_view2d_show) ? g_config->layout->buffer[LAYOUT_SIZE_NODES_W] : 0;
+	i32 ww      = iron_window_width() - g_config->layout->buffer[LAYOUT_SIZE_SIDEBAR_W] - ui_menubar_w - nodesw;
 	i32 panel_x = (base_x() - item_w) + ui_menubar_w;
 
 	if (!base_view3d_show) {
@@ -92,7 +92,7 @@ void ui_menubar_draw_tab_header() {
 	}
 
 	if (ui_window(ui_menubar_hwnd, panel_x, 0, ww, ui_header_h, false)) {
-		if (config_raw->touch_ui) {
+		if (g_config->touch_ui) {
 			ui_fill(0, 0, ui->_window_w, ui->_window_h + 4, ui->ops->theme->SEPARATOR_COL);
 		}
 		else {
@@ -266,8 +266,8 @@ void ui_menubar_draw_category_items() {
 
 		ui->changed                      = false;
 		ui_handle_t *h_pack_assets       = ui_handle(__ID__);
-		h_pack_assets->b                 = context_raw->pack_assets_on_save;
-		context_raw->pack_assets_on_save = ui_check(h_pack_assets, tr("Pack Assets"), "");
+		h_pack_assets->b                 = g_context->pack_assets_on_save;
+		g_context->pack_assets_on_save = ui_check(h_pack_assets, tr("Pack Assets"), "");
 		if (ui->changed) {
 			ui_menu_keep_open = true;
 		}
@@ -306,19 +306,19 @@ void ui_menubar_draw_category_items() {
 		}
 		ui_menu_separator();
 		if (ui_menu_sub_button(ui_handle(__ID__), tr("Export"))) {
-			ui_menu_sub_begin(config_raw->experimental ? 4 : 3);
+			ui_menu_sub_begin(g_config->experimental ? 4 : 3);
 			if (ui_menu_button(tr("Textures..."), any_map_get(config_keymap, "file_export_textures_as"), ICON_IMAGE)) {
-				context_raw->layers_export = EXPORT_MODE_VISIBLE;
+				g_context->layers_export = EXPORT_MODE_VISIBLE;
 				box_export_show_textures();
 			}
 			if (ui_menu_button(tr("Swatches..."), "", ICON_PALETTE)) {
 				project_export_swatches();
 			}
 			if (ui_menu_button(tr("Mesh..."), "", ICON_CUBE)) {
-				context_raw->export_mesh_index = 0; // All
+				g_context->export_mesh_index = 0; // All
 				box_export_show_mesh();
 			}
-			if (config_raw->experimental && ui_menu_button(tr("Player..."), "", ICON_PLAY)) {
+			if (g_config->experimental && ui_menu_button(tr("Player..."), "", ICON_PLAY)) {
 				box_export_show_player();
 			}
 			ui_menu_sub_end();
@@ -380,11 +380,11 @@ void ui_menubar_draw_category_items() {
 		ui_menu_align();
 		p->strength = ui_slider(env_handle, tr("Environment"), 0.0, 6.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
 		if (env_handle->changed) {
-			context_raw->ddirty = 2;
+			g_context->ddirty = 2;
 		}
 
 		ui_handle_t *enva_handle = ui_handle(__ID__);
-		enva_handle->f           = context_raw->envmap_angle / (float)math_pi() * 180.0;
+		enva_handle->f           = g_context->envmap_angle / (float)math_pi() * 180.0;
 		if (enva_handle->f < 0) {
 			enva_handle->f += (math_floor(-enva_handle->f / 360.0) + 1) * 360;
 		}
@@ -392,45 +392,45 @@ void ui_menubar_draw_category_items() {
 			enva_handle->f -= math_floor(enva_handle->f / 360.0) * 360;
 		}
 		ui_menu_align();
-		context_raw->envmap_angle = ui_slider(enva_handle, tr("Environment Angle"), 0.0, 360.0, true, 1, true, UI_ALIGN_RIGHT, true) / 180.0 * math_pi();
+		g_context->envmap_angle = ui_slider(enva_handle, tr("Environment Angle"), 0.0, 360.0, true, 1, true, UI_ALIGN_RIGHT, true) / 180.0 * math_pi();
 		if (ui->is_hovered) {
 			any_map_t *vars = any_map_create();
 			any_map_set(vars, "shortcut", any_map_get(config_keymap, "rotate_envmap"));
 			ui_tooltip(vtr("{shortcut} and move mouse", vars));
 		}
 		if (enva_handle->changed) {
-			context_raw->ddirty = 2;
+			g_context->ddirty = 2;
 		}
 
 		ui_handle_t *split_view_handle = ui_handle(__ID__);
 		if (split_view_handle->init) {
-			split_view_handle->b = context_raw->split_view;
+			split_view_handle->b = g_context->split_view;
 		}
-		context_raw->split_view = ui_check(split_view_handle, string(" %s", tr("Split View")), "");
+		g_context->split_view = ui_check(split_view_handle, string(" %s", tr("Split View")), "");
 		if (split_view_handle->changed) {
 			base_resize();
 		}
 
 		ui_handle_t *cull_handle = ui_handle(__ID__);
 		if (cull_handle->init) {
-			cull_handle->b = context_raw->cull_backfaces;
+			cull_handle->b = g_context->cull_backfaces;
 		}
-		context_raw->cull_backfaces = ui_check(cull_handle, string(" %s", tr("Cull Backfaces")), "");
+		g_context->cull_backfaces = ui_check(cull_handle, string(" %s", tr("Cull Backfaces")), "");
 		if (cull_handle->changed) {
 			make_material_parse_mesh_material();
 		}
 
 		ui_handle_t *filter_handle = ui_handle(__ID__);
 		if (filter_handle->init) {
-			filter_handle->b = context_raw->texture_filter;
+			filter_handle->b = g_context->texture_filter;
 		}
-		context_raw->texture_filter = ui_check(filter_handle, string(" %s", tr("Filter Textures")), "");
+		g_context->texture_filter = ui_check(filter_handle, string(" %s", tr("Filter Textures")), "");
 		if (filter_handle->changed) {
-			gpu_use_linear_sampling(context_raw->texture_filter);
+			gpu_use_linear_sampling(g_context->texture_filter);
 		}
 
-		context_raw->draw_wireframe = ui_check(context_raw->wireframe_handle, string(" %s", tr("Wireframe")), "");
-		if (context_raw->wireframe_handle->changed) {
+		g_context->draw_wireframe = ui_check(g_context->wireframe_handle, string(" %s", tr("Wireframe")), "");
+		if (g_context->wireframe_handle->changed) {
 			gpu_texture_t *current = _draw_current;
 			draw_end();
 			util_uv_cache_uv_map();
@@ -438,31 +438,31 @@ void ui_menubar_draw_category_items() {
 			make_material_parse_mesh_material();
 		}
 
-		context_raw->draw_texels = ui_check(context_raw->texels_handle, string(" %s", tr("Texels")), "");
-		if (context_raw->texels_handle->changed) {
+		g_context->draw_texels = ui_check(g_context->texels_handle, string(" %s", tr("Texels")), "");
+		if (g_context->texels_handle->changed) {
 			make_material_parse_mesh_material();
 		}
 
 		ui_handle_t *compass_handle = ui_handle(__ID__);
 		if (compass_handle->init) {
-			compass_handle->b = context_raw->show_compass;
+			compass_handle->b = g_context->show_compass;
 		}
-		context_raw->show_compass = ui_check(compass_handle, string(" %s", tr("Compass")), "");
+		g_context->show_compass = ui_check(compass_handle, string(" %s", tr("Compass")), "");
 		if (compass_handle->changed) {
-			context_raw->ddirty = 2;
+			g_context->ddirty = 2;
 		}
 
-		context_raw->show_envmap_handle->b = context_raw->show_envmap;
-		context_raw->show_envmap           = ui_check(context_raw->show_envmap_handle, string(" %s", tr("Envmap")), "");
-		if (context_raw->show_envmap_handle->changed) {
+		g_context->show_envmap_handle->b = g_context->show_envmap;
+		g_context->show_envmap           = ui_check(g_context->show_envmap_handle, string(" %s", tr("Envmap")), "");
+		if (g_context->show_envmap_handle->changed) {
 			context_load_envmap();
-			context_raw->ddirty = 2;
+			g_context->ddirty = 2;
 		}
 
-		context_raw->show_envmap_blur_handle->b = context_raw->show_envmap_blur;
-		context_raw->show_envmap_blur           = ui_check(context_raw->show_envmap_blur_handle, string(" %s", tr("Blur Envmap")), "");
-		if (context_raw->show_envmap_blur_handle->changed) {
-			context_raw->ddirty = 2;
+		g_context->show_envmap_blur_handle->b = g_context->show_envmap_blur;
+		g_context->show_envmap_blur           = ui_check(g_context->show_envmap_blur_handle, string(" %s", tr("Blur Envmap")), "");
+		if (g_context->show_envmap_blur_handle->changed) {
+			g_context->ddirty = 2;
 		}
 
 		if (ui_menu_button(tr("Reset Envmap"), "", ICON_NONE)) {
@@ -474,16 +474,16 @@ void ui_menubar_draw_category_items() {
 			ui->changed = false; // Close menu
 		}
 
-		if (config_raw->experimental && !viewport_recording && ui_menu_button(tr("Capture Video"), "", ICON_MOVIE)) {
+		if (g_config->experimental && !viewport_recording && ui_menu_button(tr("Capture Video"), "", ICON_MOVIE)) {
 			viewport_capture_video_begin();
 			ui->changed = false; // Close menu
 		}
-		if (config_raw->experimental && viewport_recording && ui_menu_button(tr("Stop Capture"), "", ICON_STOP)) {
+		if (g_config->experimental && viewport_recording && ui_menu_button(tr("Stop Capture"), "", ICON_STOP)) {
 			viewport_capture_video_end();
 			ui->changed = false; // Close menu
 		}
 
-		if (config_raw->experimental && ui_menu_button(tr("Run in Player"), "f5", ICON_PLAY)) {
+		if (g_config->experimental && ui_menu_button(tr("Run in Player"), "f5", ICON_PLAY)) {
 			base_run_in_player();
 			ui->changed = false; // Close menu
 		}
@@ -496,7 +496,7 @@ void ui_menubar_draw_category_items() {
 	}
 	else if (ui_menubar_category == MENUBAR_CATEGORY_MODE) {
 		ui_handle_t *mode_handle = ui_handle(__ID__);
-		mode_handle->i           = context_raw->viewport_mode;
+		mode_handle->i           = g_context->viewport_mode;
 		string_array_t *modes    = any_array_create_from_raw(
             (void *[]){
                 tr("Lit"),
@@ -541,7 +541,7 @@ void ui_menubar_draw_category_items() {
 			any_array_push(shortcuts, "p");
 		}
 
-		if (config_raw->workflow == WORKFLOW_BASE) {
+		if (g_config->workflow == WORKFLOW_BASE) {
 			array_splice(modes, 9, 1);
 			array_splice(modes, 8, 1);
 			array_splice(modes, 7, 1);
@@ -560,7 +560,7 @@ void ui_menubar_draw_category_items() {
 		}
 
 		for (i32 i = 0; i < modes->length; ++i) {
-			char *shortcut = config_raw->touch_ui ? "" : string("%s, %s", any_map_get(config_keymap, "viewport_mode"), shortcuts->buffer[i]);
+			char *shortcut = g_config->touch_ui ? "" : string("%s, %s", any_map_get(config_keymap, "viewport_mode"), shortcuts->buffer[i]);
 			ui_radio(mode_handle, i, modes->buffer[i], shortcut);
 		}
 
@@ -641,11 +641,11 @@ void ui_menubar_draw_category_items() {
 		}
 
 		camera_object_t *cam       = scene_camera;
-		context_raw->fov_handle->f = math_floor(cam->data->fov * 100) / 100.0;
+		g_context->fov_handle->f = math_floor(cam->data->fov * 100) / 100.0;
 		ui_menu_align();
-		cam->data->fov = ui_slider(context_raw->fov_handle, tr("FoV"), 0.3, 1.4, true, 100.0, true, UI_ALIGN_RIGHT, true);
-		if (context_raw->fov_handle->changed) {
-			viewport_update_camera_type(context_raw->camera_type);
+		cam->data->fov = ui_slider(g_context->fov_handle, tr("FoV"), 0.3, 1.4, true, 100.0, true, UI_ALIGN_RIGHT, true);
+		if (g_context->fov_handle->changed) {
+			viewport_update_camera_type(g_context->camera_type);
 		}
 
 		ui_menu_separator();
@@ -653,21 +653,21 @@ void ui_menubar_draw_category_items() {
 		ui_menu_label(tr("Pivot"), any_map_get(config_keymap, "view_pivot_center"));
 		ui_menu_align();
 		ui_handle_t *camera_pivot_handle   = ui_handle(__ID__);
-		camera_pivot_handle->i             = context_raw->camera_pivot;
+		camera_pivot_handle->i             = g_context->camera_pivot;
 		string_array_t *pivot_center_items = any_array_create_from_raw(
 		    (void *[]){
 		        tr("Cursor"),
 		        tr("Center"),
 		    },
 		    2);
-		context_raw->camera_pivot = ui_inline_radio(camera_pivot_handle, pivot_center_items, UI_ALIGN_LEFT);
+		g_context->camera_pivot = ui_inline_radio(camera_pivot_handle, pivot_center_items, UI_ALIGN_LEFT);
 
 		ui_menu_separator();
 		ui_menu_align();
 		ui_menu_label(tr("Mode"), NULL);
 		ui_menu_align();
 		ui_handle_t *camera_controls_handle   = ui_handle(__ID__);
-		camera_controls_handle->i             = context_raw->camera_controls;
+		camera_controls_handle->i             = g_context->camera_controls;
 		string_array_t *camera_controls_items = any_array_create_from_raw(
 		    (void *[]){
 		        tr("Orbit"),
@@ -675,7 +675,7 @@ void ui_menubar_draw_category_items() {
 		        tr("Fly"),
 		    },
 		    3);
-		context_raw->camera_controls = ui_inline_radio(camera_controls_handle, camera_controls_items, UI_ALIGN_LEFT);
+		g_context->camera_controls = ui_inline_radio(camera_controls_handle, camera_controls_items, UI_ALIGN_LEFT);
 
 		any_map_t *vars = any_map_create();
 		any_map_set(vars, "rotate_shortcut", any_map_get(config_keymap, "action_rotate"));
@@ -701,9 +701,9 @@ void ui_menubar_draw_category_items() {
 		        tr("Orthographic"),
 		    },
 		    2);
-		context_raw->camera_type = ui_inline_radio(context_raw->cam_handle, camera_type_items, UI_ALIGN_LEFT);
-		if (context_raw->cam_handle->changed) {
-			viewport_update_camera_type(context_raw->camera_type);
+		g_context->camera_type = ui_inline_radio(g_context->cam_handle, camera_type_items, UI_ALIGN_LEFT);
+		if (g_context->cam_handle->changed) {
+			viewport_update_camera_type(g_context->camera_type);
 		}
 
 		if (ui->changed) {
@@ -773,7 +773,7 @@ void ui_menubar_draw_category_items() {
 	}
 	else if (ui_menubar_category == MENUBAR_CATEGORY_WORKSPACE) {
 		ui_handle_t *workspace_handle = ui_handle(__ID__);
-		workspace_handle->i           = config_raw->workspace;
+		workspace_handle->i           = g_config->workspace;
 		string_array_t *modes         = any_array_create_from_raw(
             (void *[]){
                 tr("Paint 3D"),
@@ -783,7 +783,7 @@ void ui_menubar_draw_category_items() {
             },
             4);
 
-		if (config_raw->experimental) {
+		if (g_config->experimental) {
 			any_array_push(modes, tr("Sculpt"));
 			any_array_push(modes, tr("Player"));
 		}
@@ -793,7 +793,7 @@ void ui_menubar_draw_category_items() {
 		}
 
 		if (workspace_handle->changed) {
-			config_raw->workspace = workspace_handle->i;
+			g_config->workspace = workspace_handle->i;
 			config_save();
 			base_update_workspace();
 		}
@@ -803,16 +803,16 @@ void ui_menubar_draw_category_items() {
 		ui_menu_label(tr("Workflow"), NULL);
 		ui_menu_align();
 		ui_handle_t *workflow_handle   = ui_handle(__ID__);
-		workflow_handle->i             = config_raw->workflow;
+		workflow_handle->i             = g_config->workflow;
 		string_array_t *workflow_items = any_array_create_from_raw(
 		    (void *[]){
 		        tr("PBR"),
 		        tr("Base"),
 		    },
 		    2);
-		config_raw->workflow = ui_inline_radio(workflow_handle, workflow_items, UI_ALIGN_LEFT);
+		g_config->workflow = ui_inline_radio(workflow_handle, workflow_items, UI_ALIGN_LEFT);
 		if (workflow_handle->changed) {
-			config_raw->workflow = workflow_handle->i;
+			g_config->workflow = workflow_handle->i;
 			config_save();
 			base_update_workflow();
 		}
@@ -835,7 +835,7 @@ void ui_menubar_show_menu(i32 category) {
 	i32 panel_y = ui_menu_panel_y();
 	ui_menu_x   = math_floor(ui->_x - ui->_w) + panel_x;
 	ui_menu_y   = math_floor(ui_MENUBAR_H(ui)) + panel_y + 2;
-	if (config_raw->touch_ui) {
+	if (g_config->touch_ui) {
 		i32 menu_w = math_floor(base_default_element_w * UI_SCALE() * 2.0);
 		ui_menu_x -= math_floor((menu_w - ui->_w) / 2.0) + math_floor(ui_header_h / 2.0);
 		ui_menu_x += math_floor(2 * UI_SCALE());
@@ -845,7 +845,7 @@ void ui_menubar_show_menu(i32 category) {
 }
 
 void ui_menubar_render_ui() {
-	if (config_raw->touch_ui && !base_view3d_show) {
+	if (g_config->touch_ui && !base_view3d_show) {
 		return;
 	}
 
@@ -861,7 +861,7 @@ void ui_menubar_render_ui() {
 
 		ui_begin_menu();
 
-		if (config_raw->touch_ui) {
+		if (g_config->touch_ui) {
 			ui->_w = item_w;
 
 			if (ui_menubar_icon_button(ICON_MENU)) {
@@ -952,16 +952,16 @@ void ui_menubar_render_ui() {
 			ui_toolbar_handle->redraws = 2;
 		}
 		// Crop menubar if sidebar + nodes are overlapping
-		i32 nodesw = (ui_nodes_show || ui_view2d_show) ? config_raw->layout->buffer[LAYOUT_SIZE_NODES_W] : 0;
-		if (ui_menubar_w > iron_window_width() - config_raw->layout->buffer[LAYOUT_SIZE_SIDEBAR_W] - nodesw) {
-			ui_menubar_w               = iron_window_width() - config_raw->layout->buffer[LAYOUT_SIZE_SIDEBAR_W] - nodesw;
+		i32 nodesw = (ui_nodes_show || ui_view2d_show) ? g_config->layout->buffer[LAYOUT_SIZE_NODES_W] : 0;
+		if (ui_menubar_w > iron_window_width() - g_config->layout->buffer[LAYOUT_SIZE_SIDEBAR_W] - nodesw) {
+			ui_menubar_w               = iron_window_width() - g_config->layout->buffer[LAYOUT_SIZE_SIDEBAR_W] - nodesw;
 			ui_toolbar_handle->redraws = 2;
 		}
 
 		ui_end_menu();
 	}
 
-	if (config_raw->layout->buffer[LAYOUT_SIZE_HEADER] == 1) {
+	if (g_config->layout->buffer[LAYOUT_SIZE_HEADER] == 1) {
 		// Non-floating header
 		ui_menubar_draw_tab_header();
 	}

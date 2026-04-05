@@ -52,7 +52,7 @@ void ui_box_render() {
 		}
 	}
 
-	if (config_raw->touch_ui) { // Darken bg
+	if (g_config->touch_ui) { // Darken bg
 		draw_begin(NULL, false, 0);
 #if defined(IRON_ANDROID) || defined(IRON_IOS)
 		draw_set_color(color_from_floats(0, 0, 0, ui_box_tween_alpha));

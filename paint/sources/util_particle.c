@@ -2,7 +2,7 @@
 #include "global.h"
 
 void util_particle_init() {
-	if (context_raw->particle_material != NULL) {
+	if (g_context->particle_material != NULL) {
 		return;
 	}
 
@@ -27,7 +27,7 @@ void util_particle_init() {
 	}
 
 	material_data_t *md            = data_get_material("Scene", "MaterialParticle");
-	context_raw->particle_material = md;
+	g_context->particle_material = md;
 
 	for (i32 i = 0; i < _scene_raw->objects->length; ++i) {
 		obj_t *obj = _scene_raw->objects->buffer[i];
@@ -50,21 +50,21 @@ void util_particle_init() {
 }
 
 void util_particle_init_mesh() {
-	if (context_raw->paint_body != NULL) {
+	if (g_context->paint_body != NULL) {
 		return;
 	}
 
-	if (context_raw->merged_object == NULL) {
+	if (g_context->merged_object == NULL) {
 		util_mesh_merge(NULL);
 	}
 
-	mesh_object_t *po              = context_raw->merged_object;
+	mesh_object_t *po              = g_context->merged_object;
 	po->base->transform->scale.x   = po->base->parent->transform->scale.x;
 	po->base->transform->scale.y   = po->base->parent->transform->scale.y;
 	po->base->transform->scale.z   = po->base->parent->transform->scale.z;
-	context_raw->paint_body        = physics_body_create();
-	context_raw->paint_body->shape = PHYSICS_SHAPE_MESH;
-	physics_body_init(context_raw->paint_body, po->base);
+	g_context->paint_body        = physics_body_create();
+	g_context->paint_body->shape = PHYSICS_SHAPE_MESH;
+	physics_body_init(g_context->paint_body, po->base);
 }
 
 void util_particle_init_physics() {

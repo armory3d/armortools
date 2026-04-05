@@ -38,15 +38,15 @@ node_shader_context_t *make_node_preview_run(material_t *data, material_context_
 	gc_unroot(parser_material_canvases);
 	parser_material_canvases = any_array_create_from_raw(
 	    (void *[]){
-	        context_raw->material->canvas,
+	        g_context->material->canvas,
 	    },
 	    1);
 	gc_root(parser_material_canvases);
 	gc_unroot(parser_material_nodes);
-	parser_material_nodes = context_raw->material->canvas->nodes;
+	parser_material_nodes = g_context->material->canvas->nodes;
 	gc_root(parser_material_nodes);
 	gc_unroot(parser_material_links);
-	parser_material_links = context_raw->material->canvas->links;
+	parser_material_links = g_context->material->canvas->links;
 	gc_root(parser_material_links);
 	if (group != NULL) {
 		parser_material_push_group(group);
@@ -55,7 +55,7 @@ node_shader_context_t *make_node_preview_run(material_t *data, material_context_
 		gc_root(parser_material_parents);
 	}
 	ui_node_link_t_array_t *links          = parser_material_links;
-	i32                     socket_preview = i32_imap_get(context_raw->node_preview_socket_map, node->id);
+	i32                     socket_preview = i32_imap_get(g_context->node_preview_socket_map, node->id);
 	ui_node_link_t         *link           = GC_ALLOC_INIT(
         ui_node_link_t,
         {.id = ui_next_link_id(links), .from_id = node->id, .from_socket = socket_preview == -1 ? 0 : socket_preview, .to_id = -1, .to_socket = -1});

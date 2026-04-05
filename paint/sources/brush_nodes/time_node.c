@@ -11,7 +11,7 @@ logic_node_value_t *time_node_get(time_node_t *self, i32 from) {
 		return v;
 	}
 	else {
-		logic_node_value_t *v = GC_ALLOC_INIT(logic_node_value_t, {._f32 = context_raw->brush_time});
+		logic_node_value_t *v = GC_ALLOC_INIT(logic_node_value_t, {._f32 = g_context->brush_time});
 		return v;
 	}
 }

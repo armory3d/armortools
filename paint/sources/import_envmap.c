@@ -144,11 +144,11 @@ void import_envmap_run(char *path, gpu_texture_t *image) {
 	scene_world->envmap              = string_copy(path);
 	scene_world->_->radiance         = import_envmap_radiance;
 	scene_world->_->radiance_mipmaps = import_envmap_mips;
-	context_raw->saved_envmap        = image;
-	context_raw->show_envmap         = true;
-	if (context_raw->show_envmap_blur) {
+	g_context->saved_envmap        = image;
+	g_context->show_envmap         = true;
+	if (g_context->show_envmap_blur) {
 		scene_world->_->envmap = scene_world->_->radiance_mipmaps->buffer[0];
 	}
-	context_raw->ddirty = 2;
-	project_raw->envmap = string_copy(path);
+	g_context->ddirty = 2;
+	g_project->envmap = string_copy(path);
 }

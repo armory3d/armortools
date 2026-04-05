@@ -669,20 +669,20 @@ void ui_files_show2(char *filters, bool is_save, bool open_multiple, void *files
 }
 void                     project_save(bool save_and_quit);
 extern char             *project_filepath;
-extern context_t        *context_raw;
-extern config_t         *config_raw;
-extern project_format_t *project_raw;
+extern context_t        *g_context;
+extern config_t         *g_config;
+extern project_t *g_project;
 char                    *project_filepath_get() {
     return project_filepath;
 }
 context_t *script_get_context() {
-	return context_raw;
+	return g_context;
 }
 config_t *script_get_config() {
-	return config_raw;
+	return g_config;
 }
-project_format_t *script_get_project() {
-	return project_raw;
+project_t *script_get_project() {
+	return g_project;
 }
 void           context_set_viewport_shader(void *viewport_shader);
 void           node_shader_write_frag(void *raw, char *s);
@@ -1314,30 +1314,30 @@ void minic_register_builtins() {
 	minic_struct_set_size("context_t", (int)sizeof(context_t));
 	minic_struct_field_set_type("context_t", "paint_object", "mesh_object_t");
 
-	// project_format_t (16 of 25 fields; packed_assets, icons, mesh_assets, atlas, envmap_blur omitted)
+	// project_t (16 of 25 fields; packed_assets, icons, mesh_assets, atlas, envmap_blur omitted)
 	static const char *pf_fields[]  = {"version",     "assets",       "is_bgra",       "envmap",      "envmap_strength", "envmap_angle",
 	                                   "camera_fov",  "camera_world", "camera_origin", "swatches",    "brush_nodes",     "material_nodes",
 	                                   "font_assets", "layer_datas",  "mesh_datas",    "script_datas"};
 	static const int   pf_offsets[] = {
-        (int)offsetof(project_format_t, version),      (int)offsetof(project_format_t, assets),          (int)offsetof(project_format_t, is_bgra),
-        (int)offsetof(project_format_t, envmap),       (int)offsetof(project_format_t, envmap_strength), (int)offsetof(project_format_t, envmap_angle),
-        (int)offsetof(project_format_t, camera_fov),   (int)offsetof(project_format_t, camera_world),    (int)offsetof(project_format_t, camera_origin),
-        (int)offsetof(project_format_t, swatches),     (int)offsetof(project_format_t, brush_nodes),     (int)offsetof(project_format_t, material_nodes),
-        (int)offsetof(project_format_t, font_assets),  (int)offsetof(project_format_t, layer_datas),     (int)offsetof(project_format_t, mesh_datas),
-        (int)offsetof(project_format_t, script_datas),
+        (int)offsetof(project_t, version),      (int)offsetof(project_t, assets),          (int)offsetof(project_t, is_bgra),
+        (int)offsetof(project_t, envmap),       (int)offsetof(project_t, envmap_strength), (int)offsetof(project_t, envmap_angle),
+        (int)offsetof(project_t, camera_fov),   (int)offsetof(project_t, camera_world),    (int)offsetof(project_t, camera_origin),
+        (int)offsetof(project_t, swatches),     (int)offsetof(project_t, brush_nodes),     (int)offsetof(project_t, material_nodes),
+        (int)offsetof(project_t, font_assets),  (int)offsetof(project_t, layer_datas),     (int)offsetof(project_t, mesh_datas),
+        (int)offsetof(project_t, script_datas),
     };
 	static const minic_type_t pf_types[]       = {MINIC_T_PTR, MINIC_T_PTR, MINIC_T_INT, MINIC_T_PTR, MINIC_T_FLOAT, MINIC_T_FLOAT, MINIC_T_FLOAT, MINIC_T_PTR,
 	                                              MINIC_T_PTR, MINIC_T_PTR, MINIC_T_PTR, MINIC_T_PTR, MINIC_T_PTR,   MINIC_T_PTR,   MINIC_T_PTR,   MINIC_T_PTR};
 	static const minic_type_t pf_deref_types[] = {MINIC_T_CHAR,  MINIC_T_PTR, MINIC_T_INT, MINIC_T_CHAR, MINIC_T_FLOAT, MINIC_T_FLOAT,
 	                                              MINIC_T_FLOAT, MINIC_T_PTR, MINIC_T_PTR, MINIC_T_PTR,  MINIC_T_PTR,   MINIC_T_PTR,
 	                                              MINIC_T_PTR,   MINIC_T_PTR, MINIC_T_PTR, MINIC_T_PTR};
-	minic_register_struct_native("project_format_t", pf_fields, pf_offsets, pf_types, pf_deref_types, 16);
-	minic_struct_set_size("project_format_t", (int)sizeof(project_format_t));
-	minic_struct_field_set_type("project_format_t", "assets", "string_array_t");
-	minic_struct_field_set_type("project_format_t", "camera_world", "f32_array_t");
-	minic_struct_field_set_type("project_format_t", "camera_origin", "f32_array_t");
-	minic_struct_field_set_type("project_format_t", "font_assets", "string_array_t");
-	minic_struct_field_set_type("project_format_t", "script_datas", "string_array_t");
+	minic_register_struct_native("project_t", pf_fields, pf_offsets, pf_types, pf_deref_types, 16);
+	minic_struct_set_size("project_t", (int)sizeof(project_t));
+	minic_struct_field_set_type("project_t", "assets", "string_array_t");
+	minic_struct_field_set_type("project_t", "camera_world", "f32_array_t");
+	minic_struct_field_set_type("project_t", "camera_origin", "f32_array_t");
+	minic_struct_field_set_type("project_t", "font_assets", "string_array_t");
+	minic_struct_field_set_type("project_t", "script_datas", "string_array_t");
 
 	// iron_math
 	R(iron_random_init, "v(i)");

@@ -5,10 +5,10 @@ i16_array_t *util_mesh_va0;
 i32_array_t *util_mesh_quantized;
 
 void util_mesh_remove_merged() {
-	if (context_raw->merged_object != NULL) {
-		mesh_data_delete(context_raw->merged_object->data);
-		mesh_object_remove(context_raw->merged_object);
-		context_raw->merged_object = NULL;
+	if (g_context->merged_object != NULL) {
+		mesh_data_delete(g_context->merged_object->data);
+		mesh_object_remove(g_context->merged_object);
+		g_context->merged_object = NULL;
 	}
 }
 
@@ -36,7 +36,7 @@ mesh_object_t_array_t *util_mesh_get_unique() {
 
 void util_mesh_merge(mesh_object_t_array_t *paint_objects) {
 	if (paint_objects == NULL) {
-		if (context_raw->tool == TOOL_TYPE_GIZMO) {
+		if (g_context->tool == TOOL_TYPE_GIZMO) {
 			paint_objects = util_mesh_get_unique();
 		}
 		else {
@@ -46,7 +46,7 @@ void util_mesh_merge(mesh_object_t_array_t *paint_objects) {
 	if (paint_objects->length == 0) {
 		return;
 	}
-	context_raw->merged_object_is_atlas = paint_objects->length < project_paint_objects->length;
+	g_context->merged_object_is_atlas = paint_objects->length < project_paint_objects->length;
 	i32 vlen                            = 0;
 	i32 ilen                            = 0;
 	f32 max_scale                       = 0.0;
@@ -121,7 +121,7 @@ void util_mesh_merge(mesh_object_t_array_t *paint_objects) {
 		voff += math_floor(vas->buffer[0]->values->length / 4.0);
 		ioff += math_floor(ias->length);
 	}
-	mesh_data_t *raw = GC_ALLOC_INIT(mesh_data_t, {.name          = context_raw->paint_object->base->name,
+	mesh_data_t *raw = GC_ALLOC_INIT(mesh_data_t, {.name          = g_context->paint_object->base->name,
 	                                               .vertex_arrays = any_array_create_from_raw(
 	                                                   (void *[]){
 	                                                       GC_ALLOC_INIT(vertex_array_t, {.values = va0, .attrib = "pos", .data = "short4norm"}),
@@ -142,10 +142,10 @@ void util_mesh_merge(mesh_object_t_array_t *paint_objects) {
 	}
 	util_mesh_remove_merged();
 	mesh_data_t *md                           = mesh_data_create(raw);
-	context_raw->merged_object                = mesh_object_create(md, context_raw->paint_object->material);
-	context_raw->merged_object->base->name    = string("%s_merged", context_raw->paint_object->base->name);
-	context_raw->merged_object->force_context = "paint";
-	object_set_parent(context_raw->merged_object->base, context_main_object()->base);
+	g_context->merged_object                = mesh_object_create(md, g_context->paint_object->material);
+	g_context->merged_object->base->name    = string("%s_merged", g_context->paint_object->base->name);
+	g_context->merged_object->force_context = "paint";
+	object_set_parent(g_context->merged_object->base, context_main_object()->base);
 	render_path_raytrace_ready = false;
 }
 

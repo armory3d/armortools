@@ -4,7 +4,7 @@
 void import_font_run_on_next_frame(slot_font_t_array_t *font_slots) {
 	for (i32 i = 0; i < font_slots->length; ++i) {
 		slot_font_t *f    = font_slots->buffer[i];
-		context_raw->font = f;
+		g_context->font = f;
 		any_array_push(project_fonts, f);
 		util_render_make_font_preview();
 	}

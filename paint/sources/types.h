@@ -517,7 +517,7 @@ typedef struct project_format {
 	struct i32_array              *atlas_objects;
 	struct string_array           *atlas_names;
 	struct string_array           *script_datas;
-} project_format_t;
+} project_t;
 
 typedef struct asset {
 	i32   id;

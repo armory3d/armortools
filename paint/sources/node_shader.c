@@ -1,9 +1,9 @@
 
 #include "global.h"
 
-node_shader_t *node_shader_create(node_shader_context_t *context) {
+node_shader_t *node_shader_create(node_shader_context_t *ctx) {
 	node_shader_t *raw = GC_ALLOC_INIT(node_shader_t, {0});
-	raw->context       = context;
+	raw->context       = ctx;
 	raw->ins           = any_array_create_from_raw((void *[]){}, 0);
 	raw->outs          = any_array_create_from_raw((void *[]){}, 0);
 	raw->frag_out      = "float4";

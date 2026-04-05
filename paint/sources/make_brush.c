@@ -5,11 +5,11 @@ void make_brush_run(node_shader_t *kong) {
 
 	node_shader_write_frag(kong, "var dist: float = 0.0;");
 
-	if (context_raw->tool == TOOL_TYPE_PARTICLE) {
+	if (g_context->tool == TOOL_TYPE_PARTICLE) {
 		return;
 	}
 
-	bool fill_layer = context_raw->layer->fill_layer != NULL;
+	bool fill_layer = g_context->layer->fill_layer != NULL;
 	bool decal      = context_is_decal();
 	if (decal && !fill_layer) {
 		node_shader_write_frag(kong, "if (constants.decal_mask.z > 0.0) {");
@@ -23,7 +23,7 @@ void make_brush_run(node_shader_t *kong) {
 	node_shader_write_frag(kong, "winp.xyz = winp.xyz / winp.w;");
 	kong->frag_wposition = true;
 
-	if (config_raw->brush_angle_reject || context_raw->xray) {
+	if (g_config->brush_angle_reject || g_context->xray) {
 		node_shader_add_function(kong, str_octahedron_wrap);
 		node_shader_add_texture(kong, "gbuffer0", NULL);
 		node_shader_write_frag(kong, "var g0: float2 = sample_lod(gbuffer0, sampler_linear, constants.inp.xy, 0.0).rg;");
@@ -35,11 +35,11 @@ void make_brush_run(node_shader_t *kong) {
 		node_shader_write_frag(kong, "wn = normalize(wn);");
 		node_shader_write_frag(kong, "var plane_dist: float = dot(wn, winp.xyz - input.wposition);");
 
-		if (config_raw->brush_angle_reject && !context_raw->xray) {
+		if (g_config->brush_angle_reject && !g_context->xray) {
 			// constants.inp.w = paint2d ? 0.0 : 1.0
 			node_shader_write_frag(kong, "if (plane_dist < -0.03 && constants.inp.w == 0.0) { discard; }");
 			kong->frag_n = true;
-			f32 angle    = context_raw->brush_angle_reject_dot;
+			f32 angle    = g_context->brush_angle_reject_dot;
 			node_shader_write_frag(kong, string("if (dot(wn, n) < %s && constants.inp.w == 0.0) { discard; }", f32_to_string(angle)));
 		}
 	}
@@ -51,12 +51,12 @@ void make_brush_run(node_shader_t *kong) {
 	node_shader_write_frag(kong, "winplast.xyz = winplast.xyz / winplast.w;");
 
 	node_shader_write_frag(kong, "var pa: float3 = input.wposition - winp.xyz;");
-	if (context_raw->xray) {
+	if (g_context->xray) {
 		node_shader_write_frag(kong, "pa += wn * float3(plane_dist, plane_dist, plane_dist);");
 	}
 	node_shader_write_frag(kong, "var ba: float3 = winplast.xyz - winp.xyz;");
 
-	if (context_raw->brush_lazy_radius > 0 && context_raw->brush_lazy_step > 0) {
+	if (g_context->brush_lazy_radius > 0 && g_context->brush_lazy_step > 0) {
 		// Sphere
 		node_shader_write_frag(kong, "dist = distance(input.wposition, winp.xyz);");
 	}

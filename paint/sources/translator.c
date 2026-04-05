@@ -22,7 +22,7 @@ char *vtr(char *id, any_map_t *vars) {
 	char *translation = string_copy(id);
 
 	// English is the source language
-	if (!string_equals(config_raw->locale, "en")) {
+	if (!string_equals(g_config->locale, "en")) {
 		if (string_index_of(id, "\n") > -1) {
 			id = string_copy(string_replace_all(id, "\n", "\\n"));
 		}
@@ -57,7 +57,7 @@ void translator_init_font_on_next_frame(void *_) {
 
 	draw_font_t *f = data_get_font(font_path);
 	if (cjk) {
-		i32 font_index = i32_map_get(translator_cjk_font_indices, config_raw->locale) != -1 ? i32_map_get(translator_cjk_font_indices, config_raw->locale) : 0;
+		i32 font_index = i32_map_get(translator_cjk_font_indices, g_config->locale) != -1 ? i32_map_get(translator_cjk_font_indices, g_config->locale) : 0;
 		f->index       = font_index;
 		f->glyphs_version = 0;
 		draw_font_init(f);
@@ -68,7 +68,7 @@ void translator_init_font_on_next_frame(void *_) {
 	// Scale up the font size and elements width a bit
 	gc_root(base_font);
 	base_theme->FONT_SIZE = math_floor(base_default_font_size * font_scale);
-	base_theme->ELEMENT_W = math_floor(base_default_element_w * (!string_equals(config_raw->locale, "en") ? 1.4 : 1.0));
+	base_theme->ELEMENT_W = math_floor(base_default_element_w * (!string_equals(g_config->locale, "en") ? 1.4 : 1.0));
 
 	ui_set_font(ui, f);
 	ui_set_scale(UI_SCALE());
@@ -101,7 +101,7 @@ void translator_extended_glyphs() {
 void translator_load_translations_on_cjk_downloaded(char *url) {
 	if (!iron_file_exists(_translator_load_translations_cjk_font_disk_path)) {
 		// Fall back to English
-		config_raw->locale = "en";
+		g_config->locale = "en";
 		translator_extended_glyphs();
 		gc_unroot(translator_translations);
 		translator_translations = any_map_create();
@@ -128,13 +128,13 @@ void translator_load_translations(char *new_locale) {
 	}
 
 	if (string_equals(new_locale, "system")) {
-		config_raw->locale = string_copy(iron_language());
+		g_config->locale = string_copy(iron_language());
 	}
 
 	// Check whether the requested or detected locale is available
-	if (!string_equals(config_raw->locale, "en") && string_array_index_of(translator_get_supported_locales(), config_raw->locale) == -1) {
+	if (!string_equals(g_config->locale, "en") && string_array_index_of(translator_get_supported_locales(), g_config->locale) == -1) {
 		// Fall back to English
-		config_raw->locale = "en";
+		g_config->locale = "en";
 	}
 
 	// No translations to load, as source strings are in English
@@ -143,18 +143,18 @@ void translator_load_translations(char *new_locale) {
 	translator_translations = any_map_create();
 	gc_root(translator_translations);
 
-	if (string_equals(config_raw->locale, "en") && string_equals(translator_last_locale, "en")) {
+	if (string_equals(g_config->locale, "en") && string_equals(translator_last_locale, "en")) {
 		// No need to generate extended font atlas for English locale
 		return;
 	}
 
 	gc_unroot(translator_last_locale);
-	translator_last_locale = string_copy(config_raw->locale);
+	translator_last_locale = string_copy(g_config->locale);
 	gc_root(translator_last_locale);
 
-	if (!string_equals(config_raw->locale, "en")) {
+	if (!string_equals(g_config->locale, "en")) {
 		// Load the translation file
-		char *translation_json = sys_buffer_to_string(iron_load_blob(string("data/locale/%s.json", config_raw->locale)));
+		char *translation_json = sys_buffer_to_string(iron_load_blob(string("data/locale/%s.json", g_config->locale)));
 		gc_unroot(translator_translations);
 		translator_translations = json_parse_to_map(translation_json);
 		gc_root(translator_translations);

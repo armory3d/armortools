@@ -578,8 +578,8 @@ ui_node_t *nodes_brush_create_node(char *node_type) {
 		for (i32 i = 0; i < c->length; ++i) {
 			ui_node_t *n = c->buffer[i];
 			if (string_equals(n->type, node_type)) {
-				ui_node_canvas_t *canvas = context_raw->brush->canvas;
-				ui_nodes_t       *nodes  = context_raw->brush->nodes;
+				ui_node_canvas_t *canvas = g_context->brush->canvas;
+				ui_nodes_t       *nodes  = g_context->brush->nodes;
 				ui_node_t        *node   = ui_nodes_make_node(n, nodes, canvas);
 				any_array_push(canvas->nodes, node);
 				return node;

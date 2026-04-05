@@ -29,20 +29,20 @@ node_shader_context_t *make_mesh_preview_run(material_t *data, material_context_
 
 	node_shader_add_constant(kong, "WVP: float4x4", "_world_view_proj_matrix");
 	node_shader_write_attrib_vert(kong, string("output.pos = constants.WVP * float4(%s.xyz, 1.0);", pos));
-	f32   sc          = context_raw->brush_scale * context_raw->brush_nodes_scale;
+	f32   sc          = g_context->brush_scale * g_context->brush_nodes_scale;
 	char *brush_scale = f32_to_string(sc);
 	node_shader_add_out(kong, "tex_coord: float2");
 	node_shader_write_attrib_vert(kong, string("output.tex_coord = input.tex * float(%s);", brush_scale));
 	node_shader_write_attrib_frag(kong, "var tex_coord: float2 = input.tex_coord;");
 
-	bool decal                         = context_raw->decal_preview;
+	bool decal                         = g_context->decal_preview;
 	parser_material_sample_keep_aspect = decal;
 	gc_unroot(parser_material_sample_uv_scale);
 	parser_material_sample_uv_scale = string_copy(brush_scale);
 	gc_root(parser_material_sample_uv_scale);
 	parser_material_parse_height            = make_material_height_used;
 	parser_material_parse_height_as_channel = true;
-	shader_out_t *sout                      = parser_material_parse(context_raw->material->canvas, con_mesh, kong, matcon);
+	shader_out_t *sout                      = parser_material_parse(g_context->material->canvas, con_mesh, kong, matcon);
 	parser_material_parse_height            = false;
 	parser_material_parse_height_as_channel = false;
 	parser_material_sample_keep_aspect      = false;
@@ -62,13 +62,13 @@ node_shader_context_t *make_mesh_preview_run(material_t *data, material_context_
 	node_shader_write_frag(kong, string("var height: float = %s;", height));
 
 	if (decal) {
-		if (context_raw->tool == TOOL_TYPE_TEXT) {
+		if (g_context->tool == TOOL_TYPE_TEXT) {
 			node_shader_add_texture(kong, "textexttool", "_textexttool");
 			node_shader_write_frag(kong, string("opacity *= sample_lod(textexttool, sampler_linear, tex_coord / float(%s), 0.0).r;", brush_scale));
 		}
 	}
 	if (decal) {
-		f32 opac = config_raw->brush_alpha_discard;
+		f32 opac = g_config->brush_alpha_discard;
 		node_shader_write_frag(kong, string("if (opacity <= float(%s)) { discard; }", f32_to_string(opac)));
 	}
 

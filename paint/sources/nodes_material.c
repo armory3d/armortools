@@ -155,7 +155,7 @@ ui_node_t *nodes_material_create_node(char *node_type, node_group_t *group) {
 		return NULL;
 	}
 	ui_node_canvas_t *canvas = group != NULL ? group->canvas : ui_nodes_get_canvas(false);
-	ui_nodes_t       *nodes  = group != NULL ? group->nodes : context_raw->material->nodes;
+	ui_nodes_t       *nodes  = group != NULL ? group->nodes : g_context->material->nodes;
 	ui_node_t        *node   = ui_nodes_make_node(n, nodes, canvas);
 	any_array_push(canvas->nodes, node);
 	return node;

@@ -198,7 +198,7 @@ char *ui_files_file_browser(ui_handle_t *handle, bool drag_files, char *search, 
 	bool           is_cloud    = starts_with(handle->text, "cloud");
 
 	if (is_cloud && file_cloud == NULL) {
-		file_init_cloud(&ui_files_file_browser_on_init_cloud_done, config_raw->server);
+		file_init_cloud(&ui_files_file_browser_on_init_cloud_done, g_config->server);
 	}
 	if (is_cloud && file_read_directory("cloud")->length == 0) {
 		return handle->text;
@@ -341,7 +341,7 @@ char *ui_files_file_browser(ui_handle_t *handle, bool drag_files, char *search, 
 							any_map_set(ui_files_icon_file_map, icon_file, f);
 
 							file_cache_cloud(string("%s%s%s", handle->text, PATH_SEP, icon_file), &ui_files_file_browser_on_cache_cloud_done,
-							                 config_raw->server);
+							                 g_config->server);
 						}
 					}
 				}
@@ -377,7 +377,7 @@ char *ui_files_file_browser(ui_handle_t *handle, bool drag_files, char *search, 
 #endif
 
 					buffer_t         *buffer = iron_load_blob(blob_path);
-					project_format_t *raw;
+					project_t *raw;
 					if (import_arm_is_old(buffer)) {
 						raw = import_arm_from_old(buffer);
 					}
@@ -497,7 +497,7 @@ char *ui_files_file_browser(ui_handle_t *handle, bool drag_files, char *search, 
 				}
 
 				ui_files_selected = i;
-				if (sys_time() - context_raw->select_time < 0.2) {
+				if (sys_time() - g_context->select_time < 0.2) {
 					gc_unroot(base_drag_file);
 					base_drag_file = NULL;
 					gc_unroot(base_drag_file_icon);
@@ -510,7 +510,7 @@ char *ui_files_file_browser(ui_handle_t *handle, bool drag_files, char *search, 
 					handle->text      = string("%s%s", handle->text, f);
 					ui_files_selected = -1;
 				}
-				context_raw->select_time = sys_time();
+				g_context->select_time = sys_time();
 			}
 
 			// Label

@@ -2,7 +2,7 @@
 #include "global.h"
 
 void import_obj_run(char *path, bool replace_existing) {
-	split_type_t i       = context_raw->split_by;
+	split_type_t i       = g_context->split_by;
 	bool         is_udim = i == SPLIT_TYPE_UDIM;
 	i32 split_code = (i == SPLIT_TYPE_OBJECT || is_udim) ? char_code_at("o", 0) : i == SPLIT_TYPE_GROUP ? char_code_at("g", 0) : char_code_at("u", 0); // usemtl
 
@@ -46,7 +46,7 @@ void import_obj_run(char *path, bool replace_existing) {
 			}
 			any_array_push(parts, part);
 		}
-		if (context_raw->split_by == SPLIT_TYPE_MATERIAL) {
+		if (g_context->split_by == SPLIT_TYPE_MATERIAL) {
 			i16_array_t *posa0;
 			i16_array_t *posa1;
 			i16_array_t *nora0;

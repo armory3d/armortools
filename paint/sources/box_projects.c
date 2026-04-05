@@ -11,7 +11,7 @@ void box_projects_tab_menu_on_next_frame(void *_) {
 	iron_delete_file(_box_projects_icon_path);
 	char *data_path = substring(_box_projects_path, 0, string_length(_box_projects_path) - 4);
 	iron_delete_file(data_path);
-	string_array_t *recent_projects = config_raw->recent_projects;
+	string_array_t *recent_projects = g_config->recent_projects;
 	array_splice(recent_projects, _box_projects_i, 1);
 }
 
@@ -48,8 +48,8 @@ void box_projects_tab() {
 			i32   i     = 0;
 			i32   j     = 0;
 			char *title = string("%s%s", tr("untitled"), i32_to_string(i));
-			while (j < config_raw->recent_projects->length) {
-				char *base = config_raw->recent_projects->buffer[j];
+			while (j < g_config->recent_projects->length) {
+				char *base = g_config->recent_projects->buffer[j];
 				base       = string_copy(substring(base, string_last_index_of(base, PATH_SEP) + 1, string_last_index_of(base, ".")));
 				j++;
 				if (string_equals(title, base)) {
@@ -68,7 +68,7 @@ void box_projects_tab() {
 		if (num == 0) {
 			return;
 		}
-		string_array_t *recent_projects  = config_raw->recent_projects;
+		string_array_t *recent_projects  = g_config->recent_projects;
 		bool            show_asset_names = true;
 
 		for (i32 row = 0; row < math_ceil(recent_projects->length / (float)num); ++row) {
@@ -239,11 +239,11 @@ void box_projects_recent_tab() {
 
 		box_projects_draw_badge();
 
-		ui->enabled                = config_raw->recent_projects->length > 0;
+		ui->enabled                = g_config->recent_projects->length > 0;
 		box_projects_hsearch->text = string_copy(ui_text_input(box_projects_hsearch, tr("Search"), UI_ALIGN_LEFT, true, true));
 		ui->enabled                = true;
-		for (i32 i = 0; i < config_raw->recent_projects->length; ++i) {
-			char *path = config_raw->recent_projects->buffer[i];
+		for (i32 i = 0; i < g_config->recent_projects->length; ++i) {
+			char *path = g_config->recent_projects->buffer[i];
 #ifdef IRON_WINDOWS
 			path = string_copy(string_replace_all(path, "/", "\\"));
 #else
@@ -271,9 +271,9 @@ void box_projects_recent_tab() {
 			}
 		}
 
-		ui->enabled = config_raw->recent_projects->length > 0;
+		ui->enabled = g_config->recent_projects->length > 0;
 		if (ui_icon_button(tr("Clear"), ICON_ERASE, UI_ALIGN_LEFT)) {
-			config_raw->recent_projects = any_array_create_from_raw((void *[]){}, 0);
+			g_config->recent_projects = any_array_create_from_raw((void *[]){}, 0);
 			config_save();
 		}
 		ui->enabled = true;

@@ -25,10 +25,10 @@ void make_clone_run(node_shader_t *kong) {
 	node_shader_write_frag(kong, string("var height: float = %s;", height));
 	node_shader_write_frag(kong, string("var mat_opacity: float = %s;", opac));
 	node_shader_write_frag(kong, "var opacity: float = mat_opacity * constants.brush_opacity;");
-	if (context_raw->material->paint_emis) {
+	if (g_context->material->paint_emis) {
 		node_shader_write_frag(kong, "var emis: float = 0.0;");
 	}
-	if (context_raw->material->paint_subs) {
+	if (g_context->material->paint_subs) {
 		node_shader_write_frag(kong, "var subs: float = 0.0;");
 	}
 }

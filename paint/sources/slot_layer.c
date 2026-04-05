@@ -231,8 +231,8 @@ void slot_layer_clear(slot_layer_t *raw, i32 base_color, gpu_texture_t *base_ima
 		gpu_end();
 	}
 
-	context_raw->layer_preview_dirty = true;
-	context_raw->ddirty              = 3;
+	g_context->layer_preview_dirty = true;
+	g_context->ddirty              = 3;
 }
 
 void slot_layer_invert_mask(slot_layer_t *raw) {
@@ -246,8 +246,8 @@ void slot_layer_invert_mask(slot_layer_t *raw) {
 	gpu_delete_texture(_texpaint);
 	render_target_t *rt = any_map_get(render_path_render_targets, string("texpaint%d", raw->id));
 	raw->texpaint = rt->_image       = inverted;
-	context_raw->layer_preview_dirty = true;
-	context_raw->ddirty              = 3;
+	g_context->layer_preview_dirty = true;
+	g_context->ddirty              = 3;
 }
 
 void layers_apply_mask(slot_layer_t *l, slot_layer_t *m) {
@@ -443,13 +443,13 @@ void slot_layer_resize_and_set_bits(slot_layer_t *raw) {
 
 void slot_layer_to_fill_layer_on_next_frame(void *_) {
 	make_material_parse_paint_material(true);
-	context_raw->layer_preview_dirty                  = true;
+	g_context->layer_preview_dirty                  = true;
 	ui_base_hwnds->buffer[TAB_AREA_SIDEBAR0]->redraws = 2;
 }
 
 void slot_layer_to_fill_layer(slot_layer_t *raw) {
 	context_set_layer(raw);
-	raw->fill_layer = context_raw->material;
+	raw->fill_layer = g_context->material;
 	layers_update_fill_layer(true);
 	sys_notify_on_next_frame(&slot_layer_to_fill_layer_on_next_frame, NULL);
 }
@@ -458,7 +458,7 @@ void slot_layer_to_paint_layer(slot_layer_t *raw) {
 	context_set_layer(raw);
 	raw->fill_layer = NULL;
 	make_material_parse_paint_material(true);
-	context_raw->layer_preview_dirty                  = true;
+	g_context->layer_preview_dirty                  = true;
 	ui_base_hwnds->buffer[TAB_AREA_SIDEBAR0]->redraws = 2;
 }
 
@@ -780,8 +780,8 @@ void layers_init() {
 
 void layers_resize() {
 	if (base_res_handle->i >= math_floor(TEXTURE_RES_RES16384)) { // Save memory for >=16k
-		config_raw->undo_steps = 1;
-		while (history_undo_layers->length > config_raw->undo_steps) {
+		g_config->undo_steps = 1;
+		while (history_undo_layers->length > g_config->undo_steps) {
 			slot_layer_t *l = array_pop(history_undo_layers);
 			sys_notify_on_next_frame(&slot_layer_unload, l);
 		}
@@ -811,7 +811,7 @@ void layers_resize() {
 	blend1->height = config_get_texture_res_y();
 	blend1->_image = gpu_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), GPU_TEXTURE_FORMAT_R8);
 
-	context_raw->brush_blend_dirty = true;
+	g_context->brush_blend_dirty = true;
 
 	render_target_t *blur = any_map_get(rts, "texpaint_blur");
 	if (blur != NULL) {
@@ -827,7 +827,7 @@ void layers_resize() {
 		slot_layer_resize_and_set_bits(render_path_paint_live_layer);
 	}
 	render_path_raytrace_ready = false; // Rebuild baketex
-	context_raw->ddirty        = 2;
+	g_context->ddirty        = 2;
 }
 
 void layers_set_bits() {
@@ -959,11 +959,11 @@ void layers_commands_merge_pack(gpu_pipeline_t *pipe, gpu_texture_t *i0, gpu_tex
 }
 
 bool layers_is_fill_material() {
-	if (context_raw->tool == TOOL_TYPE_MATERIAL) {
+	if (g_context->tool == TOOL_TYPE_MATERIAL) {
 		return true;
 	}
 
-	slot_material_t *m = context_raw->material;
+	slot_material_t *m = g_context->material;
 	for (i32 i = 0; i < project_layers->length; ++i) {
 		slot_layer_t *l = project_layers->buffer[i];
 		if (l->fill_layer == m) {
@@ -974,12 +974,12 @@ bool layers_is_fill_material() {
 }
 
 void layers_update_fill_layers() {
-	slot_layer_t  *_layer     = context_raw->layer;
-	tool_type_t    _tool      = context_raw->tool;
-	i32            _fill_type = context_raw->fill_type_handle->i;
+	slot_layer_t  *_layer     = g_context->layer;
+	tool_type_t    _tool      = g_context->tool;
+	i32            _fill_type = g_context->fill_type_handle->i;
 	gpu_texture_t *current    = NULL;
 
-	if (context_raw->tool == TOOL_TYPE_MATERIAL) {
+	if (g_context->tool == TOOL_TYPE_MATERIAL) {
 		if (render_path_paint_live_layer == NULL) {
 			gc_unroot(render_path_paint_live_layer);
 			render_path_paint_live_layer = slot_layer_create("_live", LAYER_SLOT_TYPE_LAYER, NULL);
@@ -991,19 +991,19 @@ void layers_update_fill_layers() {
 		if (in_use)
 			draw_end();
 
-		context_raw->tool                = TOOL_TYPE_FILL;
-		context_raw->fill_type_handle->i = FILL_TYPE_OBJECT;
+		g_context->tool                = TOOL_TYPE_FILL;
+		g_context->fill_type_handle->i = FILL_TYPE_OBJECT;
 		render_path_paint_set_plane_mesh();
 		make_material_parse_paint_material(false);
-		context_raw->pdirty = 1;
+		g_context->pdirty = 1;
 		render_path_paint_use_live_layer(true);
 		render_path_paint_commands_paint(false);
 		render_path_paint_dilate(true, true);
 		render_path_paint_use_live_layer(false);
-		context_raw->tool                = _tool;
-		context_raw->fill_type_handle->i = _fill_type;
-		context_raw->pdirty              = 0;
-		context_raw->rdirty              = 2;
+		g_context->tool                = _tool;
+		g_context->fill_type_handle->i = _fill_type;
+		g_context->pdirty              = 0;
+		g_context->rdirty              = 2;
 		render_path_paint_restore_plane_mesh();
 		make_material_parse_paint_material(true);
 		ui_view2d_hwnd->redraws = 2;
@@ -1017,13 +1017,13 @@ void layers_update_fill_layers() {
 	bool has_fill_mask  = false;
 	for (i32 i = 0; i < project_layers->length; ++i) {
 		slot_layer_t *l = project_layers->buffer[i];
-		if (slot_layer_is_layer(l) && l->fill_layer == context_raw->material) {
+		if (slot_layer_is_layer(l) && l->fill_layer == g_context->material) {
 			has_fill_layer = true;
 		}
 	}
 	for (i32 i = 0; i < project_layers->length; ++i) {
 		slot_layer_t *l = project_layers->buffer[i];
-		if (slot_layer_is_mask(l) && l->fill_layer == context_raw->material) {
+		if (slot_layer_is_mask(l) && l->fill_layer == g_context->material) {
 			has_fill_mask = true;
 		}
 	}
@@ -1033,16 +1033,16 @@ void layers_update_fill_layers() {
 		bool in_use = gpu_in_use;
 		if (in_use)
 			draw_end();
-		context_raw->pdirty              = 1;
-		context_raw->tool                = TOOL_TYPE_FILL;
-		context_raw->fill_type_handle->i = FILL_TYPE_OBJECT;
+		g_context->pdirty              = 1;
+		g_context->tool                = TOOL_TYPE_FILL;
+		g_context->fill_type_handle->i = FILL_TYPE_OBJECT;
 
 		if (has_fill_layer) {
 			bool first = true;
 			for (i32 i = 0; i < project_layers->length; ++i) {
 				slot_layer_t *l = project_layers->buffer[i];
-				if (slot_layer_is_layer(l) && l->fill_layer == context_raw->material) {
-					context_raw->layer = l;
+				if (slot_layer_is_layer(l) && l->fill_layer == g_context->material) {
+					g_context->layer = l;
 					if (first) {
 						first = false;
 						make_material_parse_paint_material(false);
@@ -1058,8 +1058,8 @@ void layers_update_fill_layers() {
 			bool first = true;
 			for (i32 i = 0; i < project_layers->length; ++i) {
 				slot_layer_t *l = project_layers->buffer[i];
-				if (slot_layer_is_mask(l) && l->fill_layer == context_raw->material) {
-					context_raw->layer = l;
+				if (slot_layer_is_mask(l) && l->fill_layer == g_context->material) {
+					g_context->layer = l;
 					if (first) {
 						first = false;
 						make_material_parse_paint_material(false);
@@ -1071,16 +1071,16 @@ void layers_update_fill_layers() {
 				}
 			}
 		}
-		context_raw->pdirty               = 0;
-		context_raw->ddirty               = 2;
-		context_raw->rdirty               = 2;
-		context_raw->layers_preview_dirty = true; // Repaint all layer previews as multiple layers might have changed.
+		g_context->pdirty               = 0;
+		g_context->ddirty               = 2;
+		g_context->rdirty               = 2;
+		g_context->layers_preview_dirty = true; // Repaint all layer previews as multiple layers might have changed.
 		if (in_use)
 			draw_begin(current, false, 0);
-		context_raw->layer = _layer;
+		g_context->layer = _layer;
 		layers_set_object_mask();
-		context_raw->tool                = _tool;
-		context_raw->fill_type_handle->i = _fill_type;
+		g_context->tool                = _tool;
+		g_context->fill_type_handle->i = _fill_type;
 		make_material_parse_paint_material(false);
 	}
 }
@@ -1091,13 +1091,13 @@ void layers_update_fill_layer(bool parse_paint) {
 	if (in_use)
 		draw_end();
 
-	tool_type_t _tool                = context_raw->tool;
-	i32         _fill_type           = context_raw->fill_type_handle->i;
-	context_raw->tool                = TOOL_TYPE_FILL;
-	context_raw->fill_type_handle->i = FILL_TYPE_OBJECT;
-	context_raw->pdirty              = 1;
+	tool_type_t _tool                = g_context->tool;
+	i32         _fill_type           = g_context->fill_type_handle->i;
+	g_context->tool                = TOOL_TYPE_FILL;
+	g_context->fill_type_handle->i = FILL_TYPE_OBJECT;
+	g_context->pdirty              = 1;
 
-	slot_layer_clear(context_raw->layer, 0x00000000, NULL, 1.0, layers_default_rough, 0.0);
+	slot_layer_clear(g_context->layer, 0x00000000, NULL, 1.0, layers_default_rough, 0.0);
 
 	if (parse_paint) {
 		make_material_parse_paint_material(false);
@@ -1105,9 +1105,9 @@ void layers_update_fill_layer(bool parse_paint) {
 	render_path_paint_commands_paint(false);
 	render_path_paint_dilate(true, true);
 
-	context_raw->rdirty              = 2;
-	context_raw->tool                = _tool;
-	context_raw->fill_type_handle->i = _fill_type;
+	g_context->rdirty              = 2;
+	g_context->tool                = _tool;
+	g_context->fill_type_handle->i = _fill_type;
 	if (in_use)
 		draw_begin(current, false, 0);
 }
@@ -1123,13 +1123,13 @@ void layers_set_object_mask() {
 		any_array_push(ar, p->base->name);
 	}
 
-	i32 mask = context_object_mask_used() ? slot_layer_get_object_mask(context_raw->layer) : 0;
+	i32 mask = context_object_mask_used() ? slot_layer_get_object_mask(g_context->layer) : 0;
 	if (context_layer_filter_used()) {
-		mask = context_raw->layer_filter;
+		mask = g_context->layer_filter;
 	}
 	if (mask > 0) {
-		if (context_raw->merged_object != NULL) {
-			context_raw->merged_object->base->visible = false;
+		if (g_context->merged_object != NULL) {
+			g_context->merged_object->base->visible = false;
 		}
 		mesh_object_t *o = project_paint_objects->buffer[0];
 		for (i32 i = 0; i < project_paint_objects->length; ++i) {
@@ -1143,14 +1143,14 @@ void layers_set_object_mask() {
 		context_select_paint_object(o);
 	}
 	else {
-		bool is_atlas = slot_layer_get_object_mask(context_raw->layer) > 0 && slot_layer_get_object_mask(context_raw->layer) <= project_paint_objects->length;
-		if (context_raw->merged_object == NULL || is_atlas || context_raw->merged_object_is_atlas) {
-			mesh_object_t_array_t *visibles = is_atlas ? project_get_atlas_objects(slot_layer_get_object_mask(context_raw->layer)) : NULL;
+		bool is_atlas = slot_layer_get_object_mask(g_context->layer) > 0 && slot_layer_get_object_mask(g_context->layer) <= project_paint_objects->length;
+		if (g_context->merged_object == NULL || is_atlas || g_context->merged_object_is_atlas) {
+			mesh_object_t_array_t *visibles = is_atlas ? project_get_atlas_objects(slot_layer_get_object_mask(g_context->layer)) : NULL;
 			util_mesh_merge(visibles);
 		}
 		context_select_paint_object(context_main_object());
-		context_raw->paint_object->skip_context   = "paint";
-		context_raw->merged_object->base->visible = true;
+		g_context->paint_object->skip_context   = "paint";
+		g_context->merged_object->base->visible = true;
 	}
 	util_uv_dilatemap_cached = false;
 }
@@ -1165,29 +1165,29 @@ slot_layer_t *layers_new_layer(bool clear, i32 position) {
 	}
 
 	slot_layer_t *l = slot_layer_create("", LAYER_SLOT_TYPE_LAYER, NULL);
-	l->object_mask  = context_raw->layer_filter;
+	l->object_mask  = g_context->layer_filter;
 
 	if (position == -1) {
-		if (slot_layer_is_mask(context_raw->layer))
-			context_set_layer(context_raw->layer->parent);
-		array_insert(project_layers, array_index_of(project_layers, context_raw->layer) + 1, l);
+		if (slot_layer_is_mask(g_context->layer))
+			context_set_layer(g_context->layer->parent);
+		array_insert(project_layers, array_index_of(project_layers, g_context->layer) + 1, l);
 	}
 	else {
 		array_insert(project_layers, position, l);
 	}
 
 	context_set_layer(l);
-	i32 li = array_index_of(project_layers, context_raw->layer);
+	i32 li = array_index_of(project_layers, g_context->layer);
 	if (li > 0) {
 		slot_layer_t *below = project_layers->buffer[li - 1];
 		if (slot_layer_is_layer(below)) {
-			context_raw->layer->parent = below->parent;
+			g_context->layer->parent = below->parent;
 		}
 	}
 	if (clear) {
 		sys_notify_on_next_frame(&layers_new_layer_clear, l);
 	}
-	context_raw->layer_preview_dirty = true;
+	g_context->layer_preview_dirty = true;
 	return l;
 }
 
@@ -1209,7 +1209,7 @@ slot_layer_t *layers_new_mask(bool clear, slot_layer_t *parent, i32 position) {
 	if (clear) {
 		sys_notify_on_next_frame(&layers_new_mask_clear, l);
 	}
-	context_raw->layer_preview_dirty = true;
+	g_context->layer_preview_dirty = true;
 	return l;
 }
 
@@ -1231,13 +1231,13 @@ void layers_create_fill_layer_on_next_frame(void *_) {
 	if (!mat4_isnan(_layers_decal_mat)) {
 		l->decal_mat = _layers_decal_mat;
 	}
-	l->object_mask = context_raw->layer_filter;
+	l->object_mask = g_context->layer_filter;
 	history_to_fill_layer();
 	slot_layer_to_fill_layer(l);
 }
 
 void layers_create_fill_layer(uv_type_t uv_type, mat4_t decal_mat, i32 position) {
-	if (context_raw->tool == TOOL_TYPE_GIZMO) {
+	if (g_context->tool == TOOL_TYPE_GIZMO) {
 		return;
 	}
 
@@ -1248,7 +1248,7 @@ void layers_create_fill_layer(uv_type_t uv_type, mat4_t decal_mat, i32 position)
 }
 
 void layers_create_image_mask(asset_t *asset) {
-	slot_layer_t *l = context_raw->layer;
+	slot_layer_t *l = g_context->layer;
 	if (slot_layer_is_mask(l) || slot_layer_is_group(l)) {
 		return;
 	}
@@ -1256,14 +1256,14 @@ void layers_create_image_mask(asset_t *asset) {
 	history_new_layer();
 	slot_layer_t *m = layers_new_mask(false, l, -1);
 	slot_layer_clear(m, 0x00000000, project_get_image(asset), 1.0, layers_default_rough, 0.0);
-	context_raw->layer_preview_dirty = true;
+	g_context->layer_preview_dirty = true;
 }
 
 void layers_create_color_layer_on_next_frame(void *_) {
 	slot_layer_t *l = layers_new_layer(false, _layers_position);
 	history_new_layer();
 	l->uv_type     = UV_TYPE_UVMAP;
-	l->object_mask = context_raw->layer_filter;
+	l->object_mask = g_context->layer_filter;
 	slot_layer_clear(l, _layers_base_color, NULL, _layers_occlusion, _layers_roughness, _layers_metallic);
 }
 
@@ -1338,12 +1338,12 @@ void layers_apply_masks(slot_layer_t *l) {
 			slot_layer_delete(masks->buffer[i]);
 		}
 		slot_layer_apply_mask(masks->buffer[masks->length - 1]);
-		context_raw->layer_preview_dirty = true;
+		g_context->layer_preview_dirty = true;
 	}
 }
 
 void layers_merge_down() {
-	slot_layer_t *l1 = context_raw->layer;
+	slot_layer_t *l1 = g_context->layer;
 
 	if (slot_layer_is_group(l1)) {
 		l1 = layers_merge_group(l1);
@@ -1366,7 +1366,7 @@ void layers_merge_down() {
 	layers_merge_layer(l0, l1, false);
 	slot_layer_delete(l1);
 	context_set_layer(l0);
-	context_raw->layer_preview_dirty = true;
+	g_context->layer_preview_dirty = true;
 }
 
 slot_layer_t *layers_merge_group(slot_layer_t *l) {
@@ -1563,7 +1563,7 @@ slot_layer_t *layers_flatten(bool height_to_normal, slot_layer_t_array_t *layers
 			draw_set_pipeline(NULL);
 			draw_end();
 
-			if (context_raw->tool == TOOL_TYPE_GIZMO) {
+			if (g_context->tool == TOOL_TYPE_GIZMO) {
 				// Do not multiply basecol by alpha
 				draw_begin(layers_expa, false, 0); // Copy to temp
 				draw_set_pipeline(pipes_copy);
@@ -1666,18 +1666,18 @@ slot_layer_t *layers_flatten(bool height_to_normal, slot_layer_t_array_t *layers
 
 void layers_on_resized_on_next_frame(void *_) {
 	layers_resize();
-	slot_layer_t    *_layer    = context_raw->layer;
-	slot_material_t *_material = context_raw->material;
+	slot_layer_t    *_layer    = g_context->layer;
+	slot_material_t *_material = g_context->material;
 	for (i32 i = 0; i < project_layers->length; ++i) {
 		slot_layer_t *l = project_layers->buffer[i];
 		if (l->fill_layer != NULL) {
-			context_raw->layer    = l;
-			context_raw->material = l->fill_layer;
+			g_context->layer    = l;
+			g_context->material = l->fill_layer;
 			layers_update_fill_layer(true);
 		}
 	}
-	context_raw->layer    = _layer;
-	context_raw->material = _material;
+	g_context->layer    = _layer;
+	g_context->material = _material;
 	make_material_parse_paint_material(true);
 }
 

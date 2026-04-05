@@ -35,14 +35,14 @@ void tab_scripts_draw_edit() {
 	if (ui_menu_sub_button(ui_handle(__ID__), tr("Templates"))) {
 		ui_menu_sub_begin(2);
 		if (ui_menu_button("hello.c", "", ICON_DRAFT)) {
-			project_raw->script_datas->buffer[0] = "\
+			g_project->script_datas->buffer[0] = "\
 void main() {\n\
 	printf(\"Hello, world!\\n\");\n\
 }\n\
 ";
 		}
 		if (ui_menu_button("rotate.c", "", ICON_DRAFT)) {
-			project_raw->script_datas->buffer[0] = "\
+			g_project->script_datas->buffer[0] = "\
 void on_update() {\n\
 	mesh_object_t *o = context_main_object();\n\
 	transform_rotate(o->base->transform, vec4_z_axis(), 0.005);\n\
@@ -107,16 +107,16 @@ void tab_scripts_draw(ui_handle_t *htab) {
 		ui_text_area_coloring = tab_scripts_get_text_coloring();
 		gc_root(ui_text_area_coloring);
 
-		if (project_raw->script_datas == NULL) {
-			project_raw->script_datas = string_array_create(0);
+		if (g_project->script_datas == NULL) {
+			g_project->script_datas = string_array_create(0);
 		}
-		if (project_raw->script_datas->length == 0) {
-			string_array_push(project_raw->script_datas, "");
+		if (g_project->script_datas->length == 0) {
+			string_array_push(g_project->script_datas, "");
 		}
 
-		tab_scripts_hscript->text = project_raw->script_datas->buffer[0];
+		tab_scripts_hscript->text = g_project->script_datas->buffer[0];
 		ui_text_area(tab_scripts_hscript, UI_ALIGN_LEFT, true, "", false);
-		project_raw->script_datas->buffer[0] = tab_scripts_hscript->text;
+		g_project->script_datas->buffer[0] = tab_scripts_hscript->text;
 
 		ui_text_area_line_numbers    = false;
 		ui_text_area_scroll_past_end = false;

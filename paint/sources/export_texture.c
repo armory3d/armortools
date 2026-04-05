@@ -25,7 +25,7 @@ void export_texture_write_texture(char *file, buffer_t *pixels, i32 type, i32 of
 		format = 6; // AAA1
 	}
 
-	if (context_raw->layers_destination == EXPORT_DESTINATION_PACK_INTO_PROJECT) {
+	if (g_context->layers_destination == EXPORT_DESTINATION_PACK_INTO_PROJECT) {
 #ifdef IRON_BGRA
 		if (format == 2) { // RGB1
 			export_arm_bgra_swap(pixels);
@@ -37,10 +37,10 @@ void export_texture_write_texture(char *file, buffer_t *pixels, i32 type, i32 of
 		char           *name  = ar->buffer[ar->length - 1];
 		asset_t        *asset = GC_ALLOC_INIT(asset_t, {.name = name, .file = file, .id = project_asset_id++});
 		any_array_push(project_assets, asset);
-		if (project_raw->assets == NULL) {
-			project_raw->assets = any_array_create_from_raw((void *[]){}, 0);
+		if (g_project->assets == NULL) {
+			g_project->assets = any_array_create_from_raw((void *[]){}, 0);
 		}
-		any_array_push(project_raw->assets, asset->file);
+		any_array_push(g_project->assets, asset->file);
 		any_array_push(project_asset_names, asset->name);
 		any_imap_set(project_asset_map, asset->id, image);
 		asset_t_array_t *assets = any_array_create_from_raw(
@@ -48,15 +48,15 @@ void export_texture_write_texture(char *file, buffer_t *pixels, i32 type, i32 of
 		        asset,
 		    },
 		    1);
-		export_arm_pack_assets(project_raw, assets);
+		export_arm_pack_assets(g_project, assets);
 		return;
 	}
 
-	if (bits == 8 && context_raw->format_type == TEXTURE_LDR_FORMAT_PNG) {
+	if (bits == 8 && g_context->format_type == TEXTURE_LDR_FORMAT_PNG) {
 		iron_write_png(file, pixels, res_x, res_y, format);
 	}
-	else if (bits == 8 && context_raw->format_type == TEXTURE_LDR_FORMAT_JPG) {
-		iron_write_jpg(file, pixels, res_x, res_y, format, math_floor(context_raw->format_quality));
+	else if (bits == 8 && g_context->format_type == TEXTURE_LDR_FORMAT_JPG) {
+		iron_write_jpg(file, pixels, res_x, res_y, format, math_floor(g_context->format_quality));
 	}
 	else { // Exr
 		buffer_t *b = export_exr_run(res_x, res_y, pixels, bits, type, off);
@@ -133,14 +133,14 @@ void export_texture_run_layers(char *path, slot_layer_t_array_t *layers, char *o
 	if (string_equals(f, "")) {
 		f = string_copy(tr("untitled"));
 	}
-	texture_ldr_format_t format_type = context_raw->format_type;
+	texture_ldr_format_t format_type = g_context->format_type;
 	i32                  bits        = base_bits_handle->i == TEXTURE_BITS_BITS8 ? 8 : 16;
 	char                *ext         = bits == 16 ? ".exr" : format_type == TEXTURE_LDR_FORMAT_PNG ? ".png" : ".jpg";
 	if (ends_with(f, ext)) {
 		f = string_copy(substring(f, 0, string_length(f) - 4));
 	}
 
-	bool is_udim = context_raw->layers_export == EXPORT_MODE_PER_UDIM_TILE;
+	bool is_udim = g_context->layers_export == EXPORT_MODE_PER_UDIM_TILE;
 	if (is_udim) {
 		ext = string("%s%s", object_name, ext);
 	}
@@ -151,7 +151,7 @@ void export_texture_run_layers(char *path, slot_layer_t_array_t *layers, char *o
 	gpu_texture_t   *empty = rt->_image;
 
 	// Append object mask name
-	bool export_selected = context_raw->layers_export == EXPORT_MODE_SELECTED;
+	bool export_selected = g_context->layers_export == EXPORT_MODE_SELECTED;
 	if (export_selected && slot_layer_get_object_mask(layers->buffer[0]) > 0) {
 		f = string("%s_%s", f, project_paint_objects->buffer[slot_layer_get_object_mask(layers->buffer[0]) - 1]->base->name);
 	}
@@ -181,7 +181,7 @@ void export_texture_run_layers(char *path, slot_layer_t_array_t *layers, char *o
 			if (is_udim && !ends_with(project_paint_objects->buffer[slot_layer_get_object_mask(l1) - 1]->base->name, object_name)) {
 				continue;
 			}
-			bool per_object = context_raw->layers_export == EXPORT_MODE_PER_OBJECT;
+			bool per_object = g_context->layers_export == EXPORT_MODE_PER_OBJECT;
 			if (per_object && !string_equals(project_paint_objects->buffer[slot_layer_get_object_mask(l1) - 1]->base->name, object_name)) {
 				continue;
 			}
@@ -409,14 +409,14 @@ void export_texture_run_bake_material(char *path) {
 		gc_root(render_path_paint_live_layer);
 	}
 
-	tool_type_t _tool = context_raw->tool;
-	context_raw->tool = TOOL_TYPE_FILL;
+	tool_type_t _tool = g_context->tool;
+	g_context->tool = TOOL_TYPE_FILL;
 	make_material_parse_paint_material(true);
-	mesh_object_t *_paint_object = context_raw->paint_object;
+	mesh_object_t *_paint_object = g_context->paint_object;
 	mesh_object_t *planeo        = scene_get_child(".Plane")->ext;
 	planeo->base->visible        = true;
-	context_raw->paint_object    = planeo;
-	context_raw->pdirty          = 1;
+	g_context->paint_object    = planeo;
+	g_context->pdirty          = 1;
 
 	u8_array_t *_visibles = u8_array_create_from_raw((u8[]){}, 0);
 	for (i32 i = 0; i < project_paint_objects->length; ++i) {
@@ -429,11 +429,11 @@ void export_texture_run_bake_material(char *path) {
 	render_path_paint_commands_paint(false);
 	render_path_paint_use_live_layer(false);
 
-	context_raw->tool = _tool;
+	g_context->tool = _tool;
 	make_material_parse_paint_material(true);
-	context_raw->pdirty       = 0;
+	g_context->pdirty       = 0;
 	planeo->base->visible     = false;
-	context_raw->paint_object = _paint_object;
+	g_context->paint_object = _paint_object;
 
 	for (i32 i = 0; i < project_paint_objects->length; ++i) {
 		project_paint_objects->buffer[i]->base->visible = _visibles->buffer[i];
@@ -452,7 +452,7 @@ void export_texture_run(char *path, bool bake_material) {
 	if (bake_material) {
 		export_texture_run_bake_material(path);
 	}
-	else if (context_raw->layers_export == EXPORT_MODE_PER_UDIM_TILE) {
+	else if (g_context->layers_export == EXPORT_MODE_PER_UDIM_TILE) {
 		string_array_t *udim_tiles = any_array_create_from_raw((void *[]){}, 0);
 		for (i32 i = 0; i < project_layers->length; ++i) {
 			slot_layer_t *l = project_layers->buffer[i];
@@ -473,7 +473,7 @@ void export_texture_run(char *path, bool bake_material) {
 			export_texture_run_layers(path, project_layers, "", false);
 		}
 	}
-	else if (context_raw->layers_export == EXPORT_MODE_PER_OBJECT) {
+	else if (g_context->layers_export == EXPORT_MODE_PER_OBJECT) {
 		string_array_t *object_names = any_array_create_from_raw((void *[]){}, 0);
 		for (i32 i = 0; i < project_layers->length; ++i) {
 			slot_layer_t *l = project_layers->buffer[i];
@@ -525,14 +525,14 @@ void export_texture_run(char *path, bool bake_material) {
 		}
 		else {
 			slot_layer_t_array_t *layers;
-			if (context_raw->layers_export == EXPORT_MODE_SELECTED) {
-				if (slot_layer_is_group(context_raw->layer)) {
-					layers = slot_layer_get_children(context_raw->layer);
+			if (g_context->layers_export == EXPORT_MODE_SELECTED) {
+				if (slot_layer_is_group(g_context->layer)) {
+					layers = slot_layer_get_children(g_context->layer);
 				}
 				else {
 					layers = any_array_create_from_raw(
 					    (void *[]){
-					        context_raw->layer,
+					        g_context->layer,
 					    },
 					    1);
 				}

@@ -2,8 +2,8 @@
 #include "../global.h"
 
 void brush_output_node_parse_inputs(brush_output_node_t *self) {
-	gpu_texture_t *last_mask    = context_raw->brush_mask_image;
-	gpu_texture_t *last_stencil = context_raw->brush_stencil_image;
+	gpu_texture_t *last_mask    = g_context->brush_mask_image;
+	gpu_texture_t *last_stencil = g_context->brush_stencil_image;
 
 	logic_node_value_t *input0 = logic_node_input_get(self->base->inputs->buffer[0]);
 	logic_node_value_t *input1 = logic_node_input_get(self->base->inputs->buffer[1]);
@@ -13,88 +13,88 @@ void brush_output_node_parse_inputs(brush_output_node_t *self) {
 	logic_node_value_t *input5 = logic_node_input_get(self->base->inputs->buffer[5]);
 	logic_node_value_t *input6 = logic_node_input_get(self->base->inputs->buffer[6]);
 
-	context_raw->paint_vec          = input0->_vec4;
-	context_raw->brush_nodes_radius = input1->_f32;
-	context_raw->brush_nodes_scale  = input2->_f32;
-	context_raw->brush_nodes_angle  = input3->_f32;
+	g_context->paint_vec          = input0->_vec4;
+	g_context->brush_nodes_radius = input1->_f32;
+	g_context->brush_nodes_scale  = input2->_f32;
+	g_context->brush_nodes_angle  = input3->_f32;
 
 	logic_node_value_t *opac = input4; // Float or texture name
 	if (opac == NULL) {
 		opac = GC_ALLOC_INIT(logic_node_value_t, {._f32 = 1.0});
 	}
 	if (opac->_str != NULL) { // string
-		context_raw->brush_mask_image_is_alpha = ends_with(opac->_str, ".a");
+		g_context->brush_mask_image_is_alpha = ends_with(opac->_str, ".a");
 		opac->_str                             = string_copy(substring(opac->_str, 0, string_last_index_of(opac->_str, ".")));
-		context_raw->brush_nodes_opacity       = 1.0;
+		g_context->brush_nodes_opacity       = 1.0;
 		i32 index                              = string_array_index_of(project_asset_names, opac->_str);
 		if (index != -1) {
 			asset_t *asset                = project_assets->buffer[index];
-			context_raw->brush_mask_image = project_get_image(asset);
+			g_context->brush_mask_image = project_get_image(asset);
 		}
 	}
 	else {
-		context_raw->brush_nodes_opacity = opac->_f32;
-		context_raw->brush_mask_image    = NULL;
+		g_context->brush_nodes_opacity = opac->_f32;
+		g_context->brush_mask_image    = NULL;
 	}
 
-	context_raw->brush_nodes_hardness = input5->_f32;
+	g_context->brush_nodes_hardness = input5->_f32;
 
 	logic_node_value_t *stencil = input6; // Float or texture name
 	if (stencil == NULL) {
 		stencil = GC_ALLOC_INIT(logic_node_value_t, {._f32 = 1.0});
 	}
 	if (stencil->_str != NULL) { // string
-		context_raw->brush_stencil_image_is_alpha = ends_with(stencil->_str, ".a");
+		g_context->brush_stencil_image_is_alpha = ends_with(stencil->_str, ".a");
 		stencil->_str                             = string_copy(substring(stencil->_str, 0, string_last_index_of(stencil->_str, ".")));
 		i32 index                                 = string_array_index_of(project_asset_names, stencil->_str);
 		if (index != -1) {
 			asset_t *asset                   = project_assets->buffer[index];
-			context_raw->brush_stencil_image = project_get_image(asset);
+			g_context->brush_stencil_image = project_get_image(asset);
 		}
 	}
 	else {
-		context_raw->brush_stencil_image = NULL;
+		g_context->brush_stencil_image = NULL;
 	}
 
-	if (last_mask != context_raw->brush_mask_image || last_stencil != context_raw->brush_stencil_image) {
+	if (last_mask != g_context->brush_mask_image || last_stencil != g_context->brush_stencil_image) {
 		make_material_parse_paint_material(true);
 	}
 
-	context_raw->brush_directional = self->raw->buttons->buffer[0]->default_value->buffer[0] > 0.0;
+	g_context->brush_directional = self->raw->buttons->buffer[0]->default_value->buffer[0] > 0.0;
 }
 
 void brush_output_paint(brush_output_node_t *self) {
 	bool down = mouse_down("left") || pen_down("tip");
 
 	// Set color pick
-	if (down && context_raw->tool == TOOL_TYPE_COLORID && project_assets->length > 0) {
-		context_raw->colorid_picked = true;
+	if (down && g_context->tool == TOOL_TYPE_COLORID && project_assets->length > 0) {
+		g_context->colorid_picked = true;
 		ui_toolbar_handle->redraws  = 1;
 	}
 
 	// Prevent painting the same spot
-	bool same_spot = context_raw->paint_vec.x == context_raw->last_paint_x && context_raw->paint_vec.y == context_raw->last_paint_y;
-	bool lazy      = context_raw->tool == TOOL_TYPE_BRUSH && context_raw->brush_lazy_radius > 0;
+	bool same_spot = g_context->paint_vec.x == g_context->last_paint_x && g_context->paint_vec.y == g_context->last_paint_y;
+	bool lazy      = g_context->tool == TOOL_TYPE_BRUSH && g_context->brush_lazy_radius > 0;
 	if (down && (same_spot || lazy)) {
-		context_raw->painted++;
+		g_context->painted++;
 	}
 	else {
-		context_raw->painted = 0;
+		g_context->painted = 0;
 	}
-	context_raw->last_paint_x = context_raw->paint_vec.x;
-	context_raw->last_paint_y = context_raw->paint_vec.y;
+	g_context->last_paint_x = g_context->paint_vec.x;
+	g_context->last_paint_y = g_context->paint_vec.y;
 
-	if (context_raw->tool == TOOL_TYPE_PARTICLE) {
-		context_raw->painted = 0; // Always paint particles
+	if (g_context->tool == TOOL_TYPE_PARTICLE) {
+		g_context->painted = 0; // Always paint particles
 	}
 
-	if (context_raw->painted == 0) {
+	if (g_context->painted == 0) {
 		brush_output_node_parse_inputs(self);
 	}
 
-	if (context_raw->painted <= 1) {
-		context_raw->pdirty = 1;
-		context_raw->rdirty = 2;
+	if (g_context->painted <= 1) {
+		g_context->pdirty = 1;
+		g_context->rdirty = 2;
 		sculpt_push_undo    = true;
 	}
 }
@@ -105,9 +105,9 @@ void brush_output_node_run(brush_output_node_t *self, i32 from) {
 	f32 top    = 0.0;
 	f32 bottom = 1.0;
 
-	if (context_raw->paint2d) {
+	if (g_context->paint2d) {
 		left  = 1.0;
-		right = (context_raw->split_view ? 2.0 : 1.0) + ui_view2d_ww / (float)base_w();
+		right = (g_context->split_view ? 2.0 : 1.0) + ui_view2d_ww / (float)base_w();
 	}
 
 	// Do not paint over floating toolbar
@@ -124,33 +124,33 @@ void brush_output_node_run(brush_output_node_t *self, i32 from) {
 	}
 
 	// First time init
-	if (context_raw->last_paint_x < 0 || context_raw->last_paint_y < 0) {
-		context_raw->last_paint_vec_x = context_raw->paint_vec.x;
-		context_raw->last_paint_vec_y = context_raw->paint_vec.y;
+	if (g_context->last_paint_x < 0 || g_context->last_paint_y < 0) {
+		g_context->last_paint_vec_x = g_context->paint_vec.x;
+		g_context->last_paint_vec_y = g_context->paint_vec.y;
 	}
 
 	// Paint bounds
-	if (context_raw->paint_vec.x < left || context_raw->paint_vec.x > right || context_raw->paint_vec.y < top || context_raw->paint_vec.y > bottom) {
+	if (g_context->paint_vec.x < left || g_context->paint_vec.x > right || g_context->paint_vec.y < top || g_context->paint_vec.y > bottom) {
 		return;
 	}
 
 	// Do not paint over fill layer
-	bool fill_layer = context_raw->layer->fill_layer != NULL && context_raw->tool != TOOL_TYPE_PICKER && context_raw->tool != TOOL_TYPE_MATERIAL &&
-	                  context_raw->tool != TOOL_TYPE_COLORID;
+	bool fill_layer = g_context->layer->fill_layer != NULL && g_context->tool != TOOL_TYPE_PICKER && g_context->tool != TOOL_TYPE_MATERIAL &&
+	                  g_context->tool != TOOL_TYPE_COLORID;
 	if (fill_layer) {
 		return;
 	}
 
 	// Do not paint over groups
-	if (slot_layer_is_group(context_raw->layer)) {
+	if (slot_layer_is_group(g_context->layer)) {
 		return;
 	}
 
-	if (context_raw->brush_locked) {
+	if (g_context->brush_locked) {
 		return;
 	}
 
-	if (!slot_layer_is_visible(context_raw->layer) && !context_raw->paint2d) {
+	if (!slot_layer_is_visible(g_context->layer) && !g_context->paint2d) {
 		return;
 	}
 
@@ -162,13 +162,13 @@ void brush_output_node_run(brush_output_node_t *self, i32 from) {
 }
 
 brush_output_node_t *brush_output_node_create(ui_node_t *raw, f32_array_t *args) {
-	context_raw->run_brush          = brush_output_node_run;
-	context_raw->parse_brush_inputs = brush_output_node_parse_inputs;
+	g_context->run_brush          = brush_output_node_run;
+	g_context->parse_brush_inputs = brush_output_node_parse_inputs;
 
 	brush_output_node_t *n = GC_ALLOC_INIT(brush_output_node_t, {0});
 	n->base                = logic_node_create(n);
 	n->raw                 = raw;
-	context_raw->brush_output_node_inst = n;
+	g_context->brush_output_node_inst = n;
 	return n;
 }
 

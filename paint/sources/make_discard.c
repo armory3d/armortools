@@ -41,7 +41,7 @@ void make_discard_material_id(node_shader_t *kong) {
 	    kong, "var picker_sample_tc: float2 = float2(input.wvpposition.x / input.wvpposition.w, input.wvpposition.y / input.wvpposition.w) * 0.5 + 0.5;");
 	node_shader_write_frag(kong, "picker_sample_tc.y = 1.0 - picker_sample_tc.y;");
 	node_shader_add_texture(kong, "texpaint_nor_undo", "_texpaint_nor_undo");
-	i32 matid = context_raw->materialid_picked / 255.0;
+	i32 matid = g_context->materialid_picked / 255.0;
 	node_shader_write_frag(kong,
 	                       string("if (%s != sample_lod(texpaint_nor_undo, sampler_linear, picker_sample_tc, 0.0).a) { discard; }", i32_to_string(matid)));
 }

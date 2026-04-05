@@ -2,7 +2,7 @@
 #include "global.h"
 
 void viewport_scale_to_bounds(f32 bounds) {
-	mesh_object_t *po          = context_raw->merged_object == NULL ? context_main_object() : context_raw->merged_object;
+	mesh_object_t *po          = g_context->merged_object == NULL ? context_main_object() : g_context->merged_object;
 	mesh_data_t   *md          = po->data;
 	vec4_t         aabb        = mesh_data_calculate_aabb(md);
 	f32            r           = math_sqrt(aabb.x * aabb.x + aabb.y * aabb.y + aabb.z * aabb.z);
@@ -27,11 +27,11 @@ void viewport_reset() {
 		if (string_equals(o->type, "camera_object")) {
 			cam->base->transform->local = mat4_from_f32_array(o->transform, 0);
 			transform_decompose(cam->base->transform);
-			cam->data->fov             = config_raw->camera_fov;
-			context_raw->cam_handle->i = 0;
+			cam->data->fov             = g_config->camera_fov;
+			g_context->cam_handle->i = 0;
 			cam->data->ortho           = NULL;
 			camera_object_build_proj(cam, -1.0);
-			context_raw->ddirty = 2;
+			g_context->ddirty = 2;
 			camera_reset(-1);
 			transform_reset(context_main_object()->base->transform);
 			break;
@@ -40,16 +40,16 @@ void viewport_reset() {
 }
 
 void viewport_set_view(f32 x, f32 y, f32 z, f32 rx, f32 ry, f32 rz) {
-	context_raw->paint_object->base->transform->rot   = quat_create(0, 0, 0, 1);
-	context_raw->paint_object->base->transform->dirty = true;
+	g_context->paint_object->base->transform->rot   = quat_create(0, 0, 0, 1);
+	g_context->paint_object->base->transform->dirty = true;
 	camera_object_t *cam                              = scene_camera;
 	f32              dist                             = vec4_len(cam->base->transform->loc);
 	cam->base->transform->loc                         = vec4_create(x * dist, y * dist, z * dist, 1.0);
 	cam->base->transform->rot                         = quat_from_euler(rx, ry, rz);
 	transform_build_matrix(cam->base->transform);
 	camera_object_build_proj(cam, -1.0);
-	context_raw->ddirty = 2;
-	camera_reset(context_raw->view_index_last);
+	g_context->ddirty = 2;
+	camera_reset(g_context->view_index_last);
 }
 
 void viewport_orbit(f32 x, f32 y) {
@@ -59,7 +59,7 @@ void viewport_orbit(f32 x, f32 y) {
 	transform_rotate(cam->base->transform, vec4_create(0, 0, 1, 1.0), x);
 	transform_rotate(cam->base->transform, camera_object_right_world(cam), y);
 	transform_move(cam->base->transform, camera_object_look_world(cam), -dist);
-	context_raw->ddirty = 2;
+	g_context->ddirty = 2;
 }
 
 void viewport_orbit_opposite() {
@@ -72,7 +72,7 @@ void viewport_orbit_opposite() {
 void viewport_zoom(f32 f) {
 	camera_object_t *cam = scene_camera;
 	transform_move(cam->base->transform, camera_object_look(cam), f);
-	context_raw->ddirty = 2;
+	g_context->ddirty = 2;
 }
 
 void viewport_update_camera_type(i32 camera_type) {
@@ -90,7 +90,7 @@ void viewport_update_camera_type(i32 camera_type) {
 		cam->data->ortho  = f32a;
 	}
 	camera_object_build_proj(cam, -1.0);
-	context_raw->ddirty = 2;
+	g_context->ddirty = 2;
 }
 
 void viewport_capture_screenshot() {
@@ -107,14 +107,14 @@ void viewport_capture_screenshot() {
 	draw_begin(screenshot, false, 0);
 	draw_image(tex, 0, 0);
 	draw_end();
-	if (project_raw->packed_assets == NULL) {
-		project_raw->packed_assets = any_array_create_from_raw((void *[]){}, 0);
+	if (g_project->packed_assets == NULL) {
+		g_project->packed_assets = any_array_create_from_raw((void *[]){}, 0);
 	}
 
 	i32   num = 0;
 	char *abs = "/packed/screenshot0.png";
-	for (i32 i = 0; i < project_raw->packed_assets->length; ++i) {
-		packed_asset_t *pa = project_raw->packed_assets->buffer[i];
+	for (i32 i = 0; i < g_project->packed_assets->length; ++i) {
+		packed_asset_t *pa = g_project->packed_assets->buffer[i];
 		if (string_equals(pa->name, abs)) {
 			i = 0;
 			num++;
@@ -123,7 +123,7 @@ void viewport_capture_screenshot() {
 	}
 	packed_asset_t *pa =
 	    GC_ALLOC_INIT(packed_asset_t, {.name = abs, .bytes = iron_encode_png(gpu_get_texture_pixels(screenshot), screenshot->width, screenshot->height, 0)});
-	any_array_push(project_raw->packed_assets, pa);
+	any_array_push(g_project->packed_assets, pa);
 	any_map_set(data_cached_images, abs, screenshot);
 	import_texture_run(abs, true);
 }

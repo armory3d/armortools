@@ -5,20 +5,20 @@ i32 _tab_brushes_draw_i;
 
 void tab_brushes_draw_make_brush_preview(void *_) {
 	i32           i      = _tab_brushes_draw_i;
-	slot_brush_t *_brush = context_raw->brush;
-	context_raw->brush   = project_brushes->buffer[i];
+	slot_brush_t *_brush = g_context->brush;
+	g_context->brush   = project_brushes->buffer[i];
 	make_material_parse_brush();
 	util_render_make_brush_preview();
-	context_raw->brush = _brush;
+	g_context->brush = _brush;
 }
 
 void tab_brushes_draw_duplicate(void *_) {
 	i32 i              = _tab_brushes_draw_i;
-	context_raw->brush = slot_brush_create(NULL);
-	any_array_push(project_brushes, context_raw->brush);
+	g_context->brush = slot_brush_create(NULL);
+	any_array_push(project_brushes, g_context->brush);
 	void *cloned               = util_clone_canvas(project_brushes->buffer[i]->canvas);
-	context_raw->brush->canvas = cloned;
-	context_set_brush(context_raw->brush);
+	g_context->brush->canvas = cloned;
+	context_set_brush(g_context->brush);
 	util_render_make_brush_preview();
 }
 
@@ -59,8 +59,8 @@ void tab_brushes_draw(ui_handle_t *htab) {
 		    3);
 		ui_row(row);
 		if (ui_icon_button(tr("New"), ICON_PLUS, UI_ALIGN_CENTER)) {
-			context_raw->brush = slot_brush_create(NULL);
-			any_array_push(project_brushes, context_raw->brush);
+			g_context->brush = slot_brush_create(NULL);
+			any_array_push(project_brushes, g_context->brush);
 			make_material_parse_brush();
 			ui_nodes_hwnd->redraws = 2;
 		}
@@ -80,7 +80,7 @@ void tab_brushes_draw(ui_handle_t *htab) {
 		}
 
 		for (i32 row = 0; row < math_floor(math_ceil(project_brushes->length / (float)num)); ++row) {
-			i32          mult = config_raw->show_asset_names ? 2 : 1;
+			i32          mult = g_config->show_asset_names ? 2 : 1;
 			f32_array_t *ar   = f32_array_create_from_raw((f32[]){}, 0);
 			for (i32 i = 0; i < num * mult; ++i) {
 				f32_array_push(ar, 1 / (float)num);
@@ -88,7 +88,7 @@ void tab_brushes_draw(ui_handle_t *htab) {
 			ui_row(ar);
 
 			ui->_x += 2;
-			f32 off = config_raw->show_asset_names ? UI_ELEMENT_OFFSET() * 10.0 : 6;
+			f32 off = g_config->show_asset_names ? UI_ELEMENT_OFFSET() * 10.0 : 6;
 			if (row > 0) {
 				ui->_y += off;
 			}
@@ -98,7 +98,7 @@ void tab_brushes_draw(ui_handle_t *htab) {
 				i32 i    = j + row * num;
 				if (i >= project_brushes->length) {
 					ui_end_element_of_size(imgw);
-					if (config_raw->show_asset_names) {
+					if (g_config->show_asset_names) {
 						ui_end_element_of_size(0);
 					}
 					continue;
@@ -106,12 +106,12 @@ void tab_brushes_draw(ui_handle_t *htab) {
 				gpu_texture_t *img      = UI_SCALE() > 1 ? project_brushes->buffer[i]->image : project_brushes->buffer[i]->image_icon;
 				gpu_texture_t *img_full = project_brushes->buffer[i]->image;
 
-				if (context_raw->brush == project_brushes->buffer[i]) {
+				if (g_context->brush == project_brushes->buffer[i]) {
 					// ui_fill(1, -2, img.width + 3, img.height + 3, ui.ops.theme.HIGHLIGHT_COL); // TODO
 					i32 off = row % 2 == 1 ? 1 : 0;
 					i32 w   = 50;
-					if (config_raw->window_scale > 1) {
-						w += math_floor(config_raw->window_scale * 2);
+					if (g_config->window_scale > 1) {
+						w += math_floor(g_config->window_scale * 2);
 					}
 					ui_fill(-1, -2, w + 3, 2, ui->ops->theme->HIGHLIGHT_COL);
 					ui_fill(-1, w - off, w + 3, 2 + off, ui->ops->theme->HIGHLIGHT_COL);
@@ -125,13 +125,13 @@ void tab_brushes_draw(ui_handle_t *htab) {
 				ui_state_t state = project_brushes->buffer[i]->preview_ready ? ui_image(img, 0xffffffff, -1.0)
 				                                                             : ui_sub_image(resource_get("icons.k"), -1, -1.0, tile * 5, tile, tile, tile);
 				if (state == UI_STATE_STARTED) {
-					if (context_raw->brush != project_brushes->buffer[i]) {
+					if (g_context->brush != project_brushes->buffer[i]) {
 						context_select_brush(i);
 					}
-					if (sys_time() - context_raw->select_time < 0.2) {
+					if (sys_time() - g_context->select_time < 0.2) {
 						ui_base_show_brush_nodes();
 					}
-					context_raw->select_time = sys_time();
+					g_context->select_time = sys_time();
 					// app_drag_off_x = -(mouse_x - uix - ui._windowX - 3);
 					// app_drag_off_y = -(mouse_y - uiy - ui._windowY + 1);
 					// app_drag_brush = raw.brush;
@@ -155,7 +155,7 @@ void tab_brushes_draw(ui_handle_t *htab) {
 					}
 				}
 
-				if (config_raw->show_asset_names) {
+				if (g_config->show_asset_names) {
 					ui->_x = uix;
 					ui->_y += slotw * 0.9;
 					ui_text(project_brushes->buffer[i]->canvas->name, UI_ALIGN_CENTER, 0x00000000);
@@ -176,7 +176,7 @@ void tab_brushes_draw(ui_handle_t *htab) {
 		                ui->input_y < ui->_window_y + ui->_window_h;
 		if (in_focus && ui->is_delete_down && project_brushes->length > 1) {
 			ui->is_delete_down = false;
-			tab_brushes_delete_brush(context_raw->brush);
+			tab_brushes_delete_brush(g_context->brush);
 		}
 	}
 }

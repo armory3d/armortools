@@ -85,7 +85,7 @@ void render_path_preview_commands_preview() {
 	render_path_draw_skydome("Scene/world_pass/world_pass");
 
 	char        *framebuffer     = "texpreview";
-	slot_material_t *selected_mat    = context_raw->material;
+	slot_material_t *selected_mat    = g_context->material;
 	render_target_t *texpreview      = any_map_get(render_path_render_targets, "texpreview");
 	render_target_t *texpreview_icon = any_map_get(render_path_render_targets, "texpreview_icon");
 	texpreview->_image               = selected_mat->image;
@@ -124,7 +124,7 @@ void render_path_preview_commands_decal() {
 
 	char        *framebuffer = "texpreview";
 	render_target_t *texpreview  = any_map_get(render_path_render_targets, "texpreview");
-	texpreview->_image           = context_raw->decal_image;
+	texpreview->_image           = g_context->decal_image;
 
 	render_path_set_target(framebuffer, NULL, NULL, GPU_CLEAR_NONE, 0, 0.0);
 

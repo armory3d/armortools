@@ -58,8 +58,8 @@ void import_texture_run(char *path, bool hdr_as_envmap) {
 	char             *name  = ar->buffer[ar->length - 1];
 	asset_t          *asset = GC_ALLOC_INIT(asset_t, {.name = name, .file = path, .id = project_asset_id++});
 	any_array_push(project_assets, asset);
-	if (context_raw->texture == NULL) {
-		context_raw->texture = asset;
+	if (g_context->texture == NULL) {
+		g_context->texture = asset;
 	}
 	any_array_push(project_asset_names, name);
 	any_imap_set(project_asset_map, asset->id, image);

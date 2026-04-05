@@ -13,7 +13,7 @@ void import_mesh_run(char *path, bool _clear_layers, bool replace_existing) {
 	}
 
 	import_mesh_clear_layers  = _clear_layers;
-	context_raw->layer_filter = 0;
+	g_context->layer_filter = 0;
 
 	gc_unroot(import_mesh_meshes_to_unwrap);
 	import_mesh_meshes_to_unwrap = NULL;
@@ -67,10 +67,10 @@ i32 import_mesh_finish_import_sort(void **pa, void **pb) {
 }
 
 void import_mesh_finish_import() {
-	if (context_raw->merged_object != NULL) {
-		mesh_data_delete(context_raw->merged_object->data);
-		mesh_object_remove(context_raw->merged_object);
-		context_raw->merged_object = NULL;
+	if (g_context->merged_object != NULL) {
+		mesh_data_delete(g_context->merged_object->data);
+		mesh_object_remove(g_context->merged_object);
+		g_context->merged_object = NULL;
 	}
 
 	context_select_paint_object(context_main_object());
@@ -85,23 +85,23 @@ void import_mesh_finish_import() {
 		// Sort by name
 		array_sort(project_paint_objects, &import_mesh_finish_import_sort);
 
-		if (context_raw->merged_object == NULL) {
+		if (g_context->merged_object == NULL) {
 			util_mesh_merge(NULL);
 		}
-		context_raw->paint_object->skip_context   = "paint";
-		context_raw->merged_object->base->visible = true;
+		g_context->paint_object->skip_context   = "paint";
+		g_context->merged_object->base->visible = true;
 	}
 
 	viewport_scale_to_bounds(2.0);
 
-	if (string_equals(context_raw->paint_object->base->name, "")) {
-		context_raw->paint_object->base->name = "Object";
+	if (string_equals(g_context->paint_object->base->name, "")) {
+		g_context->paint_object->base->name = "Object";
 	}
 	make_material_parse_paint_material(true);
 	make_material_parse_mesh_material();
 	ui_view2d_hwnd->redraws    = 2;
 	render_path_raytrace_ready = false;
-	context_raw->paint_body    = NULL;
+	g_context->paint_body    = NULL;
 }
 
 void _import_mesh_make_mesh_finish_import(void *_) {
@@ -116,31 +116,31 @@ void _import_mesh_make_mesh(raw_mesh_t *mesh) {
 	mesh_data_t *raw = import_mesh_raw_mesh(mesh);
 
 	mesh_data_t *md           = mesh_data_create(raw);
-	context_raw->paint_object = context_main_object();
+	g_context->paint_object = context_main_object();
 
 	context_select_paint_object(context_main_object());
 	viewport_reset();
 
 	for (i32 i = 0; i < project_paint_objects->length; ++i) {
 		mesh_object_t *p = project_paint_objects->buffer[i];
-		if (p == context_raw->paint_object) {
+		if (p == g_context->paint_object) {
 			continue;
 		}
 		data_delete_mesh(p->data->_->handle);
 		mesh_object_remove(p);
 	}
 
-	char *handle = context_raw->paint_object->data->_->handle;
+	char *handle = g_context->paint_object->data->_->handle;
 	if (!string_equals(handle, "SceneSphere") && !string_equals(handle, "ScenePlane")) {
-		sys_notify_on_next_frame(&mesh_data_delete, context_raw->paint_object->data);
+		sys_notify_on_next_frame(&mesh_data_delete, g_context->paint_object->data);
 	}
 
-	mesh_object_set_data(context_raw->paint_object, md);
-	context_raw->paint_object->base->name = mesh->name;
+	mesh_object_set_data(g_context->paint_object, md);
+	g_context->paint_object->base->name = mesh->name;
 	gc_unroot(project_paint_objects);
 	project_paint_objects = any_array_create_from_raw(
 	    (void *[]){
-	        context_raw->paint_object,
+	        g_context->paint_object,
 	    },
 	    1);
 	gc_root(project_paint_objects);
@@ -148,7 +148,7 @@ void _import_mesh_make_mesh(raw_mesh_t *mesh) {
 	md->_->handle = string_copy(raw->name);
 	any_map_set(data_cached_meshes, md->_->handle, md);
 
-	context_raw->ddirty = 4;
+	g_context->ddirty = 4;
 
 	ui_base_hwnds->buffer[TAB_AREA_SIDEBAR0]->redraws = 2;
 	ui_base_hwnds->buffer[TAB_AREA_SIDEBAR1]->redraws = 2;
@@ -193,13 +193,13 @@ char *_import_mesh_number_ext(i32 i) {
 void _import_mesh_add_mesh(raw_mesh_t *mesh) {
 	mesh_data_t *raw = import_mesh_raw_mesh(mesh);
 
-	if (context_raw->tool == TOOL_TYPE_GIZMO) {
+	if (g_context->tool == TOOL_TYPE_GIZMO) {
 		util_mesh_pack_uvs(mesh->texa);
 	}
 
 	mesh_data_t *md = mesh_data_create(raw);
 
-	mesh_object_t *object = scene_add_mesh_object(md, context_raw->paint_object->material, context_raw->paint_object->base);
+	mesh_object_t *object = scene_add_mesh_object(md, g_context->paint_object->material, g_context->paint_object->base);
 	object->base->name    = mesh->name;
 	object->skip_context  = "paint";
 
@@ -217,7 +217,7 @@ void _import_mesh_add_mesh(raw_mesh_t *mesh) {
 	md->_->handle = string_copy(raw->name);
 	any_map_set(data_cached_meshes, md->_->handle, md);
 
-	context_raw->ddirty = 4;
+	g_context->ddirty = 4;
 
 	ui_base_hwnds->buffer[TAB_AREA_SIDEBAR0]->redraws = 2;
 	util_uv_uvmap_cached                              = false;

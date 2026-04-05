@@ -42,7 +42,7 @@ void ui_menu_render() {
 	i32 _ELEMENT_OFFSET            = ui->ops->theme->ELEMENT_OFFSET;
 	ui->ops->theme->ELEMENT_OFFSET = 0;
 	i32 _ELEMENT_H                 = ui->ops->theme->ELEMENT_H;
-	ui->ops->theme->ELEMENT_H      = config_raw->touch_ui ? (28 + 2) : 28;
+	ui->ops->theme->ELEMENT_H      = g_config->touch_ui ? (28 + 2) : 28;
 
 	if (ui_menu_nested) {
 		ui_menu_show_first = true;
@@ -115,7 +115,7 @@ void ui_menu_separator() {
 }
 
 bool ui_menu_button(char *text, char *label, icon_t icon) {
-	if (config_raw->touch_ui && !string_equals(label, ">")) {
+	if (g_config->touch_ui && !string_equals(label, ">")) {
 		label = "";
 	}
 	i32  _x_left = ui->_x;
@@ -132,7 +132,7 @@ bool ui_menu_button(char *text, char *label, icon_t icon) {
 		i32            icon_h    = 25 * UI_SCALE();
 		ui->_x                   = _x_left - 5 * UI_SCALE();
 		ui->_y                   = _y_top - 1;
-		if (config_raw->touch_ui) {
+		if (g_config->touch_ui) {
 			ui->_x = _x_left - 2 * UI_SCALE();
 			ui->_y = _y_top + 2 * UI_SCALE();
 		}
@@ -158,7 +158,7 @@ bool ui_icon_button(char *text, icon_t icon, ui_align_t align) {
 
 	char *tooltip = "";
 	i32   textw   = draw_string_width(ui->ops->font, ui->font_size, text);
-	f32   wmax    = config_raw->touch_ui ? 0.9 : 0.8;
+	f32   wmax    = g_config->touch_ui ? 0.9 : 0.8;
 	if (textw > _w * wmax) {
 		tooltip = string_copy(text);
 		text    = "";
@@ -180,7 +180,7 @@ bool ui_icon_button(char *text, icon_t icon, ui_align_t align) {
 		ui->_x                   = align == UI_ALIGN_LEFT ? _x_left : _x_left + _w / 2.0 - textw / 2.0 - icon_h / 2.0;
 		ui->_y                   = _y_top;
 
-		if (config_raw->touch_ui) {
+		if (g_config->touch_ui) {
 			ui->_x += 1 * UI_SCALE();
 			if (!string_equals(text, "")) {
 				ui->_x += 5 * UI_SCALE();
@@ -230,7 +230,7 @@ void ui_menu_label(char *text, char *shortcut) {
 }
 
 void ui_menu_align() {
-	if (!config_raw->touch_ui) {
+	if (!g_config->touch_ui) {
 		f32_array_t *row = f32_array_create_from_raw(
 		    (f32[]){
 		        12 / 100.0,

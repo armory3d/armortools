@@ -3,11 +3,11 @@
 
 void make_texcoord_run(node_shader_t *kong) {
 
-	bool      fill_layer = context_raw->layer->fill_layer != NULL;
-	uv_type_t uv_type    = fill_layer ? context_raw->layer->uv_type : context_raw->brush_paint;
+	bool      fill_layer = g_context->layer->fill_layer != NULL;
+	uv_type_t uv_type    = fill_layer ? g_context->layer->uv_type : g_context->brush_paint;
 	bool      decal      = context_is_decal();
-	f32       angle      = context_raw->brush_angle + context_raw->brush_nodes_angle;
-	f32       uv_angle   = fill_layer ? context_raw->layer->angle : angle;
+	f32       angle      = g_context->brush_angle + g_context->brush_nodes_angle;
+	f32       uv_angle   = fill_layer ? g_context->layer->angle : angle;
 
 	if (uv_type == UV_TYPE_PROJECT || decal) { // TexCoords - project
 		node_shader_add_constant(kong, "brush_scale: float", "_brush_scale");
@@ -24,7 +24,7 @@ void make_texcoord_run(node_shader_t *kong) {
 
 			kong->frag_n = true;
 			node_shader_add_constant(kong, "decal_layer_nor: float3", "_decal_layer_nor");
-			f32 dot_angle = context_raw->brush_angle_reject_dot;
+			f32 dot_angle = g_context->brush_angle_reject_dot;
 			node_shader_write_frag(kong, string("if (abs(dot(n, constants.decal_layer_nor) - 1.0) > %s) { discard; }", f32_to_string(dot_angle)));
 
 			kong->frag_wposition = true;
@@ -39,7 +39,7 @@ void make_texcoord_run(node_shader_t *kong) {
 			node_shader_write_attrib_frag(kong, "uvsp.x *= constants.aspect_ratio;");
 			node_shader_write_attrib_frag(kong, "uvsp = uvsp * (0.21 / (constants.decal_mask.w * 0.9));");
 
-			if (context_raw->brush_directional) {
+			if (g_context->brush_directional) {
 				node_shader_add_constant(kong, "brush_direction: float3", "_brush_direction");
 				node_shader_write_attrib_frag(kong, "if (constants.brush_direction.z == 0.0) { discard; }");
 				node_shader_write_attrib_frag(kong, "uvsp = float2(uvsp.x * constants.brush_direction.x - uvsp.y * constants.brush_direction.y, uvsp.x * "
@@ -72,7 +72,7 @@ void make_texcoord_run(node_shader_t *kong) {
 		node_shader_add_constant(kong, "brush_scale: float", "_brush_scale");
 		node_shader_add_out(kong, "tex_coord: float2");
 
-		if (context_raw->layer->uv_map == 1) {
+		if (g_context->layer->uv_map == 1) {
 			node_shader_write_vert(kong, "output.tex_coord = input.tex1 * constants.brush_scale;");
 		}
 		else {

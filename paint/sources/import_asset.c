@@ -29,13 +29,13 @@ void import_asset_run(char *path, f32 drop_x, f32 drop_y, bool show_box, bool hd
 		gc_unroot(_import_asset_done);
 		_import_asset_done = done;
 		gc_root(_import_asset_done);
-		file_cache_cloud(path, &import_asset_run_cache_cloud_done, config_raw->server);
+		file_cache_cloud(path, &import_asset_run_cache_cloud_done, g_config->server);
 
 		return;
 	}
 
 	if (path_is_mesh(path)) {
-		if (context_raw->tool == TOOL_TYPE_GIZMO) {
+		if (g_context->tool == TOOL_TYPE_GIZMO) {
 			// project_import_mesh_box(path, false, false, tab_meshes_import_mesh_done);
 			project_import_mesh_box(path, false, false, tab_scene_import_mesh_done);
 		}
@@ -64,9 +64,9 @@ void import_asset_run(char *path, f32 drop_x, f32 drop_y, bool show_box, bool hd
 			ui_nodes_hwnd->redraws           = 2;
 		}
 
-		if (context_raw->tool == TOOL_TYPE_COLORID && project_asset_names->length == 1) {
+		if (g_context->tool == TOOL_TYPE_COLORID && project_asset_names->length == 1) {
 			ui_header_handle->redraws = 2;
-			context_raw->ddirty       = 2;
+			g_context->ddirty       = 2;
 		}
 	}
 	else if (path_is_project(path)) {

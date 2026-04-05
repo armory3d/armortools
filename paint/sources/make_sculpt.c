@@ -86,8 +86,8 @@ node_shader_context_t *sculpt_make_sculpt_run(material_t *data, material_context
 	node_shader_add_constant(kong, "brush_opacity: float", "_brush_opacity");
 	node_shader_add_constant(kong, "brush_hardness: float", "_brush_hardness");
 
-	if (context_raw->tool == TOOL_TYPE_BRUSH || context_raw->tool == TOOL_TYPE_ERASER || context_raw->tool == TOOL_TYPE_CLONE ||
-	    context_raw->tool == TOOL_TYPE_BLUR || context_raw->tool == TOOL_TYPE_SMUDGE || context_raw->tool == TOOL_TYPE_PARTICLE || decal) {
+	if (g_context->tool == TOOL_TYPE_BRUSH || g_context->tool == TOOL_TYPE_ERASER || g_context->tool == TOOL_TYPE_CLONE ||
+	    g_context->tool == TOOL_TYPE_BLUR || g_context->tool == TOOL_TYPE_SMUDGE || g_context->tool == TOOL_TYPE_PARTICLE || decal) {
 		node_shader_write_frag(kong, "var dist: float = 0.0;");
 		node_shader_write_frag(kong, "var depth: float = sample_lod(gbufferD, sampler_linear, constants.inp.xy, 0.0).r;");
 		node_shader_add_constant(kong, "invVP: float4x4", "_inv_view_proj_matrix");
@@ -108,7 +108,7 @@ node_shader_context_t *sculpt_make_sculpt_run(material_t *data, material_context
 		node_shader_write_frag(kong, "dist = distance(wposition.xyz, winp.xyz);");
 		node_shader_write_frag(kong, "if (dist > constants.brush_radius) { discard; }");
 	}
-	else if (context_raw->tool == TOOL_TYPE_FILL) {
+	else if (g_context->tool == TOOL_TYPE_FILL) {
 		node_shader_write_frag(kong, "var dist: float = 0.0;");
 
 		node_shader_add_constant(kong, "W: float4x4", "_world_matrix");
@@ -118,7 +118,7 @@ node_shader_context_t *sculpt_make_sculpt_run(material_t *data, material_context
 
 	parser_material_parse_height            = true;
 	parser_material_parse_height_as_channel = true;
-	shader_out_t *sout                      = parser_material_parse(context_raw->material->canvas, con_paint, kong, matcon);
+	shader_out_t *sout                      = parser_material_parse(g_context->material->canvas, con_paint, kong, matcon);
 	char         *height                    = sout->out_height;
 	node_shader_write_frag(kong, string("var height: float = %s;", height));
 
@@ -199,9 +199,9 @@ void sculpt_layers_create_sculpt_layer() {
 	}
 
 	// util_mesh_merge();
-	// let md: mesh_data_t = context_raw.merged_object.data;
+	// let md: mesh_data_t = g_context.merged_object.data;
 
-	mesh_data_t *md = context_raw->paint_object->data;
+	mesh_data_t *md = g_context->paint_object->data;
 	sculpt_import_mesh_pack_to_texture(md, l);
 
 	i16_array_t *posa = i16_array_create(md->index_array->length * 4);
@@ -237,7 +237,7 @@ void sculpt_layers_create_sculpt_layer() {
 	                                               .scale_pos   = 1.0,
 	                                               .scale_tex   = 1.0});
 	md               = mesh_data_create(raw);
-	mesh_object_set_data(context_raw->paint_object, md);
+	mesh_object_set_data(g_context->paint_object, md);
 
 	make_material_parse_paint_material(true);
 	make_material_parse_mesh_material();
@@ -278,11 +278,11 @@ void sculpt_layers_create_sculpt_layer() {
 }
 
 void render_path_sculpt_commands() {
-	if (context_raw->pdirty <= 0) {
+	if (g_context->pdirty <= 0) {
 		return;
 	}
 
-	i32   tid             = context_raw->layer->id;
+	i32   tid             = g_context->layer->id;
 	char *texpaint_sculpt = string("texpaint_sculpt%s", i32_to_string(tid));
 	render_path_set_target("texpaint_blend1", NULL, NULL, GPU_CLEAR_NONE, 0, 0.0);
 	render_path_bind_target("texpaint_blend0", "tex");
@@ -294,7 +294,7 @@ void render_path_sculpt_commands() {
 	    1);
 	render_path_set_target(texpaint_sculpt, additional, NULL, GPU_CLEAR_NONE, 0, 0.0);
 	render_path_bind_target("gbufferD_undo", "gbufferD");
-	if (context_raw->xray || config_raw->brush_angle_reject) {
+	if (g_context->xray || g_config->brush_angle_reject) {
 		render_path_bind_target("gbuffer0", "gbuffer0");
 	}
 	render_path_bind_target("texpaint_blend1", "paintmask");

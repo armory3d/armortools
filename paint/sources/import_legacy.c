@@ -259,8 +259,8 @@ bool import_arm_is_old(buffer_t *b) {
 	return import_arm_is_legacy(b) || import_arm_is_version_2(b) || import_arm_is_version_3(b);
 }
 
-project_format_t *import_arm_from_legacy(any_map_t *old) {
-	project_format_t *project = GC_ALLOC_INIT(project_format_t, {0});
+project_t *import_arm_from_legacy(any_map_t *old) {
+	project_t *project = GC_ALLOC_INIT(project_t, {0});
 	project->version          = string_copy(manifest_version_project);
 	project->assets           = any_map_get(old, "assets");
 	if (project->assets == NULL) {
@@ -286,8 +286,8 @@ project_format_t *import_arm_from_legacy(any_map_t *old) {
 	return project;
 }
 
-project_format_t *import_arm_from_version_2(any_map_t *old) {
-	project_format_t *project = GC_ALLOC_INIT(project_format_t, {0});
+project_t *import_arm_from_version_2(any_map_t *old) {
+	project_t *project = GC_ALLOC_INIT(project_t, {0});
 	project->version          = string_copy(manifest_version_project);
 	project->assets           = any_map_get(old, "assets");
 	project->is_bgra          = armpack_map_get_i32(old, "is_bgra") > 0;
@@ -396,8 +396,8 @@ project_format_t *import_arm_from_version_2(any_map_t *old) {
 	return project;
 }
 
-project_format_t *import_arm_from_version_3(any_map_t *old) {
-	project_format_t *project = import_arm_from_version_2(old);
+project_t *import_arm_from_version_3(any_map_t *old) {
+	project_t *project = import_arm_from_version_2(old);
 	any_array_t      *lds     = any_map_get(old, "layer_datas");
 	for (i32 i = 0; i < lds->length; ++i) {
 		any_map_t    *old = lds->buffer[i];
@@ -411,7 +411,7 @@ project_format_t *import_arm_from_version_3(any_map_t *old) {
 	return project;
 }
 
-project_format_t *import_arm_from_old(buffer_t *b) {
+project_t *import_arm_from_old(buffer_t *b) {
 	any_map_t *old = armpack_decode_to_map(b);
 	if (import_arm_is_legacy(b)) {
 		return import_arm_from_legacy(old);

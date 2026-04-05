@@ -52,7 +52,7 @@ bool           redraw_minimap;
 i32            window_header_h;
 i32            _window_w;
 i32            _window_h;
-config_t      *config_raw;
+config_t      *g_config;
 
 void _kickstart() {
 	gc_unroot(ui_children);

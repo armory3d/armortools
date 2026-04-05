@@ -162,8 +162,8 @@ void _kickstart() {
 	translator_translations = any_map_create();
 	gc_root(translator_translations);
 
-	project_raw = GC_ALLOC_INIT(project_format_t, {0});
-	gc_root(project_raw);
+	g_project = GC_ALLOC_INIT(project_t, {0});
+	gc_root(g_project);
 
 	project_assets = any_array_create_from_raw((void *[]){}, 0);
 	gc_root(project_assets);
@@ -353,7 +353,7 @@ void _kickstart() {
 	double t_start = iron_time();
 #endif
 
-	if (config_raw->layout == NULL) {
+	if (g_config->layout == NULL) {
 		config_init_layout();
 	}
 	iron_set_app_name(manifest_title);
@@ -361,7 +361,7 @@ void _kickstart() {
 	uniforms_ext_init();
 	render_path_base_init();
 	render_path_deferred_init(); // Allocate gbuffer
-	if (config_raw->render_mode == RENDER_MODE_FORWARD) {
+	if (g_config->render_mode == RENDER_MODE_FORWARD) {
 		render_path_forward_init();
 		render_path_commands = render_path_forward_commands;
 		gc_root(render_path_commands);

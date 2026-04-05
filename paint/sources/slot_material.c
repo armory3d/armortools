@@ -47,7 +47,7 @@ slot_material_t *slot_material_create(material_data_t *m, ui_node_canvas_t *c) {
 		raw->canvas = util_clone_canvas(c);
 	}
 
-	if (config_raw->node_previews) {
+	if (g_config->node_previews) {
 		for (i32 i = 0; i < raw->canvas->nodes->length; ++i) {
 			ui_node_t *n = raw->canvas->nodes->buffer[i];
 			n->flags |= UI_NODE_FLAG_PREVIEW;

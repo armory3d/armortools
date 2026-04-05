@@ -42,7 +42,7 @@ for mat in bpy.data.materials:\n\
 ",
 	                  save, save, save);
 
-	iron_sys_command(string("\"%s\" \"%s\" -b --python-expr \"%s\"", config_raw->blender, _import_blend_material_path, py));
+	iron_sys_command(string("\"%s\" \"%s\" -b --python-expr \"%s\"", g_config->blender, _import_blend_material_path, py));
 	import_folder_run(save);
 }
 
@@ -63,7 +63,7 @@ void import_blend_material_run_box() {
 
 			ui_box_hide();
 
-			if (config_raw->blender == NULL || string_equals(config_raw->blender, "")) {
+			if (g_config->blender == NULL || string_equals(g_config->blender, "")) {
 				console_error(tr("Blender executable path not set"));
 				return;
 			}

@@ -25,9 +25,9 @@ void util_uv_cache_uv_map() {
 	}
 
 	util_uv_uvmap_cached  = true;
-	i32            mask   = slot_layer_get_object_mask(context_raw->layer);
-	mesh_object_t *merged = mask > 0 ? project_paint_objects->buffer[mask - 1] : context_raw->merged_object;
-	mesh_data_t   *mesh   = (context_raw->layer_filter == 0 && merged != NULL) ? merged->data : context_raw->paint_object->data;
+	i32            mask   = slot_layer_get_object_mask(g_context->layer);
+	mesh_object_t *merged = mask > 0 ? project_paint_objects->buffer[mask - 1] : g_context->merged_object;
+	mesh_data_t   *mesh   = (g_context->layer_filter == 0 && merged != NULL) ? merged->data : g_context->paint_object->data;
 
 	i16_array_t *texa = mesh->vertex_arrays->buffer[2]->values;
 	u32_array_t *inda = mesh->index_array;
@@ -69,7 +69,7 @@ void util_uv_cache_triangle_map() {
 	}
 
 	util_uv_trianglemap_cached = true;
-	mesh_data_t *merged        = context_raw->merged_object != NULL ? context_raw->merged_object->data : context_raw->paint_object->data;
+	mesh_data_t *merged        = g_context->merged_object != NULL ? g_context->merged_object->data : g_context->paint_object->data;
 	mesh_data_t *mesh          = merged;
 	i16_array_t *texa          = mesh->vertex_arrays->buffer[2]->values;
 	u32_array_t *inda          = mesh->index_array;
@@ -127,11 +127,11 @@ void util_uv_cache_dilate_map() {
 		// dilate_tex_unpack = getConstantLocation(pipeDilate, "tex_unpack");
 	}
 
-	i32 mask = context_object_mask_used() ? slot_layer_get_object_mask(context_raw->layer) : 0;
+	i32 mask = context_object_mask_used() ? slot_layer_get_object_mask(g_context->layer) : 0;
 	if (context_layer_filter_used()) {
-		mask = context_raw->layer_filter;
+		mask = g_context->layer_filter;
 	}
-	mesh_data_t *geom = mask == 0 && context_raw->merged_object != NULL ? context_raw->merged_object->data : context_raw->paint_object->data;
+	mesh_data_t *geom = mask == 0 && g_context->merged_object != NULL ? g_context->merged_object->data : g_context->paint_object->data;
 	_gpu_begin(util_uv_dilatemap, NULL, NULL, GPU_CLEAR_COLOR, 0x00000000, 0.0);
 	gpu_set_pipeline(util_uv_pipe_dilate);
 	gpu_set_vertex_buffer(geom->_->vertex_buffer);
@@ -178,8 +178,8 @@ void util_uv_cache_uv_island_map() {
 	util_render_pick_pos_nor_tex();
 	i32          w        = 2048; // config_get_texture_res_x()
 	i32          h        = 2048; // config_get_texture_res_y()
-	i32          x        = math_floor(context_raw->uvx_picked * w);
-	i32          y        = math_floor(context_raw->uvy_picked * h);
+	i32          x        = math_floor(g_context->uvx_picked * w);
+	i32          y        = math_floor(g_context->uvy_picked * h);
 	buffer_t    *bytes    = buffer_create(w * h);
 	i32_array_t *coords_x = i32_array_create_from_raw(
 	    (i32[]){

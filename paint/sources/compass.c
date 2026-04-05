@@ -8,7 +8,7 @@ object_t *_compass_hovered      = NULL;
 object_t *_compass_hovered_last = NULL;
 
 void compass_render() {
-	if (!context_raw->show_compass || config_raw->workspace == WORKSPACE_PLAYER) {
+	if (!g_context->show_compass || g_config->workspace == WORKSPACE_PLAYER) {
 		return;
 	}
 
@@ -91,7 +91,7 @@ bool _compass_compare_quat(quat_t a, quat_t b) {
 }
 
 void compass_update() {
-	if (!context_raw->show_compass) {
+	if (!g_context->show_compass) {
 		return;
 	}
 
@@ -99,7 +99,7 @@ void compass_update() {
 		gc_unroot(_compass_hovered_last);
 		_compass_hovered_last = _compass_hovered;
 		gc_root(_compass_hovered_last);
-		context_raw->ddirty = 2;
+		g_context->ddirty = 2;
 	}
 	gc_unroot(_compass_hovered);
 	_compass_hovered = NULL;

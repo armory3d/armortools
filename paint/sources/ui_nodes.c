@@ -32,10 +32,10 @@ ui_node_t *ui_nodes_node_changed = NULL;
 void (*_ui_nodes_render_tmp)(i32);
 
 void ui_viewnodes_on_node_remove(ui_node_t *n) {
-	gpu_texture_t *img = any_imap_get(context_raw->node_preview_map, n->id);
+	gpu_texture_t *img = any_imap_get(g_context->node_preview_map, n->id);
 	if (img != NULL) {
 		gpu_delete_texture(img);
-		imap_delete(context_raw->node_preview_map, n->id);
+		imap_delete(g_context->node_preview_map, n->id);
 	}
 }
 
@@ -207,7 +207,7 @@ void ui_viewnodes_on_link_drag(i32 link_drag_id, bool is_new_link) {
 	}
 	// Selecting which node socket to preview
 	else if (link_drag->from_id > -1) {
-		i32_imap_set(context_raw->node_preview_socket_map, node->id, link_drag->from_socket);
+		i32_imap_set(g_context->node_preview_socket_map, node->id, link_drag->from_socket);
 		gc_unroot(ui_nodes_node_changed);
 		ui_nodes_node_changed = node;
 		gc_root(ui_nodes_node_changed);
@@ -324,14 +324,14 @@ void ui_nodes_capture_output() {
 		return;
 	}
 
-	if (project_raw->packed_assets == NULL) {
-		project_raw->packed_assets = any_array_create_from_raw((void *[]){}, 0);
+	if (g_project->packed_assets == NULL) {
+		g_project->packed_assets = any_array_create_from_raw((void *[]){}, 0);
 	}
 
 	i32   num = 0;
 	char *abs = "/packed/node_preview0.png";
-	for (i32 i = 0; i < project_raw->packed_assets->length; ++i) {
-		packed_asset_t *pa = project_raw->packed_assets->buffer[i];
+	for (i32 i = 0; i < g_project->packed_assets->length; ++i) {
+		packed_asset_t *pa = g_project->packed_assets->buffer[i];
 		if (string_equals(pa->name, abs)) {
 			i = 0;
 			num++;
@@ -340,7 +340,7 @@ void ui_nodes_capture_output() {
 	}
 
 	packed_asset_t *pa = GC_ALLOC_INIT(packed_asset_t, {.name = abs, .bytes = iron_encode_png(gpu_get_texture_pixels(img), img->width, img->height, 0)});
-	any_array_push(project_raw->packed_assets, pa);
+	any_array_push(g_project->packed_assets, pa);
 	any_map_set(data_cached_images, abs, img);
 	import_texture_run(abs, true);
 }
@@ -412,7 +412,7 @@ void ui_viewnodes_on_canvas_context_menu() {
 			f32_array_t    *color      = selected->outputs->buffer[0]->default_value;
 			swatch_color_t *new_swatch = project_make_swatch(color_from_floats(color->buffer[0], color->buffer[1], color->buffer[2], color->buffer[3]));
 			context_set_swatch(new_swatch);
-			any_array_push(project_raw->swatches, new_swatch);
+			any_array_push(g_project->swatches, new_swatch);
 			ui_base_hwnds->buffer[TAB_AREA_STATUS]->redraws = 1;
 		}
 	}
@@ -455,7 +455,6 @@ void ui_viewnodes_on_canvas_released() {
 
 		// Node context menu
 		if (!ui_nodes_socket_released) {
-
 			gc_unroot(_ui_nodes_on_canvas_released_selected);
 			_ui_nodes_on_canvas_released_selected = selected;
 			gc_root(_ui_nodes_on_canvas_released_selected);
@@ -471,9 +470,9 @@ void ui_viewnodes_on_canvas_released() {
 			if (ui_input_in_rect(ui->_window_x + UI_NODE_X(node), ui->_window_y + UI_NODE_Y(node), UI_NODE_W(node), UI_NODE_H(canvas, node))) {
 				if (nodes->nodes_selected_id->length > 0 && node->id == nodes->nodes_selected_id->buffer[0]) {
 					ui_view2d_hwnd->redraws = 2;
-					if (sys_time() - context_raw->select_time < 0.2)
+					if (sys_time() - g_context->select_time < 0.2)
 						ui_base_show_2d_view(VIEW_2D_TYPE_NODE);
-					context_raw->select_time = sys_time();
+					g_context->select_time = sys_time();
 				}
 				break;
 			}
@@ -504,7 +503,7 @@ void ui_viewnodes_on_socket_released(i32 socket_id) {
 	// else {
 	// 	let i: i32 = array_index_of(node.outputs, socket);
 	// 	if (i > -1) {
-	// 		i32_imap_set(context_raw.node_preview_socket_map, node.id, i);
+	// 		i32_imap_set(g_context.node_preview_socket_map, node.id, i);
 	// 		ui_nodes_node_changed = node;
 	// 	}
 	// }
@@ -517,15 +516,15 @@ ui_canvas_control_t *ui_viewnodes_on_canvas_control() {
 }
 
 f32 ui_nodes_get_zoom_delta() {
-	return config_raw->zoom_direction == ZOOM_DIRECTION_VERTICAL              ? -ui->input_dy
-	       : config_raw->zoom_direction == ZOOM_DIRECTION_VERTICAL_INVERTED   ? -ui->input_dy
-	       : config_raw->zoom_direction == ZOOM_DIRECTION_HORIZONTAL          ? ui->input_dx
-	       : config_raw->zoom_direction == ZOOM_DIRECTION_HORIZONTAL_INVERTED ? ui->input_dx
+	return g_config->zoom_direction == ZOOM_DIRECTION_VERTICAL              ? -ui->input_dy
+	       : g_config->zoom_direction == ZOOM_DIRECTION_VERTICAL_INVERTED   ? -ui->input_dy
+	       : g_config->zoom_direction == ZOOM_DIRECTION_HORIZONTAL          ? ui->input_dx
+	       : g_config->zoom_direction == ZOOM_DIRECTION_HORIZONTAL_INVERTED ? ui->input_dx
 	                                                                          : -(ui->input_dy - ui->input_dx);
 }
 
 ui_canvas_control_t *ui_nodes_get_canvas_control(bool controls_down, bool is_node_view) {
-	if (config_raw->wrap_mouse && controls_down) {
+	if (g_config->wrap_mouse && controls_down) {
 		if (ui->input_x < ui->_window_x) {
 			ui->input_x = ui->_window_x + ui->_window_w;
 			iron_mouse_set_position(math_floor(ui->input_x), math_floor(ui->input_y));
@@ -598,11 +597,11 @@ ui_node_canvas_t *ui_nodes_get_canvas(bool groups) {
 			return ui_nodes_tabs->buffer[ui_nodes_tab_index()]->canvas;
 		}
 		else {
-			return context_raw->material->canvas;
+			return g_context->material->canvas;
 		}
 	}
 	else {
-		return context_raw->brush->canvas;
+		return g_context->brush->canvas;
 	}
 }
 
@@ -615,11 +614,11 @@ ui_nodes_t *ui_nodes_get_nodes() {
 			return ui_nodes_tabs->buffer[ui_nodes_tab_index()]->nodes;
 		}
 		else {
-			return context_raw->material->nodes;
+			return g_context->material->nodes;
 		}
 	}
 	else {
-		return context_raw->brush->nodes;
+		return g_context->brush->nodes;
 	}
 }
 
@@ -632,12 +631,12 @@ void ui_nodes_update(void *_) {
 	ui_nodes_wy = ui_header_h * 2;
 
 	if (ui_view2d_show && base_view3d_show) {
-		ui_nodes_wy += sys_h() - config_raw->layout->buffer[LAYOUT_SIZE_NODES_H];
+		ui_nodes_wy += sys_h() - g_config->layout->buffer[LAYOUT_SIZE_NODES_H];
 	}
 
-	i32 ww = config_raw->layout->buffer[LAYOUT_SIZE_NODES_W];
+	i32 ww = g_config->layout->buffer[LAYOUT_SIZE_NODES_W];
 	if (!ui_base_show) {
-		ww += config_raw->layout->buffer[LAYOUT_SIZE_SIDEBAR_W] + ui_toolbar_w(true);
+		ww += g_config->layout->buffer[LAYOUT_SIZE_SIDEBAR_W] + ui_toolbar_w(true);
 		ui_nodes_wx -= ui_toolbar_w(true);
 		ui_nodes_wy = 0;
 	}
@@ -724,9 +723,9 @@ i32 ui_nodes_get_node_y() {
 }
 
 gpu_texture_t *ui_nodes_draw_grid(f32 zoom) {
-	i32 ww = config_raw->layout->buffer[LAYOUT_SIZE_NODES_W];
+	i32 ww = g_config->layout->buffer[LAYOUT_SIZE_NODES_W];
 	if (!ui_base_show) {
-		ww += config_raw->layout->buffer[LAYOUT_SIZE_SIDEBAR_W] + ui_toolbar_w(true);
+		ww += g_config->layout->buffer[LAYOUT_SIZE_SIDEBAR_W] + ui_toolbar_w(true);
 	}
 	if (!base_view3d_show) {
 		ww += base_view3d_w();
@@ -784,12 +783,12 @@ void ui_nodes_recompile() {
 			ui_base_hwnds->buffer[TAB_AREA_SIDEBAR1]->redraws = 2;
 		}
 		else {
-			slot_material_t *_material = context_raw->material;
+			slot_material_t *_material = g_context->material;
 			if (ui_nodes_is_tab_selected()) {
-				context_raw->material = ui_nodes_tabs->buffer[ui_nodes_tab_index()];
+				g_context->material = ui_nodes_tabs->buffer[ui_nodes_tab_index()];
 			}
 			layers_is_fill_material() ? layers_update_fill_layers() : util_render_make_material_preview();
-			context_raw->material = _material;
+			g_context->material = _material;
 
 			if (ui_view2d_show && ui_view2d_type == VIEW_2D_TYPE_NODE) {
 				ui_view2d_hwnd->redraws = 2;
@@ -797,8 +796,8 @@ void ui_nodes_recompile() {
 		}
 
 		ui_base_hwnds->buffer[TAB_AREA_SIDEBAR1]->redraws = 2;
-		if (context_raw->split_view) {
-			context_raw->ddirty = 2;
+		if (g_context->split_view) {
+			g_context->ddirty = 2;
 		}
 
 		ui_nodes_recompile_mat = false;
@@ -837,7 +836,7 @@ void ui_nodes_get_linked_nodes(ui_node_t_array_t *linked_nodes, ui_node_t *n, ui
 void ui_nodes_render_color_picker_callback(swatch_color_t *color) {
 	_ui_nodes_render_tmp(color->base);
 	ui_nodes_hwnd->redraws = 2;
-	bool material_live     = config_raw->material_live;
+	bool material_live     = g_config->material_live;
 	if (material_live) {
 		ui_nodes_canvas_changed();
 	}
@@ -915,7 +914,7 @@ void ui_nodes_draw_menubar() {
 			ui_nodes_menu_category = i;
 			ui_nodes_popup_x       = ui_nodes_wx + ui->_x;
 			ui_nodes_popup_y       = ui_nodes_wy + ui->_y;
-			if (config_raw->touch_ui) {
+			if (g_config->touch_ui) {
 				ui_nodes_show_menu_first = true;
 				i32 menuw                = math_floor(ew * 2.3);
 				ui_nodes_popup_x -= menuw / 2.0;
@@ -925,7 +924,7 @@ void ui_nodes_draw_menubar() {
 		ui->_x += ui->_w + 3;
 		ui->_y = 2 + start_y;
 	}
-	if (config_raw->touch_ui) {
+	if (g_config->touch_ui) {
 		i32 _w = ui->_w;
 		ui->_w = math_floor(36 * UI_SCALE());
 		ui->_y = 4 * UI_SCALE() + start_y;
@@ -1035,7 +1034,7 @@ ui_node_t *ui_nodes_make_group_node(ui_node_canvas_t *group_canvas, ui_nodes_t *
 }
 
 void ui_nodes_make_node_preview(ui_node_t *node) {
-	context_raw->node_preview_name = string_copy(node->name);
+	g_context->node_preview_name = string_copy(node->name);
 
 	if (string_equals(node->type, "LAYER") || string_equals(node->type, "LAYER_MASK") || string_equals(node->type, "MATERIAL") ||
 	    string_equals(node->type, "OUTPUT_MATERIAL_PBR")) {
@@ -1051,10 +1050,10 @@ void ui_nodes_make_node_preview(ui_node_t *node) {
 		return;
 	}
 
-	gpu_texture_t *img = any_imap_get(context_raw->node_preview_map, node->id);
+	gpu_texture_t *img = any_imap_get(g_context->node_preview_map, node->id);
 	if (img == NULL) {
 		img = gpu_create_render_target(util_render_node_preview_size, util_render_node_preview_size, GPU_TEXTURE_FORMAT_RGBA32);
-		any_imap_set(context_raw->node_preview_map, node->id, img);
+		any_imap_set(g_context->node_preview_map, node->id, img);
 	}
 
 	ui_nodes_hwnd->redraws = 2;
@@ -1103,7 +1102,7 @@ void ui_nodes_render(void *_) {
 
 		// If script node is present, update selected node preview on every frame
 		bool              has_script_node = false;
-		ui_node_canvas_t *canvas          = context_raw->material->canvas;
+		ui_node_canvas_t *canvas          = g_context->material->canvas;
 		for (i32 i = 0; i < canvas->nodes->length; ++i) {
 			ui_node_t *n = canvas->nodes->buffer[i];
 			if (string_equals(n->type, "SCRIPT_CPU")) {
@@ -1142,12 +1141,12 @@ void ui_nodes_render(void *_) {
 	ui_begin(ui);
 
 	// Make window
-	ui_nodes_ww = config_raw->layout->buffer[LAYOUT_SIZE_NODES_W];
+	ui_nodes_ww = g_config->layout->buffer[LAYOUT_SIZE_NODES_W];
 	ui_nodes_wx = math_floor(sys_w()) + ui_toolbar_w(true);
 	ui_nodes_wy = 0;
 
 	if (!ui_base_show) {
-		ui_nodes_ww += config_raw->layout->buffer[LAYOUT_SIZE_SIDEBAR_W] + ui_toolbar_w(true);
+		ui_nodes_ww += g_config->layout->buffer[LAYOUT_SIZE_SIDEBAR_W] + ui_toolbar_w(true);
 		ui_nodes_wx -= ui_toolbar_w(true);
 	}
 	if (!base_view3d_show) {
@@ -1156,14 +1155,14 @@ void ui_nodes_render(void *_) {
 
 	i32 ew      = math_floor(UI_ELEMENT_W() * 0.7);
 	ui_nodes_wh = sys_h();
-	if (config_raw->layout->buffer[LAYOUT_SIZE_HEADER] == 1) {
+	if (g_config->layout->buffer[LAYOUT_SIZE_HEADER] == 1) {
 		ui_nodes_wh += ui_header_h * 2;
 	}
 
 	if (ui_view2d_show) {
-		ui_nodes_wh = config_raw->layout->buffer[LAYOUT_SIZE_NODES_H];
-		ui_nodes_wy = sys_h() - config_raw->layout->buffer[LAYOUT_SIZE_NODES_H] + ui_header_h;
-		if (config_raw->layout->buffer[LAYOUT_SIZE_HEADER] == 1) {
+		ui_nodes_wh = g_config->layout->buffer[LAYOUT_SIZE_NODES_H];
+		ui_nodes_wy = sys_h() - g_config->layout->buffer[LAYOUT_SIZE_NODES_H] + ui_header_h;
+		if (g_config->layout->buffer[LAYOUT_SIZE_HEADER] == 1) {
 			ui_nodes_wy += ui_header_h;
 		}
 		else {
@@ -1177,9 +1176,9 @@ void ui_nodes_render(void *_) {
 	if (!base_view3d_show && ui_view2d_show) {
 		ui_nodes_wx = base_view3d_w();
 		ui_nodes_wy = 0;
-		ui_nodes_ww = config_raw->layout->buffer[LAYOUT_SIZE_NODES_W];
+		ui_nodes_ww = g_config->layout->buffer[LAYOUT_SIZE_NODES_W];
 		ui_nodes_wh = sys_h();
-		if (config_raw->layout->buffer[LAYOUT_SIZE_HEADER] == 1) {
+		if (g_config->layout->buffer[LAYOUT_SIZE_HEADER] == 1) {
 			ui_nodes_wh += ui_header_h * 2;
 		}
 	}
@@ -1190,8 +1189,8 @@ void ui_nodes_render(void *_) {
 
 	if (ui_window(ui_nodes_hwnd, ui_nodes_wx, ui_nodes_wy, ui_nodes_ww, ui_nodes_wh, false)) {
 
-		if (!config_raw->touch_ui) {
-			bool expand = !base_view3d_show && config_raw->layout->buffer[LAYOUT_SIZE_SIDEBAR_W] == 0;
+		if (!g_config->touch_ui) {
+			bool expand = !base_view3d_show && g_config->layout->buffer[LAYOUT_SIZE_SIDEBAR_W] == 0;
 			ui_tab(ui_nodes_htab, expand ? string("%s          ", tr("Nodes")) : tr("Nodes"), false, -1, !base_view3d_show);
 
 			// Additional tabs
@@ -1211,7 +1210,7 @@ void ui_nodes_render(void *_) {
 				}
 
 				if (ui_tab(ui_nodes_htab, tr("+"), false, -1, false)) {
-					any_array_push(ui_nodes_tabs, context_raw->material);
+					any_array_push(ui_nodes_tabs, g_context->material);
 				}
 			}
 		}
@@ -1235,20 +1234,20 @@ void ui_nodes_render(void *_) {
 		i32  header_h            = UI_ELEMENT_H() * 2 + UI_ELEMENT_OFFSET() * 2;
 		bool header_hover        = ui->input_y < ui->_window_y + header_h;
 		ui->input_enabled        = _input_enabled && !ui_nodes_show_menu && !header_hover;
-		ui->window_border_right  = config_raw->layout->buffer[LAYOUT_SIZE_SIDEBAR_W];
+		ui->window_border_right  = g_config->layout->buffer[LAYOUT_SIZE_SIDEBAR_W];
 		ui->window_border_top    = ui_header_h * 2;
-		ui->window_border_bottom = config_raw->layout->buffer[LAYOUT_SIZE_STATUS_H];
+		ui->window_border_bottom = g_config->layout->buffer[LAYOUT_SIZE_STATUS_H];
 
 		ui_node_canvas(ui_nodes, c);
 		ui->input_enabled = _input_enabled;
 
 		if (ui_nodes->color_picker_callback != NULL) {
-			context_raw->color_picker_previous_tool = context_raw->tool;
+			g_context->color_picker_previous_tool = g_context->tool;
 			context_select_tool(TOOL_TYPE_PICKER);
 			gc_unroot(_ui_nodes_render_tmp);
 			_ui_nodes_render_tmp = ui_nodes->color_picker_callback;
 			gc_root(_ui_nodes_render_tmp);
-			context_raw->color_picker_callback = &ui_nodes_render_color_picker_callback;
+			g_context->color_picker_callback = &ui_nodes_render_color_picker_callback;
 			;
 			ui_nodes->color_picker_callback = NULL;
 		}
@@ -1297,7 +1296,7 @@ void ui_nodes_render(void *_) {
 
 		// Recompile material on change
 		if (ui->changed) {
-			ui_nodes_recompile_mat = (ui->input_dx != 0 || ui->input_dy != 0 || !ui_nodes_uichanged_last) && config_raw->material_live; // Instant preview
+			ui_nodes_recompile_mat = (ui->input_dx != 0 || ui->input_dy != 0 || !ui_nodes_uichanged_last) && g_config->material_live; // Instant preview
 		}
 		else if (ui_nodes_uichanged_last) {
 			ui_nodes_canvas_changed();
@@ -1306,7 +1305,7 @@ void ui_nodes_render(void *_) {
 		ui_nodes_uichanged_last = ui->changed;
 
 		// Node previews
-		if (context_raw->selected_node_preview && ui_nodes->nodes_selected_id->length > 0) {
+		if (g_context->selected_node_preview && ui_nodes->nodes_selected_id->length > 0) {
 			ui_node_t     *sel = ui_get_node(c->nodes, ui_nodes->nodes_selected_id->buffer[0]);
 			gpu_texture_t *img = ui_nodes_get_node_preview_image(sel);
 			if (img != NULL && !(sel->flags & UI_NODE_FLAG_PREVIEW)) {
@@ -1314,7 +1313,7 @@ void ui_nodes_render(void *_) {
 				f32 th = tw * (img->height / (float)img->width);
 				f32 tx = ui_nodes_ww - tw - 8 * UI_SCALE();
 				f32 ty = ui_nodes_wh - th - 8 * UI_SCALE();
-				if (img == any_imap_get(context_raw->node_preview_map, sel->id)) {
+				if (img == any_imap_get(g_context->node_preview_map, sel->id)) {
 					ui_draw_shadow(tx, ty, tw, th);
 				}
 				bool single_channel = string_equals(sel->type, "LAYER_MASK");
@@ -1353,7 +1352,7 @@ void ui_nodes_render(void *_) {
 		i32 _ELEMENT_OFFSET            = ui->ops->theme->ELEMENT_OFFSET;
 		ui->ops->theme->ELEMENT_OFFSET = 0;
 		i32 _ELEMENT_H                 = ui->ops->theme->ELEMENT_H;
-		ui->ops->theme->ELEMENT_H      = config_raw->touch_ui ? (28 + 2) : 28;
+		ui->ops->theme->ELEMENT_H      = g_config->touch_ui ? (28 + 2) : 28;
 		ui_menu_h                      = category->length * UI_ELEMENT_H();
 		if (is_group_category) {
 			ui_menu_h += project_material_groups->length * UI_ELEMENT_H();
@@ -1449,10 +1448,10 @@ gpu_texture_t *ui_nodes_get_node_preview_image(ui_node_t *n) {
 		}
 	}
 	else if (string_equals(n->type, "OUTPUT_MATERIAL_PBR")) {
-		img = context_raw->material->image;
+		img = g_context->material->image;
 	}
 	else if (string_equals(n->type, "brush_output_node")) {
-		img = context_raw->brush->image;
+		img = g_context->brush->image;
 	}
 	else if (string_equals(n->type, "TEX_IMAGE") && parser_material_get_input_link(n->inputs->buffer[0]) == NULL) {
 		i32 i = n->buttons->buffer[0]->default_value->buffer[0];
@@ -1474,7 +1473,7 @@ gpu_texture_t *ui_nodes_get_node_preview_image(ui_node_t *n) {
 		img = any_imap_get(neural_node_results, n->id);
 	}
 	else if (ui_nodes_canvas_type == CANVAS_TYPE_MATERIAL) {
-		img = any_imap_get(context_raw->node_preview_map, n->id);
+		img = any_imap_get(g_context->node_preview_map, n->id);
 	}
 	return img;
 }
@@ -1497,7 +1496,7 @@ void ui_nodes_accept_layer_drop(i32 index) {
 		return;
 	}
 	node_group_t *g                                 = ui_nodes_group_stack->length > 0 ? ui_nodes_group_stack->buffer[ui_nodes_group_stack->length - 1] : NULL;
-	ui_node_t    *n                                 = nodes_material_create_node(slot_layer_is_mask(context_raw->layer) ? "LAYER_MASK" : "LAYER", g);
+	ui_node_t    *n                                 = nodes_material_create_node(slot_layer_is_mask(g_context->layer) ? "LAYER_MASK" : "LAYER", g);
 	n->buttons->buffer[0]->default_value->buffer[0] = index;
 	ui_nodes_get_nodes()->nodes_selected_id         = i32_array_create_from_raw(
         (i32[]){
@@ -1543,7 +1542,7 @@ ui_node_t *ui_nodes_make_node(ui_node_t *n, ui_nodes_t *nodes, ui_node_canvas_t 
 	node->outputs   = any_array_create_from_raw((void *[]){}, 0);
 	node->buttons   = any_array_create_from_raw((void *[]){}, 0);
 	node->width     = 0;
-	node->flags     = config_raw->node_previews ? UI_NODE_FLAG_PREVIEW : UI_NODE_FLAG_NONE;
+	node->flags     = g_config->node_previews ? UI_NODE_FLAG_PREVIEW : UI_NODE_FLAG_NONE;
 	i32 count       = 0;
 	for (i32 i = 0; i < n->inputs->length; ++i) {
 		ui_node_socket_t *soc = GC_ALLOC_INIT(ui_node_socket_t, {0});
@@ -1656,6 +1655,6 @@ void ui_viewnodes_init() {
 	ui_nodes_on_canvas_control = ui_viewnodes_on_canvas_control;
 	gc_root(ui_nodes_on_canvas_control);
 
-	ui_nodes_grid_snap = config_raw->grid_snap;
+	ui_nodes_grid_snap = g_config->grid_snap;
 	nodes_material_init();
 }

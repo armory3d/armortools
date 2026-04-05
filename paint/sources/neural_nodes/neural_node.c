@@ -91,10 +91,10 @@ char *neural_node_sd_bin_ext() {
 }
 
 char *neural_node_sd_bin() {
-	if (config_raw->neural_backend == NEURAL_BACKEND_VULKAN) {
+	if (g_config->neural_backend == NEURAL_BACKEND_VULKAN) {
 		return string("sd_vulkan%s", neural_node_sd_bin_ext());
 	}
-	if (config_raw->neural_backend == NEURAL_BACKEND_CUDA) {
+	if (g_config->neural_backend == NEURAL_BACKEND_CUDA) {
 		return string("sd_cuda%s", neural_node_sd_bin_ext());
 	}
 	return string("sd_cpu%s", neural_node_sd_bin_ext());
