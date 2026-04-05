@@ -76,13 +76,6 @@ uint32_t iron_hash_djb2(unsigned char *str) {
 //  ╚████╔╝ ███████╗╚██████╗███████╗
 //   ╚═══╝  ╚══════╝ ╚═════╝╚══════╝
 
-vec2_t vec2_create(float x, float y) {
-	vec2_t v;
-	v.x = x;
-	v.y = y;
-	return v;
-}
-
 float vec2_len(vec2_t v) {
 	return sqrtf(v.x * v.x + v.y * v.y);
 }
@@ -150,15 +143,6 @@ bool vec2_isnan(vec2_t v) {
 // ╚██╗ ██╔╝██╔══╝  ██║     ╚════██║
 //  ╚████╔╝ ███████╗╚██████╗     ██║
 //   ╚═══╝  ╚══════╝ ╚═════╝     ╚═╝
-
-vec4_t vec4_create(float x, float y, float z, float w) {
-	vec4_t v;
-	v.x = x;
-	v.y = y;
-	v.z = z;
-	v.w = w;
-	return v;
-}
 
 vec4_t vec4_cross(vec4_t a, vec4_t b) {
 	vec4_t v;
@@ -319,15 +303,15 @@ vec4_t vec4_clamp(vec4_t a, float min, float max) {
 }
 
 vec4_t vec4_x_axis() {
-	return vec4_create(1.0, 0.0, 0.0, 1.0);
+	return (vec4_t){1.0, 0.0, 0.0, 1.0};
 }
 
 vec4_t vec4_y_axis() {
-	return vec4_create(0.0, 1.0, 0.0, 1.0);
+	return (vec4_t){0.0, 1.0, 0.0, 1.0};
 }
 
 vec4_t vec4_z_axis() {
-	return vec4_create(0.0, 0.0, 1.0, 1.0);
+	return (vec4_t){0.0, 0.0, 1.0, 1.0};
 }
 
 vec4_t vec4_nan() {
@@ -346,15 +330,6 @@ bool vec4_isnan(vec4_t v) {
 // ██║▄▄ ██║██║   ██║██╔══██║   ██║
 // ╚██████╔╝╚██████╔╝██║  ██║   ██║
 //  ╚══▀▀═╝  ╚═════╝ ╚═╝  ╚═╝   ╚═╝
-
-quat_t quat_create(float x, float y, float z, float w) {
-	quat_t q;
-	q.x = x;
-	q.y = y;
-	q.z = z;
-	q.w = w;
-	return q;
-}
 
 quat_t quat_from_axis_angle(vec4_t axis, float angle) {
 	float  s = sinf(angle * 0.5);
@@ -454,7 +429,7 @@ vec4_t quat_get_euler(quat_t q) {
 	float c = 2 * (q.x * q.y + q.w * q.z);
 	float d = -2 * (q.y * q.z - q.w * q.x);
 	float e = q.w * q.w - q.x * q.x + q.y * q.y - q.z * q.z;
-	return vec4_create(atan2f(d, e), atan2f(a, b), asinf(c), 1.0);
+	return (vec4_t){atan2f(d, e), atan2f(a, b), asinf(c), 1.0};
 }
 
 quat_t quat_from_euler(float x, float y, float z) {
@@ -508,11 +483,11 @@ quat_t quat_from_to(vec4_t v0, vec4_t v1) {
 		return quat_from_axis_angle(a, IRON_PI);
 	}
 	else if (dot > 0.999999) {
-		return quat_create(0, 0, 0, 1);
+		return (quat_t){0, 0, 0, 1};
 	}
 	else {
 		vec4_t a = vec4_cross(v0, v1);
-		quat_t q = quat_create(a.x, a.y, a.z, 1.0 + dot);
+		quat_t q = (quat_t){a.x, a.y, a.z, 1.0 + dot};
 		return quat_norm(q);
 	}
 }
@@ -534,30 +509,16 @@ quat_t quat_inv(quat_t q) {
 // ██║ ╚═╝ ██║██║  ██║   ██║   ██████╔╝
 // ╚═╝     ╚═╝╚═╝  ╚═╝   ╚═╝   ╚═════╝
 
-mat3_t mat3_create(float _00, float _10, float _20, float _01, float _11, float _21, float _02, float _12, float _22) {
-	mat3_t m;
-	m.m[0] = _00;
-	m.m[1] = _01;
-	m.m[2] = _02;
-	m.m[3] = _10;
-	m.m[4] = _11;
-	m.m[5] = _12;
-	m.m[6] = _20;
-	m.m[7] = _21;
-	m.m[8] = _22;
-	return m;
-}
-
 mat3_t mat3_identity() {
-	return mat3_create(1, 0, 0, 0, 1, 0, 0, 0, 1);
+	return (mat3_t){1, 0, 0, 0, 1, 0, 0, 0, 1};
 }
 
 mat3_t mat3_translation(float x, float y) {
-	return mat3_create(1, 0, x, 0, 1, y, 0, 0, 1);
+	return (mat3_t){1, 0, 0, 0, 1, 0, x, y, 1};
 }
 
 mat3_t mat3_rotation(float alpha) {
-	return mat3_create(cosf(alpha), -sinf(alpha), 0, sinf(alpha), cosf(alpha), 0, 0, 0, 1);
+	return (mat3_t){cosf(alpha), sinf(alpha), 0, -sinf(alpha), cosf(alpha), 0, 0, 0, 1};
 }
 
 mat3_t mat3_scale(mat3_t m, vec4_t v) {
@@ -588,27 +549,27 @@ mat3_t mat3_set_from4(mat4_t m4) {
 }
 
 mat3_t mat3_multmat(mat3_t a, mat3_t b) {
-	return mat3_create(a.m[0] * b.m[0] + a.m[3] * b.m[1] + a.m[6] * b.m[2], a.m[0] * b.m[3] + a.m[3] * b.m[4] + a.m[6] * b.m[5],
-	                   a.m[0] * b.m[6] + a.m[3] * b.m[7] + a.m[6] * b.m[8], a.m[1] * b.m[0] + a.m[4] * b.m[1] + a.m[7] * b.m[2],
-	                   a.m[1] * b.m[3] + a.m[4] * b.m[4] + a.m[7] * b.m[5], a.m[1] * b.m[6] + a.m[4] * b.m[7] + a.m[7] * b.m[8],
-	                   a.m[2] * b.m[0] + a.m[5] * b.m[1] + a.m[8] * b.m[2], a.m[2] * b.m[3] + a.m[5] * b.m[4] + a.m[8] * b.m[5],
-	                   a.m[2] * b.m[6] + a.m[5] * b.m[7] + a.m[8] * b.m[8]);
+	return (mat3_t){a.m[0] * b.m[0] + a.m[3] * b.m[1] + a.m[6] * b.m[2], a.m[1] * b.m[0] + a.m[4] * b.m[1] + a.m[7] * b.m[2],
+	                a.m[2] * b.m[0] + a.m[5] * b.m[1] + a.m[8] * b.m[2], a.m[0] * b.m[3] + a.m[3] * b.m[4] + a.m[6] * b.m[5],
+	                a.m[1] * b.m[3] + a.m[4] * b.m[4] + a.m[7] * b.m[5], a.m[2] * b.m[3] + a.m[5] * b.m[4] + a.m[8] * b.m[5],
+	                a.m[0] * b.m[6] + a.m[3] * b.m[7] + a.m[6] * b.m[8], a.m[1] * b.m[6] + a.m[4] * b.m[7] + a.m[7] * b.m[8],
+	                a.m[2] * b.m[6] + a.m[5] * b.m[7] + a.m[8] * b.m[8]};
 }
 
 mat3_t mat3_transpose(mat3_t m) {
-    float f = m.m[1];
-    m.m[1] = m.m[3];
-    m.m[3] = f;
+	float f = m.m[1];
+	m.m[1]  = m.m[3];
+	m.m[3]  = f;
 
-    f = m.m[2];
-    m.m[2] = m.m[6];
-    m.m[6] = f;
+	f      = m.m[2];
+	m.m[2] = m.m[6];
+	m.m[6] = f;
 
-    f = m.m[5];
-    m.m[5] = m.m[7];
-    m.m[7] = f;
+	f      = m.m[5];
+	m.m[5] = m.m[7];
+	m.m[7] = f;
 
-    return m;
+	return m;
 }
 
 mat3_t mat3_nan() {
@@ -628,42 +589,21 @@ bool mat3_isnan(mat3_t m) {
 // ██║ ╚═╝ ██║██║  ██║   ██║        ██║
 // ╚═╝     ╚═╝╚═╝  ╚═╝   ╚═╝        ╚═╝
 
-mat4_t mat4_create(float _00, float _10, float _20, float _30, float _01, float _11, float _21, float _31, float _02, float _12, float _22, float _32,
-                   float _03, float _13, float _23, float _33) {
-	mat4_t m;
-	m.m[0]  = _00;
-	m.m[1]  = _01;
-	m.m[2]  = _02;
-	m.m[3]  = _03;
-	m.m[4]  = _10;
-	m.m[5]  = _11;
-	m.m[6]  = _12;
-	m.m[7]  = _13;
-	m.m[8]  = _20;
-	m.m[9]  = _21;
-	m.m[10] = _22;
-	m.m[11] = _23;
-	m.m[12] = _30;
-	m.m[13] = _31;
-	m.m[14] = _32;
-	m.m[15] = _33;
-	return m;
-}
-
 mat4_t mat4_identity() {
-	return mat4_create(1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0);
+	return (mat4_t){1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0};
 }
 
 mat4_t mat4_from_f32_array(f32_array_t *a, int offset) {
-	return mat4_create(a->buffer[0 + offset], a->buffer[1 + offset], a->buffer[2 + offset], a->buffer[3 + offset], a->buffer[4 + offset], a->buffer[5 + offset],
-	                   a->buffer[6 + offset], a->buffer[7 + offset], a->buffer[8 + offset], a->buffer[9 + offset], a->buffer[10 + offset],
-	                   a->buffer[11 + offset], a->buffer[12 + offset], a->buffer[13 + offset], a->buffer[14 + offset], a->buffer[15 + offset]);
+	return (mat4_t){a->buffer[0 + offset], a->buffer[4 + offset], a->buffer[8 + offset],  a->buffer[12 + offset],
+	                a->buffer[1 + offset], a->buffer[5 + offset], a->buffer[9 + offset],  a->buffer[13 + offset],
+	                a->buffer[2 + offset], a->buffer[6 + offset], a->buffer[10 + offset], a->buffer[14 + offset],
+	                a->buffer[3 + offset], a->buffer[7 + offset], a->buffer[11 + offset], a->buffer[15 + offset]};
 }
 
 mat4_t mat4_persp(float fov_y, float aspect, float zn, float zf) {
 	float uh = 1.0 / tanf(fov_y / 2);
 	float uw = uh / aspect;
-	return mat4_create(uw, 0, 0, 0, 0, uh, 0, 0, 0, 0, (zf + zn) / (zn - zf), 2 * zf * zn / (zn - zf), 0, 0, -1, 0);
+	return (mat4_t){uw, 0, 0, 0, 0, uh, 0, 0, 0, 0, (zf + zn) / (zn - zf), -1, 0, 0, 2 * zf * zn / (zn - zf), 0};
 }
 
 mat4_t mat4_ortho(float left, float right, float bottom, float top, float znear, float zfar) {
@@ -673,13 +613,13 @@ mat4_t mat4_ortho(float left, float right, float bottom, float top, float znear,
 	float tx = -(right + left) / (rl);
 	float ty = -(top + bottom) / (tb);
 	float tz = -(zfar + znear) / (fn);
-	return mat4_create(2 / rl, 0, 0, tx, 0, 2 / tb, 0, ty, 0, 0, -2 / fn, tz, 0, 0, 0, 1);
+	return (mat4_t){2 / rl, 0, 0, 0, 0, 2 / tb, 0, 0, 0, 0, -2 / fn, 0, tx, ty, tz, 1};
 }
 
 mat4_t mat4_rot_z(float alpha) {
 	float ca = cosf(alpha);
 	float sa = sinf(alpha);
-	return mat4_create(ca, -sa, 0, 0, sa, ca, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+	return (mat4_t){ca, sa, 0, 0, -sa, ca, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
 }
 
 mat4_t mat4_compose(vec4_t loc, quat_t rot, vec4_t scl) {
@@ -696,9 +636,9 @@ mat4_decomposed_t *mat4_decompose(mat4_t m) {
 	loc.x = m.m[12];
 	loc.y = m.m[13];
 	loc.z = m.m[14];
-	scl.x = vec4_len(vec4_create(m.m[0], m.m[1], m.m[2], 1.0));
-	scl.y = vec4_len(vec4_create(m.m[4], m.m[5], m.m[6], 1.0));
-	scl.z = vec4_len(vec4_create(m.m[8], m.m[9], m.m[10], 1.0));
+	scl.x = vec4_len((vec4_t){m.m[0], m.m[1], m.m[2], 1.0});
+	scl.y = vec4_len((vec4_t){m.m[4], m.m[5], m.m[6], 1.0});
+	scl.z = vec4_len((vec4_t){m.m[8], m.m[9], m.m[10], 1.0});
 	if (mat4_determinant(m) < 0.0) {
 		scl.x = -scl.x;
 	}
@@ -1034,16 +974,16 @@ mat4_t mat4_transpose3(mat4_t m) {
 }
 
 mat4_t mat4_clone(mat4_t m) {
-	return mat4_create(m.m[0], m.m[4], m.m[8], m.m[12], m.m[1], m.m[5], m.m[9], m.m[13], m.m[2], m.m[6], m.m[10], m.m[14], m.m[3], m.m[7], m.m[11], m.m[15]);
+	return (mat4_t){m.m[0], m.m[4], m.m[8], m.m[12], m.m[1], m.m[5], m.m[9], m.m[13], m.m[2], m.m[6], m.m[10], m.m[14], m.m[3], m.m[7], m.m[11], m.m[15]};
 }
 
 vec4_t mat4_get_loc(mat4_t m) {
-	return vec4_create(m.m[12], m.m[13], m.m[14], m.m[15]);
+	return (vec4_t){m.m[12], m.m[13], m.m[14], m.m[15]};
 }
 
 vec4_t mat4_get_scale(mat4_t m) {
-	return vec4_create(sqrtf(m.m[0] * m.m[0] + m.m[4] * m.m[4] + m.m[8] * m.m[8]), sqrtf(m.m[1] * m.m[1] + m.m[5] * m.m[5] + m.m[9] * m.m[9]),
-	                   sqrtf(m.m[2] * m.m[2] + m.m[6] * m.m[6] + m.m[10] * m.m[10]), 1.0);
+	return (vec4_t){sqrtf(m.m[0] * m.m[0] + m.m[4] * m.m[4] + m.m[8] * m.m[8]), sqrtf(m.m[1] * m.m[1] + m.m[5] * m.m[5] + m.m[9] * m.m[9]),
+	                sqrtf(m.m[2] * m.m[2] + m.m[6] * m.m[6] + m.m[10] * m.m[10]), 1.0};
 }
 
 mat4_t mat4_mult(mat4_t m, float s) {
@@ -1067,15 +1007,15 @@ mat4_t mat4_mult(mat4_t m, float s) {
 }
 
 mat4_t mat4_to_rot(mat4_t m) {
-	float scale = 1.0 / vec4_len(vec4_create(m.m[0], m.m[1], m.m[2], 1.0));
+	float scale = 1.0 / vec4_len((vec4_t){m.m[0], m.m[1], m.m[2], 1.0});
 	m.m[0]      = m.m[0] * scale;
 	m.m[1]      = m.m[1] * scale;
 	m.m[2]      = m.m[2] * scale;
-	scale       = 1.0 / vec4_len(vec4_create(m.m[4], m.m[5], m.m[6], 1.0));
+	scale       = 1.0 / vec4_len((vec4_t){m.m[4], m.m[5], m.m[6], 1.0});
 	m.m[4]      = m.m[4] * scale;
 	m.m[5]      = m.m[5] * scale;
 	m.m[6]      = m.m[6] * scale;
-	scale       = 1.0 / vec4_len(vec4_create(m.m[8], m.m[9], m.m[10], 1.0));
+	scale       = 1.0 / vec4_len((vec4_t){m.m[8], m.m[9], m.m[10], 1.0});
 	m.m[8]      = m.m[8] * scale;
 	m.m[9]      = m.m[9] * scale;
 	m.m[10]     = m.m[10] * scale;
@@ -1090,15 +1030,15 @@ mat4_t mat4_to_rot(mat4_t m) {
 }
 
 vec4_t mat4_right(mat4_t m) {
-	return vec4_norm(vec4_create(m.m[0], m.m[1], m.m[2], 1.0));
+	return vec4_norm((vec4_t){m.m[0], m.m[1], m.m[2], 1.0});
 }
 
 vec4_t mat4_look(mat4_t m) {
-	return vec4_norm(vec4_create(m.m[4], m.m[5], m.m[6], 1.0));
+	return vec4_norm((vec4_t){m.m[4], m.m[5], m.m[6], 1.0});
 }
 
 vec4_t mat4_up(mat4_t m) {
-	return vec4_norm(vec4_create(m.m[8], m.m[9], m.m[10], 1.0));
+	return vec4_norm((vec4_t){m.m[8], m.m[9], m.m[10], 1.0});
 }
 
 f32_array_t *mat4_to_f32_array(mat4_t m) {

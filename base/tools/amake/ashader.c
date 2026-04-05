@@ -23,8 +23,7 @@ char *hlsl_to_bin(char *source, char *shader_type, char *to) {
 
 	ID3DBlob *error_message;
 	ID3DBlob *shader_buffer;
-	// UINT flags = D3DCOMPILE_SKIP_OPTIMIZATION | D3DCOMPILE_SKIP_VALIDATION;
-	UINT    flags = D3DCOMPILE_OPTIMIZATION_LEVEL3;
+	UINT    flags = D3DCOMPILE_OPTIMIZATION_LEVEL3 | D3DCOMPILE_PACK_MATRIX_COLUMN_MAJOR;
 	HRESULT hr    = D3DCompile(source, strlen(source) + 1, NULL, NULL, NULL, "main", type, flags, 0, &shader_buffer, &error_message);
 	if (hr != S_OK) {
 		printf("%s\n", (char *)error_message->lpVtbl->GetBufferPointer(error_message));

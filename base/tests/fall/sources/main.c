@@ -16,7 +16,7 @@ void scene_update(void *_) {
 	camera_update();
 
 	if (keyboard_started("space")) {
-		asim_body_sync_transform(body, vec4_create(0, 0, 5, 1.0), quat_create(0, 0, 0, 1));
+		asim_body_sync_transform(body, (vec4_t){0, 0, 5, 1.0}, (quat_t){0, 0, 0, 1});
 	}
 
 	object_t    *sphere = scene_get_child("Sphere");
@@ -28,8 +28,8 @@ void scene_update(void *_) {
 void scene_ready() {
 	// Set camera
 	transform_t *t = scene_camera->base->transform;
-	t->loc         = vec4_create(0, -10, 0, 1.0);
-	t->rot         = quat_from_to(vec4_create(0, 0, 1, 1.0), vec4_create(0, -1, 0, 1.0));
+	t->loc         = (vec4_t){0, -10, 0, 1.0};
+	t->rot         = quat_from_to((vec4_t){0, 0, 1, 1.0}, (vec4_t){0, -1, 0, 1.0});
 	transform_build_matrix(t);
 
 	sys_notify_on_update(scene_update, NULL);

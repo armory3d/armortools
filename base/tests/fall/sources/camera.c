@@ -11,7 +11,7 @@ void camera_update() {
 	bool             strafe_down   = keyboard_down("q");
 	f32              fast          = keyboard_down("shift") ? 2.0 : 1.0;
 	f32              speed         = 5.0;
-	vec4_t           dir           = vec4_create(0.0, 0.0, 0.0, 1.0);
+	vec4_t           dir           = (vec4_t){0.0, 0.0, 0.0, 1.0};
 
     if (move_forward || move_backward || strafe_right || strafe_left || strafe_up || strafe_down) {
 		vec4_t clook  = camera_object_look(camera);

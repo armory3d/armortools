@@ -740,10 +740,10 @@ void draw_inner_line(float x1, float y1, float x2, float y2, float strength) {
 	}
 	vec2_t vec;
 	if (y2 == y1) {
-		vec = vec2_create(0, -1);
+		vec = (vec2_t){0, -1};
 	}
 	else {
-		vec = vec2_create(1, -(x2 - x1) / (y2 - y1));
+		vec = (vec2_t){1, -(x2 - x1) / (y2 - y1)};
 	}
 	vec               = vec2_set_len(vec, strength);
 	vec2_t p1 = {x1 + side * vec.x, y1 + side * vec.y};

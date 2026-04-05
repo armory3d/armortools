@@ -76,7 +76,6 @@ int64_t  iron_random_get_max(int64_t max);
 int64_t  iron_random_get_in(int64_t min, int64_t max);
 uint32_t iron_hash_djb2(unsigned char *str);
 
-vec2_t vec2_create(float x, float y);
 float  vec2_len(vec2_t v);
 vec2_t vec2_set_len(vec2_t v, float length);
 vec2_t vec2_mult(vec2_t a, float f);
@@ -88,7 +87,6 @@ float  vec2_dot(vec2_t a, vec2_t b);
 vec2_t vec2_nan();
 bool   vec2_isnan(vec2_t v);
 
-vec4_t vec4_create(float x, float y, float z, float w);
 vec4_t vec4_cross(vec4_t a, vec4_t b);
 vec4_t vec4_add(vec4_t a, vec4_t b);
 vec4_t vec4_fadd(vec4_t a, float x, float y, float z, float w);
@@ -117,7 +115,6 @@ vec4_t vec4_z_axis();
 vec4_t vec4_nan();
 bool   vec4_isnan(vec4_t v);
 
-quat_t quat_create(float x, float y, float z, float w);
 quat_t quat_from_axis_angle(vec4_t axis, float angle);
 quat_t quat_from_mat(mat4_t m);
 quat_t quat_from_rot_mat(mat4_t m);
@@ -131,7 +128,6 @@ float  quat_dot(quat_t a, quat_t b);
 quat_t quat_from_to(vec4_t v0, vec4_t v1);
 quat_t quat_inv(quat_t q);
 
-mat3_t mat3_create(float _00, float _10, float _20, float _01, float _11, float _21, float _02, float _12, float _22);
 mat3_t mat3_identity();
 mat3_t mat3_translation(float x, float y);
 mat3_t mat3_rotation(float alpha);
@@ -148,8 +144,6 @@ typedef struct mat4_decomposed {
 	vec4_t scl;
 } mat4_decomposed_t;
 
-mat4_t mat4_create(float _00, float _10, float _20, float _30, float _01, float _11, float _21, float _31, float _02, float _12, float _22, float _32,
-                   float _03, float _13, float _23, float _33);
 mat4_t mat4_identity();
 mat4_t mat4_from_f32_array(f32_array_t *a, int offset);
 mat4_t mat4_persp(float fov_y, float aspect, float zn, float zf);
@@ -180,5 +174,3 @@ float              mat4_cofactor(float m0, float m1, float m2, float m3, float m
 float              mat4_determinant(mat4_t m);
 mat4_t             mat4_nan();
 bool               mat4_isnan(mat4_t m);
-
-#define mat4nan (mat4_nan())

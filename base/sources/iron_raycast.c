@@ -12,8 +12,8 @@ mat4_t _raycast_p_inv  = {0};
 mat4_t _raycast_v_inv  = {0};
 
 ray_t *raycast_get_ray(f32 input_x, f32 input_y, camera_object_t *camera) {
-	vec4_t start = vec4_create(0.0, 0.0, 0.0, 0.0);
-	vec4_t end   = vec4_create(0.0, 0.0, 0.0, 0.0);
+	vec4_t start = (vec4_t){0.0, 0.0, 0.0, 0.0};
+	vec4_t end   = (vec4_t){0.0, 0.0, 0.0, 0.0};
 
 	// Get 3D point form screen coords
 	// Set two vectors with opposing z values
@@ -42,8 +42,8 @@ ray_t *raycast_get_ray(f32 input_x, f32 input_y, camera_object_t *camera) {
 
 vec4_t raycast_box_intersect(transform_t *transform, f32 input_x, f32 input_y, camera_object_t *camera) {
 	ray_t *ray = raycast_get_ray(input_x, input_y, camera);
-	vec4_t c   = vec4_create(transform_world_x(transform), transform_world_y(transform), transform_world_z(transform), 0.0);
-	vec4_t s   = vec4_create(transform->dim.x, transform->dim.y, transform->dim.z, 0.0);
+	vec4_t c   = (vec4_t){transform_world_x(transform), transform_world_y(transform), transform_world_z(transform), 0.0};
+	vec4_t s   = (vec4_t){transform->dim.x, transform->dim.y, transform->dim.z, 0.0};
 	return ray_intersect_box(ray, c, s);
 }
 
@@ -98,7 +98,7 @@ vec4_t ray_at(ray_t *raw, f32 t) {
 }
 
 f32 ray_dist_to_point(ray_t *raw, vec4_t point) {
-	vec4_t v1       = vec4_create(0.0, 0.0, 0.0, 0.0);
+	vec4_t v1       = (vec4_t){0.0, 0.0, 0.0, 0.0};
 	f32    dir_dist = vec4_dot(vec4_sub(point, raw->origin), raw->dir);
 
 	// Point behind the ray
@@ -297,7 +297,7 @@ vec4_t ray_intersect_triangle(ray_t *raw, vec4_t a, vec4_t b, vec4_t c, bool cul
 
 plane_t plane_create(void) {
 	plane_t raw;
-	raw.normal   = vec4_create(1.0, 0.0, 0.0, 0.0);
+	raw.normal   = (vec4_t){1.0, 0.0, 0.0, 0.0};
 	raw.constant = 0.0;
 	return raw;
 }

@@ -125,10 +125,10 @@ void transform_reset(transform_t *raw) {
 	raw->world        = mat4_identity();
 	raw->world_unpack = mat4_identity();
 	raw->local        = mat4_identity();
-	raw->loc          = vec4_create(0.0, 0.0, 0.0, 0.0);
-	raw->rot          = quat_create(0.0, 0.0, 0.0, 1.0);
-	raw->scale        = vec4_create(1.0, 1.0, 1.0, 0.0);
-	raw->dim          = vec4_create(2.0, 2.0, 2.0, 0.0);
+	raw->loc          = (vec4_t){0.0, 0.0, 0.0, 0.0};
+	raw->rot          = (quat_t){0.0, 0.0, 0.0, 1.0};
+	raw->scale        = (vec4_t){1.0, 1.0, 1.0, 0.0};
+	raw->dim          = (vec4_t){2.0, 2.0, 2.0, 0.0};
 	raw->radius       = 1.0;
 	raw->dirty        = true;
 }
@@ -215,11 +215,11 @@ void transform_compute_dim(transform_t *raw) {
 	}
 
 	if (raw->object->raw == NULL || raw->object->raw->dimensions == NULL) {
-		raw->dim = vec4_create(2.0 * raw->scale.x, 2.0 * raw->scale.y, 2.0 * raw->scale.z, 0.0);
+		raw->dim = (vec4_t){2.0 * raw->scale.x, 2.0 * raw->scale.y, 2.0 * raw->scale.z, 0.0};
 	}
 	else {
 		f32_array_t *d = raw->object->raw->dimensions;
-		raw->dim       = vec4_create(d->buffer[0] * raw->scale.x, d->buffer[1] * raw->scale.y, d->buffer[2] * raw->scale.z, 0.0);
+		raw->dim       = (vec4_t){d->buffer[0] * raw->scale.x, d->buffer[1] * raw->scale.y, d->buffer[2] * raw->scale.z, 0.0};
 	}
 	transform_compute_radius(raw);
 }
@@ -885,9 +885,9 @@ void mesh_data_build(mesh_data_t *raw) {
 }
 
 vec4_t mesh_data_calculate_aabb(mesh_data_t *raw) {
-	vec4_t          aabb_min  = vec4_create(-0.01, -0.01, -0.01, 0.0);
-	vec4_t          aabb_max  = vec4_create(0.01, 0.01, 0.01, 0.0);
-	vec4_t          aabb      = vec4_create(0.0, 0.0, 0.0, 0.0);
+	vec4_t          aabb_min  = (vec4_t){-0.01, -0.01, -0.01, 0.0};
+	vec4_t          aabb_max  = (vec4_t){0.01, 0.01, 0.01, 0.0};
+	vec4_t          aabb      = (vec4_t){0.0, 0.0, 0.0, 0.0};
 	i32             i         = 0;
 	vertex_array_t *positions = mesh_data_get_vertex_array(raw, "pos");
 	while (i < positions->values->length) {
@@ -1138,27 +1138,27 @@ void camera_object_build_mat(camera_object_t *raw) {
 }
 
 vec4_t camera_object_right(camera_object_t *raw) {
-	return vec4_norm(vec4_create(raw->base->transform->local.m00, raw->base->transform->local.m01, raw->base->transform->local.m02, 0.0));
+	return vec4_norm((vec4_t){raw->base->transform->local.m00, raw->base->transform->local.m01, raw->base->transform->local.m02, 0.0});
 }
 
 vec4_t camera_object_up(camera_object_t *raw) {
-	return vec4_norm(vec4_create(raw->base->transform->local.m10, raw->base->transform->local.m11, raw->base->transform->local.m12, 0.0));
+	return vec4_norm((vec4_t){raw->base->transform->local.m10, raw->base->transform->local.m11, raw->base->transform->local.m12, 0.0});
 }
 
 vec4_t camera_object_look(camera_object_t *raw) {
-	return vec4_norm(vec4_create(-raw->base->transform->local.m20, -raw->base->transform->local.m21, -raw->base->transform->local.m22, 0.0));
+	return vec4_norm((vec4_t){-raw->base->transform->local.m20, -raw->base->transform->local.m21, -raw->base->transform->local.m22, 0.0});
 }
 
 vec4_t camera_object_right_world(camera_object_t *raw) {
-	return vec4_norm(vec4_create(raw->base->transform->world.m00, raw->base->transform->world.m01, raw->base->transform->world.m02, 0.0));
+	return vec4_norm((vec4_t){raw->base->transform->world.m00, raw->base->transform->world.m01, raw->base->transform->world.m02, 0.0});
 }
 
 vec4_t camera_object_up_world(camera_object_t *raw) {
-	return vec4_norm(vec4_create(raw->base->transform->world.m10, raw->base->transform->world.m11, raw->base->transform->world.m12, 0.0));
+	return vec4_norm((vec4_t){raw->base->transform->world.m10, raw->base->transform->world.m11, raw->base->transform->world.m12, 0.0});
 }
 
 vec4_t camera_object_look_world(camera_object_t *raw) {
-	return vec4_norm(vec4_create(-raw->base->transform->world.m20, -raw->base->transform->world.m21, -raw->base->transform->world.m22, 0.0));
+	return vec4_norm((vec4_t){-raw->base->transform->world.m20, -raw->base->transform->world.m21, -raw->base->transform->world.m22, 0.0});
 }
 
 void camera_object_build_view_frustum(mat4_t vp, frustum_plane_array_t *frustum_planes) {
@@ -1185,7 +1185,7 @@ bool camera_object_sphere_in_frustum(frustum_plane_array_t *frustum_planes, tran
 	f32 radius = t->radius * radius_scale;
 	for (i32 i = 0; i < frustum_planes->length; ++i) {
 		frustum_plane_t *plane       = frustum_planes->buffer[i];
-		_camera_object_sphere_center = vec4_create(transform_world_x(t) + offset_x, transform_world_y(t) + offset_y, transform_world_z(t) + offset_z, 0.0);
+		_camera_object_sphere_center = (vec4_t){transform_world_x(t) + offset_x, transform_world_y(t) + offset_y, transform_world_z(t) + offset_z, 0.0};
 		// Outside the frustum
 		if (frustum_plane_dist_to_sphere(plane, _camera_object_sphere_center, radius) + radius * 2 < 0) {
 			return false;
@@ -1203,7 +1203,7 @@ bool camera_object_sphere_in_frustum(frustum_plane_array_t *frustum_planes, tran
 
 frustum_plane_t *frustum_plane_create() {
 	frustum_plane_t *raw = gc_alloc(sizeof(frustum_plane_t));
-	raw->normal          = vec4_create(1.0, 0.0, 0.0, 0.0);
+	raw->normal          = (vec4_t){1.0, 0.0, 0.0, 0.0};
 	raw->constant        = 0.0;
 	return raw;
 }
@@ -1219,7 +1219,7 @@ f32 frustum_plane_dist_to_sphere(frustum_plane_t *raw, vec4_t sphere_center, f32
 }
 
 void frustum_plane_set_components(frustum_plane_t *raw, f32 x, f32 y, f32 z, f32 w) {
-	raw->normal   = vec4_create(x, y, z, 0.0);
+	raw->normal   = (vec4_t){x, y, z, 0.0};
 	raw->constant = w;
 }
 
@@ -1229,13 +1229,6 @@ void frustum_plane_set_components(frustum_plane_t *raw, f32 x, f32 y, f32 z, f32
 // ██║   ██║██║╚██╗██║██║██╔══╝  ██║   ██║██╔══██╗██║╚██╔╝██║╚════██║
 // ╚██████╔╝██║ ╚████║██║██║     ╚██████╔╝██║  ██║██║ ╚═╝ ██║███████║
 //  ╚═════╝ ╚═╝  ╚═══╝╚═╝╚═╝      ╚═════╝ ╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝
-
-mat4_t _uniforms_mat  = {0};
-mat4_t _uniforms_mat2 = {0};
-mat3_t _uniforms_mat3 = {0};
-vec4_t _uniforms_vec  = {0};
-vec4_t _uniforms_vec2 = {0};
-quat_t _uniforms_quat = {0.0, 0.0, 0.0, 1.0};
 
 f32 uniforms_pos_unpack = 1.0;
 f32 uniforms_tex_unpack = 1.0;
@@ -1392,10 +1385,10 @@ bool uniforms_set_context_const(i32 location, shader_const_t *c) {
 		}
 		else if (string_equals(c->link, "_skydome_matrix")) {
 			transform_t *tr     = camera->base->transform;
-			vec4_t       v      = vec4_create(transform_world_x(tr), transform_world_y(tr), transform_world_z(tr), 0.0);
+			vec4_t       v      = (vec4_t){transform_world_x(tr), transform_world_y(tr), transform_world_z(tr), 0.0};
 			f32          bounds = camera->data->far_plane * 0.9f;
-			vec4_t       v2     = vec4_create(bounds, bounds, bounds, 0.0);
-			m                   = mat4_compose(v, _uniforms_quat, v2);
+			vec4_t       v2     = (vec4_t){bounds, bounds, bounds, 0.0};
+			m                   = mat4_compose(v, (quat_t){0.0, 0.0, 0.0, 1.0}, v2);
 			m                   = mat4_mult_mat(m, camera->v);
 			m                   = mat4_mult_mat(m, camera->p);
 		}
@@ -1473,8 +1466,8 @@ bool uniforms_set_context_const(i32 location, shader_const_t *c) {
 		vec4_t v = vec4_nan();
 
 		if (string_equals(c->link, "_camera_pos")) {
-			v = vec4_create(transform_world_x(camera->base->transform), transform_world_y(camera->base->transform), transform_world_z(camera->base->transform),
-			                0.0);
+			v = (vec4_t){transform_world_x(camera->base->transform), transform_world_y(camera->base->transform), transform_world_z(camera->base->transform),
+			             0.0};
 		}
 		else if (string_equals(c->link, "_camera_look")) {
 			v = vec4_norm(camera_object_look_world(camera));
@@ -1700,14 +1693,14 @@ void uniforms_set_obj_const(object_t *obj, i32 loc, shader_const_t *c) {
 			vec4_t s = obj->transform->scale;
 			d        = uniforms_vec4_zero_to_one(d);
 			s        = uniforms_vec4_zero_to_one(s);
-			v        = vec4_create((d.x / s.x), (d.y / s.y), (d.z / s.z), 0.0);
+			v        = (vec4_t){(d.x / s.x), (d.y / s.y), (d.z / s.z), 0.0};
 		}
 		else if (string_equals(c->link, "_half_dim")) { // Model space
 			vec4_t d = obj->transform->dim;
 			vec4_t s = obj->transform->scale;
 			d        = uniforms_vec4_zero_to_one(d);
 			s        = uniforms_vec4_zero_to_one(s);
-			v        = vec4_create((d.x / s.x) / 2, (d.y / s.y) / 2, (d.z / s.z) / 2, 0.0);
+			v        = (vec4_t){(d.x / s.x) / 2, (d.y / s.y) / 2, (d.z / s.z) / 2, 0.0};
 		}
 		else if (uniforms_vec3_links != NULL) {
 			v = uniforms_vec3_links(obj, current_material(obj), c->link);

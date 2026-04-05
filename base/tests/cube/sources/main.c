@@ -9,14 +9,14 @@ void render_commands() {
 
 void spin_cube(void *_) {
 	object_t *cube = scene_get_child("Cube");
-	transform_rotate(cube->transform, vec4_create(0, 0, 1, 1.0), 0.01);
+	transform_rotate(cube->transform, (vec4_t){0, 0, 1, 1.0}, 0.01);
 }
 
 void scene_ready() {
 	// Set camera
 	transform_t *t = scene_camera->base->transform;
-	t->loc         = vec4_create(0, -6, 0, 1.0);
-	t->rot         = quat_from_to(vec4_create(0, 0, 1, 1.0), vec4_create(0, -1, 0, 1.0));
+	t->loc         = (vec4_t){0, -6, 0, 1.0};
+	t->rot         = quat_from_to((vec4_t){0, 0, 1, 1.0}, (vec4_t){0, -1, 0, 1.0});
 	transform_build_matrix(t);
 
 	// Rotate cube

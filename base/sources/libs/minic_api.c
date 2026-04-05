@@ -301,9 +301,6 @@ static void minic_set_mat4(void *p, mat4_t m) {
 #define AP(i) (_a[i].p)
 
 // vec2
-MN(vec2_create) {
-	RET2(vec2_create(AF(0), AF(1)));
-}
 MN(vec2_len) {
 	return minic_val_float(vec2_len(V2(0)));
 }
@@ -336,9 +333,6 @@ MN(vec2_isnan) {
 }
 
 // vec4
-MN(vec4_create) {
-	RET4(vec4_create(AF(0), AF(1), AF(2), AF(3)));
-}
 MN(vec4_cross) {
 	RET4(vec4_cross(V4(0), V4(1)));
 }
@@ -419,9 +413,6 @@ MN(vec4_isnan) {
 }
 
 // quat
-MN(quat_create) {
-	RETQ(quat_create(AF(0), AF(1), AF(2), AF(3)));
-}
 MN(quat_from_axis_angle) {
 	RETQ(quat_from_axis_angle(V4(0), AF(1)));
 }
@@ -460,9 +451,6 @@ MN(quat_inv) {
 }
 
 // mat3
-MN(mat3_create) {
-	RET3(mat3_create(AF(0), AF(1), AF(2), AF(3), AF(4), AF(5), AF(6), AF(7), AF(8)));
-}
 MN(mat3_identity) {
 	RET3(mat3_identity());
 }
@@ -492,9 +480,6 @@ MN(mat3_isnan) {
 }
 
 // mat4
-MN(mat4_create) {
-	RET4M(mat4_create(AF(0), AF(1), AF(2), AF(3), AF(4), AF(5), AF(6), AF(7), AF(8), AF(9), AF(10), AF(11), AF(12), AF(13), AF(14), AF(15)));
-}
 MN(mat4_identity) {
 	RET4M(mat4_identity());
 }
@@ -1352,7 +1337,6 @@ void minic_register_builtins() {
 
 	// iron_math
 #define MR(sym) minic_register_native(#sym, mn_##sym)
-	MR(vec2_create);
 	MR(vec2_len);
 	MR(vec2_set_len);
 	MR(vec2_mult);
@@ -1363,7 +1347,6 @@ void minic_register_builtins() {
 	MR(vec2_dot);
 	MR(vec2_nan);
 	MR(vec2_isnan);
-	MR(vec4_create);
 	MR(vec4_cross);
 	MR(vec4_add);
 	MR(vec4_fadd);
@@ -1390,7 +1373,6 @@ void minic_register_builtins() {
 	MR(vec4_z_axis);
 	MR(vec4_nan);
 	MR(vec4_isnan);
-	MR(quat_create);
 	MR(quat_from_axis_angle);
 	MR(quat_from_mat);
 	MR(quat_from_rot_mat);
@@ -1403,7 +1385,6 @@ void minic_register_builtins() {
 	MR(quat_dot);
 	MR(quat_from_to);
 	MR(quat_inv);
-	MR(mat3_create);
 	MR(mat3_identity);
 	MR(mat3_translation);
 	MR(mat3_rotation);
@@ -1413,7 +1394,6 @@ void minic_register_builtins() {
 	MR(mat3_transpose);
 	MR(mat3_nan);
 	MR(mat3_isnan);
-	MR(mat4_create);
 	MR(mat4_identity);
 	MR(mat4_persp);
 	MR(mat4_ortho);

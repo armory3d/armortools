@@ -341,12 +341,12 @@ raw_mesh_t *obj_parse(buffer_t *file_bytes, char split_code, uint64_t start_pos,
 					nz = nor_temp.buffer[(na[0] - _nind_off) * 3 + 2];
 				}
 				else {
-					vec4_t n = calc_normal(vec4_create(pos_temp.buffer[(va[0] - _vind_off) * 3], pos_temp.buffer[(va[0] - _vind_off) * 3 + 1],
-					                                           pos_temp.buffer[(va[0] - _vind_off) * 3 + 2], 1.0f),
-					                               vec4_create(pos_temp.buffer[(va[1] - _vind_off) * 3], pos_temp.buffer[(va[1] - _vind_off) * 3 + 1],
-					                                           pos_temp.buffer[(va[1] - _vind_off) * 3 + 2], 1.0f),
-					                               vec4_create(pos_temp.buffer[(va[2] - _vind_off) * 3], pos_temp.buffer[(va[2] - _vind_off) * 3 + 1],
-					                                           pos_temp.buffer[(va[2] - _vind_off) * 3 + 2], 1.0f));
+					vec4_t n = calc_normal((vec4_t){pos_temp.buffer[(va[0] - _vind_off) * 3], pos_temp.buffer[(va[0] - _vind_off) * 3 + 1],
+					                                           pos_temp.buffer[(va[0] - _vind_off) * 3 + 2], 1.0f},
+					                               (vec4_t){pos_temp.buffer[(va[1] - _vind_off) * 3], pos_temp.buffer[(va[1] - _vind_off) * 3 + 1],
+					                                           pos_temp.buffer[(va[1] - _vind_off) * 3 + 2], 1.0f},
+					                               (vec4_t){pos_temp.buffer[(va[2] - _vind_off) * 3], pos_temp.buffer[(va[2] - _vind_off) * 3 + 1],
+					                                           pos_temp.buffer[(va[2] - _vind_off) * 3 + 2], 1.0f});
 					nx               = n.x;
 					ny               = n.y;
 					nz               = n.z;
@@ -525,9 +525,9 @@ raw_mesh_t *obj_parse(buffer_t *file_bytes, char split_code, uint64_t start_pos,
 			int            i1 = part->inda->buffer[i * 3];
 			int            i2 = part->inda->buffer[i * 3 + 1];
 			int            i3 = part->inda->buffer[i * 3 + 2];
-			vec4_t n  = calc_normal(vec4_create(part->posa->buffer[i1 * 4], part->posa->buffer[i1 * 4 + 1], part->posa->buffer[i1 * 4 + 2], 1.0),
-			                                vec4_create(part->posa->buffer[i2 * 4], part->posa->buffer[i2 * 4 + 1], part->posa->buffer[i2 * 4 + 2], 1.0),
-			                                vec4_create(part->posa->buffer[i3 * 4], part->posa->buffer[i3 * 4 + 1], part->posa->buffer[i3 * 4 + 2], 1.0));
+			vec4_t n  = calc_normal((vec4_t){part->posa->buffer[i1 * 4], part->posa->buffer[i1 * 4 + 1], part->posa->buffer[i1 * 4 + 2], 1.0},
+			                                (vec4_t){part->posa->buffer[i2 * 4], part->posa->buffer[i2 * 4 + 1], part->posa->buffer[i2 * 4 + 2], 1.0},
+			                                (vec4_t){part->posa->buffer[i3 * 4], part->posa->buffer[i3 * 4 + 1], part->posa->buffer[i3 * 4 + 2], 1.0});
 			part->nora->buffer[i1 * 2]     = (int)(n.x * 32767);
 			part->nora->buffer[i1 * 2 + 1] = (int)(n.y * 32767);
 			part->posa->buffer[i1 * 4 + 3] = (int)(n.z * 32767);

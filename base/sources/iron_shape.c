@@ -192,9 +192,9 @@ void line_draw_line(f32 x1, f32 y1, f32 z1, f32 x2, f32 y2, f32 z2) {
 		line_draw_begin();
 	}
 
-	line_draw_mid_point = vec4_mult(vec4_create(x1 + x2, y1 + y2, z1 + z2, 0.0), 0.5);
+	line_draw_mid_point = vec4_mult((vec4_t){x1 + x2, y1 + y2, z1 + z2, 0.0}, 0.5);
 
-	line_draw_mid_line = vec4_sub(vec4_create(x1, y1, z1, 0.0), line_draw_mid_point);
+	line_draw_mid_line = vec4_sub((vec4_t){x1, y1, z1, 0.0}, line_draw_mid_point);
 
 	line_draw_camera_look = vec4_sub(mat4_get_loc(scene_camera->base->transform->world), line_draw_mid_point);
 
@@ -202,10 +202,10 @@ void line_draw_line(f32 x1, f32 y1, f32 z1, f32 x2, f32 y2, f32 z2) {
 	line_width        = vec4_norm(line_width);
 	line_width        = vec4_mult(line_width, line_draw_strength);
 
-	line_draw_corner1 = vec4_add(vec4_create(x1, y1, z1, 0.0), line_width);
-	line_draw_corner2 = vec4_sub(vec4_create(x1, y1, z1, 0.0), line_width);
-	line_draw_corner3 = vec4_sub(vec4_create(x2, y2, z2, 0.0), line_width);
-	line_draw_corner4 = vec4_add(vec4_create(x2, y2, z2, 0.0), line_width);
+	line_draw_corner1 = vec4_add((vec4_t){x1, y1, z1, 0.0}, line_width);
+	line_draw_corner2 = vec4_sub((vec4_t){x1, y1, z1, 0.0}, line_width);
+	line_draw_corner3 = vec4_sub((vec4_t){x2, y2, z2, 0.0}, line_width);
+	line_draw_corner4 = vec4_add((vec4_t){x2, y2, z2, 0.0}, line_width);
 
 	i32 i = line_draw_lines * 12; // 4 * 3 (structure len)
 
@@ -289,7 +289,7 @@ void shape_draw_sphere(mat4_t mat) {
 	gpu_set_pipeline(line_draw_overlay_pipeline);
 	f32 f        = line_draw_strength * 50;
 	line_draw_vp = mat4_clone(mat);
-	line_draw_vp = mat4_scale(line_draw_vp, vec4_create(f, f, f, 0.0));
+	line_draw_vp = mat4_scale(line_draw_vp, (vec4_t){f, f, f, 0.0});
 	line_draw_vp = mat4_mult_mat(line_draw_vp, scene_camera->v);
 	line_draw_vp = mat4_mult_mat(line_draw_vp, scene_camera->p);
 	gpu_set_mat4(line_draw_vp_loc, line_draw_vp);
