@@ -1013,7 +1013,7 @@ static void write_functions(char *hlsl, size_t *offset, shader_stage stage, func
 				if (o->op_binary.left.type.type == float4x4_id || o->op_binary.left.type.type == float3x3_id) {
 					indent(hlsl, offset, indentation);
 					*offset += sprintf(&hlsl[*offset], "%s _%" PRIu64 " = mul(_%" PRIu64 ", _%" PRIu64 ");\n", type_string(o->op_binary.result.type.type),
-					                   o->op_binary.result.index, o->op_binary.right.index, o->op_binary.left.index);
+					                   o->op_binary.result.index, o->op_binary.left.index, o->op_binary.right.index);
 				}
 				else {
 					indent(hlsl, offset, indentation);

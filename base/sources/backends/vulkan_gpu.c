@@ -11,7 +11,6 @@
 #include <vulkan/vulkan.h>
 #include <vulkan/vulkan_core.h>
 
-bool       gpu_transpose_mat = true;
 extern int constant_buffer_index;
 
 static VkSemaphore                      framebuffer_available_semaphore;

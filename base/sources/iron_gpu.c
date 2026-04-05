@@ -227,13 +227,11 @@ static void gpu_internal_set_mat4(int offset, mat4_t *value) {
 }
 
 void gpu_set_mat3(int location, mat3_t value) {
-	mat3_t m = mat3_transpose(value);
-	gpu_internal_set_mat3(location, &m);
+	gpu_internal_set_mat3(location, &value);
 }
 
 void gpu_set_mat4(int location, mat4_t value) {
-	mat4_t m = mat4_transpose(value);
-	gpu_internal_set_mat4(location, &m);
+	gpu_internal_set_mat4(location, &value);
 }
 
 void gpu_vertex_structure_add(gpu_vertex_structure_t *structure, const char *name, gpu_vertex_data_t data) {

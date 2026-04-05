@@ -12,7 +12,6 @@
 #include <math.h>
 #include <stdbool.h>
 
-bool                                gpu_transpose_mat = true;
 static ID3D12Device                *device            = NULL;
 static ID3D12CommandQueue          *queue;
 static IDXGISwapChain              *window_swapchain;

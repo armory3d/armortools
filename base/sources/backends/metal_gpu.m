@@ -11,7 +11,6 @@ id get_metal_layer(void);
 id get_metal_device(void);
 id get_metal_queue(void);
 
-bool                               gpu_transpose_mat = true;
 static id<MTLCommandBuffer>        command_buffer    = nil;
 static id<MTLRenderCommandEncoder> command_encoder   = nil;
 static id<MTLArgumentEncoder>      argument_encoder  = nil;

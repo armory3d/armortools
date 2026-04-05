@@ -7,7 +7,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-bool                                        gpu_transpose_mat = true;
 extern int                                  constant_buffer_index;
 static gpu_buffer_t                        *current_vb;
 static gpu_buffer_t                        *current_ib;

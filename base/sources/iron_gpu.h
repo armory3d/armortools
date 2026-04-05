@@ -259,7 +259,6 @@ int gpu_vertex_data_size(gpu_vertex_data_t data);
 int gpu_vertex_struct_size(gpu_vertex_structure_t *s);
 int gpu_texture_format_size(gpu_texture_format_t format);
 
-extern bool            gpu_transpose_mat;
 extern bool            gpu_in_use;
 extern gpu_texture_t  *current_textures[GPU_MAX_TEXTURES];
 extern gpu_texture_t  *current_render_targets[8];
