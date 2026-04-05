@@ -974,7 +974,7 @@ mat4_t mat4_transpose3(mat4_t m) {
 }
 
 mat4_t mat4_clone(mat4_t m) {
-	return (mat4_t){m.m[0], m.m[4], m.m[8], m.m[12], m.m[1], m.m[5], m.m[9], m.m[13], m.m[2], m.m[6], m.m[10], m.m[14], m.m[3], m.m[7], m.m[11], m.m[15]};
+	return (mat4_t){m.m[0], m.m[1], m.m[2], m.m[3], m.m[4], m.m[5], m.m[6], m.m[7], m.m[8], m.m[9], m.m[10], m.m[11], m.m[12], m.m[13], m.m[14], m.m[15]};
 }
 
 vec4_t mat4_get_loc(mat4_t m) {

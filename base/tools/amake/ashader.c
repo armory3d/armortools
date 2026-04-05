@@ -23,7 +23,7 @@ char *hlsl_to_bin(char *source, char *shader_type, char *to) {
 
 	ID3DBlob *error_message;
 	ID3DBlob *shader_buffer;
-	UINT    flags = D3DCOMPILE_OPTIMIZATION_LEVEL3 | D3DCOMPILE_PACK_MATRIX_COLUMN_MAJOR;
+	UINT    flags = D3DCOMPILE_OPTIMIZATION_LEVEL3;
 	HRESULT hr    = D3DCompile(source, strlen(source) + 1, NULL, NULL, NULL, "main", type, flags, 0, &shader_buffer, &error_message);
 	if (hr != S_OK) {
 		printf("%s\n", (char *)error_message->lpVtbl->GetBufferPointer(error_message));
@@ -77,7 +77,6 @@ void kong_compile(char *shader_lang, const char *from, const char *to) {
 	names_init();
 	types_init();
 	functions_init();
-	globals_init();
 	tokens tokens = tokenize(from, data);
 	parse(from, &tokens);
 	resolve_types();
@@ -222,4 +221,35 @@ int ashader(char *shader_lang, char *from, char *to) {
 	// shader_lang == hlsl || metal || spirv || wgsl
 	kong_compile(shader_lang, from, to);
 	return 0;
+}
+
+#ifdef IRON_WINDOWS
+void iron_microsoft_format(const char *format, va_list args, wchar_t *buffer) {
+	char cbuffer[4096];
+	vsprintf(cbuffer, format, args);
+	MultiByteToWideChar(CP_UTF8, 0, cbuffer, -1, buffer, 4096);
+}
+#endif
+
+void iron_log_args(iron_log_level_t level, const char *format, va_list args) {
+#ifdef IRON_WINDOWS
+	wchar_t buffer[4096];
+	iron_microsoft_format(format, args, buffer);
+	wcscat(buffer, L"\r\n");
+	OutputDebugStringW(buffer);
+	DWORD written;
+	WriteConsoleW(GetStdHandle(level == IRON_LOG_LEVEL_INFO ? STD_OUTPUT_HANDLE : STD_ERROR_HANDLE), buffer, (DWORD)wcslen(buffer), &written, NULL);
+#else
+	char buffer[4096];
+	vsnprintf(buffer, 4090, format, args);
+	strcat(buffer, "\n");
+	fprintf(level == IRON_LOG_LEVEL_INFO ? stdout : stderr, "%s", buffer);
+#endif
+}
+
+void iron_log(const char *format, ...) {
+	va_list args;
+	va_start(args, format);
+	iron_log_args(IRON_LOG_LEVEL_INFO, format == NULL ? "null" : format, args);
+	va_end(args);
 }

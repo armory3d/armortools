@@ -760,7 +760,7 @@ gpu_shader_t *gpu_create_shader_from_source(char *source, int source_size, gpu_s
 
 	ID3DBlob *error_message;
 	ID3DBlob *shader_buffer;
-	UINT      flags = D3DCOMPILE_SKIP_OPTIMIZATION | D3DCOMPILE_SKIP_VALIDATION | D3DCOMPILE_PACK_MATRIX_COLUMN_MAJOR;
+	UINT      flags = D3DCOMPILE_SKIP_OPTIMIZATION | D3DCOMPILE_SKIP_VALIDATION;
 	HRESULT hr = D3DCompile(temp_string_s, strlen(source) + 1, NULL, NULL, NULL, "main", shader_type == GPU_SHADER_TYPE_VERTEX ? "vs_5_0" : "ps_5_0", flags, 0,
 	                        &shader_buffer, &error_message);
 	if (hr != S_OK) {
