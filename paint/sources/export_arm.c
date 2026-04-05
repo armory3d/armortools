@@ -212,7 +212,7 @@ void export_arm_run_project() {
 	g_project->envmap_angle    = g_context->envmap_angle;
 	g_project->envmap_blur     = g_context->show_envmap_blur;
 	g_project->camera_world    = mat4_to_f32_array(scene_camera->base->transform->local);
-	g_project->camera_origin   = export_arm_vec3f32(camera_origins->buffer[0]->v);
+	g_project->camera_origin   = export_arm_vec3f32(camera_origins[0]);
 	g_project->camera_fov      = scene_camera->data->fov;
 
 	// g_project.mesh_datas = md; // TODO: fix GC ref

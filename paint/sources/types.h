@@ -4,14 +4,6 @@
 #include "enums.h"
 #include "minic.h"
 
-typedef struct mat4_box {
-	mat4_t v;
-} mat4_box_t;
-
-typedef struct vec4_box {
-	vec4_t v;
-} vec4_box_t;
-
 typedef struct slot_brush {
 	struct ui_nodes       *nodes;
 	struct ui_node_canvas *canvas;
@@ -751,12 +743,6 @@ typedef struct node_list_t_array {
 	int           capacity;
 } node_list_t_array_t;
 
-typedef struct mat4_box_t_array {
-	mat4_box_t **buffer;
-	int          length;
-	int          capacity;
-} mat4_box_t_array_t;
-
 typedef struct slot_brush_t_array {
 	slot_brush_t **buffer;
 	int            length;
@@ -834,12 +820,6 @@ typedef struct history_step_t_array {
 	int              length;
 	int              capacity;
 } history_step_t_array_t;
-
-typedef struct vec4_box_t_array {
-	vec4_box_t **buffer;
-	int          length;
-	int          capacity;
-} vec4_box_t_array_t;
 
 typedef struct tab_draw_array_t_array {
 	tab_draw_array_t **buffer;

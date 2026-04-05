@@ -43,7 +43,7 @@ vector_node_t *vector_node_create(ui_node_t *raw, f32_array_t *args) {
 	n->base->get          = vector_node_get;
 	n->base->get_as_image = vector_node_get_as_image;
 	n->base->set          = vector_node_set;
-	n->value              = vec4_create(0.0, 0.0, 0.0, 1.0);
+	n->value              = (vec4_t){0.0, 0.0, 0.0, 1.0};
 
 	if (args != NULL) {
 		logic_node_add_input(n->base, float_node_create(NULL, f32_array_create_x(args->buffer[0])), 0);

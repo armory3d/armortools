@@ -1426,8 +1426,8 @@ void ui_base_update(void *_) {
 
 			camera_object_t *camera    = scene_camera;
 			transform_t     *ct        = camera->base->transform;
-			mo->base->transform->loc   = vec4_create(transform_world_x(ct), transform_world_y(ct), transform_world_z(ct), 1.0);
-			mo->base->transform->scale = vec4_create(g_context->brush_radius * 0.2, g_context->brush_radius * 0.2, g_context->brush_radius * 0.2, 1.0);
+			mo->base->transform->loc   = (vec4_t){transform_world_x(ct), transform_world_y(ct), transform_world_z(ct), 1.0};
+			mo->base->transform->scale = (vec4_t){g_context->brush_radius * 0.2, g_context->brush_radius * 0.2, g_context->brush_radius * 0.2, 1.0};
 			transform_build_matrix(mo->base->transform);
 
 			physics_body_t *body = physics_body_create();

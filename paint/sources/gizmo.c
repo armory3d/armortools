@@ -22,22 +22,22 @@ void gizmo_update() {
 		gizmo->transform->loc = vec4_clone(paint_object->transform->loc);
 	}
 	else if (is_decal) {
-		gizmo->transform->loc = vec4_create(g_context->layer->decal_mat.m30, g_context->layer->decal_mat.m31, g_context->layer->decal_mat.m32, 1.0);
+		gizmo->transform->loc = (vec4_t){g_context->layer->decal_mat.m30, g_context->layer->decal_mat.m31, g_context->layer->decal_mat.m32, 1.0};
 	}
 
 	camera_object_t *cam                             = scene_camera;
 	f32              fov                             = cam->data->fov;
 	f32              dist                            = vec4_dist(cam->base->transform->loc, gizmo->transform->loc) / 8.0 * fov;
-	gizmo->transform->scale                          = vec4_create(dist, dist, dist, 1.0);
-	g_context->gizmo_translate_x->transform->scale = vec4_create(dist, dist, dist, 1.0);
-	g_context->gizmo_translate_y->transform->scale = vec4_create(dist, dist, dist, 1.0);
-	g_context->gizmo_translate_z->transform->scale = vec4_create(dist, dist, dist, 1.0);
-	g_context->gizmo_scale_x->transform->scale     = vec4_create(dist, dist, dist, 1.0);
-	g_context->gizmo_scale_y->transform->scale     = vec4_create(dist, dist, dist, 1.0);
-	g_context->gizmo_scale_z->transform->scale     = vec4_create(dist, dist, dist, 1.0);
-	g_context->gizmo_rotate_x->transform->scale    = vec4_create(dist, dist, dist, 1.0);
-	g_context->gizmo_rotate_y->transform->scale    = vec4_create(dist, dist, dist, 1.0);
-	g_context->gizmo_rotate_z->transform->scale    = vec4_create(dist, dist, dist, 1.0);
+	gizmo->transform->scale                          = (vec4_t){dist, dist, dist, 1.0};
+	g_context->gizmo_translate_x->transform->scale = (vec4_t){dist, dist, dist, 1.0};
+	g_context->gizmo_translate_y->transform->scale = (vec4_t){dist, dist, dist, 1.0};
+	g_context->gizmo_translate_z->transform->scale = (vec4_t){dist, dist, dist, 1.0};
+	g_context->gizmo_scale_x->transform->scale     = (vec4_t){dist, dist, dist, 1.0};
+	g_context->gizmo_scale_y->transform->scale     = (vec4_t){dist, dist, dist, 1.0};
+	g_context->gizmo_scale_z->transform->scale     = (vec4_t){dist, dist, dist, 1.0};
+	g_context->gizmo_rotate_x->transform->scale    = (vec4_t){dist, dist, dist, 1.0};
+	g_context->gizmo_rotate_y->transform->scale    = (vec4_t){dist, dist, dist, 1.0};
+	g_context->gizmo_rotate_z->transform->scale    = (vec4_t){dist, dist, dist, 1.0};
 	transform_build_matrix(gizmo->transform);
 
 	// Scene control
@@ -234,10 +234,10 @@ void gizmo_update() {
 		g_context->rdirty = 2;
 		if (is_object) {
 			transform_t *t = paint_object->transform;
-			gizmo_v        = vec4_create(transform_world_x(t), transform_world_y(t), transform_world_z(t), 1.0);
+			gizmo_v        = (vec4_t){transform_world_x(t), transform_world_y(t), transform_world_z(t), 1.0};
 		}
 		else if (is_decal) {
-			gizmo_v = vec4_create(g_context->layer->decal_mat.m30, g_context->layer->decal_mat.m31, g_context->layer->decal_mat.m32, 1.0);
+			gizmo_v = (vec4_t){g_context->layer->decal_mat.m30, g_context->layer->decal_mat.m31, g_context->layer->decal_mat.m32, 1.0};
 		}
 
 		if (g_context->translate_x || g_context->scale_x) {

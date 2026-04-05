@@ -84,12 +84,12 @@ void input_node_update(float_node_t *self) {
 	}
 
 	if (g_context->brush_lazy_radius > 0) {
-		vec4_t v1 = vec4_create(g_context->brush_lazy_x * sys_w(), g_context->brush_lazy_y * sys_h(), 0.0, 1.0);
-		vec4_t v2 = vec4_create(input_node_coords.x * sys_w(), input_node_coords.y * sys_h(), 0.0, 1.0);
+		vec4_t v1 = (vec4_t){g_context->brush_lazy_x * sys_w(), g_context->brush_lazy_y * sys_h(), 0.0, 1.0};
+		vec4_t v2 = (vec4_t){input_node_coords.x * sys_w(), input_node_coords.y * sys_h(), 0.0, 1.0};
 		f32    d  = vec4_dist(v1, v2);
 		f32    r  = g_context->brush_lazy_radius * 85;
 		if (d > r) {
-			vec4_t v3           = vec4_create(0.0, 0.0, 0.0, 1.0);
+			vec4_t v3           = (vec4_t){0.0, 0.0, 0.0, 1.0};
 			v3                  = vec4_sub(v2, v1);
 			v3                  = vec4_norm(v3);
 			v3                  = vec4_mult(v3, 1.0 - g_context->brush_lazy_step);

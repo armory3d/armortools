@@ -38,7 +38,7 @@ vec4_t import_envmap_reverse_equirect(f32 x, f32 y) {
 	f32 theta = x * math_pi() * 2 - math_pi();
 	f32 phi   = y * math_pi();
 	// return n.set(math_sin(phi) * math_cos(theta), -(math_sin(phi) * math_sin(theta)), math_cos(phi));
-	import_envmap_n = vec4_create(-math_cos(phi), math_sin(phi) * math_cos(theta), -(math_sin(phi) * math_sin(theta)), 1.0);
+	import_envmap_n = (vec4_t){-math_cos(phi), math_sin(phi) * math_cos(theta), -(math_sin(phi) * math_sin(theta)), 1.0};
 	return import_envmap_n;
 }
 

@@ -379,41 +379,41 @@ void render_path_paint_commands_symmetry() {
 		f32          sy     = t->scale.y;
 		f32          sz     = t->scale.z;
 		if (g_context->sym_x) {
-			t->scale = vec4_create(-sx, sy, sz, 1.0);
+			t->scale = (vec4_t){-sx, sy, sz, 1.0};
 			transform_build_matrix(t);
 			render_path_paint_commands_paint(false);
 		}
 		if (g_context->sym_y) {
-			t->scale = vec4_create(sx, -sy, sz, 1.0);
+			t->scale = (vec4_t){sx, -sy, sz, 1.0};
 			transform_build_matrix(t);
 			render_path_paint_commands_paint(false);
 		}
 		if (g_context->sym_z) {
-			t->scale = vec4_create(sx, sy, -sz, 1.0);
+			t->scale = (vec4_t){sx, sy, -sz, 1.0};
 			transform_build_matrix(t);
 			render_path_paint_commands_paint(false);
 		}
 		if (g_context->sym_x && g_context->sym_y) {
-			t->scale = vec4_create(-sx, -sy, sz, 1.0);
+			t->scale = (vec4_t){-sx, -sy, sz, 1.0};
 			transform_build_matrix(t);
 			render_path_paint_commands_paint(false);
 		}
 		if (g_context->sym_x && g_context->sym_z) {
-			t->scale = vec4_create(-sx, sy, -sz, 1.0);
+			t->scale = (vec4_t){-sx, sy, -sz, 1.0};
 			transform_build_matrix(t);
 			render_path_paint_commands_paint(false);
 		}
 		if (g_context->sym_y && g_context->sym_z) {
-			t->scale = vec4_create(sx, -sy, -sz, 1.0);
+			t->scale = (vec4_t){sx, -sy, -sz, 1.0};
 			transform_build_matrix(t);
 			render_path_paint_commands_paint(false);
 		}
 		if (g_context->sym_x && g_context->sym_y && g_context->sym_z) {
-			t->scale = vec4_create(-sx, -sy, -sz, 1.0);
+			t->scale = (vec4_t){-sx, -sy, -sz, 1.0};
 			transform_build_matrix(t);
 			render_path_paint_commands_paint(false);
 		}
-		t->scale = vec4_create(sx, sy, sz, 1.0);
+		t->scale = (vec4_t){sx, sy, sz, 1.0};
 		transform_build_matrix(t);
 	}
 }
@@ -772,8 +772,8 @@ void render_path_paint_set_plane_mesh() {
 	f32 tx    = ui_view2d_pan_x / (float)ui_view2d_ww;
 	f32 ty    = ui_view2d_pan_y / (float)sys_h();
 	m         = mat4_identity();
-	m         = mat4_scale(m, vec4_create(tw, tw, 1, 1.0));
-	m         = mat4_set_loc(m, vec4_create(tx, ty, 0, 1.0));
+	m         = mat4_scale(m, (vec4_t){tw, tw, 1, 1.0});
+	m         = mat4_set_loc(m, (vec4_t){tx, ty, 0, 1.0});
 	mat4_t m2 = mat4_identity();
 	m2        = mat4_inv(scene_camera->vp);
 	m         = mat4_mult_mat(m, m2);
@@ -845,19 +845,19 @@ void render_path_paint_set_plane_mesh() {
 	render_path_paint_planeo->base->visible = true;
 	g_context->paint_object               = render_path_paint_planeo;
 
-	vec4_t v                                         = vec4_create(m.m00, m.m01, m.m02, 1.0);
+	vec4_t v                                         = (vec4_t){m.m00, m.m01, m.m02, 1.0};
 	f32    sx                                        = vec4_len(v);
 	render_path_paint_planeo->base->transform->rot   = quat_from_euler(-math_pi() / 2.0, 0, 0);
-	render_path_paint_planeo->base->transform->scale = vec4_create(sx, 1.0, sx, 1.0);
+	render_path_paint_planeo->base->transform->scale = (vec4_t){sx, 1.0, sx, 1.0};
 	render_path_paint_planeo->base->transform->scale.z *= config_get_texture_res_y() / (float)config_get_texture_res_x();
-	render_path_paint_planeo->base->transform->loc = vec4_create(m.m30, -m.m31, 0.0, 1.0);
+	render_path_paint_planeo->base->transform->loc = (vec4_t){m.m30, -m.m31, 0.0, 1.0};
 	transform_build_matrix(render_path_paint_planeo->base->transform);
 }
 
 void render_path_paint_restore_plane_mesh() {
 	g_context->paint2d_view                      = false;
 	render_path_paint_planeo->base->visible        = false;
-	render_path_paint_planeo->base->transform->loc = vec4_create(0.0, 0.0, 0.0, 1.0);
+	render_path_paint_planeo->base->transform->loc = (vec4_t){0.0, 0.0, 0.0, 1.0};
 	for (i32 i = 0; i < project_paint_objects->length; ++i) {
 		project_paint_objects->buffer[i]->base->visible = render_path_paint_visibles->buffer[i];
 	}

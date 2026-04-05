@@ -10,12 +10,12 @@ void viewport_scale_to_bounds(f32 bounds) {
 	po->base->transform->dim.x = aabb.x;
 	po->base->transform->dim.y = aabb.y;
 	po->base->transform->dim.z = aabb.z;
-	po->base->transform->scale = vec4_create(bounds / (float)r, bounds / (float)r, bounds / (float)r, 1.0);
-	po->base->transform->loc   = vec4_create(0, 0, 0, 1.0);
+	po->base->transform->scale = (vec4_t){bounds / (float)r, bounds / (float)r, bounds / (float)r, 1.0};
+	po->base->transform->loc   = (vec4_t){0, 0, 0, 1.0};
 	transform_build_matrix(po->base->transform);
 	for (i32 i = 0; i < po->base->children->length; ++i) {
 		object_t *c       = po->base->children->buffer[i];
-		c->transform->loc = vec4_create(0, 0, 0, 1.0);
+		c->transform->loc = (vec4_t){0, 0, 0, 1.0};
 		transform_build_matrix(c->transform);
 	}
 }
@@ -40,11 +40,11 @@ void viewport_reset() {
 }
 
 void viewport_set_view(f32 x, f32 y, f32 z, f32 rx, f32 ry, f32 rz) {
-	g_context->paint_object->base->transform->rot   = quat_create(0, 0, 0, 1);
+	g_context->paint_object->base->transform->rot   = (quat_t){0, 0, 0, 1};
 	g_context->paint_object->base->transform->dirty = true;
 	camera_object_t *cam                              = scene_camera;
 	f32              dist                             = vec4_len(cam->base->transform->loc);
-	cam->base->transform->loc                         = vec4_create(x * dist, y * dist, z * dist, 1.0);
+	cam->base->transform->loc                         = (vec4_t){x * dist, y * dist, z * dist, 1.0};
 	cam->base->transform->rot                         = quat_from_euler(rx, ry, rz);
 	transform_build_matrix(cam->base->transform);
 	camera_object_build_proj(cam, -1.0);
@@ -56,7 +56,7 @@ void viewport_orbit(f32 x, f32 y) {
 	camera_object_t *cam  = scene_camera;
 	f32              dist = camera_distance();
 	transform_move(cam->base->transform, camera_object_look_world(cam), dist);
-	transform_rotate(cam->base->transform, vec4_create(0, 0, 1, 1.0), x);
+	transform_rotate(cam->base->transform, (vec4_t){0, 0, 1, 1.0}, x);
 	transform_rotate(cam->base->transform, camera_object_right_world(cam), y);
 	transform_move(cam->base->transform, camera_object_look_world(cam), -dist);
 	g_context->ddirty = 2;

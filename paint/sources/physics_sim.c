@@ -1,8 +1,8 @@
 
 #include "global.h"
 
-mat4_box_t_array_t *sim_transforms;
-bool                sim_initialized = false;
+any_array_t *sim_transforms;
+bool         sim_initialized = false;
 
 void sim_init() {
 	if (sim_initialized) {
@@ -66,7 +66,8 @@ void sim_play() {
 	gc_root(sim_transforms);
 	mesh_object_t_array_t *pos = project_paint_objects;
 	for (i32 i = 0; i < pos->length; ++i) {
-		mat4_box_t *m = GC_ALLOC_INIT(mat4_box_t, {.v = pos->buffer[i]->base->transform->local});
+		mat4_t *m = gc_alloc(sizeof(mat4_t));
+		memcpy(m->m, pos->buffer[i]->base->transform->local.m, sizeof(m->m));
 		any_array_push(sim_transforms, m);
 	}
 }
@@ -81,7 +82,7 @@ void sim_stop() {
 	// Restore transforms
 	mesh_object_t_array_t *pos = project_paint_objects;
 	for (i32 i = 0; i < pos->length; ++i) {
-		transform_set_matrix(pos->buffer[i]->base->transform, sim_transforms->buffer[i]->v);
+		transform_set_matrix(pos->buffer[i]->base->transform, *(mat4_t *)sim_transforms->buffer[i]);
 		physics_body_t *pb = any_imap_get(physics_body_object_map, pos->buffer[i]->base->uid);
 		if (pb != NULL) {
 			physics_body_sync_transform(pb);

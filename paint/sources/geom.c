@@ -70,7 +70,7 @@ raw_mesh_t *geom_make_uv_sphere(f32 radius, i32 width_segments, i32 height_segme
 	mesh->texa       = i16_array_create(width_verts * height_verts * 2);
 	mesh->inda       = u32_array_create(width_segments * height_segments * 6 - width_segments * 6);
 
-	vec4_t nor       = vec4_create(0.0, 0.0, 0.0, 1.0);
+	vec4_t nor       = (vec4_t){0.0, 0.0, 0.0, 1.0};
 	i32    pos       = 0;
 	for (i32 y = 0; y < height_verts; ++y) {
 		f32 v      = y / (float)height_segments;
@@ -92,7 +92,7 @@ raw_mesh_t *geom_make_uv_sphere(f32 radius, i32 width_segments, i32 height_segme
 			mesh->posa->buffer[i4]     = math_floor(vx * inv);
 			mesh->posa->buffer[i4 + 1] = math_floor(vy * inv);
 			mesh->posa->buffer[i4 + 2] = math_floor(vz * inv);
-			nor                        = vec4_create(vx, vy, vz, 1.0);
+			nor                        = (vec4_t){vx, vy, vz, 1.0};
 			nor                        = vec4_norm(nor);
 			mesh->posa->buffer[i4 + 3] = math_floor(nor.z * 32767);
 			mesh->nora->buffer[i2]     = math_floor(nor.x * 32767);

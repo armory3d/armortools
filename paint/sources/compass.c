@@ -39,9 +39,9 @@ void compass_render() {
 		compass_y = -compass_y;
 	}
 
-	compass->base->transform->loc   = vec4_create(compass_x * ratio, compass_y, -1, 1.0);
-	compass->base->transform->rot   = quat_create(-crot.x, -crot.y, -crot.z, crot.w);
-	compass->base->transform->scale = vec4_create(0.4, 0.4, 0.4, 1.0);
+	compass->base->transform->loc   = (vec4_t){compass_x * ratio, compass_y, -1, 1.0};
+	compass->base->transform->rot   = (quat_t){-crot.x, -crot.y, -crot.z, crot.w};
+	compass->base->transform->scale = (vec4_t){0.4, 0.4, 0.4, 1.0};
 	transform_build_matrix(compass->base->transform);
 	compass->frustum_culling = false;
 	mesh_object_render(compass, "overlay", NULL);
@@ -72,13 +72,13 @@ void compass_init_hitbox() {
 	_compass_hitbox_z = object_create(true);
 	gc_root(_compass_hitbox_z);
 
-	_compass_hitbox_x->transform->scale = vec4_create(0.15, 0.15, 0.15, 1.0);
-	_compass_hitbox_y->transform->scale = vec4_create(0.15, 0.15, 0.15, 1.0);
-	_compass_hitbox_z->transform->scale = vec4_create(0.15, 0.15, 0.15, 1.0);
+	_compass_hitbox_x->transform->scale = (vec4_t){0.15, 0.15, 0.15, 1.0};
+	_compass_hitbox_y->transform->scale = (vec4_t){0.15, 0.15, 0.15, 1.0};
+	_compass_hitbox_z->transform->scale = (vec4_t){0.15, 0.15, 0.15, 1.0};
 
-	_compass_hitbox_x->transform->loc = vec4_create(1.5, 0, 0, 1.0);
-	_compass_hitbox_y->transform->loc = vec4_create(0, 1.5, 0, 1.0);
-	_compass_hitbox_z->transform->loc = vec4_create(0, 0, 1.5, 1.0);
+	_compass_hitbox_x->transform->loc = (vec4_t){1.5, 0, 0, 1.0};
+	_compass_hitbox_y->transform->loc = (vec4_t){0, 1.5, 0, 1.0};
+	_compass_hitbox_z->transform->loc = (vec4_t){0, 0, 1.5, 1.0};
 
 	object_t *compass = scene_get_child(".Compass");
 	object_set_parent(_compass_hitbox_x, compass);

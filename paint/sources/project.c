@@ -265,7 +265,7 @@ void project_new(bool reset_layers) {
 	g_context->paint_object = context_main_object();
 	context_select_paint_object(context_main_object());
 
-	g_context->paint_object->base->transform->scale = vec4_create(1, 1, 1, 1.0);
+	g_context->paint_object->base->transform->scale = (vec4_t){1, 1, 1, 1.0};
 	transform_build_matrix(g_context->paint_object->base->transform);
 	g_context->paint_object->base->name = "Tessellated";
 

@@ -5,7 +5,7 @@ scene_t *scene_raw_gc;
 
 void import_arm_run_project_on_next_frame(void *_) {
 	// Once envmap is imported
-	scene_world->strength         = g_project->envmap_strength;
+	scene_world->strength       = g_project->envmap_strength;
 	g_context->envmap_angle     = g_project->envmap_angle;
 	g_context->show_envmap_blur = g_project->envmap_blur;
 	if (g_context->show_envmap_blur) {
@@ -35,7 +35,7 @@ void import_arm_run_mesh(project_t *raw) {
 			md->_->handle        = md->name;
 			any_map_set(data_cached_meshes, md->_->handle, md);
 		}
-		object->base->transform->scale = vec4_create(1, 1, 1, 1.0);
+		object->base->transform->scale = (vec4_t){1, 1, 1, 1.0};
 		transform_build_matrix(object->base->transform);
 		object->base->name = md->name;
 		any_array_push(project_paint_objects, object);
@@ -221,9 +221,9 @@ void import_arm_run_swatches_from_project(project_t *project, char *path, bool r
 }
 
 void import_arm_run_project(char *path) {
-	buffer_t         *b = data_get_blob(path);
+	buffer_t  *b = data_get_blob(path);
 	project_t *project;
-	bool              import_as_mesh = false;
+	bool       import_as_mesh = false;
 	if (import_arm_is_old(b)) {
 		project = import_arm_from_old(b);
 	}
@@ -315,8 +315,8 @@ void import_arm_run_project(char *path) {
 		transform_decompose(scene_camera->base->transform);
 		scene_camera->data->fov = g_project->camera_fov;
 		camera_object_build_proj(scene_camera, -1.0);
-		f32_array_t *origin          = g_project->camera_origin;
-		camera_origins->buffer[0]->v = vec4_create(origin->buffer[0], origin->buffer[1], origin->buffer[2], 1.0);
+		f32_array_t *origin = g_project->camera_origin;
+		camera_origins[0]   = (vec4_t){origin->buffer[0], origin->buffer[1], origin->buffer[2], 1.0};
 	}
 
 	for (i32 i = 0; i < project->assets->length; ++i) {
@@ -358,7 +358,7 @@ void import_arm_run_project(char *path) {
 	mesh_data_t *md = mesh_data_create(project->mesh_datas->buffer[0]);
 
 	mesh_object_set_data(g_context->paint_object, md);
-	g_context->paint_object->base->transform->scale = vec4_create(1, 1, 1, 1.0);
+	g_context->paint_object->base->transform->scale = (vec4_t){1, 1, 1, 1.0};
 	transform_build_matrix(g_context->paint_object->base->transform);
 	g_context->paint_object->base->name = md->name;
 	gc_unroot(project_paint_objects);
@@ -430,9 +430,9 @@ void import_arm_run_project(char *path) {
 		render_target_t *blend1           = any_map_get(rts, "texpaint_blend1");
 		gpu_texture_t   *_texpaint_blend1 = blend1->_image;
 		gpu_delete_texture(_texpaint_blend1);
-		blend1->width                  = config_get_texture_res_x();
-		blend1->height                 = config_get_texture_res_y();
-		blend1->_image                 = gpu_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), GPU_TEXTURE_FORMAT_R8);
+		blend1->width                = config_get_texture_res_x();
+		blend1->height               = config_get_texture_res_y();
+		blend1->_image               = gpu_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), GPU_TEXTURE_FORMAT_R8);
 		g_context->brush_blend_dirty = true;
 	}
 
@@ -564,7 +564,7 @@ void import_arm_run_project(char *path) {
 	}
 
 	for (i32 i = 0; i < project_materials->length; ++i) {
-		slot_material_t *m    = project_materials->buffer[i];
+		slot_material_t *m  = project_materials->buffer[i];
 		g_context->material = m;
 		make_material_parse_paint_material(true);
 		util_render_make_material_preview();
@@ -596,12 +596,12 @@ void import_arm_run_project(char *path) {
 
 	ui_base_hwnds->buffer[TAB_AREA_SIDEBAR0]->redraws = 2;
 	ui_base_hwnds->buffer[TAB_AREA_SIDEBAR1]->redraws = 2;
-	g_context->ddirty                               = 4;
+	g_context->ddirty                                 = 4;
 	data_delete_blob(path);
 }
 
 void import_arm_run_material(char *path) {
-	buffer_t         *b = data_get_blob(path);
+	buffer_t  *b = data_get_blob(path);
 	project_t *project;
 	if (import_arm_is_old(b)) {
 		project = import_arm_from_old(b);
@@ -618,7 +618,7 @@ void import_arm_run_material(char *path) {
 }
 
 void import_arm_run_brush(char *path) {
-	buffer_t         *b       = data_get_blob(path);
+	buffer_t  *b       = data_get_blob(path);
 	project_t *project = armpack_decode(b);
 	if (project->version == NULL) {
 		data_delete_blob(path);
@@ -673,7 +673,7 @@ void import_arm_run_brush_from_project(project_t *project, char *path) {
 }
 
 void import_arm_run_swatches(char *path, bool replace_existing) {
-	buffer_t         *b       = data_get_blob(path);
+	buffer_t  *b       = data_get_blob(path);
 	project_t *project = armpack_decode(b);
 	if (project->version == NULL) {
 		data_delete_blob(path);

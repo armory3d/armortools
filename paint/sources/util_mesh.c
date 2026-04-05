@@ -209,11 +209,11 @@ i32 util_mesh_calc_normals_sort(i32 *pa, i32 *pb) {
 }
 
 void util_mesh_calc_normals(bool smooth) {
-	vec4_t                 va      = vec4_create(0.0, 0.0, 0.0, 1.0);
-	vec4_t                 vb      = vec4_create(0.0, 0.0, 0.0, 1.0);
-	vec4_t                 vc      = vec4_create(0.0, 0.0, 0.0, 1.0);
-	vec4_t                 cb      = vec4_create(0.0, 0.0, 0.0, 1.0);
-	vec4_t                 ab      = vec4_create(0.0, 0.0, 0.0, 1.0);
+	vec4_t                 va      = (vec4_t){0.0, 0.0, 0.0, 1.0};
+	vec4_t                 vb      = (vec4_t){0.0, 0.0, 0.0, 1.0};
+	vec4_t                 vc      = (vec4_t){0.0, 0.0, 0.0, 1.0};
+	vec4_t                 cb      = (vec4_t){0.0, 0.0, 0.0, 1.0};
+	vec4_t                 ab      = (vec4_t){0.0, 0.0, 0.0, 1.0};
 	mesh_object_t_array_t *objects = project_paint_objects;
 	for (i32 i = 0; i < objects->length; ++i) {
 		mesh_object_t *o           = objects->buffer[i];
@@ -257,9 +257,9 @@ void util_mesh_calc_normals(bool smooth) {
 			i32 i1 = inda->buffer[i * 3];
 			i32 i2 = inda->buffer[i * 3 + 1];
 			i32 i3 = inda->buffer[i * 3 + 2];
-			va     = vec4_create(va0->buffer[i1 * 4], va0->buffer[i1 * 4 + 1], va0->buffer[i1 * 4 + 2], 1.0);
-			vb     = vec4_create(va0->buffer[i2 * 4], va0->buffer[i2 * 4 + 1], va0->buffer[i2 * 4 + 2], 1.0);
-			vc     = vec4_create(va0->buffer[i3 * 4], va0->buffer[i3 * 4 + 1], va0->buffer[i3 * 4 + 2], 1.0);
+			va     = (vec4_t){va0->buffer[i1 * 4], va0->buffer[i1 * 4 + 1], va0->buffer[i1 * 4 + 2], 1.0};
+			vb     = (vec4_t){va0->buffer[i2 * 4], va0->buffer[i2 * 4 + 1], va0->buffer[i2 * 4 + 2], 1.0};
+			vc     = (vec4_t){va0->buffer[i3 * 4], va0->buffer[i3 * 4 + 1], va0->buffer[i3 * 4 + 2], 1.0};
 			cb     = vec4_sub(vc, vb);
 			ab     = vec4_sub(va, vb);
 			cb     = vec4_cross(cb, ab);
@@ -425,9 +425,9 @@ void util_mesh_apply_displacement(gpu_texture_t *texpaint_pack, f32 strength, f3
 void util_mesh_equirect_unwrap(raw_mesh_t *mesh) {
 	i32 verts  = math_floor(mesh->posa->length / 4.0);
 	mesh->texa = i16_array_create(verts * 2);
-	vec4_t n   = vec4_create(0.0, 0.0, 0.0, 1.0);
+	vec4_t n   = (vec4_t){0.0, 0.0, 0.0, 1.0};
 	for (i32 i = 0; i < verts; ++i) {
-		n = vec4_create(mesh->posa->buffer[i * 4] / 32767.0, mesh->posa->buffer[i * 4 + 1] / 32767.0, mesh->posa->buffer[i * 4 + 2] / 32767.0, 1.0);
+		n = (vec4_t){mesh->posa->buffer[i * 4] / 32767.0, mesh->posa->buffer[i * 4 + 1] / 32767.0, mesh->posa->buffer[i * 4 + 2] / 32767.0, 1.0};
 		n = vec4_norm(n);
 		// Sphere projection
 		// mesh.texa[i * 2    ] = math_atan2(n.x, n.y) / (math_pi() * 2) + 0.5;

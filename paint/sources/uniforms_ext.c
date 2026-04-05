@@ -142,13 +142,13 @@ f32 uniforms_ext_f32_link(object_t *object, material_data_t *mat, char *link) {
 vec2_t uniforms_ext_vec2_link(object_t *object, material_data_t *mat, char *link) {
 	if (string_equals(link, "_gbuffer_size")) {
 		render_target_t *gbuffer2 = any_map_get(render_path_render_targets, "gbuffer2");
-		return vec2_create(gbuffer2->_image->width, gbuffer2->_image->height);
+		return (vec2_t){gbuffer2->_image->width, gbuffer2->_image->height};
 	}
 	else if (string_equals(link, "_clone_delta")) {
-		return vec2_create(g_context->clone_delta_x, g_context->clone_delta_y);
+		return (vec2_t){g_context->clone_delta_x, g_context->clone_delta_y};
 	}
 	else if (string_equals(link, "_texpaint_size")) {
-		return vec2_create(config_get_texture_res_x(), config_get_texture_res_y());
+		return (vec2_t){config_get_texture_res_x(), config_get_texture_res_y()};
 	}
 	else if (string_equals(link, "_brush_angle")) {
 		f32 brush_angle = g_context->brush_angle + g_context->brush_nodes_angle;
@@ -157,7 +157,7 @@ vec2_t uniforms_ext_vec2_link(object_t *object, material_data_t *mat, char *link
 		if (g_config->pressure_angle && pen_down("tip")) {
 			angle *= pen_pressure * g_config->pressure_sensitivity;
 		}
-		return vec2_create(math_cos(-angle), math_sin(-angle));
+		return (vec2_t){math_cos(-angle), math_sin(-angle)};
 	}
 	return vec2_nan();
 }
@@ -173,7 +173,6 @@ f32 uniforms_ext_vec2d(f32 x) {
 vec4_t uniforms_ext_vec3_link(object_t *object, material_data_t *mat, char *link) {
 	vec4_t v = vec4_nan();
 	if (string_equals(link, "_brush_direction")) {
-		v = _uniforms_vec;
 		// Discard first paint for directional brush
 		bool allow_paint = g_context->prev_paint_vec_x != g_context->last_paint_vec_x && g_context->prev_paint_vec_y != g_context->last_paint_vec_y &&
 		                   g_context->prev_paint_vec_x > 0 && g_context->prev_paint_vec_y > 0;
@@ -186,42 +185,36 @@ vec4_t uniforms_ext_vec3_link(object_t *object, material_data_t *mat, char *link
 			lastx = uniforms_ext_vec2d(lastx);
 		}
 		f32 angle                     = math_atan2(-y + lasty, x - lastx) - math_pi() / 2.0;
-		v                             = vec4_create(math_cos(angle), math_sin(angle), allow_paint ? 1 : 0, 1.0);
+		v                             = (vec4_t){math_cos(angle), math_sin(angle), allow_paint ? 1 : 0, 1.0};
 		g_context->prev_paint_vec_x = g_context->last_paint_vec_x;
 		g_context->prev_paint_vec_y = g_context->last_paint_vec_y;
 		return v;
 	}
 	else if (string_equals(link, "_decal_layer_loc")) {
-		v = _uniforms_vec;
-		v = vec4_create(g_context->layer->decal_mat.m30, g_context->layer->decal_mat.m31, g_context->layer->decal_mat.m32, 1.0);
+		v = (vec4_t){g_context->layer->decal_mat.m30, g_context->layer->decal_mat.m31, g_context->layer->decal_mat.m32, 1.0};
 		return v;
 	}
 	else if (string_equals(link, "_decal_layer_nor")) {
-		v = _uniforms_vec;
-		v = vec4_create(g_context->layer->decal_mat.m20, g_context->layer->decal_mat.m21, g_context->layer->decal_mat.m22, 1.0);
+		v = (vec4_t){g_context->layer->decal_mat.m20, g_context->layer->decal_mat.m21, g_context->layer->decal_mat.m22, 1.0};
 		v = vec4_norm(v);
 		return v;
 	}
 	else if (string_equals(link, "_picker_base")) {
-		v = _uniforms_vec;
-		v = vec4_create(color_get_rb(g_context->picked_color->base) / 255.0, color_get_gb(g_context->picked_color->base) / 255.0,
-		                color_get_bb(g_context->picked_color->base) / 255.0, 1.0);
+		v = (vec4_t){color_get_rb(g_context->picked_color->base) / 255.0, color_get_gb(g_context->picked_color->base) / 255.0,
+		                color_get_bb(g_context->picked_color->base) / 255.0, 1.0};
 		return v;
 	}
 	else if (string_equals(link, "_picker_normal")) {
-		v = _uniforms_vec;
-		v = vec4_create(color_get_rb(g_context->picked_color->normal) / 255.0, color_get_gb(g_context->picked_color->normal) / 255.0,
-		                color_get_bb(g_context->picked_color->normal) / 255.0, 1.0);
+		v = (vec4_t){color_get_rb(g_context->picked_color->normal) / 255.0, color_get_gb(g_context->picked_color->normal) / 255.0,
+		                color_get_bb(g_context->picked_color->normal) / 255.0, 1.0};
 		return v;
 	}
 	else if (string_equals(link, "_particle_hit")) {
-		v = _uniforms_vec;
-		v = vec4_create(g_context->particle_hit_x, g_context->particle_hit_y, g_context->particle_hit_z, 1.0);
+		v = (vec4_t){g_context->particle_hit_x, g_context->particle_hit_y, g_context->particle_hit_z, 1.0};
 		return v;
 	}
 	else if (string_equals(link, "_particle_hit_last")) {
-		v = _uniforms_vec;
-		v = vec4_create(g_context->last_particle_hit_x, g_context->last_particle_hit_y, g_context->last_particle_hit_z, 1.0);
+		v = (vec4_t){g_context->last_particle_hit_x, g_context->last_particle_hit_y, g_context->last_particle_hit_z, 1.0};
 		return v;
 	}
 	return v;
@@ -230,7 +223,7 @@ vec4_t uniforms_ext_vec3_link(object_t *object, material_data_t *mat, char *link
 vec4_t uniforms_ext_vec4_link(object_t *object, material_data_t *mat, char *link) {
 	if (string_equals(link, "_input_brush")) {
 		bool   down = mouse_down("left") || pen_down("tip");
-		vec4_t v    = vec4_create(g_context->paint_vec.x, g_context->paint_vec.y, down ? 1.0 : 0.0, g_context->paint2d ? 1.0 : 0.0);
+		vec4_t v    = (vec4_t){g_context->paint_vec.x, g_context->paint_vec.y, down ? 1.0 : 0.0, g_context->paint2d ? 1.0 : 0.0};
 		if (g_context->paint2d) {
 			v.x = uniforms_ext_vec2d(v.x);
 		}
@@ -239,7 +232,7 @@ vec4_t uniforms_ext_vec4_link(object_t *object, material_data_t *mat, char *link
 	}
 	else if (string_equals(link, "_input_brush_last")) {
 		bool   down = mouse_down("left") || pen_down("tip");
-		vec4_t v    = vec4_create(g_context->last_paint_vec_x, g_context->last_paint_vec_y, down ? 1.0 : 0.0, g_context->paint2d ? 1.0 : 0.0);
+		vec4_t v    = (vec4_t){g_context->last_paint_vec_x, g_context->last_paint_vec_y, down ? 1.0 : 0.0, g_context->paint2d ? 1.0 : 0.0};
 		if (g_context->paint2d) {
 			v.x = uniforms_ext_vec2d(v.x);
 		}
@@ -247,14 +240,14 @@ vec4_t uniforms_ext_vec4_link(object_t *object, material_data_t *mat, char *link
 		return v;
 	}
 	else if (string_equals(link, "_envmap_data")) {
-		return vec4_create(g_context->envmap_angle, math_sin(-g_context->envmap_angle), math_cos(-g_context->envmap_angle), scene_world->strength * 2.0);
+		return (vec4_t){g_context->envmap_angle, math_sin(-g_context->envmap_angle), math_cos(-g_context->envmap_angle), scene_world->strength * 2.0};
 	}
 	else if (string_equals(link, "_envmap_data_world")) {
 		bool tonemap = g_context->viewport_mode == VIEWPORT_MODE_LIT || g_context->viewport_mode == VIEWPORT_MODE_PATH_TRACE;
-		return vec4_create(g_context->envmap_angle, tonemap ? 0.0 : 1.0, 0.0, g_context->show_envmap ? scene_world->strength : 1.0);
+		return (vec4_t){g_context->envmap_angle, tonemap ? 0.0 : 1.0, 0.0, g_context->show_envmap ? scene_world->strength : 1.0};
 	}
 	else if (string_equals(link, "_stencil_transform")) {
-		vec4_t v = vec4_create(g_context->brush_stencil_x, g_context->brush_stencil_y, g_context->brush_stencil_scale, g_context->brush_stencil_angle);
+		vec4_t v = (vec4_t){g_context->brush_stencil_x, g_context->brush_stencil_y, g_context->brush_stencil_scale, g_context->brush_stencil_angle};
 		if (g_context->paint2d) {
 			v.x = uniforms_ext_vec2d(v.x);
 		}
@@ -266,7 +259,7 @@ vec4_t uniforms_ext_vec4_link(object_t *object, material_data_t *mat, char *link
 		f32  val        = (g_context->brush_radius * g_context->brush_nodes_radius) / 15.0;
 		f32  scale2d    = (900 / (float)base_h()) * g_config->window_scale;
 		val *= scale2d; // Projection ratio
-		vec4_t v = vec4_create(g_context->decal_x, g_context->decal_y, decal_mask ? 1 : 0, val);
+		vec4_t v = (vec4_t){g_context->decal_x, g_context->decal_y, decal_mask ? 1 : 0, val};
 		if (g_context->paint2d) {
 			v.x = uniforms_ext_vec2d(v.x);
 		}
@@ -281,7 +274,7 @@ mat4_t uniforms_ext_mat4_link(object_t *object, material_data_t *mat, char *link
 	if (string_equals(link, "_decal_layer_matrix")) { // Decal layer
 		mat4_t m = mat4_inv(g_context->layer->decal_mat);
 		f32    f = object->parent->transform->scale.x * object->transform->scale_world;
-		m        = mat4_scale(m, vec4_create(f, f, f, 1.0));
+		m        = mat4_scale(m, (vec4_t){f, f, f, 1.0});
 		m        = mat4_mult_mat(m, uniforms_ext_ortho_p);
 		return m;
 	}

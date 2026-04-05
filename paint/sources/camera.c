@@ -66,7 +66,7 @@ static void camera_orbit_action(bool modif, bool default_keymap) {
 			}
 
 			vec4_t offset =
-			    vec4_create(camera->base->transform->loc.x - pivot_x, camera->base->transform->loc.y - pivot_y, camera->base->transform->loc.z - pivot_z, 0.0);
+			    (vec4_t){camera->base->transform->loc.x - pivot_x, camera->base->transform->loc.y - pivot_y, camera->base->transform->loc.z - pivot_z, 0.0};
 			quat_t q_x                     = quat_from_axis_angle(vec4_z_axis(), angle_x);
 			quat_t q_y                     = quat_from_axis_angle(right, angle_y);
 			offset                         = vec4_apply_quat(offset, q_x);
@@ -128,7 +128,7 @@ static void camera_rotate_action(bool modif, bool default_keymap) {
 				angle_y = 0.0;
 			}
 
-			vec4_t offset = vec4_create(t->loc.x - pivot_x, t->loc.y - pivot_y, t->loc.z - pivot_z, 0.0);
+			vec4_t offset = (vec4_t){t->loc.x - pivot_x, t->loc.y - pivot_y, t->loc.z - pivot_z, 0.0};
 			quat_t q_x    = quat_from_axis_angle(up, angle_x);
 			quat_t q_y    = quat_from_axis_angle(right, angle_y);
 			offset        = vec4_apply_quat(offset, q_x);
@@ -152,11 +152,11 @@ static void camera_rotate_action(bool modif, bool default_keymap) {
 }
 
 f32 camera_get_zoom_speed() {
-	i32 sign = g_config->zoom_direction == ZOOM_DIRECTION_VERTICAL_INVERTED || g_config->zoom_direction == ZOOM_DIRECTION_HORIZONTAL_INVERTED ||
-	                   g_config->zoom_direction == ZOOM_DIRECTION_VERTICAL_HORIZONTAL_INVERTED
-	               ? -1
-	               : 1;
-	camera_object_t *camera     = scene_camera;
+	i32              sign   = g_config->zoom_direction == ZOOM_DIRECTION_VERTICAL_INVERTED || g_config->zoom_direction == ZOOM_DIRECTION_HORIZONTAL_INVERTED ||
+                       g_config->zoom_direction == ZOOM_DIRECTION_VERTICAL_HORIZONTAL_INVERTED
+	                              ? -1
+	                              : 1;
+	camera_object_t *camera = scene_camera;
 	f32              fov_adjust = camera->data->fov;
 	return (g_config->camera_zoom_speed * sign) / (float)fov_adjust;
 }
@@ -166,7 +166,7 @@ f32 camera_get_zoom_delta() {
 	       : g_config->zoom_direction == ZOOM_DIRECTION_VERTICAL_INVERTED   ? -mouse_movement_y
 	       : g_config->zoom_direction == ZOOM_DIRECTION_HORIZONTAL          ? mouse_movement_x
 	       : g_config->zoom_direction == ZOOM_DIRECTION_HORIZONTAL_INVERTED ? mouse_movement_x
-	                                                                          : -(mouse_movement_y - mouse_movement_x);
+	                                                                        : -(mouse_movement_y - mouse_movement_x);
 }
 
 static void camera_zoom_action(bool modif_key) {
@@ -206,7 +206,7 @@ static void camera_fly_action(bool modif_key) {
 		if (camera_ease > 1.0) {
 			camera_ease = 1.0;
 		}
-		camera_dir   = vec4_create(0, 0, 0, 1.0);
+		camera_dir   = (vec4_t){0, 0, 0, 1.0};
 		vec4_t look  = camera_object_look(camera);
 		vec4_t right = camera_object_right(camera);
 		if (move_forward) {
@@ -259,14 +259,14 @@ i32 camera_index() {
 void camera_pan_action(bool modif, bool default_keymap) {
 	camera_object_t *camera = scene_camera;
 	if (operator_shortcut(any_map_get(config_keymap, "action_pan"), SHORTCUT_TYPE_DOWN) || (mouse_down("middle") && !modif && default_keymap)) {
-		camera_redraws               = 2;
-		f32    f                     = 150 * (1.0 / (float)(camera_distance() / 4.0));
-		vec4_t look                  = vec4_mult(transform_look(camera->base->transform), mouse_movement_y / (float)f * g_config->camera_pan_speed);
-		vec4_t right                 = vec4_mult(transform_right(camera->base->transform), -mouse_movement_x / (float)f * g_config->camera_pan_speed);
-		camera->base->transform->loc = vec4_add(camera->base->transform->loc, look);
-		camera->base->transform->loc = vec4_add(camera->base->transform->loc, right);
-		camera_origins->buffer[camera_index()]->v = vec4_add(camera_origins->buffer[camera_index()]->v, look);
-		camera_origins->buffer[camera_index()]->v = vec4_add(camera_origins->buffer[camera_index()]->v, right);
+		camera_redraws                 = 2;
+		f32    f                       = 150 * (1.0 / (float)(camera_distance() / 4.0));
+		vec4_t look                    = vec4_mult(transform_look(camera->base->transform), mouse_movement_y / (float)f * g_config->camera_pan_speed);
+		vec4_t right                   = vec4_mult(transform_right(camera->base->transform), -mouse_movement_x / (float)f * g_config->camera_pan_speed);
+		camera->base->transform->loc   = vec4_add(camera->base->transform->loc, look);
+		camera->base->transform->loc   = vec4_add(camera->base->transform->loc, right);
+		camera_origins[camera_index()] = vec4_add(camera_origins[camera_index()], look);
+		camera_origins[camera_index()] = vec4_add(camera_origins[camera_index()], right);
 		camera_object_build_mat(camera);
 	}
 }
@@ -278,10 +278,9 @@ void camera_set_pivot_center_to_mouse() {
 		return;
 	}
 
-	vec4_box_t *o = camera_origins->buffer[camera_index()];
-	o->v.x        = g_context->posx_picked;
-	o->v.y        = g_context->posy_picked;
-	o->v.z        = g_context->posz_picked;
+	camera_origins[camera_index()].x = g_context->posx_picked;
+	camera_origins[camera_index()].y = g_context->posy_picked;
+	camera_origins[camera_index()].z = g_context->posz_picked;
 
 	camera_redraws                 = 2;
 	camera_object_t *camera        = scene_camera;
@@ -361,44 +360,29 @@ void camera_update(void *_) {
 
 f32 camera_distance() {
 	camera_object_t *camera = scene_camera;
-	return vec4_dist(camera_origins->buffer[camera_index()]->v, camera->base->transform->loc);
+	return vec4_dist(camera_origins[camera_index()], camera->base->transform->loc);
 }
 
 void camera_reset(i32 view_index) {
 	camera_object_t *camera = scene_camera;
 	if (view_index == -1) {
-		vec4_box_t *v0 = GC_ALLOC_INIT(vec4_box_t, {.v = vec4_create(0, 0, 0, 1)});
-		vec4_box_t *v1 = GC_ALLOC_INIT(vec4_box_t, {.v = vec4_create(0, 0, 0, 1)});
-		gc_unroot(camera_origins);
-		camera_origins = any_array_create_from_raw(
-		    (void *[]){
-		        v0,
-		        v1,
-		    },
-		    2);
-		gc_root(camera_origins);
-		mat4_box_t *m0 = GC_ALLOC_INIT(mat4_box_t, {.v = mat4_clone(camera->base->transform->local)});
-		mat4_box_t *m1 = GC_ALLOC_INIT(mat4_box_t, {.v = mat4_clone(camera->base->transform->local)});
-		gc_unroot(camera_views);
-		camera_views = any_array_create_from_raw(
-		    (void *[]){
-		        m0,
-		        m1,
-		    },
-		    2);
-		gc_root(camera_views);
+		camera_origins[0] = (vec4_t){0, 0, 0, 1};
+		camera_origins[1] = (vec4_t){0, 0, 0, 1};
+
+		camera_views[0] = mat4_clone(camera->base->transform->local);
+		camera_views[1] = mat4_clone(camera->base->transform->local);
 	}
 	else {
-		camera_origins->buffer[view_index]->v = vec4_create(0, 0, 0, 1.0);
-		camera_views->buffer[view_index]->v   = mat4_clone(camera->base->transform->local);
+		camera_origins[view_index] = (vec4_t){0, 0, 0, 1.0};
+		camera_views[view_index]   = mat4_clone(camera->base->transform->local);
 	}
 
 #ifdef IRON_IOS
 	if (config_is_iphone()) {
 		viewport_zoom(-2.8);
-		vec4_t right                              = vec4_mult(transform_right(camera->base->transform), -0.135);
-		camera->base->transform->loc              = vec4_add(camera->base->transform->loc, right);
-		camera_origins->buffer[camera_index()]->v = vec4_add(camera_origins->buffer[camera_index()]->v, right);
+		vec4_t right                   = vec4_mult(transform_right(camera->base->transform), -0.135);
+		camera->base->transform->loc   = vec4_add(camera->base->transform->loc, right);
+		camera_origins[camera_index()] = vec4_add(camera_origins[camera_index()], right);
 		camera_object_build_mat(camera);
 	}
 #endif

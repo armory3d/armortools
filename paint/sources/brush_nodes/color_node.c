@@ -49,6 +49,6 @@ color_node_t *color_node_create(ui_node_t *raw, f32_array_t *args) {
 	n->base->get          = color_node_get;
 	n->base->get_as_image = color_node_get_as_image;
 	n->base->set          = color_node_set;
-	n->value              = vec4_create(r, g, b, a);
+	n->value              = (vec4_t){r, g, b, a};
 	return n;
 }

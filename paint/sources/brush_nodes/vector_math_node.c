@@ -21,7 +21,7 @@ logic_node_value_t *vector_math_node_get(vector_math_node_t *self, i32 from) {
 	}
 	else if (string_equals(op, "Dot Product")) {
 		f       = vec4_dot(self->v, v2);
-		self->v = vec4_create(f, f, f, 1.0);
+		self->v = (vec4_t){f, f, f, 1.0};
 	}
 	else if (string_equals(op, "Cross Product")) {
 		self->v = vec4_cross(self->v, v2);
@@ -41,18 +41,18 @@ logic_node_value_t *vector_math_node_get(vector_math_node_t *self, i32 from) {
 	}
 	else if (string_equals(op, "Length")) {
 		f       = vec4_len(self->v);
-		self->v = vec4_create(f, f, f, 1.0);
+		self->v = (vec4_t){f, f, f, 1.0};
 	}
 	else if (string_equals(op, "Distance")) {
 		f       = vec4_dist(self->v, v2);
-		self->v = vec4_create(f, f, f, 1.0);
+		self->v = (vec4_t){f, f, f, 1.0};
 	}
 	else if (string_equals(op, "Project")) {
 		self->v = vec4_clone(v2);
 		self->v = vec4_mult(self->v, vec4_dot(v1, v2) / (float)vec4_dot(v2, v2));
 	}
 	else if (string_equals(op, "Reflect")) {
-		vec4_t tmp = vec4_create(0.0, 0.0, 0.0, 1.0);
+		vec4_t tmp = (vec4_t){0.0, 0.0, 0.0, 1.0};
 		tmp        = vec4_clone(v2);
 		tmp        = vec4_norm(tmp);
 		self->v    = vec4_reflect(self->v, tmp);
@@ -132,6 +132,6 @@ vector_math_node_t *vector_math_node_create(ui_node_t *raw, f32_array_t *args) {
 	vector_math_node_t *n = GC_ALLOC_INIT(vector_math_node_t, {0});
 	n->base               = logic_node_create(n);
 	n->base->get          = vector_math_node_get;
-	n->v                  = vec4_create(0.0, 0.0, 0.0, 1.0);
+	n->v                  = (vec4_t){0.0, 0.0, 0.0, 1.0};
 	return n;
 }

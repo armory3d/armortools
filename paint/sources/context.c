@@ -32,7 +32,7 @@ context_t *context_create() {
 	c->export_mesh_index       = 0;
 	c->pack_assets_on_export   = true;
 	c->pack_assets_on_save     = false;
-	c->paint_vec               = vec4_create(0.0, 0.0, 0.0, 1.0);
+	c->paint_vec               = (vec4_t){0.0, 0.0, 0.0, 1.0};
 	c->last_paint_x            = -1.0;
 	c->last_paint_y            = -1.0;
 	c->foreground_event        = false;

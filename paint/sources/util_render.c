@@ -17,30 +17,44 @@ void util_render_make_material_preview() {
 	    },
 	    1);
 	gc_root(scene_meshes);
-	mesh_object_t *painto     = g_context->paint_object;
+	mesh_object_t *painto   = g_context->paint_object;
 	g_context->paint_object = sphere;
 
-	sphere->material                     = project_materials->buffer[0]->data;
+	sphere->material                   = project_materials->buffer[0]->data;
 	g_context->material->preview_ready = true;
 
 	g_context->saved_camera = mat4_clone(scene_camera->base->transform->local);
-	mat4_t m = mat4_create(0.9146286343879498, -0.0032648027153306235, 0.404281837254303, 0.4659988049397712, 0.404295023959927, 0.007367569133732468,
-	                       -0.9145989516155143, -1.0687517188018691, 0.000007410128652369705, 0.9999675337275382, 0.008058532943908717, 0.015935682577325486, 0,
-	                       0, 0, 1);
+	mat4_t m                = (mat4_t){0.9146286343879498,
+	                                   -0.0032648027153306235,
+	                                   0.404281837254303,
+	                                   0.4659988049397712,
+	                                   0.404295023959927,
+	                                   0.007367569133732468,
+	                                   -0.9145989516155143,
+	                                   -1.0687517188018691,
+	                                   0.000007410128652369705,
+	                                   0.9999675337275382,
+	                                   0.008058532943908717,
+	                                   0.015935682577325486,
+	                                   0,
+	                                   0,
+	                                   0,
+	                                   1};
+
 	transform_set_matrix(scene_camera->base->transform, m);
 	f32 saved_fov           = scene_camera->data->fov;
 	scene_camera->data->fov = 0.92;
 	viewport_update_camera_type(CAMERA_TYPE_PERSPECTIVE);
 
-	world_data_t *probe            = scene_world;
-	f32           _probe_strength  = probe->strength;
-	probe->strength                = 2;
-	f32 _envmap_angle              = g_context->envmap_angle;
-	g_context->envmap_angle      = 0.0;
-	f32 _brush_scale               = g_context->brush_scale;
-	g_context->brush_scale       = 1.5;
-	f32 _brush_nodes_scale         = g_context->brush_nodes_scale;
-	g_context->brush_nodes_scale = 1.0;
+	world_data_t *probe           = scene_world;
+	f32           _probe_strength = probe->strength;
+	probe->strength               = 2;
+	f32 _envmap_angle             = g_context->envmap_angle;
+	g_context->envmap_angle       = 0.0;
+	f32 _brush_scale              = g_context->brush_scale;
+	g_context->brush_scale        = 1.5;
+	f32 _brush_nodes_scale        = g_context->brush_nodes_scale;
+	g_context->brush_nodes_scale  = 1.0;
 
 	gpu_texture_t *_envmap = scene_world->_->envmap;
 	scene_world->_->envmap = g_context->preview_envmap;
@@ -61,8 +75,8 @@ void util_render_make_material_preview() {
 	gc_root(render_path_commands);
 
 	g_context->material_preview = false;
-	_render_path_last_w           = sys_w();
-	_render_path_last_h           = sys_h();
+	_render_path_last_w         = sys_w();
+	_render_path_last_h         = sys_h();
 
 	// Restore
 	sphere->base->visible = false;
@@ -77,11 +91,11 @@ void util_render_make_material_preview() {
 	camera_object_build_proj(scene_camera, -1.0);
 	camera_object_build_mat(scene_camera);
 
-	probe->strength                = _probe_strength;
+	probe->strength              = _probe_strength;
 	g_context->envmap_angle      = _envmap_angle;
 	g_context->brush_scale       = _brush_scale;
 	g_context->brush_nodes_scale = _brush_nodes_scale;
-	scene_world->_->envmap         = _envmap;
+	scene_world->_->envmap       = _envmap;
 
 	make_material_parse_mesh_material();
 	g_context->ddirty = 0;
@@ -94,7 +108,7 @@ void util_render_make_decal_preview() {
 	g_context->decal_preview = true;
 
 	mesh_object_t *plane          = scene_get_child(".Plane")->ext;
-	plane->base->transform->scale = vec4_create(1, 1, 1, 1.0);
+	plane->base->transform->scale = (vec4_t){1, 1, 1, 1.0};
 	plane->base->transform->rot   = quat_from_euler(-math_pi() / 2.0, 0, 0);
 	transform_build_matrix(plane->base->transform);
 	plane->base->visible          = true;
@@ -106,12 +120,12 @@ void util_render_make_decal_preview() {
 	    },
 	    1);
 	gc_root(scene_meshes);
-	mesh_object_t *painto     = g_context->paint_object;
+	mesh_object_t *painto   = g_context->paint_object;
 	g_context->paint_object = plane;
 
 	g_context->saved_camera = mat4_clone(scene_camera->base->transform->local);
-	mat4_t m                  = mat4_identity();
-	m                         = mat4_translate(m, 0, 0, 1);
+	mat4_t m                = mat4_identity();
+	m                       = mat4_translate(m, 0, 0, 1);
 	transform_set_matrix(scene_camera->base->transform, m);
 	f32 saved_fov           = scene_camera->data->fov;
 	scene_camera->data->fov = 0.92;
@@ -136,8 +150,8 @@ void util_render_make_decal_preview() {
 	gc_root(render_path_commands);
 
 	g_context->decal_preview = false;
-	_render_path_last_w        = sys_w();
-	_render_path_last_h        = sys_h();
+	_render_path_last_w      = sys_w();
+	_render_path_last_h      = sys_h();
 
 	// Restore
 	plane->base->visible = false;
@@ -248,7 +262,7 @@ void util_render_make_brush_preview() {
 	}
 
 	slot_material_t *_material = g_context->material;
-	g_context->material      = slot_material_create(NULL, NULL);
+	g_context->material        = slot_material_create(NULL, NULL);
 
 	// Prevent grid jump
 	g_context->material->nodes->pan_x = g_context->brush->nodes->pan_x;
@@ -256,14 +270,14 @@ void util_render_make_brush_preview() {
 	g_context->material->nodes->zoom  = g_context->brush->nodes->zoom;
 
 	tool_type_t _tool = g_context->tool;
-	g_context->tool = TOOL_TYPE_BRUSH;
+	g_context->tool   = TOOL_TYPE_BRUSH;
 
 	slot_layer_t *_layer = g_context->layer;
 	if (slot_layer_is_mask(g_context->layer)) {
 		g_context->layer = g_context->layer->parent;
 	}
 
-	slot_material_t *_fill_layer   = g_context->layer->fill_layer;
+	slot_material_t *_fill_layer = g_context->layer->fill_layer;
 	g_context->layer->fill_layer = NULL;
 
 	render_path_paint_use_live_layer(true);
@@ -282,13 +296,13 @@ void util_render_make_brush_preview() {
 	}
 	bool merged_object_visible = false;
 	if (g_context->merged_object != NULL) {
-		merged_object_visible                     = g_context->merged_object->base->visible;
+		merged_object_visible                   = g_context->merged_object->base->visible;
 		g_context->merged_object->base->visible = false;
 	}
 
-	camera_object_t *cam      = scene_camera;
+	camera_object_t *cam    = scene_camera;
 	g_context->saved_camera = mat4_clone(cam->base->transform->local);
-	f32 saved_fov             = cam->data->fov;
+	f32 saved_fov           = cam->data->fov;
 	viewport_update_camera_type(CAMERA_TYPE_PERSPECTIVE);
 	mat4_t m = mat4_identity();
 	m        = mat4_translate(m, 0, 0, 0.5);
@@ -298,33 +312,33 @@ void util_render_make_brush_preview() {
 	camera_object_build_mat(cam);
 	m = mat4_inv(scene_camera->vp);
 
-	mesh_object_t *planeo     = scene_get_child(".Plane")->ext;
-	planeo->base->visible     = true;
+	mesh_object_t *planeo   = scene_get_child(".Plane")->ext;
+	planeo->base->visible   = true;
 	g_context->paint_object = planeo;
 
-	vec4_t v                       = vec4_create(0.0, 0.0, 0.0, 1.0);
-	v                              = vec4_create(m.m00, m.m01, m.m02, 1.0);
+	vec4_t v                       = (vec4_t){0.0, 0.0, 0.0, 1.0};
+	v                              = (vec4_t){m.m00, m.m01, m.m02, 1.0};
 	f32 sx                         = vec4_len(v);
 	planeo->base->transform->rot   = quat_from_euler(-math_pi() / 2.0, 0, 0);
-	planeo->base->transform->scale = vec4_create(sx, 1.0, sx, 1.0);
-	planeo->base->transform->loc   = vec4_create(m.m30, -m.m31, 0.0, 1.0);
+	planeo->base->transform->scale = (vec4_t){sx, 1.0, sx, 1.0};
+	planeo->base->transform->loc   = (vec4_t){m.m30, -m.m31, 0.0, 1.0};
 	transform_build_matrix(planeo->base->transform);
 
 	render_path_paint_live_layer_drawn = 0;
 	render_path_base_draw_gbuffer();
 
 	// Paint brush preview
-	f32 _brush_radius           = g_context->brush_radius;
-	f32 _brush_opacity          = g_context->brush_opacity;
-	f32 _brush_hardness         = g_context->brush_hardness;
+	f32 _brush_radius         = g_context->brush_radius;
+	f32 _brush_opacity        = g_context->brush_opacity;
+	f32 _brush_hardness       = g_context->brush_hardness;
 	g_context->brush_radius   = 0.33;
 	g_context->brush_opacity  = 1.0;
 	g_context->brush_hardness = 1.0;
-	f32 _x                      = g_context->paint_vec.x;
-	f32 _y                      = g_context->paint_vec.y;
-	f32 _last_x                 = g_context->last_paint_vec_x;
-	f32 _last_y                 = g_context->last_paint_vec_y;
-	i32 _pdirty                 = g_context->pdirty;
+	f32 _x                    = g_context->paint_vec.x;
+	f32 _y                    = g_context->paint_vec.y;
+	f32 _last_x               = g_context->last_paint_vec_x;
+	f32 _last_y               = g_context->last_paint_vec_y;
+	i32 _pdirty               = g_context->pdirty;
 	g_context->pdirty         = 2;
 
 	f32_array_t *points_x = f32_array_create_from_raw(
@@ -382,7 +396,7 @@ void util_render_make_brush_preview() {
 
 	// Restore paint mesh
 	g_context->material_preview = false;
-	planeo->base->visible         = false;
+	planeo->base->visible       = false;
 	for (i32 i = 0; i < project_paint_objects->length; ++i) {
 		project_paint_objects->buffer[i]->base->visible = visibles->buffer[i];
 	}
@@ -507,7 +521,7 @@ void util_render_make_node_preview(ui_node_canvas_t *canvas, ui_node_t *node, gp
 		util_render_create_screen_aligned_full_data();
 	}
 
-	f32 _scale_world                                        = g_context->paint_object->base->transform->scale_world;
+	f32 _scale_world                                      = g_context->paint_object->base->transform->scale_world;
 	g_context->paint_object->base->transform->scale_world = 3.0;
 	transform_build_matrix(g_context->paint_object->base->transform);
 
@@ -533,7 +547,7 @@ void util_render_make_node_preview(ui_node_canvas_t *canvas, ui_node_t *node, gp
 void util_render_pick_pos_nor_tex() {
 	g_context->pick_pos_nor_tex = true;
 	g_context->pdirty           = 1;
-	tool_type_t _tool             = g_context->tool;
+	tool_type_t _tool           = g_context->tool;
 	g_context->tool             = TOOL_TYPE_PICKER;
 	make_material_parse_paint_material(true);
 	if (g_context->paint2d) {
@@ -552,9 +566,9 @@ void util_render_pick_pos_nor_tex() {
 mat4_t util_render_get_decal_mat() {
 	util_render_pick_pos_nor_tex();
 	mat4_t decal_mat = mat4_identity();
-	vec4_t loc       = vec4_create(g_context->posx_picked, g_context->posy_picked, g_context->posz_picked, 1.0);
-	quat_t rot = quat_from_to(vec4_create(0.0, 0.0, -1.0, 1.0), vec4_create(g_context->norx_picked, g_context->nory_picked, g_context->norz_picked, 1.0));
-	vec4_t scale = vec4_create(g_context->brush_radius * 0.5, g_context->brush_radius * 0.5, g_context->brush_radius * 0.5, 1.0);
-	decal_mat    = mat4_compose(loc, rot, scale);
+	vec4_t loc       = (vec4_t){g_context->posx_picked, g_context->posy_picked, g_context->posz_picked, 1.0};
+	quat_t rot       = quat_from_to((vec4_t){0.0, 0.0, -1.0, 1.0}, (vec4_t){g_context->norx_picked, g_context->nory_picked, g_context->norz_picked, 1.0});
+	vec4_t scale     = (vec4_t){g_context->brush_radius * 0.5, g_context->brush_radius * 0.5, g_context->brush_radius * 0.5, 1.0};
+	decal_mat        = mat4_compose(loc, rot, scale);
 	return decal_mat;
 }

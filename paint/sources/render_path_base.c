@@ -49,7 +49,7 @@ void render_path_base_begin() {
 		camera_object_t *cam = scene_camera;
 		if (g_context->view_index_last > -1) {
 			// Save current viewport camera
-			camera_views->buffer[g_context->view_index_last]->v = mat4_clone(cam->base->transform->local);
+			camera_views[g_context->view_index_last] = mat4_clone(cam->base->transform->local);
 		}
 
 		bool decal = context_is_decal();
@@ -59,7 +59,7 @@ void render_path_base_begin() {
 			g_context->ddirty = 1;
 		}
 
-		transform_set_matrix(cam->base->transform, camera_views->buffer[g_context->view_index]->v);
+		transform_set_matrix(cam->base->transform, camera_views[g_context->view_index]);
 		camera_object_build_mat(cam);
 		camera_object_build_proj(cam, -1.0);
 	}
@@ -141,7 +141,7 @@ void render_path_base_draw_split(void (*draw_commands)(void)) {
 		camera_object_t *cam = scene_camera;
 
 		g_context->view_index = g_context->view_index == 0 ? 1 : 0;
-		transform_set_matrix(cam->base->transform, camera_views->buffer[g_context->view_index]->v);
+		transform_set_matrix(cam->base->transform, camera_views[g_context->view_index]);
 		camera_object_build_mat(cam);
 		camera_object_build_proj(cam, -1.0);
 
@@ -151,7 +151,7 @@ void render_path_base_draw_split(void (*draw_commands)(void)) {
 		g_context->viewport_mode == VIEWPORT_MODE_PATH_TRACE ? render_path_raytrace_draw(use_live_layer) : draw_commands();
 
 		g_context->view_index = g_context->view_index == 0 ? 1 : 0;
-		transform_set_matrix(cam->base->transform, camera_views->buffer[g_context->view_index]->v);
+		transform_set_matrix(cam->base->transform, camera_views[g_context->view_index]);
 		camera_object_build_mat(cam);
 		camera_object_build_proj(cam, -1.0);
 	}

@@ -134,7 +134,7 @@ void render_path_raytrace_build_data() {
 	if (mo->base->parent != NULL) {
 		sc *= mo->base->parent->transform->scale.x;
 	}
-	render_path_raytrace_transform = mat4_scale(render_path_raytrace_transform, vec4_create(sc, sc, sc, 1.0));
+	render_path_raytrace_transform = mat4_scale(render_path_raytrace_transform, (vec4_t){sc, sc, sc, 1.0});
 
 	gc_unroot(render_path_raytrace_vb);
 	render_path_raytrace_vb = mo->data->_->vertex_buffer;
