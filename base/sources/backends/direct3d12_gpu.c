@@ -1645,17 +1645,17 @@ void gpu_raytrace_acceleration_structure_build(gpu_acceleration_structure_t *acc
 		D3D12_RAYTRACING_INSTANCE_DESC instance_desc = {0};
 
 		instance_desc.Transform[0][0] = dxr_instances[i].m.m[0];
-		instance_desc.Transform[0][1] = dxr_instances[i].m.m[1];
-		instance_desc.Transform[0][2] = dxr_instances[i].m.m[2];
-		instance_desc.Transform[0][3] = dxr_instances[i].m.m[3];
-		instance_desc.Transform[1][0] = dxr_instances[i].m.m[4];
+		instance_desc.Transform[0][1] = dxr_instances[i].m.m[4];
+		instance_desc.Transform[0][2] = dxr_instances[i].m.m[8];
+		instance_desc.Transform[0][3] = dxr_instances[i].m.m[12];
+		instance_desc.Transform[1][0] = dxr_instances[i].m.m[1];
 		instance_desc.Transform[1][1] = dxr_instances[i].m.m[5];
-		instance_desc.Transform[1][2] = dxr_instances[i].m.m[6];
-		instance_desc.Transform[1][3] = dxr_instances[i].m.m[7];
-		instance_desc.Transform[2][0] = dxr_instances[i].m.m[8];
-		instance_desc.Transform[2][1] = dxr_instances[i].m.m[9];
+		instance_desc.Transform[1][2] = dxr_instances[i].m.m[9];
+		instance_desc.Transform[1][3] = dxr_instances[i].m.m[13];
+		instance_desc.Transform[2][0] = dxr_instances[i].m.m[2];
+		instance_desc.Transform[2][1] = dxr_instances[i].m.m[6];
 		instance_desc.Transform[2][2] = dxr_instances[i].m.m[10];
-		instance_desc.Transform[2][3] = dxr_instances[i].m.m[11];
+		instance_desc.Transform[2][3] = dxr_instances[i].m.m[14];
 
 		int ib_off = 0;
 		for (int j = 0; j < dxr_instances[i].i; ++j) {
