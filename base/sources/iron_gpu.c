@@ -211,19 +211,12 @@ void gpu_set_bool(int location, bool value) {
 void gpu_set_mat3(int location, mat3_t value) {
 	float *floats = (float *)(&constant_buffer.data[location]);
 	for (int y = 0; y < 3; ++y) {
-		for (int x = 0; x < 3; ++x) {
-			floats[x + y * 4] = value.m[x + y * 3];
-		}
+		memcpy(&floats[y * 4], &value.m[y * 3], 3 * sizeof(float));
 	}
 }
 
 void gpu_set_mat4(int location, mat4_t value) {
-	float *floats = (float *)(&constant_buffer.data[location]);
-	for (int y = 0; y < 4; ++y) {
-		for (int x = 0; x < 4; ++x) {
-			floats[x + y * 4] = value.m[x + y * 4];
-		}
-	}
+	memcpy(&constant_buffer.data[location], value.m, 16 * sizeof(float));
 }
 
 void gpu_vertex_structure_add(gpu_vertex_structure_t *structure, const char *name, gpu_vertex_data_t data) {
@@ -234,7 +227,6 @@ void gpu_vertex_structure_add(gpu_vertex_structure_t *structure, const char *nam
 
 void gpu_vertex_struct_add(gpu_vertex_structure_t *raw, char *name, gpu_vertex_data_t data) {
 	gpu_vertex_element_t *e = &raw->elements[raw->size];
-	// e->name                 = string_copy(name);
 	e->name = name;
 	e->data = data;
 	raw->size++;
