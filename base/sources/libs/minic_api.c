@@ -351,14 +351,8 @@ MN(vec4_mult) {
 MN(vec4_dot) {
 	return minic_val_float(vec4_dot(V4(0), V4(1)));
 }
-MN(vec4_lerp) {
-	RET4(vec4_lerp(V4(0), V4(1), AF(2)));
-}
 MN(vec4_apply_proj) {
 	RET4(vec4_apply_proj(V4(0), M4(1)));
-}
-MN(vec4_apply_mat) {
-	RET4(vec4_apply_mat(V4(0), M4(1)));
 }
 MN(vec4_apply_mat4) {
 	RET4(vec4_apply_mat4(V4(0), M4(1)));
@@ -380,9 +374,6 @@ MN(vec4_len) {
 }
 MN(vec4_sub) {
 	RET4(vec4_sub(V4(0), V4(1)));
-}
-MN(vec4_exp) {
-	RET4(vec4_exp(V4(0)));
 }
 MN(vec4_dist) {
 	return minic_val_float(vec4_dist(V4(0), V4(1)));
@@ -430,9 +421,6 @@ MN(quat_get_euler) {
 }
 MN(quat_from_euler) {
 	RETQ(quat_from_euler(AF(0), AF(1), AF(2)));
-}
-MN(quat_lerp) {
-	RETQ(quat_lerp(QT(0), QT(1), AF(2)));
 }
 MN(quat_dot) {
 	return minic_val_float(quat_dot(QT(0), QT(1)));
@@ -495,9 +483,6 @@ MN(mat4_set_loc) {
 MN(mat4_from_quat) {
 	RET4M(mat4_from_quat(QT(0)));
 }
-MN(mat4_init_translate) {
-	RET4M(mat4_init_translate(AF(0), AF(1), AF(2)));
-}
 MN(mat4_translate) {
 	RET4M(mat4_translate(M4(0), AF(1), AF(2), AF(3)));
 }
@@ -518,9 +503,6 @@ MN(mat4_transpose) {
 }
 MN(mat4_transpose3) {
 	RET4M(mat4_transpose3(M4(0)));
-}
-MN(mat4_clone) {
-	RET4M(mat4_clone(M4(0)));
 }
 MN(mat4_get_loc) {
 	RET4(mat4_get_loc(M4(0)));
@@ -1323,7 +1305,6 @@ void minic_register_builtins() {
 	R(iron_random_get, "i()");
 	R(iron_random_get_max, "i(i)");
 	R(iron_random_get_in, "i(i,i)");
-	R(iron_hash_djb2, "i(p)");
 	R(vec4_fdist, "f(f,f,f,f,f,f)");
 	R(mat4_cofactor, "f(f,f,f,f,f,f,f,f,f)");
 	R(cosf, "f(f)");
@@ -1347,9 +1328,7 @@ void minic_register_builtins() {
 	MR(vec4_norm);
 	MR(vec4_mult);
 	MR(vec4_dot);
-	MR(vec4_lerp);
 	MR(vec4_apply_proj);
-	MR(vec4_apply_mat);
 	MR(vec4_apply_mat4);
 	MR(vec4_apply_axis_angle);
 	MR(vec4_apply_quat);
@@ -1357,7 +1336,6 @@ void minic_register_builtins() {
 	MR(vec4_almost_equals);
 	MR(vec4_len);
 	MR(vec4_sub);
-	MR(vec4_exp);
 	MR(vec4_dist);
 	MR(vec4_reflect);
 	MR(vec4_clamp);
@@ -1373,7 +1351,6 @@ void minic_register_builtins() {
 	MR(quat_norm);
 	MR(quat_get_euler);
 	MR(quat_from_euler);
-	MR(quat_lerp);
 	MR(quat_dot);
 	MR(quat_from_to);
 	MR(quat_inv);
@@ -1393,7 +1370,6 @@ void minic_register_builtins() {
 	MR(mat4_compose);
 	MR(mat4_set_loc);
 	MR(mat4_from_quat);
-	MR(mat4_init_translate);
 	MR(mat4_translate);
 	MR(mat4_scale);
 	MR(mat4_mult_mat3x4);
@@ -1401,7 +1377,6 @@ void minic_register_builtins() {
 	MR(mat4_inv);
 	MR(mat4_transpose);
 	MR(mat4_transpose3);
-	MR(mat4_clone);
 	MR(mat4_get_loc);
 	MR(mat4_get_scale);
 	MR(mat4_mult);

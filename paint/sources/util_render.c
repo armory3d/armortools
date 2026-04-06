@@ -23,7 +23,7 @@ void util_render_make_material_preview() {
 	sphere->material                   = project_materials->buffer[0]->data;
 	g_context->material->preview_ready = true;
 
-	g_context->saved_camera = mat4_clone(scene_camera->base->transform->local);
+	g_context->saved_camera = scene_camera->base->transform->local;
 	mat4_t m =
 	    (mat4_t){0.9146286343879498, 0.404295023959927,   0.000007410128652369705, 0, -0.0032648027153306235, 0.007367569133732468, 0.9999675337275382,   0,
 	             0.404281837254303,  -0.9145989516155143, 0.008058532943908717,    0, 0.4659988049397712,     -1.0687517188018691,  0.015935682577325486, 1};
@@ -110,7 +110,7 @@ void util_render_make_decal_preview() {
 	mesh_object_t *painto   = g_context->paint_object;
 	g_context->paint_object = plane;
 
-	g_context->saved_camera = mat4_clone(scene_camera->base->transform->local);
+	g_context->saved_camera = scene_camera->base->transform->local;
 	mat4_t m                = mat4_identity();
 	m                       = mat4_translate(m, 0, 0, 1);
 	transform_set_matrix(scene_camera->base->transform, m);
@@ -288,7 +288,7 @@ void util_render_make_brush_preview() {
 	}
 
 	camera_object_t *cam    = scene_camera;
-	g_context->saved_camera = mat4_clone(cam->base->transform->local);
+	g_context->saved_camera = cam->base->transform->local;
 	f32 saved_fov           = cam->data->fov;
 	viewport_update_camera_type(CAMERA_TYPE_PERSPECTIVE);
 	mat4_t m = mat4_identity();

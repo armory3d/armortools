@@ -54,7 +54,7 @@ void render_path_raytrace_commands(bool use_live_layer) {
 
 	camera_object_t *cam                 = scene_camera;
 	transform_t     *ct                  = cam->base->transform;
-	render_path_raytrace_help_mat        = mat4_clone(cam->v);
+	render_path_raytrace_help_mat        = cam->v;
 	render_path_raytrace_help_mat        = mat4_mult_mat(render_path_raytrace_help_mat, cam->p);
 	render_path_raytrace_help_mat        = mat4_inv(render_path_raytrace_help_mat);
 	render_path_raytrace_f32a->buffer[0] = transform_world_x(ct);

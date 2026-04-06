@@ -49,7 +49,7 @@ void render_path_base_begin() {
 		camera_object_t *cam = scene_camera;
 		if (g_context->view_index_last > -1) {
 			// Save current viewport camera
-			camera_views[g_context->view_index_last] = mat4_clone(cam->base->transform->local);
+			camera_views[g_context->view_index_last] = cam->base->transform->local;
 		}
 
 		bool decal = context_is_decal();

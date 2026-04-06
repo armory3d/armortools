@@ -60,15 +60,6 @@ int64_t iron_random_get_in(int64_t min, int64_t max) {
 	return (value < -LLONG_MAX ? LLONG_MAX : llabs(value)) % (max + 1 - min) + min;
 }
 
-uint32_t iron_hash_djb2(unsigned char *str) {
-	unsigned long hash = 5381;
-	int           c;
-	while ((c = *str++)) {
-		hash = hash * 33 ^ c;
-	}
-	return hash;
-}
-
 // ██╗   ██╗███████╗ ██████╗██████╗
 // ██║   ██║██╔════╝██╔════╝╚════██╗
 // ██║   ██║█████╗  ██║      █████╔╝
@@ -191,28 +182,12 @@ float vec4_dot(vec4_t a, vec4_t b) {
 	return a.x * b.x + a.y * b.y + a.z * b.z;
 }
 
-vec4_t vec4_lerp(vec4_t from, vec4_t to, float s) {
-	vec4_t v;
-	v.x = from.x + (to.x - from.x) * s;
-	v.y = from.y + (to.y - from.y) * s;
-	v.z = from.z + (to.z - from.z) * s;
-	return v;
-}
-
 vec4_t vec4_apply_proj(vec4_t a, mat4_t m) {
 	vec4_t v;
 	float  d = 1.0 / (m.m[3] * a.x + m.m[7] * a.y + m.m[11] * a.z + m.m[15]); // Perspective divide
 	v.x      = (m.m[0] * a.x + m.m[4] * a.y + m.m[8] * a.z + m.m[12]) * d;
 	v.y      = (m.m[1] * a.x + m.m[5] * a.y + m.m[9] * a.z + m.m[13]) * d;
 	v.z      = (m.m[2] * a.x + m.m[6] * a.y + m.m[10] * a.z + m.m[14]) * d;
-	return v;
-}
-
-vec4_t vec4_apply_mat(vec4_t a, mat4_t m) {
-	vec4_t v;
-	v.x = m.m[0] * a.x + m.m[4] * a.y + m.m[8] * a.z + m.m[12];
-	v.y = m.m[1] * a.x + m.m[5] * a.y + m.m[9] * a.z + m.m[13];
-	v.z = m.m[2] * a.x + m.m[6] * a.y + m.m[10] * a.z + m.m[14];
 	return v;
 }
 
@@ -258,13 +233,6 @@ vec4_t vec4_sub(vec4_t a, vec4_t b) {
 	a.x -= b.x;
 	a.y -= b.y;
 	a.z -= b.z;
-	return a;
-}
-
-vec4_t vec4_exp(vec4_t a) {
-	a.x = expf(a.x);
-	a.y = expf(a.y);
-	a.z = expf(a.z);
 	return a;
 }
 
@@ -443,21 +411,6 @@ quat_t quat_from_euler(float x, float y, float z) {
 	return q;
 }
 
-quat_t quat_lerp(quat_t from, quat_t to, float s) {
-	float dot = quat_dot(from, to);
-	if (dot < 0.0) {
-		from.x = -from.x;
-		from.y = -from.y;
-		from.z = -from.z;
-		from.w = -from.w;
-	}
-	from.x += (to.x - from.x) * s;
-	from.y += (to.y - from.y) * s;
-	from.z += (to.z - from.z) * s;
-	from.w += (to.w - from.w) * s;
-	return quat_norm(from);
-}
-
 float quat_dot(quat_t a, quat_t b) {
 	return (a.x * b.x) + (a.y * b.y) + (a.z * b.z) + (a.w * b.w);
 }
@@ -586,10 +539,15 @@ mat4_t mat4_identity() {
 }
 
 mat4_t mat4_from_f32_array(f32_array_t *a, int offset) {
-	return (mat4_t){a->buffer[0 + offset], a->buffer[4 + offset], a->buffer[8 + offset],  a->buffer[12 + offset],
-	                a->buffer[1 + offset], a->buffer[5 + offset], a->buffer[9 + offset],  a->buffer[13 + offset],
-	                a->buffer[2 + offset], a->buffer[6 + offset], a->buffer[10 + offset], a->buffer[14 + offset],
-	                a->buffer[3 + offset], a->buffer[7 + offset], a->buffer[11 + offset], a->buffer[15 + offset]};
+	mat4_t m;
+	memcpy(m.m, a->buffer + offset, 16 * sizeof(float));
+	return m;
+}
+
+f32_array_t *mat4_to_f32_array(mat4_t m) {
+	f32_array_t *a = f32_array_create(16);
+	memcpy(a->buffer, m.m, 16 * sizeof(float));
+	return a;
 }
 
 mat4_t mat4_persp(float fov_y, float aspect, float zn, float zf) {
@@ -700,27 +658,6 @@ mat4_t mat4_from_quat(quat_t q) {
 	return m;
 }
 
-mat4_t mat4_init_translate(float x, float y, float z) {
-	mat4_t m;
-	m.m[0]  = 1.0;
-	m.m[1]  = 0.0;
-	m.m[2]  = 0.0;
-	m.m[3]  = 0.0;
-	m.m[4]  = 0.0;
-	m.m[5]  = 1.0;
-	m.m[6]  = 0.0;
-	m.m[7]  = 0.0;
-	m.m[8]  = 0.0;
-	m.m[9]  = 0.0;
-	m.m[10] = 1.0;
-	m.m[11] = 0.0;
-	m.m[12] = x;
-	m.m[13] = y;
-	m.m[14] = z;
-	m.m[15] = 1.0;
-	return m;
-}
-
 mat4_t mat4_translate(mat4_t m, float x, float y, float z) {
 	m.m[0] += x * m.m[3];
 	m.m[1] += y * m.m[3];
@@ -770,7 +707,6 @@ mat4_t mat4_mult_mat3x4(mat4_t a, mat4_t b) {
 	float a31 = a.m[13];
 	float a32 = a.m[14];
 	float a33 = a.m[15];
-
 	float b0 = b.m[0];
 	float b1 = b.m[4];
 	float b2 = b.m[8];
@@ -965,10 +901,6 @@ mat4_t mat4_transpose3(mat4_t m) {
 	return m;
 }
 
-mat4_t mat4_clone(mat4_t m) {
-	return (mat4_t){m.m[0], m.m[1], m.m[2], m.m[3], m.m[4], m.m[5], m.m[6], m.m[7], m.m[8], m.m[9], m.m[10], m.m[11], m.m[12], m.m[13], m.m[14], m.m[15]};
-}
-
 vec4_t mat4_get_loc(mat4_t m) {
 	return (vec4_t){m.m[12], m.m[13], m.m[14], m.m[15]};
 }
@@ -1031,27 +963,6 @@ vec4_t mat4_look(mat4_t m) {
 
 vec4_t mat4_up(mat4_t m) {
 	return vec4_norm((vec4_t){m.m[8], m.m[9], m.m[10], 1.0});
-}
-
-f32_array_t *mat4_to_f32_array(mat4_t m) {
-	f32_array_t *a = f32_array_create(16);
-	a->buffer[0]   = m.m[0];
-	a->buffer[1]   = m.m[4];
-	a->buffer[2]   = m.m[8];
-	a->buffer[3]   = m.m[12];
-	a->buffer[4]   = m.m[1];
-	a->buffer[5]   = m.m[5];
-	a->buffer[6]   = m.m[9];
-	a->buffer[7]   = m.m[13];
-	a->buffer[8]   = m.m[2];
-	a->buffer[9]   = m.m[6];
-	a->buffer[10]  = m.m[10];
-	a->buffer[11]  = m.m[14];
-	a->buffer[12]  = m.m[3];
-	a->buffer[13]  = m.m[7];
-	a->buffer[14]  = m.m[11];
-	a->buffer[15]  = m.m[15];
-	return a;
 }
 
 float mat4_cofactor(float m0, float m1, float m2, float m3, float m4, float m5, float m6, float m7, float m8) {

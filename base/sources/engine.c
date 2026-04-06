@@ -146,10 +146,10 @@ void transform_build_matrix(transform_t *raw) {
 		raw->world = mat4_mult_mat3x4(raw->local, raw->object->parent->transform->world);
 	}
 	else {
-		raw->world = mat4_clone(raw->local);
+		raw->world = raw->local;
 	}
 
-	raw->world_unpack = mat4_clone(raw->world);
+	raw->world_unpack = raw->world;
 	if (raw->scale_world != 1.0) {
 		raw->world_unpack.m00 *= raw->scale_world;
 		raw->world_unpack.m01 *= raw->scale_world;
@@ -177,7 +177,7 @@ void transform_build_matrix(transform_t *raw) {
 }
 
 void transform_set_matrix(transform_t *raw, mat4_t mat) {
-	raw->local = mat4_clone(mat);
+	raw->local = mat;
 	transform_decompose(raw);
 	transform_build_matrix(raw);
 }
@@ -1071,7 +1071,7 @@ void camera_object_build_proj(camera_object_t *raw, f32 screen_aspect) {
 		f32 aspect = raw->data->aspect != 0.0 ? raw->data->aspect : screen_aspect;
 		raw->p     = mat4_persp(raw->data->fov, aspect, raw->data->near_plane, raw->data->far_plane);
 	}
-	raw->no_jitter_p = mat4_clone(raw->p);
+	raw->no_jitter_p = raw->p;
 }
 
 void camera_object_remove(camera_object_t *raw) {
@@ -1088,7 +1088,7 @@ void camera_object_render_frame(camera_object_t *raw) {
 void camera_object_proj_jitter(camera_object_t *raw) {
 	i32 w  = render_path_current_w;
 	i32 h  = render_path_current_h;
-	raw->p = mat4_clone(raw->no_jitter_p);
+	raw->p = raw->no_jitter_p;
 
 	i32 i = raw->frame % camera_object_taa_frames;
 	f32 x = 0.0;

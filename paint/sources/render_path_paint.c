@@ -759,7 +759,7 @@ void render_path_paint_set_plane_mesh() {
 	}
 
 	camera_object_t *cam        = scene_camera;
-	g_context->saved_camera   = mat4_clone(cam->base->transform->local);
+	g_context->saved_camera   = cam->base->transform->local;
 	render_path_paint_saved_fov = cam->data->fov;
 	viewport_update_camera_type(CAMERA_TYPE_PERSPECTIVE);
 	mat4_t m = mat4_identity();

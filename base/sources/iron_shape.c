@@ -256,7 +256,7 @@ void line_draw_end(void) {
 	gpu_set_vertex_buffer(line_draw_vertex_buffer);
 	gpu_set_index_buffer(line_draw_index_buffer);
 	gpu_set_pipeline(line_draw_pipeline);
-	line_draw_vp = mat4_clone(scene_camera->vp);
+	line_draw_vp = scene_camera->vp;
 	gpu_set_mat4(line_draw_vp_loc, line_draw_vp);
 	gpu_set_float3(line_draw_color_loc, color_get_rb(line_draw_color) / 255.0, color_get_gb(line_draw_color) / 255.0, color_get_bb(line_draw_color) / 255.0);
 	gpu_draw();
@@ -288,7 +288,7 @@ void shape_draw_sphere(mat4_t mat) {
 	gpu_set_index_buffer(_shape_draw_sphere_ib);
 	gpu_set_pipeline(line_draw_overlay_pipeline);
 	f32 f        = line_draw_strength * 50;
-	line_draw_vp = mat4_clone(mat);
+	line_draw_vp = mat;
 	line_draw_vp = mat4_scale(line_draw_vp, (vec4_t){f, f, f, 0.0});
 	line_draw_vp = mat4_mult_mat(line_draw_vp, scene_camera->v);
 	line_draw_vp = mat4_mult_mat(line_draw_vp, scene_camera->p);

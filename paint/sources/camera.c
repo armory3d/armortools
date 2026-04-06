@@ -369,12 +369,12 @@ void camera_reset(i32 view_index) {
 		camera_origins[0] = (vec4_t){0, 0, 0, 1};
 		camera_origins[1] = (vec4_t){0, 0, 0, 1};
 
-		camera_views[0] = mat4_clone(camera->base->transform->local);
-		camera_views[1] = mat4_clone(camera->base->transform->local);
+		camera_views[0] = camera->base->transform->local;
+		camera_views[1] = camera->base->transform->local;
 	}
 	else {
 		camera_origins[view_index] = (vec4_t){0, 0, 0, 1.0};
-		camera_views[view_index]   = mat4_clone(camera->base->transform->local);
+		camera_views[view_index]   = camera->base->transform->local;
 	}
 
 #ifdef IRON_IOS
