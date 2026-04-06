@@ -351,9 +351,6 @@ MN(vec4_mult) {
 MN(vec4_dot) {
 	return minic_val_float(vec4_dot(V4(0), V4(1)));
 }
-MN(vec4_clone) {
-	RET4(vec4_clone(V4(0)));
-}
 MN(vec4_lerp) {
 	RET4(vec4_lerp(V4(0), V4(1), AF(2)));
 }
@@ -427,9 +424,6 @@ MN(quat_mult) {
 }
 MN(quat_norm) {
 	RETQ(quat_norm(QT(0)));
-}
-MN(quat_clone) {
-	RETQ(quat_clone(QT(0)));
 }
 MN(quat_get_euler) {
 	RET4(quat_get_euler(QT(0)));
@@ -1353,7 +1347,6 @@ void minic_register_builtins() {
 	MR(vec4_norm);
 	MR(vec4_mult);
 	MR(vec4_dot);
-	MR(vec4_clone);
 	MR(vec4_lerp);
 	MR(vec4_apply_proj);
 	MR(vec4_apply_mat);
@@ -1378,7 +1371,6 @@ void minic_register_builtins() {
 	MR(quat_from_rot_mat);
 	MR(quat_mult);
 	MR(quat_norm);
-	MR(quat_clone);
 	MR(quat_get_euler);
 	MR(quat_from_euler);
 	MR(quat_lerp);

@@ -161,7 +161,7 @@ void line_draw_bounds(mat4_t mat, vec4_t dim) {
 }
 
 void line_draw_lineb(i32 a, i32 b, i32 c, i32 d, i32 e, i32 f) {
-	line_draw_v1 = vec4_clone(line_draw_wpos);
+	line_draw_v1 = line_draw_wpos;
 
 	line_draw_t  = vec4_mult(line_draw_vx, (f32)a);
 	line_draw_v1 = vec4_add(line_draw_v1, line_draw_t);
@@ -172,7 +172,7 @@ void line_draw_lineb(i32 a, i32 b, i32 c, i32 d, i32 e, i32 f) {
 	line_draw_t  = vec4_mult(line_draw_vz, (f32)c);
 	line_draw_v1 = vec4_add(line_draw_v1, line_draw_t);
 
-	line_draw_v2 = vec4_clone(line_draw_wpos);
+	line_draw_v2 = line_draw_wpos;
 
 	line_draw_t  = vec4_mult(line_draw_vx, (f32)d);
 	line_draw_v2 = vec4_add(line_draw_v2, line_draw_t);

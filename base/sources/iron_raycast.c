@@ -307,7 +307,7 @@ f32 plane_dist_to_point(plane_t *raw, vec4_t point) {
 }
 
 plane_t plane_set(plane_t *raw, vec4_t normal, vec4_t point) {
-	raw->normal   = vec4_clone(normal);
+	raw->normal   = normal;
 	raw->constant = -vec4_dot(point, raw->normal);
 	return *raw;
 }

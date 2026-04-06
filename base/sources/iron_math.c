@@ -191,10 +191,6 @@ float vec4_dot(vec4_t a, vec4_t b) {
 	return a.x * b.x + a.y * b.y + a.z * b.z;
 }
 
-vec4_t vec4_clone(vec4_t v) {
-	return v;
-}
-
 vec4_t vec4_lerp(vec4_t from, vec4_t to, float s) {
 	vec4_t v;
 	v.x = from.x + (to.x - from.x) * s;
@@ -416,10 +412,6 @@ quat_t quat_norm(quat_t q) {
 		q.z *= l;
 		q.w *= l;
 	}
-	return q;
-}
-
-quat_t quat_clone(quat_t q) {
 	return q;
 }
 
