@@ -4,12 +4,13 @@
 f32 input_node_start_x = 0.0;
 f32 input_node_start_y = 0.0;
 // Brush ruler
-bool input_node_lock_begin   = false;
-bool input_node_lock_x       = false;
-bool input_node_lock_y       = false;
-f32  input_node_lock_start_x = 0.0;
-f32  input_node_lock_start_y = 0.0;
-bool input_node_registered   = false;
+bool   input_node_lock_begin   = false;
+bool   input_node_lock_x       = false;
+bool   input_node_lock_y       = false;
+f32    input_node_lock_start_x = 0.0;
+f32    input_node_lock_start_y = 0.0;
+bool   input_node_registered   = false;
+vec4_t input_node_coords       = (vec4_t){0.0, 0.0, 0.0, 1.0};
 
 void input_node_update(float_node_t *self) {
 	if (g_context->split_view) {
@@ -19,7 +20,7 @@ void input_node_update(float_node_t *self) {
 	bool  decal_mask  = context_is_decal_mask_paint();
 	char *ruler_paint = string("%s+%s", any_map_get(config_keymap, "brush_ruler"), any_map_get(config_keymap, "action_paint"));
 	bool  lazy_paint  = g_context->brush_lazy_radius > 0 && (operator_shortcut(any_map_get(config_keymap, "action_paint"), SHORTCUT_TYPE_DOWN) ||
-                                                             operator_shortcut(ruler_paint, SHORTCUT_TYPE_DOWN) || decal_mask);
+                                                           operator_shortcut(ruler_paint, SHORTCUT_TYPE_DOWN) || decal_mask);
 
 	f32 paint_x = mouse_view_x() / (float)sys_w();
 	f32 paint_y = mouse_view_y() / (float)sys_h();
@@ -110,7 +111,7 @@ void input_node_update(float_node_t *self) {
 logic_node_value_t *input_node_get(input_node_t *self, i32 from) {
 	g_context->brush_lazy_radius = logic_node_input_get(self->base->inputs->buffer[0])->_f32;
 	g_context->brush_lazy_step   = logic_node_input_get(self->base->inputs->buffer[1])->_f32;
-	logic_node_value_t *v          = GC_ALLOC_INIT(logic_node_value_t, {._vec4 = input_node_coords});
+	logic_node_value_t *v        = GC_ALLOC_INIT(logic_node_value_t, {._vec4 = input_node_coords});
 	return v;
 }
 

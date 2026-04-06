@@ -6,7 +6,9 @@ i32                    import_envmap_params_loc;
 i32                    import_envmap_radiance_loc;
 gpu_texture_t         *import_envmap_radiance = NULL;
 i32                    import_envmap_noise_loc;
-gpu_texture_t_array_t *import_envmap_mips = NULL;
+gpu_texture_t_array_t *import_envmap_mips   = NULL;
+vec4_t                 import_envmap_params = (vec4_t){0.0, 0.0, 0.0, 1.0};
+vec4_t                 import_envmap_n      = (vec4_t){0.0, 0.0, 0.0, 1.0};
 
 void import_envmap_get_radiance_mip(gpu_texture_t *mip, i32 level, gpu_texture_t *radiance) {
 #ifdef IRON_METAL
@@ -144,8 +146,8 @@ void import_envmap_run(char *path, gpu_texture_t *image) {
 	scene_world->envmap              = string_copy(path);
 	scene_world->_->radiance         = import_envmap_radiance;
 	scene_world->_->radiance_mipmaps = import_envmap_mips;
-	g_context->saved_envmap        = image;
-	g_context->show_envmap         = true;
+	g_context->saved_envmap          = image;
+	g_context->show_envmap           = true;
 	if (g_context->show_envmap_blur) {
 		scene_world->_->envmap = scene_world->_->radiance_mipmaps->buffer[0];
 	}

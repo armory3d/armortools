@@ -1,9 +1,10 @@
 
 #include "global.h"
 
-i32  camera_redraws       = 0;
-f32  camera_ease          = 1.0;
-bool camera_controls_down = false;
+i32    camera_redraws       = 0;
+f32    camera_ease          = 1.0;
+bool   camera_controls_down = false;
+vec4_t camera_dir           = (vec4_t){0.0, 0.0, 0.0, 1.0};
 
 static bool camera_wrap_mouse() {
 	if (mouse_view_x() < 0 || mouse_view_x() > sys_w() || mouse_view_y() < 0 || mouse_view_y() > sys_h()) {

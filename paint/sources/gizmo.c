@@ -1,13 +1,18 @@
 
 #include "global.h"
 
-void gizmo_update() {
-	bool      is_object = g_context->tool == TOOL_TYPE_GIZMO;
-	bool      is_decal  = base_is_decal_layer();
+vec4_t gizmo_v  = (vec4_t){0.0, 0.0, 0.0, 1.0};
+vec4_t gizmo_v0 = (vec4_t){0.0, 0.0, 0.0, 1.0};
+quat_t gizmo_q  = (quat_t){0.0, 0.0, 0.0, 1.0};
+quat_t gizmo_q0 = (quat_t){0.0, 0.0, 0.0, 1.0};
 
-	object_t *gizmo     = g_context->gizmo;
-	bool      hide      = operator_shortcut(any_map_get(config_keymap, "stencil_hide"), SHORTCUT_TYPE_DOWN);
-	gizmo->visible      = (is_object || is_decal) && !hide && g_config->workspace != WORKSPACE_PLAYER;
+void gizmo_update() {
+	bool is_object = g_context->tool == TOOL_TYPE_GIZMO;
+	bool is_decal  = base_is_decal_layer();
+
+	object_t *gizmo = g_context->gizmo;
+	bool      hide  = operator_shortcut(any_map_get(config_keymap, "stencil_hide"), SHORTCUT_TYPE_DOWN);
+	gizmo->visible  = (is_object || is_decal) && !hide && g_config->workspace != WORKSPACE_PLAYER;
 	if (!gizmo->visible) {
 		return;
 	}
@@ -25,10 +30,10 @@ void gizmo_update() {
 		gizmo->transform->loc = (vec4_t){g_context->layer->decal_mat.m30, g_context->layer->decal_mat.m31, g_context->layer->decal_mat.m32, 1.0};
 	}
 
-	camera_object_t *cam                             = scene_camera;
-	f32              fov                             = cam->data->fov;
-	f32              dist                            = vec4_dist(cam->base->transform->loc, gizmo->transform->loc) / 8.0 * fov;
-	gizmo->transform->scale                          = (vec4_t){dist, dist, dist, 1.0};
+	camera_object_t *cam                           = scene_camera;
+	f32              fov                           = cam->data->fov;
+	f32              dist                          = vec4_dist(cam->base->transform->loc, gizmo->transform->loc) / 8.0 * fov;
+	gizmo->transform->scale                        = (vec4_t){dist, dist, dist, 1.0};
 	g_context->gizmo_translate_x->transform->scale = (vec4_t){dist, dist, dist, 1.0};
 	g_context->gizmo_translate_y->transform->scale = (vec4_t){dist, dist, dist, 1.0};
 	g_context->gizmo_translate_z->transform->scale = (vec4_t){dist, dist, dist, 1.0};
@@ -42,8 +47,8 @@ void gizmo_update() {
 
 	// Scene control
 	if (is_object) {
-		if (g_context->translate_x || g_context->translate_y || g_context->translate_z || g_context->scale_x || g_context->scale_y ||
-		    g_context->scale_z || g_context->rotate_x || g_context->rotate_y || g_context->rotate_z) {
+		if (g_context->translate_x || g_context->translate_y || g_context->translate_z || g_context->scale_x || g_context->scale_y || g_context->scale_z ||
+		    g_context->rotate_x || g_context->rotate_y || g_context->rotate_z) {
 			if (g_context->translate_x) {
 				paint_object->transform->loc.x = g_context->gizmo_drag;
 			}
@@ -86,8 +91,8 @@ void gizmo_update() {
 	}
 	// Decal layer control
 	else if (is_decal) {
-		if (g_context->translate_x || g_context->translate_y || g_context->translate_z || g_context->scale_x || g_context->scale_y ||
-		    g_context->scale_z || g_context->rotate_x || g_context->rotate_y || g_context->rotate_z) {
+		if (g_context->translate_x || g_context->translate_y || g_context->translate_z || g_context->scale_x || g_context->scale_y || g_context->scale_z ||
+		    g_context->rotate_x || g_context->rotate_y || g_context->rotate_z) {
 			if (g_context->translate_x) {
 				g_context->layer->decal_mat.m30 = g_context->gizmo_drag;
 			}
@@ -122,30 +127,30 @@ void gizmo_update() {
 				g_context->layer->decal_mat = mat4_compose(gizmo_v, gizmo_q, gizmo_v0);
 			}
 			else if (g_context->rotate_x) {
-				mat4_decomposed_t *dec        = mat4_decompose(g_context->layer->decal_mat);
-				gizmo_v                       = dec->loc;
-				gizmo_q                       = dec->rot;
-				gizmo_v0                      = dec->scl;
-				gizmo_q0                      = quat_from_axis_angle(vec4_x_axis(), -g_context->gizmo_drag + g_context->gizmo_drag_last);
-				gizmo_q                       = quat_mult(gizmo_q0, gizmo_q);
+				mat4_decomposed_t *dec      = mat4_decompose(g_context->layer->decal_mat);
+				gizmo_v                     = dec->loc;
+				gizmo_q                     = dec->rot;
+				gizmo_v0                    = dec->scl;
+				gizmo_q0                    = quat_from_axis_angle(vec4_x_axis(), -g_context->gizmo_drag + g_context->gizmo_drag_last);
+				gizmo_q                     = quat_mult(gizmo_q0, gizmo_q);
 				g_context->layer->decal_mat = mat4_compose(gizmo_v, gizmo_q, gizmo_v0);
 			}
 			else if (g_context->rotate_y) {
-				mat4_decomposed_t *dec        = mat4_decompose(g_context->layer->decal_mat);
-				gizmo_v                       = dec->loc;
-				gizmo_q                       = dec->rot;
-				gizmo_v0                      = dec->scl;
-				gizmo_q0                      = quat_from_axis_angle(vec4_y_axis(), -g_context->gizmo_drag + g_context->gizmo_drag_last);
-				gizmo_q                       = quat_mult(gizmo_q0, gizmo_q);
+				mat4_decomposed_t *dec      = mat4_decompose(g_context->layer->decal_mat);
+				gizmo_v                     = dec->loc;
+				gizmo_q                     = dec->rot;
+				gizmo_v0                    = dec->scl;
+				gizmo_q0                    = quat_from_axis_angle(vec4_y_axis(), -g_context->gizmo_drag + g_context->gizmo_drag_last);
+				gizmo_q                     = quat_mult(gizmo_q0, gizmo_q);
 				g_context->layer->decal_mat = mat4_compose(gizmo_v, gizmo_q, gizmo_v0);
 			}
 			else if (g_context->rotate_z) {
-				mat4_decomposed_t *dec        = mat4_decompose(g_context->layer->decal_mat);
-				gizmo_v                       = dec->loc;
-				gizmo_q                       = dec->rot;
-				gizmo_v0                      = dec->scl;
-				gizmo_q0                      = quat_from_axis_angle(vec4_z_axis(), g_context->gizmo_drag - g_context->gizmo_drag_last);
-				gizmo_q                       = quat_mult(gizmo_q0, gizmo_q);
+				mat4_decomposed_t *dec      = mat4_decompose(g_context->layer->decal_mat);
+				gizmo_v                     = dec->loc;
+				gizmo_q                     = dec->rot;
+				gizmo_v0                    = dec->scl;
+				gizmo_q0                    = quat_from_axis_angle(vec4_z_axis(), g_context->gizmo_drag - g_context->gizmo_drag_last);
+				gizmo_q                     = quat_mult(gizmo_q0, gizmo_q);
 				g_context->layer->decal_mat = mat4_compose(gizmo_v, gizmo_q, gizmo_v0);
 			}
 			g_context->gizmo_drag_last = g_context->gizmo_drag;
@@ -190,8 +195,7 @@ void gizmo_update() {
 			else if (hit->object == g_context->gizmo_scale_z) {
 				g_context->scale_z = true;
 			}
-			if (g_context->translate_x || g_context->translate_y || g_context->translate_z || g_context->scale_x || g_context->scale_y ||
-			    g_context->scale_z) {
+			if (g_context->translate_x || g_context->translate_y || g_context->translate_z || g_context->scale_x || g_context->scale_y || g_context->scale_z) {
 				g_context->gizmo_offset  = 0.0;
 				g_context->gizmo_started = true;
 			}
@@ -229,8 +233,8 @@ void gizmo_update() {
 		g_context->rotate_x = g_context->rotate_y = g_context->rotate_z = false;
 	}
 
-	if (g_context->translate_x || g_context->translate_y || g_context->translate_z || g_context->scale_x || g_context->scale_y ||
-	    g_context->scale_z || g_context->rotate_x || g_context->rotate_y || g_context->rotate_z) {
+	if (g_context->translate_x || g_context->translate_y || g_context->translate_z || g_context->scale_x || g_context->scale_y || g_context->scale_z ||
+	    g_context->rotate_x || g_context->rotate_y || g_context->rotate_z) {
 		g_context->rdirty = 2;
 		if (is_object) {
 			transform_t *t = paint_object->transform;
@@ -271,10 +275,10 @@ void gizmo_update() {
 			vec4_t hit = raycast_plane_intersect(vec4_x_axis(), gizmo_v, mouse_view_x(), mouse_view_y(), scene_camera);
 			if (!vec4_isnan(hit)) {
 				if (g_context->gizmo_started) {
-					mat4_decomposed_t *dec    = mat4_decompose(g_context->layer->decal_mat);
-					gizmo_v                   = dec->loc;
-					gizmo_q                   = dec->rot;
-					gizmo_v0                  = dec->scl;
+					mat4_decomposed_t *dec  = mat4_decompose(g_context->layer->decal_mat);
+					gizmo_v                 = dec->loc;
+					gizmo_q                 = dec->rot;
+					gizmo_v0                = dec->scl;
 					g_context->gizmo_offset = math_atan2(hit.y - gizmo_v.y, hit.z - gizmo_v.z);
 				}
 				g_context->gizmo_drag = math_atan2(hit.y - gizmo_v.y, hit.z - gizmo_v.z) - g_context->gizmo_offset;
@@ -284,10 +288,10 @@ void gizmo_update() {
 			vec4_t hit = raycast_plane_intersect(vec4_y_axis(), gizmo_v, mouse_view_x(), mouse_view_y(), scene_camera);
 			if (!vec4_isnan(hit)) {
 				if (g_context->gizmo_started) {
-					mat4_decomposed_t *dec    = mat4_decompose(g_context->layer->decal_mat);
-					gizmo_v                   = dec->loc;
-					gizmo_q                   = dec->rot;
-					gizmo_v0                  = dec->scl;
+					mat4_decomposed_t *dec  = mat4_decompose(g_context->layer->decal_mat);
+					gizmo_v                 = dec->loc;
+					gizmo_q                 = dec->rot;
+					gizmo_v0                = dec->scl;
 					g_context->gizmo_offset = math_atan2(hit.z - gizmo_v.z, hit.x - gizmo_v.x);
 				}
 				g_context->gizmo_drag = math_atan2(hit.z - gizmo_v.z, hit.x - gizmo_v.x) - g_context->gizmo_offset;
@@ -297,10 +301,10 @@ void gizmo_update() {
 			vec4_t hit = raycast_plane_intersect(vec4_z_axis(), gizmo_v, mouse_view_x(), mouse_view_y(), scene_camera);
 			if (!vec4_isnan(hit)) {
 				if (g_context->gizmo_started) {
-					mat4_decomposed_t *dec    = mat4_decompose(g_context->layer->decal_mat);
-					gizmo_v                   = dec->loc;
-					gizmo_q                   = dec->rot;
-					gizmo_v0                  = dec->scl;
+					mat4_decomposed_t *dec  = mat4_decompose(g_context->layer->decal_mat);
+					gizmo_v                 = dec->loc;
+					gizmo_q                 = dec->rot;
+					gizmo_v0                = dec->scl;
 					g_context->gizmo_offset = math_atan2(hit.y - gizmo_v.y, hit.x - gizmo_v.x);
 				}
 				g_context->gizmo_drag = math_atan2(hit.y - gizmo_v.y, hit.x - gizmo_v.x) - g_context->gizmo_offset;

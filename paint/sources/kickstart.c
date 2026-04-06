@@ -88,10 +88,6 @@ void _kickstart() {
 
 	ui_base_hwnd_tabs = ui_base_init_hwnd_tabs();
 	gc_root(ui_base_hwnd_tabs);
-	gizmo_v  = (vec4_t){0.0, 0.0, 0.0, 1.0};
-	gizmo_v0 = (vec4_t){0.0, 0.0, 0.0, 1.0};
-	gizmo_q  = (quat_t){0.0, 0.0, 0.0, 1.0};
-	gizmo_q0 = (quat_t){0.0, 0.0, 0.0, 1.0};
 
 	ui_toolbar_handle = ui_handle_create();
 	gc_root(ui_toolbar_handle);
@@ -157,7 +153,7 @@ void _kickstart() {
 
 	ui_menubar_tab = ui_handle_create();
 	gc_root(ui_menubar_tab);
-	ui_menubar_w             = ui_menubar_default_w;
+	ui_menubar_w = ui_menubar_default_w;
 
 	translator_translations = any_map_create();
 	gc_root(translator_translations);
@@ -315,7 +311,6 @@ void _kickstart() {
 
 	console_last_traces = any_array_create(0);
 	gc_root(console_last_traces);
-	camera_dir = (vec4_t){0.0, 0.0, 0.0, 1.0};
 
 	box_preferences_htab = ui_handle_create();
 	gc_root(box_preferences_htab);
@@ -330,12 +325,8 @@ void _kickstart() {
 	gc_root(render_path_raytrace_f32a);
 	render_path_raytrace_help_mat = mat4_identity();
 
-	import_envmap_params = (vec4_t){0.0, 0.0, 0.0, 1.0};
-	import_envmap_n      = (vec4_t){0.0, 0.0, 0.0, 1.0};
-
 	neural_node_results = any_imap_create();
 	gc_root(neural_node_results);
-	input_node_coords = (vec4_t){0.0, 0.0, 0.0, 1.0};
 
 	sys_on_resize = base_on_resize;
 	sys_on_w      = base_w;

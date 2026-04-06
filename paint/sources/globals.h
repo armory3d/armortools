@@ -109,10 +109,6 @@ i32                       ui_base_viewport_col;
 ui_handle_t_array_t      *ui_base_hwnds;
 ui_handle_t_array_t      *ui_base_htabs;
 tab_draw_array_t_array_t *ui_base_hwnd_tabs;
-vec4_t                    gizmo_v;
-vec4_t                    gizmo_v0;
-quat_t                    gizmo_q;
-quat_t                    gizmo_q0;
 context_t                *g_context;
 i32                       ui_toolbar_default_w = 36;
 ui_handle_t              *ui_toolbar_handle;
@@ -148,7 +144,7 @@ i32                       render_path_base_taa_frame         = 0;
 i32                       render_path_base_bloom_current_mip = 0;
 f32                       render_path_base_bloom_sample_scale;
 bool                      render_path_base_buf_swapped = false;
-project_t         *g_project;
+project_t                *g_project;
 char                     *project_filepath = "";
 asset_t_array_t          *project_assets;
 string_array_t           *project_asset_names;
@@ -330,7 +326,7 @@ fun pack_f32_i16(f: float, i: uint): float { \
 } \
 ";
 
-char               *str_dither_bayer          = "\
+char           *str_dither_bayer          = "\
 fun dither_bayer(uv: float2): float { \
 	var x: int = int(uv.x % 4.0); \
 	var y: int = int(uv.y % 4.0); \
@@ -382,49 +378,48 @@ fun dither_bayer(uv: float2): float { \
 	return 5.0 / 16.0; \
 } \
 ";
-i32                 ui_sidebar_default_w_mini = 56;
-i32                 ui_sidebar_default_w_full = 280;
-i32                 ui_sidebar_default_w;
-ui_handle_t        *ui_sidebar_hminimized;
-i32                 ui_sidebar_w_mini;
-char               *console_message       = "";
-f32                 console_message_timer = 0.0;
-i32                 console_message_color = 0x00000000;
-string_array_t     *console_last_traces;
-vec4_t              camera_origins[2];
-mat4_t              camera_views[2];
-vec4_t              camera_dir;
-ui_handle_t        *box_preferences_htab;
-string_array_t     *box_preferences_files_plugin = NULL;
-ui_handle_t        *box_preferences_h_theme;
-ui_handle_t        *box_preferences_h_preset;
-slot_layer_t       *render_path_paint_live_layer        = NULL;
-i32                 render_path_paint_live_layer_drawn  = 0;
-bool                render_path_paint_live_layer_locked = false;
-bool                render_path_paint_push_undo_last;
-bool                ui_box_show = false;
-ui_handle_t        *ui_box_hwnd;
-bool                ui_box_click_to_hide           = true;
-i32                 ui_box_modalw                  = 400;
-i32                 ui_box_modalh                  = 170;
-i32                 _tab_scene_paint_object_length = 1;
-ui_handle_t        *tab_layers_layer_name_handle;
-gpu_texture_t      *util_uv_uvmap                    = NULL;
-bool                util_uv_uvmap_cached             = false;
-gpu_texture_t      *util_uv_trianglemap              = NULL;
-bool                util_uv_trianglemap_cached       = false;
-gpu_texture_t      *util_uv_dilatemap                = NULL;
-bool                util_uv_dilatemap_cached         = false;
-gpu_texture_t      *util_uv_uvislandmap              = NULL;
-bool                util_uv_uvislandmap_cached       = false;
-i32                 render_path_raytrace_frame       = 0;
-bool                render_path_raytrace_ready       = false;
-i32                 render_path_raytrace_dirty       = 0;
-bool                render_path_raytrace_init_shader = true;
-f32_array_t        *render_path_raytrace_f32a;
-mat4_t              render_path_raytrace_help_mat;
-gpu_texture_t      *render_path_raytrace_last_envmap = NULL;
-bool                render_path_raytrace_is_bake     = false;
+i32             ui_sidebar_default_w_mini = 56;
+i32             ui_sidebar_default_w_full = 280;
+i32             ui_sidebar_default_w;
+ui_handle_t    *ui_sidebar_hminimized;
+i32             ui_sidebar_w_mini;
+char           *console_message       = "";
+f32             console_message_timer = 0.0;
+i32             console_message_color = 0x00000000;
+string_array_t *console_last_traces;
+vec4_t          camera_origins[2];
+mat4_t          camera_views[2];
+ui_handle_t    *box_preferences_htab;
+string_array_t *box_preferences_files_plugin = NULL;
+ui_handle_t    *box_preferences_h_theme;
+ui_handle_t    *box_preferences_h_preset;
+slot_layer_t   *render_path_paint_live_layer        = NULL;
+i32             render_path_paint_live_layer_drawn  = 0;
+bool            render_path_paint_live_layer_locked = false;
+bool            render_path_paint_push_undo_last;
+bool            ui_box_show = false;
+ui_handle_t    *ui_box_hwnd;
+bool            ui_box_click_to_hide           = true;
+i32             ui_box_modalw                  = 400;
+i32             ui_box_modalh                  = 170;
+i32             _tab_scene_paint_object_length = 1;
+ui_handle_t    *tab_layers_layer_name_handle;
+gpu_texture_t  *util_uv_uvmap                    = NULL;
+bool            util_uv_uvmap_cached             = false;
+gpu_texture_t  *util_uv_trianglemap              = NULL;
+bool            util_uv_trianglemap_cached       = false;
+gpu_texture_t  *util_uv_dilatemap                = NULL;
+bool            util_uv_dilatemap_cached         = false;
+gpu_texture_t  *util_uv_uvislandmap              = NULL;
+bool            util_uv_uvislandmap_cached       = false;
+i32             render_path_raytrace_frame       = 0;
+bool            render_path_raytrace_ready       = false;
+i32             render_path_raytrace_dirty       = 0;
+bool            render_path_raytrace_init_shader = true;
+f32_array_t    *render_path_raytrace_f32a;
+mat4_t          render_path_raytrace_help_mat;
+gpu_texture_t  *render_path_raytrace_last_envmap = NULL;
+bool            render_path_raytrace_is_bake     = false;
 
 #ifdef IRON_DIRECT3D12
 char *render_path_raytrace_ext = ".cso";
@@ -434,13 +429,11 @@ char *render_path_raytrace_ext = ".metal";
 char *render_path_raytrace_ext = ".spirv";
 #endif
 
-bool   sculpt_push_undo       = false;
-i32    ui_statusbar_default_h = 33;
-vec4_t import_envmap_params;
-vec4_t import_envmap_n;
-char  *parser_material_bake_passthrough_strength = "0.0";
-char  *parser_material_bake_passthrough_radius   = "0.0";
-char  *parser_material_bake_passthrough_offset   = "0.0";
+bool  sculpt_push_undo                          = false;
+i32   ui_statusbar_default_h                    = 33;
+char *parser_material_bake_passthrough_strength = "0.0";
+char *parser_material_bake_passthrough_radius   = "0.0";
+char *parser_material_bake_passthrough_offset   = "0.0";
 
 char *str_hue_sat = "\
 fun hsv_to_rgb(c: float3): float3 { \
@@ -477,4 +470,3 @@ any_imap_t                  *neural_node_results;
 ui_node_t                   *neural_node_current;
 i32                          neural_node_downloading = 0;
 neural_node_model_t_array_t *neural_node_models      = NULL;
-vec4_t                       input_node_coords;
