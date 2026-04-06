@@ -19,7 +19,7 @@ void gizmo_update() {
 	}
 
 	if (is_object) {
-		gizmo->transform->loc = vec4_clone(paint_object->transform->loc);
+		gizmo->transform->loc = paint_object->transform->loc;
 	}
 	else if (is_decal) {
 		gizmo->transform->loc = (vec4_t){g_context->layer->decal_mat.m30, g_context->layer->decal_mat.m31, g_context->layer->decal_mat.m32, 1.0};

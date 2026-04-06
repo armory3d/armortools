@@ -214,7 +214,7 @@ void tab_meshes_draw_context_menu() {
 				object_set_parent(child, project_paint_objects->buffer[0]->base);
 			}
 			if (o->base->children->length == 0) {
-				project_paint_objects->buffer[0]->base->transform->scale = vec4_clone(o->base->transform->scale);
+				project_paint_objects->buffer[0]->base->transform->scale = o->base->transform->scale;
 				transform_build_matrix(project_paint_objects->buffer[0]->base->transform);
 			}
 		}

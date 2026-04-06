@@ -4,7 +4,7 @@
 logic_node_value_t *vector_math_node_get(vector_math_node_t *self, i32 from) {
 	vec4_t v1    = logic_node_input_get(self->base->inputs->buffer[0])->_vec4;
 	vec4_t v2    = logic_node_input_get(self->base->inputs->buffer[1])->_vec4;
-	self->v      = vec4_clone(v1);
+	self->v      = v1;
 	f32       f  = 0.0;
 	char *op = self->operation;
 	if (string_equals(op, "Add")) {
@@ -48,12 +48,12 @@ logic_node_value_t *vector_math_node_get(vector_math_node_t *self, i32 from) {
 		self->v = (vec4_t){f, f, f, 1.0};
 	}
 	else if (string_equals(op, "Project")) {
-		self->v = vec4_clone(v2);
+		self->v = v2;
 		self->v = vec4_mult(self->v, vec4_dot(v1, v2) / (float)vec4_dot(v2, v2));
 	}
 	else if (string_equals(op, "Reflect")) {
 		vec4_t tmp = (vec4_t){0.0, 0.0, 0.0, 1.0};
-		tmp        = vec4_clone(v2);
+		tmp        = v2;
 		tmp        = vec4_norm(tmp);
 		self->v    = vec4_reflect(self->v, tmp);
 	}
