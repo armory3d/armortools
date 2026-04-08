@@ -207,7 +207,7 @@ void export_arm_run_project() {
 	g_project->assets          = texture_files;
 	g_project->packed_assets   = packed_assets;
 	g_project->swatches        = g_project->swatches;
-	g_project->envmap = g_project->envmap != NULL ? (same_drive ? path_to_relative(project_filepath, g_project->envmap) : g_project->envmap) : NULL;
+	g_project->envmap          = g_project->envmap != NULL ? (same_drive ? path_to_relative(project_filepath, g_project->envmap) : g_project->envmap) : NULL;
 	g_project->envmap_strength = scene_world->strength;
 	g_project->envmap_angle    = g_context->envmap_angle;
 	g_project->envmap_blur     = g_context->show_envmap_blur;
@@ -337,34 +337,28 @@ void export_arm_run_material(char *path) {
 	any_array_push(mnodes, c);
 
 	string_array_t *texture_files = export_arm_assets_to_files(path, assets);
-	bool              is_cloud      = ends_with(path, "_cloud_.arm");
-	if (is_cloud) {
-		path = string_copy(string_replace_all(path, "_cloud_", ""));
-	}
 	packed_asset_t_array_t *packed_assets = NULL;
 	if (!g_context->pack_assets_on_export) {
 		packed_assets = export_arm_get_packed_assets(path, texture_files);
 	}
 
-	buffer_t_array_t *micons = NULL;
-	if (!is_cloud) {
 #ifdef IRON_BGRA
-		buffer_t *buf = lz4_encode(export_arm_bgra64_swap(gpu_get_texture_pixels(m->image)));
+	buffer_t *buf = lz4_encode(export_arm_bgra64_swap(gpu_get_texture_pixels(m->image)));
 #else
-		buffer_t *buf = lz4_encode(gpu_get_texture_pixels(m->image));
+	buffer_t *buf = lz4_encode(gpu_get_texture_pixels(m->image));
 #endif
-		micons = any_array_create_from_raw(
-		    (void *[]){
-		        buf,
-		    },
-		    1);
-	}
+	buffer_t_array_t *micons = any_array_create_from_raw(
+		(void *[]){
+			buf,
+		},
+		1);
+
 	project_t *raw = GC_ALLOC_INIT(project_t, {.version         = manifest_version_project,
-	                                                         .material_nodes  = mnodes,
-	                                                         .material_groups = mgroups,
-	                                                         .material_icons  = micons,
-	                                                         .assets          = texture_files,
-	                                                         .packed_assets   = packed_assets});
+	                                           .material_nodes  = mnodes,
+	                                           .material_groups = mgroups,
+	                                           .material_icons  = micons,
+	                                           .assets          = texture_files,
+	                                           .packed_assets   = packed_assets});
 	if (g_context->write_icon_on_export) { // Separate icon files
 		buffer_t *buf = export_arm_rgba64_to_rgba32(gpu_get_texture_pixels(m->image));
 #ifdef IRON_BGRA
@@ -418,28 +412,21 @@ void export_arm_run_brush(char *path) {
 	any_array_push(bnodes, c);
 
 	string_array_t *texture_files = export_arm_assets_to_files(path, assets);
-	bool              is_cloud      = ends_with(path, "_cloud_.arm");
-	if (is_cloud) {
-		path = string_copy(string_replace_all(path, "_cloud_", ""));
-	}
 	packed_asset_t_array_t *packed_assets = NULL;
 	if (!g_context->pack_assets_on_export) {
 		packed_assets = export_arm_get_packed_assets(path, texture_files);
 	}
 
-	buffer_t_array_t *bicons = NULL;
-	if (!is_cloud) {
 #ifdef IRON_BGRA
-		buffer_t *buf = lz4_encode(export_arm_bgra_swap(gpu_get_texture_pixels(b->image)));
+	buffer_t *buf = lz4_encode(export_arm_bgra_swap(gpu_get_texture_pixels(b->image)));
 #else
-		buffer_t *buf = lz4_encode(gpu_get_texture_pixels(b->image));
+	buffer_t *buf = lz4_encode(gpu_get_texture_pixels(b->image));
 #endif
-		bicons = any_array_create_from_raw(
-		    (void *[]){
-		        buf,
-		    },
-		    1);
-	}
+	buffer_t_array_t *bicons = any_array_create_from_raw(
+		(void *[]){
+			buf,
+		},
+		1);
 
 	project_t *raw = GC_ALLOC_INIT(
 	    project_t,
@@ -493,6 +480,6 @@ void export_arm_run_swatches(char *path) {
 		path = string("%s.arm", path);
 	}
 	project_t *raw    = GC_ALLOC_INIT(project_t, {.version = manifest_version_project, .swatches = g_project->swatches});
-	buffer_t         *buffer = util_encode_project(raw);
+	buffer_t  *buffer = util_encode_project(raw);
 	iron_file_save_bytes(path, buffer, buffer->length + 1);
 }
