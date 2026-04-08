@@ -224,7 +224,8 @@ void import_arm_run_project(char *path) {
 	buffer_t  *b = data_get_blob(path);
 	project_t *project;
 	bool       import_as_mesh = false;
-	if (import_arm_is_old(b)) {
+	bool       is_cloud       = string_index_of(path, "/cloud/") >= 0;
+	if (import_arm_is_old(b) && !is_cloud) {
 		project = import_arm_from_old(b);
 	}
 	else if (!import_arm_has_version(b)) {
