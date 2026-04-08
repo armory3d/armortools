@@ -167,7 +167,7 @@ if (flags.with_raytrace) {
 
 if (flags.export_version_info) {
 	let dir  = "../" + flags.name.substr(5).toLowerCase() + "/build";
-	let sha  = os_popen(`git log --pretty=format:"%h" -n 1`).stdout.substr(1, 7);
+	let sha  = os_popen(`git log --pretty=format:"%h" -n 1`).stdout.substr(0, 7);
 	let date = new Date().toISOString().split("T")[0];
 	let data = `{ "sha": "${sha}", "date": "${date}" }`;
 	fs_ensuredir(dir);
