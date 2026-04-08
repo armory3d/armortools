@@ -166,16 +166,16 @@ typedef struct irradiance {
 } irradiance_t;
 
 typedef struct scene {
-	char             *name;
-	any_array_t      *objects;      // obj_t[]
-	any_array_t      *mesh_datas;   // mesh_data_t[]
-	any_array_t      *camera_datas; // camera_data_t[]
-	char             *camera_ref;
-	any_array_t      *material_datas; // material_data_t[]
-	any_array_t      *shader_datas;   // shader_data_t[]
-	any_array_t      *world_datas;    // world_data_t[]
-	char             *world_ref;
-	any_array_t      *speaker_datas;  // TODO: deprecated
+	char           *name;
+	any_array_t    *objects;      // obj_t[]
+	any_array_t    *mesh_datas;   // mesh_data_t[]
+	any_array_t    *camera_datas; // camera_data_t[]
+	char           *camera_ref;
+	any_array_t    *material_datas; // material_data_t[]
+	any_array_t    *shader_datas;   // shader_data_t[]
+	any_array_t    *world_datas;    // world_data_t[]
+	char           *world_ref;
+	any_array_t    *speaker_datas;  // TODO: deprecated
 	string_array_t *embedded_datas; // Preload for this scene, images only for now
 } scene_t;
 
@@ -220,7 +220,7 @@ typedef struct shader_context {
 	u8_array_t               *color_writes_green;
 	u8_array_t               *color_writes_blue;
 	u8_array_t               *color_writes_alpha;
-	string_array_t         *color_attachments; // RGBA32, RGBA64, R8
+	string_array_t           *color_attachments; // RGBA32, RGBA64, R8
 	char                     *depth_attachment;  // D32
 	vertex_element_t_array_t *vertex_elements;   // vertex_element_t[]
 	shader_const_t_array_t   *constants;         // shader_const_t[]
@@ -634,20 +634,20 @@ void             scene_embed_data(char *file);
 // ╚═╝  ╚═╝╚══════╝╚═╝  ╚═══╝╚═════╝ ╚══════╝╚═╝  ╚═╝    ╚═╝     ╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝
 
 extern void (*render_path_commands)(void);
-extern any_map_t        *render_path_render_targets;
-extern i32               render_path_current_w;
-extern i32               render_path_current_h;
-extern f32               _render_path_frame_time;
-extern i32               _render_path_frame;
-extern render_target_t  *_render_path_current_target;
-extern gpu_texture_t    *_render_path_current_image;
-extern bool              _render_path_paused;
-extern i32               _render_path_last_w;
-extern i32               _render_path_last_h;
-extern string_array_t *_render_path_bind_params;
-extern f32               _render_path_last_frame_time;
-extern i32               _render_path_loading;
-extern any_map_t        *_render_path_cached_shader_contexts;
+extern any_map_t       *render_path_render_targets;
+extern i32              render_path_current_w;
+extern i32              render_path_current_h;
+extern f32              _render_path_frame_time;
+extern i32              _render_path_frame;
+extern render_target_t *_render_path_current_target;
+extern gpu_texture_t   *_render_path_current_image;
+extern bool             _render_path_paused;
+extern i32              _render_path_last_w;
+extern i32              _render_path_last_h;
+extern string_array_t  *_render_path_bind_params;
+extern f32              _render_path_last_frame_time;
+extern i32              _render_path_loading;
+extern any_map_t       *_render_path_cached_shader_contexts;
 
 bool                 render_path_ready(void);
 void                 render_path_render_frame(void);
