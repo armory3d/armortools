@@ -1,151 +1,6 @@
 
 #include "global.h"
 
-ui_node_socket_t_array_t *_import_arm_get_legacy_node_socket_array(any_map_t *old, char *key) { // DEPRECATED
-	ui_node_socket_t_array_t *sockets = any_array_create_from_raw((void *[]){}, 0);
-	any_array_t              *ias     = any_map_get(old, key);
-	for (i32 i = 0; i < ias->length; ++i) {
-		any_map_t        *old = ias->buffer[i];
-		ui_node_socket_t *s   = GC_ALLOC_INIT(ui_node_socket_t, {0});
-		s->id                 = armpack_map_get_i32(old, "id");
-		s->node_id            = armpack_map_get_i32(old, "node_id");
-		s->name               = string_copy(any_map_get(old, "name"));
-		s->type               = string_copy(any_map_get(old, "type"));
-		s->color              = armpack_map_get_i32(old, "color");
-		if (string_equals(s->type, "VALUE")) {
-			f32 x            = armpack_map_get_f32(old, "default_value");
-			s->default_value = f32_array_create_x(x);
-		}
-		else { // VECTOR, RGBA
-			any_map_t *dv = any_map_get(old, "default_value");
-			f32        x  = armpack_map_get_f32(dv, "0");
-			f32        y  = armpack_map_get_f32(dv, "1");
-			f32        z  = armpack_map_get_f32(dv, "2");
-			if (string_equals(s->type, "VECTOR")) {
-				s->default_value = f32_array_create_xyz(x, y, z);
-			}
-			else { // RGBA
-				f32 w            = armpack_map_get_f32(dv, "3");
-				s->default_value = f32_array_create_xyzw(x, y, z, w);
-			}
-		}
-		s->min = armpack_map_get_f32(old, "min");
-		s->max = armpack_map_get_f32(old, "max");
-		if (s->max == 0.0) {
-			s->max = 1.0;
-		}
-		s->precision = armpack_map_get_f32(old, "precision");
-		if (s->precision == 0.0) {
-			s->precision = 100.0;
-		}
-		s->display = armpack_map_get_i32(old, "display");
-		any_array_push(sockets, s);
-	}
-	return sockets;
-}
-
-ui_node_canvas_t_array_t *_import_arm_get_legacy_node_canvas_array(any_map_t *map, char *key) { // DEPRECATED
-	any_array_t *cas = any_map_get(map, key);
-	if (cas == NULL) {
-		return NULL;
-	}
-	ui_node_canvas_t_array_t *ar = any_array_create_from_raw((void *[]){}, 0);
-	for (i32 i = 0; i < cas->length; ++i) {
-		any_map_t        *old = cas->buffer[i];
-		ui_node_canvas_t *c   = GC_ALLOC_INIT(ui_node_canvas_t, {0});
-		c->name               = string_copy(any_map_get(old, "name"));
-
-		c->nodes        = any_array_create_from_raw((void *[]){}, 0);
-		any_array_t *ns = any_map_get(old, "nodes");
-		for (i32 i = 0; i < ns->length; ++i) {
-			any_map_t *old = ns->buffer[i];
-			ui_node_t *n   = GC_ALLOC_INIT(ui_node_t, {0});
-
-			n->id      = armpack_map_get_i32(old, "id");
-			n->name    = string_copy(any_map_get(old, "name"));
-			n->type    = string_copy(any_map_get(old, "type"));
-			n->x       = armpack_map_get_f32(old, "x");
-			n->y       = armpack_map_get_f32(old, "y");
-			n->color   = armpack_map_get_i32(old, "color");
-			n->inputs  = _import_arm_get_legacy_node_socket_array(old, "inputs");
-			n->outputs = _import_arm_get_legacy_node_socket_array(old, "outputs");
-
-			n->buttons       = any_array_create_from_raw((void *[]){}, 0);
-			any_array_t *bas = any_map_get(old, "buttons");
-			for (i32 i = 0; i < bas->length; ++i) {
-				any_map_t        *old = bas->buffer[i];
-				ui_node_button_t *b   = GC_ALLOC_INIT(ui_node_button_t, {0});
-				b->name               = string_copy(any_map_get(old, "name"));
-				b->type               = string_copy(any_map_get(old, "type"));
-				b->output             = armpack_map_get_i32(old, "output");
-
-				if (string_equals(b->type, "ENUM")) {
-					f32 x            = armpack_map_get_i32(old, "default_value");
-					b->default_value = f32_array_create_x(x);
-
-					if (string_equals(b->name, "File")) {
-						char *data_string = any_map_get(old, "data");
-						b->data           = sys_string_to_buffer(data_string);
-					}
-					else {
-						string_array_t *data_strings = any_map_get(old, "data");
-						char           *joined       = string_array_join(data_strings, "\n");
-						b->data                      = sys_string_to_buffer(joined);
-					}
-				}
-				else if (string_equals(b->type, "BOOL")) {
-					f32 x            = armpack_map_get_i32(old, "default_value");
-					b->default_value = f32_array_create_x(x);
-				}
-				else if (string_equals(b->type, "CUSTOM")) {
-					if (string_equals(b->name, "arm.shader.NodesMaterial.newGroupButton")) {
-						b->name = "nodes_material_new_group_button";
-					}
-					else if (string_equals(b->name, "arm.shader.NodesMaterial.groupOutputButton")) {
-						b->name = "nodes_material_group_output_button";
-					}
-					else if (string_equals(b->name, "arm.shader.NodesMaterial.groupInputButton")) {
-						b->name = "nodes_material_group_input_button";
-					}
-					else if (string_equals(b->name, "arm.shader.NodesMaterial.vectorCurvesButton")) {
-						b->name = "nodes_material_vector_curves_button";
-					}
-					else if (string_equals(b->name, "arm.shader.NodesMaterial.colorRampButton")) {
-						b->name = "nodes_material_color_ramp_button";
-					}
-				}
-
-				b->min       = armpack_map_get_f32(old, "min");
-				b->max       = armpack_map_get_f32(old, "max");
-				b->precision = armpack_map_get_f32(old, "precision");
-				b->height    = armpack_map_get_f32(old, "height");
-				any_array_push(n->buttons, b);
-			}
-
-			n->width = armpack_map_get_f32(old, "width");
-			n->flags = 0;
-
-			any_array_push(c->nodes, n);
-		}
-
-		c->links         = any_array_create_from_raw((void *[]){}, 0);
-		any_array_t *las = any_map_get(old, "links");
-		for (i32 i = 0; i < las->length; ++i) {
-			any_map_t      *old = las->buffer[i];
-			ui_node_link_t *l   = GC_ALLOC_INIT(ui_node_link_t, {0});
-			l->id               = armpack_map_get_i32(old, "id");
-			l->from_id          = armpack_map_get_i32(old, "from_id");
-			l->from_socket      = armpack_map_get_i32(old, "from_socket");
-			l->to_id            = armpack_map_get_i32(old, "to_id");
-			l->to_socket        = armpack_map_get_i32(old, "to_socket");
-			any_array_push(c->links, l);
-		}
-
-		any_array_push(ar, c);
-	}
-	return ar;
-}
-
 ui_node_socket_t_array_t *import_arm_get_node_socket_array(any_map_t *old, char *key) {
 	ui_node_socket_t_array_t *sockets = any_array_create_from_raw((void *[]){}, 0);
 	any_array_t              *ias     = any_map_get(old, key);
@@ -227,16 +82,6 @@ ui_node_canvas_t_array_t *import_arm_get_node_canvas_array(any_map_t *map, char 
 	return ar;
 }
 
-bool import_arm_is_legacy(buffer_t *b) { // DEPRECATED
-	// Cloud materials are at version 0.8 / 0.9
-	bool has_version = b->buffer[10] == 118; // 'v'
-	bool has_zero    = b->buffer[22] == 48;  // '0'
-	bool has_dot     = b->buffer[23] == 46;  // '.'
-	bool has_eight   = b->buffer[24] == 56;  // '8'
-	bool has_nine    = b->buffer[24] == 57;  // '9'
-	return has_version && has_zero && has_dot && (has_eight || has_nine);
-}
-
 bool import_arm_is_version_4(buffer_t *b) {
 	bool has_version = b->buffer[10] == 118; // 'v'
 	bool has_four    = b->buffer[22] == 52;  // '4'
@@ -265,7 +110,7 @@ bool import_arm_is_version_2(buffer_t *b) {
 }
 
 bool import_arm_is_old(buffer_t *b) {
-	return import_arm_is_legacy(b) || import_arm_is_version_2(b) || import_arm_is_version_3(b) || import_arm_is_version_4(b);
+	return import_arm_is_version_2(b) || import_arm_is_version_3(b) || import_arm_is_version_4(b);
 }
 
 project_t *import_arm_from_legacy(any_map_t *old) { // DEPRECATED
@@ -447,9 +292,6 @@ project_t *import_arm_from_version_2(any_map_t *old) {
 
 project_t *import_arm_from_old(buffer_t *b) {
 	any_map_t *old = armpack_decode_to_map(b);
-	if (import_arm_is_legacy(b)) {
-		return import_arm_from_legacy(old); // DEPRECATED: Old cloud material
-	}
 	if (import_arm_is_version_4(b)) {
 		return import_arm_from_version_4(old);
 	}
