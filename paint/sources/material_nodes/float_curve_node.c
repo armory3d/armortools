@@ -90,20 +90,13 @@ void nodes_material_float_curve_button(i32 node_id) {
 		val->buffer[32] = (f32)num;
 	}
 	ui_handle_t *ihandle = ui_nest(ui_nest(nhandle, 0), 2);
-	if (ihandle->init) {
-		ihandle->i = 0;
-	}
-	i32 i = math_floor(ui_slider(ihandle, "Index", 0, num - 1, false, 1, true, UI_ALIGN_LEFT, true));
+	i32          i       = math_floor(ui_slider(ihandle, "Index", 0, num - 1, false, 1, true, UI_ALIGN_LEFT, true));
 	if (i >= num || i < 0) {
 		ihandle->f = i = num - 1;
 	}
 	ui_row2();
-	ui_handle_t *h1 = ui_nest(ui_nest(nhandle, 0), 3);
-	ui_handle_t *h2 = ui_nest(ui_nest(nhandle, 0), 4);
-	if (h1->init)
-		h1->f = val->buffer[i * 2 + 0];
-	if (h2->init)
-		h2->f = val->buffer[i * 2 + 1];
+	ui_handle_t *h1        = ui_nest(ui_nest(nhandle, 0), 3);
+	ui_handle_t *h2        = ui_nest(ui_nest(nhandle, 0), 4);
 	h1->f                  = val->buffer[i * 2 + 0];
 	h2->f                  = val->buffer[i * 2 + 1];
 	val->buffer[i * 2 + 0] = ui_slider(h1, "X", 0, 1, true, 100, true, UI_ALIGN_LEFT, true);

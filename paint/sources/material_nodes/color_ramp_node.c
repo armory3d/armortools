@@ -202,10 +202,8 @@ void nodes_material_color_ramp_button(i32 node_id) {
 		array_pop(vals);
 		ihandle->f -= 1;
 	}
-	ui_handle_t *h = ui_nest(ui_nest(nhandle, 0), 1);
-	if (h->init) {
-		h->i = but->data->buffer[0];
-	}
+	ui_handle_t *h                    = ui_nest(ui_nest(nhandle, 0), 1);
+	h->i                              = but->data->buffer[0];
 	string_array_t *interpolate_combo = any_array_create_from_raw(
 	    (void *[]){
 	        tr("Linear"),
