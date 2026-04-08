@@ -300,6 +300,7 @@ project_t *import_arm_from_map_to_arm(any_map_t *old) {
 	project->version   = string_copy(manifest_version_project);
 	project->assets    = any_map_get(old, "assets");
 	project->is_bgra   = armpack_map_get_i32(old, "is_bgra") > 0;
+
 	any_array_t *pas   = any_map_get(old, "packed_assets");
 	if (pas != NULL) {
 		project->packed_assets = any_array_create_from_raw((void *[]){}, 0);
@@ -318,21 +319,24 @@ project_t *import_arm_from_map_to_arm(any_map_t *old) {
 	project->camera_world    = any_map_get(old, "camera_world");
 	project->camera_origin   = any_map_get(old, "camera_origin");
 	project->camera_fov      = armpack_map_get_f32(old, "camera_fov");
+
 	any_array_t *ss          = any_map_get(old, "swatches");
-	project->swatches        = any_array_create_from_raw((void *[]){}, 0);
-	for (i32 i = 0; i < ss->length; ++i) {
-		any_map_t      *old = ss->buffer[i];
-		swatch_color_t *s   = GC_ALLOC_INIT(swatch_color_t, {0});
-		s->base             = armpack_map_get_i32(old, "base");
-		s->opacity          = armpack_map_get_f32(old, "opacity");
-		s->occlusion        = armpack_map_get_f32(old, "occlusion");
-		s->roughness        = armpack_map_get_f32(old, "roughness");
-		s->metallic         = armpack_map_get_f32(old, "metallic");
-		s->normal           = armpack_map_get_i32(old, "normal");
-		s->emission         = armpack_map_get_f32(old, "emission");
-		s->height           = armpack_map_get_f32(old, "height");
-		s->subsurface       = armpack_map_get_f32(old, "subsurface");
-		any_array_push(project->swatches, s);
+	if (ss != NULL) {
+		project->swatches        = any_array_create_from_raw((void *[]){}, 0);
+		for (i32 i = 0; i < ss->length; ++i) {
+			any_map_t      *old = ss->buffer[i];
+			swatch_color_t *s   = GC_ALLOC_INIT(swatch_color_t, {0});
+			s->base             = armpack_map_get_i32(old, "base");
+			s->opacity          = armpack_map_get_f32(old, "opacity");
+			s->occlusion        = armpack_map_get_f32(old, "occlusion");
+			s->roughness        = armpack_map_get_f32(old, "roughness");
+			s->metallic         = armpack_map_get_f32(old, "metallic");
+			s->normal           = armpack_map_get_i32(old, "normal");
+			s->emission         = armpack_map_get_f32(old, "emission");
+			s->height           = armpack_map_get_f32(old, "height");
+			s->subsurface       = armpack_map_get_f32(old, "subsurface");
+			any_array_push(project->swatches, s);
+		}
 	}
 	project->brush_nodes    = import_arm_get_node_canvas_array(old, "brush_nodes");
 	project->brush_icons    = any_map_get(old, "brush_icons");
@@ -342,75 +346,85 @@ project_t *import_arm_from_map_to_arm(any_map_t *old) {
 	}
 	project->material_icons = any_map_get(old, "material_icons");
 	project->font_assets    = any_map_get(old, "font_assets");
+
 	any_array_t *lds        = any_map_get(old, "layer_datas");
-	project->layer_datas    = any_array_create_from_raw((void *[]){}, 0);
-	for (i32 i = 0; i < lds->length; ++i) {
-		any_map_t    *old      = lds->buffer[i];
-		layer_data_t *ld       = GC_ALLOC_INIT(layer_data_t, {0});
-		ld->name               = string_copy(any_map_get(old, "name"));
-		ld->res                = armpack_map_get_i32(old, "res");
-		ld->bpp                = armpack_map_get_i32(old, "bpp");
-		ld->texpaint           = any_map_get(old, "texpaint");
-		ld->uv_scale           = armpack_map_get_f32(old, "uv_scale");
-		ld->uv_rot             = armpack_map_get_f32(old, "uv_rot");
-		ld->uv_type            = armpack_map_get_i32(old, "uv_type");
-		ld->decal_mat          = any_map_get(old, "decal_mat");
-		ld->opacity_mask       = armpack_map_get_f32(old, "opacity_mask");
-		ld->fill_layer         = armpack_map_get_i32(old, "fill_layer");
-		ld->object_mask        = armpack_map_get_i32(old, "object_mask");
-		ld->blending           = armpack_map_get_i32(old, "blending");
-		ld->parent             = armpack_map_get_i32(old, "parent");
-		ld->visible            = armpack_map_get_i32(old, "visible") > 0;
-		ld->texpaint_nor       = any_map_get(old, "texpaint_nor");
-		ld->texpaint_pack      = any_map_get(old, "texpaint_pack");
-		ld->paint_base         = armpack_map_get_i32(old, "paint_base") > 0;
-		ld->paint_opac         = armpack_map_get_i32(old, "paint_opac") > 0;
-		ld->paint_occ          = armpack_map_get_i32(old, "paint_occ") > 0;
-		ld->paint_rough        = armpack_map_get_i32(old, "paint_rough") > 0;
-		ld->paint_met          = armpack_map_get_i32(old, "paint_met") > 0;
-		ld->paint_nor          = armpack_map_get_i32(old, "paint_nor") > 0;
-		ld->paint_nor_blend    = armpack_map_get_i32(old, "paint_nor_blend") > 0;
-		ld->paint_height       = armpack_map_get_i32(old, "paint_height") > 0;
-		ld->paint_height_blend = armpack_map_get_i32(old, "paint_height_blend") > 0;
-		ld->paint_emis         = armpack_map_get_i32(old, "paint_emis") > 0;
-		ld->paint_subs         = armpack_map_get_i32(old, "paint_subs") > 0;
-		ld->uv_map             = armpack_map_get_i32(old, "uv_map");
-		any_array_push(project->layer_datas, ld);
-	}
-	any_array_t *ms     = any_map_get(old, "mesh_datas");
-	project->mesh_datas = any_array_create_from_raw((void *[]){}, 0);
-	for (i32 i = 0; i < ms->length; ++i) {
-		any_map_t   *old  = ms->buffer[i];
-		mesh_data_t *md   = GC_ALLOC_INIT(mesh_data_t, {0});
-		md->name          = string_copy(any_map_get(old, "name"));
-		md->scale_pos     = armpack_map_get_f32(old, "scale_pos");
-		md->scale_tex     = armpack_map_get_f32(old, "scale_tex");
-		any_array_t *vas  = any_map_get(old, "vertex_arrays");
-		md->vertex_arrays = any_array_create_from_raw((void *[]){}, 0);
-		for (i32 i = 0; i < vas->length; ++i) {
-			any_map_t      *old = vas->buffer[i];
-			vertex_array_t *va  = GC_ALLOC_INIT(vertex_array_t, {0});
-			va->attrib          = string_copy(any_map_get(old, "attrib"));
-			va->data            = string_copy(any_map_get(old, "data"));
-			va->values          = any_map_get(old, "values");
-			any_array_push(md->vertex_arrays, va);
+	if (lds != NULL) {
+		project->layer_datas    = any_array_create_from_raw((void *[]){}, 0);
+		for (i32 i = 0; i < lds->length; ++i) {
+			any_map_t    *old      = lds->buffer[i];
+			layer_data_t *ld       = GC_ALLOC_INIT(layer_data_t, {0});
+			ld->name               = string_copy(any_map_get(old, "name"));
+			ld->res                = armpack_map_get_i32(old, "res");
+			ld->bpp                = armpack_map_get_i32(old, "bpp");
+			ld->texpaint           = any_map_get(old, "texpaint");
+			ld->uv_scale           = armpack_map_get_f32(old, "uv_scale");
+			ld->uv_rot             = armpack_map_get_f32(old, "uv_rot");
+			ld->uv_type            = armpack_map_get_i32(old, "uv_type");
+			ld->decal_mat          = any_map_get(old, "decal_mat");
+			ld->opacity_mask       = armpack_map_get_f32(old, "opacity_mask");
+			ld->fill_layer         = armpack_map_get_i32(old, "fill_layer");
+			ld->object_mask        = armpack_map_get_i32(old, "object_mask");
+			ld->blending           = armpack_map_get_i32(old, "blending");
+			ld->parent             = armpack_map_get_i32(old, "parent");
+			ld->visible            = armpack_map_get_i32(old, "visible") > 0;
+			ld->texpaint_nor       = any_map_get(old, "texpaint_nor");
+			ld->texpaint_pack      = any_map_get(old, "texpaint_pack");
+			ld->paint_base         = armpack_map_get_i32(old, "paint_base") > 0;
+			ld->paint_opac         = armpack_map_get_i32(old, "paint_opac") > 0;
+			ld->paint_occ          = armpack_map_get_i32(old, "paint_occ") > 0;
+			ld->paint_rough        = armpack_map_get_i32(old, "paint_rough") > 0;
+			ld->paint_met          = armpack_map_get_i32(old, "paint_met") > 0;
+			ld->paint_nor          = armpack_map_get_i32(old, "paint_nor") > 0;
+			ld->paint_nor_blend    = armpack_map_get_i32(old, "paint_nor_blend") > 0;
+			ld->paint_height       = armpack_map_get_i32(old, "paint_height") > 0;
+			ld->paint_height_blend = armpack_map_get_i32(old, "paint_height_blend") > 0;
+			ld->paint_emis         = armpack_map_get_i32(old, "paint_emis") > 0;
+			ld->paint_subs         = armpack_map_get_i32(old, "paint_subs") > 0;
+			ld->uv_map             = armpack_map_get_i32(old, "uv_map");
+			any_array_push(project->layer_datas, ld);
 		}
-		md->index_array = any_map_get(old, "index_array");
-		any_array_push(project->mesh_datas, md);
 	}
+
+	any_array_t *ms     = any_map_get(old, "mesh_datas");
+	if (ms != NULL) {
+		project->mesh_datas = any_array_create_from_raw((void *[]){}, 0);
+		for (i32 i = 0; i < ms->length; ++i) {
+			any_map_t   *old  = ms->buffer[i];
+			mesh_data_t *md   = GC_ALLOC_INIT(mesh_data_t, {0});
+			md->name          = string_copy(any_map_get(old, "name"));
+			md->scale_pos     = armpack_map_get_f32(old, "scale_pos");
+			md->scale_tex     = armpack_map_get_f32(old, "scale_tex");
+			any_array_t *vas  = any_map_get(old, "vertex_arrays");
+			md->vertex_arrays = any_array_create_from_raw((void *[]){}, 0);
+			for (i32 i = 0; i < vas->length; ++i) {
+				any_map_t      *old = vas->buffer[i];
+				vertex_array_t *va  = GC_ALLOC_INIT(vertex_array_t, {0});
+				va->attrib          = string_copy(any_map_get(old, "attrib"));
+				va->data            = string_copy(any_map_get(old, "data"));
+				va->values          = any_map_get(old, "values");
+				any_array_push(md->vertex_arrays, va);
+			}
+			md->index_array = any_map_get(old, "index_array");
+			any_array_push(project->mesh_datas, md);
+		}
+	}
+
 	project->mesh_assets   = any_map_get(old, "mesh_assets");
 	project->mesh_icons    = any_map_get(old, "mesh_icons");
 	project->atlas_objects = any_map_get(old, "atlas_objects");
 	project->atlas_names   = any_map_get(old, "atlas_names");
+
 	return project;
 }
 
 project_t *import_arm_from_version_4(any_map_t *old) {
 	f32_array_t *camera_world = any_map_get(old, "camera_world");
-	mat4_t       m            = mat4_from_f32_array(camera_world, 0);
-	m                         = mat4_transpose(m);
-	camera_world              = mat4_to_f32_array(m);
-	any_map_set(old, "camera_world", camera_world);
+	if (camera_world != NULL) {
+		mat4_t       m            = mat4_from_f32_array(camera_world, 0);
+		m                         = mat4_transpose(m);
+		camera_world              = mat4_to_f32_array(m);
+		any_map_set(old, "camera_world", camera_world);
+	}
 	return import_arm_from_map_to_arm(old);
 }
 
@@ -422,9 +436,11 @@ project_t *import_arm_from_version_3(any_map_t *old) {
 
 project_t *import_arm_from_version_2(any_map_t *old) {
 	any_array_t *lds = any_map_get(old, "layer_datas");
-	for (i32 i = 0; i < lds->length; ++i) {
-		any_map_t *ld = lds->buffer[i];
-		any_map_set(ld, "uv_map", 0);
+	if (lds != NULL) {
+		for (i32 i = 0; i < lds->length; ++i) {
+			any_map_t *ld = lds->buffer[i];
+			any_map_set(ld, "uv_map", 0);
+		}
 	}
 	return import_arm_from_version_3(old);
 }
