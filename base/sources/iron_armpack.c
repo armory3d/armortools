@@ -175,18 +175,6 @@ static uint32_t traverse(int di, bool count_arrays) {
 			if (count <= 4096)
 				len += count;
 			break;
-		case 0xc2: // Deprecated: Bool array
-			ei -= 1;
-			ei += count;
-			if (count <= 4096)
-				len += count;
-			break;
-		case 0xc3: // Deprecated: Bool array
-			ei -= 1;
-			ei += count;
-			if (count <= 4096)
-				len += count;
-			break;
 		default:     // Dynamic (type (array / map / string) - value)
 			ei -= 1; // Undo flag2 read
 			for (uint32_t j = 0; j < count; ++j) {
@@ -637,6 +625,72 @@ typedef union ptr_storage {
 	int i;
 } ptr_storage_t;
 
+any_map_t *_armpack_decode_to_map();
+
+void *_armpack_decode_to_array() {
+	uint32_t array_count = read_u32();
+	if (array_count == 0) {
+		return any_array_create(0);
+	}
+	uint8_t element_flag = read_u8();
+	if (element_flag == 0xca) { // f32
+		f32_array_t *array = f32_array_create(array_count);
+		for (uint32_t j = 0; j < array_count; j++) {
+			array->buffer[j] = read_f32();
+		}
+		return array;
+	}
+	else if (element_flag == 0xd2) { // i32
+		i32_array_t *array = i32_array_create(array_count);
+		for (uint32_t j = 0; j < array_count; j++) {
+			array->buffer[j] = read_i32();
+		}
+		return array;
+	}
+	else if (element_flag == 0xd1) { // i16
+		i16_array_t *array = i16_array_create(array_count);
+		for (uint32_t j = 0; j < array_count; j++) {
+			array->buffer[j] = read_i16();
+		}
+		return array;
+	}
+	else if (element_flag == 0xc4) { // u8
+		u8_array_t *array = u8_array_create(array_count);
+		for (uint32_t j = 0; j < array_count; j++) {
+			array->buffer[j] = read_u8();
+		}
+		return array;
+	}
+	else if (element_flag == 0xdb) { // string
+		ei--;
+		string_array_t *array = string_array_create(array_count);
+		for (uint32_t j = 0; j < array_count; j++) {
+			read_u8(); // flag
+			array->buffer[j] = read_string_alloc();
+		}
+		return array;
+	}
+	else if (element_flag == 0xdf) { // map
+		ei--;
+		any_array_t *array = any_array_create(array_count);
+		for (uint32_t j = 0; j < array_count; j++) {
+			read_u8(); // flag
+			array->buffer[j] = _armpack_decode_to_map();
+		}
+		return array;
+	}
+	else if (element_flag == 0xdd) { // array
+		ei--;
+		any_array_t *nested_array = any_array_create(array_count);
+		for (uint32_t j = 0; j < array_count; j++) {
+			read_u8(); // flag
+			nested_array->buffer[j] = _armpack_decode_to_array();
+		}
+		return nested_array;
+	}
+	return NULL;
+}
+
 any_map_t *_armpack_decode_to_map() {
 	any_map_t *result = any_map_create();
 	uint32_t   count  = read_u32();
@@ -689,77 +743,9 @@ any_map_t *_armpack_decode_to_map() {
 			break;
 		}
 		case 0xdd: { // array
-			uint32_t array_count  = read_u32();
-			uint8_t  element_flag = read_u8();
-			if (element_flag == 0xca) { // f32
-				f32_array_t *array = f32_array_create(array_count);
-				for (uint32_t j = 0; j < array_count; j++) {
-					array->buffer[j] = read_f32();
-				}
-				any_map_set(result, key, array);
-			}
-			else if (element_flag == 0xd2) { // i32
-				i32_array_t *array = i32_array_create(array_count);
-				for (uint32_t j = 0; j < array_count; j++) {
-					array->buffer[j] = read_i32();
-				}
-				any_map_set(result, key, array);
-			}
-			else if (element_flag == 0xd1) { // i16
-				i16_array_t *array = i16_array_create(array_count);
-				for (uint32_t j = 0; j < array_count; j++) {
-					array->buffer[j] = read_i16();
-				}
-				any_map_set(result, key, array);
-			}
-			else if (element_flag == 0xc4) { // u8
-				u8_array_t *array = u8_array_create(array_count);
-				for (uint32_t j = 0; j < array_count; j++) {
-					array->buffer[j] = read_u8();
-				}
-				any_map_set(result, key, array);
-			}
-			else if (element_flag == 0xdb) { // string
-				ei--;
-				string_array_t *array = string_array_create(array_count);
-				for (uint32_t j = 0; j < array_count; j++) {
-					read_u8(); // flag
-					array->buffer[j] = read_string_alloc();
-				}
-				any_map_set(result, key, array);
-			}
-			else if (element_flag == 0xdf) { // map
-				ei--;
-				any_array_t *array = any_array_create(array_count);
-				for (uint32_t j = 0; j < array_count; j++) {
-					read_u8(); // flag
-					array->buffer[j] = _armpack_decode_to_map();
-				}
-				any_map_set(result, key, array);
-			}
-			else if (element_flag == 0xc6) { // buffer_t (deprecated)
-				ei--;
-				any_array_t *array = any_array_create(array_count);
-				for (uint32_t j = 0; j < array_count; j++) {
-					read_u8(); // flag
-					uint32_t  buffer_size = read_u32();
-					buffer_t *buffer      = buffer_create(buffer_size);
-					for (uint32_t k = 0; k < buffer_size; k++) {
-						buffer->buffer[k] = read_u8();
-					}
-					array->buffer[j] = buffer;
-				}
-				any_map_set(result, key, array);
-			}
+			void *array = _armpack_decode_to_array();
+			any_map_set(result, key, array);
 			break;
-		}
-		case 0xc6: { // buffer_t (deprecated)
-			uint32_t  buffer_size = read_u32();
-			buffer_t *buffer      = buffer_create(buffer_size);
-			for (uint32_t j = 0; j < buffer_size; j++) {
-				buffer->buffer[j] = read_u8();
-			}
-			any_map_set(result, key, buffer);
 		}
 		}
 	}
@@ -865,14 +851,6 @@ static char *armpack_to_json_value() {
 				if (i > 0)
 					result = string("%s,", result);
 				result = string("%s%s", result, i32_to_string(read_u8()));
-			}
-		}
-		else if (flag2 == 0xc2 || flag2 == 0xc3) { // Deprecated: bool array
-			ei--;                                  // undo flag2 read
-			for (uint32_t i = 0; i < count; i++) {
-				if (i > 0)
-					result = string("%s,", result);
-				result = string("%s%s", result, read_u8() ? "true" : "false");
 			}
 		}
 		else {    // dynamic (string, array, map)
