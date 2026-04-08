@@ -113,33 +113,6 @@ bool import_arm_is_old(buffer_t *b) {
 	return import_arm_is_version_2(b) || import_arm_is_version_3(b) || import_arm_is_version_4(b);
 }
 
-project_t *import_arm_from_legacy(any_map_t *old) { // DEPRECATED
-	project_t *project = GC_ALLOC_INIT(project_t, {0});
-	project->version   = string_copy(manifest_version_project);
-	project->assets    = any_map_get(old, "assets");
-	if (project->assets == NULL) {
-		project->assets = any_array_create_from_raw((void *[]){}, 0);
-	}
-	project->is_bgra = armpack_map_get_i32(old, "is_bgra") > 0;
-	any_array_t *pas = any_map_get(old, "packed_assets");
-	if (pas != NULL) {
-		project->packed_assets = any_array_create_from_raw((void *[]){}, 0);
-		for (i32 i = 0; i < pas->length; ++i) {
-			any_map_t      *old = pas->buffer[i];
-			packed_asset_t *pa  = GC_ALLOC_INIT(packed_asset_t, {0});
-			pa->name            = string_copy(any_map_get(old, "name"));
-			pa->bytes           = any_map_get(old, "bytes");
-			any_array_push(project->packed_assets, pa);
-		}
-	}
-	project->brush_nodes     = _import_arm_get_legacy_node_canvas_array(old, "brush_nodes");
-	project->brush_icons     = any_map_get(old, "brush_icons");
-	project->material_nodes  = _import_arm_get_legacy_node_canvas_array(old, "material_nodes");
-	project->material_groups = _import_arm_get_legacy_node_canvas_array(old, "material_groups");
-	project->material_icons  = any_map_get(old, "material_icons");
-	return project;
-}
-
 project_t *import_arm_from_map_to_arm(any_map_t *old) {
 	project_t *project = GC_ALLOC_INIT(project_t, {0});
 	project->version   = string_copy(manifest_version_project);
