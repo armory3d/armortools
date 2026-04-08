@@ -483,7 +483,7 @@ void                         make_discard_face(node_shader_t *kong);
 void                         make_discard_uv_island(node_shader_t *kong);
 void                         make_discard_material_id(node_shader_t *kong);
 bool                         import_arm_is_old(buffer_t *b);
-project_t            *import_arm_from_old(buffer_t *b);
+project_t                   *import_arm_from_old(buffer_t *b);
 void                         nodes_brush_init();
 void                         nodes_brush_list_init();
 ui_node_t                   *nodes_brush_create_node(char *node_type);
