@@ -212,10 +212,12 @@ class IronActivity: NativeActivity(), KeyEvent.Callback {
 	private external fun onAndroidFilePicked(pickedPath: String)
 	private external fun getMobileTitle(): String
 
-	override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
+	override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
 		super.onActivityResult(requestCode, resultCode, data)
 		if (requestCode == 1 && resultCode == RESULT_OK) {
-			importFile(data.data!!)
+			data?.data?.let { uri ->
+				importFile(uri)
+			}
 		}
 	}
 
