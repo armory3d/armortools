@@ -120,6 +120,25 @@ void tab_browser_go_to_cloud() {
 	tab_browser_hpath->text = "cloud";
 }
 
+#ifdef IRON_ANDROID
+
+void tab_browser_go_to_disk_android_menu() {
+	if (ui_menu_button(tr("Download"), "", ICON_FOLDER)) {
+		tab_browser_hpath->text = string_copy(ui_files_default_path);
+	}
+	if (ui_menu_button(tr("Pictures"), "", ICON_FOLDER)) {
+		tab_browser_hpath->text = "/storage/emulated/0/Pictures";
+	}
+	if (ui_menu_button(tr("Camera"), "", ICON_FOLDER)) {
+		tab_browser_hpath->text = "/storage/emulated/0/DCIM/Camera";
+	}
+	if (ui_menu_button(tr("Projects"), "", ICON_FOLDER)) {
+		tab_browser_hpath->text = string_copy(iron_internal_save_path());
+	}
+}
+
+#endif
+
 void tab_browser_go_to_disk() {
 #ifdef IRON_ANDROID
 	ui_menu_draw(&tab_browser_go_to_disk_android_menu, -1, -1);
@@ -345,22 +364,3 @@ void tab_browser_draw(ui_handle_t *htab) {
 		}
 	}
 }
-
-#ifdef IRON_ANDROID
-
-void tab_browser_go_to_disk_android_menu() {
-	if (ui_menu_button(tr("Download"), "", ICON_FOLDER)) {
-		tab_browser_hpath->text = string_copy(ui_files_default_path);
-	}
-	if (ui_menu_button(tr("Pictures"), "", ICON_FOLDER)) {
-		tab_browser_hpath->text = "/storage/emulated/0/Pictures";
-	}
-	if (ui_menu_button(tr("Camera"), "", ICON_FOLDER)) {
-		tab_browser_hpath->text = "/storage/emulated/0/DCIM/Camera";
-	}
-	if (ui_menu_button(tr("Projects"), "", ICON_FOLDER)) {
-		tab_browser_hpath->text = string_copy(iron_internal_save_path());
-	}
-}
-
-#endif
