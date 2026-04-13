@@ -192,16 +192,12 @@ void config_init() {
 #else
 		g_config->keymap = "default.json";
 #endif
-		g_config->theme           = "default.json";
-		g_config->server          = "https://cloud.armory3d.com";
-		g_config->undo_steps      = 4;
-		g_config->pressure_radius = true;
-#if defined(IRON_IOS) || defined(IRON_LINUX)
-		g_config->pressure_sensitivity = 1.0;
-#else
+		g_config->theme                = "default.json";
+		g_config->server               = "https://cloud.armory3d.com";
+		g_config->undo_steps           = 4;
+		g_config->pressure_radius      = true;
 		g_config->pressure_sensitivity = 2.0;
-#endif
-		g_config->camera_fov = 0.69;
+		g_config->camera_fov           = 0.69;
 #if defined(IRON_ANDROID) || defined(IRON_IOS)
 		g_config->camera_zoom_speed     = 0.5;
 		g_config->camera_pan_speed      = 0.5;
@@ -390,7 +386,7 @@ void config_import_from(config_t *from) {
 
 void config_apply() {
 	config_save();
-	g_context->ddirty    = 2;
+	g_context->ddirty      = 2;
 	gpu_texture_t *current = _draw_current;
 	bool           in_use  = gpu_in_use;
 	if (in_use)
