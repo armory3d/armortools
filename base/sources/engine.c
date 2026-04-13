@@ -2176,25 +2176,48 @@ i32              _scene_objects_traversed = 0;
 i32              _scene_objects_count     = 0;
 
 object_t *scene_create(scene_t *format) {
-	_scene_uid   = _scene_uid_counter++;
+	_scene_uid = _scene_uid_counter++;
+
+	gc_unroot(scene_meshes);
 	scene_meshes = any_array_create(0);
 	gc_root(scene_meshes);
+
+	gc_unroot(scene_cameras);
 	scene_cameras = any_array_create(0);
 	gc_root(scene_cameras);
+
+	gc_unroot(scene_empties);
 	scene_empties = any_array_create(0);
 	gc_root(scene_empties);
+
+	gc_unroot(scene_embedded);
 	scene_embedded = any_map_create();
 	gc_root(scene_embedded);
-	_scene_root       = object_create(true);
-	_scene_root->name = "Root";
-	_scene_raw        = format;
 
+	gc_unroot(_scene_root);
+	_scene_root = object_create(true);
+	gc_root(_scene_root);
+	_scene_root->name = "Root";
+
+	gc_unroot(_scene_raw);
+	_scene_raw = format;
+	gc_root(_scene_raw);
+
+	gc_unroot(scene_world);
 	scene_world = data_get_world(format->name, format->world_ref);
+	gc_root(scene_world);
 
 	// Startup scene
 	object_t *scene_object = scene_add_scene(format->name, NULL);
-	scene_camera           = (camera_object_t *)scene_cameras->buffer[0]; // format->camera_ref
-	_scene_scene_parent    = scene_object;
+
+	gc_unroot(scene_camera);
+	scene_camera = (camera_object_t *)scene_cameras->buffer[0]; // format->camera_ref
+	gc_root(scene_camera);
+
+	gc_unroot(_scene_scene_parent);
+	_scene_scene_parent = scene_object;
+	gc_root(_scene_scene_parent);
+
 	return scene_object;
 }
 
@@ -2498,6 +2521,7 @@ void render_path_set_target(char *target, string_array_t *additional, char *dept
 	}
 
 	if (string_equals(target, "")) { // Framebuffer
+		gc_unroot(_render_path_current_target);
 		_render_path_current_target = NULL;
 		render_path_current_w       = sys_w();
 		render_path_current_h       = sys_h();
@@ -2505,8 +2529,10 @@ void render_path_set_target(char *target, string_array_t *additional, char *dept
 		gpu_viewport(sys_x(), render_path_current_h - (sys_h() - sys_y()), sys_w(), sys_h());
 	}
 	else { // Render target
-		render_target_t *rt            = (render_target_t *)any_map_get(render_path_render_targets, target);
-		_render_path_current_target    = rt;
+		render_target_t *rt = (render_target_t *)any_map_get(render_path_render_targets, target);
+		gc_unroot(_render_path_current_target);
+		_render_path_current_target = rt;
+		gc_root(_render_path_current_target);
 		any_array_t *additional_images = NULL;
 		if (additional != NULL) {
 			additional_images = any_array_create(0);
@@ -2516,19 +2542,24 @@ void render_path_set_target(char *target, string_array_t *additional, char *dept
 				any_array_push(additional_images, t->_image);
 			}
 		}
-		render_path_current_w      = rt->_image->width;
-		render_path_current_h      = rt->_image->height;
-		render_target_t *db        = depth_buffer != NULL ? (render_target_t *)any_map_get(render_path_render_targets, depth_buffer) : NULL;
+		render_path_current_w = rt->_image->width;
+		render_path_current_h = rt->_image->height;
+		render_target_t *db   = depth_buffer != NULL ? (render_target_t *)any_map_get(render_path_render_targets, depth_buffer) : NULL;
+		gc_unroot(_render_path_current_image);
 		_render_path_current_image = rt->_image;
+		gc_root(_render_path_current_image);
 		_gpu_begin(rt->_image, additional_images, db != NULL ? db->_image : NULL, flags, color, depth);
 	}
+	gc_unroot(_render_path_bind_params);
 	_render_path_bind_params = NULL;
 }
 
 void render_path_end(void) {
 	gpu_end();
+	gc_unroot(_render_path_current_image);
 	_render_path_current_image = NULL;
-	_render_path_bind_params   = NULL;
+	gc_unroot(_render_path_bind_params);
+	_render_path_bind_params = NULL;
 }
 
 void render_path_draw_meshes(char *context) {
@@ -2537,7 +2568,8 @@ void render_path_draw_meshes(char *context) {
 }
 
 void render_path_submit_draw(char *context) {
-	any_array_t *meshes        = scene_meshes;
+	any_array_t *meshes = scene_meshes;
+	gc_unroot(_mesh_object_last_pipeline);
 	_mesh_object_last_pipeline = NULL;
 	for (i32 i = 0; i < meshes->length; ++i) {
 		mesh_object_t *mesh = (mesh_object_t *)meshes->buffer[i];
@@ -2565,7 +2597,8 @@ void render_path_bind_target(char *target, char *uniform) {
 		string_array_push(_render_path_bind_params, uniform);
 	}
 	else {
-		_render_path_bind_params            = string_array_create(2);
+		_render_path_bind_params = string_array_create(2);
+		gc_root(_render_path_bind_params);
 		_render_path_bind_params->buffer[0] = target;
 		_render_path_bind_params->buffer[1] = uniform;
 		_render_path_bind_params->length    = 2;
