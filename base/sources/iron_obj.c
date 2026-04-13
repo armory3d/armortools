@@ -2,8 +2,8 @@
 
 #include "iron_array.h"
 #include "iron_gc.h"
-#include "iron_string.h"
 #include "iron_math.h"
+#include "iron_string.h"
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
@@ -127,7 +127,9 @@ static float read_float() {
 			}
 			return exp > 0 ? (float)first * dec : (float)first / dec;
 		}
-		buf[bi++] = c;
+		if (bi < 9) {
+			buf[bi++] = c;
+		}
 		part->pos++;
 	}
 	float   res = 0.0; // Parse buffer into float
@@ -208,8 +210,8 @@ static bool pnpoly(float v0x, float v0y, float v1x, float v1y, float v2x, float 
 static vec4_t calc_normal(vec4_t a, vec4_t b, vec4_t c) {
 	vec4_t cb = vec4_sub(c, b);
 	vec4_t ab = vec4_sub(a, b);
-	cb                = vec4_cross(cb, ab);
-	cb                = vec4_norm(cb);
+	cb        = vec4_cross(cb, ab);
+	cb        = vec4_norm(cb);
 	return cb;
 }
 
@@ -342,14 +344,14 @@ raw_mesh_t *obj_parse(buffer_t *file_bytes, char split_code, uint64_t start_pos,
 				}
 				else {
 					vec4_t n = calc_normal((vec4_t){pos_temp.buffer[(va[0] - _vind_off) * 3], pos_temp.buffer[(va[0] - _vind_off) * 3 + 1],
-					                                           pos_temp.buffer[(va[0] - _vind_off) * 3 + 2], 1.0f},
-					                               (vec4_t){pos_temp.buffer[(va[1] - _vind_off) * 3], pos_temp.buffer[(va[1] - _vind_off) * 3 + 1],
-					                                           pos_temp.buffer[(va[1] - _vind_off) * 3 + 2], 1.0f},
-					                               (vec4_t){pos_temp.buffer[(va[2] - _vind_off) * 3], pos_temp.buffer[(va[2] - _vind_off) * 3 + 1],
-					                                           pos_temp.buffer[(va[2] - _vind_off) * 3 + 2], 1.0f});
-					nx               = n.x;
-					ny               = n.y;
-					nz               = n.z;
+					                                pos_temp.buffer[(va[0] - _vind_off) * 3 + 2], 1.0f},
+					                       (vec4_t){pos_temp.buffer[(va[1] - _vind_off) * 3], pos_temp.buffer[(va[1] - _vind_off) * 3 + 1],
+					                                pos_temp.buffer[(va[1] - _vind_off) * 3 + 2], 1.0f},
+					                       (vec4_t){pos_temp.buffer[(va[2] - _vind_off) * 3], pos_temp.buffer[(va[2] - _vind_off) * 3 + 1],
+					                                pos_temp.buffer[(va[2] - _vind_off) * 3 + 2], 1.0f});
+					nx       = n.x;
+					ny       = n.y;
+					nz       = n.z;
 				}
 				float nxabs = (float)fabs(nx);
 				float nyabs = (float)fabs(ny);
@@ -522,13 +524,13 @@ raw_mesh_t *obj_parse(buffer_t *file_bytes, char split_code, uint64_t start_pos,
 		part->nora->buffer                        = malloc(part->nora->capacity * sizeof(int16_t));
 
 		for (int i = 0; i < (int)(inda_length / 3); ++i) {
-			int            i1 = part->inda->buffer[i * 3];
-			int            i2 = part->inda->buffer[i * 3 + 1];
-			int            i3 = part->inda->buffer[i * 3 + 2];
-			vec4_t n  = calc_normal((vec4_t){part->posa->buffer[i1 * 4], part->posa->buffer[i1 * 4 + 1], part->posa->buffer[i1 * 4 + 2], 1.0},
-			                                (vec4_t){part->posa->buffer[i2 * 4], part->posa->buffer[i2 * 4 + 1], part->posa->buffer[i2 * 4 + 2], 1.0},
-			                                (vec4_t){part->posa->buffer[i3 * 4], part->posa->buffer[i3 * 4 + 1], part->posa->buffer[i3 * 4 + 2], 1.0});
-			part->nora->buffer[i1 * 2]     = (int)(n.x * 32767);
+			int    i1                  = part->inda->buffer[i * 3];
+			int    i2                  = part->inda->buffer[i * 3 + 1];
+			int    i3                  = part->inda->buffer[i * 3 + 2];
+			vec4_t n                   = calc_normal((vec4_t){part->posa->buffer[i1 * 4], part->posa->buffer[i1 * 4 + 1], part->posa->buffer[i1 * 4 + 2], 1.0},
+			                                         (vec4_t){part->posa->buffer[i2 * 4], part->posa->buffer[i2 * 4 + 1], part->posa->buffer[i2 * 4 + 2], 1.0},
+			                                         (vec4_t){part->posa->buffer[i3 * 4], part->posa->buffer[i3 * 4 + 1], part->posa->buffer[i3 * 4 + 2], 1.0});
+			part->nora->buffer[i1 * 2] = (int)(n.x * 32767);
 			part->nora->buffer[i1 * 2 + 1] = (int)(n.y * 32767);
 			part->posa->buffer[i1 * 4 + 3] = (int)(n.z * 32767);
 			part->nora->buffer[i2 * 2]     = (int)(n.x * 32767);
