@@ -449,6 +449,13 @@ void export_texture_run_bake_material(char *path) {
 
 void export_texture_run(char *path, bool bake_material) {
 
+	////
+	if (box_export_files == NULL) {
+		box_export_fetch_presets();
+		box_export_parse_preset();
+	}
+	////
+
 	if (bake_material) {
 		export_texture_run_bake_material(path);
 	}
