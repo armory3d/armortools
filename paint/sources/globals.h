@@ -414,7 +414,6 @@ gpu_texture_t  *util_uv_uvislandmap              = NULL;
 bool            util_uv_uvislandmap_cached       = false;
 i32             render_path_raytrace_frame       = 0;
 bool            render_path_raytrace_ready       = false;
-i32             render_path_raytrace_dirty       = 0;
 bool            render_path_raytrace_init_shader = true;
 f32_array_t    *render_path_raytrace_f32a;
 mat4_t          render_path_raytrace_help_mat;

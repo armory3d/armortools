@@ -351,7 +351,10 @@ void camera_update(void *_) {
 
 	if (camera_redraws > 0) {
 		camera_redraws--;
-		g_context->ddirty = 2;
+
+		if (!ui_menu_show) {
+			g_context->ddirty = 2;
+		}
 
 		if (g_context->camera_type == CAMERA_TYPE_ORTHOGRAPHIC) {
 			viewport_update_camera_type(g_context->camera_type);

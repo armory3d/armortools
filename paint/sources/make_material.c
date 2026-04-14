@@ -84,8 +84,7 @@ void make_material_parse_mesh_material() {
 	}
 
 	g_context->ddirty = 2;
-
-	render_path_raytrace_dirty = 1;
+	g_context->pdirty = 1;
 }
 
 void make_material_parse_mesh_preview_material(material_data_t *md) {

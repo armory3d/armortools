@@ -48,7 +48,7 @@ void render_path_raytrace_commands(bool use_live_layer) {
 	}
 	////
 
-	if (g_context->pdirty > 0 || render_path_raytrace_dirty > 0) {
+	if (g_context->pdirty > 0) {
 		layers_flatten(true, NULL);
 	}
 
@@ -191,7 +191,7 @@ void render_path_raytrace_draw(bool use_live_layer) {
 #ifdef IRON_METAL
 	// Delay path tracing additional samples while painting
 	bool down = mouse_down("left") || pen_down("tip");
-	if (context_in_3d_view() && down) {
+	if (context_in_3d_view() && down && !ui_menu_show) {
 		render_path_raytrace_frame = 0;
 	}
 #endif
