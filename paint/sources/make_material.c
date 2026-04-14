@@ -84,7 +84,9 @@ void make_material_parse_mesh_material() {
 	}
 
 	g_context->ddirty = 2;
-	g_context->pdirty = 1;
+	if (g_context->viewport_mode == VIEWPORT_MODE_PATH_TRACE) {
+		g_context->pdirty = 1;
+	}
 }
 
 void make_material_parse_mesh_preview_material(material_data_t *md) {
@@ -192,8 +194,8 @@ void make_material_bake_node_preview(ui_node_t *node, ui_node_canvas_t *group, u
 
 		tool_type_t _tool      = g_context->tool;
 		bake_type_t _bake_type = g_context->bake_type;
-		g_context->tool      = TOOL_TYPE_BAKE;
-		g_context->bake_type = BAKE_TYPE_CURVATURE;
+		g_context->tool        = TOOL_TYPE_BAKE;
+		g_context->bake_type   = BAKE_TYPE_CURVATURE;
 
 		parser_material_bake_passthrough = true;
 		gc_unroot(parser_material_start_node);
@@ -213,7 +215,7 @@ void make_material_bake_node_preview(ui_node_t *node, ui_node_canvas_t *group, u
 		parser_material_start_group = NULL;
 		gc_unroot(parser_material_start_parents);
 		parser_material_start_parents = NULL;
-		g_context->pdirty           = 1;
+		g_context->pdirty             = 1;
 		render_path_paint_use_live_layer(true);
 		render_path_paint_commands_paint(false);
 		render_path_paint_dilate(true, false);
