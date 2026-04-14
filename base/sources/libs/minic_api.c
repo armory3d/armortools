@@ -603,11 +603,12 @@ void *plugin_create();
 void  plugin_notify_on_ui(void *plugin, void *f);
 void  plugin_notify_on_update(void *plugin, void *f);
 void  plugin_notify_on_delete(void *plugin, void *f);
+
 void *script_update_fn = NULL;
 void  iron_delay_idle_sleep();
-void script_on_update(void *_) {
-	iron_delay_idle_sleep();
-	minic_call_fn(script_update_fn, NULL, 0);
+void  script_on_update(void *_) {
+    iron_delay_idle_sleep();
+    minic_call_fn(script_update_fn, NULL, 0);
 }
 void script_notify_on_update(void *fn) {
 	if (script_update_fn == NULL) {
@@ -615,6 +616,16 @@ void script_notify_on_update(void *fn) {
 	}
 	script_update_fn = fn;
 }
+
+void *script_next_frame_fn = NULL;
+void  script_on_next_frame(void *_) {
+    minic_call_fn(script_next_frame_fn, NULL, 0);
+}
+void script_notify_on_next_frame(void *fn) {
+	sys_notify_on_next_frame(script_on_next_frame, NULL);
+	script_next_frame_fn = fn;
+}
+
 void  console_info(char *s);
 void  console_error(char *s);
 void  ui_box_show_message(char *title, char *text, bool copyable);
@@ -628,13 +639,16 @@ void ui_files_show2(char *filters, bool is_save, bool open_multiple, void *files
 	_ui_files_done = files_done;
 	ui_files_show(filters, is_save, open_multiple, _ui_files_show_done);
 }
-void                     project_save(bool save_and_quit);
-extern char             *project_filepath;
-extern context_t        *g_context;
-extern config_t         *g_config;
+void              project_save(bool save_and_quit);
+extern char      *project_filepath;
+extern context_t *g_context;
+extern config_t  *g_config;
 extern project_t *g_project;
-char                    *project_filepath_get() {
+char             *project_filepath_get() {
     return project_filepath;
+}
+void project_filepath_set(char *s) {
+	project_filepath = string_copy(s);
 }
 context_t *script_get_context() {
 	return g_context;
@@ -648,6 +662,8 @@ project_t *script_get_project() {
 void           context_set_viewport_shader(void *viewport_shader);
 void           node_shader_write_frag(void *raw, char *s);
 mesh_object_t *context_main_object();
+void           export_texture_run(char *path, bool bake_material);
+void           context_select_tool(i32 i);
 
 extern any_map_t      *import_texture_importers;
 extern string_array_t *_path_texture_formats;
@@ -2005,6 +2021,7 @@ void minic_register_builtins() {
 	R(plugin_notify_on_update, "v(p,p)");
 	R(plugin_notify_on_delete, "v(p,p)");
 	R(script_notify_on_update, "v(p)");
+	R(script_notify_on_next_frame, "v(p)");
 	R(console_info, "v(p)");
 	R(console_error, "v(p)");
 	R(console_log, "v(p)");
@@ -2012,6 +2029,7 @@ void minic_register_builtins() {
 	R(ui_files_show2, "v(p,i,i,p)");
 	R(project_save, "v(i)");
 	R(project_filepath_get, "p()");
+	R(project_filepath_set, "v(p)");
 	R(script_get_context, "p()");
 	R(script_get_config, "p()");
 	R(script_get_project, "p()");
@@ -2034,6 +2052,8 @@ void minic_register_builtins() {
 	R(parser_material_parse_value_input, "p(p,i)");
 	R(node_shader_write_frag, "v(p,p)");
 	R(context_main_object, "p()");
+	R(export_texture_run, "v(p,i)");
+	R(context_select_tool, "v(i)");
 
 	// json
 	R(json_parse, "p(p)");
