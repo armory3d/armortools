@@ -383,6 +383,9 @@ bool ui_get_initial_hover(float elem_h) {
 	if (current->scissor && current->input_y < current->_window_y + current->window_header_h) {
 		return false;
 	}
+	if (current->current_window != NULL && !ui_input_in_rect(current->_window_x, current->_window_y, current->_window_w, current->_window_h)) {
+		return false;
+	}
 	return current->enabled && current->input_enabled && current->input_started_x >= current->_window_x + current->_x &&
 	       current->input_started_x < (current->_window_x + current->_x + current->_w) && current->input_started_y >= current->_window_y + current->_y &&
 	       current->input_started_y < (current->_window_y + current->_y + elem_h);
@@ -390,6 +393,9 @@ bool ui_get_initial_hover(float elem_h) {
 
 bool ui_get_hover(float elem_h) {
 	if (current->scissor && current->input_y < current->_window_y + current->window_header_h) {
+		return false;
+	}
+	if (current->current_window != NULL && !ui_input_in_rect(current->_window_x, current->_window_y, current->_window_w, current->_window_h)) {
 		return false;
 	}
 	current->is_hovered = current->enabled && current->input_enabled && current->input_x >= current->_window_x + current->_x &&
@@ -889,7 +895,8 @@ void ui_draw_combo() {
 			break;
 		}
 		if (current->combo_selected_images != NULL && current->combo_selected_images->length > i) {
-			draw_scaled_image(current->combo_selected_images->buffer[i], current->_x - UI_ELEMENT_H(), current->_y - UI_ELEMENT_H() + 1, UI_ELEMENT_H(), UI_ELEMENT_H());
+			draw_scaled_image(current->combo_selected_images->buffer[i], current->_x - UI_ELEMENT_H(), current->_y - UI_ELEMENT_H() + 1, UI_ELEMENT_H(),
+			                  UI_ELEMENT_H());
 		}
 		if (current->_y + UI_ELEMENT_H() > iron_window_height() - current->window_border_bottom ||
 		    current->_y - UI_ELEMENT_H() * 2 < current->window_border_top) {
