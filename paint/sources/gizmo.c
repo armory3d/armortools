@@ -244,70 +244,85 @@ void gizmo_update() {
 			gizmo_v = (vec4_t){g_context->layer->decal_mat.m30, g_context->layer->decal_mat.m31, g_context->layer->decal_mat.m32, 1.0};
 		}
 
+		// Project the world axis into screen space and map per-frame mouse delta onto it
 		if (g_context->translate_x || g_context->scale_x) {
-			vec4_t hit = raycast_plane_intersect(vec4_y_axis(), gizmo_v, mouse_view_x(), mouse_view_y(), scene_camera);
-			if (!vec4_isnan(hit)) {
-				if (g_context->gizmo_started) {
-					g_context->gizmo_offset = hit.x - gizmo_v.x;
-				}
-				g_context->gizmo_drag = hit.x - g_context->gizmo_offset;
+			if (g_context->gizmo_started) {
+				g_context->gizmo_drag = gizmo_v.x;
+			}
+			vec4_t s0   = vec4_apply_proj(gizmo_v, scene_camera->vp);
+			vec4_t s1   = vec4_apply_proj((vec4_t){gizmo_v.x + 1.0, gizmo_v.y, gizmo_v.z, 1.0}, scene_camera->vp);
+			f32    sax  = (s1.x - s0.x) * (f32)base_w() * 0.5;
+			f32    say  = -(s1.y - s0.y) * (f32)base_h() * 0.5;
+			f32    len2 = sax * sax + say * say;
+			if (len2 > 0.000001) {
+				g_context->gizmo_drag += (mouse_movement_x * sax + mouse_movement_y * say) / len2;
 			}
 		}
 		else if (g_context->translate_y || g_context->scale_y) {
-			vec4_t hit = raycast_plane_intersect(vec4_x_axis(), gizmo_v, mouse_view_x(), mouse_view_y(), scene_camera);
-			if (!vec4_isnan(hit)) {
-				if (g_context->gizmo_started) {
-					g_context->gizmo_offset = hit.y - gizmo_v.y;
-				}
-				g_context->gizmo_drag = hit.y - g_context->gizmo_offset;
+			if (g_context->gizmo_started) {
+				g_context->gizmo_drag = gizmo_v.y;
+			}
+			vec4_t s0   = vec4_apply_proj(gizmo_v, scene_camera->vp);
+			vec4_t s1   = vec4_apply_proj((vec4_t){gizmo_v.x, gizmo_v.y + 1.0, gizmo_v.z, 1.0}, scene_camera->vp);
+			f32    sax  = (s1.x - s0.x) * (f32)base_w() * 0.5;
+			f32    say  = -(s1.y - s0.y) * (f32)base_h() * 0.5;
+			f32    len2 = sax * sax + say * say;
+			if (len2 > 0.000001) {
+				g_context->gizmo_drag += (mouse_movement_x * sax + mouse_movement_y * say) / len2;
 			}
 		}
 		else if (g_context->translate_z || g_context->scale_z) {
-			vec4_t hit = raycast_plane_intersect(vec4_x_axis(), gizmo_v, mouse_view_x(), mouse_view_y(), scene_camera);
-			if (!vec4_isnan(hit)) {
-				if (g_context->gizmo_started) {
-					g_context->gizmo_offset = hit.z - gizmo_v.z;
-				}
-				g_context->gizmo_drag = hit.z - g_context->gizmo_offset;
+			if (g_context->gizmo_started) {
+				g_context->gizmo_drag = gizmo_v.z;
+			}
+			vec4_t s0   = vec4_apply_proj(gizmo_v, scene_camera->vp);
+			vec4_t s1   = vec4_apply_proj((vec4_t){gizmo_v.x, gizmo_v.y, gizmo_v.z + 1.0, 1.0}, scene_camera->vp);
+			f32    sax  = (s1.x - s0.x) * (f32)base_w() * 0.5;
+			f32    say  = -(s1.y - s0.y) * (f32)base_h() * 0.5;
+			f32    len2 = sax * sax + say * say;
+			if (len2 > 0.000001) {
+				g_context->gizmo_drag += (mouse_movement_x * sax + mouse_movement_y * say) / len2;
 			}
 		}
-		else if (g_context->rotate_x) {
-			vec4_t hit = raycast_plane_intersect(vec4_x_axis(), gizmo_v, mouse_view_x(), mouse_view_y(), scene_camera);
-			if (!vec4_isnan(hit)) {
+		else if (g_context->rotate_x || g_context->rotate_y || g_context->rotate_z) {
+			// Project the two ring basis axes into screen pixels
+			vec4_t s0 = vec4_apply_proj(gizmo_v, scene_camera->vp);
+			f32    cx = (s0.x * 0.5 + 0.5) * (f32)base_w();
+			f32    cy = (-s0.y * 0.5 + 0.5) * (f32)base_h();
+			vec4_t e1p, e2p;
+			if (g_context->rotate_x) {
+				// Ring in YZ plane
+				e1p = vec4_apply_proj((vec4_t){gizmo_v.x, gizmo_v.y, gizmo_v.z + 1.0, 1.0}, scene_camera->vp);
+				e2p = vec4_apply_proj((vec4_t){gizmo_v.x, gizmo_v.y + 1.0, gizmo_v.z, 1.0}, scene_camera->vp);
+			}
+			else if (g_context->rotate_y) {
+				// Ring in XZ plane
+				e1p = vec4_apply_proj((vec4_t){gizmo_v.x + 1.0, gizmo_v.y, gizmo_v.z, 1.0}, scene_camera->vp);
+				e2p = vec4_apply_proj((vec4_t){gizmo_v.x, gizmo_v.y, gizmo_v.z + 1.0, 1.0}, scene_camera->vp);
+			}
+			else {
+				// Ring in XY plane
+				e1p = vec4_apply_proj((vec4_t){gizmo_v.x + 1.0, gizmo_v.y, gizmo_v.z, 1.0}, scene_camera->vp);
+				e2p = vec4_apply_proj((vec4_t){gizmo_v.x, gizmo_v.y + 1.0, gizmo_v.z, 1.0}, scene_camera->vp);
+			}
+			f32 e1x = (e1p.x * 0.5 + 0.5) * (f32)base_w() - cx;
+			f32 e1y = (-e1p.y * 0.5 + 0.5) * (f32)base_h() - cy;
+			f32 e2x = (e2p.x * 0.5 + 0.5) * (f32)base_w() - cx;
+			f32 e2y = (-e2p.y * 0.5 + 0.5) * (f32)base_h() - cy;
+			f32 det = e1x * e2y - e1y * e2x;
+			if (math_abs(det) > 0.000001) {
+				f32 mx = mouse_view_x() - cx;
+				f32 my = mouse_view_y() - cy;
+				f32 u  = (mx * e2y - my * e2x) / det;
+				f32 v  = (e1x * my - e1y * mx) / det;
 				if (g_context->gizmo_started) {
 					mat4_decomposed_t *dec  = mat4_decompose(g_context->layer->decal_mat);
 					gizmo_v                 = dec->loc;
 					gizmo_q                 = dec->rot;
 					gizmo_v0                = dec->scl;
-					g_context->gizmo_offset = math_atan2(hit.y - gizmo_v.y, hit.z - gizmo_v.z);
+					g_context->gizmo_offset = math_atan2(v, u);
 				}
-				g_context->gizmo_drag = math_atan2(hit.y - gizmo_v.y, hit.z - gizmo_v.z) - g_context->gizmo_offset;
-			}
-		}
-		else if (g_context->rotate_y) {
-			vec4_t hit = raycast_plane_intersect(vec4_y_axis(), gizmo_v, mouse_view_x(), mouse_view_y(), scene_camera);
-			if (!vec4_isnan(hit)) {
-				if (g_context->gizmo_started) {
-					mat4_decomposed_t *dec  = mat4_decompose(g_context->layer->decal_mat);
-					gizmo_v                 = dec->loc;
-					gizmo_q                 = dec->rot;
-					gizmo_v0                = dec->scl;
-					g_context->gizmo_offset = math_atan2(hit.z - gizmo_v.z, hit.x - gizmo_v.x);
-				}
-				g_context->gizmo_drag = math_atan2(hit.z - gizmo_v.z, hit.x - gizmo_v.x) - g_context->gizmo_offset;
-			}
-		}
-		else if (g_context->rotate_z) {
-			vec4_t hit = raycast_plane_intersect(vec4_z_axis(), gizmo_v, mouse_view_x(), mouse_view_y(), scene_camera);
-			if (!vec4_isnan(hit)) {
-				if (g_context->gizmo_started) {
-					mat4_decomposed_t *dec  = mat4_decompose(g_context->layer->decal_mat);
-					gizmo_v                 = dec->loc;
-					gizmo_q                 = dec->rot;
-					gizmo_v0                = dec->scl;
-					g_context->gizmo_offset = math_atan2(hit.y - gizmo_v.y, hit.x - gizmo_v.x);
-				}
-				g_context->gizmo_drag = math_atan2(hit.y - gizmo_v.y, hit.x - gizmo_v.x) - g_context->gizmo_offset;
+				g_context->gizmo_drag = math_atan2(v, u) - g_context->gizmo_offset;
 			}
 		}
 
