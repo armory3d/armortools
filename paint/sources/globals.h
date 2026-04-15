@@ -221,6 +221,7 @@ i32                       util_render_font_preview_size     = 200;
 ui_handle_t              *tab_browser_hpath;
 ui_handle_t              *tab_browser_hsearch;
 bool                      tab_browser_refresh = false;
+extern i32                ui_files_selected;
 any_map_t                *util_mesh_unwrappers;
 i32                       ui_header_default_h = 30;
 i32                       ui_header_h;

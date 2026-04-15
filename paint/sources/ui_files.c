@@ -17,6 +17,8 @@ string_array_t *ui_files_files           = NULL;
 any_map_t      *ui_files_icon_map        = NULL;
 any_map_t      *ui_files_icon_file_map   = NULL;
 i32             ui_files_selected        = -1;
+i32             ui_files_num_cols        = 1;
+char           *ui_files_select_pending  = NULL;
 bool            ui_files_show_extensions = false;
 bool            ui_files_offline         = false;
 ui_handle_t    *_ui_files_file_browser_handle;
@@ -260,11 +262,24 @@ char *ui_files_file_browser(ui_handle_t *handle, bool drag_files, char *search, 
 	gc_root(ui_files_last_search);
 	handle->changed = false;
 
+	if (ui_files_select_pending != NULL) {
+		ui_files_selected = -1;
+		for (i32 i = 0; i < ui_files_files->length; ++i) {
+			if (string_equals(ui_files_files->buffer[i], ui_files_select_pending)) {
+				ui_files_selected = i;
+				break;
+			}
+		}
+		gc_unroot(ui_files_select_pending);
+		ui_files_select_pending = NULL;
+	}
+
 	i32 slotw = math_floor(70 * UI_SCALE());
 	i32 num   = math_floor(ui->_w / (float)slotw);
 	if (num == 0) {
 		return handle->text;
 	}
+	ui_files_num_cols = num;
 
 	ui->_y += 4; // Don't cut off the border around selected materials
 	// Directory contents
@@ -340,8 +355,7 @@ char *ui_files_file_browser(ui_handle_t *handle, bool drag_files, char *search, 
 							gc_root(_ui_files_file_browser_handle);
 							any_map_set(ui_files_icon_file_map, icon_file, f);
 
-							file_cache_cloud(string("%s%s%s", handle->text, PATH_SEP, icon_file), &ui_files_file_browser_on_cache_cloud_done,
-							                 g_config->server);
+							file_cache_cloud(string("%s%s%s", handle->text, PATH_SEP, icon_file), &ui_files_file_browser_on_cache_cloud_done, g_config->server);
 						}
 					}
 				}
@@ -376,7 +390,7 @@ char *ui_files_file_browser(ui_handle_t *handle, bool drag_files, char *search, 
 					blob_path = string("%s%s", document_directory, blob_path);
 #endif
 
-					buffer_t         *buffer = iron_load_blob(blob_path);
+					buffer_t  *buffer = iron_load_blob(blob_path);
 					project_t *raw;
 					if (import_arm_is_old(buffer)) {
 						raw = import_arm_from_old(buffer);
@@ -553,8 +567,39 @@ char *ui_files_file_browser(ui_handle_t *handle, bool drag_files, char *search, 
 	return handle->text;
 }
 
+void ui_files_enter_selected(ui_handle_t *handle) {
+	if (ui_files_files == NULL || ui_files_selected < 0 || ui_files_selected >= ui_files_files->length) {
+		return;
+	}
+	char *f = ui_files_files->buffer[ui_files_selected];
+	if (!string_equals(char_at(handle->text, string_length(handle->text) - 1), PATH_SEP)) {
+		handle->text = string("%s%s", handle->text, PATH_SEP);
+	}
+	handle->text      = string("%s%s", handle->text, f);
+	handle->changed   = true;
+	ui_files_selected = -1;
+}
+
+void ui_files_navigate(i32 dx, i32 dy) {
+	if (ui_files_files == NULL || ui_files_files->length == 0) {
+		return;
+	}
+	if (ui_files_selected < 0) {
+		ui_files_selected = 0;
+		return;
+	}
+	i32 next = ui_files_selected + dx + dy * ui_files_num_cols;
+	if (next >= 0 && next < ui_files_files->length) {
+		ui_files_selected = next;
+	}
+}
+
 void ui_files_go_up(ui_handle_t *handle) {
-	handle->text = string_copy(substring(handle->text, 0, string_last_index_of(handle->text, PATH_SEP)));
+	i32 sep = string_last_index_of(handle->text, PATH_SEP);
+	gc_unroot(ui_files_select_pending);
+	ui_files_select_pending = string_copy(substring(handle->text, sep + 1, string_length(handle->text)));
+	gc_root(ui_files_select_pending);
+	handle->text = string_copy(substring(handle->text, 0, sep));
 	// Drive root
 	if (string_length(handle->text) == 2 && string_equals(char_at(handle->text, 1), ":")) {
 		handle->text = string("%s%s", handle->text, PATH_SEP);

@@ -7,9 +7,9 @@ char *_tab_browser_draw_file;
 char *_tab_browser_draw_b;
 
 void tab_browser_show_directory(char *directory) {
-	tab_browser_hpath->text                          = string_copy(directory);
-	tab_browser_hsearch->text                        = "";
-	ui_base_htabs->buffer[TAB_AREA_STATUS]->i        = 0;
+	tab_browser_hpath->text                        = string_copy(directory);
+	tab_browser_hsearch->text                      = "";
+	ui_base_htabs->buffer[TAB_AREA_STATUS]->i      = 0;
 	g_config->layout_tabs->buffer[TAB_AREA_STATUS] = 0;
 }
 
@@ -37,10 +37,10 @@ void tab_browser_draw_set_as_color_id_map_on_next_frame(void *_) {
 	if (asset_index != -1) {
 		g_context->colorid_handle->i = asset_index;
 		g_context->colorid_picked    = false;
-		ui_toolbar_handle->redraws     = 1;
+		ui_toolbar_handle->redraws   = 1;
 		if (g_context->tool == TOOL_TYPE_COLORID) {
 			ui_header_handle->redraws = 2;
-			g_context->ddirty       = 2;
+			g_context->ddirty         = 2;
 		}
 	}
 }
@@ -172,6 +172,8 @@ void tab_browser_draw(ui_handle_t *htab) {
 
 		i32  bookmarks_w = math_floor(100 * UI_SCALE());
 		bool show_full   = ui->_w > (500 * UI_SCALE());
+		bool in_focus    = ui->input_x > ui->_window_x && ui->input_x < ui->_window_x + ui->_window_w && ui->input_y > ui->_window_y &&
+		                ui->input_y < ui->_window_y + ui->_window_h;
 
 		if (string_equals(tab_browser_hpath->text, "") && g_config->bookmarks->length > 0) { // Init to first bookmark
 			tab_browser_hpath->text = string_copy(g_config->bookmarks->buffer[0]);
@@ -221,8 +223,8 @@ void tab_browser_draw(ui_handle_t *htab) {
 			}
 
 			// Refresh
-			bool in_focus = ui->input_x > ui->_window_x && ui->input_x < ui->_window_x + ui->_window_w && ui->input_y > ui->_window_y &&
-			                ui->input_y < ui->_window_y + ui->_window_h;
+			in_focus = ui->input_x > ui->_window_x && ui->input_x < ui->_window_x + ui->_window_w && ui->input_y > ui->_window_y &&
+			           ui->input_y < ui->_window_y + ui->_window_h;
 			if (ui_icon_button(tr("Refresh"), ICON_REFRESH, UI_ALIGN_CENTER) || (in_focus && ui->is_key_pressed && ui->key_code == KEY_CODE_F5)) {
 				tab_browser_refresh = true;
 			}
@@ -361,6 +363,23 @@ void tab_browser_draw(ui_handle_t *htab) {
 			if (ui->_y < bottom_y) {
 				ui->_y = bottom_y;
 			}
+		}
+
+		if (in_focus) {
+			if (ui->is_key_pressed && ui->key_code == KEY_CODE_LEFT)
+				ui_files_navigate(-1, 0);
+			if (ui->is_key_pressed && ui->key_code == KEY_CODE_RIGHT)
+				ui_files_navigate(1, 0);
+			if (ui->is_key_pressed && ui->key_code == KEY_CODE_UP)
+				ui_files_navigate(0, -1);
+			if (ui->is_key_pressed && ui->key_code == KEY_CODE_DOWN)
+				ui_files_navigate(0, 1);
+			if (ui->is_key_pressed && ui->key_code == KEY_CODE_RETURN)
+				ui_files_enter_selected(tab_browser_hpath);
+			if (ui->is_key_pressed && ui->key_code == KEY_CODE_BACKSPACE && nested)
+				ui_files_go_up(tab_browser_hpath);
+			if (ui->is_escape_down)
+				ui_files_selected = -1;
 		}
 	}
 }
