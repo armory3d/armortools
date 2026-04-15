@@ -41,7 +41,7 @@ void bump_node_init() {
 	                                              .name          = _tr("Distance"),
 	                                              .type          = "VALUE",
 	                                              .color         = 0xffa1a1a1,
-	                                              .default_value = f32_array_create_x(0.0),
+	                                              .default_value = f32_array_create_x(0.001),
 	                                              .min           = 0.0,
 	                                              .max           = 1.0,
 	                                              .precision     = 100,
