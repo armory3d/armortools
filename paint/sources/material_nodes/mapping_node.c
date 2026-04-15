@@ -6,29 +6,30 @@ char *mapping_node_vector(ui_node_t *node, ui_node_socket_t *socket) {
 	char *node_translation = parser_material_parse_vector_input(node->inputs->buffer[1]);
 	char *node_rotation    = parser_material_parse_vector_input(node->inputs->buffer[2]);
 	char *node_scale       = parser_material_parse_vector_input(node->inputs->buffer[3]);
-	if (!string_equals(node_scale, "float3(1, 1, 1)")) {
+	if (!string_equals(node_scale, "float3(1.0, 1.0, 1.0)")) {
 		out = string("(%s * %s)", out, node_scale);
 	}
-	if (!string_equals(node_rotation, "float3(0, 0, 0)")) {
-		// ZYX rotation, Z axis for now..
-		char *a = string("%s.z * (3.1415926535 / 180)", node_rotation);
-		// x * cos(theta) - y * sin(theta)
-		// x * sin(theta) + y * cos(theta)
-		out = string("float3(%s.x * cos(%s) - %s.y * sin(%s), %s.x * sin(%s) + %s.y * cos(%s), 0.0)", out, a, out, a, out, a, out, a);
+	if (!string_equals(node_rotation, "float3(0.0, 0.0, 0.0)")) {
+		char *name = parser_material_store_var_name(node);
+		char *v    = string("%s_v", name);
+		char *rx   = string("%s_rx", name);
+		char *ry   = string("%s_ry", name);
+		char *rz   = string("%s_rz", name);
+		parser_material_write(parser_material_kong, string("var %s: float3 = %s;", v, out));
+		parser_material_write(parser_material_kong, string("var %s: float = %s.x * (3.14159265 / 180.0);", rx, node_rotation));
+		parser_material_write(parser_material_kong, string("var %s: float = %s.y * (3.14159265 / 180.0);", ry, node_rotation));
+		parser_material_write(parser_material_kong, string("var %s: float = %s.z * (3.14159265 / 180.0);", rz, node_rotation));
+		parser_material_write(parser_material_kong,
+		                      string("%s = float3(%s.x * cos(%s) - %s.y * sin(%s), %s.x * sin(%s) + %s.y * cos(%s), %s.z);", v, v, rz, v, rz, v, rz, v, rz, v));
+		parser_material_write(parser_material_kong, string("%s = float3(%s.x * cos(%s) + %s.z * sin(%s), %s.y, -%s.x * sin(%s) + %s.z * cos(%s));", v, v, ry, v,
+		                                                   ry, v, v, ry, v, ry));
+		parser_material_write(parser_material_kong,
+		                      string("%s = float3(%s.x, %s.y * cos(%s) - %s.z * sin(%s), %s.y * sin(%s) + %s.z * cos(%s));", v, v, v, rx, v, rx, v, rx, v, rx));
+		out = v;
 	}
-	if (!string_equals(node_translation, "float3(0, 0, 0)")) {
+	if (!string_equals(node_translation, "float3(0.0, 0.0, 0.0)")) {
 		out = string("(%s + %s)", out, node_translation);
 	}
-	// if node.rotation[1] != 0.0:
-	//     a = node.rotation[1]
-	//     out = "float3({0}.x * {1} - {0}.z * {2}, {0}.x * {2} + {0}.z * {1}, 0.0)".format(out, math_cos(a), math_sin(a))
-	// if node.rotation[0] != 0.0:
-	//     a = node.rotation[0]
-	//     out = "float3({0}.y * {1} - {0}.z * {2}, {0}.y * {2} + {0}.z * {1}, 0.0)".format(out, math_cos(a), math_sin(a))
-	// if node.use_min:
-	// out = "max({0}, float3({1}, {2}, {3}))".format(out, node.min[0], node.min[1])
-	// if node.use_max:
-	// out = "min({0}, float3({1}, {2}, {3}))".format(out, node.max[0], node.max[1])
 	return out;
 }
 
