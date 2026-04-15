@@ -1033,7 +1033,7 @@ void tab_layers_button_new_menu() {
 		sys_notify_on_next_frame(&tab_layers_button_new_to_fill_layer, m);
 		g_context->layer_preview_dirty = true;
 		history_new_fill_mask();
-		sys_notify_on_next_frame(&tab_layers_button_new_to_fill_layer, NULL);
+		sys_notify_on_next_frame(&tab_layers_button_new_update_fill_layers, NULL);
 	}
 	ui->enabled = !slot_layer_is_group(g_context->layer) && !slot_layer_is_in_group(g_context->layer);
 	if (ui_menu_button(tr("Group"), "", ICON_FOLDER)) {
