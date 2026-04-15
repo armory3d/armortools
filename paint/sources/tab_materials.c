@@ -32,10 +32,10 @@ void tab_materials_update_material() {
 }
 
 void tab_materials_draw_slots_duplicate(void *_) {
-	i32 i                 = _tab_materials_draw_slots;
+	i32 i               = _tab_materials_draw_slots;
 	g_context->material = slot_material_create(project_materials->buffer[0]->data, NULL);
 	any_array_push(project_materials, g_context->material);
-	ui_node_canvas_t *cloned      = util_clone_canvas(project_materials->buffer[i]->canvas);
+	ui_node_canvas_t *cloned    = util_clone_canvas(project_materials->buffer[i]->canvas);
 	g_context->material->canvas = cloned;
 	tab_materials_update_material();
 	history_duplicate_material();
@@ -322,6 +322,19 @@ void tab_materials_draw_slots(bool mini) {
 	if (in_focus && ui->is_delete_down && project_materials->length > 1) {
 		ui->is_delete_down = false;
 		tab_materials_delete_material(g_context->material);
+	}
+	if (in_focus) {
+		i32 i = array_index_of(project_materials, g_context->material);
+		if (ui->is_key_pressed && ui->key_code == KEY_CODE_UP) {
+			if (i > 0) {
+				context_select_material(i - 1);
+			}
+		}
+		if (ui->is_key_pressed && ui->key_code == KEY_CODE_DOWN) {
+			if (i < project_materials->length - 1) {
+				context_select_material(i + 1);
+			}
+		}
 	}
 }
 

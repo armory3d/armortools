@@ -6,17 +6,17 @@ i32 _tab_brushes_draw_i;
 void tab_brushes_draw_make_brush_preview(void *_) {
 	i32           i      = _tab_brushes_draw_i;
 	slot_brush_t *_brush = g_context->brush;
-	g_context->brush   = project_brushes->buffer[i];
+	g_context->brush     = project_brushes->buffer[i];
 	make_material_parse_brush();
 	util_render_make_brush_preview();
 	g_context->brush = _brush;
 }
 
 void tab_brushes_draw_duplicate(void *_) {
-	i32 i              = _tab_brushes_draw_i;
+	i32 i            = _tab_brushes_draw_i;
 	g_context->brush = slot_brush_create(NULL);
 	any_array_push(project_brushes, g_context->brush);
-	void *cloned               = util_clone_canvas(project_brushes->buffer[i]->canvas);
+	void *cloned             = util_clone_canvas(project_brushes->buffer[i]->canvas);
 	g_context->brush->canvas = cloned;
 	context_set_brush(g_context->brush);
 	util_render_make_brush_preview();
@@ -177,6 +177,19 @@ void tab_brushes_draw(ui_handle_t *htab) {
 		if (in_focus && ui->is_delete_down && project_brushes->length > 1) {
 			ui->is_delete_down = false;
 			tab_brushes_delete_brush(g_context->brush);
+		}
+		if (in_focus) {
+			i32 i = array_index_of(project_brushes, g_context->brush);
+			if (ui->is_key_pressed && ui->key_code == KEY_CODE_UP) {
+				if (i > 0) {
+					context_select_brush(i - 1);
+				}
+			}
+			if (ui->is_key_pressed && ui->key_code == KEY_CODE_DOWN) {
+				if (i < project_brushes->length - 1) {
+					context_select_brush(i + 1);
+				}
+			}
 		}
 	}
 }

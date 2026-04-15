@@ -75,10 +75,10 @@ void tab_textures_delete_texture(asset_t *asset) {
 	ui_base_hwnds->buffer[TAB_AREA_STATUS]->redraws = 2;
 
 	if (g_context->tool == TOOL_TYPE_COLORID && index == g_context->colorid_handle->i) {
-		ui_header_handle->redraws   = 2;
-		g_context->ddirty         = 2;
-		g_context->colorid_picked = false;
-		ui_toolbar_handle->redraws  = 1;
+		ui_header_handle->redraws  = 2;
+		g_context->ddirty          = 2;
+		g_context->colorid_picked  = false;
+		ui_toolbar_handle->redraws = 1;
 	}
 
 	if (data_get_image(asset->file) == scene_world->_->envmap) {
@@ -128,10 +128,10 @@ void tab_textures_draw_context_menu() {
 	if (ui_menu_button(tr("Set as Color ID Map"), "", ICON_COLOR_ID)) {
 		g_context->colorid_handle->i = _tab_textures_draw_i;
 		g_context->colorid_picked    = false;
-		ui_toolbar_handle->redraws     = 1;
+		ui_toolbar_handle->redraws   = 1;
 		if (g_context->tool == TOOL_TYPE_COLORID) {
 			ui_header_handle->redraws = 2;
-			g_context->ddirty       = 2;
+			g_context->ddirty         = 2;
 		}
 	}
 	if (ui_menu_button(tr("Delete"), "delete", ICON_DELETE)) {
@@ -228,8 +228,8 @@ void tab_textures_draw(ui_handle_t *htab) {
 						if (sys_time() - g_context->select_time < 0.2) {
 							ui_base_show_2d_view(VIEW_2D_TYPE_ASSET);
 						}
-						g_context->select_time = sys_time();
-						ui_view2d_hwnd->redraws  = 2;
+						g_context->select_time  = sys_time();
+						ui_view2d_hwnd->redraws = 2;
 					}
 
 					if (asset == g_context->texture) {
@@ -306,6 +306,19 @@ void tab_textures_draw(ui_handle_t *htab) {
 		if (in_focus && ui->is_delete_down && project_assets->length > 0 && array_index_of(project_assets, g_context->texture) >= 0) {
 			ui->is_delete_down = false;
 			tab_textures_delete_texture(g_context->texture);
+		}
+		if (in_focus && project_assets->length > 0) {
+			i32 i = array_index_of(project_assets, g_context->texture);
+			if (ui->is_key_pressed && ui->key_code == KEY_CODE_UP) {
+				if (i > 0) {
+					g_context->texture = project_assets->buffer[i - 1];
+				}
+			}
+			if (ui->is_key_pressed && ui->key_code == KEY_CODE_DOWN) {
+				if (i < project_assets->length - 1) {
+					g_context->texture = project_assets->buffer[i + 1];
+				}
+			}
 		}
 	}
 }

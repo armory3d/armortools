@@ -161,7 +161,7 @@ void tab_layers_delete_layer(slot_layer_t *l) {
 	if (slot_layer_is_layer(l) && slot_layer_has_masks(l, false)) {
 		slot_layer_t_array_t *masks = slot_layer_get_masks(l, false);
 		for (i32 i = 0; i < masks->length; ++i) {
-			slot_layer_t *m    = masks->buffer[i];
+			slot_layer_t *m  = masks->buffer[i];
 			g_context->layer = m;
 			history_delete_layer();
 			slot_layer_delete(m);
@@ -174,7 +174,7 @@ void tab_layers_delete_layer(slot_layer_t *l) {
 			if (slot_layer_has_masks(c, false)) {
 				slot_layer_t_array_t *masks = slot_layer_get_masks(c, false);
 				for (i32 i = 0; i < masks->length; ++i) {
-					slot_layer_t *m    = masks->buffer[i];
+					slot_layer_t *m  = masks->buffer[i];
 					g_context->layer = m;
 					history_delete_layer();
 					slot_layer_delete(m);
@@ -186,7 +186,7 @@ void tab_layers_delete_layer(slot_layer_t *l) {
 		}
 		if (slot_layer_has_masks(l, true)) {
 			for (i32 i = 0; i < slot_layer_get_masks(l, true)->length; ++i) {
-				slot_layer_t *m    = slot_layer_get_masks(l, true)->buffer[i];
+				slot_layer_t *m  = slot_layer_get_masks(l, true)->buffer[i];
 				g_context->layer = m;
 				history_delete_layer();
 				slot_layer_delete(m);
@@ -209,7 +209,7 @@ void tab_layers_delete_layer(slot_layer_t *l) {
 		// Maybe some group masks are left
 		if (slot_layer_has_masks(g, true)) {
 			for (i32 i = 0; i < slot_layer_get_masks(g, true)->length; ++i) {
-				slot_layer_t *m    = slot_layer_get_masks(g, true)->buffer[i];
+				slot_layer_t *m  = slot_layer_get_masks(g, true)->buffer[i];
 				g_context->layer = m;
 				history_delete_layer();
 				slot_layer_delete(m);
@@ -564,7 +564,7 @@ void tab_layers_draw_layer_context_menu_merge_group(void *_) {
 }
 
 void tab_layers_draw_layer_context_menu_apply(void *_) {
-	slot_layer_t *l    = tab_layers_l;
+	slot_layer_t *l  = tab_layers_l;
 	g_context->layer = l;
 	history_apply_mask();
 	slot_layer_apply_mask(l);
@@ -588,7 +588,7 @@ void tab_layers_draw_layer_context_menu_clear(void *_) {
 	}
 	else {
 		for (i32 i = 0; i < slot_layer_get_children(l)->length; ++i) {
-			slot_layer_t *c    = slot_layer_get_children(l)->buffer[i];
+			slot_layer_t *c  = slot_layer_get_children(l)->buffer[i];
 			g_context->layer = c;
 			history_clear_layer();
 			slot_layer_clear(c, 0x00000000, NULL, 1.0, layers_default_rough, 0.0);
@@ -897,7 +897,7 @@ void tab_layers_draw_layer_slot(slot_layer_t *l, i32 i, bool mini) {
 	if (base_is_dragging && base_drag_layer != NULL && context_in_layers()) {
 		if (mouse_y > absy + step && mouse_y < absy + step * 3) {
 			bool down                          = array_index_of(project_layers, base_drag_layer) >= i;
-			g_context->drag_dest             = down ? i : i - 1;
+			g_context->drag_dest               = down ? i : i - 1;
 			slot_layer_t_array_t *ls           = project_layers;
 			i32                   dest         = g_context->drag_dest;
 			bool                  to_group     = down ? dest > 0 && ls->buffer[dest - 1]->parent != NULL && ls->buffer[dest - 1]->parent->show_panel
@@ -1086,7 +1086,7 @@ void tab_layers_combo_filter() {
 	}
 	ui_handle_t *filter_handle = ui_handle(__ID__);
 	filter_handle->i           = g_context->layer_filter;
-	g_context->layer_filter  = ui_combo(filter_handle, ar, tr("Filter"), false, UI_ALIGN_LEFT, true);
+	g_context->layer_filter    = ui_combo(filter_handle, ar, tr("Filter"), false, UI_ALIGN_LEFT, true);
 	if (filter_handle->changed) {
 		for (i32 i = 0; i < project_paint_objects->length; ++i) {
 			mesh_object_t *p           = project_paint_objects->buffer[i];
@@ -1108,7 +1108,7 @@ void tab_layers_combo_filter() {
 		}
 		layers_set_object_mask();
 		util_uv_uvmap_cached       = false;
-		g_context->ddirty        = 2;
+		g_context->ddirty          = 2;
 		render_path_raytrace_ready = false;
 	}
 }
@@ -1156,6 +1156,45 @@ void tab_layers_draw_full(ui_handle_t *htab) {
 
 		tab_layers_highlight_odd_lines();
 		tab_layers_draw_slots(false);
+
+		bool in_focus = ui->input_x > ui->_window_x && ui->input_x < ui->_window_x + ui->_window_w && ui->input_y > ui->_window_y &&
+		                ui->input_y < ui->_window_y + ui->_window_h;
+		if (in_focus) {
+			// Layer selection
+			if (ui->is_key_pressed && ui->key_code == KEY_CODE_UP) {
+				i32 i = array_index_of(project_layers, g_context->layer);
+				while (++i < project_layers->length) {
+					slot_layer_t *candidate = project_layers->buffer[i];
+					if (candidate->parent != NULL && !candidate->parent->show_panel)
+						continue;
+					if (candidate->parent != NULL && candidate->parent->parent != NULL && !candidate->parent->parent->show_panel)
+						continue;
+					context_set_layer(candidate);
+					ui_base_hwnds->buffer[TAB_AREA_SIDEBAR0]->redraws = 2;
+					break;
+				}
+			}
+			if (ui->is_key_pressed && ui->key_code == KEY_CODE_DOWN) {
+				i32 i = array_index_of(project_layers, g_context->layer);
+				while (--i >= 0) {
+					slot_layer_t *candidate = project_layers->buffer[i];
+					if (candidate->parent != NULL && !candidate->parent->show_panel)
+						continue;
+					if (candidate->parent != NULL && candidate->parent->parent != NULL && !candidate->parent->parent->show_panel)
+						continue;
+					context_set_layer(candidate);
+					ui_base_hwnds->buffer[TAB_AREA_SIDEBAR0]->redraws = 2;
+					break;
+				}
+			}
+			// Open / close group
+			slot_layer_t *l            = g_context->layer;
+			bool          has_children = slot_layer_is_group(l) || (slot_layer_is_layer(l) && slot_layer_get_masks(l, false) != NULL);
+			if (has_children && ui->is_key_pressed && ui->key_code == KEY_CODE_RETURN) {
+				l->show_panel                                     = !l->show_panel;
+				ui_base_hwnds->buffer[TAB_AREA_SIDEBAR0]->redraws = 2;
+			}
+		}
 	}
 }
 

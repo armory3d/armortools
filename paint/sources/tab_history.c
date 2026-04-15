@@ -22,5 +22,21 @@ void tab_history_draw(ui_handle_t *htab) {
 			}
 			ui_fill(0, 0, (ui->_window_w / (float)UI_SCALE() - 2), 1 * UI_SCALE(), ui->ops->theme->SEPARATOR_COL);
 		}
+
+		bool in_focus = ui->input_x > ui->_window_x && ui->input_x < ui->_window_x + ui->_window_w && ui->input_y > ui->_window_y &&
+		                ui->input_y < ui->_window_y + ui->_window_h;
+		if (in_focus) {
+			i32 active = history_steps->length - 1 - history_redos;
+			if (ui->is_key_pressed && ui->key_code == KEY_CODE_UP) {
+				if (active > 0) {
+					history_undo();
+				}
+			}
+			if (ui->is_key_pressed && ui->key_code == KEY_CODE_DOWN) {
+				if (history_redos > 0) {
+					history_redo();
+				}
+			}
+		}
 	}
 }

@@ -56,7 +56,7 @@ void tab_swatches_draw_menu() {
 }
 
 void tab_swatches_draw_color_picker_callback(swatch_color_t *color) {
-	i32 i                            = _tab_swatches_draw_i;
+	i32 i                          = _tab_swatches_draw_i;
 	g_project->swatches->buffer[i] = project_clone_swatch(color);
 }
 
@@ -73,22 +73,22 @@ void tab_swatches_draw_edit_menu() {
 
 	g_context->swatch->base = ui_color_wheel(h, false, -1, 11 * ui->ops->theme->ELEMENT_H * UI_SCALE(), true, &tab_swatches_draw_color_picker, NULL);
 
-	ui_handle_t *hopacity        = ui_handle(__ID__);
-	hopacity->f                  = g_context->swatch->opacity;
+	ui_handle_t *hopacity      = ui_handle(__ID__);
+	hopacity->f                = g_context->swatch->opacity;
 	g_context->swatch->opacity = ui_slider(hopacity, "Opacity", 0, 1, true, 100.0, true, UI_ALIGN_RIGHT, true);
 
 	if (g_config->workflow == WORKFLOW_PBR) {
-		ui_handle_t *hocclusion        = ui_handle(__ID__);
-		hocclusion->f                  = g_context->swatch->occlusion;
+		ui_handle_t *hocclusion      = ui_handle(__ID__);
+		hocclusion->f                = g_context->swatch->occlusion;
 		g_context->swatch->occlusion = ui_slider(hocclusion, "Occlusion", 0, 1, true, 100.0, true, UI_ALIGN_RIGHT, true);
-		ui_handle_t *hroughness        = ui_handle(__ID__);
-		hroughness->f                  = g_context->swatch->roughness;
+		ui_handle_t *hroughness      = ui_handle(__ID__);
+		hroughness->f                = g_context->swatch->roughness;
 		g_context->swatch->roughness = ui_slider(hroughness, "Roughness", 0, 1, true, 100.0, true, UI_ALIGN_RIGHT, true);
-		ui_handle_t *hmetallic         = ui_handle(__ID__);
-		hmetallic->f                   = g_context->swatch->metallic;
+		ui_handle_t *hmetallic       = ui_handle(__ID__);
+		hmetallic->f                 = g_context->swatch->metallic;
 		g_context->swatch->metallic  = ui_slider(hmetallic, "Metallic", 0, 1, true, 100.0, true, UI_ALIGN_RIGHT, true);
-		ui_handle_t *hheight           = ui_handle(__ID__);
-		hheight->f                     = g_context->swatch->height;
+		ui_handle_t *hheight         = ui_handle(__ID__);
+		hheight->f                   = g_context->swatch->height;
 		g_context->swatch->height    = ui_slider(hheight, "Height", 0, 1, true, 100.0, true, UI_ALIGN_RIGHT, true);
 	}
 
@@ -97,7 +97,7 @@ void tab_swatches_draw_edit_menu() {
 	}
 	if (ui->input_released) {
 		context_set_swatch(g_context->swatch); // Trigger material preview update
-		g_context->picked_color = util_clone_swatch_color(g_context->swatch);
+		g_context->picked_color   = util_clone_swatch_color(g_context->swatch);
 		ui_header_handle->redraws = 2;
 	}
 }
@@ -219,7 +219,7 @@ void tab_swatches_draw(ui_handle_t *htab) {
 					gc_unroot(base_drag_swatch);
 					base_drag_swatch = g_context->swatch;
 					gc_root(base_drag_swatch);
-					g_context->picked_color = util_clone_swatch_color(g_context->swatch);
+					g_context->picked_color   = util_clone_swatch_color(g_context->swatch);
 					ui_header_handle->redraws = 2;
 				}
 				else if (state == UI_STATE_HOVERED) {
@@ -269,6 +269,19 @@ void tab_swatches_draw(ui_handle_t *htab) {
 		if (in_focus && ui->is_delete_down && g_project->swatches->length > 1) {
 			ui->is_delete_down = false;
 			tab_swatches_delete_swatch(g_context->swatch);
+		}
+		if (in_focus) {
+			i32 i = array_index_of(g_project->swatches, g_context->swatch);
+			if (ui->is_key_pressed && ui->key_code == KEY_CODE_UP) {
+				if (i > 0) {
+					context_set_swatch(g_project->swatches->buffer[i - 1]);
+				}
+			}
+			if (ui->is_key_pressed && ui->key_code == KEY_CODE_DOWN) {
+				if (i < g_project->swatches->length - 1) {
+					context_set_swatch(g_project->swatches->buffer[i + 1]);
+				}
+			}
 		}
 	}
 }
