@@ -74,13 +74,13 @@ typedef enum {
 	WORKSPACE_PAINT_2D = 1,
 	WORKSPACE_NODES    = 2,
 	WORKSPACE_SCRIPT   = 3,
-	WORKSPACE_SCULPT   = 4,
-	WORKSPACE_PLAYER   = 5,
+	WORKSPACE_PLAYER   = 4,
 } workspace_t;
 
 typedef enum {
-	WORKFLOW_PBR  = 0,
-	WORKFLOW_BASE = 1,
+	WORKFLOW_PBR    = 0,
+	WORKFLOW_BASE   = 1,
+	WORKFLOW_SCULPT = 2,
 } workflow_t;
 
 typedef enum {

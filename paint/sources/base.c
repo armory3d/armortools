@@ -2247,7 +2247,7 @@ void ui_base_set_viewport_col(i32 col) {
 void base_update_workspace() {
 	config_init_layout();
 
-	if (g_config->workspace == WORKSPACE_PAINT_3D || g_config->workspace == WORKSPACE_SCULPT) {
+	if (g_config->workspace == WORKSPACE_PAINT_3D) {
 		base_view3d_show  = true;
 		ui_menubar_tab->i = 0;
 		ui_view2d_show    = false;
@@ -2297,7 +2297,8 @@ void base_update_workflow() {
 		ui_node_array_t *nodes = project_materials->buffer[i]->canvas->nodes;
 		for (i32 j = 0; j < nodes->length; ++j) {
 			if (string_equals(nodes->buffer[j]->type, "OUTPUT_MATERIAL_PBR")) {
-				nodes->buffer[j]->inputs->length = g_config->workflow == WORKFLOW_BASE ? 2 : 9;
+				nodes->buffer[j]->inputs->length = g_config->workflow == WORKFLOW_PBR ? 9 : 2;
+				nodes->buffer[j]->inputs->buffer[0]->name = g_config->workflow == WORKFLOW_SCULPT ? tr("Displacement") : tr("Base Color");
 			}
 		}
 	}

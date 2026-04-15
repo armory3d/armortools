@@ -28,6 +28,7 @@ void tab_materials_update_material() {
 	if (decal) {
 		util_render_make_decal_preview();
 	}
+	base_update_workflow();
 }
 
 void tab_materials_draw_slots_duplicate(void *_) {
@@ -101,6 +102,11 @@ void tab_materials_draw_slots_menu() {
 
 	if (project_materials->length > 1 && ui_menu_button(tr("Delete"), "delete", ICON_DELETE)) {
 		tab_materials_delete_material(m);
+	}
+
+	if (g_config->experimental && ui_menu_button(tr("Inspect as Script"), "", ICON_SEARCH)) {
+		node_shader_dump_to_script = true;
+		context_select_material(i);
 	}
 
 	ui_handle_t *base_handle = ui_nest(ui_handle(__ID__), m->id);

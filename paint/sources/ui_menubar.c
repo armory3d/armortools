@@ -784,7 +784,6 @@ void ui_menubar_draw_category_items() {
             4);
 
 		if (g_config->experimental) {
-			any_array_push(modes, tr("Sculpt"));
 			any_array_push(modes, tr("Player"));
 		}
 
@@ -810,6 +809,11 @@ void ui_menubar_draw_category_items() {
 		        tr("Base"),
 		    },
 		    2);
+
+		if (g_config->experimental) {
+			any_array_push(workflow_items, tr("Sculpt"));
+		}
+
 		g_config->workflow = ui_inline_radio(workflow_handle, workflow_items, UI_ALIGN_LEFT);
 		if (workflow_handle->changed) {
 			g_config->workflow = workflow_handle->i;

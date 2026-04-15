@@ -982,7 +982,7 @@ void tab_layers_button_new_sculpt_layer(void *_) {
 
 void tab_layers_button_new_menu() {
 	slot_layer_t *l = g_context->layer;
-	if (g_config->workspace == WORKSPACE_SCULPT) {
+	if (g_config->workflow == WORKFLOW_SCULPT) {
 		if (ui_menu_button(tr("Sculpt Layer"), "", ICON_PAINT)) {
 			sys_notify_on_next_frame(&tab_layers_button_new_sculpt_layer, NULL);
 		}
