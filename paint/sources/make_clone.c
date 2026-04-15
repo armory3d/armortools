@@ -9,14 +9,16 @@ void make_clone_run(node_shader_t *kong) {
 	node_shader_write_frag(kong, "var tex_coord_inp4: float4 = gbuffer2[tex_coord_coord];");
 	node_shader_write_frag(kong, "var tex_coord_inp: float2 = tex_coord_inp4.ba;");
 
+	node_shader_write_frag(kong, "var texpaint_undo_sample: float4 = sample_lod(texpaint_undo, sampler_linear, tex_coord_inp, 0.0);");
 	node_shader_write_frag(kong, "var texpaint_pack_sample: float3 = sample_lod(texpaint_pack_undo, sampler_linear, tex_coord_inp, 0.0).rgb;");
-	char *base   = "sample_lod(texpaint_undo, sampler_linear, tex_coord_inp, 0.0).rgb";
+	char *base   = "texpaint_undo_sample.rgb";
 	char *rough  = "texpaint_pack_sample.g";
 	char *met    = "texpaint_pack_sample.b";
 	char *occ    = "texpaint_pack_sample.r";
 	char *nortan = "sample_lod(texpaint_nor_undo, sampler_linear, tex_coord_inp, 0.0).rgb";
 	char *height = "0.0";
 	char *opac   = "1.0";
+	node_shader_write_frag(kong, "var clone_src_alpha: float = texpaint_undo_sample.a;");
 	node_shader_write_frag(kong, string("var basecol: float3 = %s;", base));
 	node_shader_write_frag(kong, string("var roughness: float = %s;", rough));
 	node_shader_write_frag(kong, string("var metallic: float = %s;", met));

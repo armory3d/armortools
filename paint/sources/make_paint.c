@@ -447,6 +447,10 @@ node_shader_context_t *make_paint_run(material_t *data, material_context_t *matc
 		node_shader_write_frag(kong, "var str: float = (1.0 - t2 * t2 * (3.0 - 2.0 * t2)) * opacity;");
 	}
 
+	if (g_context->tool == TOOL_TYPE_CLONE) {
+		node_shader_write_frag(kong, "str *= clone_src_alpha;");
+	}
+
 	// Manual blending to preserve memory
 	kong->frag_wvpposition = true;
 	node_shader_write_frag(kong,
@@ -497,7 +501,12 @@ node_shader_context_t *make_paint_run(material_t *data, material_context_t *matc
 	node_shader_write_frag(kong, "var sample_pack_undo: float4 = sample_lod(texpaint_pack_undo, sampler_linear, sample_tc, 0.0);");
 
 	bool is_mask = slot_layer_is_mask(g_context->layer);
-	if (make_material_opac_used || g_context->tool == TOOL_TYPE_GIZMO || g_context->layer->fill_layer != NULL) {
+	if ((g_context->tool == TOOL_TYPE_BLUR || g_context->tool == TOOL_TYPE_SMUDGE) && !is_mask) {
+		node_shader_write_frag(kong, "var t_blur: float = str / max(blur_src_alpha, 0.0000001);");
+		node_shader_write_frag(kong, "var out_a: float = str + sample_undo.a * (1.0 - t_blur);");
+		node_shader_write_frag(kong, "output[0] = float4((basecol * t_blur + sample_undo.rgb * sample_undo.a * (1.0 - t_blur)) / max(out_a, 0.0000001), out_a);");
+	}
+	else if (make_material_opac_used || g_context->tool == TOOL_TYPE_GIZMO || g_context->layer->fill_layer != NULL) {
 		node_shader_write_frag(kong, string("output[0] = float4(%s, %s);",
 		                                    make_material_blend_mode(kong, g_context->brush_blending, "sample_undo.rgb", "basecol", "str"), "mat_opacity"));
 	}
