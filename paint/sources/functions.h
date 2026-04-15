@@ -259,6 +259,7 @@ void                      history_new_material();
 void                      history_delete_material();
 void                      history_duplicate_material();
 void                      history_delete_material_group(node_group_t *group);
+void                      tab_scripts_set(char *s);
 void                      tab_scripts_draw(ui_handle_t *htab);
 ui_text_coloring_t       *tab_scripts_get_text_coloring();
 void                      render_path_preview_init();

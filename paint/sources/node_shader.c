@@ -234,6 +234,11 @@ char *node_shader_get(node_shader_t *raw) {
 	s = string("%s\tfragment = kong_frag;\n", s);
 	s = string("%s}\n", s);
 
+	if (node_shader_dump_to_script) {
+		node_shader_dump_to_script = false;
+		tab_scripts_set(s);
+	}
+
 	return s;
 }
 

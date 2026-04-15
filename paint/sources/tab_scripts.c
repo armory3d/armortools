@@ -3,8 +3,27 @@
 
 ui_text_coloring_t *tab_scripts_text_coloring = NULL;
 
+void tab_scripts_prepare() {
+	if (g_project->script_datas == NULL) {
+		g_project->script_datas = string_array_create(0);
+	}
+	if (g_project->script_datas->length == 0) {
+		string_array_push(g_project->script_datas, "");
+	}
+}
+
+char *tab_scripts_get() {
+	tab_scripts_prepare();
+	return g_project->script_datas->buffer[0];
+}
+
+void tab_scripts_set(char *s) {
+	tab_scripts_prepare();
+	g_project->script_datas->buffer[0] = string_copy(s);
+}
+
 void tab_scripts_draw_export(char *path) {
-	char *str = tab_scripts_hscript->text;
+	char *str = tab_scripts_get();
 	char *f   = ui_files_filename;
 	if (string_equals(f, "")) {
 		f = string_copy(tr("untitled"));
@@ -18,13 +37,13 @@ void tab_scripts_draw_export(char *path) {
 
 void tab_scripts_draw_import(char *path) {
 	buffer_t *b               = data_get_blob(path);
-	tab_scripts_hscript->text = string_copy(sys_buffer_to_string(b));
+	tab_scripts_set(sys_buffer_to_string(b));
 	data_delete_blob(path);
 }
 
 void tab_scripts_draw_edit() {
 	if (ui_menu_button(tr("Clear"), "", ICON_ERASE)) {
-		tab_scripts_hscript->text = "";
+		tab_scripts_set("");
 	}
 	if (ui_menu_button(tr("Import"), "", ICON_IMPORT)) {
 		ui_files_show("c", false, false, &tab_scripts_draw_import);
@@ -107,12 +126,7 @@ void tab_scripts_draw(ui_handle_t *htab) {
 		ui_text_area_coloring = tab_scripts_get_text_coloring();
 		gc_root(ui_text_area_coloring);
 
-		if (g_project->script_datas == NULL) {
-			g_project->script_datas = string_array_create(0);
-		}
-		if (g_project->script_datas->length == 0) {
-			string_array_push(g_project->script_datas, "");
-		}
+		tab_scripts_prepare();
 
 		tab_scripts_hscript->text = g_project->script_datas->buffer[0];
 		ui_text_area(tab_scripts_hscript, UI_ALIGN_LEFT, true, "", false);
