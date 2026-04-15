@@ -343,7 +343,7 @@ void project_new(bool reset_layers) {
 
 	base_update_workflow();
 	project_set_default_envmap();
-	context_init_tool();
+	context_select_tool(TOOL_TYPE_BRUSH);
 	viewport_reset();
 	viewport_scale_to_bounds(1.8);
 	render_path_raytrace_ready = false;
