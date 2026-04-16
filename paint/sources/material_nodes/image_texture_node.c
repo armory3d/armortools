@@ -42,6 +42,10 @@ char *parser_material_texture_store(ui_node_t *node, bind_tex_t *tex, char *tex_
 		uv_name = string("%s_uv", tex_store);
 	}
 	if (parser_material_triplanar) {
+		if (!string_equals(uv_name, parser_material_tex_coord)) {
+			parser_material_write(parser_material_kong, string("var %s1: float3 = %s;", uv_name, uv_name));
+			parser_material_write(parser_material_kong, string("var %s2: float3 = %s;", uv_name, uv_name));
+		}
 		parser_material_write(parser_material_kong, string("var %s: float4 = float4(0.0, 0.0, 0.0, 0.0);", tex_store));
 		parser_material_write(parser_material_kong, string("if (tex_coord_blend.x > 0.0) {%s += sample(%s, sampler_linear, %s.xy) * tex_coord_blend.x; }",
 		                                                   tex_store, tex_name, uv_name));

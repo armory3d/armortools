@@ -87,7 +87,7 @@ void make_texcoord_run(node_shader_t *kong) {
 		}
 		node_shader_write_attrib_frag(kong, "var tex_coord: float2 = input.tex_coord;");
 	}
-	else { // TexCoords - triplanar
+	else { // UV_TYPE_TRIPLANAR, TexCoords - triplanar
 		kong->frag_wposition = true;
 		kong->frag_n         = true;
 		node_shader_add_constant(kong, "brush_scale: float", "_brush_scale");
