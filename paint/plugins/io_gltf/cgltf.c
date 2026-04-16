@@ -1,9 +1,11 @@
 
 #define CGLTF_IMPLEMENTATION
 #include "cgltf.h"
+#include "engine.h"
 #include "iron_array.h"
 #include "iron_obj.h"
 #include <math.h>
+#include <stdarg.h>
 
 static bool  has_next     = false;
 static int   current_node = 0;
@@ -615,6 +617,268 @@ void *io_gltf_parse_skinned(char *buf, size_t size, const char *path, int frame)
 	return raw;
 }
 
-void export_glb_run(char *path, any_array_t *paint_objects) {
+typedef struct {
+	char  *buf;
+	size_t len;
+	size_t cap;
+} json_buf_t;
 
+static void json_buf_append(json_buf_t *j, const char *fmt, ...) {
+	char    tmp[1024];
+	va_list ap;
+	va_start(ap, fmt);
+	int tl = vsnprintf(tmp, sizeof(tmp), fmt, ap);
+	va_end(ap);
+	while (j->len + (size_t)tl + 1 > j->cap) {
+		j->cap *= 2;
+		j->buf = (char *)realloc(j->buf, j->cap);
+	}
+	memcpy(j->buf + j->len, tmp, (size_t)tl);
+	j->len += (size_t)tl;
+}
+
+void export_glb_run(char *path, any_array_t *paint_objects) {
+	int n = (int)paint_objects->length;
+
+	int      *vcs     = (int *)malloc(n * sizeof(int));
+	int      *ics     = (int *)malloc(n * sizeof(int));
+	uint32_t *pos_off = (uint32_t *)malloc(n * sizeof(uint32_t));
+	uint32_t *nor_off = (uint32_t *)malloc(n * sizeof(uint32_t));
+	uint32_t *tex_off = (uint32_t *)malloc(n * sizeof(uint32_t));
+	uint32_t *idx_off = (uint32_t *)malloc(n * sizeof(uint32_t));
+	float    *pmins   = (float *)malloc(n * 3 * sizeof(float));
+	float    *pmaxs   = (float *)malloc(n * 3 * sizeof(float));
+
+	// binary buffer: per object [positions][normals][texcoords][indices]
+	size_t   bin_cap = 64 * 1024;
+	size_t   bin_len = 0;
+	uint8_t *bin     = (uint8_t *)malloc(bin_cap);
+
+	for (int oi = 0; oi < n; oi++) {
+		mesh_object_t *p    = (mesh_object_t *)paint_objects->buffer[oi];
+		mesh_data_t   *mesh = p->data;
+		float          inv  = 1.0f / 32767.0f;
+		float          sc   = mesh->scale_pos * inv;
+		i16_array_t   *posa = mesh->vertex_arrays->buffer[0]->values;
+		i16_array_t   *nora = mesh->vertex_arrays->buffer[1]->values;
+		i16_array_t   *texa = mesh->vertex_arrays->buffer[2]->values;
+		int            vc   = (int)(posa->length / 4);
+		u32_array_t   *inda = mesh->index_array;
+		int            ic   = (int)inda->length;
+
+		vcs[oi] = vc;
+		ics[oi] = ic;
+
+		// Positions (float32, VEC3), z-up to y-up
+		pos_off[oi]       = (uint32_t)bin_len;
+		pmins[oi * 3 + 0] = pmins[oi * 3 + 1] = pmins[oi * 3 + 2] = 1e30f;
+		pmaxs[oi * 3 + 0] = pmaxs[oi * 3 + 1] = pmaxs[oi * 3 + 2] = -1e30f;
+		for (int i = 0; i < vc; i++) {
+			float x = posa->buffer[i * 4 + 0] * sc;
+			float y = posa->buffer[i * 4 + 2] * sc;
+			float z = -posa->buffer[i * 4 + 1] * sc;
+			if (x < pmins[oi * 3 + 0])
+				pmins[oi * 3 + 0] = x;
+			if (y < pmins[oi * 3 + 1])
+				pmins[oi * 3 + 1] = y;
+			if (z < pmins[oi * 3 + 2])
+				pmins[oi * 3 + 2] = z;
+			if (x > pmaxs[oi * 3 + 0])
+				pmaxs[oi * 3 + 0] = x;
+			if (y > pmaxs[oi * 3 + 1])
+				pmaxs[oi * 3 + 1] = y;
+			if (z > pmaxs[oi * 3 + 2])
+				pmaxs[oi * 3 + 2] = z;
+			if (bin_len + 12 > bin_cap) {
+				bin_cap *= 2;
+				bin = (uint8_t *)realloc(bin, bin_cap);
+			}
+			memcpy(bin + bin_len, &x, 4);
+			bin_len += 4;
+			memcpy(bin + bin_len, &y, 4);
+			bin_len += 4;
+			memcpy(bin + bin_len, &z, 4);
+			bin_len += 4;
+		}
+
+		// Normals (float32, VEC3), nz packed into posa[i*4+3]
+		nor_off[oi] = (uint32_t)bin_len;
+		for (int i = 0; i < vc; i++) {
+			float x = nora->buffer[i * 2 + 0] * inv;
+			float y = posa->buffer[i * 4 + 3] * inv;
+			float z = -nora->buffer[i * 2 + 1] * inv;
+			if (bin_len + 12 > bin_cap) {
+				bin_cap *= 2;
+				bin = (uint8_t *)realloc(bin, bin_cap);
+			}
+			memcpy(bin + bin_len, &x, 4);
+			bin_len += 4;
+			memcpy(bin + bin_len, &y, 4);
+			bin_len += 4;
+			memcpy(bin + bin_len, &z, 4);
+			bin_len += 4;
+		}
+
+		// Texcoords (float32, VEC2)
+		tex_off[oi] = (uint32_t)bin_len;
+		for (int i = 0; i < vc; i++) {
+			float u = texa->buffer[i * 2 + 0] * inv;
+			float v = texa->buffer[i * 2 + 1] * inv;
+			if (bin_len + 8 > bin_cap) {
+				bin_cap *= 2;
+				bin = (uint8_t *)realloc(bin, bin_cap);
+			}
+			memcpy(bin + bin_len, &u, 4);
+			bin_len += 4;
+			memcpy(bin + bin_len, &v, 4);
+			bin_len += 4;
+		}
+
+		// Indices (uint32)
+		idx_off[oi] = (uint32_t)bin_len;
+		for (int i = 0; i < ic; i++) {
+			uint32_t idx = inda->buffer[i];
+			if (bin_len + 4 > bin_cap) {
+				bin_cap *= 2;
+				bin = (uint8_t *)realloc(bin, bin_cap);
+			}
+			memcpy(bin + bin_len, &idx, 4);
+			bin_len += 4;
+		}
+	}
+
+	// Pad to 4-byte boundary with zeros
+	while (bin_len % 4 != 0) {
+		if (bin_len >= bin_cap) {
+			bin_cap *= 2;
+			bin = (uint8_t *)realloc(bin, bin_cap);
+		}
+		bin[bin_len++] = 0;
+	}
+
+	// Build JSON string
+	json_buf_t j = {(char *)malloc(4096), 0, 4096};
+	json_buf_append(&j, "{\"asset\":{\"generator\":\"ArmorPaint\",\"version\":\"2.0\"},\"scene\":0,");
+
+	// scenes
+	json_buf_append(&j, "\"scenes\":[{\"name\":\"Scene\",\"nodes\":[");
+	for (int i = 0; i < n; i++) {
+		if (i > 0)
+			json_buf_append(&j, ",");
+		json_buf_append(&j, "%d", i);
+	}
+	json_buf_append(&j, "]}],");
+
+	// nodes
+	json_buf_append(&j, "\"nodes\":[");
+	for (int i = 0; i < n; i++) {
+		if (i > 0)
+			json_buf_append(&j, ",");
+		mesh_object_t *p = (mesh_object_t *)paint_objects->buffer[i];
+		json_buf_append(&j, "{\"mesh\":%d,\"name\":\"%s\"}", i, p->base->name);
+	}
+	json_buf_append(&j, "],");
+
+	// meshes
+	json_buf_append(&j, "\"meshes\":[");
+	for (int i = 0; i < n; i++) {
+		if (i > 0)
+			json_buf_append(&j, ",");
+		mesh_object_t *p       = (mesh_object_t *)paint_objects->buffer[i];
+		int            base_ac = i * 4;
+		json_buf_append(&j, "{\"name\":\"%s\",\"primitives\":[{\"attributes\":{\"POSITION\":%d,\"NORMAL\":%d,\"TEXCOORD_0\":%d},\"indices\":%d}]}",
+		                p->base->name, base_ac, base_ac + 1, base_ac + 2, base_ac + 3);
+	}
+	json_buf_append(&j, "],");
+
+	// accessors
+	json_buf_append(&j, "\"accessors\":[");
+	for (int i = 0; i < n; i++) {
+		if (i > 0)
+			json_buf_append(&j, ",");
+		int bv = i * 4;
+		int vc = vcs[i];
+		int ic = ics[i];
+		// position
+		json_buf_append(&j,
+		                "{\"bufferView\":%d,\"componentType\":5126,\"count\":%d,\"type\":\"VEC3\","
+		                "\"min\":[%.7g,%.7g,%.7g],\"max\":[%.7g,%.7g,%.7g]}",
+		                bv, vc, pmins[i * 3 + 0], pmins[i * 3 + 1], pmins[i * 3 + 2], pmaxs[i * 3 + 0], pmaxs[i * 3 + 1], pmaxs[i * 3 + 2]);
+		// normal
+		json_buf_append(&j, ",{\"bufferView\":%d,\"componentType\":5126,\"count\":%d,\"type\":\"VEC3\"}", bv + 1, vc);
+		// texcoord
+		json_buf_append(&j, ",{\"bufferView\":%d,\"componentType\":5126,\"count\":%d,\"type\":\"VEC2\"}", bv + 2, vc);
+		// indices
+		json_buf_append(&j, ",{\"bufferView\":%d,\"componentType\":5125,\"count\":%d,\"type\":\"SCALAR\"}", bv + 3, ic);
+	}
+	json_buf_append(&j, "],");
+
+	// bufferViews
+	json_buf_append(&j, "\"bufferViews\":[");
+	for (int i = 0; i < n; i++) {
+		if (i > 0)
+			json_buf_append(&j, ",");
+		int vc = vcs[i];
+		int ic = ics[i];
+		json_buf_append(&j, "{\"buffer\":0,\"byteOffset\":%u,\"byteLength\":%u}", pos_off[i], (uint32_t)(vc * 12));
+		json_buf_append(&j, ",{\"buffer\":0,\"byteOffset\":%u,\"byteLength\":%u}", nor_off[i], (uint32_t)(vc * 12));
+		json_buf_append(&j, ",{\"buffer\":0,\"byteOffset\":%u,\"byteLength\":%u}", tex_off[i], (uint32_t)(vc * 8));
+		json_buf_append(&j, ",{\"buffer\":0,\"byteOffset\":%u,\"byteLength\":%u}", idx_off[i], (uint32_t)(ic * 4));
+	}
+	json_buf_append(&j, "],");
+
+	// buffers
+	json_buf_append(&j, "\"buffers\":[{\"byteLength\":%u}]}", (uint32_t)bin_len);
+
+	// Pad to 4-byte boundary with spaces
+	while (j.len % 4 != 0) {
+		if (j.len >= j.cap) {
+			j.cap *= 2;
+			j.buf = (char *)realloc(j.buf, j.cap);
+		}
+		j.buf[j.len++] = ' ';
+	}
+
+	// Write glb
+	uint32_t json_chunk_len = (uint32_t)j.len;
+	uint32_t bin_chunk_len  = (uint32_t)bin_len;
+	uint32_t total_len      = 12 + 8 + json_chunk_len + 8 + bin_chunk_len;
+
+	char out_path[4096];
+	int  plen = (int)strlen(path);
+	if (plen >= 4 && strcmp(path + plen - 4, ".glb") == 0) {
+		snprintf(out_path, sizeof(out_path), "%s", path);
+	}
+	else {
+		snprintf(out_path, sizeof(out_path), "%s.glb", path);
+	}
+
+	FILE *f = fopen(out_path, "wb");
+	if (f != NULL) {
+		uint32_t magic     = 0x46546C67; // "glTF"
+		uint32_t version   = 2;
+		uint32_t json_type = 0x4E4F534A; // "JSON"
+		uint32_t bin_type  = 0x004E4942; // "BIN\0"
+		fwrite(&magic, 4, 1, f);
+		fwrite(&version, 4, 1, f);
+		fwrite(&total_len, 4, 1, f);
+		fwrite(&json_chunk_len, 4, 1, f);
+		fwrite(&json_type, 4, 1, f);
+		fwrite(j.buf, 1, j.len, f);
+		fwrite(&bin_chunk_len, 4, 1, f);
+		fwrite(&bin_type, 4, 1, f);
+		fwrite(bin, 1, bin_len, f);
+		fclose(f);
+	}
+
+	free(vcs);
+	free(ics);
+	free(pos_off);
+	free(nor_off);
+	free(tex_off);
+	free(idx_off);
+	free(pmins);
+	free(pmaxs);
+	free(bin);
+	free(j.buf);
 }
