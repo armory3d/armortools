@@ -11,6 +11,10 @@ void tab_textures_draw_set_as_envmap(void *_) {
 	import_envmap_run(_tab_textures_draw_asset->file, _tab_textures_draw_img);
 }
 
+void tab_textures_draw_to_layer(void *_) {
+	layers_create_image_layer(_tab_textures_draw_asset);
+}
+
 void tab_textures_draw_to_mask(void *_) {
 	layers_create_image_mask(_tab_textures_draw_asset);
 }
@@ -118,6 +122,9 @@ void tab_textures_draw_context_menu() {
 	}
 	if (ui_menu_button(tr("Reimport"), "", ICON_SYNC)) {
 		project_reimport_texture(_tab_textures_draw_asset);
+	}
+	if (ui_menu_button(tr("To Layer"), "", ICON_LAYER)) {
+		sys_notify_on_next_frame(&tab_textures_draw_to_layer, NULL);
 	}
 	if (ui_menu_button(tr("To Mask"), "", ICON_MASK)) {
 		sys_notify_on_next_frame(&tab_textures_draw_to_mask, NULL);
