@@ -197,6 +197,7 @@ typedef struct context {
 	texture_ldr_format_t        format_type;
 	f32                         format_quality;
 	export_destination_t        layers_destination;
+	bool                        export_padding;
 	split_type_t                split_by;
 	f32                         select_time;
 	viewport_mode_t             viewport_mode;
