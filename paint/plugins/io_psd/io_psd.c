@@ -1,6 +1,7 @@
 #include "iron_array.h"
 #include "iron_gpu.h"
 #include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -175,6 +176,9 @@ static uint8_t *psd_decode_channel(uint8_t *buf, size_t buf_size, size_t *pos, u
 
 typedef struct {
 	int32_t  top, left, bottom, right;
+	int32_t  mask_top, mask_left, mask_bottom, mask_right;
+	uint8_t  mask_default_color;
+	int      has_mask;
 	uint16_t num_channels;
 	int16_t  chan_ids[PSD_MAX_CHAN];
 	uint64_t chan_lengths[PSD_MAX_CHAN]; // Includes 2-byte compression header
@@ -314,7 +318,16 @@ void *io_psd_parse(uint8_t *buf, size_t buf_size, const char *file_name) {
 			// Layer mask data
 			if (pos + 4 <= buf_size) {
 				uint32_t mask_len = psd_r32(buf, pos);
-				pos += 4 + mask_len;
+				pos += 4;
+				if (mask_len >= 17 && pos + 17 <= buf_size) {
+					layers[i].mask_top           = (int32_t)psd_r32(buf, pos);
+					layers[i].mask_left          = (int32_t)psd_r32(buf, pos + 4);
+					layers[i].mask_bottom        = (int32_t)psd_r32(buf, pos + 8);
+					layers[i].mask_right         = (int32_t)psd_r32(buf, pos + 12);
+					layers[i].mask_default_color = buf[pos + 16];
+					layers[i].has_mask           = 1;
+				}
+				pos += mask_len;
 			}
 			// Layer blending ranges
 			if (pos + 4 <= buf_size) {
@@ -353,11 +366,21 @@ void *io_psd_parse(uint8_t *buf, size_t buf_size, const char *file_name) {
 			size_t   row_bytes = (size_t)lw * depth_bytes;
 			uint8_t *bufs[PSD_MAX_CHAN];
 			memset(bufs, 0, sizeof(bufs));
+			uint8_t *mask_buf = NULL;
+
+			int32_t mw             = layers[i].has_mask ? (layers[i].mask_right - layers[i].mask_left) : lw;
+			int32_t mh             = layers[i].has_mask ? (layers[i].mask_bottom - layers[i].mask_top) : lh;
+			int32_t mox            = layers[i].has_mask ? layers[i].mask_left : layers[i].left;
+			int32_t moy            = layers[i].has_mask ? layers[i].mask_top : layers[i].top;
+			size_t  mask_row_bytes = (mw > 0 && mh > 0) ? (size_t)mw * depth_bytes : 0;
 
 			for (uint16_t c = 0; c < layers[i].num_channels; c++) {
-				// Skip layer mask channels (-2, -3)
 				if (layers[i].chan_ids[c] < -1) {
-					pos += (size_t)layers[i].chan_lengths[c];
+					// Decode first mask channel using mask bounds, skip additional ones
+					if (mask_buf == NULL && mask_row_bytes > 0)
+						mask_buf = psd_decode_channel(buf, buf_size, &pos, layers[i].chan_lengths[c], (uint32_t)mh, mask_row_bytes, version);
+					else
+						pos += (size_t)layers[i].chan_lengths[c];
 					continue;
 				}
 				bufs[c] = psd_decode_channel(buf, buf_size, &pos, layers[i].chan_lengths[c], (uint32_t)lh, row_bytes, version);
@@ -369,13 +392,16 @@ void *io_psd_parse(uint8_t *buf, size_t buf_size, const char *file_name) {
 			for (uint16_t c = 0; c < layers[i].num_channels; c++)
 				free(bufs[c]);
 
-			if (!layer_rgba)
+			if (!layer_rgba) {
+				free(mask_buf);
 				continue;
+			}
 
 			// Place the layer into a full-image canvas at its (left, top) offset
 			uint8_t *rgba = (uint8_t *)calloc((size_t)width * height * 4, 1);
 			if (!rgba) {
 				free(layer_rgba);
+				free(mask_buf);
 				continue;
 			}
 
@@ -404,14 +430,61 @@ void *io_psd_parse(uint8_t *buf, size_t buf_size, const char *file_name) {
 			b->length = b->capacity = (uint32_t)((size_t)width * height * 4);
 			void *tex               = gpu_create_texture_from_bytes(b, (int)width, (int)height, GPU_TEXTURE_FORMAT_RGBA32);
 
+			char *layer_name = layers[i].name[0] != 0 ? layers[i].name : "layer";
 			if (num_layers_found == 0) {
 				result = tex;
 			}
 			else {
-				char *layer_name = layers[i].name[0] != 0 ? layers[i].name : "layer";
 				io_psd_import_layer((char *)file_name, layer_name, tex);
 			}
 			num_layers_found++;
+
+			// Import mask as a separate grayscale texture
+			if (mask_buf != NULL) {
+				uint8_t *mask_rgba = (uint8_t *)calloc((size_t)width * height * 4, 1);
+				if (mask_rgba) {
+					for (int32_t y = 0; y < mh; y++) {
+						int32_t dy = moy + y;
+						if (dy < 0 || dy >= (int32_t)height)
+							continue;
+						for (int32_t x = 0; x < mw; x++) {
+							int32_t dx = mox + x;
+							if (dx < 0 || dx >= (int32_t)width)
+								continue;
+							size_t  src_i = ((size_t)y * mw + x) * depth_bytes;
+							uint8_t v;
+							if (depth == 8)
+								v = mask_buf[src_i];
+							else if (depth == 16)
+								v = (uint8_t)(psd_r16(mask_buf, src_i) / 257);
+							else {
+								float fv = *(float *)(mask_buf + src_i);
+								v        = (uint8_t)((fv < 0.0f ? 0.0f : fv > 1.0f ? 1.0f : fv) * 255.0f);
+							}
+							uint8_t *dst = mask_rgba + ((size_t)dy * width + dx) * 4;
+							if (layers[i].mask_default_color == 255) {
+								// White background, dark stroke: invert so stroke is opaque, bg transparent
+								dst[0] = dst[1] = dst[2] = 0;
+								dst[3]                   = (uint8_t)(255 - v);
+							}
+							else {
+								// Black background, light stroke
+								dst[0] = dst[1] = dst[2] = 255;
+								dst[3]                   = v;
+							}
+						}
+					}
+					buffer_t *mb = (buffer_t *)malloc(sizeof(buffer_t));
+					mb->buffer   = mask_rgba;
+					mb->length = mb->capacity = (uint32_t)((size_t)width * height * 4);
+					void *mask_tex            = gpu_create_texture_from_bytes(mb, (int)width, (int)height, GPU_TEXTURE_FORMAT_RGBA32);
+
+					char mask_name[256 + 5];
+					snprintf(mask_name, sizeof(mask_name), "%s_mask", layer_name);
+					io_psd_import_layer((char *)file_name, mask_name, mask_tex);
+				}
+				free(mask_buf);
+			}
 		}
 
 		free(layers);
