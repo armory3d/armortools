@@ -130,7 +130,7 @@ void box_export_tab_export_textures(char *title, bool bake_material) {
 		    },
 		    4);
 		g_context->layers_export = ui_combo(layers_export_handle, layers_export_combo, tr("Layers"), true, UI_ALIGN_LEFT, true);
-		ui->enabled                = true;
+		ui->enabled              = true;
 
 		ui_combo(box_export_hpreset, box_export_files, tr("Preset"), true, UI_ALIGN_LEFT, true);
 		if (box_export_hpreset->changed) {
@@ -158,7 +158,7 @@ void box_export_tab_export_textures(char *title, bool bake_material) {
 		if (ui_icon_button(tr("Export"), ICON_CHECK, UI_ALIGN_CENTER)) {
 			ui_box_hide();
 			if (g_context->layers_destination == EXPORT_DESTINATION_PACK_INTO_PROJECT) {
-				_box_export_bake_material        = bake_material;
+				_box_export_bake_material      = bake_material;
 				g_context->texture_export_path = "/";
 				sys_notify_on_next_frame(&box_export_tab_export_textures_run, NULL);
 			}
@@ -466,6 +466,11 @@ void box_export_tab_export_mesh(ui_handle_t *htab) {
 		        "arm",
 		    },
 		    2);
+
+#ifdef WITH_PLUGINS
+		string_array_push(export_mesh_format_combo, "glb");
+#endif
+
 		g_context->export_mesh_format = ui_combo(h_export_mesh_format, export_mesh_format_combo, tr("Format"), true, UI_ALIGN_LEFT, true);
 
 		string_array_t *ar = any_array_create_from_raw(
@@ -515,7 +520,7 @@ void box_export_tab_export_mesh(ui_handle_t *htab) {
 			ui_box_hide();
 			_box_export_apply_displacement = apply_displacement;
 			_box_export_merge_vertices     = merge_vertices;
-			ui_files_show(g_context->export_mesh_format == MESH_FORMAT_OBJ ? "obj" : "arm", true, false, &box_export_tab_export_mesh_path_picked);
+			ui_files_show(export_mesh_format_combo->buffer[g_context->export_mesh_format], true, false, &box_export_tab_export_mesh_path_picked);
 		}
 	}
 }
@@ -587,10 +592,10 @@ void box_export_show_material_box() {
 	ui_handle_t *htab         = ui_handle(__ID__);
 	bool         tab_vertical = g_config->touch_ui;
 	if (ui_tab(htab, tr("Export Material"), tab_vertical, -1, false)) {
-		ui_handle_t *h1                    = ui_handle(__ID__);
-		ui_handle_t *h2                    = ui_handle(__ID__);
-		h1->b                              = g_context->pack_assets_on_export;
-		h2->b                              = g_context->write_icon_on_export;
+		ui_handle_t *h1                  = ui_handle(__ID__);
+		ui_handle_t *h2                  = ui_handle(__ID__);
+		h1->b                            = g_context->pack_assets_on_export;
+		h2->b                            = g_context->write_icon_on_export;
 		g_context->pack_assets_on_export = ui_check(h1, tr("Pack Assets"), "");
 		g_context->write_icon_on_export  = ui_check(h2, tr("Export Icon"), "");
 		ui_row2();
@@ -623,10 +628,10 @@ void box_export_show_brush_box() {
 	ui_handle_t *htab         = ui_handle(__ID__);
 	bool         tab_vertical = g_config->touch_ui;
 	if (ui_tab(htab, tr("Export Brush"), tab_vertical, -1, false)) {
-		ui_handle_t *h1                    = ui_handle(__ID__);
-		ui_handle_t *h2                    = ui_handle(__ID__);
-		h1->b                              = g_context->pack_assets_on_export;
-		h2->b                              = g_context->write_icon_on_export;
+		ui_handle_t *h1                  = ui_handle(__ID__);
+		ui_handle_t *h2                  = ui_handle(__ID__);
+		h1->b                            = g_context->pack_assets_on_export;
+		h2->b                            = g_context->write_icon_on_export;
 		g_context->pack_assets_on_export = ui_check(h1, tr("Pack Assets"), "");
 		g_context->write_icon_on_export  = ui_check(h2, tr("Export Icon"), "");
 		ui_row2();

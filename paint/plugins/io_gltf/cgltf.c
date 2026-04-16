@@ -614,3 +614,7 @@ void *io_gltf_parse_skinned(char *buf, size_t size, const char *path, int frame)
 	cgltf_free(data);
 	return raw;
 }
+
+void export_glb_run(char *path, any_array_t *paint_objects) {
+
+}

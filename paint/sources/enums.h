@@ -175,6 +175,7 @@ typedef enum {
 typedef enum {
 	MESH_FORMAT_OBJ = 0,
 	MESH_FORMAT_ARM = 1,
+	MESH_FORMAT_GLB = 2,
 } mesh_format_t;
 
 typedef enum {
