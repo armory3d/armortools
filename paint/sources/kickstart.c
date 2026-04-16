@@ -48,10 +48,16 @@ void _kickstart() {
 	        "smooth",
 	        "emis",
 	        "subs",
+			"diff_r",
+			"diff_g",
+			"diff_b",
+			"spec_r",
+			"spec_g",
+			"spec_b",
 	        "0.0",
 	        "1.0",
 	    },
-	    17);
+	    23);
 	gc_root(box_export_channels);
 
 	box_export_color_spaces = any_array_create_from_raw(

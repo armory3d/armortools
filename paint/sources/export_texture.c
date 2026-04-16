@@ -112,6 +112,32 @@ void export_texture_extract_channel(buffer_t *from, i32 from_channel, buffer_t *
 	}
 }
 
+void export_texture_compute_diff_spec_channel(buffer_t *from_albedo, buffer_t *from_pack, i32 albedo_channel, buffer_t *to, i32 to_channel, bool linear,
+                                              bool is_specular) {
+#ifdef IRON_BGRA
+	albedo_channel    = _export_texture_channel_bgra_swap(albedo_channel);
+	to_channel        = _export_texture_channel_bgra_swap(to_channel);
+	i32 metal_channel = _export_texture_channel_bgra_swap(2);
+#else
+	i32 metal_channel = 2;
+#endif
+	for (i32 i = 0; i < math_floor((to->length) / 4.0); ++i) {
+		f32 albedo = buffer_get_u8(from_albedo, i * 4 + albedo_channel) / 255.0;
+		f32 metal  = buffer_get_u8(from_pack, i * 4 + metal_channel) / 255.0;
+		f32 value;
+		if (is_specular) {
+			value = 0.04 * (1.0 - metal) + albedo * metal;
+		}
+		else {
+			value = albedo * (1.0 - metal);
+		}
+		buffer_set_u8(to, i * 4 + to_channel, (u8)math_floor(value * 255.0 + 0.5));
+	}
+	if (!linear) {
+		export_texture_to_srgb(to, to_channel);
+	}
+}
+
 void export_texture_set_channel(i32 value, buffer_t *to, i32 to_channel, bool linear) {
 	for (i32 i = 0; i < math_floor((to->length) / 4.0); ++i) {
 		buffer_set_u8(to, i * 4 + to_channel, value);
@@ -285,17 +311,21 @@ void export_texture_run_layers(char *path, slot_layer_t_array_t *layers, char *o
 		export_preset_texture_t *t = preset->textures->buffer[i];
 		for (i32 i = 0; i < t->channels->length; ++i) {
 			char *c = t->channels->buffer[i];
-			if ((string_equals(c, "base_r") || string_equals(c, "base_g") || string_equals(c, "base_b") || string_equals(c, "opac")) && pixpaint == NULL) {
+			if ((string_equals(c, "base_r") || string_equals(c, "base_g") || string_equals(c, "base_b") || string_equals(c, "opac") ||
+			     string_equals(c, "diff_r") || string_equals(c, "diff_g") || string_equals(c, "diff_b") || string_equals(c, "spec_r") ||
+			     string_equals(c, "spec_g") || string_equals(c, "spec_b")) &&
+			    pixpaint == NULL) {
 				pixpaint = gpu_get_texture_pixels(texpaint);
 			}
-			else if ((string_equals(c, "nor_r") || string_equals(c, "nor_g") || string_equals(c, "nor_g_directx") || string_equals(c, "nor_b") ||
-			          string_equals(c, "emis") || string_equals(c, "subs")) &&
-			         pixpaint_nor == NULL) {
+			if ((string_equals(c, "nor_r") || string_equals(c, "nor_g") || string_equals(c, "nor_g_directx") || string_equals(c, "nor_b") ||
+			     string_equals(c, "emis") || string_equals(c, "subs")) &&
+			    pixpaint_nor == NULL) {
 				pixpaint_nor = gpu_get_texture_pixels(texpaint_nor);
 			}
-			else if ((string_equals(c, "occ") || string_equals(c, "rough") || string_equals(c, "metal") || string_equals(c, "height") ||
-			          string_equals(c, "smooth")) &&
-			         pixpaint_pack == NULL) {
+			if ((string_equals(c, "occ") || string_equals(c, "rough") || string_equals(c, "metal") || string_equals(c, "height") ||
+			     string_equals(c, "smooth") || string_equals(c, "diff_r") || string_equals(c, "diff_g") || string_equals(c, "diff_b") ||
+			     string_equals(c, "spec_r") || string_equals(c, "spec_g") || string_equals(c, "spec_b")) &&
+			    pixpaint_pack == NULL) {
 				pixpaint_pack = gpu_get_texture_pixels(texpaint_pack);
 			}
 		}
@@ -385,6 +415,24 @@ void export_texture_run_layers(char *path, slot_layer_t_array_t *layers, char *o
 				else if (string_equals(c, "subs")) {
 					export_texture_extract_channel(pixpaint_nor, 3, pix, i, 3, 2, string_equals(t->color_space, "linear"));
 				}
+				else if (string_equals(c, "diff_r")) {
+					export_texture_compute_diff_spec_channel(pixpaint, pixpaint_pack, 0, pix, i, string_equals(t->color_space, "linear"), false);
+				}
+				else if (string_equals(c, "diff_g")) {
+					export_texture_compute_diff_spec_channel(pixpaint, pixpaint_pack, 1, pix, i, string_equals(t->color_space, "linear"), false);
+				}
+				else if (string_equals(c, "diff_b")) {
+					export_texture_compute_diff_spec_channel(pixpaint, pixpaint_pack, 2, pix, i, string_equals(t->color_space, "linear"), false);
+				}
+				else if (string_equals(c, "spec_r")) {
+					export_texture_compute_diff_spec_channel(pixpaint, pixpaint_pack, 0, pix, i, string_equals(t->color_space, "linear"), true);
+				}
+				else if (string_equals(c, "spec_g")) {
+					export_texture_compute_diff_spec_channel(pixpaint, pixpaint_pack, 1, pix, i, string_equals(t->color_space, "linear"), true);
+				}
+				else if (string_equals(c, "spec_b")) {
+					export_texture_compute_diff_spec_channel(pixpaint, pixpaint_pack, 2, pix, i, string_equals(t->color_space, "linear"), true);
+				}
 				else if (string_equals(c, "0.0")) {
 					export_texture_set_channel(0, pix, i, true);
 				}
@@ -410,13 +458,13 @@ void export_texture_run_bake_material(char *path) {
 	}
 
 	tool_type_t _tool = g_context->tool;
-	g_context->tool = TOOL_TYPE_FILL;
+	g_context->tool   = TOOL_TYPE_FILL;
 	make_material_parse_paint_material(true);
 	mesh_object_t *_paint_object = g_context->paint_object;
 	mesh_object_t *planeo        = scene_get_child(".Plane")->ext;
 	planeo->base->visible        = true;
-	g_context->paint_object    = planeo;
-	g_context->pdirty          = 1;
+	g_context->paint_object      = planeo;
+	g_context->pdirty            = 1;
 
 	u8_array_t *_visibles = u8_array_create_from_raw((u8[]){}, 0);
 	for (i32 i = 0; i < project_paint_objects->length; ++i) {
@@ -432,7 +480,7 @@ void export_texture_run_bake_material(char *path) {
 	g_context->tool = _tool;
 	make_material_parse_paint_material(true);
 	g_context->pdirty       = 0;
-	planeo->base->visible     = false;
+	planeo->base->visible   = false;
 	g_context->paint_object = _paint_object;
 
 	for (i32 i = 0; i < project_paint_objects->length; ++i) {

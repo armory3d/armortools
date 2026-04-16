@@ -1,0 +1,9 @@
+{
+	"textures": [
+		{ "name": "diff", "channels": ["diff_r", "diff_g", "diff_b", "1.0"], "color_space": "linear" },
+		{ "name": "spec", "channels": ["spec_r", "spec_g", "spec_b", "1.0"], "color_space": "linear" },
+		{ "name": "nor", "channels": ["nor_r", "nor_g", "nor_b", "1.0"], "color_space": "linear" },
+		{ "name": "occ", "channels": ["occ", "occ", "occ", "1.0"], "color_space": "linear" },
+		{ "name": "smooth", "channels": ["smooth", "smooth", "smooth", "1.0"], "color_space": "linear" }
+	]
+}
