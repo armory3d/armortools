@@ -37,7 +37,7 @@ void import_texture_run(char *path, bool hdr_as_envmap) {
 		}
 	}
 
-	char *ext                    = substring(path, string_last_index_of(path, ".") + 1, string_length(path));
+	char *ext                              = substring(path, string_last_index_of(path, ".") + 1, string_length(path));
 	gpu_texture_t *(*importer)(char *path) = any_map_get(import_texture_importers, ext);
 
 	bool           cached = any_map_get(data_cached_images, path) != NULL; // Already loaded or pink texture for missing file
@@ -55,8 +55,8 @@ void import_texture_run(char *path, bool hdr_as_envmap) {
 
 	any_map_set(data_cached_images, path, image);
 	string_array_t *ar    = string_split(path, PATH_SEP);
-	char             *name  = ar->buffer[ar->length - 1];
-	asset_t          *asset = GC_ALLOC_INIT(asset_t, {.name = name, .file = path, .id = project_asset_id++});
+	char           *name  = ar->buffer[ar->length - 1];
+	asset_t        *asset = GC_ALLOC_INIT(asset_t, {.name = name, .file = path, .id = project_asset_id++});
 	any_array_push(project_assets, asset);
 	if (g_context->texture == NULL) {
 		g_context->texture = asset;
