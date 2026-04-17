@@ -405,6 +405,12 @@ void render_path_base_copy_to_gbuffer() {
 }
 
 void render_path_base_draw_gbuffer() {
+
+	if (make_material_transluc_used) {
+		render_path_set_target("gbuffer0", NULL, NULL, GPU_CLEAR_COLOR, 0x00000000, 0.0);
+		render_path_set_target("gbuffer1", NULL, NULL, GPU_CLEAR_COLOR, 0x00000000, 0.0);
+	}
+
 	render_path_set_target("gbuffer0", NULL, "main", GPU_CLEAR_DEPTH, 0, 1.0); // Only clear gbuffer0
 	string_array_t *additional = any_array_create_from_raw(
 	    (void *[]){
@@ -443,6 +449,11 @@ void render_path_base_draw_gbuffer() {
 		if (make_mesh_layer_pass_count % 2 == 0) {
 			render_path_base_copy_to_gbuffer();
 		}
+	}
+
+	if (make_material_transluc_used) {
+		render_path_set_target("gbuffer0", NULL, "main", GPU_CLEAR_NONE, 0, 1.0);
+		render_path_draw_meshes("depth");
 	}
 
 	bool hide     = operator_shortcut(any_map_get(config_keymap, "stencil_hide"), SHORTCUT_TYPE_DOWN) || keyboard_down("control");

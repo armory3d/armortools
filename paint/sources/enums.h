@@ -465,3 +465,8 @@ typedef enum {
 	HISTORY_ACTION_DELETE_MATERIAL,
 	HISTORY_ACTION_DUPLICATE_MATERIAL,
 } history_action_t;
+
+typedef enum {
+	OPACITY_MODE_ALPHA,
+	OPACITY_MODE_TRANSLUC,
+} opacity_mode_t;

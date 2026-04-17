@@ -328,7 +328,8 @@ node_shader_context_t *make_paint_run(material_t *data, material_context_t *matc
 		node_shader_write_frag(kong, string("var nortan: float3 = %s;", nortan));
 		node_shader_write_frag(kong, string("var height: float = %s;", height));
 		node_shader_write_frag(kong, string("var mat_opacity: float = %s;", opac));
-		if (make_material_opac_used) {
+		if (g_context->material->paint_opac_mode == OPACITY_MODE_TRANSLUC) {
+			make_material_transluc_used = true;
 			node_shader_write_frag(kong, "var opacity: float = 1.0;");
 		}
 		else {
@@ -348,11 +349,6 @@ node_shader_context_t *make_paint_run(material_t *data, material_context_t *matc
 		}
 		if (g_context->material->paint_subs) {
 			node_shader_write_frag(kong, string("var subs: float = %s;", subs));
-		}
-		if (!make_material_opac_used && parse_float(opac) != 1.0 && g_context->viewport_mode == VIEWPORT_MODE_PATH_TRACE &&
-		    g_config->pathtrace_mode == PATHTRACE_MODE_QUALITY) {
-			make_material_opac_used = true;
-			return make_paint_run(data, matcon);
 		}
 		if (!make_material_height_used && parse_float(height) != 0.0) {
 			make_material_height_used = true;
@@ -510,7 +506,7 @@ node_shader_context_t *make_paint_run(material_t *data, material_context_t *matc
 		node_shader_write_frag(kong,
 		                       "output[0] = float4((basecol * t_blur + sample_undo.rgb * sample_undo.a * (1.0 - t_blur)) / max(out_a, 0.0000001), out_a);");
 	}
-	else if (make_material_opac_used || g_context->tool == TOOL_TYPE_GIZMO || g_context->layer->fill_layer != NULL) {
+	else if (g_context->material->paint_opac_mode == OPACITY_MODE_TRANSLUC || g_context->tool == TOOL_TYPE_GIZMO || g_context->layer->fill_layer != NULL) {
 		node_shader_write_frag(kong, string("output[0] = float4(%s, %s);",
 		                                    make_material_blend_mode(kong, g_context->brush_blending, "sample_undo.rgb", "basecol", "str"), "mat_opacity"));
 	}

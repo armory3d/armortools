@@ -1,7 +1,7 @@
 
 #include "global.h"
 
-char *str_sh_irradiance    = "\
+char *str_sh_irradiance = "\
 fun sh_irradiance(nor: float3): float3 { \
 	var c1: float = 0.429043; \
 	var c2: float = 0.511664; \
@@ -32,7 +32,7 @@ fun sh_irradiance(nor: float3): float3 { \
 } \
 ";
 
-char *str_envmap_equirect  = "\
+char *str_envmap_equirect = "\
 fun envmap_equirect(normal: float3, angle: float): float2 { \
 	var PI: float = 3.1415926535; \
 	var PI2: float = PI * 2.0; \
@@ -42,7 +42,7 @@ fun envmap_equirect(normal: float3, angle: float): float2 { \
 } \
 ";
 
-char *str_envmap_sample    = "\
+char *str_envmap_sample = "\
 fun envmap_sample(lod: float, coord: float2): float3 { \
 	if (lod == 0.0) { \
 		return sample_lod(senvmap_radiance, sampler_linear, coord, 0.0).rgb; \
@@ -64,7 +64,7 @@ fun envmap_sample(lod: float, coord: float2): float3 { \
 ";
 
 // https://www.unrealengine.com/en-US/blog/physically-based-shading-on-mobile
-char               *str_env_brdf_approx       = "\
+char *str_env_brdf_approx = "\
 fun env_brdf_approx(specular: float3, roughness: float, dotnv: float): float3 { \
 	var c0: float4 = float4(-1.0, -0.0275, -0.572, 0.022); \
 	var c1: float4 = float4(1.0, 0.0425, 1.04, -0.04); \
@@ -304,14 +304,16 @@ node_shader_context_t *make_mesh_run(material_t *data, i32 layer_pass) {
 			node_shader_write_frag(kong, string("texpaint_sample = sample_lod(texpaint%s, sampler_linear, %s, 0.0);", i32_to_string(l->id), tex_coord));
 			node_shader_write_frag(kong, "texpaint_opac = texpaint_sample.a;");
 
-			// if (g_context.viewport_mode == viewport_mode_t.LIT && make_material_opac_used) {
-			// 	kong.frag_wvpposition = true;
-			// 	node_shader_add_function(kong, str_dither_bayer);
-			// 	node_shader_add_constant(kong, "gbuffer_size: float2", "_gbuffer_size");
-			// 	node_shader_write_frag(kong, "var fragcoord1: float2 = float2(input.wvpposition.x / input.wvpposition.w, input.wvpposition.y /
-			// input.wvpposition.w) * 0.5 + 0.5;"); 	node_shader_write_frag(kong, "var dither: float = dither_bayer(fragcoord1 * constants.gbuffer_size);");
-			// 	node_shader_write_frag(kong, "if (texpaint_opac < dither) { discard; }");
-			// }
+			if (g_context->viewport_mode == VIEWPORT_MODE_LIT && make_material_transluc_used) {
+				con_mesh->data->cull_mode = "none";
+				kong->frag_wvpposition    = true;
+				node_shader_add_function(kong, str_dither_bayer);
+				node_shader_add_constant(kong, "gbuffer_size: float2", "_gbuffer_size");
+				node_shader_write_frag(
+				    kong, "var fragcoord1: float2 = float2(input.wvpposition.x / input.wvpposition.w, input.wvpposition.y / input.wvpposition.w) * 0.5 + 0.5;");
+				node_shader_write_frag(kong, "var dither: float = dither_bayer(fragcoord1 * constants.gbuffer_size);");
+				node_shader_write_frag(kong, "if (texpaint_opac < dither) { discard; }");
+			}
 
 			slot_layer_t_array_t *masks = slot_layer_get_masks(l, true);
 			if (masks != NULL) {

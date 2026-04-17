@@ -447,6 +447,7 @@ rect_t                      *resource_tile50(gpu_texture_t *img, i32 i);
 rect_t                      *resource_tile18(gpu_texture_t *img, i32 i);
 bool                         render_path_raytrace_bake_commands(void (*parse_paint_material)(bool));
 void                         make_material_parse_mesh_material();
+void                         make_material_parse_depth_material();
 void                         make_material_parse_mesh_preview_material(material_data_t *md);
 void                         make_material_parse_paint_material(bool bake_previews);
 parse_node_preview_result_t *make_material_parse_node_preview_material(ui_node_t *node, ui_node_canvas_t *group, ui_node_t_array_t *parents);
@@ -502,6 +503,7 @@ ui_node_t                   *nodes_material_create_node(char *node_type, node_gr
 raw_mesh_t                  *geom_make_plane(f32 size_x, f32 size_y, i32 verts_x, i32 verts_y, f32 uv_scale);
 raw_mesh_t                  *geom_make_uv_sphere(f32 radius, i32 width_segments, i32 height_segments, bool stretch_uv, f32 uv_scale);
 node_shader_context_t       *make_mesh_run(material_t *data, i32 layer_pass);
+node_shader_context_t       *make_depth_run(material_t *data, material_context_t *matcon);
 void                         ui_sidebar_render_ui();
 void                         ui_sidebar_show(bool b);
 void                         console_toast(char *s);

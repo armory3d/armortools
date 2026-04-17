@@ -232,7 +232,7 @@ any_map_t                *resource_bundled;
 i32                       render_path_raytrace_bake_rays_pix       = 0;
 i32                       render_path_raytrace_bake_rays_sec       = 0;
 i32                       render_path_raytrace_bake_current_sample = 0;
-bool                      make_material_opac_used                  = false;
+bool                      make_material_transluc_used              = false;
 bool                      make_material_height_used                = false;
 bool                      make_material_emis_used                  = false;
 bool                      make_material_subs_used                  = false;

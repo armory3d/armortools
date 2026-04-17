@@ -87,6 +87,10 @@ void make_material_parse_mesh_material() {
 	if (g_context->viewport_mode == VIEWPORT_MODE_PATH_TRACE) {
 		g_context->pdirty = 1;
 	}
+
+	if (make_material_transluc_used) {
+		make_material_parse_depth_material();
+	}
 }
 
 void make_material_parse_mesh_preview_material(material_data_t *md) {
@@ -512,4 +516,44 @@ char *make_material_blend_mode_mask(node_shader_t *kong, i32 blending, char *col
 f32 make_material_get_displace_strength() {
 	vec4_t sc = context_main_object()->base->transform->scale;
 	return g_config->displace_strength * 0.02 * sc.x;
+}
+
+void make_material_parse_depth_material() {
+	material_data_t *m = project_materials->buffer[0]->data;
+
+	for (i32 i = 0; i < m->_->shader->contexts->length; ++i) {
+		shader_context_t *c = m->_->shader->contexts->buffer[i];
+		if (string_equals(c->name, "depth")) {
+			array_remove(m->_->shader->contexts, c);
+			make_material_delete_context(c);
+			break;
+		}
+	}
+	for (i32 i = 0; i < m->contexts->length; ++i) {
+		material_context_t *c = m->contexts->buffer[i];
+		if (string_equals(c->name, "depth")) {
+			array_remove(m->contexts, c);
+			break;
+		}
+	}
+
+	material_t            *sdata = GC_ALLOC_INIT(material_t, {.name = "Material", .canvas = g_context->material->canvas});
+	material_context_t    *tmcon = GC_ALLOC_INIT(material_context_t, {.name = "depth", .bind_textures = any_array_create_from_raw((void *[]){}, 0)});
+	node_shader_context_t *con   = make_depth_run(sdata, tmcon);
+
+	bool              compile_error = false;
+	shader_context_t *scon;
+	shader_context_load(con->data);
+	if (con->data == NULL) {
+		compile_error = true;
+	}
+	scon = con->data;
+	if (compile_error) {
+		return;
+	}
+	material_context_load(tmcon);
+	material_context_t *mcon = tmcon;
+
+	any_array_push(m->_->shader->contexts, scon);
+	any_array_push(m->contexts, mcon);
 }

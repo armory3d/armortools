@@ -149,6 +149,7 @@ typedef struct slot_material {
 	i32                    id;
 	bool                   paint_base;
 	bool                   paint_opac;
+	i32                    paint_opac_mode;
 	bool                   paint_occ;
 	bool                   paint_rough;
 	bool                   paint_met;

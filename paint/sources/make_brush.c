@@ -35,7 +35,7 @@ void make_brush_run(node_shader_t *kong) {
 		node_shader_write_frag(kong, "wn = normalize(wn);");
 		node_shader_write_frag(kong, "var plane_dist: float = dot(wn, winp.xyz - input.wposition);");
 
-		if (g_config->brush_angle_reject && !g_context->xray) {
+		if (g_config->brush_angle_reject && !g_context->xray && !make_material_transluc_used) {
 			// constants.inp.w = paint2d ? 0.0 : 1.0
 			node_shader_write_frag(kong, "if (plane_dist < -0.03 && constants.inp.w == 0.0) { discard; }");
 			kong->frag_n = true;

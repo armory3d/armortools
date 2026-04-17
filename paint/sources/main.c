@@ -130,6 +130,7 @@
 #include "make_brush.c"
 #include "make_clone.c"
 #include "make_colorid_picker.c"
+#include "make_depth.c"
 #include "make_discard.c"
 #include "make_material.c"
 #include "make_mesh.c"
