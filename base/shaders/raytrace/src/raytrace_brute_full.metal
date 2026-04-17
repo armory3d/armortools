@@ -5,7 +5,7 @@
 #define _SUBSURFACE
 #define _TRANSLUCENCY
 #define _ROULETTE
-#define _TRANSPARENCY
+// #define _TRANSPARENCY
 // #define _FRESNEL
 #endif
 #define _RENDER

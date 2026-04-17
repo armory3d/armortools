@@ -2,7 +2,7 @@
 #define _EMISSION
 #define _SUBSURFACE
 #define _TRANSLUCENCY
-#define _TRANSPARENCY
+// #define _TRANSPARENCY
 #define _ROULETTE
 // #define _FRESNEL
 #endif
@@ -139,7 +139,8 @@ void main(uint3 id : SV_DispatchThreadID) {
 					payload.a = j;
 					transparent_hits++;
 					i--;
-				} else {
+				}
+				else {
 					payload.a = -2;
 				}
 				continue;
