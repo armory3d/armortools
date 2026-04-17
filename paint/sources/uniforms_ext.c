@@ -14,7 +14,7 @@ f32 uniforms_ext_f32_link(object_t *object, material_data_t *mat, char *link) {
 		bool decal_mask = decal && operator_shortcut(string("%s+%s", any_map_get(config_keymap, "decal_mask"), any_map_get(config_keymap, "action_paint")),
 		                                             SHORTCUT_TYPE_DOWN);
 		f32  brush_decal_mask_radius = g_context->brush_decal_mask_radius;
-		brush_decal_mask_radius *= g_context->paint2d ? 0.55 * ui_view2d_pan_scale : 2.0;
+		brush_decal_mask_radius *= g_context->paint2d ? 0.35 * ui_view2d_pan_scale : 2.0;
 		f32 radius = decal_mask ? brush_decal_mask_radius : g_context->brush_radius;
 		f32 val    = (radius * g_context->brush_nodes_radius) / 15.0;
 		if (g_config->pressure_radius && pen_down("tip")) {
@@ -22,7 +22,7 @@ f32 uniforms_ext_f32_link(object_t *object, material_data_t *mat, char *link) {
 		}
 		f32 scale2d = (900 / (float)base_h()) * g_config->window_scale;
 		if (!decal) {
-			val *= g_context->paint2d ? 0.55 * scale2d * ui_view2d_pan_scale : 2;
+			val *= g_context->paint2d ? 0.5 * 0.5 * scale2d * ui_view2d_pan_scale : 2;
 		}
 		else {
 			val *= scale2d; // Projection ratio

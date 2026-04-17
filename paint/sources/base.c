@@ -1573,7 +1573,7 @@ void ui_base_render_cursor(void *_) {
 	}
 
 	gpu_texture_t *cursor_img = resource_get("cursor.k");
-	i32            psize      = math_floor(182 * (g_context->brush_radius * g_context->brush_nodes_radius) * UI_SCALE());
+	i32            psize      = math_floor(182 * (g_context->brush_radius * 0.5 * g_context->brush_nodes_radius) * UI_SCALE());
 
 	// Clone source cursor
 	if (g_context->tool == TOOL_TYPE_CLONE && !keyboard_down("alt") && (mouse_down("left") || pen_down("tip"))) {
