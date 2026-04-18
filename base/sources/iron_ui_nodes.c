@@ -480,9 +480,9 @@ void ui_node_draw_body(ui_node_t *node, ui_node_canvas_t *canvas, float nx, floa
 				h2->f = val[2];
 			}
 
-			val[0]                           = ui_slider(h0, "X", min, max, true, 100, true, UI_ALIGN_LEFT, true);
-			val[1]                           = ui_slider(h1, "Y", min, max, true, 100, true, UI_ALIGN_LEFT, true);
-			val[2]                           = ui_slider(h2, "Z", min, max, true, 100, true, UI_ALIGN_LEFT, true);
+			val[0]                           = ui_slider(h0, "X", min, max, true, but->precision, true, UI_ALIGN_LEFT, true);
+			val[1]                           = ui_slider(h1, "Y", min, max, true, but->precision, true, UI_ALIGN_LEFT, true);
+			val[2]                           = ui_slider(h2, "Z", min, max, true, but->precision, true, UI_ALIGN_LEFT, true);
 			current->ops->theme->TEXT_OFFSET = text_off;
 			ny += lineh * 3.0;
 		}
@@ -689,9 +689,9 @@ void ui_node_draw_body(ui_node_t *node, ui_node_canvas_t *canvas, float nx, floa
 			if (h2->init) {
 				h2->f = val[2];
 			}
-			val[0]                           = ui_slider(h0, "X", min, max, true, 100, true, UI_ALIGN_LEFT, true);
-			val[1]                           = ui_slider(h1, "Y", min, max, true, 100, true, UI_ALIGN_LEFT, true);
-			val[2]                           = ui_slider(h2, "Z", min, max, true, 100, true, UI_ALIGN_LEFT, true);
+			val[0]                           = ui_slider(h0, "X", min, max, true, inp->precision, true, UI_ALIGN_LEFT, true);
+			val[1]                           = ui_slider(h1, "Y", min, max, true, inp->precision, true, UI_ALIGN_LEFT, true);
+			val[2]                           = ui_slider(h2, "Z", min, max, true, inp->precision, true, UI_ALIGN_LEFT, true);
 			current->ops->theme->TEXT_OFFSET = text_off;
 			ny += lineh * 2.5;
 		}
