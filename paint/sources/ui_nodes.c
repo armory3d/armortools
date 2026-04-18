@@ -520,7 +520,7 @@ f32 ui_nodes_get_zoom_delta() {
 	       : g_config->zoom_direction == ZOOM_DIRECTION_VERTICAL_INVERTED   ? -ui->input_dy
 	       : g_config->zoom_direction == ZOOM_DIRECTION_HORIZONTAL          ? ui->input_dx
 	       : g_config->zoom_direction == ZOOM_DIRECTION_HORIZONTAL_INVERTED ? ui->input_dx
-	                                                                          : -(ui->input_dy - ui->input_dx);
+	                                                                        : -(ui->input_dy - ui->input_dx);
 }
 
 ui_canvas_control_t *ui_nodes_get_canvas_control(bool controls_down, bool is_node_view) {
@@ -1045,7 +1045,8 @@ void ui_nodes_make_node_preview(ui_node_t *node) {
 		return;
 	}
 
-	ui_node_t_array_t *nodes = ui_nodes_get_canvas(false)->nodes;
+	ui_node_canvas_t  *current_canvas = ui_nodes_get_canvas(true);
+	ui_node_t_array_t *nodes          = current_canvas->nodes;
 	if (array_index_of(nodes, node) == -1) {
 		return;
 	}
@@ -1056,8 +1057,31 @@ void ui_nodes_make_node_preview(ui_node_t *node) {
 		any_imap_set(g_context->node_preview_map, node->id, img);
 	}
 
+	ui_node_canvas_t  *group_canvas  = NULL;
+	ui_node_t_array_t *group_parents = NULL;
+	if (ui_nodes_group_stack->length > 0) {
+		group_canvas            = ui_nodes_group_stack->buffer[ui_nodes_group_stack->length - 1]->canvas;
+		group_parents           = any_array_create_from_raw((void *[]){}, 0);
+		ui_node_canvas_t *outer = ui_nodes_get_canvas(false);
+		for (i32 i = 0; i < ui_nodes_group_stack->length; ++i) {
+			char      *gname      = ui_nodes_group_stack->buffer[i]->canvas->name;
+			ui_node_t *group_node = NULL;
+			for (i32 j = 0; j < outer->nodes->length; ++j) {
+				ui_node_t *n = outer->nodes->buffer[j];
+				if (string_equals(n->type, "GROUP") && string_equals(n->name, gname)) {
+					group_node = n;
+					break;
+				}
+			}
+			if (group_node != NULL) {
+				any_array_push(group_parents, group_node);
+			}
+			outer = ui_nodes_group_stack->buffer[i]->canvas;
+		}
+	}
+
 	ui_nodes_hwnd->redraws = 2;
-	util_render_make_node_preview(ui_nodes_get_canvas(false), node, img, NULL, NULL);
+	util_render_make_node_preview(current_canvas, node, img, group_canvas, group_parents);
 }
 
 void ui_nodes_render(void *_) {
