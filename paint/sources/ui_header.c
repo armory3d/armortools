@@ -138,6 +138,12 @@ void ui_header_draw_tool_properties() {
 			history_new_white_mask();
 		}
 		ui->enabled = true;
+
+		ui_handle_t *h_viewport_mask = ui_handle(__ID__);
+		g_context->colorid_viewport_mask = ui_check(h_viewport_mask, tr("Viewport Mask"), "");
+		if (h_viewport_mask->changed) {
+			make_material_parse_mesh_material();
+		}
 	}
 	else if (g_context->tool == TOOL_TYPE_PICKER || g_context->tool == TOOL_TYPE_MATERIAL) {
 

@@ -168,6 +168,11 @@ node_shader_context_t *make_mesh_run(material_t *data, i32 layer_pass) {
 			sculpt_make_mesh_run(kong, l);
 		}
 	}
+
+	if (g_context->colorid_viewport_mask && g_context->tool != TOOL_TYPE_COLORID) {
+		make_discard_color_id(kong, "tex_coord");
+	}
+
 	if (g_context->tool == TOOL_TYPE_COLORID) {
 		texture_count++;
 		node_shader_add_texture(kong, "texcolorid", "_texcolorid");

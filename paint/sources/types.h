@@ -253,6 +253,7 @@ typedef struct context {
 	struct gpu_texture         *mask_preview_rgba32;
 	struct slot_layer          *mask_preview_last;
 	bool                        colorid_picked;
+	bool                        colorid_viewport_mask;
 	bool                        material_preview;
 	mat4_t                      saved_camera;
 	tool_type_t                 color_picker_previous_tool;

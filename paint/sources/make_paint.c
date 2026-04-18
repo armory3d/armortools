@@ -266,7 +266,7 @@ node_shader_context_t *make_paint_run(material_t *data, material_context_t *matc
 		node_shader_add_out(kong, "tex_coord_pick: float2");
 		node_shader_write_vert(kong, "output.tex_coord_pick = input.tex;");
 		if (g_context->colorid_picked) {
-			make_discard_color_id(kong);
+			make_discard_color_id(kong, "tex_coord_pick");
 		}
 		if (face_fill) {
 			make_discard_face(kong);

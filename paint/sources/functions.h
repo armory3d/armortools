@@ -482,7 +482,7 @@ swatch_color_t              *util_clone_swatch_color(swatch_color_t *s);
 void                         import_keymap_run(char *path);
 void                         tab_plugins_draw(ui_handle_t *htab);
 void                         plugin_uv_unwrap_button();
-void                         make_discard_color_id(node_shader_t *kong);
+void                         make_discard_color_id(node_shader_t *kong, char *tex_coord);
 void                         make_discard_face(node_shader_t *kong);
 void                         make_discard_uv_island(node_shader_t *kong);
 void                         make_discard_material_id(node_shader_t *kong);

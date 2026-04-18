@@ -894,6 +894,10 @@ void render_path_paint_bind_layers() {
 			render_path_bind_target(string("texpaint_sculpt%d", l->id), string("texpaint_sculpt%d", l->id));
 		}
 	}
+
+	if (g_context->colorid_picked && g_context->colorid_viewport_mask) {
+		render_path_bind_target("texpaint_colorid", "texpaint_colorid");
+	}
 }
 
 void render_path_paint_unbind_layers() {
