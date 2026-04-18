@@ -289,9 +289,9 @@ void parser_material_finalize(node_shader_context_t *con) {
 		node_shader_write_attrib_vert(kong, "output.wnormal = constants.N * float3(input.nor.xy, input.pos.w);");
 		node_shader_write_attrib_frag(kong, "var n: float3 = normalize(input.wnormal);");
 	}
-	else if (kong->vert_n) {
+	if (kong->vert_n) {
 		node_shader_add_constant(kong, "N: float3x3", "_normal_matrix");
-		node_shader_write_attrib_vert(kong, "var wnormal: float3 = normalize(constants.N * float3(input.nor.xy, input.pos.w));");
+		node_shader_write_attrib_vert(kong, "var vert_wnormal: float3 = normalize(constants.N * float3(input.nor.xy, input.pos.w));");
 	}
 	if (kong->frag_nattr) {
 		node_shader_add_out(kong, "nattr: float3");

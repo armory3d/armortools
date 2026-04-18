@@ -515,7 +515,7 @@ char *make_material_blend_mode_mask(node_shader_t *kong, i32 blending, char *col
 
 f32 make_material_get_displace_strength() {
 	vec4_t sc = context_main_object()->base->transform->scale;
-	return g_config->displace_strength * 0.02 * sc.x;
+	return g_config->displace_strength * 0.1 * sc.x;
 }
 
 void make_material_parse_depth_material() {

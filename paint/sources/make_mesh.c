@@ -144,7 +144,7 @@ node_shader_context_t *make_mesh_run(material_t *data, i32 layer_pass) {
 				}
 			}
 		}
-		node_shader_write_vert(kong, string("output.wposition += wnormal * float3(height, height, height) * float3(%s, %s, %s);",
+		node_shader_write_vert(kong, string("output.wposition += vert_wnormal * float3(height, height, height) * float3(%s, %s, %s);",
 		                                    f32_to_string(displace_strength), f32_to_string(displace_strength), f32_to_string(displace_strength)));
 	}
 

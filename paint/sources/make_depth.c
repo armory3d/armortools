@@ -54,7 +54,7 @@ node_shader_context_t *make_depth_run(material_t *data, material_context_t *matc
 	// 			}
 	// 		}
 	// 	}
-	// 	node_shader_write_vert(kong, string("output.wposition += wnormal * float3(height, height, height) * float3(%s, %s, %s);",
+	// 	node_shader_write_vert(kong, string("output.wposition += vert_wnormal * float3(height, height, height) * float3(%s, %s, %s);",
 	// 	                                    f32_to_string(displace_strength), f32_to_string(displace_strength), f32_to_string(displace_strength)));
 	// }
 
