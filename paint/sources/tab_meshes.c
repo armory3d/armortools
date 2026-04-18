@@ -5,7 +5,7 @@ i32 _tab_meshes_draw_i;
 
 void tab_meshes_draw_properties(mesh_object_t *o) {
 	g_context->selected_object = o->base;
-	ui_handle_t *h               = ui_handle(__ID__);
+	ui_handle_t *h             = ui_handle(__ID__);
 	// h->b = g_context->selected_object->visible;
 	// g_context->selected_object->visible = ui_check(h, "Visible", "");
 	// if (h->changed) {
@@ -18,6 +18,7 @@ void tab_meshes_draw_properties(mesh_object_t *o) {
 	rot              = vec4_mult(rot, 180 / 3.141592);
 	f32  f           = 0.0;
 	bool changed     = false;
+	ui->changed      = false;
 
 	ui_row4();
 	ui_text("Loc", UI_ALIGN_LEFT, 0x00000000);
@@ -128,7 +129,7 @@ void tab_meshes_draw_properties(mesh_object_t *o) {
 	}
 
 	if (changed) {
-		rot                                          = vec4_mult(rot, 3.141592 / 180.0);
+		rot                                        = vec4_mult(rot, 3.141592 / 180.0);
 		g_context->selected_object->transform->rot = quat_from_euler(rot.x, rot.y, rot.z);
 		transform_build_matrix(g_context->selected_object->transform);
 		transform_compute_dim(g_context->selected_object->transform);
@@ -197,6 +198,30 @@ void tab_meshes_draw_properties(mesh_object_t *o) {
 	}
 }
 
+void tab_meshes_draw_context_menu_delete_next_frame(mesh_object_t *o) {
+	data_delete_mesh(o->data->_->handle);
+	mesh_object_remove(o);
+	g_context->paint_object = context_main_object();
+	util_mesh_merge(NULL);
+	g_context->ddirty = 2;
+}
+
+void tab_meshes_draw_context_menu_delete(mesh_object_t *o) {
+	array_remove(project_paint_objects, o);
+	while (o->base->children->length > 0) {
+		object_t *child = o->base->children->buffer[0];
+		object_set_parent(child, NULL);
+		if (project_paint_objects->buffer[0]->base != child) {
+			object_set_parent(child, project_paint_objects->buffer[0]->base);
+		}
+		if (o->base->children->length == 0) {
+			project_paint_objects->buffer[0]->base->transform->scale = o->base->transform->scale;
+			transform_build_matrix(project_paint_objects->buffer[0]->base->transform);
+		}
+	}
+	sys_notify_on_next_frame(tab_meshes_draw_context_menu_delete_next_frame, o);
+}
+
 void tab_meshes_draw_context_menu() {
 	i32            i = _tab_meshes_draw_i;
 	mesh_object_t *o = project_paint_objects->buffer[i];
@@ -206,25 +231,9 @@ void tab_meshes_draw_context_menu() {
 		box_export_show_mesh();
 	}
 	if (project_paint_objects->length > 1 && ui_menu_button(tr("Delete"), "", ICON_DELETE)) {
-		array_remove(project_paint_objects, o);
-		while (o->base->children->length > 0) {
-			object_t *child = o->base->children->buffer[0];
-			object_set_parent(child, NULL);
-			if (project_paint_objects->buffer[0]->base != child) {
-				object_set_parent(child, project_paint_objects->buffer[0]->base);
-			}
-			if (o->base->children->length == 0) {
-				project_paint_objects->buffer[0]->base->transform->scale = o->base->transform->scale;
-				transform_build_matrix(project_paint_objects->buffer[0]->base->transform);
-			}
-		}
-		data_delete_mesh(o->data->_->handle);
-		mesh_object_remove(o);
-		g_context->paint_object = context_main_object();
-		util_mesh_merge(NULL);
-		g_context->ddirty = 2;
+		sys_notify_on_next_frame(tab_meshes_draw_context_menu_delete, o);
 	}
-	if (ui_menu_button(tr("Duplicate"), "", ICON_DUPLICATE)) {
+	if (ui_menu_button(tr("Duplicate"), "ctrl+d", ICON_DUPLICATE)) {
 		sim_duplicate();
 	}
 
@@ -394,7 +403,6 @@ void tab_meshes_draw(ui_handle_t *htab) {
 
 			if (ui->is_hovered && ui->input_released_r) {
 				_tab_meshes_draw_i = i;
-
 				ui_menu_draw(&tab_meshes_draw_context_menu, -1, -1);
 			}
 			if (h->changed) {
