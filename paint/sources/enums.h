@@ -28,9 +28,8 @@ typedef enum {
 
 typedef enum {
 	SPLIT_TYPE_OBJECT   = 0,
-	SPLIT_TYPE_GROUP    = 1,
-	SPLIT_TYPE_MATERIAL = 2,
-	SPLIT_TYPE_UDIM     = 3,
+	SPLIT_TYPE_MATERIAL = 1,
+	SPLIT_TYPE_UDIM     = 2,
 } split_type_t;
 
 typedef enum {

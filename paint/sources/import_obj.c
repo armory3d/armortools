@@ -4,7 +4,7 @@
 void import_obj_run(char *path, bool replace_existing) {
 	split_type_t i       = g_context->split_by;
 	bool         is_udim = i == SPLIT_TYPE_UDIM;
-	i32 split_code = (i == SPLIT_TYPE_OBJECT || is_udim) ? char_code_at("o", 0) : i == SPLIT_TYPE_GROUP ? char_code_at("g", 0) : char_code_at("u", 0); // usemtl
+	i32 split_code = (i == SPLIT_TYPE_OBJECT || is_udim) ? 'o' : 'u'; // usemtl
 
 	buffer_t *b = data_get_blob(path);
 

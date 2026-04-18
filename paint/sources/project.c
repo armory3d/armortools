@@ -444,6 +444,7 @@ void project_append_mesh() {
 }
 
 extern int plugins_skinning_frame;
+extern int plugins_split_by;
 
 void project_import_mesh_box_draw() {
 	char *path             = _project_import_mesh_box_path;
@@ -451,18 +452,18 @@ void project_import_mesh_box_draw() {
 	bool  clear_layers     = _project_import_mesh_box_clear_layers;
 	void (*done)(void)     = _project_import_mesh_box_done;
 
-	if (ends_with(to_lower_case(path), ".obj")) {
+	if (ends_with(to_lower_case(path), ".obj") || ends_with(to_lower_case(path), ".fbx")) {
 		string_array_t *split_by_combo = any_array_create_from_raw(
 		    (void *[]){
 		        tr("Object"),
-		        tr("Group"),
 		        tr("Material"),
 		        tr("UDIM Tile"),
 		    },
-		    4);
-		g_context->split_by = ui_combo(ui_handle(__ID__), split_by_combo, tr("Split By"), true, UI_ALIGN_LEFT, true);
+		    3);
+		ui_text(tr("Split By"), UI_ALIGN_LEFT, 0);
+		g_context->split_by = plugins_split_by = ui_inline_radio(ui_handle(__ID__), split_by_combo, UI_ALIGN_LEFT);
 		if (ui->is_hovered) {
-			ui_tooltip(tr("Split .obj mesh into objects"));
+			ui_tooltip(tr("Split mesh into objects"));
 		}
 	}
 
@@ -489,6 +490,7 @@ void project_import_mesh_box_draw() {
 	    },
 	    3);
 
+	ui_end_element();
 	ui_row(row);
 	if (ui_icon_button(tr("Cancel"), ICON_CLOSE, UI_ALIGN_CENTER)) {
 		ui_box_hide();
