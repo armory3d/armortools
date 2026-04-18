@@ -96,7 +96,7 @@ void tab_materials_draw_slots_menu() {
 		box_export_show_bake_material();
 	}
 
-	if (ui_menu_button(tr("Duplicate"), "", ICON_DUPLICATE)) {
+	if (ui_menu_button(tr("Duplicate"), "ctrl+d", ICON_DUPLICATE)) {
 		sys_notify_on_next_frame(&tab_materials_draw_slots_duplicate, NULL);
 	}
 
@@ -339,6 +339,10 @@ void tab_materials_draw_slots(bool mini) {
 	if (in_focus && ui->is_delete_down && project_materials->length > 1) {
 		ui->is_delete_down = false;
 		tab_materials_delete_material(g_context->material);
+	}
+	if (in_focus && ui->is_ctrl_down && ui->is_key_pressed && ui->key_code == KEY_CODE_D) {
+		_tab_materials_draw_slots = array_index_of(project_materials, g_context->material);
+		sys_notify_on_next_frame(&tab_materials_draw_slots_duplicate, NULL);
 	}
 	if (in_focus) {
 		i32 i = array_index_of(project_materials, g_context->material);

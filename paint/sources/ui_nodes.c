@@ -404,7 +404,7 @@ void ui_viewnodes_on_canvas_context_menu() {
 	if (ui_menu_button(tr("Delete"), "delete", ICON_DELETE)) {
 		sys_notify_on_next_frame(&ui_viewnodes_on_canvas_delete, NULL);
 	}
-	if (ui_menu_button(tr("Duplicate"), "", ICON_DUPLICATE)) {
+	if (ui_menu_button(tr("Duplicate"), "ctrl+d", ICON_DUPLICATE)) {
 		sys_notify_on_next_frame(&ui_viewnodes_on_canvas_released_duplicate, NULL);
 	}
 	if (selected != NULL && string_equals(selected->type, "RGB")) {

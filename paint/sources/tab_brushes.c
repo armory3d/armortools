@@ -38,7 +38,7 @@ void tab_brushes_draw_context_menu() {
 		box_export_show_brush();
 	}
 
-	if (ui_menu_button(tr("Duplicate"), "", ICON_DUPLICATE)) {
+	if (ui_menu_button(tr("Duplicate"), "ctrl+d", ICON_DUPLICATE)) {
 		sys_notify_on_next_frame(&tab_brushes_draw_duplicate, NULL);
 	}
 
@@ -177,6 +177,10 @@ void tab_brushes_draw(ui_handle_t *htab) {
 		if (in_focus && ui->is_delete_down && project_brushes->length > 1) {
 			ui->is_delete_down = false;
 			tab_brushes_delete_brush(g_context->brush);
+		}
+		if (in_focus && ui->is_ctrl_down && ui->is_key_pressed && ui->key_code == KEY_CODE_D) {
+			_tab_brushes_draw_i = array_index_of(project_brushes, g_context->brush);
+			sys_notify_on_next_frame(&tab_brushes_draw_duplicate, NULL);
 		}
 		if (in_focus) {
 			i32 i = array_index_of(project_brushes, g_context->brush);

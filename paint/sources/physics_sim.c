@@ -102,6 +102,10 @@ void sim_remove_body(i32 uid) {
 }
 
 void sim_duplicate() {
+	if (g_context->selected_object == NULL) {
+		return;
+	}
+
 	// Mesh
 	mesh_object_t *so  = g_context->selected_object->ext;
 	mesh_object_t *dup = scene_add_mesh_object(so->data, so->material, so->base->parent);

@@ -52,10 +52,10 @@ void tab_scene_import_mesh_done() {
 }
 
 void tab_scene_draw_list_context_menu() {
-	if (ui_menu_button(tr("Duplicate"), "", ICON_DUPLICATE)) {
+	if (ui_menu_button(tr("Duplicate"), "ctrl+d", ICON_DUPLICATE)) {
 		sim_duplicate();
 	}
-	if (ui_menu_button(tr("Delete"), "", ICON_DELETE)) {
+	if (ui_menu_button(tr("Delete"), "delete", ICON_DELETE)) {
 		sim_delete();
 	}
 }

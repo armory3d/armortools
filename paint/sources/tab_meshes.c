@@ -230,7 +230,7 @@ void tab_meshes_draw_context_menu() {
 		g_context->export_mesh_index = i + 1;
 		box_export_show_mesh();
 	}
-	if (project_paint_objects->length > 1 && ui_menu_button(tr("Delete"), "", ICON_DELETE)) {
+	if (project_paint_objects->length > 1 && ui_menu_button(tr("Delete"), "delete", ICON_DELETE)) {
 		sys_notify_on_next_frame(tab_meshes_draw_context_menu_delete, o);
 	}
 	if (ui_menu_button(tr("Duplicate"), "ctrl+d", ICON_DUPLICATE)) {

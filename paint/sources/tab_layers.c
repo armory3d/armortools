@@ -333,6 +333,13 @@ bool tab_layers_can_delete(slot_layer_t *l) {
 	return num_layers > 1;
 }
 
+void tab_layers_draw_layer_context_menu_duplicate(void *_) {
+	slot_layer_t *l = tab_layers_l;
+	context_set_layer(l);
+	history_duplicate_layer();
+	layers_duplicate_layer(l);
+}
+
 void tab_layers_draw_layer_slot_full(slot_layer_t *l, i32 i) {
 	i32 step   = ui->ops->theme->ELEMENT_H;
 	f32 center = (step / 2.0) * UI_SCALE();
@@ -421,6 +428,13 @@ void tab_layers_draw_layer_slot_full(slot_layer_t *l, i32 i) {
 		if (in_focus && ui->is_delete_down && tab_layers_can_delete(g_context->layer)) {
 			ui->is_delete_down = false;
 			sys_notify_on_next_frame(&tab_layers_draw_layer_slot_full_delete_layer, NULL);
+		}
+		if (in_focus && ui->is_ctrl_down && ui->is_key_pressed && ui->key_code == KEY_CODE_D) {
+			ui->is_key_pressed = false;
+			gc_unroot(tab_layers_l);
+			tab_layers_l = g_context->layer;
+			gc_root(tab_layers_l);
+			sys_notify_on_next_frame(&tab_layers_draw_layer_context_menu_duplicate, NULL);
 		}
 	}
 
@@ -540,13 +554,6 @@ void tab_layers_draw_layer_context_menu_update_fill_layers(void *_) {
 
 void tab_layers_draw_layer_context_menu_set_bits(void *_) {
 	layers_set_bits();
-}
-
-void tab_layers_draw_layer_context_menu_duplicate(void *_) {
-	slot_layer_t *l = tab_layers_l;
-	context_set_layer(l);
-	history_duplicate_layer();
-	layers_duplicate_layer(l);
 }
 
 void tab_layers_draw_layer_context_menu_merge_down(void *_) {
@@ -671,7 +678,7 @@ void tab_layers_draw_layer_context_menu_draw() {
 	}
 	ui->enabled = true;
 
-	if (ui_menu_button(tr("Duplicate"), "", ICON_DUPLICATE)) {
+	if (ui_menu_button(tr("Duplicate"), "ctrl+d", ICON_DUPLICATE)) {
 		sys_notify_on_next_frame(&tab_layers_draw_layer_context_menu_duplicate, NULL);
 	}
 

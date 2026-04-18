@@ -16,8 +16,8 @@ void box_projects_tab_menu_on_next_frame(void *_) {
 }
 
 void box_projects_tab_menu() {
-	// if (ui_menu_button(tr("Duplicate"), "", icon_t.DUPLICATE)) {}
-	if (ui_menu_button(tr("Delete"), "", ICON_DELETE)) {
+	// if (ui_menu_button(tr("Duplicate"), "ctrl+d", icon_t.DUPLICATE)) {}
+	if (ui_menu_button(tr("Delete"), "delete", ICON_DELETE)) {
 		sys_notify_on_next_frame(&box_projects_tab_menu_on_next_frame, NULL);
 	}
 }
