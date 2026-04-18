@@ -10,27 +10,24 @@ void make_clone_run(node_shader_t *kong) {
 	node_shader_write_frag(kong, "var tex_coord_inp: float2 = tex_coord_inp4.ba;");
 
 	node_shader_write_frag(kong, "var texpaint_undo_sample: float4 = sample_lod(texpaint_undo, sampler_linear, tex_coord_inp, 0.0);");
-	node_shader_write_frag(kong, "var texpaint_pack_sample: float3 = sample_lod(texpaint_pack_undo, sampler_linear, tex_coord_inp, 0.0).rgb;");
-	char *base   = "texpaint_undo_sample.rgb";
-	char *rough  = "texpaint_pack_sample.g";
-	char *met    = "texpaint_pack_sample.b";
-	char *occ    = "texpaint_pack_sample.r";
-	char *nortan = "sample_lod(texpaint_nor_undo, sampler_linear, tex_coord_inp, 0.0).rgb";
-	char *height = "0.0";
-	char *opac   = "1.0";
+	node_shader_write_frag(kong, "var texpaint_pack_undo_sample: float4 = sample_lod(texpaint_pack_undo, sampler_linear, tex_coord_inp, 0.0);");
+	node_shader_write_frag(kong, "var texpaint_nor_undo_sample: float4 = sample_lod(texpaint_nor_undo, sampler_linear, tex_coord_inp, 0.0);");
 	node_shader_write_frag(kong, "var clone_src_alpha: float = texpaint_undo_sample.a;");
-	node_shader_write_frag(kong, string("var basecol: float3 = %s;", base));
-	node_shader_write_frag(kong, string("var roughness: float = %s;", rough));
-	node_shader_write_frag(kong, string("var metallic: float = %s;", met));
-	node_shader_write_frag(kong, string("var occlusion: float = %s;", occ));
-	node_shader_write_frag(kong, string("var nortan: float3 = %s;", nortan));
-	node_shader_write_frag(kong, string("var height: float = %s;", height));
-	node_shader_write_frag(kong, string("var mat_opacity: float = %s;", opac));
+	node_shader_write_frag(kong, "var basecol: float3 = texpaint_undo_sample.rgb;");
+	node_shader_write_frag(kong, "var roughness: float = texpaint_pack_undo_sample.g;");
+	node_shader_write_frag(kong, "var metallic: float = texpaint_pack_undo_sample.b;");
+	node_shader_write_frag(kong, "var occlusion: float = texpaint_pack_undo_sample.r;");
+	node_shader_write_frag(kong, "var nortan: float3 = texpaint_nor_undo_sample.rgb;");
+	node_shader_write_frag(kong, "var height: float = texpaint_pack_undo_sample.a;");
+	node_shader_write_frag(kong, "var mat_opacity: float = texpaint_undo_sample.a;");
 	node_shader_write_frag(kong, "var opacity: float = mat_opacity * constants.brush_opacity;");
+	if (g_context->material->paint_emis || g_context->material->paint_subs) {
+		node_shader_write_frag(kong, "var clone_matid_mod: float = float(int(texpaint_nor_undo_sample.a * 255.0)) % float(3);");
+	}
 	if (g_context->material->paint_emis) {
-		node_shader_write_frag(kong, "var emis: float = 0.0;");
+		node_shader_write_frag(kong, "var emis: float = 0.0; if (clone_matid_mod == 1.0) { emis = 1.0; }");
 	}
 	if (g_context->material->paint_subs) {
-		node_shader_write_frag(kong, "var subs: float = 0.0;");
+		node_shader_write_frag(kong, "var subs: float = 0.0; if (clone_matid_mod == 2.0) { subs = 1.0; }");
 	}
 }
