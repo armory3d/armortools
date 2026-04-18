@@ -259,7 +259,7 @@ void base_update(void *_) {
 		g_context->ddirty = 0;
 	}
 
-	if (g_context->tool == TOOL_TYPE_GIZMO) {
+	if (g_context->tool == TOOL_TYPE_CURSOR) {
 		if (keyboard_down("control") && keyboard_started("d")) {
 			sim_duplicate();
 		}
@@ -366,7 +366,7 @@ void base_render(void *_) {
 		base_init_undo_layers();
 	}
 
-	if (g_context->tool == TOOL_TYPE_GIZMO) {
+	if (g_context->tool == TOOL_TYPE_CURSOR) {
 		sim_init();
 		sim_update();
 	}
@@ -1207,11 +1207,11 @@ void ui_base_update(void *_) {
 			else if (operator_shortcut(any_map_get(config_keymap, "tool_bake"), SHORTCUT_TYPE_STARTED)) {
 				context_select_tool(TOOL_TYPE_BAKE);
 			}
-			else if (operator_shortcut(any_map_get(config_keymap, "tool_gizmo"), SHORTCUT_TYPE_STARTED)) {
-				context_select_tool(TOOL_TYPE_GIZMO);
-			}
 			else if (operator_shortcut(any_map_get(config_keymap, "tool_material"), SHORTCUT_TYPE_STARTED)) {
 				context_select_tool(TOOL_TYPE_MATERIAL);
+			}
+			else if (operator_shortcut(any_map_get(config_keymap, "tool_cursor"), SHORTCUT_TYPE_STARTED)) {
+				context_select_tool(TOOL_TYPE_CURSOR);
 			}
 			else if (operator_shortcut(any_map_get(config_keymap, "swap_brush_eraser"), SHORTCUT_TYPE_STARTED)) {
 				context_select_tool(g_context->tool == TOOL_TYPE_BRUSH ? TOOL_TYPE_ERASER : TOOL_TYPE_BRUSH);
@@ -1738,7 +1738,7 @@ void base_init() {
 
 	if (args_player) {
 		sys_notify_on_next_frame(&base_init_on_start_arm, NULL);
-		g_context->tool = TOOL_TYPE_GIZMO;
+		g_context->tool = TOOL_TYPE_CURSOR;
 		make_material_parse_paint_material(true);
 		g_config->workspace = WORKSPACE_PLAYER;
 		base_update_workspace();

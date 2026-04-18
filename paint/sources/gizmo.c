@@ -7,7 +7,7 @@ quat_t gizmo_q  = (quat_t){0.0, 0.0, 0.0, 1.0};
 quat_t gizmo_q0 = (quat_t){0.0, 0.0, 0.0, 1.0};
 
 void gizmo_update() {
-	bool is_object = g_context->tool == TOOL_TYPE_GIZMO;
+	bool is_object = g_context->tool == TOOL_TYPE_CURSOR;
 	bool is_decal  = base_is_decal_layer();
 
 	object_t *gizmo = g_context->gizmo;
@@ -19,7 +19,7 @@ void gizmo_update() {
 
 	object_t *paint_object = g_context->paint_object->base;
 
-	if (g_context->tool == TOOL_TYPE_GIZMO && g_context->selected_object != NULL) {
+	if (g_context->tool == TOOL_TYPE_CURSOR && g_context->selected_object != NULL) {
 		paint_object = g_context->selected_object;
 	}
 

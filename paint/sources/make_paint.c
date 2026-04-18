@@ -336,7 +336,7 @@ node_shader_context_t *make_paint_run(material_t *data, material_context_t *matc
 			node_shader_write_frag(kong, "var opacity: float = mat_opacity;");
 		}
 
-		if (g_context->tool == TOOL_TYPE_GIZMO) {
+		if (g_context->tool == TOOL_TYPE_CURSOR) {
 			node_shader_write_frag(kong, "opacity = 1.0;");
 		}
 		else {
@@ -506,7 +506,7 @@ node_shader_context_t *make_paint_run(material_t *data, material_context_t *matc
 		node_shader_write_frag(kong,
 		                       "output[0] = float4((basecol * t_blur + sample_undo.rgb * sample_undo.a * (1.0 - t_blur)) / max(out_a, 0.0000001), out_a);");
 	}
-	else if (g_context->material->paint_opac_mode == OPACITY_MODE_TRANSLUC || g_context->tool == TOOL_TYPE_GIZMO || g_context->layer->fill_layer != NULL) {
+	else if (g_context->material->paint_opac_mode == OPACITY_MODE_TRANSLUC || g_context->tool == TOOL_TYPE_CURSOR || g_context->layer->fill_layer != NULL) {
 		node_shader_write_frag(kong, string("output[0] = float4(%s, %s);",
 		                                    make_material_blend_mode(kong, g_context->brush_blending, "sample_undo.rgb", "basecol", "str"), "mat_opacity"));
 	}

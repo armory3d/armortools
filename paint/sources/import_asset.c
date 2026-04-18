@@ -35,7 +35,7 @@ void import_asset_run(char *path, f32 drop_x, f32 drop_y, bool show_box, bool hd
 	}
 
 	if (path_is_mesh(path)) {
-		if (g_context->tool == TOOL_TYPE_GIZMO) {
+		if (g_context->tool == TOOL_TYPE_CURSOR) {
 			// project_import_mesh_box(path, false, false, tab_meshes_import_mesh_done);
 			project_import_mesh_box(path, false, false, tab_scene_import_mesh_done);
 		}

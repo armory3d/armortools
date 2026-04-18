@@ -234,7 +234,7 @@ typedef enum {
 	TOOL_TYPE_PICKER   = 10,
 	TOOL_TYPE_BAKE     = 11,
 	TOOL_TYPE_MATERIAL = 12,
-	TOOL_TYPE_GIZMO    = 13,
+	TOOL_TYPE_CURSOR   = 13,
 } tool_type_t;
 
 typedef enum {
@@ -319,7 +319,7 @@ typedef enum {
 	ICON_PROPERTIES       = 19,
 	ICON_FOLDER_OPEN      = 20,
 	ICON_EMPTY            = 21,
-	ICON_GIZMO            = 22,
+	ICON_CURSOR           = 22,
 	ICON_MATERIAL         = 23,
 	ICON_MENU             = 24,
 	ICON_FILE_NEW         = 25,
@@ -382,7 +382,7 @@ typedef enum {
 	ICON_LABEL            = 82,
 	ICON_ACCOUNT          = 83,
 	ICON_ARROW_UP_LEFT    = 84,
-	ICON_ATTACHMENT       = 85,
+	ICON_GIZMO            = 85,
 	ICON_BLOCK            = 86,
 	ICON_LANDSCAPE        = 87,
 	ICON_CHAT             = 88,

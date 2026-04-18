@@ -636,7 +636,7 @@ void ui_header_draw_tool_properties() {
 			}
 		}
 	}
-	if (g_context->tool == TOOL_TYPE_GIZMO) {
+	if (g_context->tool == TOOL_TYPE_CURSOR) {
 		// if (!sim_running && ui_button("Play")) {
 		// 	sim_play();
 		// 	g_context.selected_object = scene_camera.base;

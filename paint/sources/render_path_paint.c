@@ -535,8 +535,8 @@ bool render_path_paint_paint_enabled() {
 	bool fill_layer = g_context->layer->fill_layer != NULL && g_context->tool != TOOL_TYPE_PICKER && g_context->tool != TOOL_TYPE_MATERIAL &&
 	                  g_context->tool != TOOL_TYPE_COLORID;
 	bool group_layer = slot_layer_is_group(g_context->layer);
-	bool gizmo       = g_context->tool == TOOL_TYPE_GIZMO;
-	return !fill_layer && !group_layer && !g_context->foreground_event && !gizmo;
+	bool cursor      = g_context->tool == TOOL_TYPE_CURSOR;
+	return !fill_layer && !group_layer && !g_context->foreground_event && !cursor;
 }
 
 void render_path_paint_live_brush_dirty() {

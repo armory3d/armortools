@@ -16,7 +16,7 @@ void render_path_raytrace_commands(bool use_live_layer) {
 			render_path_raytrace_init_shader = true;
 		}
 		char *ext = "";
-		if (g_context->tool == TOOL_TYPE_GIZMO) {
+		if (g_context->tool == TOOL_TYPE_CURSOR) {
 			ext = "forge_";
 		}
 		char *mode = g_config->pathtrace_mode == PATHTRACE_MODE_FAST ? "core" : "full";
@@ -111,7 +111,7 @@ void render_path_raytrace_commands(bool use_live_layer) {
 
 	// g_context->ddirty = 1; // _RENDER
 
-	if (g_context->tool == TOOL_TYPE_GIZMO) {
+	if (g_context->tool == TOOL_TYPE_CURSOR) {
 		g_context->ddirty = 1;
 	}
 }
@@ -123,7 +123,7 @@ void render_path_raytrace_build_data() {
 
 	mesh_object_t *mo = !context_layer_filter_used() ? g_context->merged_object : g_context->paint_object;
 
-	if (g_context->tool == TOOL_TYPE_GIZMO) {
+	if (g_context->tool == TOOL_TYPE_CURSOR) {
 		render_path_raytrace_transform = mo->base->transform->world_unpack;
 	}
 	else {
@@ -162,7 +162,7 @@ void render_path_raytrace_raytrace_init(char *shader_name, bool build) {
 	{
 		_gpu_raytrace_as_init();
 
-		if (g_context->tool == TOOL_TYPE_GIZMO) {
+		if (g_context->tool == TOOL_TYPE_CURSOR) {
 			for (i32 i = 0; i < project_paint_objects->length; ++i) {
 				mesh_object_t *po = project_paint_objects->buffer[i];
 				if (!po->base->visible) {

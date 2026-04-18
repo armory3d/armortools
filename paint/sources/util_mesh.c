@@ -36,7 +36,7 @@ mesh_object_t_array_t *util_mesh_get_unique() {
 
 void util_mesh_merge(mesh_object_t_array_t *paint_objects) {
 	if (paint_objects == NULL) {
-		if (g_context->tool == TOOL_TYPE_GIZMO) {
+		if (g_context->tool == TOOL_TYPE_CURSOR) {
 			paint_objects = util_mesh_get_unique();
 		}
 		else {

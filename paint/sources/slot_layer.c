@@ -1237,7 +1237,7 @@ void layers_create_fill_layer_on_next_frame(void *_) {
 }
 
 void layers_create_fill_layer(uv_type_t uv_type, mat4_t decal_mat, i32 position) {
-	if (g_context->tool == TOOL_TYPE_GIZMO) {
+	if (g_context->tool == TOOL_TYPE_CURSOR) {
 		return;
 	}
 
@@ -1570,7 +1570,7 @@ slot_layer_t *layers_flatten(bool height_to_normal, slot_layer_t_array_t *layers
 			draw_set_pipeline(NULL);
 			draw_end();
 
-			if (g_context->tool == TOOL_TYPE_GIZMO) {
+			if (g_context->tool == TOOL_TYPE_CURSOR) {
 				// Do not multiply basecol by alpha
 				draw_begin(layers_expa, false, 0); // Copy to temp
 				draw_set_pipeline(pipes_copy);

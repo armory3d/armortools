@@ -193,7 +193,7 @@ char *_import_mesh_number_ext(i32 i) {
 void _import_mesh_add_mesh(raw_mesh_t *mesh) {
 	mesh_data_t *raw = import_mesh_raw_mesh(mesh);
 
-	if (g_context->tool == TOOL_TYPE_GIZMO) {
+	if (g_context->tool == TOOL_TYPE_CURSOR) {
 		util_mesh_pack_uvs(mesh->texa);
 	}
 

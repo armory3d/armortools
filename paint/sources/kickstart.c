@@ -113,7 +113,7 @@ void _kickstart() {
 	        _tr("Picker"),
 	        _tr("Bake"),
 	        _tr("Material"),
-	        _tr("Gizmo"),
+	        _tr("Cursor"),
 	    },
 	    14);
 	gc_root(ui_toolbar_tool_names);
