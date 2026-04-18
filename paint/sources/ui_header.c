@@ -104,7 +104,7 @@ void ui_header_draw_tool_properties() {
 			ui_image(rt->_image, 0xffffffff, 64);
 		}
 		ui->enabled = g_context->colorid_picked;
-		if (ui_button(tr("Clear"), UI_ALIGN_CENTER, "")) {
+		if (ui_icon_button(tr("Clear"), ICON_ERASE, UI_ALIGN_CENTER)) {
 			g_context->colorid_picked = false;
 			ui_toolbar_handle->redraws  = 1;
 		}
@@ -125,11 +125,11 @@ void ui_header_draw_tool_properties() {
 				ui_tooltip_image(project_get_image(project_assets->buffer[cid]), 256);
 			}
 		}
-		if (ui_button(tr("Import"), UI_ALIGN_CENTER, "")) {
+		if (ui_icon_button(tr("Import"), ICON_FOLDER_OPEN, UI_ALIGN_CENTER)) {
 			ui_files_show(string_array_join(path_texture_formats(), ","), false, true, &ui_header_draw_tool_properties_import);
 		}
 		ui->enabled = g_context->colorid_picked;
-		if (ui_button(tr("To Mask"), UI_ALIGN_CENTER, "")) {
+		if (ui_icon_button(tr("To Mask"), ICON_MASK, UI_ALIGN_CENTER)) {
 			if (slot_layer_is_mask(g_context->layer)) {
 				context_set_layer(g_context->layer->parent);
 			}
@@ -161,7 +161,7 @@ void ui_header_draw_tool_properties() {
 			gc_root(_ui_header_draw_tool_properties_h);
 			ui_menu_draw(&ui_header_draw_tool_properties_color_picker_base, -1, -1);
 		}
-		if (ui_button(tr("Add Swatch"), UI_ALIGN_CENTER, "")) {
+		if (ui_icon_button(tr("Add Swatch"), ICON_PLUS, UI_ALIGN_CENTER)) {
 			swatch_color_t *new_swatch = project_clone_swatch(g_context->picked_color);
 			context_set_swatch(new_swatch);
 			any_array_push(g_project->swatches, new_swatch);
@@ -231,12 +231,12 @@ void ui_header_draw_tool_properties() {
 
 		bool baking  = g_context->pdirty > 0;
 		bool rt_bake = render_path_paint_is_rt_bake();
-		if (baking && ui_button(tr("Stop"), UI_ALIGN_CENTER, "")) {
+		if (baking && ui_icon_button(tr("Stop"), ICON_STOP, UI_ALIGN_CENTER)) {
 			g_context->pdirty = 0;
 			g_context->rdirty = 2;
 		}
 
-		if (!baking && ui_button(tr("Bake"), UI_ALIGN_CENTER, "")) {
+		if (!baking && ui_icon_button(tr("Bake"), ICON_PLAY, UI_ALIGN_CENTER)) {
 			g_context->pdirty = rt_bake ? g_context->bake_samples : 1;
 			g_context->rdirty = 3;
 			sys_notify_on_next_frame(&ui_header_draw_tool_properties_layer_preview_dirty, NULL);
