@@ -505,11 +505,11 @@ void ui_node_draw_body(ui_node_t *node, ui_node_canvas_t *canvas, float nx, floa
 		}
 		else if (strcmp(but->type, "STRING") == 0) {
 			ny += lineh;
-			current->_x           = nx;
-			current->_y           = ny;
-			current->_w           = w;
-			ui_handle_t      *h   = ui_nest(nhandle, buti);
-			h->text = val != NULL ? (char *)val : "";
+			current->_x                = nx;
+			current->_y                = ny;
+			current->_w                = w;
+			ui_handle_t *h             = ui_nest(nhandle, buti);
+			h->text                    = val != NULL ? (char *)val : "";
 			but->default_value->buffer = ui_text_input(h, ui_tr(but->name), UI_ALIGN_LEFT, true, false);
 			but->default_value->length = strlen(but->default_value->buffer) + 1;
 		}
@@ -1370,6 +1370,13 @@ void ui_node_canvas(ui_nodes_t *nodes, ui_node_canvas_t *canvas) {
 			current->changed = true;
 		}
 		current_nodes->nodes_selected_id->length = 0;
+	}
+
+	// Node duplicate
+	bool node_duplicate = current->input_enabled && current->is_ctrl_down && current->is_key_pressed && current->key_code == KEY_CODE_D && !current->is_typing;
+	if (current_nodes->nodes_selected_id->length > 0 && node_duplicate) {
+		ui_is_copy  = true;
+		ui_is_paste = true;
 	}
 
 	ui_set_scale(current_nodes->scale_factor); // Restore non-zoomed scale
