@@ -72,7 +72,7 @@ void mapping_node_init() {
 	                                                                       .default_value = f32_array_create_xyz(0.0, 0.0, 0.0),
 	                                                                       .min           = 0.0,
 	                                                                       .max           = 360.0,
-	                                                                       .precision     = 100,
+	                                                                       .precision     = 10,
 	                                                                       .display       = 1}),
 	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                       .node_id       = 0,
