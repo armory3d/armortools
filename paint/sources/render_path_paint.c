@@ -229,6 +229,7 @@ void render_path_paint_commands_paint(bool dilation) {
 			g_context->picked_color->opacity   = buffer_get_u8(a, i3) / 255.0;
 			g_context->uvx_picked              = buffer_get_u8(d, i0) / 255.0;
 			g_context->uvy_picked              = buffer_get_u8(d, i1) / 255.0;
+
 			// Pick material
 			if (g_context->picker_select_material && g_context->color_picker_callback == NULL) {
 				// matid % 3 == 0 - normal, 1 - emission, 2 - subsurface
@@ -243,6 +244,27 @@ void render_path_paint_commands_paint(bool dilation) {
 					}
 				}
 			}
+
+			// Update fill layers which are using materials containing a PICKER node
+			slot_material_t *_material = g_context->material;
+			for (i32 i = 0; i < project_materials->length; ++i) {
+				slot_material_t *m          = project_materials->buffer[i];
+				bool             has_picker = false;
+				for (i32 j = 0; j < m->canvas->nodes->length; ++j) {
+					ui_node_t *node = m->canvas->nodes->buffer[j];
+					if (string_equals(node->type, "PICKER")) {
+						has_picker = true;
+						break;
+					}
+				}
+				if (has_picker) {
+					g_context->material = m;
+					layers_update_fill_layers();
+					util_render_make_material_preview();
+					ui_base_hwnds->buffer[TAB_AREA_SIDEBAR1]->redraws = 2;
+				}
+			}
+			g_context->material = _material;
 		}
 	}
 	else {
