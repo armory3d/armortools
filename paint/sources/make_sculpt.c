@@ -222,7 +222,7 @@ void sculpt_make_mesh_run(node_shader_t *kong, slot_layer_t *l) {
 }
 
 void sculpt_layers_create_sculpt_layer() {
-	slot_layer_t *l  = layers_new_layer(true, -1);
+	slot_layer_t *l  = layers_new_layer(true, -1, NULL);
 	i32           id = l->id;
 
 	{

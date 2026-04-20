@@ -340,6 +340,11 @@ void tab_layers_draw_layer_context_menu_duplicate(void *_) {
 	layers_duplicate_layer(l);
 }
 
+bool tab_layers_has_children(slot_layer_t *l) {
+	return slot_layer_is_group(l) || (slot_layer_is_layer(l) && slot_layer_get_masks(l, false) != NULL) ||
+	       (slot_layer_is_layer(l) && slot_layer_get_filters(l, false));
+}
+
 void tab_layers_draw_layer_slot_full(slot_layer_t *l, i32 i) {
 	i32 step   = ui->ops->theme->ELEMENT_H;
 	f32 center = (step / 2.0) * UI_SCALE();
@@ -347,7 +352,7 @@ void tab_layers_draw_layer_slot_full(slot_layer_t *l, i32 i) {
 	f32 uix    = ui->_x;
 	f32 uiy    = ui->_y;
 
-	bool has_children = slot_layer_is_group(l) || (slot_layer_is_layer(l) && slot_layer_get_masks(l, false) != NULL);
+	bool has_children = tab_layers_has_children(l);
 
 	// Draw eye icon
 	f32_array_t *row = f32_array_create_from_raw(
@@ -519,7 +524,7 @@ void tab_layers_draw_layer_context_menu_to_fill_layer(void *_) {
 
 void tab_layers_make_mask_preview_rgba32_on_next_frame(void *_) {
 	slot_layer_t *l = tab_layers_l;
-	draw_begin(g_context->mask_preview_rgba32, false, 0);
+	draw_begin(g_context->mask_preview_rgba32, true, 0xff000000);
 	draw_set_pipeline(ui_view2d_pipe);
 	gpu_set_int(ui_view2d_channel_loc, 1);
 	draw_image(l->texpaint_preview, 0, 0);
@@ -996,7 +1001,7 @@ void tab_layers_button_new_menu() {
 	}
 	else {
 		if (ui_menu_button(tr("Paint Layer"), "", ICON_PAINT)) {
-			layers_new_layer(true, -1);
+			layers_new_layer(true, -1, NULL);
 			history_new_layer();
 		}
 	}
@@ -1007,7 +1012,7 @@ void tab_layers_button_new_menu() {
 		layers_create_fill_layer(UV_TYPE_PROJECT, mat4_nan(), -1);
 	}
 	if (ui_menu_button(tr("Black Mask"), "", ICON_MASK)) {
-		if (slot_layer_is_mask(l)) {
+		if (slot_layer_is_mask(l) || slot_layer_is_filter(l)) {
 			context_set_layer(l->parent);
 		}
 		l = g_context->layer;
@@ -1019,7 +1024,7 @@ void tab_layers_button_new_menu() {
 		sys_notify_on_next_frame(&tab_layers_button_new_update_fill_layers, NULL);
 	}
 	if (ui_menu_button(tr("White Mask"), "", ICON_MASK_WHITE)) {
-		if (slot_layer_is_mask(l)) {
+		if (slot_layer_is_mask(l) || slot_layer_is_filter(l)) {
 			context_set_layer(l->parent);
 		}
 		l = g_context->layer;
@@ -1031,7 +1036,7 @@ void tab_layers_button_new_menu() {
 		sys_notify_on_next_frame(&tab_layers_button_new_update_fill_layers, NULL);
 	}
 	if (ui_menu_button(tr("Fill Mask"), "", ICON_MASK_FILL)) {
-		if (slot_layer_is_mask(l)) {
+		if (slot_layer_is_mask(l) || slot_layer_is_filter(l)) {
 			context_set_layer(l->parent);
 		}
 		l = g_context->layer;
@@ -1041,6 +1046,12 @@ void tab_layers_button_new_menu() {
 		g_context->layer_preview_dirty = true;
 		history_new_fill_mask();
 		sys_notify_on_next_frame(&tab_layers_button_new_update_fill_layers, NULL);
+	}
+	if (ui_menu_button(tr("Filter"), "", ICON_FILTER)) {
+		if (slot_layer_is_mask(l) || slot_layer_is_filter(l)) {
+			context_set_layer(l->parent);
+		}
+		layers_create_filter();
 	}
 	ui->enabled = !slot_layer_is_group(g_context->layer) && !slot_layer_is_in_group(g_context->layer);
 	if (ui_menu_button(tr("Group"), "", ICON_FOLDER)) {
@@ -1196,7 +1207,7 @@ void tab_layers_draw_full(ui_handle_t *htab) {
 			}
 			// Open / close group
 			slot_layer_t *l            = g_context->layer;
-			bool          has_children = slot_layer_is_group(l) || (slot_layer_is_layer(l) && slot_layer_get_masks(l, false) != NULL);
+			bool          has_children = tab_layers_has_children(l);
 			if (has_children && ui->is_key_pressed && ui->key_code == KEY_CODE_RETURN) {
 				l->show_panel                                     = !l->show_panel;
 				ui_base_hwnds->buffer[TAB_AREA_SIDEBAR0]->redraws = 2;

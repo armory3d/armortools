@@ -265,16 +265,24 @@ node_shader_context_t *make_mesh_run(material_t *data, i32 layer_pass) {
 				continue;
 			}
 
-			i32                   count = 3;
+			slot_layer_t_array_t *filters = slot_layer_get_filters(l, true);
+			if (filters != NULL) {
+				continue;
+			}
+
+			i32 count = 3;
+
 			slot_layer_t_array_t *masks = slot_layer_get_masks(l, true);
 			if (masks != NULL) {
 				count += masks->length;
 			}
+
 			texture_count += count;
 			if (texture_count >= GPU_MAX_TEXTURES - 3) {
 				texture_count = start_count + count + 3; // gbuffer0_copy, gbuffer1_copy, gbuffer2_copy
 				make_mesh_layer_pass_count++;
 			}
+
 			if (layer_pass == make_mesh_layer_pass_count - 1) {
 				any_array_push(layers, l);
 			}

@@ -51,7 +51,7 @@ void util_render_make_material_preview() {
 	camera_object_build_proj(scene_camera, -1.0);
 	camera_object_build_mat(scene_camera);
 
-	make_material_parse_mesh_preview_material(NULL);
+	make_material_parse_mesh_preview_material();
 	void (*_commands)(void) = render_path_commands;
 	gc_unroot(render_path_commands);
 	render_path_commands = render_path_preview_commands_preview;
@@ -126,7 +126,7 @@ void util_render_make_decal_preview() {
 	camera_object_build_proj(scene_camera, -1.0);
 	camera_object_build_mat(scene_camera);
 
-	make_material_parse_mesh_preview_material(NULL);
+	make_material_parse_mesh_preview_material();
 	void (*_commands)(void) = render_path_commands;
 	gc_unroot(render_path_commands);
 	render_path_commands = render_path_preview_commands_decal;

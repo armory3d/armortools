@@ -89,6 +89,10 @@ slot_layer_t *slot_layer_create(char *ext, layer_slot_type_t type, slot_layer_t 
 		}
 
 		raw->texpaint_preview = gpu_create_render_target(util_render_layer_preview_size, util_render_layer_preview_size, GPU_TEXTURE_FORMAT_RGBA32);
+
+		if (slot_layer_is_filter(raw)) {
+			raw->name = string("Filter %d", id);
+		}
 	}
 
 	else { // Mask
@@ -245,7 +249,7 @@ void slot_layer_invert_mask(slot_layer_t *raw) {
 	gpu_texture_t *_texpaint = raw->texpaint;
 	gpu_delete_texture(_texpaint);
 	render_target_t *rt = any_map_get(render_path_render_targets, string("texpaint%d", raw->id));
-	raw->texpaint = rt->_image       = inverted;
+	raw->texpaint = rt->_image     = inverted;
 	g_context->layer_preview_dirty = true;
 	g_context->ddirty              = 3;
 }
@@ -443,7 +447,7 @@ void slot_layer_resize_and_set_bits(slot_layer_t *raw) {
 
 void slot_layer_to_fill_layer_on_next_frame(void *_) {
 	make_material_parse_paint_material(true);
-	g_context->layer_preview_dirty                  = true;
+	g_context->layer_preview_dirty                    = true;
 	ui_base_hwnds->buffer[TAB_AREA_SIDEBAR0]->redraws = 2;
 }
 
@@ -458,7 +462,7 @@ void slot_layer_to_paint_layer(slot_layer_t *raw) {
 	context_set_layer(raw);
 	raw->fill_layer = NULL;
 	make_material_parse_paint_material(true);
-	g_context->layer_preview_dirty                  = true;
+	g_context->layer_preview_dirty                    = true;
 	ui_base_hwnds->buffer[TAB_AREA_SIDEBAR0]->redraws = 2;
 }
 
@@ -554,6 +558,39 @@ bool slot_layer_has_masks(slot_layer_t *raw, bool include_group_masks) {
 	return false;
 }
 
+slot_layer_t_array_t *slot_layer_get_filters(slot_layer_t *raw, bool include_group_filters) {
+	if (slot_layer_is_filter(raw)) {
+		return NULL;
+	}
+
+	slot_layer_t_array_t *children = NULL;
+	// Child filters of a layer
+	for (i32 i = 0; i < project_layers->length; ++i) {
+		slot_layer_t *l = project_layers->buffer[i];
+		if (l->parent == raw && slot_layer_is_filter(l)) {
+			if (children == NULL) {
+				children = any_array_create_from_raw((void *[]){}, 0);
+			}
+			any_array_push(children, l);
+		}
+	}
+	// Child filters of a parent group
+	if (include_group_filters) {
+		if (raw->parent != NULL && slot_layer_is_group(raw->parent)) {
+			for (i32 i = 0; i < project_layers->length; ++i) {
+				slot_layer_t *l = project_layers->buffer[i];
+				if (l->parent == raw->parent && slot_layer_is_filter(l)) {
+					if (children == NULL) {
+						children = any_array_create_from_raw((void *[]){}, 0);
+					}
+					any_array_push(children, l);
+				}
+			}
+		}
+	}
+	return children;
+}
+
 f32 slot_layer_get_opacity(slot_layer_t *raw) {
 	f32 f = raw->mask_opacity;
 	if (slot_layer_is_layer(raw) && raw->parent != NULL) {
@@ -586,16 +623,20 @@ slot_layer_t *slot_layer_get_containing_group(slot_layer_t *raw) {
 	}
 }
 
+bool slot_layer_is_filter(slot_layer_t *raw) {
+	return raw->texpaint != NULL && raw->texpaint_nor != NULL && raw->parent != NULL && slot_layer_is_layer(raw->parent);
+}
+
 bool slot_layer_is_mask(slot_layer_t *raw) {
 	return raw->texpaint != NULL && raw->texpaint_nor == NULL;
 }
 
 bool slot_layer_is_group_mask(slot_layer_t *raw) {
-	return raw->texpaint != NULL && raw->texpaint_nor == NULL && slot_layer_is_group(raw->parent);
+	return slot_layer_is_mask(raw) && slot_layer_is_group(raw->parent);
 }
 
 bool slot_layer_is_layer_mask(slot_layer_t *raw) {
-	return raw->texpaint != NULL && raw->texpaint_nor == NULL && slot_layer_is_layer(raw->parent);
+	return slot_layer_is_mask(raw) && slot_layer_is_layer(raw->parent);
 }
 
 bool slot_layer_is_in_group(slot_layer_t *raw) {
@@ -640,13 +681,36 @@ bool slot_layer_can_move(slot_layer_t *raw, i32 to) {
 		}
 	}
 
-	if (slot_layer_is_layer(raw)) {
+	if (slot_layer_is_filter(raw)) {
+		// Filters can not be on top
+		if (new_upper_layer == NULL) {
+			return false;
+		}
+		// Filters should not be placed below a collapsed group
+		if (slot_layer_is_in_group(new_upper_layer) && !slot_layer_get_containing_group(new_upper_layer)->show_panel) {
+			return false;
+		}
+		// Filters should not be placed below a collapsed layer
+		if ((slot_layer_is_filter(new_upper_layer) || slot_layer_is_mask(new_upper_layer)) && !new_upper_layer->parent->show_panel) {
+			return false;
+		}
+	}
+
+	if (slot_layer_is_layer(raw) && !slot_layer_is_filter(raw)) {
 		// Layers can not be moved directly below its own mask(s)
 		if (new_upper_layer != NULL && slot_layer_is_mask(new_upper_layer) && new_upper_layer->parent == raw) {
 			return false;
 		}
+		// Layers can not be moved directly below its own filter(s)
+		if (new_upper_layer != NULL && slot_layer_is_filter(new_upper_layer) && new_upper_layer->parent == raw) {
+			return false;
+		}
 		// Layers can not be placed above a mask as the mask would be reparented
 		if (new_lower_layer != NULL && slot_layer_is_mask(new_lower_layer)) {
+			return false;
+		}
+		// Layers can not be placed above a filter as the filter would be reparented
+		if (new_lower_layer != NULL && slot_layer_is_filter(new_lower_layer)) {
 			return false;
 		}
 	}
@@ -706,7 +770,16 @@ void slot_layer_move(slot_layer_t *raw, i32 to) {
 	array_remove(project_layers, raw);
 	array_insert(project_layers, to, raw);
 
-	if (slot_layer_is_layer(raw)) {
+	if (slot_layer_is_filter(raw)) {
+		// Precondition new_upper_layer != NULL, ensured in can_move
+		if (slot_layer_is_filter(new_upper_layer) || slot_layer_is_mask(new_upper_layer)) {
+			raw->parent = new_upper_layer->parent;
+		}
+		else if (slot_layer_is_layer(new_upper_layer) || slot_layer_is_group(new_upper_layer)) {
+			raw->parent = new_upper_layer;
+		}
+	}
+	else if (slot_layer_is_layer(raw)) {
 		slot_layer_t *old_parent = raw->parent;
 
 		if (new_upper_layer == NULL) {
@@ -714,6 +787,9 @@ void slot_layer_move(slot_layer_t *raw, i32 to) {
 		}
 		else if (slot_layer_is_in_group(new_upper_layer) && !slot_layer_get_containing_group(new_upper_layer)->show_panel) {
 			raw->parent = NULL; // Placed below a collapsed group
+		}
+		else if (slot_layer_is_filter(new_upper_layer)) {
+			raw->parent = new_upper_layer->parent->parent; // Placed below a filter, use the same level as the filter's parent
 		}
 		else if (slot_layer_is_layer(new_upper_layer)) {
 			raw->parent = new_upper_layer->parent; // Placed below a layer, use the same parent
@@ -740,6 +816,18 @@ void slot_layer_move(slot_layer_t *raw, i32 to) {
 			}
 		}
 
+		// Layers can have filters as children
+		// These have to be moved, too
+		slot_layer_t_array_t *layer_filters = slot_layer_get_filters(raw, false);
+		if (layer_filters != NULL) {
+			i32 masks_count = layer_masks != NULL ? layer_masks->length : 0;
+			for (i32 idx = 0; idx < layer_filters->length; ++idx) {
+				slot_layer_t *filter = layer_filters->buffer[idx];
+				array_remove(project_layers, filter);
+				array_insert(project_layers, delta > 0 ? old_index + delta - 1 : old_index + delta + masks_count + idx, filter);
+			}
+		}
+
 		// The layer is the last layer in the group, remove it
 		// Notice that this might remove group masks
 		if (old_parent != NULL && slot_layer_get_children(old_parent) == NULL) {
@@ -748,11 +836,11 @@ void slot_layer_move(slot_layer_t *raw, i32 to) {
 	}
 	else if (slot_layer_is_mask(raw)) {
 		// Precondition new_upper_layer != NULL, ensured in can_move
-		if (slot_layer_is_layer(new_upper_layer) || slot_layer_is_group(new_upper_layer)) {
-			raw->parent = new_upper_layer;
-		}
-		else if (slot_layer_is_mask(new_upper_layer)) { // Group mask or layer mask
+		if (slot_layer_is_filter(new_upper_layer) || slot_layer_is_mask(new_upper_layer)) {
 			raw->parent = new_upper_layer->parent;
+		}
+		else if (slot_layer_is_layer(new_upper_layer) || slot_layer_is_group(new_upper_layer)) {
+			raw->parent = new_upper_layer;
 		}
 	}
 	else if (slot_layer_is_group(raw)) {
@@ -827,7 +915,7 @@ void layers_resize() {
 		slot_layer_resize_and_set_bits(render_path_paint_live_layer);
 	}
 	render_path_raytrace_ready = false; // Rebuild baketex
-	g_context->ddirty        = 2;
+	g_context->ddirty          = 2;
 }
 
 void layers_set_bits() {
@@ -1091,8 +1179,8 @@ void layers_update_fill_layer(bool parse_paint) {
 	if (in_use)
 		draw_end();
 
-	tool_type_t _tool                = g_context->tool;
-	i32         _fill_type           = g_context->fill_type_handle->i;
+	tool_type_t _tool              = g_context->tool;
+	i32         _fill_type         = g_context->fill_type_handle->i;
 	g_context->tool                = TOOL_TYPE_FILL;
 	g_context->fill_type_handle->i = FILL_TYPE_OBJECT;
 	g_context->pdirty              = 1;
@@ -1159,16 +1247,20 @@ void layers_new_layer_clear(slot_layer_t *l) {
 	slot_layer_clear(l, 0x00000000, NULL, 1.0, layers_default_rough, 0.0);
 }
 
-slot_layer_t *layers_new_layer(bool clear, i32 position) {
+slot_layer_t *layers_new_layer(bool clear, i32 position, slot_layer_t *parent) {
 	if (project_layers->length > layers_max_layers) {
 		return NULL;
 	}
 
-	slot_layer_t *l = slot_layer_create("", LAYER_SLOT_TYPE_LAYER, NULL);
+	slot_layer_t *l = slot_layer_create("", LAYER_SLOT_TYPE_LAYER, parent);
 	l->object_mask  = g_context->layer_filter;
 
+	if (position == -1 && slot_layer_is_filter(l)) {
+		position = array_index_of(project_layers, parent);
+	}
+
 	if (position == -1) {
-		if (slot_layer_is_mask(g_context->layer))
+		if (slot_layer_is_mask(g_context->layer) || slot_layer_is_filter(g_context->layer))
 			context_set_layer(g_context->layer->parent);
 		array_insert(project_layers, array_index_of(project_layers, g_context->layer) + 1, l);
 	}
@@ -1177,13 +1269,17 @@ slot_layer_t *layers_new_layer(bool clear, i32 position) {
 	}
 
 	context_set_layer(l);
-	i32 li = array_index_of(project_layers, g_context->layer);
-	if (li > 0) {
-		slot_layer_t *below = project_layers->buffer[li - 1];
-		if (slot_layer_is_layer(below)) {
-			g_context->layer->parent = below->parent;
+
+	if (parent == NULL) {
+		i32 li = array_index_of(project_layers, g_context->layer);
+		if (li > 0) {
+			slot_layer_t *below = project_layers->buffer[li - 1];
+			if (slot_layer_is_layer(below)) {
+				g_context->layer->parent = below->parent;
+			}
 		}
 	}
+
 	if (clear) {
 		sys_notify_on_next_frame(&layers_new_layer_clear, l);
 	}
@@ -1225,7 +1321,7 @@ slot_layer_t *layers_new_group() {
 }
 
 void layers_create_fill_layer_on_next_frame(void *_) {
-	slot_layer_t *l = layers_new_layer(false, _layers_position);
+	slot_layer_t *l = layers_new_layer(false, _layers_position, NULL);
 	history_new_layer();
 	l->uv_type = _layers_uv_type;
 	if (!mat4_isnan(_layers_decal_mat)) {
@@ -1247,6 +1343,60 @@ void layers_create_fill_layer(uv_type_t uv_type, mat4_t decal_mat, i32 position)
 	sys_notify_on_next_frame(&layers_create_fill_layer_on_next_frame, NULL);
 }
 
+void tab_materials_button_new_on_next_frame(void *_);
+
+void layers_create_filter_on_next_frame(void *_) {
+	if (slot_layer_get_filters(g_context->layer, true) != NULL) {
+		return;
+	}
+
+	tab_materials_button_new_on_next_frame(NULL);
+
+	slot_layer_t *l = layers_new_layer(false, -1, g_context->layer);
+	history_new_layer();
+	history_to_fill_layer();
+	slot_layer_to_fill_layer(l);
+
+	// Filter material
+	g_context->material->canvas->name = string_copy(g_context->layer->name);
+
+	ui_nodes_t       *nodes  = g_context->material->nodes;
+	ui_node_canvas_t *canvas = g_context->material->canvas;
+	ui_node_t        *nout   = NULL;
+	for (i32 i = 0; i < canvas->nodes->length; ++i) {
+		ui_node_t *n = canvas->nodes->buffer[i];
+		if (string_equals(n->type, "OUTPUT_MATERIAL_PBR")) {
+			nout = n;
+			break;
+		}
+	}
+	for (i32 i = 0; i < canvas->nodes->length; ++i) {
+		ui_node_t *n = canvas->nodes->buffer[i];
+		if (string_equals(n->name, "Color")) {
+			ui_remove_node(n, canvas);
+			break;
+		}
+	}
+
+	ui_node_t *n                         = nodes_material_create_node("LAYER", NULL);
+	n->buttons->buffer[0]->default_value = f32_array_create_x(array_index_of(project_layers, l->parent));
+	n->x                                 = -50;
+	n->y                                 = 100;
+
+	for (int i = 0; i < 9; ++i) {
+		ui_node_link_t *l =
+			GC_ALLOC_INIT(ui_node_link_t, {.id = ui_next_link_id(canvas->links), .from_id = n->id, .from_socket = i, .to_id = nout->id, .to_socket = i});
+		any_array_push(canvas->links, l);
+	}
+
+	layers_update_fill_layer(true);
+	util_render_make_material_preview();
+}
+
+void layers_create_filter() {
+	sys_notify_on_next_frame(&layers_create_filter_on_next_frame, NULL);
+}
+
 void layers_create_image_mask(asset_t *asset) {
 	slot_layer_t *l = g_context->layer;
 	if (slot_layer_is_mask(l) || slot_layer_is_group(l)) {
@@ -1261,13 +1411,13 @@ void layers_create_image_mask(asset_t *asset) {
 
 void layers_create_image_layer(asset_t *asset) {
 	history_new_layer();
-	slot_layer_t *m = layers_new_layer(false, -1);
+	slot_layer_t *m = layers_new_layer(false, -1, NULL);
 	slot_layer_clear(m, 0x00000000, project_get_image(asset), 1.0, layers_default_rough, 0.0);
 	g_context->layer_preview_dirty = true;
 }
 
 void layers_create_color_layer_on_next_frame(void *_) {
-	slot_layer_t *l = layers_new_layer(false, _layers_position);
+	slot_layer_t *l = layers_new_layer(false, _layers_position, NULL);
 	history_new_layer();
 	l->uv_type     = UV_TYPE_UVMAP;
 	l->object_mask = g_context->layer_filter;

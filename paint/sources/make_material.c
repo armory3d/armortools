@@ -93,12 +93,12 @@ void make_material_parse_mesh_material() {
 	}
 }
 
-void make_material_parse_mesh_preview_material(material_data_t *md) {
+void make_material_parse_mesh_preview_material() {
 	if (!make_material_get_mout()) {
 		return;
 	}
 
-	material_data_t  *m    = md == NULL ? project_materials->buffer[0]->data : md;
+	material_data_t  *m    = project_materials->buffer[0]->data;
 	shader_context_t *scon = NULL;
 	for (i32 i = 0; i < m->_->shader->contexts->length; ++i) {
 		shader_context_t *c = m->_->shader->contexts->buffer[i];

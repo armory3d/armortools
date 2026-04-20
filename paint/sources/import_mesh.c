@@ -161,7 +161,7 @@ void _import_mesh_make_mesh(raw_mesh_t *mesh) {
 			slot_layer_t *l = array_pop(project_layers);
 			slot_layer_unload(l);
 		}
-		layers_new_layer(false, -1);
+		layers_new_layer(false, -1, NULL);
 		sys_notify_on_next_frame(&_import_mesh_make_mesh_clear_layers, NULL);
 		history_reset();
 	}

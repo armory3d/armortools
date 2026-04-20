@@ -18,7 +18,7 @@ typedef struct slot_layer {
 	char                 *name;
 	char                 *ext;
 	bool                  visible;
-	struct slot_layer    *parent;   // Group (for layers) or layer (for masks)
+	struct slot_layer    *parent;   // Group (for layers) or layer (for masks and filters)
 	struct gpu_texture   *texpaint; // Base or mask
 	struct gpu_texture   *texpaint_nor;
 	struct gpu_texture   *texpaint_pack;
