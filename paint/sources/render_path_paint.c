@@ -167,39 +167,48 @@ void render_path_paint_commands_paint(bool dilation) {
 			g_context->uvy_picked                       = buffer_get_f32(b, 12);
 		}
 		else {
-			string_array_t *additional = any_array_create_from_raw(
-			    (void *[]){
-			        "texpaint_nor_picker",
-			        "texpaint_pack_picker",
-			        "texpaint_uv_picker",
-			    },
-			    3);
-			render_path_set_target("texpaint_picker", additional, NULL, GPU_CLEAR_NONE, 0, 0.0);
-			render_path_bind_target("gbuffer2", "gbuffer2");
-			tid                 = g_context->layer->id;
-			bool use_live_layer = g_context->tool == TOOL_TYPE_MATERIAL;
-			if (use_live_layer) {
-				render_path_paint_use_live_layer(true);
+			tid          = g_context->layer->id;
+			bool is_mask = slot_layer_is_mask(g_context->layer);
+			if (is_mask) {
+				string_array_t *additional = any_array_create_from_raw(
+				    (void *[]){
+				        "texpaint_uv_picker",
+				    },
+				    1);
+				render_path_set_target("texpaint_picker", additional, NULL, GPU_CLEAR_NONE, 0, 0.0);
+				render_path_bind_target("gbuffer2", "gbuffer2");
+				render_path_bind_target(string("texpaint%d", tid), "texpaint");
+				render_path_paint_draw_fullscreen_triangle("paint");
 			}
-			render_path_bind_target(string("texpaint%d", tid), "texpaint");
-			render_path_bind_target(string("texpaint_nor%d", tid), "texpaint_nor");
-			render_path_bind_target(string("texpaint_pack%d", tid), "texpaint_pack");
-			render_path_paint_draw_fullscreen_triangle("paint");
-
-			if (use_live_layer) {
-				render_path_paint_use_live_layer(false);
+			else {
+				string_array_t *additional = any_array_create_from_raw(
+				    (void *[]){
+				        "texpaint_nor_picker",
+				        "texpaint_pack_picker",
+				        "texpaint_uv_picker",
+				    },
+				    3);
+				render_path_set_target("texpaint_picker", additional, NULL, GPU_CLEAR_NONE, 0, 0.0);
+				render_path_bind_target("gbuffer2", "gbuffer2");
+				bool use_live_layer = g_context->tool == TOOL_TYPE_MATERIAL;
+				if (use_live_layer) {
+					render_path_paint_use_live_layer(true);
+				}
+				render_path_bind_target(string("texpaint%d", tid), "texpaint");
+				render_path_bind_target(string("texpaint_nor%d", tid), "texpaint_nor");
+				render_path_bind_target(string("texpaint_pack%d", tid), "texpaint_pack");
+				render_path_paint_draw_fullscreen_triangle("paint");
+				if (use_live_layer) {
+					render_path_paint_use_live_layer(false);
+				}
 			}
 			ui_header_handle->redraws         = 2;
 			ui_base_hwnds->buffer[2]->redraws = 2;
 
-			render_target_t *texpaint_picker      = any_map_get(render_path_render_targets, "texpaint_picker");
-			render_target_t *texpaint_nor_picker  = any_map_get(render_path_render_targets, "texpaint_nor_picker");
-			render_target_t *texpaint_pack_picker = any_map_get(render_path_render_targets, "texpaint_pack_picker");
-			render_target_t *texpaint_uv_picker   = any_map_get(render_path_render_targets, "texpaint_uv_picker");
-			buffer_t        *a                    = gpu_get_texture_pixels(texpaint_picker->_image);
-			buffer_t        *b                    = gpu_get_texture_pixels(texpaint_nor_picker->_image);
-			buffer_t        *c                    = gpu_get_texture_pixels(texpaint_pack_picker->_image);
-			buffer_t        *d                    = gpu_get_texture_pixels(texpaint_uv_picker->_image);
+			render_target_t *texpaint_picker    = any_map_get(render_path_render_targets, "texpaint_picker");
+			render_target_t *texpaint_uv_picker = any_map_get(render_path_render_targets, "texpaint_uv_picker");
+			buffer_t        *a                  = gpu_get_texture_pixels(texpaint_picker->_image);
+			buffer_t        *d                  = gpu_get_texture_pixels(texpaint_uv_picker->_image);
 
 			if (g_context->color_picker_callback != NULL) {
 				g_context->color_picker_callback(g_context->picked_color);
@@ -215,32 +224,39 @@ void render_path_paint_commands_paint(bool dilation) {
 			i32 i1 = 1;
 			i32 i2 = 2;
 #endif
-			i32 i3                             = 3;
-			g_context->picked_color->base      = color_set_rb(g_context->picked_color->base, buffer_get_u8(a, i0));
-			g_context->picked_color->base      = color_set_gb(g_context->picked_color->base, buffer_get_u8(a, i1));
-			g_context->picked_color->base      = color_set_bb(g_context->picked_color->base, buffer_get_u8(a, i2));
-			g_context->picked_color->normal    = color_set_rb(g_context->picked_color->normal, buffer_get_u8(b, i0));
-			g_context->picked_color->normal    = color_set_gb(g_context->picked_color->normal, buffer_get_u8(b, i1));
-			g_context->picked_color->normal    = color_set_bb(g_context->picked_color->normal, buffer_get_u8(b, i2));
-			g_context->picked_color->occlusion = buffer_get_u8(c, i0) / 255.0;
-			g_context->picked_color->roughness = buffer_get_u8(c, i1) / 255.0;
-			g_context->picked_color->metallic  = buffer_get_u8(c, i2) / 255.0;
-			g_context->picked_color->height    = buffer_get_u8(c, i3) / 255.0;
-			g_context->picked_color->opacity   = buffer_get_u8(a, i3) / 255.0;
-			g_context->uvx_picked              = buffer_get_u8(d, i0) / 255.0;
-			g_context->uvy_picked              = buffer_get_u8(d, i1) / 255.0;
+			i32 i3                           = 3;
+			g_context->picked_color->base    = color_set_rb(g_context->picked_color->base, buffer_get_u8(a, i0));
+			g_context->picked_color->base    = color_set_gb(g_context->picked_color->base, buffer_get_u8(a, i1));
+			g_context->picked_color->base    = color_set_bb(g_context->picked_color->base, buffer_get_u8(a, i2));
+			g_context->picked_color->opacity = buffer_get_u8(a, i3) / 255.0;
+			g_context->uvx_picked            = buffer_get_u8(d, i0) / 255.0;
+			g_context->uvy_picked            = buffer_get_u8(d, i1) / 255.0;
 
-			// Pick material
-			if (g_context->picker_select_material && g_context->color_picker_callback == NULL) {
-				// matid % 3 == 0 - normal, 1 - emission, 2 - subsurface
-				i32 id    = buffer_get_u8(b, 3);
-				i32 matid = math_floor((id - (id % 3)) / 3.0);
-				for (i32 i = 0; i < project_materials->length; ++i) {
-					slot_material_t *m = project_materials->buffer[i];
-					if (m->id == matid) {
-						context_set_material(m);
-						g_context->materialid_picked = matid;
-						break;
+			if (!is_mask) {
+				render_target_t *texpaint_nor_picker  = any_map_get(render_path_render_targets, "texpaint_nor_picker");
+				render_target_t *texpaint_pack_picker = any_map_get(render_path_render_targets, "texpaint_pack_picker");
+				buffer_t        *b                    = gpu_get_texture_pixels(texpaint_nor_picker->_image);
+				buffer_t        *c                    = gpu_get_texture_pixels(texpaint_pack_picker->_image);
+				g_context->picked_color->normal       = color_set_rb(g_context->picked_color->normal, buffer_get_u8(b, i0));
+				g_context->picked_color->normal       = color_set_gb(g_context->picked_color->normal, buffer_get_u8(b, i1));
+				g_context->picked_color->normal       = color_set_bb(g_context->picked_color->normal, buffer_get_u8(b, i2));
+				g_context->picked_color->occlusion    = buffer_get_u8(c, i0) / 255.0;
+				g_context->picked_color->roughness    = buffer_get_u8(c, i1) / 255.0;
+				g_context->picked_color->metallic     = buffer_get_u8(c, i2) / 255.0;
+				g_context->picked_color->height       = buffer_get_u8(c, i3) / 255.0;
+
+				// Pick material
+				if (g_context->picker_select_material && g_context->color_picker_callback == NULL) {
+					// matid % 3 == 0 - normal, 1 - emission, 2 - subsurface
+					i32 id    = buffer_get_u8(b, 3);
+					i32 matid = math_floor((id - (id % 3)) / 3.0);
+					for (i32 i = 0; i < project_materials->length; ++i) {
+						slot_material_t *m = project_materials->buffer[i];
+						if (m->id == matid) {
+							context_set_material(m);
+							g_context->materialid_picked = matid;
+							break;
+						}
 					}
 				}
 			}

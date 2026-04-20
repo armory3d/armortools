@@ -49,6 +49,13 @@ void make_colorid_picker_run(node_shader_t *kong) {
 			node_shader_write_frag(kong, "output[0] = float4(out_pos_from_depth, tex_coord_inp.x);");
 			node_shader_write_frag(kong, "output[1] = float4(out_nor_from_depth, tex_coord_inp.y);");
 		}
+		else if (slot_layer_is_mask(g_context->layer)) {
+			kong->frag_out = "float4[2]";
+			node_shader_add_texture(kong, "texpaint", NULL);
+			node_shader_write_frag(kong, "var texpaint_val: float = sample_lod(texpaint, sampler_linear, tex_coord_inp, 0.0).r;");
+			node_shader_write_frag(kong, "output[0] = float4(texpaint_val, texpaint_val, texpaint_val, 1.0);");
+			node_shader_write_frag(kong, "output[1].rg = tex_coord_inp.xy;");
+		}
 		else {
 			kong->frag_out = "float4[4]";
 			node_shader_add_texture(kong, "texpaint", NULL);

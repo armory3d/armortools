@@ -23,6 +23,15 @@ string_array_t *make_paint_color_attachments() {
 		    2);
 		return res;
 	}
+	if (g_context->tool == TOOL_TYPE_PICKER && slot_layer_is_mask(g_context->layer)) {
+		string_array_t *res = any_array_create_from_raw(
+		    (void *[]){
+		        "RGBA32",
+		        "RGBA32",
+		    },
+		    2);
+		return res;
+	}
 	if (g_context->tool == TOOL_TYPE_PICKER || g_context->tool == TOOL_TYPE_MATERIAL) {
 		string_array_t *res = any_array_create_from_raw(
 		    (void *[]){
