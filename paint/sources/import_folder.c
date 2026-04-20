@@ -13,13 +13,13 @@ void import_folder_place_image_node(ui_nodes_t *nodes, ui_node_canvas_t *canvas,
 
 void import_folder_run(char *path) {
 	string_array_t *files     = file_read_directory(path);
-	char             *mapbase   = "";
-	char             *mapopac   = "";
-	char             *mapnor    = "";
-	char             *mapocc    = "";
-	char             *maprough  = "";
-	char             *mapmet    = "";
-	char             *mapheight = "";
+	char           *mapbase   = "";
+	char           *mapopac   = "";
+	char           *mapnor    = "";
+	char           *mapocc    = "";
+	char           *maprough  = "";
+	char           *mapmet    = "";
+	char           *mapheight = "";
 
 	bool found_texture = false;
 	// Import maps
@@ -28,8 +28,6 @@ void import_folder_run(char *path) {
 		if (!path_is_texture(f)) {
 			continue;
 		}
-
-		// TODO: handle -albedo
 
 		char *base  = to_lower_case(substring(f, 0, string_last_index_of(f, ".")));
 		bool  valid = false;
@@ -78,7 +76,7 @@ void import_folder_run(char *path) {
 	any_array_push(project_materials, g_context->material);
 	ui_nodes_t       *nodes  = g_context->material->nodes;
 	ui_node_canvas_t *canvas = g_context->material->canvas;
-	string_array_t *dirs   = string_split(path, PATH_SEP);
+	string_array_t   *dirs   = string_split(path, PATH_SEP);
 	canvas->name             = string_copy(dirs->buffer[dirs->length - 1]);
 	ui_node_t *nout          = NULL;
 	for (i32 i = 0; i < canvas->nodes->length; ++i) {
