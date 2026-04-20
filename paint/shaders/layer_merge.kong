@@ -56,8 +56,9 @@ fun rgb_to_hsv(c: float3): float3 {
 fun layer_merge_frag(input: vert_out): float4 {
 	var col0: float4 = sample_lod(tex0, sampler_linear, input.tex, 0.0);
 	var cola: float4 = sample_lod(texa, sampler_linear, input.tex, 0.0);
+	var maskr: float = sample_lod(texmask, sampler_linear, input.tex, 0.0).r;
 	var str: float = col0.a * constants.opac;
-	str *= sample_lod(texmask, sampler_linear, input.tex, 0.0).r;
+	str *= maskr;
 
 	if (constants.blending == 101) { // Merging _nor and _pack
 		var col1: float4 = sample_lod(tex1, sampler_linear, input.tex, 0.0);
@@ -93,15 +94,15 @@ fun layer_merge_frag(input: vert_out): float4 {
 	}
 	if (constants.blending == 0) { // Mix
 		return float4(
-			lerp3(cola.rgb, col0.rgb, str), max(col0.a, cola.a));
+			lerp3(cola.rgb, col0.rgb, str), max(col0.a * maskr, cola.a));
 	}
 	if (constants.blending == 1) { // Darken
 		return float4(
-			lerp3(cola.rgb, min3(cola.rgb, col0.rgb), str), max(col0.a, cola.a));
+			lerp3(cola.rgb, min3(cola.rgb, col0.rgb), str), max(col0.a * maskr, cola.a));
 	}
 	if (constants.blending == 2) { // Multiply
 		return float4(
-			lerp3(cola.rgb, cola.rgb * col0.rgb, str), max(col0.a, cola.a));
+			lerp3(cola.rgb, cola.rgb * col0.rgb, str), max(col0.a * maskr, cola.a));
 	}
 	if (constants.blending == 3) { // Burn
 		return float4(
@@ -109,28 +110,28 @@ fun layer_merge_frag(input: vert_out): float4 {
 				cola.rgb,
 				float3(1.0, 1.0, 1.0) - (float3(1.0, 1.0, 1.0) - cola.rgb) / col0.rgb,
 				str),
-			max(col0.a, cola.a));
+			max(col0.a * maskr, cola.a));
 	}
 	if (constants.blending == 4) { // Lighten
 		return float4(
 			max3(cola.rgb, col0.rgb * str),
-			max(col0.a, cola.a));
+			max(col0.a * maskr, cola.a));
 	}
 	if (constants.blending == 5) { // Screen
 		return float4(
 			(float3(1.0, 1.0, 1.0) - (float3(1.0 - str, 1.0 - str, 1.0 - str) +
 				str * (float3(1.0, 1.0, 1.0) - col0.rgb)) * (float3(1.0, 1.0, 1.0) - cola.rgb)),
-			max(col0.a, cola.a));
+			max(col0.a * maskr, cola.a));
 	}
 	if (constants.blending == 6) { // Dodge
 		return float4(
 			lerp3(cola.rgb, cola.rgb / (float3(1.0, 1.0, 1.0) - col0.rgb), str),
-			max(col0.a, cola.a));
+			max(col0.a * maskr, cola.a));
 	}
 	if (constants.blending == 7) { // Add
 		return float4(
 			lerp3(cola.rgb, cola.rgb + col0.rgb, str),
-			max(col0.a, cola.a));
+			max(col0.a * maskr, cola.a));
 	}
 
 	////
