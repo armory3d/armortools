@@ -61,7 +61,7 @@ void ui_view2d_render_color_pick(void *_) {
 	g_context->picked_color->base = color_set_rb(g_context->picked_color->base, buffer_get_u8(a, i0));
 	g_context->picked_color->base = color_set_gb(g_context->picked_color->base, buffer_get_u8(a, i1));
 	g_context->picked_color->base = color_set_bb(g_context->picked_color->base, buffer_get_u8(a, i2));
-	ui_header_handle->redraws       = 2;
+	ui_header_handle->redraws     = 2;
 
 	if (g_context->color_picker_callback != NULL) {
 		g_context->color_picker_callback(g_context->picked_color);
@@ -187,6 +187,7 @@ void ui_view2d_render(void *_) {
 			if (g_context->tool == TOOL_TYPE_MATERIAL) {
 				layer = render_path_paint_live_layer;
 			}
+
 			if (ui_view2d_layer_mode == VIEW_2D_LAYER_MODE_VISIBLE) {
 				gpu_texture_t *current = _draw_current;
 				bool           in_use  = gpu_in_use;
@@ -205,14 +206,17 @@ void ui_view2d_render(void *_) {
 				if (in_use)
 					draw_begin(current, false, 0);
 			}
+			else {
+				draw_set_color(color_from_floats(layer->mask_opacity, layer->mask_opacity, layer->mask_opacity, 1.0));
+			}
 
-			tex = slot_layer_is_mask(g_context->layer)    ? layer->texpaint
+			tex = slot_layer_is_mask(g_context->layer)      ? layer->texpaint
 			      : ui_view2d_tex_type == PAINT_TEX_BASE    ? layer->texpaint
 			      : ui_view2d_tex_type == PAINT_TEX_OPACITY ? layer->texpaint
 			      : ui_view2d_tex_type == PAINT_TEX_NORMAL  ? layer->texpaint_nor
 			                                                : layer->texpaint_pack;
 
-			channel = slot_layer_is_mask(g_context->layer)      ? 1
+			channel = slot_layer_is_mask(g_context->layer)        ? 1
 			          : ui_view2d_tex_type == PAINT_TEX_OCCLUSION ? 1
 			          : ui_view2d_tex_type == PAINT_TEX_ROUGHNESS ? 2
 			          : ui_view2d_tex_type == PAINT_TEX_METALLIC  ? 3
@@ -248,6 +252,7 @@ void ui_view2d_render(void *_) {
 			if (ui_view2d_type == VIEW_2D_TYPE_LAYER) {
 				draw_set_pipeline(NULL);
 			}
+			draw_set_color(0xffffffff);
 
 			// Texture and node preview color picking
 			if ((context_in_2d_view(VIEW_2D_TYPE_ASSET) || context_in_2d_view(VIEW_2D_TYPE_NODE)) && g_context->tool == TOOL_TYPE_PICKER && ui->input_down) {
@@ -305,7 +310,7 @@ void ui_view2d_render(void *_) {
 			ui_view2d_text_input_hover = ui->is_hovered;
 		}
 		else if (ui_view2d_type == VIEW_2D_TYPE_FONT) {
-			h->text                 = string_copy(g_context->font->name);
+			h->text               = string_copy(g_context->font->name);
 			g_context->font->name = ui_text_input(h, "", UI_ALIGN_LEFT, true, false);
 		}
 
