@@ -202,6 +202,9 @@ void export_texture_run_layers(char *path, slot_layer_t_array_t *layers, char *o
 		if (!slot_layer_is_layer(l1)) {
 			continue;
 		}
+		if (slot_layer_get_filters(l1, false) != NULL) {
+			continue;
+		}
 
 		if (!string_equals(object_name, "") && slot_layer_get_object_mask(l1) > 0) {
 			if (is_udim && !ends_with(project_paint_objects->buffer[slot_layer_get_object_mask(l1) - 1]->base->name, object_name)) {

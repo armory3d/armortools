@@ -1694,6 +1694,9 @@ slot_layer_t *layers_flatten(bool height_to_normal, slot_layer_t_array_t *layers
 		if (!slot_layer_is_layer(l1)) {
 			continue;
 		}
+		if (slot_layer_get_filters(l1, false) != NULL) {
+			continue;
+		}
 
 		gpu_texture_t        *mask    = empty;
 		slot_layer_t_array_t *l1masks = slot_layer_get_masks(l1, true);

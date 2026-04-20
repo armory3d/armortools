@@ -512,6 +512,14 @@ void tab_layers_draw_layer_context_menu_delete(void *_) {
 
 void tab_layers_draw_layer_context_menu_to_paint_layer(void *_) {
 	slot_layer_t *l = tab_layers_l;
+
+	if (slot_layer_is_filter(l)) {
+		i32 pi = array_index_of(project_layers, l->parent);
+		array_remove(project_layers, l);
+		array_insert(project_layers, pi, l);
+		l->parent = NULL;
+	}
+
 	slot_layer_is_layer(l) ? history_to_paint_layer() : history_to_paint_mask();
 	slot_layer_to_paint_layer(l);
 }
@@ -1017,7 +1025,12 @@ void tab_layers_button_new_menu() {
 		}
 		l = g_context->layer;
 
-		slot_layer_t *m = layers_new_mask(false, l, -1);
+		i32_map_t    *pointers = tab_layers_init_layer_map();
+		slot_layer_t *m        = layers_new_mask(false, l, -1);
+		for (i32 i = 0; i < project_materials->length; ++i) {
+			slot_material_t *mat = project_materials->buffer[i];
+			tab_layers_remap_layer_pointers(mat->canvas->nodes, tab_layers_fill_layer_map(pointers));
+		}
 		sys_notify_on_next_frame(&tab_layers_button_new_black_mask, m);
 		g_context->layer_preview_dirty = true;
 		history_new_black_mask();
@@ -1029,7 +1042,12 @@ void tab_layers_button_new_menu() {
 		}
 		l = g_context->layer;
 
-		slot_layer_t *m = layers_new_mask(false, l, -1);
+		i32_map_t    *pointers = tab_layers_init_layer_map();
+		slot_layer_t *m        = layers_new_mask(false, l, -1);
+		for (i32 i = 0; i < project_materials->length; ++i) {
+			slot_material_t *mat = project_materials->buffer[i];
+			tab_layers_remap_layer_pointers(mat->canvas->nodes, tab_layers_fill_layer_map(pointers));
+		}
 		sys_notify_on_next_frame(&tab_layers_button_new_layer_clear, m);
 		g_context->layer_preview_dirty = true;
 		history_new_white_mask();
@@ -1041,7 +1059,12 @@ void tab_layers_button_new_menu() {
 		}
 		l = g_context->layer;
 
-		slot_layer_t *m = layers_new_mask(false, l, -1);
+		i32_map_t    *pointers = tab_layers_init_layer_map();
+		slot_layer_t *m        = layers_new_mask(false, l, -1);
+		for (i32 i = 0; i < project_materials->length; ++i) {
+			slot_material_t *mat = project_materials->buffer[i];
+			tab_layers_remap_layer_pointers(mat->canvas->nodes, tab_layers_fill_layer_map(pointers));
+		}
 		sys_notify_on_next_frame(&tab_layers_button_new_to_fill_layer, m);
 		g_context->layer_preview_dirty = true;
 		history_new_fill_mask();

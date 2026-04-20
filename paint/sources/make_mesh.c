@@ -261,12 +261,13 @@ node_shader_context_t *make_mesh_run(material_t *data, i32 layer_pass) {
 			if (is_material_tool && l != g_context->layer) {
 				continue;
 			}
-			if (!slot_layer_is_layer(l) || !slot_layer_is_visible(l)) {
+			if (!slot_layer_is_visible(l)) {
 				continue;
 			}
-
-			slot_layer_t_array_t *filters = slot_layer_get_filters(l, true);
-			if (filters != NULL) {
+			if (!slot_layer_is_layer(l)) {
+				continue;
+			}
+			if (slot_layer_get_filters(l, false) != NULL) {
 				continue;
 			}
 
