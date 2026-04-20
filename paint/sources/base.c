@@ -518,12 +518,12 @@ bool ui_base_picker_button() {
 }
 
 void ui_base_make_empty_envmap(i32 col) {
-	ui_base_viewport_col      = col;
-	u8_array_t *b             = u8_array_create(4);
-	b->buffer[0]              = color_get_rb(col);
-	b->buffer[1]              = color_get_gb(col);
-	b->buffer[2]              = color_get_bb(col);
-	b->buffer[3]              = 255;
+	ui_base_viewport_col    = col;
+	u8_array_t *b           = u8_array_create(4);
+	b->buffer[0]            = color_get_rb(col);
+	b->buffer[1]            = color_get_gb(col);
+	b->buffer[2]            = color_get_bb(col);
+	b->buffer[3]            = 255;
 	g_context->empty_envmap = gpu_create_texture_from_bytes(b, 1, 1, GPU_TEXTURE_FORMAT_RGBA32);
 }
 
@@ -541,11 +541,11 @@ void ui_base_init() {
 		ui_base_make_empty_envmap(base_theme->VIEWPORT_COL);
 	}
 	if (g_context->preview_envmap == NULL) {
-		u8_array_t *b               = u8_array_create(4);
-		b->buffer[0]                = 0;
-		b->buffer[1]                = 0;
-		b->buffer[2]                = 0;
-		b->buffer[3]                = 255;
+		u8_array_t *b             = u8_array_create(4);
+		b->buffer[0]              = 0;
+		b->buffer[1]              = 0;
+		b->buffer[2]              = 0;
+		b->buffer[3]              = 255;
 		g_context->preview_envmap = gpu_create_texture_from_bytes(b, 1, 1, GPU_TEXTURE_FORMAT_RGBA32);
 	}
 
@@ -556,7 +556,7 @@ void ui_base_init() {
 		g_context->default_radiance_mipmaps = scene_world->_->radiance_mipmaps;
 	}
 	scene_world->_->envmap = g_context->show_envmap ? g_context->saved_envmap : g_context->empty_envmap;
-	g_context->ddirty    = 1;
+	g_context->ddirty      = 1;
 
 	string_array_t *resources = any_array_create_from_raw(
 	    (void *[]){
@@ -746,8 +746,7 @@ void ui_base_update_ui_on_next_frame(void *_) {
 }
 
 rect_t *ui_base_get_brush_stencil_rect() {
-	i32 w =
-	    math_floor(g_context->brush_stencil_image->width * (base_h() / (float)g_context->brush_stencil_image->height) * g_context->brush_stencil_scale);
+	i32     w = math_floor(g_context->brush_stencil_image->width * (base_h() / (float)g_context->brush_stencil_image->height) * g_context->brush_stencil_scale);
 	i32     h = math_floor(base_h() * g_context->brush_stencil_scale);
 	i32     x = math_floor(base_x() + g_context->brush_stencil_x * base_w());
 	i32     y = math_floor(base_y() + g_context->brush_stencil_y * base_h());
@@ -815,9 +814,9 @@ void ui_base_update_ui() {
 		rect_t *r = ui_base_get_brush_stencil_rect();
 		if (mouse_started("left")) {
 			g_context->brush_stencil_scaling = ui_base_hit_rect(mouse_x, mouse_y, r->x - 8, r->y - 8, 16, 16) ||
-			                                     ui_base_hit_rect(mouse_x, mouse_y, r->x - 8, r->h + r->y - 8, 16, 16) ||
-			                                     ui_base_hit_rect(mouse_x, mouse_y, r->w + r->x - 8, r->y - 8, 16, 16) ||
-			                                     ui_base_hit_rect(mouse_x, mouse_y, r->w + r->x - 8, r->h + r->y - 8, 16, 16);
+			                                   ui_base_hit_rect(mouse_x, mouse_y, r->x - 8, r->h + r->y - 8, 16, 16) ||
+			                                   ui_base_hit_rect(mouse_x, mouse_y, r->w + r->x - 8, r->y - 8, 16, 16) ||
+			                                   ui_base_hit_rect(mouse_x, mouse_y, r->w + r->x - 8, r->h + r->y - 8, 16, 16);
 			f32 cosa = math_cos(-g_context->brush_stencil_angle);
 			f32 sina = math_sin(-g_context->brush_stencil_angle);
 			f32 ox   = 0;
@@ -835,8 +834,8 @@ void ui_base_update_ui() {
 				g_context->brush_stencil_scale += mouse_movement_x / 400.0 * mult;
 			}
 			else if (g_context->brush_stencil_rotating) {
-				f32 gizmo_x                      = r->x + r->w / 2.0;
-				f32 gizmo_y                      = r->y + r->h / 2.0;
+				f32 gizmo_x                    = r->x + r->w / 2.0;
+				f32 gizmo_y                    = r->y + r->h / 2.0;
 				g_context->brush_stencil_angle = -math_atan2(mouse_y - gizmo_y, mouse_x - gizmo_x) - math_pi() / 2.0;
 			}
 			else {
@@ -969,15 +968,14 @@ void ui_base_update_ui() {
 		}
 		ui_base_hwnds->buffer[TAB_AREA_SIDEBAR0]->redraws = 2;
 	}
+
 	if (g_context->layer != NULL && g_context->layer_preview_dirty && !slot_layer_is_group(g_context->layer)) {
 		g_context->layer_preview_dirty = false;
 		g_context->mask_preview_last   = NULL;
 		// Update layer preview
-		slot_layer_t *l = g_context->layer;
-
+		slot_layer_t  *l      = g_context->layer;
 		gpu_texture_t *target = l->texpaint_preview;
 		if (target != NULL) {
-
 			gpu_texture_t *source = l->texpaint;
 			draw_begin(target, true, 0x00000000);
 			// draw_set_pipeline(raw.layer.is_mask() ? pipes_copy8 : pipes_copy);
@@ -988,6 +986,7 @@ void ui_base_update_ui() {
 			ui_base_hwnds->buffer[TAB_AREA_SIDEBAR0]->redraws = 2;
 		}
 	}
+
 	bool undo_pressed = operator_shortcut(any_map_get(config_keymap, "edit_undo"), SHORTCUT_TYPE_STARTED);
 	bool redo_pressed =
 	    operator_shortcut(any_map_get(config_keymap, "edit_redo"), SHORTCUT_TYPE_STARTED) || (keyboard_down("control") && keyboard_started("y"));
@@ -1122,7 +1121,7 @@ void ui_base_update(void *_) {
 				}
 				else if (operator_shortcut(any_map_get(config_keymap, "brush_angle"), SHORTCUT_TYPE_DOWN)) {
 					g_context->brush_angle += mouse_movement_x / 5.0;
-					i32 i                    = math_floor(g_context->brush_angle);
+					i32 i                  = math_floor(g_context->brush_angle);
 					g_context->brush_angle = i % 360;
 					if (g_context->brush_angle < 0)
 						g_context->brush_angle += 360;
@@ -1236,13 +1235,13 @@ void ui_base_update(void *_) {
 				g_context->brush_radius -= ui_base_get_radius_increment();
 				g_context->brush_radius           = math_max(math_round(g_context->brush_radius * 100) / 100.0, 0.01);
 				g_context->brush_radius_handle->f = g_context->brush_radius;
-				ui_header_handle->redraws           = 2;
+				ui_header_handle->redraws         = 2;
 			}
 			else if (operator_shortcut(any_map_get(config_keymap, "brush_radius_increase"), SHORTCUT_TYPE_REPEAT)) {
 				g_context->brush_radius += ui_base_get_radius_increment();
 				g_context->brush_radius           = math_round(g_context->brush_radius * 100) / 100.0;
 				g_context->brush_radius_handle->f = g_context->brush_radius;
-				ui_header_handle->redraws           = 2;
+				ui_header_handle->redraws         = 2;
 			}
 			else if (decal_mask) {
 				if (operator_shortcut(string("%s+%s", any_map_get(config_keymap, "decal_mask"), any_map_get(config_keymap, "brush_radius_decrease")),
@@ -1250,14 +1249,14 @@ void ui_base_update(void *_) {
 					g_context->brush_decal_mask_radius -= ui_base_get_radius_increment();
 					g_context->brush_decal_mask_radius           = math_max(math_round(g_context->brush_decal_mask_radius * 100) / 100.0, 0.01);
 					g_context->brush_decal_mask_radius_handle->f = g_context->brush_decal_mask_radius;
-					ui_header_handle->redraws                      = 2;
+					ui_header_handle->redraws                    = 2;
 				}
 				else if (operator_shortcut(string("%s+%s", any_map_get(config_keymap, "decal_mask"), any_map_get(config_keymap, "brush_radius_increase")),
 				                           SHORTCUT_TYPE_REPEAT)) {
 					g_context->brush_decal_mask_radius += ui_base_get_radius_increment();
 					g_context->brush_decal_mask_radius           = math_round(g_context->brush_decal_mask_radius * 100) / 100.0;
 					g_context->brush_decal_mask_radius_handle->f = g_context->brush_decal_mask_radius;
-					ui_header_handle->redraws                      = 2;
+					ui_header_handle->redraws                    = 2;
 				}
 			}
 		}
@@ -1417,12 +1416,12 @@ void ui_base_update(void *_) {
 				timer->done(timer->done_data);
 				g_context->particle_timer = NULL;
 			}
-			history_push_undo           = true;
+			history_push_undo         = true;
 			g_context->particle_hit_x = g_context->particle_hit_y = g_context->particle_hit_z = 0;
-			object_t      *o                                                                        = scene_spawn_object(".Sphere", NULL, true);
-			mesh_object_t *mo                                                                       = o->ext;
-			mo->base->name                                                                          = ".Bullet";
-			mo->base->visible                                                                       = true;
+			object_t      *o                                                                  = scene_spawn_object(".Sphere", NULL, true);
+			mesh_object_t *mo                                                                 = o->ext;
+			mo->base->name                                                                    = ".Bullet";
+			mo->base->visible                                                                 = true;
 
 			camera_object_t *camera    = scene_camera;
 			transform_t     *ct        = camera->base->transform;
@@ -1446,7 +1445,7 @@ void ui_base_update(void *_) {
 		physics_pair_t_array_t *pairs = physics_world_get_contact_pairs(world, g_context->paint_body);
 		if (pairs != NULL) {
 			for (i32 i = 0; i < pairs->length; ++i) {
-				physics_pair_t *p                = pairs->buffer[i];
+				physics_pair_t *p              = pairs->buffer[i];
 				g_context->last_particle_hit_x = g_context->particle_hit_x != 0 ? g_context->particle_hit_x : p->pos_a_x;
 				g_context->last_particle_hit_y = g_context->particle_hit_y != 0 ? g_context->particle_hit_y : p->pos_a_y;
 				g_context->last_particle_hit_z = g_context->particle_hit_z != 0 ? g_context->particle_hit_z : p->pos_a_z;
@@ -1525,8 +1524,8 @@ void ui_base_render_cursor(void *_) {
 	draw_set_color(0xffffffff);
 
 	g_context->view_index = g_context->view_index_last;
-	i32 mx                  = base_x() + g_context->paint_vec.x * base_w();
-	i32 my                  = base_y() + g_context->paint_vec.y * base_h();
+	i32 mx                = base_x() + g_context->paint_vec.x * base_w();
+	i32 my                = base_y() + g_context->paint_vec.y * base_h();
 	g_context->view_index = -1;
 
 	if (g_context->brush_stencil_image != NULL && g_context->tool != TOOL_TYPE_PICKER && g_context->tool != TOOL_TYPE_COLORID) {
@@ -1592,7 +1591,7 @@ void ui_base_render_cursor(void *_) {
 			if (!decal_mask) {
 				g_context->decal_x = g_context->paint_vec.x;
 				g_context->decal_y = g_context->paint_vec.y;
-				decal_alpha          = g_context->brush_opacity;
+				decal_alpha        = g_context->brush_opacity;
 			}
 
 			if (!g_config->brush_live) {
@@ -1600,8 +1599,8 @@ void ui_base_render_cursor(void *_) {
 				i32 psizey = math_floor(256 * UI_SCALE() * (g_context->brush_radius * g_context->brush_nodes_radius));
 
 				g_context->view_index = g_context->view_index_last;
-				f32 decalx              = base_x() + g_context->decal_x * base_w() - psizex / 2.0;
-				f32 decaly              = base_y() + g_context->decal_y * base_h() - psizey / 2.0;
+				f32 decalx            = base_x() + g_context->decal_x * base_w() - psizex / 2.0;
+				f32 decaly            = base_y() + g_context->decal_y * base_h() - psizey / 2.0;
 				g_context->view_index = -1;
 
 				draw_set_color(color_from_floats(1, 1, 1, decal_alpha));
@@ -1626,9 +1625,9 @@ void ui_base_render_cursor(void *_) {
 	}
 
 	if (g_context->brush_lazy_radius > 0 && !g_context->brush_locked &&
-	    (g_context->tool == TOOL_TYPE_BRUSH || g_context->tool == TOOL_TYPE_ERASER || g_context->tool == TOOL_TYPE_DECAL ||
-	     g_context->tool == TOOL_TYPE_TEXT || g_context->tool == TOOL_TYPE_CLONE || g_context->tool == TOOL_TYPE_BLUR ||
-	     g_context->tool == TOOL_TYPE_SMUDGE || g_context->tool == TOOL_TYPE_PARTICLE)) {
+	    (g_context->tool == TOOL_TYPE_BRUSH || g_context->tool == TOOL_TYPE_ERASER || g_context->tool == TOOL_TYPE_DECAL || g_context->tool == TOOL_TYPE_TEXT ||
+	     g_context->tool == TOOL_TYPE_CLONE || g_context->tool == TOOL_TYPE_BLUR || g_context->tool == TOOL_TYPE_SMUDGE ||
+	     g_context->tool == TOOL_TYPE_PARTICLE)) {
 		draw_filled_rect(mx - 1, my - 1, 2, 2);
 		mx         = g_context->brush_lazy_x * base_w() + base_x();
 		my         = g_context->brush_lazy_y * base_h() + base_y();
@@ -2186,7 +2185,7 @@ void ui_base_show_3d_view() {
 }
 
 void ui_base_toggle_browser() {
-	bool minimized                                   = g_config->layout->buffer[LAYOUT_SIZE_STATUS_H] <= (ui_statusbar_default_h * g_config->window_scale);
+	bool minimized                                 = g_config->layout->buffer[LAYOUT_SIZE_STATUS_H] <= (ui_statusbar_default_h * g_config->window_scale);
 	g_config->layout->buffer[LAYOUT_SIZE_STATUS_H] = minimized ? 240 : ui_statusbar_default_h;
 	g_config->layout->buffer[LAYOUT_SIZE_STATUS_H] = math_floor(g_config->layout->buffer[LAYOUT_SIZE_STATUS_H] * g_config->window_scale);
 	base_resize();
@@ -2273,14 +2272,14 @@ void base_update_workspace() {
 		ui_view2d_show    = false;
 		ui_nodes_show     = false;
 
-		ui_base_htabs->buffer[TAB_AREA_STATUS]->i          = 5; // Console
+		ui_base_htabs->buffer[TAB_AREA_STATUS]->i        = 5; // Console
 		g_config->layout_tabs->buffer[TAB_AREA_STATUS]   = 5;
-		ui_base_htabs->buffer[TAB_AREA_SIDEBAR0]->i        = 2; // Script
+		ui_base_htabs->buffer[TAB_AREA_SIDEBAR0]->i      = 2; // Script
 		g_config->layout_tabs->buffer[TAB_AREA_SIDEBAR0] = 2;
 
 		g_config->layout->buffer[LAYOUT_SIZE_STATUS_H]   = iron_window_height() * 0.3;
 		g_config->layout->buffer[LAYOUT_SIZE_SIDEBAR_W]  = iron_window_width() * 0.52;
-		float h                                            = UI_ELEMENT_H() + UI_ELEMENT_OFFSET() + 2;
+		float h                                          = UI_ELEMENT_H() + UI_ELEMENT_OFFSET() + 2;
 		g_config->layout->buffer[LAYOUT_SIZE_SIDEBAR_H0] = iron_window_height() - h;
 		g_config->layout->buffer[LAYOUT_SIZE_SIDEBAR_H1] = h;
 	}
@@ -2297,7 +2296,7 @@ void base_update_workflow() {
 		ui_node_array_t *nodes = project_materials->buffer[i]->canvas->nodes;
 		for (i32 j = 0; j < nodes->length; ++j) {
 			if (string_equals(nodes->buffer[j]->type, "OUTPUT_MATERIAL_PBR")) {
-				nodes->buffer[j]->inputs->length = g_config->workflow == WORKFLOW_PBR ? 9 : 2;
+				nodes->buffer[j]->inputs->length          = g_config->workflow == WORKFLOW_PBR ? 9 : 2;
 				nodes->buffer[j]->inputs->buffer[0]->name = g_config->workflow == WORKFLOW_SCULPT ? tr("Displacement") : tr("Base Color");
 			}
 		}

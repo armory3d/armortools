@@ -631,6 +631,11 @@ void render_path_paint_end() {
 	if (!render_path_paint_paint_enabled()) {
 		return;
 	}
+
+	if (g_context->pdirty > 0) {
+		layers_update_linked_layers();
+	}
+
 	g_context->pdirty--;
 }
 

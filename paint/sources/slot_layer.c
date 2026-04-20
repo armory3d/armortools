@@ -1200,6 +1200,28 @@ void layers_update_fill_layer(bool parse_paint) {
 		draw_begin(current, false, 0);
 }
 
+void layers_update_linked_layers() {
+	slot_material_t *_material = g_context->material;
+	for (i32 i = 0; i < project_materials->length; ++i) {
+		slot_material_t *m = project_materials->buffer[i];
+		bool has_linked = false;
+		for (i32 j = 0; j < m->canvas->nodes->length; ++j) {
+			ui_node_t *node = m->canvas->nodes->buffer[j];
+			if (string_equals(node->type, "LAYER") || string_equals(node->type, "LAYER_MASK")) {
+				has_linked = true;
+				break;
+			}
+		}
+		if (!has_linked) {
+			continue;
+		}
+		g_context->material = m;
+		layers_update_fill_layers();
+	}
+	g_context->material = _material;
+	make_material_parse_paint_material(false);
+}
+
 void layers_set_object_mask() {
 	string_array_t *ar = any_array_create_from_raw(
 	    (void *[]){

@@ -57,6 +57,7 @@ void layers_commands_merge_pack(gpu_pipeline_t *pipe, gpu_texture_t *i0, gpu_tex
 bool layers_is_fill_material();
 void layers_update_fill_layers();
 void layers_update_fill_layer(bool parse_paint);
+void layers_update_linked_layers();
 void layers_set_object_mask();
 slot_layer_t             *layers_new_layer(bool clear, i32 position, slot_layer_t *parent);
 slot_layer_t             *layers_new_mask(bool clear, slot_layer_t *parent, i32 position);
