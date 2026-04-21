@@ -165,7 +165,7 @@ vec2_t uniforms_ext_vec2_link(object_t *object, material_data_t *mat, char *link
 f32 uniforms_ext_vec2d(f32 x) {
 	// Transform from 3d viewport coord to 2d view coord
 	g_context->paint2d_view = false;
-	f32 res                   = (x * base_w() - base_w()) / (float)ui_view2d_ww;
+	f32 res                 = (x * base_w() - base_w()) / (float)ui_view2d_ww;
 	g_context->paint2d_view = true;
 	return res;
 }
@@ -184,8 +184,8 @@ vec4_t uniforms_ext_vec3_link(object_t *object, material_data_t *mat, char *link
 			x     = uniforms_ext_vec2d(x);
 			lastx = uniforms_ext_vec2d(lastx);
 		}
-		f32 angle                     = math_atan2(-y + lasty, x - lastx) - math_pi() / 2.0;
-		v                             = (vec4_t){math_cos(angle), math_sin(angle), allow_paint ? 1 : 0, 1.0};
+		f32 angle                   = math_atan2(-y + lasty, x - lastx) - math_pi() / 2.0;
+		v                           = (vec4_t){math_cos(angle), math_sin(angle), allow_paint ? 1 : 0, 1.0};
 		g_context->prev_paint_vec_x = g_context->last_paint_vec_x;
 		g_context->prev_paint_vec_y = g_context->last_paint_vec_y;
 		return v;
@@ -201,12 +201,12 @@ vec4_t uniforms_ext_vec3_link(object_t *object, material_data_t *mat, char *link
 	}
 	else if (string_equals(link, "_picker_base")) {
 		v = (vec4_t){color_get_rb(g_context->picked_color->base) / 255.0, color_get_gb(g_context->picked_color->base) / 255.0,
-		                color_get_bb(g_context->picked_color->base) / 255.0, 1.0};
+		             color_get_bb(g_context->picked_color->base) / 255.0, 1.0};
 		return v;
 	}
 	else if (string_equals(link, "_picker_normal")) {
 		v = (vec4_t){color_get_rb(g_context->picked_color->normal) / 255.0, color_get_gb(g_context->picked_color->normal) / 255.0,
-		                color_get_bb(g_context->picked_color->normal) / 255.0, 1.0};
+		             color_get_bb(g_context->picked_color->normal) / 255.0, 1.0};
 		return v;
 	}
 	else if (string_equals(link, "_particle_hit")) {

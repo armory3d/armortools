@@ -84,7 +84,7 @@ void render_path_preview_commands_preview() {
 	render_path_set_target("mtex", NULL, "mmain", GPU_CLEAR_NONE, 0, 0.0);
 	render_path_draw_skydome("Scene/world_pass/world_pass");
 
-	char        *framebuffer     = "texpreview";
+	char            *framebuffer     = "texpreview";
 	slot_material_t *selected_mat    = g_context->material;
 	render_target_t *texpreview      = any_map_get(render_path_render_targets, "texpreview");
 	render_target_t *texpreview_icon = any_map_get(render_path_render_targets, "texpreview_icon");
@@ -122,7 +122,7 @@ void render_path_preview_commands_decal() {
 	render_path_set_target(output, NULL, "main", GPU_CLEAR_NONE, 0, 0.0);
 	render_path_draw_skydome("Scene/world_pass/world_pass");
 
-	char        *framebuffer = "texpreview";
+	char            *framebuffer = "texpreview";
 	render_target_t *texpreview  = any_map_get(render_path_render_targets, "texpreview");
 	texpreview->_image           = g_context->decal_image;
 

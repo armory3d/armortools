@@ -24,7 +24,7 @@ void logic_node_add_outputs(logic_node_t *self, logic_node_t_array_t *nodes) {
 	any_array_push(self->outputs, nodes);
 }
 
-void * logic_node_get(logic_node_t *self, i32 from) {
+void *logic_node_get(logic_node_t *self, i32 from) {
 	if (self->get != NULL) {
 		return self->get(self->ext, from);
 	}
@@ -38,7 +38,7 @@ gpu_texture_t *logic_node_get_as_image(logic_node_t *self, i32 from) {
 	return NULL;
 }
 
-void logic_node_set(logic_node_t *self, void * value) {
+void logic_node_set(logic_node_t *self, void *value) {
 	if (self->set != NULL) {
 		self->set(self->ext, value);
 	}

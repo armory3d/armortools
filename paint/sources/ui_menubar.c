@@ -264,9 +264,9 @@ void ui_menubar_draw_category_items() {
 			project_save_as(false);
 		}
 
-		ui->changed                      = false;
-		ui_handle_t *h_pack_assets       = ui_handle(__ID__);
-		h_pack_assets->b                 = g_context->pack_assets_on_save;
+		ui->changed                    = false;
+		ui_handle_t *h_pack_assets     = ui_handle(__ID__);
+		h_pack_assets->b               = g_context->pack_assets_on_save;
 		g_context->pack_assets_on_save = ui_check(h_pack_assets, tr("Pack Assets"), "");
 		if (ui->changed) {
 			ui_menu_keep_open = true;
@@ -640,7 +640,7 @@ void ui_menubar_draw_category_items() {
 			viewport_zoom(-0.2);
 		}
 
-		camera_object_t *cam       = scene_camera;
+		camera_object_t *cam     = scene_camera;
 		g_context->fov_handle->f = math_floor(cam->data->fov * 100) / 100.0;
 		ui_menu_align();
 		cam->data->fov = ui_slider(g_context->fov_handle, tr("FoV"), 0.3, 1.4, true, 100.0, true, UI_ALIGN_RIGHT, true);

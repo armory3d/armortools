@@ -12,8 +12,8 @@ void import_mesh_run(char *path, bool _clear_layers, bool replace_existing) {
 		}
 	}
 
-	import_mesh_clear_layers  = _clear_layers;
-	g_context->layer_filter = 0;
+	import_mesh_clear_layers = _clear_layers;
+	g_context->layer_filter  = 0;
 
 	gc_unroot(import_mesh_meshes_to_unwrap);
 	import_mesh_meshes_to_unwrap = NULL;
@@ -101,7 +101,7 @@ void import_mesh_finish_import() {
 	make_material_parse_mesh_material();
 	ui_view2d_hwnd->redraws    = 2;
 	render_path_raytrace_ready = false;
-	g_context->paint_body    = NULL;
+	g_context->paint_body      = NULL;
 }
 
 void _import_mesh_make_mesh_finish_import(void *_) {
@@ -115,7 +115,7 @@ void _import_mesh_make_mesh_clear_layers(void *_) {
 void _import_mesh_make_mesh(raw_mesh_t *mesh) {
 	mesh_data_t *raw = import_mesh_raw_mesh(mesh);
 
-	mesh_data_t *md           = mesh_data_create(raw);
+	mesh_data_t *md         = mesh_data_create(raw);
 	g_context->paint_object = context_main_object();
 
 	context_select_paint_object(context_main_object());

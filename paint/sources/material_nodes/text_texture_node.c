@@ -4,8 +4,8 @@
 void _parser_material_cache_tex_text_node_on_next_frame(char *text) {
 	char          *_text_tool_text  = g_context->text_tool_text;
 	gpu_texture_t *_text_tool_image = g_context->text_tool_image;
-	g_context->text_tool_text     = string_copy(text);
-	g_context->text_tool_image    = NULL;
+	g_context->text_tool_text       = string_copy(text);
+	g_context->text_tool_image      = NULL;
 	util_render_make_text_preview();
 	char *file = string("tex_text_%s", text);
 	// TODO: remove old cache

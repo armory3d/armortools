@@ -27,9 +27,9 @@ void viewport_reset() {
 		if (string_equals(o->type, "camera_object")) {
 			cam->base->transform->local = mat4_from_f32_array(o->transform, 0);
 			transform_decompose(cam->base->transform);
-			cam->data->fov             = g_config->camera_fov;
+			cam->data->fov           = g_config->camera_fov;
 			g_context->cam_handle->i = 0;
-			cam->data->ortho           = NULL;
+			cam->data->ortho         = NULL;
 			camera_object_build_proj(cam, -1.0);
 			g_context->ddirty = 2;
 			camera_reset(-1);
@@ -42,10 +42,10 @@ void viewport_reset() {
 void viewport_set_view(f32 x, f32 y, f32 z, f32 rx, f32 ry, f32 rz) {
 	g_context->paint_object->base->transform->rot   = (quat_t){0, 0, 0, 1};
 	g_context->paint_object->base->transform->dirty = true;
-	camera_object_t *cam                              = scene_camera;
-	f32              dist                             = vec4_len(cam->base->transform->loc);
-	cam->base->transform->loc                         = (vec4_t){x * dist, y * dist, z * dist, 1.0};
-	cam->base->transform->rot                         = quat_from_euler(rx, ry, rz);
+	camera_object_t *cam                            = scene_camera;
+	f32              dist                           = vec4_len(cam->base->transform->loc);
+	cam->base->transform->loc                       = (vec4_t){x * dist, y * dist, z * dist, 1.0};
+	cam->base->transform->rot                       = quat_from_euler(rx, ry, rz);
 	transform_build_matrix(cam->base->transform);
 	camera_object_build_proj(cam, -1.0);
 	g_context->ddirty = 2;

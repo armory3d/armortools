@@ -119,7 +119,7 @@ project_t *import_arm_from_map_to_arm(any_map_t *old) {
 	project->assets    = any_map_get(old, "assets");
 	project->is_bgra   = armpack_map_get_i32(old, "is_bgra") > 0;
 
-	any_array_t *pas   = any_map_get(old, "packed_assets");
+	any_array_t *pas = any_map_get(old, "packed_assets");
 	if (pas != NULL) {
 		project->packed_assets = any_array_create_from_raw((void *[]){}, 0);
 		for (i32 i = 0; i < pas->length; ++i) {
@@ -138,9 +138,9 @@ project_t *import_arm_from_map_to_arm(any_map_t *old) {
 	project->camera_origin   = any_map_get(old, "camera_origin");
 	project->camera_fov      = armpack_map_get_f32(old, "camera_fov");
 
-	any_array_t *ss          = any_map_get(old, "swatches");
+	any_array_t *ss = any_map_get(old, "swatches");
 	if (ss != NULL) {
-		project->swatches        = any_array_create_from_raw((void *[]){}, 0);
+		project->swatches = any_array_create_from_raw((void *[]){}, 0);
 		for (i32 i = 0; i < ss->length; ++i) {
 			any_map_t      *old = ss->buffer[i];
 			swatch_color_t *s   = GC_ALLOC_INIT(swatch_color_t, {0});
@@ -165,9 +165,9 @@ project_t *import_arm_from_map_to_arm(any_map_t *old) {
 	project->material_icons = any_map_get(old, "material_icons");
 	project->font_assets    = any_map_get(old, "font_assets");
 
-	any_array_t *lds        = any_map_get(old, "layer_datas");
+	any_array_t *lds = any_map_get(old, "layer_datas");
 	if (lds != NULL) {
-		project->layer_datas    = any_array_create_from_raw((void *[]){}, 0);
+		project->layer_datas = any_array_create_from_raw((void *[]){}, 0);
 		for (i32 i = 0; i < lds->length; ++i) {
 			any_map_t    *old      = lds->buffer[i];
 			layer_data_t *ld       = GC_ALLOC_INIT(layer_data_t, {0});
@@ -203,7 +203,7 @@ project_t *import_arm_from_map_to_arm(any_map_t *old) {
 		}
 	}
 
-	any_array_t *ms     = any_map_get(old, "mesh_datas");
+	any_array_t *ms = any_map_get(old, "mesh_datas");
 	if (ms != NULL) {
 		project->mesh_datas = any_array_create_from_raw((void *[]){}, 0);
 		for (i32 i = 0; i < ms->length; ++i) {
@@ -238,9 +238,9 @@ project_t *import_arm_from_map_to_arm(any_map_t *old) {
 project_t *import_arm_from_version_4(any_map_t *old) {
 	f32_array_t *camera_world = any_map_get(old, "camera_world");
 	if (camera_world != NULL) {
-		mat4_t       m            = mat4_from_f32_array(camera_world, 0);
-		m                         = mat4_transpose(m);
-		camera_world              = mat4_to_f32_array(m);
+		mat4_t m     = mat4_from_f32_array(camera_world, 0);
+		m            = mat4_transpose(m);
+		camera_world = mat4_to_f32_array(m);
 		any_map_set(old, "camera_world", camera_world);
 	}
 	return import_arm_from_map_to_arm(old);

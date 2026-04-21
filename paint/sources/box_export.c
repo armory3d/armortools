@@ -9,14 +9,14 @@ bool                     _box_export_merge_vertices;
 void box_export_tab_export_textures_run(void *_) {
 
 	if (g_context->export_padding) {
-		i32 _dilate_radius = g_config->dilate_radius;
+		i32 _dilate_radius      = g_config->dilate_radius;
 		g_config->dilate_radius = 256;
-		slot_layer_t *_layer = g_context->layer;
+		slot_layer_t *_layer    = g_context->layer;
 		for (i32 i = 0; i < project_layers->length; ++i) {
 			g_context->layer = project_layers->buffer[i];
 			render_path_paint_dilate(true, true);
 		}
-		g_context->layer = _layer;
+		g_context->layer        = _layer;
 		g_config->dilate_radius = _dilate_radius;
 	}
 
@@ -164,8 +164,8 @@ void box_export_tab_export_textures(char *title, bool bake_material) {
 		    2);
 		g_context->layers_destination = ui_combo(layers_destination_handle, layers_destination_combo, tr("Destination"), true, UI_ALIGN_LEFT, true);
 
-		ui_handle_t *h_padding = ui_handle(__ID__);
-		h_padding->b = g_context->export_padding;
+		ui_handle_t *h_padding    = ui_handle(__ID__);
+		h_padding->b              = g_context->export_padding;
 		g_context->export_padding = ui_check(h_padding, tr("Padding"), "");
 
 		ui_row2();

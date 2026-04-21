@@ -65,9 +65,8 @@ void render_path_base_begin() {
 	}
 
 	// Match projection matrix jitter
-	bool skip_taa =
-	    g_context->split_view || g_context->viewport_mode == VIEWPORT_MODE_PATH_TRACE || g_context->camera_type == CAMERA_TYPE_ORTHOGRAPHIC ||
-	    ((g_context->tool == TOOL_TYPE_CLONE || g_context->tool == TOOL_TYPE_BLUR || g_context->tool == TOOL_TYPE_SMUDGE) && g_context->pdirty > 0);
+	bool skip_taa = g_context->split_view || g_context->viewport_mode == VIEWPORT_MODE_PATH_TRACE || g_context->camera_type == CAMERA_TYPE_ORTHOGRAPHIC ||
+	                ((g_context->tool == TOOL_TYPE_CLONE || g_context->tool == TOOL_TYPE_BLUR || g_context->tool == TOOL_TYPE_SMUDGE) && g_context->pdirty > 0);
 
 	if (g_config->brush_live) {
 		render_path_base_taa_frame = 0;
@@ -137,7 +136,7 @@ bool render_path_base_is_cached() {
 
 void render_path_base_draw_split(void (*draw_commands)(void)) {
 	if (g_context->split_view && !g_context->paint2d_view) {
-		g_context->ddirty  = 2;
+		g_context->ddirty    = 2;
 		camera_object_t *cam = scene_camera;
 
 		g_context->view_index = g_context->view_index == 0 ? 1 : 0;

@@ -1,7 +1,7 @@
 
 #include "global.h"
 
-char                *str_get_smudge_tool_weight = "\
+char *str_get_smudge_tool_weight = "\
 fun get_smudge_tool_weight(i: int): float { \
 	if (i == 0) { return 1.0 / 28.0; } \
 	if (i == 1) { return 2.0 / 28.0; } \
@@ -13,7 +13,7 @@ fun get_smudge_tool_weight(i: int): float { \
 } \
 ";
 
-char                *str_get_blur_tool_weight   = "\
+char *str_get_blur_tool_weight = "\
 fun get_blur_tool_weight(i: int): float { \
 	if (i == 0) { return 0.034619 / 2.0; } \
 	if (i == 1) { return 0.044859 / 2.0; } \

@@ -336,7 +336,7 @@ void export_arm_run_material(char *path) {
 	}
 	any_array_push(mnodes, c);
 
-	string_array_t *texture_files = export_arm_assets_to_files(path, assets);
+	string_array_t         *texture_files = export_arm_assets_to_files(path, assets);
 	packed_asset_t_array_t *packed_assets = NULL;
 	if (!g_context->pack_assets_on_export) {
 		packed_assets = export_arm_get_packed_assets(path, texture_files);
@@ -348,10 +348,10 @@ void export_arm_run_material(char *path) {
 	buffer_t *buf = lz4_encode(gpu_get_texture_pixels(m->image));
 #endif
 	buffer_t_array_t *micons = any_array_create_from_raw(
-		(void *[]){
-			buf,
-		},
-		1);
+	    (void *[]){
+	        buf,
+	    },
+	    1);
 
 	project_t *raw = GC_ALLOC_INIT(project_t, {.version         = manifest_version_project,
 	                                           .material_nodes  = mnodes,
@@ -411,7 +411,7 @@ void export_arm_run_brush(char *path) {
 	}
 	any_array_push(bnodes, c);
 
-	string_array_t *texture_files = export_arm_assets_to_files(path, assets);
+	string_array_t         *texture_files = export_arm_assets_to_files(path, assets);
 	packed_asset_t_array_t *packed_assets = NULL;
 	if (!g_context->pack_assets_on_export) {
 		packed_assets = export_arm_get_packed_assets(path, texture_files);
@@ -423,10 +423,10 @@ void export_arm_run_brush(char *path) {
 	buffer_t *buf = lz4_encode(gpu_get_texture_pixels(b->image));
 #endif
 	buffer_t_array_t *bicons = any_array_create_from_raw(
-		(void *[]){
-			buf,
-		},
-		1);
+	    (void *[]){
+	        buf,
+	    },
+	    1);
 
 	project_t *raw = GC_ALLOC_INIT(
 	    project_t,

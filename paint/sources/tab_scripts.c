@@ -36,7 +36,7 @@ void tab_scripts_draw_export(char *path) {
 }
 
 void tab_scripts_draw_import(char *path) {
-	buffer_t *b               = data_get_blob(path);
+	buffer_t *b = data_get_blob(path);
 	tab_scripts_set(sys_buffer_to_string(b));
 	data_delete_blob(path);
 }

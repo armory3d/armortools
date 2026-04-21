@@ -24,8 +24,8 @@ void import_blend_mesh_ui() {
 	    2);
 	ui_row(ar);
 
-	ui_handle_t *h      = ui_handle(__ID__);
-	h->text             = string_copy(g_config->blender);
+	ui_handle_t *h    = ui_handle(__ID__);
+	h->text           = string_copy(g_config->blender);
 	g_config->blender = string_copy(ui_text_input(h, "", UI_ALIGN_LEFT, true, false));
 	if (ui_icon_button("", ICON_FOLDER_OPEN, UI_ALIGN_CENTER)) {
 		ui_files_show("", false, false, &import_blend_mesh_ui_blender_folder_picked);

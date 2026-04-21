@@ -107,7 +107,7 @@ void ui_sidebar_show(bool b) {
 		    g_context->maximized_sidebar_width != 0 ? g_context->maximized_sidebar_width : math_floor(ui_sidebar_default_w * g_config->window_scale);
 	}
 	else {
-		ui_base_htabs->buffer[TAB_AREA_SIDEBAR0]->i        = ui_sidebar_last_tab;
+		ui_base_htabs->buffer[TAB_AREA_SIDEBAR0]->i      = ui_sidebar_last_tab;
 		g_config->layout_tabs->buffer[TAB_AREA_SIDEBAR0] = ui_sidebar_last_tab;
 		g_context->maximized_sidebar_width               = g_config->layout->buffer[LAYOUT_SIZE_SIDEBAR_W];
 		g_config->layout->buffer[LAYOUT_SIZE_SIDEBAR_W]  = 0;

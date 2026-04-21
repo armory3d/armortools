@@ -162,11 +162,11 @@ void tab_materials_draw_slots_menu() {
 	ui_handle_t *opac_mode_handle   = ui_handle(__ID__);
 	opac_mode_handle->i             = m->paint_opac_mode;
 	string_array_t *opac_mode_items = any_array_create_from_raw(
-		(void *[]){
-			tr("Alpha"),
-			tr("Translucency"),
-		},
-		2);
+	    (void *[]){
+	        tr("Alpha"),
+	        tr("Translucency"),
+	    },
+	    2);
 	m->paint_opac_mode = ui_inline_radio(opac_mode_handle, opac_mode_items, UI_ALIGN_LEFT);
 
 	ui_menu_separator();
@@ -201,8 +201,8 @@ void tab_materials_draw_slots_menu() {
 }
 
 void tab_materials_draw_slots(bool mini) {
-	i32  slotw        = math_floor(51 * UI_SCALE() + g_config->window_scale * 2);
-	i32  num          = math_floor(ui->_window_w / (float)slotw);
+	i32 slotw = math_floor(51 * UI_SCALE() + g_config->window_scale * 2);
+	i32 num   = math_floor(ui->_window_w / (float)slotw);
 	if (num == 0) {
 		return;
 	}
@@ -256,10 +256,10 @@ void tab_materials_draw_slots(bool mini) {
 			}
 
 			// Draw material icon
-			uix              = ui->_x;
-			uiy              = ui->_y;
-			i32        tile  = UI_SCALE() > 1 ? 100 : 50;
-			f32        imgh  = mini ? ui_sidebar_default_w_mini * 0.85 * UI_SCALE() : 50 * UI_SCALE();
+			uix      = ui->_x;
+			uiy      = ui->_y;
+			i32 tile = UI_SCALE() > 1 ? 100 : 50;
+			f32 imgh = mini ? ui_sidebar_default_w_mini * 0.85 * UI_SCALE() : 50 * UI_SCALE();
 
 			if (base_drag_material != NULL && tab_materials_drag_pos == i) {
 				ui_fill(-1, -2, 2, imgw_val + 4, ui->ops->theme->HIGHLIGHT_COL);

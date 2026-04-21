@@ -15,7 +15,7 @@ char *render_path_raytrace_bake_get_bake_shader_name() {
 	return g_context->bake_type == BAKE_TYPE_AO            ? string("raytrace_bake_ao%s", render_path_raytrace_ext)
 	       : g_context->bake_type == BAKE_TYPE_LIGHTMAP    ? string("raytrace_bake_light%s", render_path_raytrace_ext)
 	       : g_context->bake_type == BAKE_TYPE_BENT_NORMAL ? string("raytrace_bake_bent%s", render_path_raytrace_ext)
-	                                                         : string("raytrace_bake_thick%s", render_path_raytrace_ext);
+	                                                       : string("raytrace_bake_thick%s", render_path_raytrace_ext);
 }
 
 bool render_path_raytrace_bake_commands(void (*parse_paint_material)(bool)) {
@@ -66,7 +66,7 @@ bool render_path_raytrace_bake_commands(void (*parse_paint_material)(bool)) {
 		}
 
 		bake_type_t _bake_type = g_context->bake_type;
-		g_context->bake_type = BAKE_TYPE_INIT;
+		g_context->bake_type   = BAKE_TYPE_INIT;
 		parse_paint_material(true);
 		render_path_set_target("baketex0", NULL, NULL, GPU_CLEAR_COLOR, 0x00000000, 0.0);
 		// Pixels with alpha of 0.0 are skipped during raytracing

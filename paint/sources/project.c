@@ -114,7 +114,7 @@ void project_new_box_draw() {
 	if (h_project_type->init) {
 		h_project_type->i = g_context->project_type;
 	}
-	g_context->project_type           = ui_combo(h_project_type, project_mesh_list, tr("Template"), true, UI_ALIGN_LEFT, true);
+	g_context->project_type             = ui_combo(h_project_type, project_mesh_list, tr("Template"), true, UI_ALIGN_LEFT, true);
 	ui_handle_t *h_project_aspect_ratio = ui_handle(__ID__);
 	if (h_project_aspect_ratio->init) {
 		h_project_aspect_ratio->i = g_context->project_aspect_ratio;
@@ -276,7 +276,7 @@ void project_new(bool reset_layers) {
 
 	g_context->picker_mask_handle->i = PICKER_MASK_NONE;
 	g_context->material              = project_materials->buffer[0];
-	ui_nodes_hwnd->redraws             = 2;
+	ui_nodes_hwnd->redraws           = 2;
 	gc_unroot(ui_nodes_group_stack);
 	ui_nodes_group_stack = any_array_create_from_raw((void *[]){}, 0);
 	gc_root(ui_nodes_group_stack);
@@ -318,8 +318,8 @@ void project_new(bool reset_layers) {
 	project_asset_map = any_imap_create();
 	gc_root(project_asset_map);
 	project_asset_id                                  = 0;
-	g_project->packed_assets                        = any_array_create_from_raw((void *[]){}, 0);
-	g_context->ddirty                               = 4;
+	g_project->packed_assets                          = any_array_create_from_raw((void *[]){}, 0);
+	g_context->ddirty                                 = 4;
 	ui_base_hwnds->buffer[TAB_AREA_SIDEBAR0]->redraws = 2;
 	ui_base_hwnds->buffer[TAB_AREA_SIDEBAR1]->redraws = 2;
 
@@ -354,16 +354,16 @@ void project_new(bool reset_layers) {
 void project_set_default_envmap() {
 	g_context->saved_envmap          = NULL;
 	g_context->envmap_loaded         = false;
-	scene_world->_->envmap             = g_context->empty_envmap;
-	scene_world->envmap                = "World_radiance.k";
+	scene_world->_->envmap           = g_context->empty_envmap;
+	scene_world->envmap              = "World_radiance.k";
 	g_context->show_envmap_handle->b = g_context->show_envmap = false;
-	scene_world->_->radiance                                      = g_context->default_radiance;
-	scene_world->_->radiance_mipmaps                              = g_context->default_radiance_mipmaps;
-	scene_world->_->irradiance                                    = g_context->default_irradiance;
-	scene_world->strength                                         = 2.0;
-	g_context->envmap_angle                                     = 0.0;
-	g_context->show_envmap_blur                                 = false;
-	g_project->envmap                                           = NULL;
+	scene_world->_->radiance                                  = g_context->default_radiance;
+	scene_world->_->radiance_mipmaps                          = g_context->default_radiance_mipmaps;
+	scene_world->_->irradiance                                = g_context->default_irradiance;
+	scene_world->strength                                     = 2.0;
+	g_context->envmap_angle                                   = 0.0;
+	g_context->show_envmap_blur                               = false;
+	g_project->envmap                                         = NULL;
 }
 
 void project_import_material_on_file_picked(char *path) {
@@ -781,13 +781,13 @@ void project_set_default_swatches() {
 	// 32-Color Palette by Andrew Kensler
 	// http://eastfarthing.com/blog/2016-05-06-palette/
 	g_project->swatches = any_array_create_from_raw((void *[]){}, 0);
-	i32_array_t *colors   = i32_array_create_from_raw(
-        (i32[]){
-            0xffffffff, 0xff000000, 0xffd6a090, 0xffa12c32, 0xfffa2f7a, 0xfffb9fda, 0xffe61cf7, 0xff992f7c, 0xff47011f, 0xff051155, 0xff4f02ec,
-            0xff2d69cb, 0xff00a6ee, 0xff6febff, 0xff08a29a, 0xff2a666a, 0xff063619, 0xff4a4957, 0xff8e7ba4, 0xffb7c0ff, 0xffacbe9c, 0xff827c70,
-            0xff5a3b1c, 0xffae6507, 0xfff7aa30, 0xfff4ea5c, 0xff9b9500, 0xff566204, 0xff11963b, 0xff51e113, 0xff08fdcc,
-        },
-        31);
+	i32_array_t *colors = i32_array_create_from_raw(
+	    (i32[]){
+	        0xffffffff, 0xff000000, 0xffd6a090, 0xffa12c32, 0xfffa2f7a, 0xfffb9fda, 0xffe61cf7, 0xff992f7c, 0xff47011f, 0xff051155, 0xff4f02ec,
+	        0xff2d69cb, 0xff00a6ee, 0xff6febff, 0xff08a29a, 0xff2a666a, 0xff063619, 0xff4a4957, 0xff8e7ba4, 0xffb7c0ff, 0xffacbe9c, 0xff827c70,
+	        0xff5a3b1c, 0xffae6507, 0xfff7aa30, 0xfff4ea5c, 0xff9b9500, 0xff566204, 0xff11963b, 0xff51e113, 0xff08fdcc,
+	    },
+	    31);
 	for (i32 i = 0; i < colors->length; ++i) {
 		i32 c = colors->buffer[i];
 		any_array_push(g_project->swatches, project_make_swatch(c));

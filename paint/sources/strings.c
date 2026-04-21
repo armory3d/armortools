@@ -26,13 +26,13 @@ char *strings_asset_already_imported() {
 }
 
 char *strings_graphics_api() {
-	#ifdef IRON_DIRECT3D12
+#ifdef IRON_DIRECT3D12
 	return "Direct3D12";
-	#elif defined(IRON_METAL)
+#elif defined(IRON_METAL)
 	return "Metal";
-	#elif defined(IRON_VULKAN)
+#elif defined(IRON_VULKAN)
 	return "Vulkan";
-	#else
+#else
 	return "WebGPU";
-	#endif
+#endif
 }

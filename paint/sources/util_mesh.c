@@ -47,9 +47,9 @@ void util_mesh_merge(mesh_object_t_array_t *paint_objects) {
 		return;
 	}
 	g_context->merged_object_is_atlas = paint_objects->length < project_paint_objects->length;
-	i32 vlen                            = 0;
-	i32 ilen                            = 0;
-	f32 max_scale                       = 0.0;
+	i32 vlen                          = 0;
+	i32 ilen                          = 0;
+	f32 max_scale                     = 0.0;
 	for (i32 i = 0; i < paint_objects->length; ++i) {
 		vlen += paint_objects->buffer[i]->data->vertex_arrays->buffer[0]->values->length;
 		ilen += paint_objects->buffer[i]->data->index_array->length;
@@ -141,7 +141,7 @@ void util_mesh_merge(mesh_object_t_array_t *paint_objects) {
 		any_array_push(raw->vertex_arrays, va);
 	}
 	util_mesh_remove_merged();
-	mesh_data_t *md                           = mesh_data_create(raw);
+	mesh_data_t *md                         = mesh_data_create(raw);
 	g_context->merged_object                = mesh_object_create(md, g_context->paint_object->material);
 	g_context->merged_object->base->name    = string("%s_merged", g_context->paint_object->base->name);
 	g_context->merged_object->force_context = "paint";

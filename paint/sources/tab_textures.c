@@ -186,8 +186,8 @@ void tab_textures_draw(ui_handle_t *htab) {
 
 		if (project_assets->length > 0) {
 
-			i32  slotw        = math_floor(52 * UI_SCALE());
-			i32  num          = math_floor(ui->_window_w / (float)slotw);
+			i32 slotw = math_floor(52 * UI_SCALE());
+			i32 num   = math_floor(ui->_window_w / (float)slotw);
 			if (num == 0) {
 				return;
 			}
@@ -228,9 +228,9 @@ void tab_textures_draw(ui_handle_t *htab) {
 						render_target_t *empty_rt = any_map_get(render_path_render_targets, "empty_black");
 						img                       = empty_rt->_image;
 					}
-					uix     = ui->_x;
-					uiy     = ui->_y;
-					i32 sw  = img->height < img->width ? img->height : 0;
+					uix    = ui->_x;
+					uiy    = ui->_y;
+					i32 sw = img->height < img->width ? img->height : 0;
 
 					if (base_drag_asset != NULL && tab_textures_drag_pos == i) {
 						ui_fill(-1, -2, 2, imgw_val + 4, ui->ops->theme->HIGHLIGHT_COL);

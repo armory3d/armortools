@@ -26,7 +26,7 @@ void util_particle_init() {
 		}
 	}
 
-	material_data_t *md            = data_get_material("Scene", "MaterialParticle");
+	material_data_t *md          = data_get_material("Scene", "MaterialParticle");
 	g_context->particle_material = md;
 
 	for (i32 i = 0; i < _scene_raw->objects->length; ++i) {
@@ -58,10 +58,10 @@ void util_particle_init_mesh() {
 		util_mesh_merge(NULL);
 	}
 
-	mesh_object_t *po              = g_context->merged_object;
-	po->base->transform->scale.x   = po->base->parent->transform->scale.x;
-	po->base->transform->scale.y   = po->base->parent->transform->scale.y;
-	po->base->transform->scale.z   = po->base->parent->transform->scale.z;
+	mesh_object_t *po            = g_context->merged_object;
+	po->base->transform->scale.x = po->base->parent->transform->scale.x;
+	po->base->transform->scale.y = po->base->parent->transform->scale.y;
+	po->base->transform->scale.z = po->base->parent->transform->scale.z;
 	g_context->paint_body        = physics_body_create();
 	g_context->paint_body->shape = PHYSICS_SHAPE_MESH;
 	physics_body_init(g_context->paint_body, po->base);

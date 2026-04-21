@@ -66,8 +66,8 @@ void tab_fonts_draw(ui_handle_t *htab) {
 		ui_end_sticky();
 		ui_separator(3, false);
 
-		i32  slotw        = math_floor(51 * UI_SCALE());
-		i32  num          = math_floor(ui->_window_w / (float)slotw);
+		i32 slotw = math_floor(51 * UI_SCALE());
+		i32 num   = math_floor(ui->_window_w / (float)slotw);
 		if (num == 0) {
 			return;
 		}
@@ -116,9 +116,9 @@ void tab_fonts_draw(ui_handle_t *htab) {
 					ui_fill(w + 1, -2, 2, w + 4, ui->ops->theme->HIGHLIGHT_COL);
 				}
 
-				uix              = ui->_x;
-				uiy              = ui->_y;
-				i32        tile  = UI_SCALE() > 1 ? 100 : 50;
+				uix      = ui->_x;
+				uiy      = ui->_y;
+				i32 tile = UI_SCALE() > 1 ? 100 : 50;
 
 				if (base_drag_font != NULL && tab_fonts_drag_pos == i) {
 					ui_fill(-1, -2, 2, imgw_val + 4, ui->ops->theme->HIGHLIGHT_COL);

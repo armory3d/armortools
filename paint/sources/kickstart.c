@@ -33,29 +33,8 @@ void _kickstart() {
 
 	box_export_channels = any_array_create_from_raw(
 	    (void *[]){
-	        "base_r",
-	        "base_g",
-	        "base_b",
-	        "height",
-	        "metal",
-	        "nor_r",
-	        "nor_g",
-	        "nor_g_directx",
-	        "nor_b",
-	        "occ",
-	        "opac",
-	        "rough",
-	        "smooth",
-	        "emis",
-	        "subs",
-			"diff_r",
-			"diff_g",
-			"diff_b",
-			"spec_r",
-			"spec_g",
-			"spec_b",
-	        "0.0",
-	        "1.0",
+	        "base_r", "base_g", "base_b", "height", "metal",  "nor_r",  "nor_g",  "nor_g_directx", "nor_b",  "occ", "opac", "rough",
+	        "smooth", "emis",   "subs",   "diff_r", "diff_g", "diff_b", "spec_r", "spec_g",        "spec_b", "0.0", "1.0",
 	    },
 	    23);
 	gc_root(box_export_channels);

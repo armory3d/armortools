@@ -57,8 +57,8 @@ void translator_init_font_on_next_frame(void *_) {
 
 	draw_font_t *f = data_get_font(font_path);
 	if (cjk) {
-		i32 font_index = i32_map_get(translator_cjk_font_indices, g_config->locale) != -1 ? i32_map_get(translator_cjk_font_indices, g_config->locale) : 0;
-		f->index       = font_index;
+		i32 font_index    = i32_map_get(translator_cjk_font_indices, g_config->locale) != -1 ? i32_map_get(translator_cjk_font_indices, g_config->locale) : 0;
+		f->index          = font_index;
 		f->glyphs_version = 0;
 		draw_font_init(f);
 	}

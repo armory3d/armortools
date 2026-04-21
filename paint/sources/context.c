@@ -181,8 +181,7 @@ void context_init() {
 
 bool context_use_deferred() {
 	return g_config->render_mode != RENDER_MODE_FORWARD &&
-	       (g_context->viewport_mode == VIEWPORT_MODE_LIT || g_context->viewport_mode == VIEWPORT_MODE_PATH_TRACE) &&
-	       g_context->tool != TOOL_TYPE_COLORID;
+	       (g_context->viewport_mode == VIEWPORT_MODE_LIT || g_context->viewport_mode == VIEWPORT_MODE_PATH_TRACE) && g_context->tool != TOOL_TYPE_COLORID;
 }
 
 void context_select_material(i32 i) {
@@ -261,7 +260,7 @@ void context_set_layer(slot_layer_t *l) {
 	if (l == g_context->layer) {
 		return;
 	}
-	g_context->layer        = l;
+	g_context->layer          = l;
 	ui_header_handle->redraws = 2;
 
 	gpu_texture_t *current = _draw_current;
@@ -284,9 +283,9 @@ void context_select_tool(i32 i) {
 	g_context->tool = i;
 	make_material_parse_paint_material(true);
 	make_material_parse_mesh_material();
-	g_context->ddirty            = 3;
+	g_context->ddirty              = 3;
 	viewport_mode_t _viewport_mode = g_context->viewport_mode;
-	g_context->viewport_mode     = VIEWPORT_MODE_MINUS_ONE;
+	g_context->viewport_mode       = VIEWPORT_MODE_MINUS_ONE;
 	context_set_viewport_mode(_viewport_mode);
 
 	context_init_tool();

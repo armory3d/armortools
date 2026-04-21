@@ -31,46 +31,52 @@ void nodes_material_new_group_button(i32 node_id) {
 				break;
 			}
 		}
-		ui_node_canvas_t *canvas = GC_ALLOC_INIT(
-		    ui_node_canvas_t,
-		    {.name  = node->name,
-		     .nodes = any_array_create_from_raw(
-		         (void *[]){
-		             GC_ALLOC_INIT(ui_node_t,
-		                           {.id      = 0,
-		                            .name    = _tr("Group Input"),
-		                            .type    = "GROUP_INPUT",
-		                            .x       = 50,
-		                            .y       = 200,
-		                            .color   = 0xff448c6d,
-		                            .inputs  = any_array_create_from_raw((void *[]){}, 0),
-		                            .outputs = any_array_create_from_raw((void *[]){}, 0),
-		                            .buttons = any_array_create_from_raw(
-		                                (void *[]){
-		                                    GC_ALLOC_INIT(ui_node_button_t, {.name = "nodes_material_group_input_button", .type = "CUSTOM", .height = 1, .output = -1, .default_value = f32_array_create_x(0.0) }),
-		                                },
-		                                1),
-		                            .width = 0,
-		                            .flags = 0}),
-		             GC_ALLOC_INIT(ui_node_t,
-		                           {.id      = 1,
-		                            .name    = _tr("Group Output"),
-		                            .type    = "GROUP_OUTPUT",
-		                            .x       = 450,
-		                            .y       = 200,
-		                            .color   = 0xff448c6d,
-		                            .inputs  = any_array_create_from_raw((void *[]){}, 0),
-		                            .outputs = any_array_create_from_raw((void *[]){}, 0),
-		                            .buttons = any_array_create_from_raw(
-		                                (void *[]){
-		                                    GC_ALLOC_INIT(ui_node_button_t, {.name = "nodes_material_group_output_button", .type = "CUSTOM", .height = 1, .output = -1, .default_value = f32_array_create_x(0.0) }),
-		                                },
-		                                1),
-		                            .width = 0,
-		                            .flags = 0}),
-		         },
-		         2),
-		     .links = any_array_create_from_raw((void *[]){}, 0)});
+		ui_node_canvas_t *canvas =
+		    GC_ALLOC_INIT(ui_node_canvas_t,
+		                  {.name  = node->name,
+		                   .nodes = any_array_create_from_raw(
+		                       (void *[]){
+		                           GC_ALLOC_INIT(ui_node_t, {.id      = 0,
+		                                                     .name    = _tr("Group Input"),
+		                                                     .type    = "GROUP_INPUT",
+		                                                     .x       = 50,
+		                                                     .y       = 200,
+		                                                     .color   = 0xff448c6d,
+		                                                     .inputs  = any_array_create_from_raw((void *[]){}, 0),
+		                                                     .outputs = any_array_create_from_raw((void *[]){}, 0),
+		                                                     .buttons = any_array_create_from_raw(
+		                                                         (void *[]){
+		                                                             GC_ALLOC_INIT(ui_node_button_t, {.name          = "nodes_material_group_input_button",
+		                                                                                              .type          = "CUSTOM",
+		                                                                                              .height        = 1,
+		                                                                                              .output        = -1,
+		                                                                                              .default_value = f32_array_create_x(0.0)}),
+		                                                         },
+		                                                         1),
+		                                                     .width = 0,
+		                                                     .flags = 0}),
+		                           GC_ALLOC_INIT(ui_node_t, {.id      = 1,
+		                                                     .name    = _tr("Group Output"),
+		                                                     .type    = "GROUP_OUTPUT",
+		                                                     .x       = 450,
+		                                                     .y       = 200,
+		                                                     .color   = 0xff448c6d,
+		                                                     .inputs  = any_array_create_from_raw((void *[]){}, 0),
+		                                                     .outputs = any_array_create_from_raw((void *[]){}, 0),
+		                                                     .buttons = any_array_create_from_raw(
+		                                                         (void *[]){
+		                                                             GC_ALLOC_INIT(ui_node_button_t, {.name          = "nodes_material_group_output_button",
+		                                                                                              .type          = "CUSTOM",
+		                                                                                              .height        = 1,
+		                                                                                              .output        = -1,
+		                                                                                              .default_value = f32_array_create_x(0.0)}),
+		                                                         },
+		                                                         1),
+		                                                     .width = 0,
+		                                                     .flags = 0}),
+		                       },
+		                       2),
+		                   .links = any_array_create_from_raw((void *[]){}, 0)});
 		node_group_t *ng = GC_ALLOC_INIT(node_group_t, {.canvas = canvas, .nodes = ui_nodes_create()});
 		any_array_push(project_material_groups, ng);
 	}

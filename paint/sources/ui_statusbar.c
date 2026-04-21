@@ -28,7 +28,7 @@ void ui_statusbar_render_ui() {
 		if (!g_config->touch_ui) {
 			bool minimized = g_config->layout->buffer[LAYOUT_SIZE_STATUS_H] <= (ui_statusbar_default_h * g_config->window_scale);
 			if (ui_tab(ui_base_htabs->buffer[TAB_AREA_STATUS], minimized ? "<" : ">", false, -2, false)) {
-				ui_base_htabs->buffer[TAB_AREA_STATUS]->i        = ui_statusbar_last_tab;
+				ui_base_htabs->buffer[TAB_AREA_STATUS]->i      = ui_statusbar_last_tab;
 				g_config->layout_tabs->buffer[TAB_AREA_STATUS] = ui_statusbar_last_tab;
 			}
 		}

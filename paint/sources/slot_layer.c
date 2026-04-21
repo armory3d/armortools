@@ -1203,8 +1203,8 @@ void layers_update_fill_layer(bool parse_paint) {
 void layers_update_linked_layers() {
 	slot_material_t *_material = g_context->material;
 	for (i32 i = 0; i < project_materials->length; ++i) {
-		slot_material_t *m = project_materials->buffer[i];
-		bool has_linked = false;
+		slot_material_t *m          = project_materials->buffer[i];
+		bool             has_linked = false;
 		for (i32 j = 0; j < m->canvas->nodes->length; ++j) {
 			ui_node_t *node = m->canvas->nodes->buffer[j];
 			if (string_equals(node->type, "LAYER") || string_equals(node->type, "LAYER_MASK")) {
@@ -1407,7 +1407,7 @@ void layers_create_filter_on_next_frame(void *_) {
 
 	for (int i = 0; i < 9; ++i) {
 		ui_node_link_t *l =
-			GC_ALLOC_INIT(ui_node_link_t, {.id = ui_next_link_id(canvas->links), .from_id = n->id, .from_socket = i, .to_id = nout->id, .to_socket = i});
+		    GC_ALLOC_INIT(ui_node_link_t, {.id = ui_next_link_id(canvas->links), .from_id = n->id, .from_socket = i, .to_id = nout->id, .to_socket = i});
 		any_array_push(canvas->links, l);
 	}
 

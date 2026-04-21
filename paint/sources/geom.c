@@ -10,17 +10,17 @@ raw_mesh_t *geom_make_plane(f32 size_x, f32 size_y, i32 verts_x, i32 verts_y, f3
 	mesh->has_next   = false;
 
 	// Pack positions to (-1, 1) range
-	f32 half_x       = size_x / 2.0;
-	f32 half_y       = size_y / 2.0;
-	mesh->scale_pos  = math_max(size_x, size_y);
-	f32 inv          = (1 / (float)mesh->scale_pos) * 32767;
+	f32 half_x      = size_x / 2.0;
+	f32 half_y      = size_y / 2.0;
+	mesh->scale_pos = math_max(size_x, size_y);
+	f32 inv         = (1 / (float)mesh->scale_pos) * 32767;
 
-	mesh->posa       = i16_array_create(verts_x * verts_y * 4);
-	mesh->nora       = i16_array_create(verts_x * verts_y * 2);
-	mesh->texa       = i16_array_create(verts_x * verts_y * 2);
-	mesh->inda       = u32_array_create((verts_x - 1) * (verts_y - 1) * 6);
-	f32 step_x       = size_x / (float)(verts_x - 1);
-	f32 step_y       = size_y / (float)(verts_y - 1);
+	mesh->posa = i16_array_create(verts_x * verts_y * 4);
+	mesh->nora = i16_array_create(verts_x * verts_y * 2);
+	mesh->texa = i16_array_create(verts_x * verts_y * 2);
+	mesh->inda = u32_array_create((verts_x - 1) * (verts_y - 1) * 6);
+	f32 step_x = size_x / (float)(verts_x - 1);
+	f32 step_y = size_y / (float)(verts_y - 1);
 	for (i32 i = 0; i < verts_x * verts_y; ++i) {
 		f32 x                         = (i % verts_x) * step_x - half_x;
 		f32 y                         = math_floor(i / (float)verts_x) * step_y - half_y;
@@ -58,10 +58,10 @@ raw_mesh_t *geom_make_uv_sphere(f32 radius, i32 width_segments, i32 height_segme
 	mesh->has_next   = false;
 
 	// Pack positions to (-1, 1) range
-	mesh->scale_pos  = radius;
-	mesh->scale_tex  = uv_scale;
-	f32 inv          = (1 / (float)mesh->scale_pos) * 32767;
-	f32 pi2          = math_pi() * 2;
+	mesh->scale_pos = radius;
+	mesh->scale_tex = uv_scale;
+	f32 inv         = (1 / (float)mesh->scale_pos) * 32767;
+	f32 pi2         = math_pi() * 2;
 
 	i32 width_verts  = width_segments + 1;
 	i32 height_verts = height_segments + 1;
@@ -70,8 +70,8 @@ raw_mesh_t *geom_make_uv_sphere(f32 radius, i32 width_segments, i32 height_segme
 	mesh->texa       = i16_array_create(width_verts * height_verts * 2);
 	mesh->inda       = u32_array_create(width_segments * height_segments * 6 - width_segments * 6);
 
-	vec4_t nor       = (vec4_t){0.0, 0.0, 0.0, 1.0};
-	i32    pos       = 0;
+	vec4_t nor = (vec4_t){0.0, 0.0, 0.0, 1.0};
+	i32    pos = 0;
 	for (i32 y = 0; y < height_verts; ++y) {
 		f32 v      = y / (float)height_segments;
 		f32 v_flip = 1.0 - v;

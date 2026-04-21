@@ -2,9 +2,9 @@
 #include "global.h"
 
 void import_obj_run(char *path, bool replace_existing) {
-	split_type_t i       = g_context->split_by;
-	bool         is_udim = i == SPLIT_TYPE_UDIM;
-	i32 split_code = (i == SPLIT_TYPE_OBJECT || is_udim) ? 'o' : 'u'; // usemtl
+	split_type_t i          = g_context->split_by;
+	bool         is_udim    = i == SPLIT_TYPE_UDIM;
+	i32          split_code = (i == SPLIT_TYPE_OBJECT || is_udim) ? 'o' : 'u'; // usemtl
 
 	buffer_t *b = data_get_blob(path);
 

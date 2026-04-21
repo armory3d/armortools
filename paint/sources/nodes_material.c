@@ -78,15 +78,15 @@ void nodes_material_init() {
 	vector_rotate_node_init();
 	vector_transform_node_init();
 
-	#if defined(IRON_WINDOWS) || defined(IRON_LINUX) || defined(IRON_MACOS)
+#if defined(IRON_WINDOWS) || defined(IRON_LINUX) || defined(IRON_MACOS)
 
 	gc_unroot(nodes_material_neural);
 	nodes_material_neural = any_array_create_from_raw((void *[]){}, 0);
 	gc_root(nodes_material_neural);
 	edit_image_node_init();
-	#ifdef IRON_WINDOWS
+#ifdef IRON_WINDOWS
 	image_to_3d_mesh_node_init();
-	#endif
+#endif
 	image_to_depth_node_init();
 	image_to_normal_map_node_init();
 	image_to_pbr_node_init();
@@ -97,14 +97,14 @@ void nodes_material_init() {
 	upscale_image_node_init();
 	vary_image_node_init();
 
-	#endif
+#endif
 
 	gc_unroot(nodes_material_group);
 	nodes_material_group = any_array_create_from_raw((void *[]){}, 0);
 	gc_root(nodes_material_group);
 	group_node_init();
 
-	#if defined(IRON_WINDOWS) || defined(IRON_LINUX) || defined(IRON_MACOS)
+#if defined(IRON_WINDOWS) || defined(IRON_LINUX) || defined(IRON_MACOS)
 
 	gc_unroot(nodes_material_list);
 	nodes_material_list = any_array_create_from_raw(
@@ -119,7 +119,7 @@ void nodes_material_init() {
 	    6);
 	gc_root(nodes_material_list);
 
-	#else
+#else
 
 	gc_unroot(nodes_material_list);
 	nodes_material_list = any_array_create_from_raw(
@@ -133,7 +133,7 @@ void nodes_material_init() {
 	    5);
 	gc_root(nodes_material_list);
 
-	#endif
+#endif
 }
 
 ui_node_t *nodes_material_get_node_t(char *node_type) {

@@ -6,8 +6,8 @@ void keymap_load() {
 	config_keymap = keymap_get_default();
 	gc_root(config_keymap);
 	if (!string_equals(g_config->keymap, "default.json")) {
-		buffer_t         *blob       = data_get_blob(string("keymap_presets/%s", g_config->keymap));
-		any_map_t        *new_keymap = json_parse_to_map(sys_buffer_to_string(blob));
+		buffer_t       *blob       = data_get_blob(string("keymap_presets/%s", g_config->keymap));
+		any_map_t      *new_keymap = json_parse_to_map(sys_buffer_to_string(blob));
 		string_array_t *keys       = map_keys(new_keymap);
 		for (i32 i = 0; i < keys->length; ++i) {
 			char *key = keys->buffer[i];

@@ -1057,7 +1057,7 @@ void box_preferences_plugins_tab() {
 
 	ui_handle_t *box_preferences_plugins_hsearch = ui_handle(__ID__);
 	if (!string_equals(box_preferences_plugins_hsearch->text, "")) {
-		ui_row(f32_array_create_from_raw((f32[]){ 0.85, 0.15 }, 2));
+		ui_row(f32_array_create_from_raw((f32[]){0.85, 0.15}, 2));
 	}
 	box_preferences_plugins_hsearch->text = string_copy(ui_text_input(box_preferences_plugins_hsearch, tr("Search"), UI_ALIGN_LEFT, true, true));
 	if (!string_equals(box_preferences_plugins_hsearch->text, "") && (ui_button(tr("X"), UI_ALIGN_CENTER, "") || ui->is_escape_down)) {

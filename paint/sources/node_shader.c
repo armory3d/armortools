@@ -54,8 +54,8 @@ void node_shader_add_constant(node_shader_t *raw, char *s, char *link) {
 	// inp: float4
 	if (string_array_index_of(raw->consts, s) == -1) {
 		string_array_t *ar    = string_split(s, ": ");
-		char             *uname = ar->buffer[0];
-		char             *utype = ar->buffer[1];
+		char           *uname = ar->buffer[0];
+		char           *utype = ar->buffer[1];
 
 		////
 		if (string_equals(utype, "float2"))

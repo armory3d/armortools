@@ -111,13 +111,13 @@ static void export_player_run_on_download(char *url, buffer_t *ab) {}
 void export_player_run(char *path) {
 	char *path_base = path_base_dir(path);
 
-	char *_project_filepath          = string_copy(project_filepath);
-	project_filepath                 = string("%s/%s", path_base, "start.arm");
-	bool _pack_assets_on_save        = g_context->pack_assets_on_save;
+	char *_project_filepath        = string_copy(project_filepath);
+	project_filepath               = string("%s/%s", path_base, "start.arm");
+	bool _pack_assets_on_save      = g_context->pack_assets_on_save;
 	g_context->pack_assets_on_save = true;
 	export_arm_run_project();
 	g_context->pack_assets_on_save = _pack_assets_on_save;
-	project_filepath                 = _project_filepath;
+	project_filepath               = _project_filepath;
 
 	if (box_export_h_export_player_target->i == PLAYER_TARGET_WEB) {
 		char *start_js = string("%s/start.js", path_base);
@@ -134,12 +134,12 @@ void export_player_run(char *path) {
 	}
 	else if (box_export_h_export_player_target->i == PLAYER_TARGET_WINDOWS) {
 		char *player_bin_src = string("%s%s%s", iron_internal_files_location(), PATH_SEP, "ArmorPaint.exe");
-		char *player_bin_to = string("%s/player.exe", path_base);
+		char *player_bin_to  = string("%s/player.exe", path_base);
 		file_copy(player_bin_src, player_bin_to);
 	}
 	else if (box_export_h_export_player_target->i == PLAYER_TARGET_LINUX) {
 		char *player_bin_src = string("%s%s%s", iron_internal_files_location(), PATH_SEP, "ArmorPaint");
-		char *player_bin_to = string("%s/player", path_base);
+		char *player_bin_to  = string("%s/player", path_base);
 		file_copy(player_bin_src, player_bin_to);
 	}
 	else if (box_export_h_export_player_target->i == PLAYER_TARGET_MACOS) {
