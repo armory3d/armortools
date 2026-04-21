@@ -98,6 +98,9 @@ void base_material_dropped() {
 	else if (context_in_nodes()) {
 		ui_nodes_accept_material_drop(array_index_of(project_materials, base_drag_material));
 	}
+	else if (context_in_materials()) {
+		tab_materials_accept_material_drop(base_drag_material);
+	}
 	gc_unroot(base_drag_material);
 	base_drag_material = NULL;
 }
@@ -132,7 +135,8 @@ void base_update(void *_) {
 		iron_mouse_set_cursor(IRON_CURSOR_ARROW);
 	}
 
-	bool has_drag = base_drag_asset != NULL || base_drag_material != NULL || base_drag_layer != NULL || base_drag_file != NULL || base_drag_swatch != NULL;
+	bool has_drag = base_drag_asset != NULL || base_drag_material != NULL || base_drag_layer != NULL || base_drag_file != NULL || base_drag_swatch != NULL ||
+	                base_drag_brush != NULL || base_drag_font != NULL;
 
 	if (g_config->touch_ui) {
 		// Touch and hold to activate dragging
@@ -163,6 +167,10 @@ void base_update(void *_) {
 			base_drag_material = NULL;
 			gc_unroot(base_drag_layer);
 			base_drag_layer = NULL;
+			gc_unroot(base_drag_brush);
+			base_drag_brush = NULL;
+			gc_unroot(base_drag_font);
+			base_drag_font = NULL;
 		}
 		// Disable touch scrolling while dragging is active
 		ui_touch_control = !base_is_dragging;
@@ -187,6 +195,9 @@ void base_update(void *_) {
 			// Create mask
 			else if (context_in_layers() || context_in_2d_view(VIEW_2D_TYPE_LAYER)) {
 				layers_create_image_mask(base_drag_asset);
+			}
+			else if (context_in_textures()) {
+				tab_textures_accept_asset_drop(base_drag_asset);
 			}
 			gc_unroot(base_drag_asset);
 			base_drag_asset = NULL;
@@ -243,6 +254,20 @@ void base_update(void *_) {
 			}
 			gc_unroot(base_drag_layer);
 			base_drag_layer = NULL;
+		}
+		else if (base_drag_brush != NULL) {
+			if (context_in_brushes()) {
+				tab_brushes_accept_brush_drop(base_drag_brush);
+			}
+			gc_unroot(base_drag_brush);
+			base_drag_brush = NULL;
+		}
+		else if (base_drag_font != NULL) {
+			if (context_in_fonts()) {
+				tab_fonts_accept_font_drop(base_drag_font);
+			}
+			gc_unroot(base_drag_font);
+			base_drag_font = NULL;
 		}
 
 		iron_mouse_set_cursor(IRON_CURSOR_ARROW);
@@ -315,6 +340,12 @@ gpu_texture_t *base_get_drag_image() {
 
 	if (base_drag_material != NULL) {
 		return base_drag_material->image_icon;
+	}
+	if (base_drag_brush != NULL) {
+		return base_drag_brush->image_icon;
+	}
+	if (base_drag_font != NULL) {
+		return base_drag_font->image;
 	}
 	if (base_drag_layer != NULL && slot_layer_is_group(base_drag_layer)) {
 		gpu_texture_t *icons         = resource_get("icons.k");

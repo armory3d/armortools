@@ -393,6 +393,21 @@ bool context_in_swatches() {
 	return string_equals(tab, tr("Swatches"));
 }
 
+bool context_in_brushes() {
+	char *tab = ui_hovered_tab_name();
+	return string_equals(tab, tr("Brushes"));
+}
+
+bool context_in_fonts() {
+	char *tab = ui_hovered_tab_name();
+	return string_equals(tab, tr("Fonts"));
+}
+
+bool context_in_textures() {
+	char *tab = ui_hovered_tab_name();
+	return string_equals(tab, tr("Textures"));
+}
+
 bool context_in_browser() {
 	char *tab = ui_hovered_tab_name();
 	return string_equals(tab, tr("Browser"));

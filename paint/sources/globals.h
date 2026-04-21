@@ -102,6 +102,8 @@ ui_handle_t              *base_bits_handle;
 string_array_t           *base_drop_paths;
 slot_material_t          *base_drag_material = NULL;
 slot_layer_t             *base_drag_layer    = NULL;
+slot_brush_t             *base_drag_brush    = NULL;
+slot_font_t              *base_drag_font     = NULL;
 bool                      base_player_lock   = false;
 ui_t                     *ui;
 bool                      ui_base_show = true;

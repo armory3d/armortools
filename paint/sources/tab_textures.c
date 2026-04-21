@@ -6,6 +6,7 @@ char          *_tab_textures_draw_path;
 asset_t       *_tab_textures_draw_asset;
 i32            _tab_textures_draw_i;
 bool           _tab_textures_draw_is_packed;
+i32            tab_textures_drag_pos = -1;
 
 void tab_textures_draw_set_as_envmap(void *_) {
 	import_envmap_run(_tab_textures_draw_asset->file, _tab_textures_draw_img);
@@ -185,11 +186,16 @@ void tab_textures_draw(ui_handle_t *htab) {
 
 		if (project_assets->length > 0) {
 
-			i32 slotw = math_floor(52 * UI_SCALE());
-			i32 num   = math_floor(ui->_window_w / (float)slotw);
+			i32  slotw        = math_floor(52 * UI_SCALE());
+			i32  num          = math_floor(ui->_window_w / (float)slotw);
 			if (num == 0) {
 				return;
 			}
+
+			bool drag_pos_set = false;
+			f32  uix          = 0.0;
+			f32  uiy          = 0.0;
+			i32  imgw_val     = math_floor(50 * UI_SCALE());
 
 			for (i32 row = 0; row < math_floor(math_ceil(project_assets->length / (float)num)); ++row) {
 				i32          mult = g_config->show_asset_names ? 2 : 1;
@@ -222,10 +228,22 @@ void tab_textures_draw(ui_handle_t *htab) {
 						render_target_t *empty_rt = any_map_get(render_path_render_targets, "empty_black");
 						img                       = empty_rt->_image;
 					}
-					f32 uix = ui->_x;
-					f32 uiy = ui->_y;
+					uix     = ui->_x;
+					uiy     = ui->_y;
 					i32 sw  = img->height < img->width ? img->height : 0;
-					if (ui_sub_image(img, 0xffffffff, slotw, 0, 0, sw, sw) == UI_STATE_STARTED && ui->input_y > ui->_window_y) {
+
+					if (base_drag_asset != NULL && tab_textures_drag_pos == i) {
+						ui_fill(-1, -2, 2, imgw_val + 4, ui->ops->theme->HIGHLIGHT_COL);
+					}
+
+					ui_state_t _state = ui_sub_image(img, 0xffffffff, slotw, 0, 0, sw, sw);
+
+					if (_state == UI_STATE_HOVERED && base_drag_asset != NULL) {
+						tab_textures_drag_pos = (mouse_x > uix + ui->_window_x + imgw_val / 2.0) ? i + 1 : i;
+						drag_pos_set          = true;
+					}
+
+					if (_state == UI_STATE_STARTED && ui->input_y > ui->_window_y) {
 						base_drag_off_x = -(mouse_x - uix - ui->_window_x - 3);
 						base_drag_off_y = -(mouse_y - uiy - ui->_window_y + 1);
 						gc_unroot(base_drag_asset);
@@ -298,6 +316,16 @@ void tab_textures_draw(ui_handle_t *htab) {
 					}
 				}
 			}
+
+			if (base_drag_asset != NULL && tab_textures_drag_pos == project_assets->length) {
+				ui->_x = uix;
+				ui->_y = uiy;
+				ui_fill(imgw_val + 1, -2, 2, imgw_val + 4, ui->ops->theme->HIGHLIGHT_COL);
+			}
+
+			if (!drag_pos_set) {
+				tab_textures_drag_pos = -1;
+			}
 		}
 		else {
 			gpu_texture_t *img = resource_get("icons.k");
@@ -326,6 +354,56 @@ void tab_textures_draw(ui_handle_t *htab) {
 					g_context->texture = project_assets->buffer[i + 1];
 				}
 			}
+		}
+	}
+}
+
+void tab_textures_remap_node_indices(ui_node_t_array_t *nodes, i32 old_pos, i32 new_pos) {
+	for (i32 i = 0; i < nodes->length; ++i) {
+		ui_node_t *n = nodes->buffer[i];
+		if (string_equals(n->type, "TEX_IMAGE")) {
+			i32 idx = n->buttons->buffer[0]->default_value->buffer[0];
+			if (idx == old_pos) {
+				n->buttons->buffer[0]->default_value->buffer[0] = new_pos;
+			}
+			else if (new_pos > old_pos && idx > old_pos && idx <= new_pos) {
+				n->buttons->buffer[0]->default_value->buffer[0] = idx - 1;
+			}
+			else if (new_pos < old_pos && idx >= new_pos && idx < old_pos) {
+				n->buttons->buffer[0]->default_value->buffer[0] = idx + 1;
+			}
+		}
+	}
+}
+
+void tab_textures_accept_asset_drop(asset_t *asset) {
+	if (tab_textures_drag_pos == -1) {
+		return;
+	}
+
+	i32 asset_pos = array_index_of(project_assets, asset);
+	if (asset_pos != -1 && math_abs(asset_pos - tab_textures_drag_pos) > 0) {
+		array_remove(project_assets, asset);
+		char *asset_name = project_asset_names->buffer[asset_pos];
+		array_splice(project_asset_names, asset_pos, 1);
+		i32 new_pos = tab_textures_drag_pos - asset_pos > 0 ? tab_textures_drag_pos - 1 : tab_textures_drag_pos;
+		array_insert(project_assets, new_pos, asset);
+		array_insert(project_asset_names, new_pos, asset_name);
+
+		for (i32 i = 0; i < project_materials->length; ++i) {
+			tab_textures_remap_node_indices(project_materials->buffer[i]->canvas->nodes, asset_pos, new_pos);
+		}
+		for (i32 i = 0; i < project_brushes->length; ++i) {
+			tab_textures_remap_node_indices(project_brushes->buffer[i]->canvas->nodes, asset_pos, new_pos);
+		}
+		if (g_context->colorid_handle->i == asset_pos) {
+			g_context->colorid_handle->i = new_pos;
+		}
+		else if (new_pos > asset_pos && g_context->colorid_handle->i > asset_pos && g_context->colorid_handle->i <= new_pos) {
+			g_context->colorid_handle->i--;
+		}
+		else if (new_pos < asset_pos && g_context->colorid_handle->i >= new_pos && g_context->colorid_handle->i < asset_pos) {
+			g_context->colorid_handle->i++;
 		}
 	}
 }

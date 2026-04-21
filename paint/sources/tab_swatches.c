@@ -214,7 +214,7 @@ void tab_swatches_draw(ui_handle_t *htab) {
 
 				if (state == UI_STATE_STARTED) {
 					context_set_swatch(g_project->swatches->buffer[i]);
-					base_drag_off_x = -(mouse_x - uix - ui->_window_x - 2 * slotw);
+					base_drag_off_x = -(mouse_x - uix - ui->_window_x);
 					base_drag_off_y = -(mouse_y - uiy - ui->_window_y + 1);
 					gc_unroot(base_drag_swatch);
 					base_drag_swatch = g_context->swatch;
