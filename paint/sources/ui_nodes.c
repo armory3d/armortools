@@ -745,12 +745,12 @@ gpu_texture_t *ui_nodes_draw_grid(f32 zoom) {
 	draw_begin(grid, true, ui->ops->theme->SEPARATOR_COL);
 
 	i32 sep_col      = ui->ops->theme->SEPARATOR_COL;
-	i32 line_primary = sep_col - 0x00050505;
+	i32 line_primary = base_darker(sep_col, 0x00050505);
 	if (line_primary < 0xff000000) {
 		line_primary = sep_col + 0x00050505;
 	}
 
-	i32 line_secondary = sep_col - 0x00090909;
+	i32 line_secondary = base_darker(sep_col, 0x00090909);
 	if (line_secondary < 0xff000000) {
 		line_secondary = sep_col + 0x00090909;
 	}

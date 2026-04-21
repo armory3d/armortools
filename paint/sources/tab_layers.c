@@ -142,7 +142,7 @@ ui_state_t tab_layers_draw_layer_icon(slot_layer_t *l, i32 i, f32 uix, f32 uiy, 
 		rect_t *folder_closed = resource_tile50(icons, ICON_FOLDER_FULL);
 		rect_t *folder_open   = resource_tile50(icons, ICON_FOLDER_OPEN);
 		rect_t *folder        = l->show_panel ? folder_open : folder_closed;
-		return ui_sub_image(icons, ui->ops->theme->LABEL_COL - 0x00202020, icon_h, folder->x, folder->y, folder->w, folder->h);
+		return ui_sub_image(icons, base_darker(ui->ops->theme->LABEL_COL, 0x00202020), icon_h, folder->x, folder->y, folder->w, folder->h);
 	}
 }
 
@@ -975,7 +975,7 @@ void tab_layers_highlight_odd_lines() {
 	i32 full_h = ui->_window_h - ui_base_hwnds->buffer[0]->scroll_offset;
 	for (i32 i = 0; i < math_floor(full_h / (float)step); ++i) {
 		if (i % 2 == 0) {
-			ui_fill(0, i * step, (ui->_w / (float)UI_SCALE() - 2), step, ui->ops->theme->WINDOW_BG_COL - 0x00040404);
+			ui_fill(0, i * step, (ui->_w / (float)UI_SCALE() - 2), step, base_darker(ui->ops->theme->WINDOW_BG_COL, 0x00040404));
 		}
 	}
 }

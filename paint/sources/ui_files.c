@@ -319,7 +319,7 @@ char *ui_files_file_browser(ui_handle_t *handle, bool drag_files, char *search, 
 				rect = cube;
 			}
 
-			i32 col = rect == file ? ui->ops->theme->LABEL_COL : ui->ops->theme->LABEL_COL - 0x00202020;
+			i32 col = rect == file ? ui->ops->theme->LABEL_COL : base_darker(ui->ops->theme->LABEL_COL, 0x00202020);
 			if (ui_files_selected == i)
 				col = ui->ops->theme->HIGHLIGHT_COL;
 

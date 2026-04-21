@@ -136,7 +136,7 @@ bool ui_menu_button(char *text, char *label, icon_t icon) {
 			ui->_x = _x_left - 2 * UI_SCALE();
 			ui->_y = _y_top + 2 * UI_SCALE();
 		}
-		ui_sub_image(icons, ui->ops->theme->LABEL_COL - 0x00222222, icon_h, rect->x / 2.0, rect->y / 2.0, rect->w / 2.0, rect->h / 2.0);
+		ui_sub_image(icons, base_darker(ui->ops->theme->LABEL_COL, 0x00222222), icon_h, rect->x / 2.0, rect->y / 2.0, rect->w / 2.0, rect->h / 2.0);
 		ui->_x = _x_left;
 		ui->_y = _y_bottom;
 	}

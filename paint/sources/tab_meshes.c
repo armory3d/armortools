@@ -394,7 +394,7 @@ void tab_meshes_draw(ui_handle_t *htab) {
 			gpu_texture_t *icons  = resource_get("icons05x.k");
 			rect_t        *rect   = resource_tile50(icons, ICON_CUBE);
 			i32            icon_h = 25 * UI_SCALE();
-			ui_sub_image(icons, ui->ops->theme->LABEL_COL - 0x00333333, icon_h, rect->x / 2.0, rect->y / 2.0, rect->w / 2.0, rect->h / 2.0);
+			ui_sub_image(icons, base_darker(ui->ops->theme->LABEL_COL, 0x00333333), icon_h, rect->x / 2.0, rect->y / 2.0, rect->w / 2.0, rect->h / 2.0);
 
 			mesh_object_t *o = project_paint_objects->buffer[i];
 			ui_handle_t   *h = ui_handle(__ID__);

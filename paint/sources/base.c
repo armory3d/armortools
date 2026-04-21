@@ -354,7 +354,7 @@ gpu_texture_t *base_get_drag_image() {
 		gc_unroot(base_drag_rect);
 		base_drag_rect = base_drag_layer->show_panel ? folder_open : folder_closed;
 		gc_root(base_drag_rect);
-		base_drag_tint = ui->ops->theme->LABEL_COL - 0x00202020;
+		base_drag_tint = base_darker(ui->ops->theme->LABEL_COL, 0x00202020);
 		return icons;
 	}
 	if (base_drag_layer != NULL && slot_layer_is_mask(base_drag_layer) && base_drag_layer->fill_layer == NULL) {
@@ -2343,4 +2343,17 @@ void base_run_in_player() {
 	char *bin = iron_get_arg(0);
 	iron_sys_command(string("%s %s --player", bin, project_filepath));
 	// iron_exec_async()
+}
+
+uint32_t base_darker(uint32_t x, uint32_t y) {
+	uint32_t r  = ((x >> 16) & 0xff);
+	uint32_t g  = ((x >> 8) & 0xff);
+	uint32_t b  = ((x) & 0xff);
+	uint32_t ry = ((y >> 16) & 0xff);
+	uint32_t gy = ((y >> 8) & 0xff);
+	uint32_t by = ((y) & 0xff);
+	r           = r > ry ? r - ry : 0;
+	g           = g > gy ? g - gy : 0;
+	b           = b > by ? b - by : 0;
+	return (x & 0xff000000) | (r << 16) | (g << 8) | b;
 }
