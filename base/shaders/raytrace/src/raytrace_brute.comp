@@ -7,8 +7,8 @@
 #define _EMISSION
 #define _SUBSURFACE
 #define _TRANSLUCENCY
-// #define _TRANSPARENCY
 #define _ROULETTE
+// #define _TRANSPARENCY
 // #define _FRESNEL
 #endif
 // #define _RENDER
