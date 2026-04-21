@@ -672,7 +672,7 @@ void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, 
 	}
 	else
 #endif
-	if (aligned_bpr != width * bpp) {
+	    if (aligned_bpr != width * bpp) {
 		upload_size = (size_t)aligned_bpr * height;
 		upload_data = malloc(upload_size);
 		for (int row = 0; row < height; ++row) {

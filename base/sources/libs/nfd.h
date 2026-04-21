@@ -21,44 +21,37 @@
 typedef char nfdchar_t;
 
 typedef struct {
-    nfdchar_t *buf;
-    size_t *indices; /* byte offsets into buf */
-    size_t count;    /* number of indices into buf */
-}nfdpathset_t;
+	nfdchar_t *buf;
+	size_t    *indices; /* byte offsets into buf */
+	size_t     count;   /* number of indices into buf */
+} nfdpathset_t;
 
 typedef enum {
-    NFD_ERROR,       /* programmatic error */
-    NFD_OKAY,        /* user pressed okay, or successful return */
-    NFD_CANCEL       /* user pressed cancel */
-}nfdresult_t;
+	NFD_ERROR, /* programmatic error */
+	NFD_OKAY,  /* user pressed okay, or successful return */
+	NFD_CANCEL /* user pressed cancel */
+} nfdresult_t;
 
-nfdresult_t NFD_OpenDialog( const nfdchar_t *filterList,
-                            const nfdchar_t *defaultPath,
-                            nfdchar_t **outPath );
+nfdresult_t NFD_OpenDialog(const nfdchar_t *filterList, const nfdchar_t *defaultPath, nfdchar_t **outPath);
 
-nfdresult_t NFD_OpenDialogMultiple( const nfdchar_t *filterList,
-                                    const nfdchar_t *defaultPath,
-                                    nfdpathset_t *outPaths );
+nfdresult_t NFD_OpenDialogMultiple(const nfdchar_t *filterList, const nfdchar_t *defaultPath, nfdpathset_t *outPaths);
 
-nfdresult_t NFD_SaveDialog( const nfdchar_t *filterList,
-                            const nfdchar_t *defaultPath,
-                            nfdchar_t **outPath );
+nfdresult_t NFD_SaveDialog(const nfdchar_t *filterList, const nfdchar_t *defaultPath, nfdchar_t **outPath);
 
-nfdresult_t NFD_PickFolder( const nfdchar_t *defaultPath,
-                            nfdchar_t **outPath);
+nfdresult_t NFD_PickFolder(const nfdchar_t *defaultPath, nfdchar_t **outPath);
 
-const char *NFD_GetError( void );
-size_t      NFD_PathSet_GetCount( const nfdpathset_t *pathSet );
-nfdchar_t  *NFD_PathSet_GetPath( const nfdpathset_t *pathSet, size_t index );
-void        NFD_PathSet_Free( nfdpathset_t *pathSet );
+const char *NFD_GetError(void);
+size_t      NFD_PathSet_GetCount(const nfdpathset_t *pathSet);
+nfdchar_t  *NFD_PathSet_GetPath(const nfdpathset_t *pathSet, size_t index);
+void        NFD_PathSet_Free(nfdpathset_t *pathSet);
 
 #define NFD_MAX_STRLEN 256
 #define _NFD_UNUSED(x) ((void)x)
-#define NFD_UTF8_BOM "\xEF\xBB\xBF"
+#define NFD_UTF8_BOM   "\xEF\xBB\xBF"
 
-void  *NFDi_Malloc( size_t bytes );
-void   NFDi_Free( void *ptr );
-void   NFDi_SetError( const char *msg );
-int    NFDi_SafeStrncpy( char *dst, const char *src, size_t maxCopy );
-int32_t NFDi_UTF8_Strlen( const nfdchar_t *str );
-int    NFDi_IsFilterSegmentChar( char ch );
+void   *NFDi_Malloc(size_t bytes);
+void    NFDi_Free(void *ptr);
+void    NFDi_SetError(const char *msg);
+int     NFDi_SafeStrncpy(char *dst, const char *src, size_t maxCopy);
+int32_t NFDi_UTF8_Strlen(const nfdchar_t *str);
+int     NFDi_IsFilterSegmentChar(char ch);

@@ -13,9 +13,9 @@ draw_font_t   *draw_font = NULL;
 int            draw_font_size;
 gpu_texture_t *_draw_current = NULL;
 
-static mat3_t draw_transform;
-static uint32_t         draw_color           = 0;
-static gpu_pipeline_t  *draw_custom_pipeline = NULL;
+static mat3_t          draw_transform;
+static uint32_t        draw_color           = 0;
+static gpu_pipeline_t *draw_custom_pipeline = NULL;
 
 static gpu_buffer_t           rect_vertex_buffer;
 static gpu_buffer_t           rect_index_buffer;
@@ -226,7 +226,9 @@ void draw_end(void) {
 
 void draw_scaled_sub_image(gpu_texture_t *tex, float sx, float sy, float sw, float sh, float dx, float dy, float dw, float dh) {
 	if (mat3_isnan(draw_transform)) {
-		gpu_set_pipeline(draw_custom_pipeline != NULL ? draw_custom_pipeline : (_draw_current != NULL && _draw_current->format == GPU_TEXTURE_FORMAT_R8) ? &image_r8_pipeline : &image_pipeline);
+		gpu_set_pipeline(draw_custom_pipeline != NULL                                                ? draw_custom_pipeline
+		                 : (_draw_current != NULL && _draw_current->format == GPU_TEXTURE_FORMAT_R8) ? &image_r8_pipeline
+		                                                                                             : &image_pipeline);
 	}
 	else {
 		gpu_set_pipeline(draw_custom_pipeline != NULL ? draw_custom_pipeline : &image_transform_pipeline);
@@ -745,7 +747,7 @@ void draw_inner_line(float x1, float y1, float x2, float y2, float strength) {
 	else {
 		vec = (vec2_t){1, -(x2 - x1) / (y2 - y1)};
 	}
-	vec               = vec2_set_len(vec, strength);
+	vec       = vec2_set_len(vec, strength);
 	vec2_t p1 = {x1 + side * vec.x, y1 + side * vec.y};
 	vec2_t p2 = {x2 + side * vec.x, y2 + side * vec.y};
 	vec2_t p3 = vec2_sub(p1, vec);

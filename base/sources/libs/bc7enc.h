@@ -1,19 +1,19 @@
 // File: bc7enc.h - Richard Geldreich, Jr. - MIT license or public domain (see end of bc7enc.c)
 #pragma once
-#include <stdlib.h>
 #include <stdint.h>
+#include <stdlib.h>
 
-#define BC7ENC_BLOCK_SIZE (16)
+#define BC7ENC_BLOCK_SIZE      (16)
 #define BC7ENC_MAX_PARTITIONS1 (64)
-#define BC7ENC_MAX_UBER_LEVEL (4)
+#define BC7ENC_MAX_UBER_LEVEL  (4)
 
 typedef uint8_t bc7enc_bool;
-#define BC7ENC_TRUE (1)
+#define BC7ENC_TRUE  (1)
 #define BC7ENC_FALSE (0)
 
-typedef struct
-{
-	// m_max_partitions_mode may range from 0 (disables mode 1) to BC7ENC_MAX_PARTITIONS1. The higher this value, the slower the compressor, but the higher the quality.
+typedef struct {
+	// m_max_partitions_mode may range from 0 (disables mode 1) to BC7ENC_MAX_PARTITIONS1. The higher this value, the slower the compressor, but the higher the
+	// quality.
 	uint32_t m_max_partitions_mode;
 
 	// Relative RGBA or YCbCrA weights.
@@ -28,8 +28,9 @@ typedef struct
 	// Set m_try_least_squares to false for slightly faster/lower quality compression.
 	bc7enc_bool m_try_least_squares;
 
-	// When m_mode_partition_estimation_filterbank, the mode1 partition estimator skips lesser used partition patterns unless they are strongly predicted to be potentially useful.
-	// There's a slight loss in quality with this enabled (around .08 dB RGB PSNR or .05 dB Y PSNR), but up to a 11% gain in speed depending on the other settings.
+	// When m_mode_partition_estimation_filterbank, the mode1 partition estimator skips lesser used partition patterns unless they are strongly predicted to be
+	// potentially useful. There's a slight loss in quality with this enabled (around .08 dB RGB PSNR or .05 dB Y PSNR), but up to a 11% gain in speed depending
+	// on the other settings.
 	bc7enc_bool m_mode_partition_estimation_filterbank;
 
 	bc7enc_bool m_use_mode5_for_alpha;

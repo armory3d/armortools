@@ -1,8 +1,8 @@
 #include "stdlib.h"
-#include "string.h"
+#include "ctype.h"
 #include "stddef.h"
 #include "stdio.h"
-#include "ctype.h"
+#include "string.h"
 
 #define ALIGNMENT   8
 #define ALIGN(size) (((size) + (ALIGNMENT - 1)) & ~(ALIGNMENT - 1))
@@ -20,8 +20,7 @@ static block_t *free_list = NULL;
 #ifdef IRON_WASM
 __attribute__((export_name("wasm_malloc")))
 #endif
-void *
-malloc(size_t size) {
+void *malloc(size_t size) {
 	size           = ALIGN(size);
 	block_t **link = &free_list;
 	block_t  *curr = free_list;

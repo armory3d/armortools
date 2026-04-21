@@ -1,9 +1,9 @@
 #pragma once
 
 #include "iron_array.h"
+#include <stdarg.h>
 #include <stdbool.h>
 #include <stdint.h>
-#include <stdarg.h>
 
 char *string_alloc(int size);
 char *string(char *fmt, ...);

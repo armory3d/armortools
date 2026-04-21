@@ -1199,9 +1199,9 @@ static void write_functions(char *hlsl, size_t *offset, shader_stage stage, func
 				}
 				else if (o->op_call.func == add_name("float3x3") && o->op_call.parameters_size == 3) {
 					*offset += sprintf(&hlsl[*offset],
-					                   "float3x3 _%" PRIu64 " = float3x3(_%" PRIu64 ".x, _%" PRIu64 ".x, _%" PRIu64 ".x, _%" PRIu64 ".y, _%" PRIu64 ".y, _%" PRIu64 ".y, _%" PRIu64 ".z, _%" PRIu64 ".z, _%" PRIu64 ".z);\n",
-					                   o->op_call.var.index,
-					                   o->op_call.parameters[0].index, o->op_call.parameters[1].index, o->op_call.parameters[2].index,
+					                   "float3x3 _%" PRIu64 " = float3x3(_%" PRIu64 ".x, _%" PRIu64 ".x, _%" PRIu64 ".x, _%" PRIu64 ".y, _%" PRIu64
+					                   ".y, _%" PRIu64 ".y, _%" PRIu64 ".z, _%" PRIu64 ".z, _%" PRIu64 ".z);\n",
+					                   o->op_call.var.index, o->op_call.parameters[0].index, o->op_call.parameters[1].index, o->op_call.parameters[2].index,
 					                   o->op_call.parameters[0].index, o->op_call.parameters[1].index, o->op_call.parameters[2].index,
 					                   o->op_call.parameters[0].index, o->op_call.parameters[1].index, o->op_call.parameters[2].index);
 				}

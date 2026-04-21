@@ -18,17 +18,17 @@ bool _input_registered = false;
 // Mouse
 
 string_array_t *_mouse_buttons          = NULL;
-u8_array_t       *_mouse_buttons_down     = NULL;
-u8_array_t       *_mouse_buttons_started  = NULL;
-u8_array_t       *_mouse_buttons_released = NULL;
-f32               mouse_x                 = -1.0f;
-f32               mouse_y                 = -1.0f;
-bool              mouse_moved             = false;
-f32               mouse_movement_x        = 0.0f;
-f32               mouse_movement_y        = 0.0f;
-f32               mouse_wheel_delta       = 0.0f;
-f32               mouse_last_x            = -1.0f;
-f32               mouse_last_y            = -1.0f;
+u8_array_t     *_mouse_buttons_down     = NULL;
+u8_array_t     *_mouse_buttons_started  = NULL;
+u8_array_t     *_mouse_buttons_released = NULL;
+f32             mouse_x                 = -1.0f;
+f32             mouse_y                 = -1.0f;
+bool            mouse_moved             = false;
+f32             mouse_movement_x        = 0.0f;
+f32             mouse_movement_y        = 0.0f;
+f32             mouse_wheel_delta       = 0.0f;
+f32             mouse_last_x            = -1.0f;
+f32             mouse_last_y            = -1.0f;
 
 #if defined(IRON_ANDROID) || defined(IRON_IOS)
 f32 mouse_pinch_dist   = 0.0f;
@@ -39,29 +39,29 @@ f32 mouse_pinch_smooth = 0.0f;
 // Pen
 
 string_array_t *pen_buttons          = NULL;
-u8_array_t       *pen_buttons_down     = NULL;
-u8_array_t       *pen_buttons_started  = NULL;
-u8_array_t       *pen_buttons_released = NULL;
-f32               pen_x                = 0.0f;
-f32               pen_y                = 0.0f;
-bool              pen_moved            = false;
-f32               pen_movement_x       = 0.0f;
-f32               pen_movement_y       = 0.0f;
-f32               pen_pressure         = 0.0f;
-bool              pen_connected        = false;
-bool              pen_in_use           = false;
-f32               pen_last_x           = -1.0f;
-f32               pen_last_y           = -1.0f;
+u8_array_t     *pen_buttons_down     = NULL;
+u8_array_t     *pen_buttons_started  = NULL;
+u8_array_t     *pen_buttons_released = NULL;
+f32             pen_x                = 0.0f;
+f32             pen_y                = 0.0f;
+bool            pen_moved            = false;
+f32             pen_movement_x       = 0.0f;
+f32             pen_movement_y       = 0.0f;
+f32             pen_pressure         = 0.0f;
+bool            pen_connected        = false;
+bool            pen_in_use           = false;
+f32             pen_last_x           = -1.0f;
+f32             pen_last_y           = -1.0f;
 
 // Keyboard
 
 string_array_t *keyboard_keys          = NULL;
-i32_map_t        *keyboard_keys_down     = NULL;
-i32_map_t        *keyboard_keys_started  = NULL;
-i32_map_t        *keyboard_keys_released = NULL;
+i32_map_t      *keyboard_keys_down     = NULL;
+i32_map_t      *keyboard_keys_started  = NULL;
+i32_map_t      *keyboard_keys_released = NULL;
 string_array_t *keyboard_keys_frame    = NULL;
-bool              keyboard_repeat_key    = false;
-f32               keyboard_repeat_time   = 0.0f;
+bool            keyboard_repeat_key    = false;
+f32             keyboard_repeat_time   = 0.0f;
 
 #ifdef WITH_GAMEPAD
 
@@ -70,7 +70,7 @@ f32               keyboard_repeat_time   = 0.0f;
 string_array_t *gamepad_buttons_ps   = NULL;
 string_array_t *gamepad_buttons_xbox = NULL;
 string_array_t *gamepad_buttons      = NULL;
-any_array_t      *gamepad_raws         = NULL;
+any_array_t    *gamepad_raws         = NULL;
 
 #endif
 

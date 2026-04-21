@@ -12,7 +12,7 @@
 #include <math.h>
 #include <stdbool.h>
 
-static ID3D12Device                *device            = NULL;
+static ID3D12Device                *device = NULL;
 static ID3D12CommandQueue          *queue;
 static IDXGISwapChain              *window_swapchain;
 static ID3D12RootSignature         *root_signature = NULL;

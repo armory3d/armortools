@@ -1495,12 +1495,12 @@ void iron_gamepad_rumble(int gamepad, float left, float right) {}
 #include <gtk/gtk.h>
 extern void (*iron_save_and_quit)(bool);
 static bool iron_gtk_setlocale_disabled = false;
-void iron_gtk_disable_setlocale() {
-	if (iron_gtk_setlocale_disabled) {
-		return;
-	}
-	gtk_disable_setlocale();
-	iron_gtk_setlocale_disabled = true;
+void        iron_gtk_disable_setlocale() {
+    if (iron_gtk_setlocale_disabled) {
+        return;
+    }
+    gtk_disable_setlocale();
+    iron_gtk_setlocale_disabled = true;
 }
 #endif
 

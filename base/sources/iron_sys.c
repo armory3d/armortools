@@ -41,8 +41,8 @@ void iron_set_gamepad_axis_callback(void (*callback)(int, int, float));
 void iron_set_gamepad_button_callback(void (*callback)(int, int, float));
 #endif
 
-any_map_t *_sys_shaders      = NULL;
-f32        _sys_start_time   = 0.0f;
+any_map_t *_sys_shaders    = NULL;
+f32        _sys_start_time = 0.0f;
 char       _sys_window_title[1024];
 
 any_array_t *_sys_foreground_listeners = NULL;

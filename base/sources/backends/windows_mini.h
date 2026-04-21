@@ -5,9 +5,9 @@ typedef unsigned __int64 UINT_PTR;
 typedef __int64          LONG_PTR;
 typedef unsigned __int64 ULONG_PTR;
 
-typedef unsigned long DWORD;
+typedef unsigned long  DWORD;
 typedef unsigned short WORD;
-typedef DWORD        *LPDWORD;
+typedef DWORD         *LPDWORD;
 #define STD_OUTPUT_HANDLE ((DWORD) - 11)
 #define STD_ERROR_HANDLE  ((DWORD) - 12)
 #define WINAPI            __stdcall
@@ -96,57 +96,42 @@ typedef BYTE         *LPBYTE;
 #define CREATE_NO_WINDOW     0x08000000
 
 typedef struct _STARTUPINFOW {
-    DWORD  cb;
-    LPWSTR lpReserved;
-    LPWSTR lpDesktop;
-    LPWSTR lpTitle;
-    DWORD  dwX;
-    DWORD  dwY;
-    DWORD  dwXSize;
-    DWORD  dwYSize;
-    DWORD  dwXCountChars;
-    DWORD  dwYCountChars;
-    DWORD  dwFillAttribute;
-    DWORD  dwFlags;
-    WORD   wShowWindow;
-    WORD   cbReserved2;
-    LPBYTE lpReserved2;
-    HANDLE hStdInput;
-    HANDLE hStdOutput;
-    HANDLE hStdError;
+	DWORD  cb;
+	LPWSTR lpReserved;
+	LPWSTR lpDesktop;
+	LPWSTR lpTitle;
+	DWORD  dwX;
+	DWORD  dwY;
+	DWORD  dwXSize;
+	DWORD  dwYSize;
+	DWORD  dwXCountChars;
+	DWORD  dwYCountChars;
+	DWORD  dwFillAttribute;
+	DWORD  dwFlags;
+	WORD   wShowWindow;
+	WORD   cbReserved2;
+	LPBYTE lpReserved2;
+	HANDLE hStdInput;
+	HANDLE hStdOutput;
+	HANDLE hStdError;
 } STARTUPINFOW, *LPSTARTUPINFOW;
 
-typedef STARTUPINFOW STARTUPINFO;
+typedef STARTUPINFOW   STARTUPINFO;
 typedef LPSTARTUPINFOW LPSTARTUPINFO;
 
 typedef struct _PROCESS_INFORMATION {
-    HANDLE hProcess;
-    HANDLE hThread;
-    DWORD  dwProcessId;
-    DWORD  dwThreadId;
+	HANDLE hProcess;
+	HANDLE hThread;
+	DWORD  dwProcessId;
+	DWORD  dwThreadId;
 } PROCESS_INFORMATION, *PPROCESS_INFORMATION, *LPPROCESS_INFORMATION;
 
 WINBASEAPI DWORD WINAPI GetEnvironmentVariableW(LPCWSTR lpName, LPWSTR lpBuffer, DWORD nSize);
 
-WINBASEAPI BOOL WINAPI CreateProcessW(
-    LPCWSTR               lpApplicationName,
-    LPWSTR                lpCommandLine,
-    LPSECURITY_ATTRIBUTES lpProcessAttributes,
-    LPSECURITY_ATTRIBUTES lpThreadAttributes,
-    BOOL                  bInheritHandles,
-    DWORD                 dwCreationFlags,
-    LPVOID                lpEnvironment,
-    LPCWSTR               lpCurrentDirectory,
-    LPSTARTUPINFOW        lpStartupInfo,
-    LPPROCESS_INFORMATION lpProcessInformation
-);
+WINBASEAPI BOOL WINAPI CreateProcessW(LPCWSTR lpApplicationName, LPWSTR lpCommandLine, LPSECURITY_ATTRIBUTES lpProcessAttributes,
+                                      LPSECURITY_ATTRIBUTES lpThreadAttributes, BOOL bInheritHandles, DWORD dwCreationFlags, LPVOID lpEnvironment,
+                                      LPCWSTR lpCurrentDirectory, LPSTARTUPINFOW lpStartupInfo, LPPROCESS_INFORMATION lpProcessInformation);
 
-WINBASEAPI DWORD WINAPI WaitForSingleObject(
-    HANDLE hHandle,
-    DWORD  dwMilliseconds
-);
+WINBASEAPI DWORD WINAPI WaitForSingleObject(HANDLE hHandle, DWORD dwMilliseconds);
 
-WINBASEAPI BOOL WINAPI GetExitCodeProcess(
-    HANDLE  hProcess,
-    LPDWORD lpExitCode
-);
+WINBASEAPI BOOL WINAPI GetExitCodeProcess(HANDLE hProcess, LPDWORD lpExitCode);

@@ -12,7 +12,6 @@
 #include "backends/posix_thread.h"
 #endif
 
-
 typedef struct iron_thread {
 	iron_thread_impl_t impl;
 } iron_thread_t;

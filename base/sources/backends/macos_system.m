@@ -1191,9 +1191,9 @@ void deviceRemoved(void *inContext, IOReturn inResult, void *inSender, IOHIDDevi
 extern void (*iron_save_and_quit)(bool);
 
 bool _save_and_quit_callback_internal() {
-	bool save = false;
+	bool      save  = false;
 	NSString *title = [window title];
-	bool dirty = [title rangeOfString:@"* - ArmorPaint"].location != NSNotFound;
+	bool      dirty = [title rangeOfString:@"* - ArmorPaint"].location != NSNotFound;
 	if (dirty) {
 		NSAlert *alert = [[NSAlert alloc] init];
 		[alert setMessageText:@"Project has been modified, save changes?"];
@@ -1220,16 +1220,16 @@ volatile int iron_exec_async_done = 1;
 
 void iron_exec_async(const char *path, char *argv[]) {
 	iron_exec_async_done = 0;
-	NSTask *task = [[NSTask alloc] init];
+	NSTask *task         = [[NSTask alloc] init];
 	[task setLaunchPath:[NSString stringWithUTF8String:path]];
 	NSMutableArray *args = [NSMutableArray array];
-	int i = 1;
+	int             i    = 1;
 	while (argv[i] != NULL) {
 		[args addObject:[NSString stringWithUTF8String:argv[i]]];
 		i++;
 	}
 	[task setArguments:args];
-	task.terminationHandler = ^(NSTask *t){
+	task.terminationHandler = ^(NSTask *t) {
 		iron_exec_async_done = 1;
 	};
 	[task launch];

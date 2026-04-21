@@ -3,13 +3,14 @@
 #include <iron_net.h>
 #include <iron_system.h>
 #include <jni.h>
-#include <string.h>
 #include <stdio.h>
+#include <string.h>
 
 ANativeActivity *iron_android_get_activity(void);
 jclass           iron_android_find_class(JNIEnv *env, const char *name);
 
-void iron_net_request(const char *url_base, const char *url_path, const char *data, int port, int method, iron_https_callback_t callback, void *callbackdata, const char *dst_path) {
+void iron_net_request(const char *url_base, const char *url_path, const char *data, int port, int method, iron_https_callback_t callback, void *callbackdata,
+                      const char *dst_path) {
 	ANativeActivity *activity = iron_android_get_activity();
 	JNIEnv          *env;
 	JavaVM          *vm = iron_android_get_activity()->vm;
@@ -18,9 +19,10 @@ void iron_net_request(const char *url_base, const char *url_path, const char *da
 
 	jstring    jurl_base   = (*env)->NewStringUTF(env, url_base);
 	jstring    jurl_path   = (*env)->NewStringUTF(env, url_path);
-	jbyteArray bytes_array = (jbyteArray)((*env)->CallStaticObjectMethod(
-	    env, activityClass, (*env)->GetStaticMethodID(env, activityClass, "androidHttpRequest", "(Ljava/lang/String;Ljava/lang/String;)[B"), jurl_base,
-	    jurl_path));
+	jbyteArray bytes_array = (jbyteArray)((*env)->CallStaticObjectMethod(env, activityClass,
+	                                                                     (*env)->GetStaticMethodID(env, activityClass, "androidHttpRequest",
+	                                                                                               "(Ljava/lang/String;Ljava/lang/String;)[B"),
+	                                                                     jurl_base, jurl_path));
 
 	if (bytes_array == NULL) {
 		callback(NULL, callbackdata);
@@ -50,7 +52,6 @@ void iron_net_request(const char *url_base, const char *url_path, const char *da
 	(*vm)->DetachCurrentThread(vm);
 }
 
-void iron_net_update() {
-}
+void iron_net_update() {}
 
 volatile uint64_t iron_net_bytes_downloaded = 0;

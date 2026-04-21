@@ -69,11 +69,11 @@ typedef union mat4 {
 	};
 } mat4_t;
 
-void     iron_color_components(uint32_t color, float *red, float *green, float *blue, float *alpha);
-void     iron_random_init(int64_t seed);
-int64_t  iron_random_get(void);
-int64_t  iron_random_get_max(int64_t max);
-int64_t  iron_random_get_in(int64_t min, int64_t max);
+void    iron_color_components(uint32_t color, float *red, float *green, float *blue, float *alpha);
+void    iron_random_init(int64_t seed);
+int64_t iron_random_get(void);
+int64_t iron_random_get_max(int64_t max);
+int64_t iron_random_get_in(int64_t min, int64_t max);
 
 float  vec2_len(vec2_t v);
 vec2_t vec2_set_len(vec2_t v, float length);
@@ -137,12 +137,12 @@ typedef struct mat4_decomposed {
 	vec4_t scl;
 } mat4_decomposed_t;
 
-mat4_t mat4_identity();
-mat4_t mat4_from_f32_array(f32_array_t *a, int offset);
-mat4_t mat4_persp(float fov_y, float aspect, float zn, float zf);
-mat4_t mat4_ortho(float left, float right, float bottom, float top, float znear, float zfar);
-mat4_t mat4_rot_z(float alpha);
-mat4_t mat4_compose(vec4_t loc, quat_t rot, vec4_t scl);
+mat4_t             mat4_identity();
+mat4_t             mat4_from_f32_array(f32_array_t *a, int offset);
+mat4_t             mat4_persp(float fov_y, float aspect, float zn, float zf);
+mat4_t             mat4_ortho(float left, float right, float bottom, float top, float znear, float zfar);
+mat4_t             mat4_rot_z(float alpha);
+mat4_t             mat4_compose(vec4_t loc, quat_t rot, vec4_t scl);
 mat4_decomposed_t *mat4_decompose(mat4_t m);
 mat4_t             mat4_set_loc(mat4_t m, vec4_t v);
 mat4_t             mat4_from_quat(quat_t q);

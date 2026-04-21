@@ -28,7 +28,7 @@ buffer_t *lz4_encode(buffer_t *b) {
 
 	if (_lz4_hash_table == NULL) {
 		_lz4_hash_table = i32_array_create(65536);
-        gc_root(_lz4_hash_table);
+		gc_root(_lz4_hash_table);
 	}
 	for (uint32_t i = 0; i < _lz4_hash_table->length; ++i) {
 		_lz4_hash_table->buffer[i] = -65536;
@@ -46,7 +46,7 @@ buffer_t *lz4_encode(buffer_t *b) {
 		uint32_t moffset  = 0;
 		uint32_t sequence = ((uint32_t)ibuf->buffer[ipos] << 8) | ((uint32_t)ibuf->buffer[ipos + 1] << 16) | ((uint32_t)ibuf->buffer[ipos + 2] << 24);
 
-        // Match-finding loop
+		// Match-finding loop
 		while (ipos <= last_match_pos) {
 			sequence                      = (sequence >> 8) | ((uint32_t)ibuf->buffer[ipos + 3] << 24);
 			uint32_t hash                 = ((sequence * 0x9e37) & 0xffff) + ((sequence * 0x79b1) >> 16) & 0xffff;
@@ -60,12 +60,12 @@ buffer_t *lz4_encode(buffer_t *b) {
 			ipos += 1;
 		}
 
-        // No match found
+		// No match found
 		if (ipos > last_match_pos) {
 			break;
 		}
 
-        // Match found
+		// Match found
 		uint32_t llen = ipos - anchor_pos;
 		uint32_t mlen = ipos;
 		ipos += 4;
@@ -77,7 +77,7 @@ buffer_t *lz4_encode(buffer_t *b) {
 		mlen           = ipos - mlen;
 		uint32_t token = mlen < 19 ? mlen - 4 : 15;
 
-        // Write token, length of literals if needed
+		// Write token, length of literals if needed
 		if (llen >= 15) {
 			obuf->buffer[opos++] = 0xf0 | token;
 			uint32_t l           = llen - 15;
@@ -91,7 +91,7 @@ buffer_t *lz4_encode(buffer_t *b) {
 			obuf->buffer[opos++] = (llen << 4) | token;
 		}
 
-        // Write literals
+		// Write literals
 		while (llen-- > 0) {
 			obuf->buffer[opos++] = ibuf->buffer[anchor_pos++];
 		}
@@ -100,12 +100,12 @@ buffer_t *lz4_encode(buffer_t *b) {
 			break;
 		}
 
-        // Write offset of match
+		// Write offset of match
 		obuf->buffer[opos + 0] = moffset;
 		obuf->buffer[opos + 1] = moffset >> 8;
 		opos += 2;
 
-        // Write length of match if needed
+		// Write length of match if needed
 		if (mlen >= 19) {
 			uint32_t l = mlen - 19;
 			while (l >= 255) {
@@ -118,7 +118,7 @@ buffer_t *lz4_encode(buffer_t *b) {
 		anchor_pos = ipos;
 	}
 
-    // Last sequence is literals only
+	// Last sequence is literals only
 	uint32_t llen = ilen - anchor_pos;
 	if (llen >= 15) {
 		obuf->buffer[opos++] = 0xf0;
@@ -149,10 +149,10 @@ buffer_t *lz4_decode(buffer_t *b, uint32_t olen) {
 	while (ipos < ilen) {
 		uint32_t token = ibuf->buffer[ipos++];
 
-        // Literals
+		// Literals
 		uint32_t clen = token >> 4;
 
-        // Length of literals
+		// Length of literals
 		if (clen != 0) {
 			if (clen == 15) {
 				uint32_t l = 0;
@@ -166,7 +166,7 @@ buffer_t *lz4_decode(buffer_t *b, uint32_t olen) {
 				clen += l;
 			}
 
-            // Copy literals
+			// Copy literals
 			uint32_t end = ipos + clen;
 			while (ipos < end) {
 				obuf->buffer[opos++] = ibuf->buffer[ipos++];
@@ -176,14 +176,14 @@ buffer_t *lz4_decode(buffer_t *b, uint32_t olen) {
 			}
 		}
 
-        // Match
+		// Match
 		uint32_t moffset = ibuf->buffer[ipos + 0] | (ibuf->buffer[ipos + 1] << 8);
 		if (moffset == 0 || moffset > opos) {
 			return NULL;
 		}
 		ipos += 2;
 
-        // Length of match
+		// Length of match
 		clen = (token & 0x0f) + 4;
 		if (clen == 19) {
 			uint32_t l = 0;
@@ -197,7 +197,7 @@ buffer_t *lz4_decode(buffer_t *b, uint32_t olen) {
 			clen += l;
 		}
 
-        // Copy match
+		// Copy match
 		uint32_t mpos = opos - moffset;
 		uint32_t end  = opos + clen;
 		while (opos < end) {

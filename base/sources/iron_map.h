@@ -5,17 +5,17 @@
 
 typedef struct i32_map {
 	string_array_t *keys;
-	i32_array_t      *values;
+	i32_array_t    *values;
 } i32_map_t;
 
 typedef struct f32_map {
 	string_array_t *keys;
-	f32_array_t      *values;
+	f32_array_t    *values;
 } f32_map_t;
 
 typedef struct any_map {
 	string_array_t *keys;
-	any_array_t      *values;
+	any_array_t    *values;
 } any_map_t;
 
 void i32_map_set(i32_map_t *m, char *k, int v);

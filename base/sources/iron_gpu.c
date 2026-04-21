@@ -227,8 +227,8 @@ void gpu_vertex_structure_add(gpu_vertex_structure_t *structure, const char *nam
 
 void gpu_vertex_struct_add(gpu_vertex_structure_t *raw, char *name, gpu_vertex_data_t data) {
 	gpu_vertex_element_t *e = &raw->elements[raw->size];
-	e->name = name;
-	e->data = data;
+	e->name                 = name;
+	e->data                 = data;
 	raw->size++;
 }
 

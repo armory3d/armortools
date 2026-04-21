@@ -707,10 +707,10 @@ mat4_t mat4_mult_mat3x4(mat4_t a, mat4_t b) {
 	float a31 = a.m[13];
 	float a32 = a.m[14];
 	float a33 = a.m[15];
-	float b0 = b.m[0];
-	float b1 = b.m[4];
-	float b2 = b.m[8];
-	float b3 = b.m[12];
+	float b0  = b.m[0];
+	float b1  = b.m[4];
+	float b2  = b.m[8];
+	float b3  = b.m[12];
 
 	mat4_t m;
 	m.m[0]  = a00 * b0 + a01 * b1 + a02 * b2 + a03 * b3;

@@ -18,10 +18,10 @@ extern i32          _sys_lastw;
 extern i32          _sys_lasth;
 
 extern void (*sys_on_resize)(void);
-extern i32  (*sys_on_w)(void);
-extern i32  (*sys_on_h)(void);
-extern i32  (*sys_on_x)(void);
-extern i32  (*sys_on_y)(void);
+extern i32 (*sys_on_w)(void);
+extern i32 (*sys_on_h)(void);
+extern i32 (*sys_on_x)(void);
+extern i32 (*sys_on_y)(void);
 
 typedef struct sys_callback {
 	void (*f)(void);
@@ -114,5 +114,5 @@ typedef struct {
 
 void video_unload(video_t *self);
 
-char *sys_buffer_to_string(buffer_t *b);
+char     *sys_buffer_to_string(buffer_t *b);
 buffer_t *sys_string_to_buffer(char *str);

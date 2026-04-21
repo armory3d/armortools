@@ -498,12 +498,15 @@ void importFile(NSURL *url) {
 	file_path               = [file_path stringByAppendingPathComponent:suggestedName];
 	[url startAccessingSecurityScopedResource];
 	NSFileCoordinator *coordinator = [[NSFileCoordinator alloc] initWithFilePresenter:nil];
-	[coordinator coordinateReadingItemAtURL:url options:NSFileCoordinatorReadingWithoutChanges error:nil byAccessor:^(NSURL *new_url) {
-		if ([[NSFileManager defaultManager] fileExistsAtPath:file_path]) {
-			[[NSFileManager defaultManager] removeItemAtPath:file_path error:nil];
-		}
-		[[NSFileManager defaultManager] copyItemAtURL:new_url toURL:[NSURL fileURLWithPath:file_path] error:nil];
-	}];
+	[coordinator coordinateReadingItemAtURL:url
+	                                options:NSFileCoordinatorReadingWithoutChanges
+	                                  error:nil
+	                             byAccessor:^(NSURL *new_url) {
+		                             if ([[NSFileManager defaultManager] fileExistsAtPath:file_path]) {
+			                             [[NSFileManager defaultManager] removeItemAtPath:file_path error:nil];
+		                             }
+		                             [[NSFileManager defaultManager] copyItemAtURL:new_url toURL:[NSURL fileURLWithPath:file_path] error:nil];
+	                             }];
 
 	[url stopAccessingSecurityScopedResource];
 	const char *cpath = [file_path cStringUsingEncoding:NSUTF8StringEncoding];

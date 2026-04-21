@@ -12,8 +12,8 @@
 bool path_is_protected_linux = false;
 #endif
 
-string_array_t *_path_mesh_formats     = NULL;
-string_array_t *_path_texture_formats  = NULL;
+string_array_t        *_path_mesh_formats     = NULL;
+string_array_t        *_path_texture_formats  = NULL;
 static string_array_t *_path_base_color_ext   = NULL;
 static string_array_t *_path_opacity_ext      = NULL;
 static string_array_t *_path_normal_map_ext   = NULL;
@@ -215,7 +215,7 @@ char *path_base_name(char *path) {
 }
 
 bool path_is_mesh(char *path) {
-	char             *p       = to_lower_case(path);
+	char           *p       = to_lower_case(path);
 	string_array_t *formats = path_mesh_formats();
 	for (uint32_t i = 0; i < formats->length; ++i) {
 		char *s   = formats->buffer[i];
@@ -228,7 +228,7 @@ bool path_is_mesh(char *path) {
 }
 
 bool path_is_texture(char *path) {
-	char             *p       = to_lower_case(path);
+	char           *p       = to_lower_case(path);
 	string_array_t *formats = path_texture_formats();
 	for (uint32_t i = 0; i < formats->length; ++i) {
 		char *s   = formats->buffer[i];

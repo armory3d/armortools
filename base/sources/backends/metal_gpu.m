@@ -11,10 +11,10 @@ id get_metal_layer(void);
 id get_metal_device(void);
 id get_metal_queue(void);
 
-static id<MTLCommandBuffer>        command_buffer    = nil;
-static id<MTLRenderCommandEncoder> command_encoder   = nil;
-static id<MTLArgumentEncoder>      argument_encoder  = nil;
-static id<MTLBuffer>               argument_buffer   = nil;
+static id<MTLCommandBuffer>        command_buffer   = nil;
+static id<MTLRenderCommandEncoder> command_encoder  = nil;
+static id<MTLArgumentEncoder>      argument_encoder = nil;
+static id<MTLBuffer>               argument_buffer  = nil;
 static id<CAMetalDrawable>         drawable;
 static id<MTLSamplerState>         linear_sampler;
 static id<MTLSamplerState>         point_sampler;

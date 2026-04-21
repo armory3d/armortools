@@ -40,11 +40,11 @@ void iron_log_args(iron_log_level_t level, const char *format, va_list args) {
 	char buffer[4096];
 	vsnprintf(buffer, 4090, format, args);
 	strcat(buffer, "\n");
-	#ifdef IRON_WASM
+#ifdef IRON_WASM
 	printf("%s", buffer); ////
-	#else
+#else
 	fprintf(level == IRON_LOG_LEVEL_INFO ? stdout : stderr, "%s", buffer);
-	#endif
+#endif
 #endif
 }
 
@@ -658,7 +658,7 @@ string_array_t *iron_open_dialog(char *filter_list, char *default_path, bool ope
 	nfdresult_t  result = open_multiple ? NFD_OpenDialogMultiple(filter_list, default_path, &out_paths) : NFD_OpenDialog(filter_list, default_path, &out_path);
 
 	if (result == NFD_OKAY) {
-		int               path_count = open_multiple ? (int)NFD_PathSet_GetCount(&out_paths) : 1;
+		int             path_count = open_multiple ? (int)NFD_PathSet_GetCount(&out_paths) : 1;
 		string_array_t *result     = any_array_create(path_count);
 
 		if (open_multiple) {
@@ -729,7 +729,7 @@ char *iron_save_dialog(char *filter_list, char *default_path) {
 
 #elif defined(IRON_WASM)
 
-__attribute__((import_module("imports"), import_name("js_open_dialog"))) void js_open_dialog();
+__attribute__((import_module("imports"), import_name("js_open_dialog"))) void  js_open_dialog();
 __attribute__((import_module("imports"), import_name("js_save_dialog"))) char *js_save_dialog();
 
 string_array_t *iron_open_dialog(char *filter_list, char *default_path, bool open_multiple) {

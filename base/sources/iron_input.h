@@ -18,17 +18,17 @@ void input_register(void);
 // Mouse
 
 extern string_array_t *_mouse_buttons;
-extern u8_array_t       *_mouse_buttons_down;
-extern u8_array_t       *_mouse_buttons_started;
-extern u8_array_t       *_mouse_buttons_released;
-extern f32               mouse_x;
-extern f32               mouse_y;
-extern bool              mouse_moved;
-extern f32               mouse_movement_x;
-extern f32               mouse_movement_y;
-extern f32               mouse_wheel_delta;
-extern f32               mouse_last_x;
-extern f32               mouse_last_y;
+extern u8_array_t     *_mouse_buttons_down;
+extern u8_array_t     *_mouse_buttons_started;
+extern u8_array_t     *_mouse_buttons_released;
+extern f32             mouse_x;
+extern f32             mouse_y;
+extern bool            mouse_moved;
+extern f32             mouse_movement_x;
+extern f32             mouse_movement_y;
+extern f32             mouse_wheel_delta;
+extern f32             mouse_last_x;
+extern f32             mouse_last_y;
 
 void mouse_end_frame(void);
 void mouse_reset(void);
@@ -59,19 +59,19 @@ f32 mouse_view_y(void);
 // Pen
 
 extern string_array_t *pen_buttons;
-extern u8_array_t       *pen_buttons_down;
-extern u8_array_t       *pen_buttons_started;
-extern u8_array_t       *pen_buttons_released;
-extern f32               pen_x;
-extern f32               pen_y;
-extern bool              pen_moved;
-extern f32               pen_movement_x;
-extern f32               pen_movement_y;
-extern f32               pen_pressure;
-extern bool              pen_connected;
-extern bool              pen_in_use;
-extern f32               pen_last_x;
-extern f32               pen_last_y;
+extern u8_array_t     *pen_buttons_down;
+extern u8_array_t     *pen_buttons_started;
+extern u8_array_t     *pen_buttons_released;
+extern f32             pen_x;
+extern f32             pen_y;
+extern bool            pen_moved;
+extern f32             pen_movement_x;
+extern f32             pen_movement_y;
+extern f32             pen_pressure;
+extern bool            pen_connected;
+extern bool            pen_in_use;
+extern f32             pen_last_x;
+extern f32             pen_last_y;
 
 void pen_end_frame(void);
 void pen_reset(void);
@@ -88,12 +88,12 @@ f32  pen_view_y(void);
 // Keyboard
 
 extern string_array_t *keyboard_keys;
-extern i32_map_t        *keyboard_keys_down;
-extern i32_map_t        *keyboard_keys_started;
-extern i32_map_t        *keyboard_keys_released;
+extern i32_map_t      *keyboard_keys_down;
+extern i32_map_t      *keyboard_keys_started;
+extern i32_map_t      *keyboard_keys_released;
 extern string_array_t *keyboard_keys_frame;
-extern bool              keyboard_repeat_key;
-extern f32               keyboard_repeat_time;
+extern bool            keyboard_repeat_key;
+extern f32             keyboard_repeat_time;
 
 void  keyboard_end_frame(void);
 void  keyboard_reset(void);
@@ -132,7 +132,7 @@ typedef struct gamepad {
 extern string_array_t *gamepad_buttons_ps;
 extern string_array_t *gamepad_buttons_xbox;
 extern string_array_t *gamepad_buttons;
-extern any_array_t      *gamepad_raws;
+extern any_array_t    *gamepad_raws;
 
 void             gamepad_end_frame(void);
 gamepad_stick_t *gamepad_stick_create(void);

@@ -3,9 +3,9 @@
 double fabs(double n);
 float  fabsf(float n);
 double fmax(double x, double y);
-float fmaxf(float x, float y);
+float  fmaxf(float x, float y);
 double fmin(double x, double y);
-float fminf(float x, float y);
+float  fminf(float x, float y);
 double ldexp(double x, int exp);
 double pow(double base, double exponent);
 float  powf(float base, float exponent);
