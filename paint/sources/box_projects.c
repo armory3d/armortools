@@ -284,6 +284,7 @@ void box_projects_recent_tab() {
 		}
 		if (ui_icon_button(tr("Open..."), ICON_FOLDER_OPEN, UI_ALIGN_LEFT)) {
 			project_open();
+			ui_box_hide();
 		}
 	}
 }
