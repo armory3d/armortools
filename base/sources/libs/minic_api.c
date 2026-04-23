@@ -660,6 +660,8 @@ project_t *script_get_project() {
 	return g_project;
 }
 void           context_set_viewport_shader(void *viewport_shader);
+void           context_set_viewport_mode(int mode);
+void           context_set_camera_controls(int i);
 void           node_shader_write_frag(void *raw, char *s);
 mesh_object_t *context_main_object();
 void           export_texture_run(char *path, bool bake_material);
@@ -2034,6 +2036,8 @@ void minic_register_builtins() {
 	R(script_get_config, "p()");
 	R(script_get_project, "p()");
 	R(context_set_viewport_shader, "v(p)");
+	R(context_set_viewport_mode, "v(i)");
+	R(context_set_camera_controls, "v(i)");
 	R(node_shader_write_frag, "v(p,p)");
 	R(plugin_register_texture, "v(p,p)");
 	R(plugin_unregister_texture, "v(p)");
