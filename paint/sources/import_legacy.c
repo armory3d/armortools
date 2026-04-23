@@ -82,35 +82,14 @@ ui_node_canvas_t_array_t *import_arm_get_node_canvas_array(any_map_t *map, char 
 	return ar;
 }
 
-bool import_arm_is_version_4(buffer_t *b) {
-	bool has_version = b->buffer[10] == 118; // 'v'
-	bool has_four    = b->buffer[22] == 52;  // '4'
-	if (has_version && has_four) {
-		return true;
-	}
-	return false;
-}
-
-bool import_arm_is_version_3(buffer_t *b) {
-	bool has_version = b->buffer[10] == 118; // 'v'
-	bool has_three   = b->buffer[22] == 51;  // '3'
-	if (has_version && has_three) {
-		return true;
-	}
-	return false;
-}
-
-bool import_arm_is_version_2(buffer_t *b) {
-	bool has_version = b->buffer[10] == 118; // 'v'
-	bool has_two     = b->buffer[22] == 50;  // '2'
-	if (has_version && has_two) {
-		return true;
-	}
-	return false;
+bool import_arm_is_version(buffer_t *b, char n) {
+	bool has_v = b->buffer[10] == 118; // 'v'
+	bool has_n = b->buffer[22] == n;   // '4'
+	return has_v && has_n;
 }
 
 bool import_arm_is_old(buffer_t *b) {
-	return import_arm_is_version_2(b) || import_arm_is_version_3(b) || import_arm_is_version_4(b);
+	return !import_arm_is_version(b, manifest_version_project[0]);
 }
 
 project_t *import_arm_from_map_to_arm(any_map_t *old) {
@@ -265,13 +244,13 @@ project_t *import_arm_from_version_2(any_map_t *old) {
 
 project_t *import_arm_from_old(buffer_t *b) {
 	any_map_t *old = armpack_decode_to_map(b);
-	if (import_arm_is_version_4(b)) {
+	if (import_arm_is_version(b, '4')) {
 		return import_arm_from_version_4(old);
 	}
-	if (import_arm_is_version_3(b)) {
+	if (import_arm_is_version(b, '3')) {
 		return import_arm_from_version_3(old);
 	}
-	if (import_arm_is_version_2(b)) {
+	if (import_arm_is_version(b, '2')) {
 		return import_arm_from_version_2(old);
 	}
 	return NULL;
