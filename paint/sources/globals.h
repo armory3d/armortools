@@ -5,6 +5,14 @@
 #include "types.h"
 #include <iron.h>
 
+char *manifest_title           = "ArmorPaint";
+char *manifest_version         = "1.0 alpha";
+char *manifest_version_project = "5";
+char *manifest_version_config  = "1";
+char *manifest_url             = "https://armorpaint.org";
+char *manifest_url_android     = "https://play.google.com/store/apps/details?id=org.armorpaint";
+char *manifest_url_ios         = "https://apps.apple.com/app/armorpaint/id1533967534";
+
 any_map_t       *ui_children;
 any_map_t       *ui_nodes_custom_buttons;
 gpu_texture_t   *layers_temp_image    = NULL;
@@ -262,13 +270,6 @@ ui_handle_t              *_ui_nodes_hval3;
 string_array_t           *nodes_brush_categories;
 node_list_t_array_t      *nodes_brush_list;
 any_map_t                *nodes_brush_creates;
-char                     *manifest_title           = "ArmorPaint";
-char                     *manifest_version         = "1.0 alpha";
-char                     *manifest_version_project = "5";
-char                     *manifest_version_config  = "1";
-char                     *manifest_url             = "https://armorpaint.org";
-char                     *manifest_url_android     = "https://play.google.com/store/apps/details?id=org.armorpaint";
-char                     *manifest_url_ios         = "https://apps.apple.com/app/armorpaint/id1533967534";
 string_array_t           *nodes_material_categories;
 ui_node_t_array_t        *nodes_material_input;
 ui_node_t_array_t        *nodes_material_texture;

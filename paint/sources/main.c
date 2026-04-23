@@ -140,7 +140,6 @@
 #include "make_particle.c"
 #include "make_sculpt.c"
 #include "make_texcoord.c"
-#include "manifest.c"
 #include "node_shader.c"
 #include "nodes_brush.c"
 #include "nodes_material.c"
