@@ -294,7 +294,7 @@ void camera_set_pivot_center_to_mouse() {
 }
 
 void camera_update(void *_) {
-	if (!camera_wrap_mouse()) {
+	if (!camera_wrap_mouse() || g_context->camera_controls == CAMERA_CONTROLS_NONE) {
 		return;
 	}
 
