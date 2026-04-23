@@ -111,6 +111,11 @@ buffer_t *export_arm_rgba64_to_rgba32(buffer_t *buffer) {
 }
 
 void export_arm_run_project() {
+
+	workflow_t _workflow = g_config->workflow;
+	g_config->workflow = WORKFLOW_PBR;
+	base_update_workflow();
+
 	ui_node_canvas_t_array_t *mnodes = any_array_create_from_raw((void *[]){}, 0);
 	for (i32 i = 0; i < project_materials->length; ++i) {
 		slot_material_t  *m = project_materials->buffer[i];
@@ -121,6 +126,9 @@ void export_arm_run_project() {
 		}
 		any_array_push(mnodes, c);
 	}
+
+	g_config->workflow = _workflow;
+	base_update_workflow();
 
 	ui_node_canvas_t_array_t *bnodes = any_array_create_from_raw((void *[]){}, 0);
 	for (i32 i = 0; i < project_brushes->length; ++i) {
