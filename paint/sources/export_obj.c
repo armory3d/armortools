@@ -274,3 +274,109 @@ void export_obj_run_fast(char *path, mesh_object_t_array_t *paint_objects) {
 	}
 	iron_file_save_bytes(path, o, 0);
 }
+
+void export_obj_run_sculpt(char *path, mesh_object_t_array_t *paint_objects) {
+	slot_layer_t *l = NULL;
+	for (i32 i = 0; i < project_layers->length; ++i) {
+		if (project_layers->buffer[i]->texpaint_sculpt != NULL) {
+			l = project_layers->buffer[i];
+			break;
+		}
+	}
+	if (l == NULL) {
+		return;
+	}
+
+	u8_array_t *o = u8_array_create_from_raw((u8[]){}, 0);
+	export_obj_write_string(o, "# armorpaint.org\n");
+
+	mesh_object_t *p    = paint_objects->buffer[0];
+	mesh_data_t   *mesh = p->data;
+	f32            sc   = mesh->scale_pos;
+	i16_array_t   *texa = mesh->vertex_arrays->buffer[2]->values;
+	i32            len  = math_floor(mesh->index_array->length);
+	i32            tris = math_floor(len / 3.0);
+	f32            inv  = 1.0 / 32767.0;
+
+	buffer_t *pixels = gpu_get_texture_pixels(l->texpaint_sculpt);
+
+	export_obj_write_string(o, string("o %s\n", p->base->name));
+
+	for (i32 i = 0; i < len; ++i) {
+		f32 x = buffer_get_f32(pixels, i * 16)     * sc;
+		f32 y = buffer_get_f32(pixels, i * 16 + 4) * sc;
+		f32 z = buffer_get_f32(pixels, i * 16 + 8) * sc;
+		export_obj_write_string(o, "v ");
+		export_obj_write_string(o, f32_to_string(x));
+		export_obj_write_string(o, " ");
+		export_obj_write_string(o, f32_to_string(z));
+		export_obj_write_string(o, " ");
+		export_obj_write_string(o, f32_to_string(-y));
+		export_obj_write_string(o, "\n");
+	}
+
+	for (i32 t = 0; t < tris; ++t) {
+		i32 i0 = t * 3, i1 = t * 3 + 1, i2 = t * 3 + 2;
+		f32 x0 = buffer_get_f32(pixels, i0 * 16)     * sc;
+		f32 y0 = buffer_get_f32(pixels, i0 * 16 + 4) * sc;
+		f32 z0 = buffer_get_f32(pixels, i0 * 16 + 8) * sc;
+		f32 x1 = buffer_get_f32(pixels, i1 * 16)     * sc;
+		f32 y1 = buffer_get_f32(pixels, i1 * 16 + 4) * sc;
+		f32 z1 = buffer_get_f32(pixels, i1 * 16 + 8) * sc;
+		f32 x2 = buffer_get_f32(pixels, i2 * 16)     * sc;
+		f32 y2 = buffer_get_f32(pixels, i2 * 16 + 4) * sc;
+		f32 z2 = buffer_get_f32(pixels, i2 * 16 + 8) * sc;
+		f32 e1x = x1 - x0, e1y = y1 - y0, e1z = z1 - z0;
+		f32 e2x = x2 - x0, e2y = y2 - y0, e2z = z2 - z0;
+		f32 nx  = e1y * e2z - e1z * e2y;
+		f32 ny  = e1z * e2x - e1x * e2z;
+		f32 nz  = e1x * e2y - e1y * e2x;
+		f32 nl  = math_sqrt(nx * nx + ny * ny + nz * nz);
+		if (nl > 0.0) { nx /= nl; ny /= nl; nz /= nl; }
+		export_obj_write_string(o, "vn ");
+		export_obj_write_string(o, f32_to_string(nx));
+		export_obj_write_string(o, " ");
+		export_obj_write_string(o, f32_to_string(nz));
+		export_obj_write_string(o, " ");
+		export_obj_write_string(o, f32_to_string(-ny));
+		export_obj_write_string(o, "\n");
+	}
+
+	for (i32 i = 0; i < len; ++i) {
+		f32 u = texa->buffer[i * 2]     * inv;
+		f32 v = 1.0 - texa->buffer[i * 2 + 1] * inv;
+		export_obj_write_string(o, "vt ");
+		export_obj_write_string(o, f32_to_string(u));
+		export_obj_write_string(o, " ");
+		export_obj_write_string(o, f32_to_string(v));
+		export_obj_write_string(o, "\n");
+	}
+
+	for (i32 t = 0; t < tris; ++t) {
+		i32 b = t * 3 + 1;
+		export_obj_write_string(o, "f ");
+		export_obj_write_string(o, i32_to_string(b));
+		export_obj_write_string(o, "/");
+		export_obj_write_string(o, i32_to_string(b));
+		export_obj_write_string(o, "/");
+		export_obj_write_string(o, i32_to_string(t + 1));
+		export_obj_write_string(o, " ");
+		export_obj_write_string(o, i32_to_string(b + 1));
+		export_obj_write_string(o, "/");
+		export_obj_write_string(o, i32_to_string(b + 1));
+		export_obj_write_string(o, "/");
+		export_obj_write_string(o, i32_to_string(t + 1));
+		export_obj_write_string(o, " ");
+		export_obj_write_string(o, i32_to_string(b + 2));
+		export_obj_write_string(o, "/");
+		export_obj_write_string(o, i32_to_string(b + 2));
+		export_obj_write_string(o, "/");
+		export_obj_write_string(o, i32_to_string(t + 1));
+		export_obj_write_string(o, "\n");
+	}
+
+	if (!ends_with(path, ".obj")) {
+		path = string("%s.obj", path);
+	}
+	iron_file_save_bytes(path, o, 0);
+}
