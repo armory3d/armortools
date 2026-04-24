@@ -607,12 +607,7 @@ void box_preferences_pen_tab() {
 void box_preferences_viewport_tab() {
 	ui_handle_t *h_mode        = ui_handle(__ID__);
 	h_mode->i                  = g_config->viewport_mode;
-	string_array_t *mode_combo = any_array_create_from_raw(
-	    (void *[]){
-	        tr("Lit"),
-	        tr("Path Traced"),
-	    },
-	    2);
+	string_array_t *mode_combo = base_get_viewport_modes();
 	ui_combo(h_mode, mode_combo, tr("Default Mode"), true, UI_ALIGN_LEFT, true);
 	if (h_mode->changed) {
 		g_config->viewport_mode = h_mode->i;

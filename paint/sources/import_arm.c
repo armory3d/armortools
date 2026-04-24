@@ -595,6 +595,7 @@ void import_arm_run_project(char *path) {
 
 	sys_notify_on_next_frame(&import_arm_run_project_on_next_frame, NULL);
 
+	base_update_workflow();
 	ui_base_hwnds->buffer[TAB_AREA_SIDEBAR0]->redraws = 2;
 	ui_base_hwnds->buffer[TAB_AREA_SIDEBAR1]->redraws = 2;
 	g_context->ddirty                                 = 4;

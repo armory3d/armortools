@@ -26,7 +26,7 @@ context_t *context_create() {
 	c->layers_destination      = EXPORT_DESTINATION_DISK;
 	c->split_by                = SPLIT_TYPE_OBJECT;
 	c->select_time             = 0.0;
-	c->viewport_mode           = g_config->viewport_mode == 0 ? VIEWPORT_MODE_LIT : VIEWPORT_MODE_PATH_TRACE;
+	c->viewport_mode           = g_config->viewport_mode;
 	c->hscale_was_changed      = false;
 	c->export_mesh_format      = MESH_FORMAT_OBJ;
 	c->export_mesh_index       = 0;
@@ -285,7 +285,7 @@ void context_select_tool(i32 i) {
 	make_material_parse_mesh_material();
 	g_context->ddirty              = 3;
 	viewport_mode_t _viewport_mode = g_context->viewport_mode;
-	g_context->viewport_mode       = VIEWPORT_MODE_MINUS_ONE;
+	g_context->viewport_mode       = VIEWPORT_MODE_NONE;
 	context_set_viewport_mode(_viewport_mode);
 
 	context_init_tool();
@@ -458,6 +458,10 @@ void context_set_viewport_mode(viewport_mode_t mode) {
 	if (g_context->viewport_mode == VIEWPORT_MODE_PATH_TRACE && g_context->tool == TOOL_TYPE_BAKE) {
 		g_context->viewport_mode = VIEWPORT_MODE_LIT;
 	}
+}
+
+void context_set_camera_controls(int i) {
+	g_context->camera_controls = i;
 }
 
 void context_load_envmap() {

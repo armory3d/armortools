@@ -59,6 +59,7 @@ void base_on_drop_files(char *drop_path) {
 
 void base_init_on_start_arm(void *_) {
 	import_arm_run_project(project_filepath);
+	g_context->tool = TOOL_TYPE_CURSOR;
 	// Auto-run script
 	if (g_project->script_datas != NULL && g_project->script_datas->length > 0) {
 		minic_ctx_t *ctx = minic_eval(g_project->script_datas->buffer[0]);
@@ -390,12 +391,6 @@ void base_init_undo_layers() {
 }
 
 void base_render(void *_) {
-	if (g_context->frame == 2) {
-		util_render_make_material_preview();
-		ui_base_hwnds->buffer[TAB_AREA_SIDEBAR1]->redraws = 2;
-
-		base_init_undo_layers();
-	}
 
 	if (g_context->tool == TOOL_TYPE_CURSOR) {
 		sim_init();
@@ -403,11 +398,12 @@ void base_render(void *_) {
 	}
 
 	if (g_context->frame == 2) {
+		util_render_make_material_preview();
+		ui_base_hwnds->buffer[TAB_AREA_SIDEBAR1]->redraws = 2;
+		base_init_undo_layers();
 		make_material_parse_mesh_material();
 		make_material_parse_paint_material(true);
 		g_context->ddirty          = 0;
-		g_context->camera_pivot    = g_config->camera_pivot;
-		g_context->camera_controls = g_config->camera_controls;
 	}
 	else if (g_context->frame == 3) {
 		g_context->ddirty = 3;
@@ -648,44 +644,8 @@ void ui_base_menu_draw_viewport_mode() {
 	mode_handle->i           = g_context->viewport_mode;
 	ui_text(tr("Viewport Mode"), UI_ALIGN_RIGHT, 0x00000000);
 
-	string_array_t *modes = any_array_create_from_raw(
-	    (void *[]){
-	        tr("Lit"),
-	        tr("Base Color"),
-	        tr("Normal"),
-	        tr("Occlusion"),
-	        tr("Roughness"),
-	        tr("Metallic"),
-	        tr("Opacity"),
-	        tr("Height"),
-	        tr("Emission"),
-	        tr("Subsurface"),
-	        tr("TexCoord"),
-	        tr("Object Normal"),
-	        tr("Material ID"),
-	        tr("Object ID"),
-	        tr("Mask"),
-	    },
-	    15);
-	string_array_t *shortcuts = any_array_create_from_raw(
-	    (void *[]){
-	        "l",
-	        "b",
-	        "n",
-	        "o",
-	        "r",
-	        "m",
-	        "a",
-	        "h",
-	        "e",
-	        "s",
-	        "t",
-	        "1",
-	        "2",
-	        "3",
-	        "4",
-	    },
-	    15);
+	string_array_t *modes = base_get_viewport_modes();
+	string_array_t *shortcuts = base_get_viewport_mode_shortcuts();
 	if (gpu_raytrace_supported()) {
 		any_array_push(modes, tr("Path Traced"));
 		any_array_push(shortcuts, "p");
@@ -1752,6 +1712,9 @@ void base_init() {
 		base_update_workflow();
 	}
 
+	g_context->camera_pivot    = g_config->camera_pivot;
+	g_context->camera_controls = g_config->camera_controls;
+
 	bool has_projects = g_config->recent_projects->length > 0;
 	if (g_config->splash_screen && has_projects) {
 		box_projects_show();
@@ -1768,7 +1731,6 @@ void base_init() {
 
 	if (args_player) {
 		sys_notify_on_next_frame(&base_init_on_start_arm, NULL);
-		g_context->tool = TOOL_TYPE_CURSOR;
 		make_material_parse_paint_material(true);
 		g_config->workspace = WORKSPACE_PLAYER;
 		base_update_workspace();
@@ -2356,4 +2318,60 @@ uint32_t base_darker(uint32_t x, uint32_t y) {
 	g           = g > gy ? g - gy : 0;
 	b           = b > by ? b - by : 0;
 	return (x & 0xff000000) | (r << 16) | (g << 8) | b;
+}
+
+string_array_t *base_get_viewport_modes() {
+	string_array_t *modes = any_array_create_from_raw(
+	    (void *[]){
+	        tr("Lit"),
+	        tr("Base Color"),
+	        tr("Normal"),
+	        tr("Occlusion"),
+	        tr("Roughness"),
+	        tr("Metallic"),
+	        tr("Opacity"),
+	        tr("Height"),
+	        tr("Emission"),
+	        tr("Subsurface"),
+	        tr("TexCoord"),
+	        tr("Object Normal"),
+	        tr("Material ID"),
+	        tr("Object ID"),
+	        tr("Mask"),
+	    },
+	    15);
+
+	if (gpu_raytrace_supported()) {
+		any_array_push(modes, tr("Path Traced"));
+	}
+
+	return modes;
+}
+
+string_array_t *base_get_viewport_mode_shortcuts() {
+	string_array_t *shortcuts = any_array_create_from_raw(
+	    (void *[]){
+	        "l",
+	        "b",
+	        "n",
+	        "o",
+	        "r",
+	        "m",
+	        "a",
+	        "h",
+	        "e",
+	        "s",
+	        "t",
+	        "1",
+	        "2",
+	        "3",
+	        "4",
+	    },
+	    15);
+
+	if (gpu_raytrace_supported()) {
+		any_array_push(shortcuts, "p");
+	}
+
+	return shortcuts;
 }

@@ -138,6 +138,7 @@ buffer_t *util_encode_project(project_t *raw) {
 
 	armpack_encode_start(encoded->buffer);
 	armpack_encode_map(25);
+
 	armpack_encode_string("version");
 	armpack_encode_string(raw->version);
 	armpack_encode_string("assets");

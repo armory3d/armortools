@@ -49,7 +49,7 @@ typedef enum {
 } bake_up_axis_t;
 
 typedef enum {
-	VIEWPORT_MODE_MINUS_ONE     = -1,
+	VIEWPORT_MODE_NONE          = -1,
 	VIEWPORT_MODE_LIT           = 0,
 	VIEWPORT_MODE_BASE_COLOR    = 1,
 	VIEWPORT_MODE_NORMAL_MAP    = 2,
@@ -145,6 +145,7 @@ typedef enum {
 } blend_type_t;
 
 typedef enum {
+	CAMERA_CONTROLS_NONE   = -1,
 	CAMERA_CONTROLS_ORBIT  = 0,
 	CAMERA_CONTROLS_ROTATE = 1,
 	CAMERA_CONTROLS_FLY    = 2,

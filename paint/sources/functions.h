@@ -157,6 +157,8 @@ void                      base_redraw_status();
 void                      base_redraw_console();
 uint32_t                  base_darker(uint32_t x, uint32_t y);
 void                      base_redraw_ui();
+string_array_t           *base_get_viewport_modes();
+string_array_t           *base_get_viewport_mode_shortcuts();
 ui_handle_t_array_t      *ui_base_init_hwnds();
 ui_handle_t_array_t      *ui_base_init_htabs();
 tab_draw_array_t_array_t *ui_base_init_hwnd_tabs();
@@ -577,6 +579,9 @@ void                         render_path_raytrace_raytrace_init(char *shader_nam
 void                         render_path_raytrace_draw(bool use_live_layer);
 node_shader_context_t       *sculpt_make_sculpt_run(material_t *data, material_context_t *matcon);
 void                         sculpt_make_mesh_run(node_shader_t *kong, slot_layer_t *l);
+void                         sculpt_import_mesh_pack_to_texture(mesh_data_t *mesh, slot_layer_t *l);
+void                         sculpt_setup_layer_sculpt_texture(slot_layer_t *l, mesh_data_t *md);
+void                         sculpt_setup();
 void                         sculpt_layers_create_sculpt_layer();
 void                         render_path_sculpt_commands();
 void                         render_path_sculpt_begin();
