@@ -8,7 +8,19 @@ void sculpt_import_mesh_pack_to_texture(mesh_data_t *mesh, slot_layer_t *l) {
 		buffer_set_f32(b, 4 * i * 4, mesh->vertex_arrays->buffer[0]->values->buffer[index * 4] / 32767.0);
 		buffer_set_f32(b, 4 * i * 4 + 1 * 4, mesh->vertex_arrays->buffer[0]->values->buffer[index * 4 + 1] / 32767.0);
 		buffer_set_f32(b, 4 * i * 4 + 2 * 4, mesh->vertex_arrays->buffer[0]->values->buffer[index * 4 + 2] / 32767.0);
-		buffer_set_f32(b, 4 * i * 4 + 3 * 4, 1.0);
+		f32 nor_x = mesh->vertex_arrays->buffer[1]->values->buffer[index * 2] / 32767.0f;
+		f32 nor_y = mesh->vertex_arrays->buffer[1]->values->buffer[index * 2 + 1] / 32767.0f;
+		f32 nor_z = mesh->vertex_arrays->buffer[0]->values->buffer[index * 4 + 3] / 32767.0f;
+		f32 l1    = math_abs(nor_x) + math_abs(nor_y) + math_abs(nor_z);
+		f32 oct_x = l1 > 0.0f ? nor_x / l1 : 0.0f;
+		f32 oct_y = l1 > 0.0f ? nor_y / l1 : 0.0f;
+		if (nor_z < 0.0f) {
+			f32 ox = oct_x;
+			f32 oy = oct_y;
+			oct_x  = (1.0f - math_abs(oy)) * (ox >= 0.0f ? 1.0f : -1.0f);
+			oct_y  = (1.0f - math_abs(ox)) * (oy >= 0.0f ? 1.0f : -1.0f);
+		}
+		buffer_set_f32(b, 4 * i * 4 + 3 * 4, (oct_x + 1.0f) * 0.5f + math_floor((oct_y + 1.0f) * 0.5f * 255.0f + 0.5f));
 	}
 
 	gpu_texture_t *imgmesh = gpu_create_texture_from_bytes(b, config_get_texture_res_x(), config_get_texture_res_y(), GPU_TEXTURE_FORMAT_RGBA128);
@@ -101,8 +113,8 @@ node_shader_context_t *sculpt_make_sculpt_run(material_t *data, material_context
 		// node_shader_add_constant(kong, "texpaint_undo_size: float2", "_size(texpaint_sculpt_undo)"); ////
 		// node_shader_write_attrib_frag(kong, "var wposition: float3 = (constants.W * texpaint_sculpt_undo[uint2(uint(tex_coord.x *
 		// constants.texpaint_undo_size.x), uint(tex_coord.y * constants.texpaint_undo_size.y))]).xyz;");
-		node_shader_write_attrib_frag(
-		    kong, "var wposition: float3 = (constants.W * texpaint_sculpt_undo[uint2(uint(tex_coord.x * 2048.0), uint(tex_coord.y * 2048.0))]).xyz;");
+		node_shader_write_attrib_frag(kong, "var read_undo: float4 = texpaint_sculpt_undo[uint2(uint(tex_coord.x * 2048.0), uint(tex_coord.y * 2048.0))];");
+		node_shader_write_attrib_frag(kong, "var wposition: float3 = (constants.W * float4(read_undo.xyz, 1.0)).xyz;");
 		node_shader_write_frag(kong, "var depthlast: float = sample_lod(gbufferD, sampler_linear, constants.inplast.xy, 0.0).r;");
 		node_shader_write_frag(kong, "var winplast: float4 = float4(float2(constants.inplast.x, 1.0 - constants.inplast.y) * 2.0 - 1.0, depthlast, 1.0);");
 		node_shader_write_frag(kong, "winplast = constants.invVP * winplast;");
@@ -117,8 +129,8 @@ node_shader_context_t *sculpt_make_sculpt_run(material_t *data, material_context
 		node_shader_write_frag(kong, "var dist: float = 0.0;");
 
 		node_shader_add_constant(kong, "W: float4x4", "_world_matrix");
-		node_shader_write_attrib_frag(
-		    kong, "var wposition: float3 = (constants.W * texpaint_sculpt_undo[uint2(uint(tex_coord.x * 2048.0), uint(tex_coord.y * 2048.0))]).xyz;");
+		node_shader_write_attrib_frag(kong, "var read_undo: float4 = texpaint_sculpt_undo[uint2(uint(tex_coord.x * 2048.0), uint(tex_coord.y * 2048.0))];");
+		node_shader_write_attrib_frag(kong, "var wposition: float3 = (constants.W * float4(read_undo.xyz, 1.0)).xyz;");
 	}
 
 	if (decal) {
@@ -150,12 +162,13 @@ node_shader_context_t *sculpt_make_sculpt_run(material_t *data, material_context
 	}
 
 	// parser_material_parse may add vertex elements
-	i32 velen                                = con_paint->data->vertex_elements->length;
-	parser_material_parse_height             = true;
-	parser_material_parse_height_as_channel  = true;
+	i32 velen = con_paint->data->vertex_elements->length;
+	// parser_material_parse_height             = true;
+	// parser_material_parse_height_as_channel  = true;
 	shader_out_t *sout                       = parser_material_parse(g_context->material->canvas, con_paint, kong, matcon);
 	con_paint->data->vertex_elements->length = velen;
-	node_shader_write_frag(kong, string("var height: float = %s.r;", sout->out_basecol));
+	// node_shader_write_frag(kong, string("var height: float = %s.r;", sout->out_basecol));
+	node_shader_write_frag(kong, string("var disp: float3 = %s;", sout->out_basecol));
 
 	if (kong->frag_bposition) {
 		kong->frag_bposition = false;
@@ -168,18 +181,28 @@ node_shader_context_t *sculpt_make_sculpt_run(material_t *data, material_context
 	node_shader_write_frag(kong, "var str: float = clamp((constants.brush_radius - dist) * constants.brush_hardness * 1.0, 0.0, 1.0) * opacity;");
 	node_shader_add_texture(kong, "texpaint_sculpt_undo", "_texpaint_sculpt_undo");
 	node_shader_write_frag(kong, "var sample_undo: float4 = sample_lod(texpaint_sculpt_undo, sampler_linear, sculpt_uv, 0.0);");
+	node_shader_write_frag(kong, "var raw_undo: float4 = texpaint_sculpt_undo[uint2(uint(tex_coord.x * 2048.0), uint(tex_coord.y * 2048.0))];");
 
-	node_shader_write_frag(kong, "if (sample_undo.r == 0.0 && sample_undo.g == 0.0 && sample_undo.b == 0.0) { discard; }");
-	node_shader_add_function(kong, str_octahedron_wrap);
-	node_shader_add_texture(kong, "gbuffer0_undo", NULL);
-	node_shader_write_frag(kong, "var g0_undo: float2 = sample_lod(gbuffer0_undo, sampler_linear, constants.inp.xy, 0.0).rg;");
-	node_shader_write_frag(kong, "var wn: float3;");
-	node_shader_write_frag(kong, "wn.z = 1.0 - abs(g0_undo.x) - abs(g0_undo.y);");
-	// node_shader_write_frag(kong, "wn.xy = wn.z >= 0.0 ? g0_undo.xy : octahedron_wrap(g0_undo.xy);");
-	node_shader_write_frag(kong, "if (wn.z >= 0.0) { wn.xy = g0_undo.xy; } else { wn.xy = octahedron_wrap(g0_undo.xy); }");
-	node_shader_write_frag(kong, "var n: float3 = normalize(wn);");
-	// node_shader_write_frag(kong, "output[0] = float4(sample_undo.rgb + n * 0.1 * str, 1.0);");
-	node_shader_write_frag(kong, "output[0] = float4(sample_undo.rgb + n * (height / 10.0) * str, 1.0);");
+	if (g_context->layer->fill_layer != NULL) {
+		node_shader_add_function(kong, str_octahedron_wrap);
+		node_shader_write_frag(kong, "var nor_v: float = floor(raw_undo.a) / 255.0;");
+		node_shader_write_frag(kong, "var nor_oct: float2 = float2(raw_undo.a - floor(raw_undo.a), nor_v) * 2.0 - 1.0;");
+		node_shader_write_frag(kong, "var nor_z: float = 1.0 - abs(nor_oct.x) - abs(nor_oct.y);");
+		node_shader_write_frag(kong, "var nor_xyz: float3 = float3(nor_oct.xy, nor_z);");
+		node_shader_write_frag(kong, "if (nor_z < 0.0) { nor_xyz.xy = octahedron_wrap(nor_oct.xy); }");
+		node_shader_write_frag(kong, "var n: float3 = normalize((constants.W * float4(normalize(nor_xyz), 0.0)).xyz);");
+	}
+	else {
+		node_shader_write_frag(kong, "if (sample_undo.r == 0.0 && sample_undo.g == 0.0 && sample_undo.b == 0.0) { discard; }");
+		node_shader_add_function(kong, str_octahedron_wrap);
+		node_shader_add_texture(kong, "gbuffer0_undo", NULL);
+		node_shader_write_frag(kong, "var g0_undo: float2 = sample_lod(gbuffer0_undo, sampler_linear, constants.inp.xy, 0.0).rg;");
+		node_shader_write_frag(kong, "var wn: float3;");
+		node_shader_write_frag(kong, "wn.z = 1.0 - abs(g0_undo.x) - abs(g0_undo.y);");
+		node_shader_write_frag(kong, "if (wn.z >= 0.0) { wn.xy = g0_undo.xy; } else { wn.xy = octahedron_wrap(g0_undo.xy); }");
+		node_shader_write_frag(kong, "var n: float3 = normalize(wn);");
+	}
+	node_shader_write_frag(kong, "output[0] = float4(sample_undo.rgb + n * disp * str, raw_undo.a);");
 	node_shader_write_frag(kong, "output[1] = float4(str, 0.0, 0.0, 1.0);");
 	parser_material_finalize(con_paint);
 	con_paint->data->shader_from_source = true;
@@ -216,15 +239,15 @@ void sculpt_make_mesh_run(node_shader_t *kong, slot_layer_t *l) {
 	                                    "/ constants.texpaint_sculpt_size.y))];");
 	node_shader_write_attrib_vert(kong, "var meshpos2: float4 = texpaint_sculpt[uint2(uint(base_vertex2 % constants.texpaint_sculpt_size.x), uint(base_vertex2 "
 	                                    "/ constants.texpaint_sculpt_size.y))];");
+
 	node_shader_write_attrib_vert(kong, "var meshnor: float3 = normalize(cross(meshpos2.xyz - meshpos1.xyz, meshpos0.xyz - meshpos1.xyz));");
 	node_shader_write_attrib_vert(kong, "output.wnormal = constants.N * meshnor;");
+
 	node_shader_write_attrib_frag(kong, "var n: float3 = normalize(input.wnormal);");
 }
 
-void sculpt_layers_create_sculpt_layer() {
-	slot_layer_t *l  = layers_new_layer(true, -1, NULL);
-	i32           id = l->id;
-
+void sculpt_init_sculpt_texture(slot_layer_t *l, mesh_data_t *md) {
+	i32 id = l->id;
 	{
 		render_target_t *t = render_target_create();
 		t->name            = string("texpaint_sculpt%s", i32_to_string(id));
@@ -233,13 +256,15 @@ void sculpt_layers_create_sculpt_layer() {
 		t->format          = "RGBA128";
 		l->texpaint_sculpt = render_path_create_render_target(t)->_image;
 	}
-
-	// util_mesh_merge();
-	// let md: mesh_data_t = g_context.merged_object.data;
-
-	mesh_data_t *md = g_context->paint_object->data;
 	sculpt_import_mesh_pack_to_texture(md, l);
+}
 
+void sculpt_init() {
+	if (any_map_get(render_path_render_targets, "gbuffer0_undo") != NULL) {
+		return;
+	}
+
+	mesh_data_t *md   = g_context->paint_object->data;
 	i16_array_t *posa = i16_array_create(md->index_array->length * 4);
 	i16_array_t *nora = i16_array_create(md->index_array->length * 2);
 	i16_array_t *texa = i16_array_create(md->index_array->length * 2);
@@ -299,18 +324,22 @@ void sculpt_layers_create_sculpt_layer() {
 	render_path_load_shader("Scene/copy_pass/copyR32_pass");
 
 	for (i32 i = 0; i < history_undo_layers->length; ++i) {
-		char         *ext = string("_undo%s", i32_to_string(i));
-		slot_layer_t *l   = history_undo_layers->buffer[i];
-
-		{
-			render_target_t *t = render_target_create();
-			t->name            = string("texpaint_sculpt%s", ext);
-			t->width           = config_get_texture_res_x();
-			t->height          = config_get_texture_res_y();
-			t->format          = "RGBA128";
-			l->texpaint_sculpt = render_path_create_render_target(t)->_image;
-		}
+		char            *ext = string("_undo%s", i32_to_string(i));
+		slot_layer_t    *ul  = history_undo_layers->buffer[i];
+		render_target_t *t   = render_target_create();
+		t->name              = string("texpaint_sculpt%s", ext);
+		t->width             = config_get_texture_res_x();
+		t->height            = config_get_texture_res_y();
+		t->format            = "RGBA128";
+		ul->texpaint_sculpt  = render_path_create_render_target(t)->_image;
 	}
+}
+
+void sculpt_layers_create_sculpt_layer() {
+	slot_layer_t *l  = layers_new_layer(true, -1, NULL);
+	mesh_data_t  *md = g_context->paint_object->data;
+	sculpt_init_sculpt_texture(l, md);
+	sculpt_init();
 }
 
 void render_path_sculpt_commands() {
@@ -374,4 +403,47 @@ void render_path_sculpt_begin() {
 	if (sculpt_push_undo && history_undo_layers != NULL) {
 		history_paint();
 	}
+}
+
+void slot_layer_apply_sculpt(slot_layer_t *raw) {
+	if (raw->texpaint_sculpt == NULL) {
+		return;
+	}
+
+	mesh_object_t *o         = project_paint_objects->buffer[0];
+	mesh_data_t   *g         = o->data;
+	i16_array_t   *va0       = g->vertex_arrays->buffer[0]->values;
+	i32            num_verts = math_floor(va0->length / 4.0);
+
+	buffer_t *pixels = gpu_get_texture_pixels(raw->texpaint_sculpt);
+
+	f32 max_abs = 1.0;
+	for (i32 i = 0; i < num_verts; ++i) {
+		f32 x = math_abs(buffer_get_f32(pixels, i * 16));
+		f32 y = math_abs(buffer_get_f32(pixels, i * 16 + 4));
+		f32 z = math_abs(buffer_get_f32(pixels, i * 16 + 8));
+		if (x > max_abs)
+			max_abs = x;
+		if (y > max_abs)
+			max_abs = y;
+		if (z > max_abs)
+			max_abs = z;
+	}
+
+	if (max_abs > 1.0) {
+		o->base->transform->scale_world = g->scale_pos = g->scale_pos * max_abs;
+		transform_build_matrix(o->base->transform);
+	}
+
+	for (i32 i = 0; i < num_verts; ++i) {
+		va0->buffer[i * 4]     = math_floor(buffer_get_f32(pixels, i * 16) / max_abs * 32767.0);
+		va0->buffer[i * 4 + 1] = math_floor(buffer_get_f32(pixels, i * 16 + 4) / max_abs * 32767.0);
+		va0->buffer[i * 4 + 2] = math_floor(buffer_get_f32(pixels, i * 16 + 8) / max_abs * 32767.0);
+	}
+
+	mesh_data_build_vertices(g->_->vertex_buffer, o->data->vertex_arrays);
+	util_mesh_calc_normals(true);
+	render_path_raytrace_ready = false;
+
+	slot_layer_delete(raw);
 }

@@ -1136,9 +1136,20 @@ void layers_update_fill_layers() {
 						make_material_parse_paint_material(false);
 					}
 					layers_set_object_mask();
-					slot_layer_clear(l, 0x00000000, NULL, 1.0, layers_default_rough, 0.0);
-					render_path_paint_commands_paint(false);
-					render_path_paint_dilate(true, true);
+					if (l->texpaint_sculpt != NULL) {
+						i32 tid = l->id;
+						i32 hid = history_undo_i - 1 < 0 ? g_config->undo_steps - 1 : history_undo_i - 1;
+						sculpt_import_mesh_pack_to_texture(g_context->paint_object->data, l);
+						render_path_set_target(string("texpaint_sculpt_undo%d", hid), NULL, NULL, GPU_CLEAR_NONE, 0, 0.0);
+						render_path_bind_target(string("texpaint_sculpt%d", tid), "tex");
+						render_path_draw_shader("Scene/copy_pass/copyRGBA128_pass");
+						render_path_sculpt_commands();
+					}
+					else {
+						slot_layer_clear(l, 0x00000000, NULL, 1.0, layers_default_rough, 0.0);
+						render_path_paint_commands_paint(false);
+						render_path_paint_dilate(true, true);
+					}
 				}
 			}
 		}
@@ -1185,13 +1196,26 @@ void layers_update_fill_layer(bool parse_paint) {
 	g_context->fill_type_handle->i = FILL_TYPE_OBJECT;
 	g_context->pdirty              = 1;
 
-	slot_layer_clear(g_context->layer, 0x00000000, NULL, 1.0, layers_default_rough, 0.0);
-
-	if (parse_paint) {
-		make_material_parse_paint_material(false);
+	if (g_context->layer->texpaint_sculpt != NULL) {
+		i32 tid = g_context->layer->id;
+		i32 hid = history_undo_i - 1 < 0 ? g_config->undo_steps - 1 : history_undo_i - 1;
+		sculpt_import_mesh_pack_to_texture(g_context->paint_object->data, g_context->layer);
+		render_path_set_target(string("texpaint_sculpt_undo%d", hid), NULL, NULL, GPU_CLEAR_NONE, 0, 0.0);
+		render_path_bind_target(string("texpaint_sculpt%d", tid), "tex");
+		render_path_draw_shader("Scene/copy_pass/copyRGBA128_pass");
+		if (parse_paint) {
+			make_material_parse_paint_material(false);
+		}
+		render_path_sculpt_commands();
 	}
-	render_path_paint_commands_paint(false);
-	render_path_paint_dilate(true, true);
+	else {
+		slot_layer_clear(g_context->layer, 0x00000000, NULL, 1.0, layers_default_rough, 0.0);
+		if (parse_paint) {
+			make_material_parse_paint_material(false);
+		}
+		render_path_paint_commands_paint(false);
+		render_path_paint_dilate(true, true);
+	}
 
 	g_context->rdirty              = 2;
 	g_context->tool                = _tool;
@@ -1350,6 +1374,11 @@ void layers_create_fill_layer_on_next_frame(void *_) {
 		l->decal_mat = _layers_decal_mat;
 	}
 	l->object_mask = g_context->layer_filter;
+	if (g_config->workflow == WORKFLOW_SCULPT) {
+		mesh_data_t *md = g_context->paint_object->data;
+		sculpt_init();
+		sculpt_init_sculpt_texture(l, md);
+	}
 	history_to_fill_layer();
 	slot_layer_to_fill_layer(l);
 }
