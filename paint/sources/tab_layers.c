@@ -593,6 +593,12 @@ void tab_layers_draw_layer_context_menu_apply(void *_) {
 	g_context->layers_preview_dirty = true;
 }
 
+void tab_layers_draw_layer_context_menu_apply_sculpt(void *_) {
+	slot_layer_t *l  = tab_layers_l;
+	g_context->layer = l;
+	slot_layer_apply_sculpt(l);
+}
+
 void tab_layers_draw_layer_context_menu_invert(void *_) {
 	slot_layer_t *l = tab_layers_l;
 	context_set_layer(l);
@@ -663,6 +669,10 @@ void tab_layers_draw_layer_context_menu_draw() {
 		if (l->fill_layer != NULL && ui_menu_button(to_paint_string, "", ICON_PAINT)) {
 			sys_notify_on_next_frame(&tab_layers_draw_layer_context_menu_to_paint_layer, NULL);
 		}
+	}
+
+	if (slot_layer_is_layer(l) && l->fill_layer != NULL && l->texpaint_sculpt != NULL && ui_menu_button(tr("Apply"), "", ICON_CHECK)) {
+		sys_notify_on_next_frame(&tab_layers_draw_layer_context_menu_apply_sculpt, NULL);
 	}
 
 	ui->enabled = tab_layers_can_delete(l);
