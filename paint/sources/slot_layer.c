@@ -1374,11 +1374,13 @@ void layers_create_fill_layer_on_next_frame(void *_) {
 		l->decal_mat = _layers_decal_mat;
 	}
 	l->object_mask = g_context->layer_filter;
+
 	if (g_config->workflow == WORKFLOW_SCULPT) {
 		mesh_data_t *md = g_context->paint_object->data;
 		sculpt_init();
 		sculpt_init_sculpt_texture(l, md);
 	}
+
 	history_to_fill_layer();
 	slot_layer_to_fill_layer(l);
 }
