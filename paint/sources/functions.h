@@ -561,6 +561,7 @@ void                         ui_box_show_message(char *title, char *text, bool c
 void                         ui_box_show_custom(void (*commands)(void), i32 mw, i32 mh, void (*on_hide)(void), bool draggable, char *title);
 void                         ui_box_hide();
 void                         tab_meshes_draw(ui_handle_t *htab);
+void                         tab_meshes_reset_preview_map();
 void                         tab_scene_select_object(mesh_object_t *mo);
 void                         tab_scene_sort();
 void                         tab_scene_import_mesh_done();

@@ -341,6 +341,7 @@ void project_new(bool reset_layers) {
 	if (in_use)
 		draw_begin(current, false, 0);
 
+	tab_meshes_reset_preview_map();
 	base_update_workflow();
 	project_set_default_envmap();
 	context_select_tool(TOOL_TYPE_BRUSH);

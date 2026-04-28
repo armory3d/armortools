@@ -102,6 +102,7 @@ void import_mesh_finish_import() {
 	ui_view2d_hwnd->redraws    = 2;
 	render_path_raytrace_ready = false;
 	g_context->paint_body      = NULL;
+	tab_meshes_reset_preview_map();
 }
 
 void _import_mesh_make_mesh_finish_import(void *_) {
