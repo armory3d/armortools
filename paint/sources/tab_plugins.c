@@ -43,18 +43,98 @@ void tab_plugins_draw(ui_handle_t *htab) {
 #ifdef WITH_PLUGINS
 void proc_uv_unwrap(void *mesh);
 void plugin_uv_unwrap_button() {
-	for (i32 i = 0; i < project_paint_objects->length; ++i) {
-		mesh_data_t *md = project_paint_objects->buffer[i]->data;
-		raw_mesh_t  *mesh =
-		    GC_ALLOC_INIT(raw_mesh_t,
-		                  {.posa = md->vertex_arrays->buffer[0]->values, .nora = md->vertex_arrays->buffer[1]->values, .texa = NULL, .inda = md->index_array});
-		proc_uv_unwrap(mesh);
-		md->vertex_arrays->buffer[0]->values = mesh->posa;
-		md->vertex_arrays->buffer[1]->values = mesh->nora;
-		md->vertex_arrays->buffer[2]->values = mesh->texa;
-		md->index_array                      = mesh->inda;
-		mesh_data_build(md);
+	util_mesh_merge(project_paint_objects);
+	if (g_context->merged_object == NULL) {
+		return;
 	}
+
+	mesh_data_t *mmd         = g_context->merged_object->data;
+	i16_array_t *merged_posa = mmd->vertex_arrays->buffer[0]->values;
+	i16_array_t *merged_nora = mmd->vertex_arrays->buffer[1]->values;
+	u32_array_t *merged_inda = mmd->index_array;
+
+	i16_array_t *posa = malloc(sizeof(i16_array_t));
+	posa->length = posa->capacity = merged_posa->length;
+	posa->buffer                  = malloc(merged_posa->length * sizeof(i16));
+	memcpy(posa->buffer, merged_posa->buffer, merged_posa->length * sizeof(i16));
+
+	i16_array_t *nora = malloc(sizeof(i16_array_t));
+	nora->length = nora->capacity = merged_nora->length;
+	nora->buffer                  = malloc(merged_nora->length * sizeof(i16));
+	memcpy(nora->buffer, merged_nora->buffer, merged_nora->length * sizeof(i16));
+
+	u32_array_t *inda = malloc(sizeof(u32_array_t));
+	inda->length = inda->capacity = merged_inda->length;
+	inda->buffer                  = malloc(merged_inda->length * sizeof(u32));
+	memcpy(inda->buffer, merged_inda->buffer, merged_inda->length * sizeof(u32));
+
+	raw_mesh_t *mesh = GC_ALLOC_INIT(raw_mesh_t, {.posa = posa, .nora = nora, .texa = NULL, .inda = inda});
+	proc_uv_unwrap(mesh);
+
+	i32 ioff      = 0;
+	f32 max_scale = mmd->scale_pos;
+	for (i32 i = 0; i < project_paint_objects->length; ++i) {
+		mesh_data_t *md      = project_paint_objects->buffer[i]->data;
+		i32          ilen    = md->index_array->length;
+		f32          rescale = max_scale / md->scale_pos;
+
+		i16_array_t *new_posa = i16_array_create(ilen * 4);
+		i16_array_t *new_nora = i16_array_create(ilen * 2);
+		i16_array_t *new_texa = i16_array_create(ilen * 2);
+		u32_array_t *new_inda = u32_array_create(ilen);
+
+		for (i32 j = 0; j < ilen; ++j) {
+			i32 src                     = (ioff + j) * 4;
+			new_posa->buffer[j * 4]     = (i16)math_floor(mesh->posa->buffer[src] * rescale);
+			new_posa->buffer[j * 4 + 1] = (i16)math_floor(mesh->posa->buffer[src + 1] * rescale);
+			new_posa->buffer[j * 4 + 2] = (i16)math_floor(mesh->posa->buffer[src + 2] * rescale);
+			new_posa->buffer[j * 4 + 3] = mesh->posa->buffer[src + 3];
+		}
+		for (i32 j = 0; j < ilen * 2; ++j) {
+			new_nora->buffer[j] = mesh->nora->buffer[ioff * 2 + j];
+		}
+		for (i32 j = 0; j < ilen * 2; ++j) {
+			new_texa->buffer[j] = mesh->texa->buffer[ioff * 2 + j];
+		}
+		for (i32 j = 0; j < ilen; ++j) {
+			new_inda->buffer[j] = (u32)j;
+		}
+
+		md->vertex_arrays->buffer[0]->values = new_posa;
+		md->vertex_arrays->buffer[1]->values = new_nora;
+		md->vertex_arrays->buffer[2]->values = new_texa;
+		md->index_array                      = new_inda;
+
+		mesh_data_build(md);
+		ioff += ilen;
+	}
+
+	free(mesh->posa->buffer);
+	free(mesh->posa);
+	free(mesh->nora->buffer);
+	free(mesh->nora);
+	free(mesh->texa->buffer);
+	free(mesh->texa);
+	free(mesh->inda->buffer);
+	free(mesh->inda);
+
 	util_mesh_merge(NULL);
 }
+
+// void plugin_uv_unwrap_per_object_button() {
+// 	for (i32 i = 0; i < project_paint_objects->length; ++i) {
+// 		mesh_data_t *md = project_paint_objects->buffer[i]->data;
+// 		raw_mesh_t  *mesh =
+// 		    GC_ALLOC_INIT(raw_mesh_t,
+// 		                  {.posa = md->vertex_arrays->buffer[0]->values, .nora = md->vertex_arrays->buffer[1]->values, .texa = NULL, .inda = md->index_array});
+// 		proc_uv_unwrap(mesh);
+// 		md->vertex_arrays->buffer[0]->values = mesh->posa;
+// 		md->vertex_arrays->buffer[1]->values = mesh->nora;
+// 		md->vertex_arrays->buffer[2]->values = mesh->texa;
+// 		md->index_array                      = mesh->inda;
+// 		mesh_data_build(md);
+// 	}
+// 	util_mesh_merge(NULL);
+// }
+
 #endif
