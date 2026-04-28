@@ -17,10 +17,8 @@ static mat3_t          draw_transform;
 static uint32_t        draw_color           = 0;
 static gpu_pipeline_t *draw_custom_pipeline = NULL;
 
-static gpu_buffer_t           rect_vertex_buffer;
-static gpu_buffer_t           rect_index_buffer;
-static gpu_buffer_t           tris_vertex_buffer;
-static gpu_buffer_t           tris_index_buffer;
+static gpu_buffer_t           draw_vertex_buffer;
+static gpu_buffer_t           draw_index_buffer;
 static gpu_vertex_structure_t draw_structure;
 
 static gpu_pipeline_t image_pipeline;
@@ -99,8 +97,8 @@ void draw_init(buffer_t *image_vert, buffer_t *image_frag, buffer_t *image_trans
 	gpu_vertex_structure_add(&draw_structure, "pos", GPU_VERTEX_DATA_F32_2X);
 
 	{
-		gpu_vertex_buffer_init(&rect_vertex_buffer, 4, &draw_structure);
-		float *verts = gpu_vertex_buffer_lock(&rect_vertex_buffer);
+		gpu_vertex_buffer_init(&draw_vertex_buffer, 4, &draw_structure);
+		float *verts = gpu_vertex_buffer_lock(&draw_vertex_buffer);
 		verts[0]     = 0.0; // Bottom-left
 		verts[1]     = 1.0;
 		verts[2]     = 0.0; // Top-left
@@ -109,36 +107,17 @@ void draw_init(buffer_t *image_vert, buffer_t *image_frag, buffer_t *image_trans
 		verts[5]     = 0.0;
 		verts[6]     = 1.0; // Bottom-right
 		verts[7]     = 1.0;
-		gpu_vertex_buffer_unlock(&rect_vertex_buffer);
+		gpu_vertex_buffer_unlock(&draw_vertex_buffer);
 
-		gpu_index_buffer_init(&rect_index_buffer, 3 * 2);
-		int *indices = gpu_index_buffer_lock(&rect_index_buffer);
+		gpu_index_buffer_init(&draw_index_buffer, 3 * 2);
+		int *indices = gpu_index_buffer_lock(&draw_index_buffer);
 		indices[0]   = 0;
 		indices[1]   = 1;
 		indices[2]   = 2;
 		indices[3]   = 0;
 		indices[4]   = 2;
 		indices[5]   = 3;
-		gpu_index_buffer_unlock(&rect_index_buffer);
-	}
-
-	{
-		gpu_vertex_buffer_init(&tris_vertex_buffer, 3, &draw_structure);
-		float *verts = gpu_vertex_buffer_lock(&tris_vertex_buffer);
-		verts[0]     = 0.0; // Bottom-left
-		verts[1]     = 1.0;
-		verts[2]     = 0.0; // Top-left
-		verts[3]     = 0.0;
-		verts[4]     = 1.0; // Top-right
-		verts[5]     = 0.0;
-		gpu_vertex_buffer_unlock(&tris_vertex_buffer);
-
-		gpu_index_buffer_init(&tris_index_buffer, 3);
-		int *indices = gpu_index_buffer_lock(&tris_index_buffer);
-		indices[0]   = 0;
-		indices[1]   = 1;
-		indices[2]   = 2;
-		gpu_index_buffer_unlock(&tris_index_buffer);
+		gpu_index_buffer_unlock(&draw_index_buffer);
 	}
 
 	gpu_shader_t vert_shader;
@@ -234,8 +213,9 @@ void draw_scaled_sub_image(gpu_texture_t *tex, float sx, float sy, float sw, flo
 		gpu_set_pipeline(draw_custom_pipeline != NULL ? draw_custom_pipeline : &image_transform_pipeline);
 		gpu_set_mat3(image_transform_w_loc, draw_transform);
 	}
-	gpu_set_vertex_buffer(&rect_vertex_buffer);
-	gpu_set_index_buffer(&rect_index_buffer);
+	gpu_set_vertex_buffer(&draw_vertex_buffer);
+	gpu_set_index_buffer(&draw_index_buffer);
+	draw_index_buffer.count = 6;
 	gpu_set_float4(image_pos_loc, (int)dx / vw(), (int)dy / vh(), (int)dw / vw(), (int)dh / vh());
 	gpu_set_float4(image_tex_loc, sx / tex->width, sy / tex->height, sw / tex->width, sh / tex->height);
 	gpu_set_float4(image_col_loc, _draw_color_r(draw_color) / 255.0, _draw_color_g(draw_color) / 255.0, _draw_color_b(draw_color) / 255.0,
@@ -258,8 +238,9 @@ void draw_image(gpu_texture_t *tex, float x, float y) {
 
 void draw_filled_triangle(float x0, float y0, float x1, float y1, float x2, float y2) {
 	gpu_set_pipeline(draw_custom_pipeline != NULL ? draw_custom_pipeline : &tris_pipeline);
-	gpu_set_vertex_buffer(&tris_vertex_buffer);
-	gpu_set_index_buffer(&tris_index_buffer);
+	gpu_set_vertex_buffer(&draw_vertex_buffer);
+	gpu_set_index_buffer(&draw_index_buffer);
+	draw_index_buffer.count = 3;
 	gpu_set_float2(tris_pos0_loc, x0 / vw(), y0 / vh());
 	gpu_set_float2(tris_pos1_loc, x1 / vw(), y1 / vh());
 	gpu_set_float2(tris_pos2_loc, x2 / vw(), y2 / vh());
@@ -270,8 +251,9 @@ void draw_filled_triangle(float x0, float y0, float x1, float y1, float x2, floa
 
 void draw_filled_rect(float x, float y, float width, float height) {
 	gpu_set_pipeline(draw_custom_pipeline != NULL ? draw_custom_pipeline : &rect_pipeline);
-	gpu_set_vertex_buffer(&rect_vertex_buffer);
-	gpu_set_index_buffer(&rect_index_buffer);
+	gpu_set_vertex_buffer(&draw_vertex_buffer);
+	gpu_set_index_buffer(&draw_index_buffer);
+	draw_index_buffer.count = 6;
 	gpu_set_float4(rect_pos_loc, (int)x / vw(), (int)y / vh(), (int)width / vw(), (int)height / vh());
 	gpu_set_float4(rect_col_loc, _draw_color_r(draw_color) / 255.0, _draw_color_g(draw_color) / 255.0, _draw_color_b(draw_color) / 255.0,
 	               _draw_color_a(draw_color) / 255.0);
@@ -520,8 +502,9 @@ void draw_string(const char *text, float x, float y) {
 	draw_font_aligned_quad_t q;
 
 	gpu_set_pipeline(draw_custom_pipeline != NULL ? draw_custom_pipeline : _draw_current != NULL ? &text_rt_pipeline : &text_pipeline);
-	gpu_set_vertex_buffer(&rect_vertex_buffer);
-	gpu_set_index_buffer(&rect_index_buffer);
+	gpu_set_vertex_buffer(&draw_vertex_buffer);
+	gpu_set_index_buffer(&draw_index_buffer);
+	draw_index_buffer.count = 6;
 	gpu_set_texture(text_tex_unit, img->tex);
 
 	for (int i = 0; text[i] != 0;) {
