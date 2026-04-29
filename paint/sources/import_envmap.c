@@ -99,7 +99,7 @@ void import_envmap_run(char *path, gpu_texture_t *image) {
 		import_envmap_pipeline->blend_source      = GPU_BLEND_SOURCE_ALPHA;
 		import_envmap_pipeline->blend_destination = GPU_BLEND_ONE;
 		gpu_vertex_structure_t *vs                = GC_ALLOC_INIT(gpu_vertex_structure_t, {0});
-		gpu_vertex_struct_add(vs, "pos", GPU_VERTEX_DATA_F32_2X);
+		gpu_vertex_structure_add(vs, "pos", GPU_VERTEX_DATA_F32_2X);
 		import_envmap_pipeline->input_layout           = vs;
 		import_envmap_pipeline->color_attachment_count = 1;
 		import_envmap_pipeline->color_attachment[0]    = GPU_TEXTURE_FORMAT_RGBA64;

@@ -116,9 +116,9 @@ void util_uv_cache_dilate_map() {
 		util_uv_pipe_dilate->vertex_shader   = sys_get_shader("dilate_map.vert");
 		util_uv_pipe_dilate->fragment_shader = sys_get_shader("dilate_map.frag");
 		gpu_vertex_structure_t *vs           = GC_ALLOC_INIT(gpu_vertex_structure_t, {0});
-		gpu_vertex_struct_add(vs, "pos", GPU_VERTEX_DATA_I16_4X_NORM);
-		gpu_vertex_struct_add(vs, "nor", GPU_VERTEX_DATA_I16_2X_NORM);
-		gpu_vertex_struct_add(vs, "tex", GPU_VERTEX_DATA_I16_2X_NORM);
+		gpu_vertex_structure_add(vs, "pos", GPU_VERTEX_DATA_I16_4X_NORM);
+		gpu_vertex_structure_add(vs, "nor", GPU_VERTEX_DATA_I16_2X_NORM);
+		gpu_vertex_structure_add(vs, "tex", GPU_VERTEX_DATA_I16_2X_NORM);
 		util_uv_pipe_dilate->input_layout        = vs;
 		util_uv_pipe_dilate->depth_write         = false;
 		util_uv_pipe_dilate->depth_mode          = GPU_COMPARE_MODE_ALWAYS;

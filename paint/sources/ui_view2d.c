@@ -21,16 +21,16 @@ void ui_view2d_init() {
 	ui_view2d_pipe->vertex_shader   = sys_get_shader("layer_view.vert");
 	ui_view2d_pipe->fragment_shader = sys_get_shader("layer_view.frag");
 	gpu_vertex_structure_t *vs      = GC_ALLOC_INIT(gpu_vertex_structure_t, {0});
-	gpu_vertex_struct_add(vs, "pos", GPU_VERTEX_DATA_F32_2X);
+	gpu_vertex_structure_add(vs, "pos", GPU_VERTEX_DATA_F32_2X);
+	gpu_vertex_structure_add(vs, "tex", GPU_VERTEX_DATA_F32_2X);
+	gpu_vertex_structure_add(vs, "col", GPU_VERTEX_DATA_F32_4X);
 	ui_view2d_pipe->input_layout              = vs;
 	ui_view2d_pipe->blend_source              = GPU_BLEND_ONE;
 	ui_view2d_pipe->blend_destination         = GPU_BLEND_ZERO;
 	ui_view2d_pipe->color_write_mask_alpha[0] = false;
 	gpu_pipeline_compile(ui_view2d_pipe);
 	pipes_offset = 0;
-	pipes_get_constant_location("float4");
-	pipes_get_constant_location("float4");
-	pipes_get_constant_location("float4");
+	pipes_get_constant_location("float4"); // empty
 	ui_view2d_channel_loc = pipes_get_constant_location("int");
 }
 

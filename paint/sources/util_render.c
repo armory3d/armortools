@@ -474,26 +474,26 @@ void util_render_create_screen_aligned_full_data() {
 
 	// Mandatory vertex data names and sizes
 	gpu_vertex_structure_t *structure = GC_ALLOC_INIT(gpu_vertex_structure_t, {0});
-	gpu_vertex_struct_add(structure, "pos", GPU_VERTEX_DATA_I16_4X_NORM);
-	gpu_vertex_struct_add(structure, "nor", GPU_VERTEX_DATA_I16_2X_NORM);
-	gpu_vertex_struct_add(structure, "tex", GPU_VERTEX_DATA_I16_2X_NORM);
-	gpu_vertex_struct_add(structure, "col", GPU_VERTEX_DATA_I16_4X_NORM);
+	gpu_vertex_structure_add(structure, "pos", GPU_VERTEX_DATA_I16_4X_NORM);
+	gpu_vertex_structure_add(structure, "nor", GPU_VERTEX_DATA_I16_2X_NORM);
+	gpu_vertex_structure_add(structure, "tex", GPU_VERTEX_DATA_I16_2X_NORM);
+	gpu_vertex_structure_add(structure, "col", GPU_VERTEX_DATA_I16_4X_NORM);
 	gc_unroot(util_render_screen_aligned_full_vb);
 	util_render_screen_aligned_full_vb =
 	    gpu_create_vertex_buffer(math_floor(data->length / (float)math_floor(gpu_vertex_struct_size(structure) / 2.0)), structure);
 	gc_root(util_render_screen_aligned_full_vb);
-	buffer_t *vertices = gpu_lock_vertex_buffer(util_render_screen_aligned_full_vb);
-	for (i32 i = 0; i < math_floor((vertices->length) / 2.0); ++i) {
-		buffer_set_i16(vertices, i * 2, data->buffer[i]);
+	int16_t *vertices = gpu_vertex_buffer_lock(util_render_screen_aligned_full_vb);
+	for (i32 i = 0; i < data->length; ++i) {
+		vertices[i] = data->buffer[i];
 	}
 	gpu_vertex_buffer_unlock(util_render_screen_aligned_full_vb);
 
 	gc_unroot(util_render_screen_aligned_full_ib);
 	util_render_screen_aligned_full_ib = gpu_create_index_buffer(indices->length);
 	gc_root(util_render_screen_aligned_full_ib);
-	u32_array_t *id = gpu_lock_index_buffer(util_render_screen_aligned_full_ib);
-	for (i32 i = 0; i < id->length; ++i) {
-		id->buffer[i] = indices->buffer[i];
+	uint32_t *id = gpu_index_buffer_lock(util_render_screen_aligned_full_ib);
+	for (i32 i = 0; i < indices->length; ++i) {
+		id[i] = indices->buffer[i];
 	}
 	gpu_index_buffer_unlock(util_render_screen_aligned_full_ib);
 }
