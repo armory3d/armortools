@@ -26,8 +26,6 @@ u8 color_get_bb(i32 c);
 
 gpu_buffer_t   *gpu_create_vertex_buffer(i32 count, gpu_vertex_structure_t *structure);
 gpu_buffer_t   *gpu_create_index_buffer(i32 count);
-buffer_t       *gpu_lock_vertex_buffer(gpu_buffer_t *buffer);
-u32_array_t    *gpu_lock_index_buffer(gpu_buffer_t *buffer);
 void            gpu_vertex_buffer_unlock(gpu_buffer_t *buffer);
 void            gpu_index_buffer_unlock(gpu_buffer_t *buffer);
 void            gpu_pipeline_compile(gpu_pipeline_t *pipeline);
@@ -52,8 +50,8 @@ gpu_pipeline_t *line_draw_overlay_pipeline = NULL;
 mat4_t          line_draw_vp;
 i32             line_draw_vp_loc       = 0;
 i32             line_draw_color_loc    = 0;
-buffer_t       *line_draw_vb_data      = NULL;
-u32_array_t    *line_draw_ib_data      = NULL;
+float          *line_draw_vb_data      = NULL;
+uint32_t       *line_draw_ib_data      = NULL;
 i32             line_draw_max_lines    = 300;
 i32             line_draw_max_vertices = 300 * 4;
 i32             line_draw_max_indices  = 300 * 6;
@@ -209,32 +207,32 @@ void line_draw_line(f32 x1, f32 y1, f32 z1, f32 x2, f32 y2, f32 z2) {
 
 	i32 i = line_draw_lines * 12; // 4 * 3 (structure len)
 
-	buffer_set_f32(line_draw_vb_data, (i + 0) * 4, line_draw_corner1.x);
-	buffer_set_f32(line_draw_vb_data, (i + 1) * 4, line_draw_corner1.y);
-	buffer_set_f32(line_draw_vb_data, (i + 2) * 4, line_draw_corner1.z);
+	line_draw_vb_data[i + 0] = line_draw_corner1.x;
+	line_draw_vb_data[i + 1] = line_draw_corner1.y;
+	line_draw_vb_data[i + 2] = line_draw_corner1.z;
 
 	i += 3;
-	buffer_set_f32(line_draw_vb_data, (i + 0) * 4, line_draw_corner2.x);
-	buffer_set_f32(line_draw_vb_data, (i + 1) * 4, line_draw_corner2.y);
-	buffer_set_f32(line_draw_vb_data, (i + 2) * 4, line_draw_corner2.z);
+	line_draw_vb_data[i + 0] = line_draw_corner2.x;
+	line_draw_vb_data[i + 1] = line_draw_corner2.y;
+	line_draw_vb_data[i + 2] = line_draw_corner2.z;
 
 	i += 3;
-	buffer_set_f32(line_draw_vb_data, (i + 0) * 4, line_draw_corner3.x);
-	buffer_set_f32(line_draw_vb_data, (i + 1) * 4, line_draw_corner3.y);
-	buffer_set_f32(line_draw_vb_data, (i + 2) * 4, line_draw_corner3.z);
+	line_draw_vb_data[i + 0] = line_draw_corner3.x;
+	line_draw_vb_data[i + 1] = line_draw_corner3.y;
+	line_draw_vb_data[i + 2] = line_draw_corner3.z;
 
 	i += 3;
-	buffer_set_f32(line_draw_vb_data, (i + 0) * 4, line_draw_corner4.x);
-	buffer_set_f32(line_draw_vb_data, (i + 1) * 4, line_draw_corner4.y);
-	buffer_set_f32(line_draw_vb_data, (i + 2) * 4, line_draw_corner4.z);
+	line_draw_vb_data[i + 0] = line_draw_corner4.x;
+	line_draw_vb_data[i + 1] = line_draw_corner4.y;
+	line_draw_vb_data[i + 2] = line_draw_corner4.z;
 
-	i                                = line_draw_lines * 6;
-	line_draw_ib_data->buffer[i]     = line_draw_lines * 4;
-	line_draw_ib_data->buffer[i + 1] = line_draw_lines * 4 + 1;
-	line_draw_ib_data->buffer[i + 2] = line_draw_lines * 4 + 2;
-	line_draw_ib_data->buffer[i + 3] = line_draw_lines * 4 + 2;
-	line_draw_ib_data->buffer[i + 4] = line_draw_lines * 4 + 3;
-	line_draw_ib_data->buffer[i + 5] = line_draw_lines * 4;
+	i                    = line_draw_lines * 6;
+	line_draw_ib_data[i]     = line_draw_lines * 4;
+	line_draw_ib_data[i + 1] = line_draw_lines * 4 + 1;
+	line_draw_ib_data[i + 2] = line_draw_lines * 4 + 2;
+	line_draw_ib_data[i + 3] = line_draw_lines * 4 + 2;
+	line_draw_ib_data[i + 4] = line_draw_lines * 4 + 3;
+	line_draw_ib_data[i + 5] = line_draw_lines * 4;
 
 	line_draw_lines++;
 }
@@ -242,10 +240,10 @@ void line_draw_line(f32 x1, f32 y1, f32 z1, f32 x2, f32 y2, f32 z2) {
 void line_draw_begin(void) {
 	line_draw_init();
 	line_draw_lines   = 0;
-	line_draw_vb_data = gpu_lock_vertex_buffer(line_draw_vertex_buffer);
-	line_draw_ib_data = gpu_lock_index_buffer(line_draw_index_buffer);
+	line_draw_vb_data = gpu_vertex_buffer_lock(line_draw_vertex_buffer);
+	line_draw_ib_data = gpu_index_buffer_lock(line_draw_index_buffer);
 	for (i32 i = 0; i < line_draw_max_indices; ++i) {
-		line_draw_ib_data->buffer[i] = 0;
+		line_draw_ib_data[i] = 0;
 	}
 }
 
@@ -274,11 +272,11 @@ void shape_draw_sphere(mat4_t mat) {
 		gpu_vertex_structure_t structure = {0};
 		gpu_vertex_structure_add(&structure, "pos", GPU_VERTEX_DATA_F32_3X);
 		_shape_draw_sphere_vb = gpu_create_vertex_buffer(posa->length, &structure);
-		buffer_t *data        = gpu_lock_vertex_buffer(_shape_draw_sphere_vb);
+		float *data = gpu_vertex_buffer_lock(_shape_draw_sphere_vb);
 		for (i32 i = 0; i < (i32)posa->length / 4; ++i) {
-			buffer_set_f32(data, (i * 3 + 0) * 4, posa->buffer[i * 4 + 0] / 32767.0);
-			buffer_set_f32(data, (i * 3 + 1) * 4, posa->buffer[i * 4 + 1] / 32767.0);
-			buffer_set_f32(data, (i * 3 + 2) * 4, posa->buffer[i * 4 + 2] / 32767.0);
+			data[i * 3 + 0] = posa->buffer[i * 4 + 0] / 32767.0;
+			data[i * 3 + 1] = posa->buffer[i * 4 + 1] / 32767.0;
+			data[i * 3 + 2] = posa->buffer[i * 4 + 2] / 32767.0;
 		}
 		gpu_vertex_buffer_unlock(_shape_draw_sphere_vb);
 		_shape_draw_sphere_ib = md->_->index_buffer;

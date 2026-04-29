@@ -720,25 +720,12 @@ void *gpu_create_index_buffer(i32 count) {
 	return buffer;
 }
 
-u32_array_t *gpu_lock_index_buffer(gpu_buffer_t *buffer) {
-	u32_array_t *ar = (u32_array_t *)malloc(sizeof(u32_array_t));
-	ar->buffer      = gpu_index_buffer_lock(buffer);
-	ar->length      = buffer->count;
-	return ar;
-}
-
 void *gpu_create_vertex_buffer(i32 count, gpu_vertex_structure_t *structure) {
 	gpu_buffer_t *buffer = (gpu_buffer_t *)malloc(sizeof(gpu_buffer_t));
 	gpu_vertex_buffer_init(buffer, count, structure);
 	return buffer;
 }
 
-buffer_t *gpu_lock_vertex_buffer(gpu_buffer_t *buffer) {
-	buffer_t *b = (buffer_t *)malloc(sizeof(buffer_t));
-	b->buffer   = gpu_vertex_buffer_lock(buffer);
-	b->length   = buffer->count * buffer->stride;
-	return b;
-}
 
 gpu_shader_t *gpu_create_shader(buffer_t *data, i32 shader_type) {
 	gpu_shader_t *shader = (gpu_shader_t *)malloc(sizeof(gpu_shader_t));

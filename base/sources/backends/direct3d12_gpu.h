@@ -54,11 +54,11 @@ typedef struct {
 	int                    srv_index;
 	int                    rtv_index;
 	bool                   is_dsv;
-	bool                   has_storage_bit;
 } gpu_texture_impl_t;
 
 typedef struct {
 	struct ID3D12Resource       *buffer;
+	struct ID3D12Resource       *cpu_buffer;
 	struct D3D12VertexBufferView vertex_buffer_view;
 	struct D3D12IndexBufferView  index_buffer_view;
 	int                          last_start;

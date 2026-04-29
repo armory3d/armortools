@@ -1776,7 +1776,7 @@ void minic_register_builtins() {
 	minic_register_native("shape_draw_sphere", mn_shape_draw_sphere);
 
 	// iron_draw
-	R(draw_init, "v(p,p,p,p,p,p,p,p,p,p)");
+	R(draw_init, "v(p,p,p,p,p,p,p,p)");
 	R(draw_begin, "v(p,i,i)");
 	R(draw_scaled_sub_image, "v(p,f,f,f,f,f,f,f,f)");
 	R(draw_scaled_image, "v(p,f,f,f,f)");
@@ -1789,6 +1789,7 @@ void minic_register_builtins() {
 	R(draw_line_aa, "v(f,f,f,f,f)");
 	R(draw_string, "v(p,f,f)");
 	R(draw_end, "v()");
+	R(draw_flush, "v()");
 	R(draw_set_color, "v(i)");
 	R(draw_get_color, "i()");
 	R(draw_set_pipeline, "v(p)");

@@ -1,14 +1,13 @@
 
 #[set(everything)]
 const constants: {
-	pos0: float2;
-	pos1: float2;
-	pos2: float2;
-	col: float4;
+	empty: float4;
 };
 
 struct vert_in {
 	pos: float2;
+	tex: float2;
+	col: float4;
 }
 
 struct vert_out {
@@ -18,18 +17,8 @@ struct vert_out {
 
 fun draw_tris_vert(input: vert_in): vert_out {
 	var output: vert_out;
-	if (vertex_id() == 0) {
-		output.pos = float4(constants.pos0, 0.0, 1.0);
-	}
-	else if (vertex_id() == 1) {
-		output.pos = float4(constants.pos1, 0.0, 1.0);
-	}
-	else if (vertex_id() == 2) {
-		output.pos = float4(constants.pos2, 0.0, 1.0);
-	}
-	output.pos.xy = output.pos.xy * 2.0 - 1.0;
-	output.pos.y = -output.pos.y;
-	output.col = constants.col;
+	output.pos = float4(input.pos, 0.0, 1.0);
+	output.col = input.col;
 	return output;
 }
 

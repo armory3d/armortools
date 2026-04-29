@@ -25,9 +25,10 @@ typedef struct draw_font {
 	int       index;
 } draw_font_t;
 
-void     draw_init(buffer_t *image_vert, buffer_t *image_frag, buffer_t *image_transform_vert, buffer_t *image_transform_frag, buffer_t *rect_vert,
-                   buffer_t *rect_frag, buffer_t *tris_vert, buffer_t *tris_frag, buffer_t *text_vert, buffer_t *text_frag);
+void     draw_init(buffer_t *image_vert, buffer_t *image_frag, buffer_t *rect_vert, buffer_t *rect_frag, buffer_t *tris_vert, buffer_t *tris_frag,
+                   buffer_t *text_vert, buffer_t *text_frag);
 void     draw_begin(gpu_texture_t *target, bool clear, unsigned color);
+void     draw_flush(void);
 void     draw_scaled_sub_image(gpu_texture_t *img, float sx, float sy, float sw, float sh, float dx, float dy, float dw, float dh);
 void     draw_scaled_image(gpu_texture_t *tex, float dx, float dy, float dw, float dh);
 void     draw_sub_image(gpu_texture_t *tex, float sx, float sy, float sw, float sh, float x, float y);
@@ -39,6 +40,8 @@ void     draw_line(float x0, float y0, float x1, float y1, float strength);
 void     draw_line_aa(float x0, float y0, float x1, float y1, float strength);
 void     draw_string(const char *text, float x, float y);
 void     draw_end(void);
+void     draw_scissor(int x, int y, int width, int height);
+void     draw_viewport(int x, int y, int width, int height);
 void     draw_set_color(uint32_t color);
 uint32_t draw_get_color();
 void     draw_set_pipeline(gpu_pipeline_t *pipeline);
@@ -54,10 +57,9 @@ int      draw_font_count(draw_font_t *font);
 int      draw_font_height(draw_font_t *font, int font_size);
 float    draw_sub_string_width(draw_font_t *font, int font_size, const char *text, int start, int end);
 int      draw_string_width(draw_font_t *font, int font_size, const char *text);
-
-void draw_filled_circle(float cx, float cy, float radius, int segments);
-void draw_circle(float cx, float cy, float radius, int segments, float strength);
-void draw_cubic_bezier(f32_array_t *x, f32_array_t *y, int segments, float strength);
+void     draw_filled_circle(float cx, float cy, float radius, int segments);
+void     draw_circle(float cx, float cy, float radius, int segments, float strength);
+void     draw_cubic_bezier(f32_array_t *x, f32_array_t *y, int segments, float strength);
 
 extern int            draw_font_size;
 extern draw_font_t   *draw_font;

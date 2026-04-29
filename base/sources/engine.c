@@ -15,8 +15,6 @@ i32             camera_object_taa_frames     = 1;
 
 gpu_buffer_t   *gpu_create_vertex_buffer(i32 count, gpu_vertex_structure_t *structure);
 gpu_buffer_t   *gpu_create_index_buffer(i32 count);
-buffer_t       *gpu_lock_vertex_buffer(gpu_buffer_t *buffer);
-u32_array_t    *gpu_lock_index_buffer(gpu_buffer_t *buffer);
 void            gpu_delete_buffer(gpu_buffer_t *buffer);
 f32             math_floor(f32 x);
 gpu_shader_t   *gpu_create_shader(buffer_t *data, i32 shader_type);
@@ -843,7 +841,7 @@ i32 mesh_data_get_vertex_size(char *vertex_data) {
 
 void mesh_data_build_vertices(gpu_buffer_t *vertex_buffer, any_array_t *vertex_arrays) {
 	vertex_array_t *va0       = (vertex_array_t *)vertex_arrays->buffer[0];
-	buffer_t       *vertices  = gpu_lock_vertex_buffer(vertex_buffer);
+	int16_t        *vertices  = gpu_vertex_buffer_lock(vertex_buffer);
 	i32             size      = mesh_data_get_vertex_size(va0->data);
 	i32             num_verts = va0->values->length / size;
 	i32             di        = -1;
@@ -852,7 +850,7 @@ void mesh_data_build_vertices(gpu_buffer_t *vertex_buffer, any_array_t *vertex_a
 			vertex_array_t *v = (vertex_array_t *)vertex_arrays->buffer[va];
 			i32             l = mesh_data_get_vertex_size(v->data);
 			for (i32 o = 0; o < l; ++o) {
-				buffer_set_i16(vertices, ++di * 2, v->values->buffer[i * l + o]);
+				vertices[++di] = v->values->buffer[i * l + o];
 			}
 		}
 	}
@@ -860,8 +858,8 @@ void mesh_data_build_vertices(gpu_buffer_t *vertex_buffer, any_array_t *vertex_a
 }
 
 void mesh_data_build_indices(gpu_buffer_t *index_buffer, u32_array_t *index_array) {
-	u32_array_t *ia = gpu_lock_index_buffer(index_buffer);
-	memcpy(ia->buffer, index_array->buffer, ia->length * 4);
+	uint32_t *ia = gpu_index_buffer_lock(index_buffer);
+	memcpy(ia, index_array->buffer, index_buffer->count * 4);
 	gpu_index_buffer_unlock(index_buffer);
 }
 

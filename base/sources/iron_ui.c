@@ -1626,7 +1626,7 @@ void ui_begin_sticky() {
 void ui_end_sticky() {
 	current->sticky  = false;
 	current->scissor = true;
-	gpu_scissor(0, current->_y, current->_window_w, current->_window_h - current->_y);
+	draw_scissor(0, current->_y, current->_window_w, current->_window_h - current->_y);
 	current->window_header_h += current->_y - current->window_header_h;
 	current->_y += current->current_window->scroll_offset;
 	current->is_hovered = false;

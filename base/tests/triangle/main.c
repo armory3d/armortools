@@ -34,7 +34,7 @@ void _kickstart() {
 	gc_root(pipeline);
 
 	gpu_vertex_structure_t *vs = GC_ALLOC_INIT(gpu_vertex_structure_t, {0});
-	gpu_vertex_struct_add(vs, "pos", GPU_VERTEX_DATA_F32_3X);
+	gpu_vertex_structure_add(vs, "pos", GPU_VERTEX_DATA_F32_3X);
 	buffer_t     *vs_buffer         = iron_load_blob(string("./data/test.vert%s", sys_shader_ext()));
 	buffer_t     *fs_buffer         = iron_load_blob(string("./data/test.frag%s", sys_shader_ext()));
 	gpu_shader_t *vert              = gpu_create_shader(vs_buffer, GPU_SHADER_TYPE_VERTEX);
@@ -70,18 +70,18 @@ void _kickstart() {
 	vb = gpu_create_vertex_buffer(vertices->length / (float)3, vs->elements);
 	gc_root(vb);
 
-	buffer_t *vb_data = gpu_lock_vertex_buffer(vb);
+	float *vb_data = gpu_vertex_buffer_lock(vb);
 	for (i32 i = 0; i < vertices->length; i++) {
-		buffer_set_f32(vb_data, i * 4, vertices->buffer[i]);
+		vb_data[i] = vertices->buffer[i];
 	}
 	gpu_vertex_buffer_unlock(vb);
 
 	ib = gpu_create_index_buffer(indices->length);
 	gc_root(ib);
 
-	u32_array_t *ib_data = gpu_lock_index_buffer(ib);
+	uint32_t *ib_data = gpu_index_buffer_lock(ib);
 	for (i32 i = 0; i < indices->length; i++) {
-		ib_data->buffer[i] = indices->buffer[i];
+		ib_data[i] = indices->buffer[i];
 	}
 	gpu_index_buffer_unlock(ib);
 

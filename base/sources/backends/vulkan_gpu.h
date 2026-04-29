@@ -22,12 +22,13 @@ typedef struct {
 	VkImage        image;
 	VkDeviceMemory mem;
 	VkImageView    view;
-	bool           has_storage_bit;
 } gpu_texture_impl_t;
 
 typedef struct {
 	VkBuffer       buf;
 	VkDeviceMemory mem;
+	VkBuffer       cpu_buf;
+	VkDeviceMemory cpu_mem;
 } gpu_buffer_impl_t;
 
 typedef struct {

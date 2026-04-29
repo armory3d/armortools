@@ -225,13 +225,6 @@ void gpu_vertex_structure_add(gpu_vertex_structure_t *structure, const char *nam
 	structure->size++;
 }
 
-void gpu_vertex_struct_add(gpu_vertex_structure_t *raw, char *name, gpu_vertex_data_t data) {
-	gpu_vertex_element_t *e = &raw->elements[raw->size];
-	e->name                 = name;
-	e->data                 = data;
-	raw->size++;
-}
-
 void gpu_pipeline_init(gpu_pipeline_t *pipe) {
 	pipe->input_layout            = NULL;
 	pipe->vertex_shader           = NULL;

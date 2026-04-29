@@ -103,6 +103,7 @@ typedef struct gpu_texture {
 	gpu_texture_compression_t compression;
 	gpu_texture_state_t       state;
 	buffer_t                 *buffer;
+	bool                      gpu_write;
 	gpu_texture_impl_t        impl;
 } gpu_texture_t;
 
@@ -110,6 +111,7 @@ typedef struct gpu_buffer {
 	int               count;
 	int               stride;
 	uint8_t          *data; // constant buffer data
+	bool              cpu_write;
 	gpu_buffer_impl_t impl;
 } gpu_buffer_t;
 
@@ -189,7 +191,6 @@ void gpu_set_mat3(int location, mat3_t value);
 void gpu_set_mat4(int location, mat4_t value);
 
 void  gpu_vertex_structure_add(gpu_vertex_structure_t *structure, const char *name, gpu_vertex_data_t data);
-void  gpu_vertex_struct_add(gpu_vertex_structure_t *raw, char *name, gpu_vertex_data_t data);
 void  gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, int height, gpu_texture_format_t format);
 void  gpu_texture_destroy(gpu_texture_t *texture);
 void  gpu_texture_destroy_internal(gpu_texture_t *texture);
