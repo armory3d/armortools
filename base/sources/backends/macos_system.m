@@ -231,6 +231,7 @@ static bool capslock = false;
 				iron_internal_paste_callback(charData);
 			}
 		}
+		return;
 	}
 
 	if (ch == NSCarriageReturnCharacter || ch == NSNewlineCharacter || ch == NSEnterCharacter) {
