@@ -11,6 +11,7 @@
 #include <string.h>
 
 #define DRAW_BATCH_QUADS 512
+#define DRAW_VB_COUNT    64
 
 draw_font_t   *draw_font = NULL;
 int            draw_font_size;
@@ -20,8 +21,9 @@ static mat3_t          draw_transform;
 static uint32_t        draw_color           = 0;
 static gpu_pipeline_t *draw_custom_pipeline = NULL;
 
-static gpu_buffer_t           draw_vertex_buffer;
-static gpu_buffer_t           draw_index_buffer;
+int                           draw_vb_index = 0;
+static gpu_buffer_t           draw_vbs[DRAW_VB_COUNT];
+static gpu_buffer_t           draw_ib;
 static gpu_vertex_structure_t draw_structure;
 
 static gpu_pipeline_t image_pipeline;
@@ -90,11 +92,13 @@ void draw_init(buffer_t *image_vert, buffer_t *image_frag, buffer_t *rect_vert, 
 	gpu_vertex_structure_add(&draw_structure, "tex", GPU_VERTEX_DATA_F32_2X);
 	gpu_vertex_structure_add(&draw_structure, "col", GPU_VERTEX_DATA_F32_4X);
 
-	gpu_vertex_buffer_init(&draw_vertex_buffer, DRAW_BATCH_QUADS * 4, &draw_structure);
-	draw_vertex_buffer.cpu_write = true;
+	for (int i = 0; i < DRAW_VB_COUNT; ++i) {
+		gpu_vertex_buffer_init(&draw_vbs[i], DRAW_BATCH_QUADS * 4, &draw_structure);
+		draw_vbs[i].cpu_write = true;
+	}
 
-	gpu_index_buffer_init(&draw_index_buffer, DRAW_BATCH_QUADS * 6);
-	int *indices = gpu_index_buffer_lock(&draw_index_buffer);
+	gpu_index_buffer_init(&draw_ib, DRAW_BATCH_QUADS * 6);
+	int *indices = gpu_index_buffer_lock(&draw_ib);
 	for (int i = 0; i < DRAW_BATCH_QUADS; ++i) {
 		int base           = i * 4;
 		indices[i * 6]     = base;
@@ -104,7 +108,7 @@ void draw_init(buffer_t *image_vert, buffer_t *image_frag, buffer_t *rect_vert, 
 		indices[i * 6 + 4] = base + 2;
 		indices[i * 6 + 5] = base + 3;
 	}
-	gpu_index_buffer_unlock(&draw_index_buffer);
+	gpu_index_buffer_unlock(&draw_ib);
 
 	gpu_shader_t vert_shader;
 	gpu_shader_t frag_shader;
@@ -160,18 +164,22 @@ void draw_flush(void) {
 		return;
 	}
 
-	gpu_vertex_buffer_unlock(&draw_vertex_buffer);
+	gpu_vertex_buffer_unlock(&draw_vbs[draw_vb_index]);
 	draw_batch_verts = NULL;
 
 	gpu_set_pipeline(draw_batch_pipeline);
 	if (draw_batch_texture != NULL) {
 		gpu_set_texture(0, draw_batch_texture);
 	}
-	gpu_set_vertex_buffer(&draw_vertex_buffer);
-	gpu_set_index_buffer(&draw_index_buffer);
-	draw_index_buffer.count = draw_batch_count * 6;
+	gpu_set_vertex_buffer(&draw_vbs[draw_vb_index]);
+	gpu_set_index_buffer(&draw_ib);
+	draw_ib.count = draw_batch_count * 6;
 	gpu_draw();
 
+	if (++draw_vb_index == DRAW_VB_COUNT) {
+		gpu_execute_and_wait();
+		draw_vb_index = 0;
+	}
 	draw_batch_count    = 0;
 	draw_batch_pipeline = NULL;
 	draw_batch_texture  = NULL;
@@ -191,7 +199,7 @@ static void draw_batch_set(gpu_pipeline_t *pipeline, gpu_texture_t *tex) {
 static void draw_push(float x0, float y0, float u0, float v0, float x1, float y1, float u1, float v1, float x2, float y2, float u2, float v2, float x3,
                       float y3, float u3, float v3, float r, float g, float b, float a) {
 	if (draw_batch_verts == NULL) {
-		draw_batch_verts = (float *)gpu_vertex_buffer_lock(&draw_vertex_buffer);
+		draw_batch_verts = (float *)gpu_vertex_buffer_lock(&draw_vbs[draw_vb_index]);
 	}
 	float *vp = draw_batch_verts + draw_batch_count * 4 * 8;
 	vp[0]     = x0;

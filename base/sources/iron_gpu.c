@@ -12,6 +12,7 @@ static int            textures_to_destroy_count  = 0;
 static int            buffers_to_destroy_count   = 0;
 static int            pipelines_to_destroy_count = 0;
 
+extern int      draw_vb_index;
 int             constant_buffer_index              = 0;
 int             draw_calls                         = 0;
 int             draw_calls_last                    = 0;
@@ -124,6 +125,7 @@ void gpu_present() {
 	gpu_present_internal();
 	draw_calls_last = draw_calls;
 	draw_calls      = 0;
+	draw_vb_index   = 0;
 	gpu_cleanup();
 }
 
@@ -439,14 +441,14 @@ void *gpu_bc7_compress(void *data, int width, int height) {
 	}
 	volatile int32_t    next_block = 0;
 	bc7_thread_params_t tp         = {
-	            .src          = (uint8_t *)data,
-	            .dst          = (uint8_t *)bc7_data,
-	            .width        = width,
-	            .height       = height,
-	            .blocks_x     = blocks_x,
-	            .total_blocks = blocks_x * blocks_y,
-	            .next_block   = &next_block,
-    };
+	    .src          = (uint8_t *)data,
+	    .dst          = (uint8_t *)bc7_data,
+	    .width        = width,
+	    .height       = height,
+	    .blocks_x     = blocks_x,
+	    .total_blocks = blocks_x * blocks_y,
+	    .next_block   = &next_block,
+	};
 	bc7enc_compress_block_params_init(&tp.params);
 	tp.params.m_max_partitions_mode = 0;
 	tp.params.m_try_least_squares   = false;
