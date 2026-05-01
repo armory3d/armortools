@@ -1100,12 +1100,12 @@ void *gpu_vertex_buffer_lock(gpu_buffer_t *buffer) {
 	    .End   = buffer->count * buffer->stride,
 	};
 	void *p;
-	buffer->impl.buffer->lpVtbl->Map(buffer->impl.cpu_buffer, 0, &range, &p);
+	buffer->impl.cpu_buffer->lpVtbl->Map(buffer->impl.cpu_buffer, 0, &range, &p);
 	return p;
 }
 
 void gpu_vertex_buffer_unlock(gpu_buffer_t *buffer) {
-	if (!buffer->cpu_write || buffer->impl.buf == NULL) {
+	if (!buffer->cpu_write || buffer->impl.buffer == NULL) {
 		_gpu_buffer_init(&buffer->impl.buffer, buffer->stride * buffer->count, D3D12_HEAP_TYPE_DEFAULT);
 	}
 
@@ -1113,7 +1113,7 @@ void gpu_vertex_buffer_unlock(gpu_buffer_t *buffer) {
 	    .Begin = 0,
 	    .End   = buffer->count * buffer->stride,
 	};
-	buffer->impl.buffer->lpVtbl->Unmap(buffer->impl.cpu_buffer, 0, &range);
+	buffer->impl.cpu_buffer->lpVtbl->Unmap(buffer->impl.cpu_buffer, 0, &range);
 
 	_gpu_barrier(buffer->impl.buffer, D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_COPY_DEST);
 	command_list->lpVtbl->CopyBufferRegion(command_list, buffer->impl.buffer, 0, buffer->impl.cpu_buffer, 0, buffer->stride * buffer->count);
