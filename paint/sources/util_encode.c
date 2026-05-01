@@ -106,6 +106,17 @@ i32 util_encode_buffers_size(buffer_t_array_t *buffers) {
 	return size;
 }
 
+i32 util_encode_f32_arrays_size(f32_array_t_array_t *arrays) {
+	if (arrays == NULL) {
+		return 0;
+	}
+	i32 size = 0;
+	for (i32 i = 0; i < arrays->length; ++i) {
+		size += arrays->buffer[i]->length * 4;
+	}
+	return size;
+}
+
 i32 util_encode_layer_data_size(layer_data_t_array_t *datas) {
 	if (datas == NULL) {
 		return 0;
@@ -133,11 +144,11 @@ i32 util_encode_layer_data_size(layer_data_t_array_t *datas) {
 buffer_t *util_encode_project(project_t *raw) {
 	i32 size = 32 * 1024 * 1024 + util_encode_layer_data_size(raw->layer_datas) + util_encode_mesh_data_size(raw->mesh_datas) +
 	           util_encode_packed_assets_size(raw->packed_assets) + util_encode_buffers_size(raw->brush_icons) + util_encode_buffers_size(raw->material_icons) +
-	           util_encode_buffers_size(raw->mesh_icons);
+	           util_encode_buffers_size(raw->mesh_icons) + util_encode_f32_arrays_size(raw->mesh_transforms);
 	buffer_t *encoded = buffer_create(size);
 
 	armpack_encode_start(encoded->buffer);
-	armpack_encode_map(25);
+	armpack_encode_map(26);
 
 	armpack_encode_string("version");
 	armpack_encode_string(raw->version);
@@ -342,6 +353,18 @@ buffer_t *util_encode_project(project_t *raw) {
 	else {
 		armpack_encode_null();
 	}
+
+	armpack_encode_string("mesh_transforms");
+	if (raw->mesh_transforms != NULL) {
+		armpack_encode_array(raw->mesh_transforms->length);
+		for (i32 i = 0; i < raw->mesh_transforms->length; ++i) {
+			armpack_encode_array_f32(raw->mesh_transforms->buffer[i]);
+		}
+	}
+	else {
+		armpack_encode_null();
+	}
+
 	armpack_encode_string("atlas_objects");
 	armpack_encode_array_i32(raw->atlas_objects);
 	armpack_encode_string("atlas_names");

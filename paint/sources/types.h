@@ -509,6 +509,7 @@ typedef struct project_format {
 	struct mesh_data_t_array      *mesh_datas;
 	struct string_array           *mesh_assets;
 	struct buffer_t_array         *mesh_icons;
+	struct f32_array_t_array      *mesh_transforms;
 	struct i32_array              *atlas_objects;
 	struct string_array           *atlas_names;
 	struct string_array           *script_datas;
@@ -715,6 +716,12 @@ typedef struct buffer_t_array {
 	int        length;
 	int        capacity;
 } buffer_t_array_t;
+
+typedef struct f32_array_t_array {
+	f32_array_t **buffer;
+	int           length;
+	int           capacity;
+} f32_array_t_array_t;
 
 typedef struct slot_material_t_array {
 	slot_material_t **buffer;

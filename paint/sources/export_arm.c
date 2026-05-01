@@ -234,6 +234,14 @@ void export_arm_run_project() {
 		}
 	}
 
+	f32_array_t_array_t *mesh_transforms = any_array_create_from_raw((void *[]){}, 0);
+	for (i32 i = 0; i < project_paint_objects->length; ++i) {
+		mesh_object_t *p = project_paint_objects->buffer[i];
+		f32_array_t *ar = f32_array_create_from_raw(p->base->transform->local.m, 16);
+		any_array_push(mesh_transforms, ar);
+	}
+	g_project->mesh_transforms = mesh_transforms;
+
 	g_project->material_nodes = mnodes;
 	g_project->brush_nodes    = bnodes;
 	g_project->layer_datas    = ld;

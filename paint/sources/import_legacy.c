@@ -206,12 +206,23 @@ project_t *import_arm_from_map_to_arm(any_map_t *old) {
 		}
 	}
 
-	project->mesh_assets   = any_map_get(old, "mesh_assets");
-	project->mesh_icons    = any_map_get(old, "mesh_icons");
-	project->atlas_objects = any_map_get(old, "atlas_objects");
-	project->atlas_names   = any_map_get(old, "atlas_names");
+	project->mesh_assets     = any_map_get(old, "mesh_assets");
+	project->mesh_icons      = any_map_get(old, "mesh_icons");
+	project->mesh_transforms = any_map_get(old, "mesh_transforms");
+	project->atlas_objects   = any_map_get(old, "atlas_objects");
+	project->atlas_names     = any_map_get(old, "atlas_names");
 
 	return project;
+}
+
+project_t *import_arm_from_version_5(any_map_t *old) {
+	any_array_t *mds = any_map_get(old, "mesh_datas");
+	any_array_t *mts = any_array_create_from_raw((void *[]){}, 0);
+	for (i32 i = 0; i < mds->length; ++i) {
+		any_array_push(mts, mat4_to_f32_array(mat4_identity()));
+	}
+	any_map_set(old, "mesh_transforms", mts);
+	return import_arm_from_map_to_arm(old);
 }
 
 project_t *import_arm_from_version_4(any_map_t *old) {
@@ -222,7 +233,7 @@ project_t *import_arm_from_version_4(any_map_t *old) {
 		camera_world = mat4_to_f32_array(m);
 		any_map_set(old, "camera_world", camera_world);
 	}
-	return import_arm_from_map_to_arm(old);
+	return import_arm_from_version_5(old);
 }
 
 project_t *import_arm_from_version_3(any_map_t *old) {
@@ -244,6 +255,9 @@ project_t *import_arm_from_version_2(any_map_t *old) {
 
 project_t *import_arm_from_old(buffer_t *b) {
 	any_map_t *old = armpack_decode_to_map(b);
+	if (import_arm_is_version(b, '5')) {
+		return import_arm_from_version_5(old);
+	}
 	if (import_arm_is_version(b, '4')) {
 		return import_arm_from_version_4(old);
 	}

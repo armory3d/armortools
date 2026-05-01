@@ -379,6 +379,11 @@ void import_arm_run_project(char *path) {
 		any_array_push(project_paint_objects, object);
 	}
 
+	for (i32 i = 0; i < project->mesh_datas->length; ++i) {
+		mesh_object_t *o = project_paint_objects->buffer[i];
+		transform_set_matrix(o->base->transform, mat4_from_f32_array(project->mesh_transforms->buffer[i], 0));
+	}
+
 	if (project->mesh_assets != NULL && project->mesh_assets->length > 0) {
 		char *file = project->mesh_assets->buffer[0];
 		char *abs  = data_is_abs(file) ? file : string("%s%s", base, file);
