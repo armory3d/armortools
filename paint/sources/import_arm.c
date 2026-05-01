@@ -379,7 +379,8 @@ void import_arm_run_project(char *path) {
 		any_array_push(project_paint_objects, object);
 	}
 
-	for (i32 i = 0; i < project->mesh_datas->length; ++i) {
+	transform_set_matrix(g_context->paint_object->base->transform, mat4_from_f32_array(project->mesh_transforms->buffer[0], 0));
+	for (i32 i = 1; i < project->mesh_datas->length; ++i) {
 		mesh_object_t *o = project_paint_objects->buffer[i];
 		transform_set_matrix(o->base->transform, mat4_from_f32_array(project->mesh_transforms->buffer[i], 0));
 	}
@@ -414,7 +415,6 @@ void import_arm_run_project(char *path) {
 	}
 
 	context_select_paint_object(context_main_object());
-	viewport_scale_to_bounds(2.0);
 	g_context->paint_object->skip_context   = "paint";
 	g_context->merged_object->base->visible = true;
 

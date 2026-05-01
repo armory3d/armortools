@@ -82,8 +82,18 @@ void import_mesh_finish_import() {
 	}
 
 	if (project_paint_objects->length > 1) {
+
 		// Sort by name
 		array_sort(project_paint_objects, &import_mesh_finish_import_sort);
+		mesh_object_t *new_parent = project_paint_objects->buffer[0];
+		object_set_parent(new_parent->base, NULL);
+		for (i32 i = 0; i < project_paint_objects->length; ++i) {
+			mesh_object_t *p = project_paint_objects->buffer[i];
+			if (p != new_parent) {
+				object_set_parent(p->base, new_parent->base);
+			}
+		}
+		context_select_paint_object(context_main_object());
 
 		if (g_context->merged_object == NULL) {
 			util_mesh_merge(NULL);
