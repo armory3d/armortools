@@ -8,33 +8,138 @@
 #include <objc/runtime.h>
 #include <stdbool.h>
 
-struct WindowData {
+struct window_data {
 	id   handle;
 	id   view;
 	bool fullscreen;
-	void (*resizeCallback)(int width, int height, void *data);
-	void *resizeCallbackData;
-	bool (*closeCallback)(void *data);
-	void *closeCallbackData;
+	void (*resize_callback)(int width, int height, void *data);
+	void *resize_callback_data;
+	bool (*close_callback)(void *data);
+	void *close_callback_data;
 };
 
-static struct WindowData windows[1]            = {0};
-static bool              controlKeyMouseButton = false;
-static int               mouseX, mouseY;
-static bool              keyboardShown  = false;
-static const char       *videoFormats[] = {"ogv", NULL};
-static NSApplication    *myapp;
-static NSWindow         *window;
-static BasicMTKView     *view;
-static char              language[3];
-static int               current_cursor_index = 0;
+static struct window_data windows[1]              = {0};
+static bool               controlkey_mouse_button = false;
+static bool               keyboard_shown          = false;
+static const char        *video_formats[]         = {"ogv", NULL};
+static NSApplication     *myapp;
+static NSWindow          *window;
+static BasicMTKView      *view;
+static char               language[3];
+static int                current_cursor_index = 0;
+static int                key_translated[128];
+
+static void init_key_translation(void) {
+	for (int i = 0; i < 128; ++i)
+		key_translated[i] = KEY_CODE_UNKNOWN;
+	key_translated[0]   = KEY_CODE_A;
+	key_translated[1]   = KEY_CODE_S;
+	key_translated[2]   = KEY_CODE_D;
+	key_translated[3]   = KEY_CODE_F;
+	key_translated[4]   = KEY_CODE_H;
+	key_translated[5]   = KEY_CODE_G;
+	key_translated[6]   = KEY_CODE_Z;
+	key_translated[7]   = KEY_CODE_X;
+	key_translated[8]   = KEY_CODE_C;
+	key_translated[9]   = KEY_CODE_V;
+	key_translated[11]  = KEY_CODE_B;
+	key_translated[12]  = KEY_CODE_Q;
+	key_translated[13]  = KEY_CODE_W;
+	key_translated[14]  = KEY_CODE_E;
+	key_translated[15]  = KEY_CODE_R;
+	key_translated[16]  = KEY_CODE_Y;
+	key_translated[17]  = KEY_CODE_T;
+	key_translated[18]  = KEY_CODE_1;
+	key_translated[19]  = KEY_CODE_2;
+	key_translated[20]  = KEY_CODE_3;
+	key_translated[21]  = KEY_CODE_4;
+	key_translated[22]  = KEY_CODE_6;
+	key_translated[23]  = KEY_CODE_5;
+	key_translated[24]  = KEY_CODE_PLUS;
+	key_translated[25]  = KEY_CODE_9;
+	key_translated[26]  = KEY_CODE_7;
+	key_translated[27]  = KEY_CODE_HYPHEN_MINUS;
+	key_translated[28]  = KEY_CODE_8;
+	key_translated[29]  = KEY_CODE_0;
+	key_translated[30]  = KEY_CODE_CLOSE_BRACKET;
+	key_translated[31]  = KEY_CODE_O;
+	key_translated[32]  = KEY_CODE_U;
+	key_translated[33]  = KEY_CODE_OPEN_BRACKET;
+	key_translated[34]  = KEY_CODE_I;
+	key_translated[35]  = KEY_CODE_P;
+	key_translated[36]  = KEY_CODE_RETURN;
+	key_translated[37]  = KEY_CODE_L;
+	key_translated[38]  = KEY_CODE_J;
+	key_translated[39]  = KEY_CODE_QUOTE;
+	key_translated[40]  = KEY_CODE_K;
+	key_translated[41]  = KEY_CODE_SEMICOLON;
+	key_translated[42]  = KEY_CODE_BACK_SLASH;
+	key_translated[43]  = KEY_CODE_COMMA;
+	key_translated[44]  = KEY_CODE_SLASH;
+	key_translated[45]  = KEY_CODE_N;
+	key_translated[46]  = KEY_CODE_M;
+	key_translated[47]  = KEY_CODE_PERIOD;
+	key_translated[48]  = KEY_CODE_TAB;
+	key_translated[49]  = KEY_CODE_SPACE;
+	key_translated[50]  = KEY_CODE_BACK_QUOTE;
+	key_translated[51]  = KEY_CODE_BACKSPACE;
+	key_translated[53]  = KEY_CODE_ESCAPE;
+	key_translated[64]  = KEY_CODE_F17;
+	key_translated[65]  = KEY_CODE_DECIMAL;
+	key_translated[67]  = KEY_CODE_MULTIPLY;
+	key_translated[69]  = KEY_CODE_ADD;
+	key_translated[71]  = KEY_CODE_NUM_LOCK;
+	key_translated[75]  = KEY_CODE_DIVIDE;
+	key_translated[76]  = KEY_CODE_RETURN;
+	key_translated[78]  = KEY_CODE_SUBTRACT;
+	key_translated[79]  = KEY_CODE_F18;
+	key_translated[80]  = KEY_CODE_F19;
+	key_translated[82]  = KEY_CODE_NUMPAD_0;
+	key_translated[83]  = KEY_CODE_NUMPAD_1;
+	key_translated[84]  = KEY_CODE_NUMPAD_2;
+	key_translated[85]  = KEY_CODE_NUMPAD_3;
+	key_translated[86]  = KEY_CODE_NUMPAD_4;
+	key_translated[87]  = KEY_CODE_NUMPAD_5;
+	key_translated[88]  = KEY_CODE_NUMPAD_6;
+	key_translated[89]  = KEY_CODE_NUMPAD_7;
+	key_translated[90]  = KEY_CODE_F20;
+	key_translated[91]  = KEY_CODE_NUMPAD_8;
+	key_translated[92]  = KEY_CODE_NUMPAD_9;
+	key_translated[96]  = KEY_CODE_F5;
+	key_translated[97]  = KEY_CODE_F6;
+	key_translated[98]  = KEY_CODE_F7;
+	key_translated[99]  = KEY_CODE_F3;
+	key_translated[100] = KEY_CODE_F8;
+	key_translated[101] = KEY_CODE_F9;
+	key_translated[103] = KEY_CODE_F11;
+	key_translated[105] = KEY_CODE_F13;
+	key_translated[106] = KEY_CODE_F16;
+	key_translated[107] = KEY_CODE_F14;
+	key_translated[109] = KEY_CODE_F10;
+	key_translated[111] = KEY_CODE_F12;
+	key_translated[113] = KEY_CODE_F15;
+	key_translated[114] = KEY_CODE_INSERT;
+	key_translated[115] = KEY_CODE_HOME;
+	key_translated[116] = KEY_CODE_PAGE_UP;
+	key_translated[117] = KEY_CODE_DELETE;
+	key_translated[118] = KEY_CODE_F4;
+	key_translated[119] = KEY_CODE_END;
+	key_translated[120] = KEY_CODE_F2;
+	key_translated[121] = KEY_CODE_PAGE_DOWN;
+	key_translated[122] = KEY_CODE_F1;
+	key_translated[123] = KEY_CODE_LEFT;
+	key_translated[124] = KEY_CODE_RIGHT;
+	key_translated[125] = KEY_CODE_DOWN;
+	key_translated[126] = KEY_CODE_UP;
+}
 
 @implementation BasicMTKView
 
-static bool shift = false;
-static bool ctrl  = false;
-static bool alt   = false;
-static bool cmd   = false;
+static bool shift    = false;
+static bool ctrl     = false;
+static bool alt      = false;
+static bool cmd      = false;
+static bool capslock = false;
 
 - (void)flagsChanged:(NSEvent *)theEvent {
 	if (shift) {
@@ -53,6 +158,10 @@ static bool cmd   = false;
 		iron_internal_keyboard_trigger_key_up(KEY_CODE_META);
 		cmd = false;
 	}
+	if (capslock) {
+		iron_internal_keyboard_trigger_key_up(KEY_CODE_CAPS_LOCK);
+		capslock = false;
+	}
 
 	if ([theEvent modifierFlags] & NSShiftKeyMask) {
 		iron_internal_keyboard_trigger_key_down(KEY_CODE_SHIFT);
@@ -70,247 +179,87 @@ static bool cmd   = false;
 		iron_internal_keyboard_trigger_key_down(KEY_CODE_META);
 		cmd = true;
 	}
+	if ([theEvent modifierFlags] & NSAlphaShiftKeyMask) {
+		iron_internal_keyboard_trigger_key_down(KEY_CODE_CAPS_LOCK);
+		capslock = true;
+	}
 }
 
 - (void)keyDown:(NSEvent *)theEvent {
 	if ([theEvent isARepeat])
 		return;
-	NSString *characters = [theEvent charactersIgnoringModifiers];
-	if ([characters length]) {
-		unichar ch = [characters characterAtIndex:0];
-		switch (ch) { // keys that exist in keydown and keypress events
-		case 59:
-			iron_internal_keyboard_trigger_key_down(KEY_CODE_SEMICOLON);
-			break;
-		case 91:
-			iron_internal_keyboard_trigger_key_down(KEY_CODE_OPEN_BRACKET);
-			break;
-		case 93:
-			iron_internal_keyboard_trigger_key_down(KEY_CODE_CLOSE_BRACKET);
-			break;
-		case 39:
-			iron_internal_keyboard_trigger_key_down(KEY_CODE_QUOTE);
-			break;
-		case 92:
-			iron_internal_keyboard_trigger_key_down(KEY_CODE_BACK_SLASH);
-			break;
-		case 44:
-			iron_internal_keyboard_trigger_key_down(KEY_CODE_COMMA);
-			break;
-		case 46:
-			iron_internal_keyboard_trigger_key_down(KEY_CODE_PERIOD);
-			break;
-		case 47:
-			iron_internal_keyboard_trigger_key_down(KEY_CODE_SLASH);
-			break;
-		case 96:
-			iron_internal_keyboard_trigger_key_down(KEY_CODE_BACK_QUOTE);
-			break;
-		case 32:
-			iron_internal_keyboard_trigger_key_down(KEY_CODE_SPACE);
-			break;
-		case 34:
-			iron_internal_keyboard_trigger_key_down(KEY_CODE_DOUBLE_QUOTE);
-			break;
-		case 40:
-			iron_internal_keyboard_trigger_key_down(KEY_CODE_OPEN_PAREN);
-			break;
-		case 41:
-			iron_internal_keyboard_trigger_key_down(KEY_CODE_CLOSE_PAREN);
-			break;
-		case 42:
-			iron_internal_keyboard_trigger_key_down(KEY_CODE_ASTERISK);
-			break;
-		case 43:
-			iron_internal_keyboard_trigger_key_down(KEY_CODE_PLUS);
-			break;
-		case 45:
-			iron_internal_keyboard_trigger_key_down(KEY_CODE_HYPHEN_MINUS);
-			break;
-		case 61:
-			iron_internal_keyboard_trigger_key_down(KEY_CODE_EQUALS);
-			break;
-		case 95:
-			iron_internal_keyboard_trigger_key_down(KEY_CODE_UNDERSCORE);
-			break;
-		}
 
-		switch (ch) {
-		case NSRightArrowFunctionKey:
-			iron_internal_keyboard_trigger_key_down(KEY_CODE_RIGHT);
-			break;
-		case NSLeftArrowFunctionKey:
-			iron_internal_keyboard_trigger_key_down(KEY_CODE_LEFT);
-			break;
-		case NSUpArrowFunctionKey:
-			iron_internal_keyboard_trigger_key_down(KEY_CODE_UP);
-			break;
-		case NSDownArrowFunctionKey:
-			iron_internal_keyboard_trigger_key_down(KEY_CODE_DOWN);
-			break;
-		case 27:
-			iron_internal_keyboard_trigger_key_down(KEY_CODE_ESCAPE);
-			break;
-		case NSEnterCharacter:
-		case NSNewlineCharacter:
-		case NSCarriageReturnCharacter:
-			iron_internal_keyboard_trigger_key_down(KEY_CODE_RETURN);
-			iron_internal_keyboard_trigger_key_press('\n');
-			break;
-		case 0x7f:
-			iron_internal_keyboard_trigger_key_down(KEY_CODE_BACKSPACE);
-			iron_internal_keyboard_trigger_key_press('\x08');
-			break;
-		case 9:
-			iron_internal_keyboard_trigger_key_down(KEY_CODE_TAB);
-			iron_internal_keyboard_trigger_key_press('\t');
-			break;
-		default:
-			if (ch == 'x' && [theEvent modifierFlags] & NSCommandKeyMask) {
-				char *text = iron_internal_cut_callback();
-				if (text != NULL) {
-					NSPasteboard *board = [NSPasteboard generalPasteboard];
-					[board clearContents];
-					[board setString:[NSString stringWithUTF8String:text] forType:NSStringPboardType];
-				}
-			}
-			if (ch == 'c' && [theEvent modifierFlags] & NSCommandKeyMask) {
-				char *text = iron_internal_copy_callback();
-				if (text != NULL) {
-					iron_copy_to_clipboard(text);
-				}
-			}
-			if (ch == 'v' && [theEvent modifierFlags] & NSCommandKeyMask) {
+	unsigned short kc   = [theEvent keyCode];
+	int            code = (kc < 128) ? key_translated[kc] : KEY_CODE_UNKNOWN;
+	if (code != KEY_CODE_UNKNOWN) {
+		iron_internal_keyboard_trigger_key_down(code);
+	}
+
+	NSString *chars = [theEvent characters];
+	if (![chars length])
+		return;
+	unichar ch = [chars characterAtIndex:0];
+
+	if (ch >= 0xF700)
+		return;
+	if (ch == 27)
+		return;
+
+	if ([theEvent modifierFlags] & NSCommandKeyMask) {
+		NSString *base = [theEvent charactersIgnoringModifiers];
+		unichar   bc   = [base length] ? [base characterAtIndex:0] : ch;
+		if (bc == 'x') {
+			char *text = iron_internal_cut_callback();
+			if (text != NULL) {
 				NSPasteboard *board = [NSPasteboard generalPasteboard];
-				NSString     *data  = [board stringForType:NSStringPboardType];
-				if (data != nil) {
-					char charData[4096];
-					strcpy(charData, [data UTF8String]);
-					iron_internal_paste_callback(charData);
-				}
+				[board clearContents];
+				[board setString:[NSString stringWithUTF8String:text] forType:NSStringPboardType];
 			}
-			if (ch >= L'a' && ch <= L'z') {
-				iron_internal_keyboard_trigger_key_down(ch - L'a' + KEY_CODE_A);
+		}
+		if (bc == 'c') {
+			char *text = iron_internal_copy_callback();
+			if (text != NULL) {
+				iron_copy_to_clipboard(text);
 			}
-			else if (ch >= L'A' && ch <= L'Z') {
-				iron_internal_keyboard_trigger_key_down(ch - L'A' + KEY_CODE_A);
+		}
+		if (bc == 'v') {
+			NSPasteboard *board = [NSPasteboard generalPasteboard];
+			NSString     *data  = [board stringForType:NSStringPboardType];
+			if (data != nil) {
+				char charData[4096];
+				strcpy(charData, [data UTF8String]);
+				iron_internal_paste_callback(charData);
 			}
-			else if (ch >= L'0' && ch <= L'9') {
-				iron_internal_keyboard_trigger_key_down(ch - L'0' + KEY_CODE_0);
-			}
-			iron_internal_keyboard_trigger_key_press(ch);
-			break;
 		}
 	}
+
+	if (ch == NSCarriageReturnCharacter || ch == NSNewlineCharacter || ch == NSEnterCharacter) {
+		iron_internal_keyboard_trigger_key_press('\n');
+		return;
+	}
+	if (ch == 0x7f) {
+		iron_internal_keyboard_trigger_key_press('\x08');
+		return;
+	}
+
+	iron_internal_keyboard_trigger_key_press(ch);
 }
 
 - (void)keyUp:(NSEvent *)theEvent {
-	NSString *characters = [theEvent charactersIgnoringModifiers];
-	if ([characters length]) {
-		unichar ch = [characters characterAtIndex:0];
-		switch (ch) {
-		case 59:
-			iron_internal_keyboard_trigger_key_up(KEY_CODE_SEMICOLON);
-			break;
-		case 91:
-			iron_internal_keyboard_trigger_key_up(KEY_CODE_OPEN_BRACKET);
-			break;
-		case 93:
-			iron_internal_keyboard_trigger_key_up(KEY_CODE_CLOSE_BRACKET);
-			break;
-		case 39:
-			iron_internal_keyboard_trigger_key_up(KEY_CODE_QUOTE);
-			break;
-		case 92:
-			iron_internal_keyboard_trigger_key_up(KEY_CODE_BACK_SLASH);
-			break;
-		case 44:
-			iron_internal_keyboard_trigger_key_up(KEY_CODE_COMMA);
-			break;
-		case 46:
-			iron_internal_keyboard_trigger_key_up(KEY_CODE_PERIOD);
-			break;
-		case 47:
-			iron_internal_keyboard_trigger_key_up(KEY_CODE_SLASH);
-			break;
-		case 96:
-			iron_internal_keyboard_trigger_key_up(KEY_CODE_BACK_QUOTE);
-			break;
-		case 45:
-			iron_internal_keyboard_trigger_key_up(KEY_CODE_HYPHEN_MINUS);
-			break;
-		case 61:
-			iron_internal_keyboard_trigger_key_up(KEY_CODE_EQUALS);
-			break;
-		case NSRightArrowFunctionKey:
-			iron_internal_keyboard_trigger_key_up(KEY_CODE_RIGHT);
-			break;
-		case NSLeftArrowFunctionKey:
-			iron_internal_keyboard_trigger_key_up(KEY_CODE_LEFT);
-			break;
-		case NSUpArrowFunctionKey:
-			iron_internal_keyboard_trigger_key_up(KEY_CODE_UP);
-			break;
-		case NSDownArrowFunctionKey:
-			iron_internal_keyboard_trigger_key_up(KEY_CODE_DOWN);
-			break;
-		case 27:
-			iron_internal_keyboard_trigger_key_up(KEY_CODE_ESCAPE);
-			break;
-		case NSEnterCharacter:
-		case NSNewlineCharacter:
-		case NSCarriageReturnCharacter:
-			iron_internal_keyboard_trigger_key_up(KEY_CODE_RETURN);
-			break;
-		case 0x7f:
-			iron_internal_keyboard_trigger_key_up(KEY_CODE_BACKSPACE);
-			break;
-		case 9:
-			iron_internal_keyboard_trigger_key_up(KEY_CODE_TAB);
-			break;
-		case 32:
-			iron_internal_keyboard_trigger_key_up(KEY_CODE_SPACE);
-			break;
-		case 34:
-			iron_internal_keyboard_trigger_key_up(KEY_CODE_DOUBLE_QUOTE);
-			break;
-		case 40:
-			iron_internal_keyboard_trigger_key_up(KEY_CODE_OPEN_PAREN);
-			break;
-		case 41:
-			iron_internal_keyboard_trigger_key_up(KEY_CODE_CLOSE_PAREN);
-			break;
-		case 42:
-			iron_internal_keyboard_trigger_key_up(KEY_CODE_ASTERISK);
-			break;
-		case 43:
-			iron_internal_keyboard_trigger_key_up(KEY_CODE_PLUS);
-			break;
-		case 95:
-			iron_internal_keyboard_trigger_key_up(KEY_CODE_UNDERSCORE);
-			break;
-		default:
-			if (ch >= L'a' && ch <= L'z') {
-				iron_internal_keyboard_trigger_key_up(ch - L'a' + KEY_CODE_A);
-			}
-			else if (ch >= L'A' && ch <= L'Z') {
-				iron_internal_keyboard_trigger_key_up(ch - L'A' + KEY_CODE_A);
-			}
-			else if (ch >= L'0' && ch <= L'9') {
-				iron_internal_keyboard_trigger_key_up(ch - L'0' + KEY_CODE_0);
-			}
-			break;
-		}
+	unsigned short kc   = [theEvent keyCode];
+	int            code = (kc < 128) ? key_translated[kc] : KEY_CODE_UNKNOWN;
+	if (code != KEY_CODE_UNKNOWN) {
+		iron_internal_keyboard_trigger_key_up(code);
 	}
 }
 
-static int getMouseX(NSEvent *event) {
+static int get_mouse_x(NSEvent *event) {
 	NSWindow *window = [[NSApplication sharedApplication] mainWindow];
 	float     scale  = [window backingScaleFactor];
 	return (int)([event locationInWindow].x * scale);
 }
 
-static int getMouseY(NSEvent *event) {
+static int get_mouse_y(NSEvent *event) {
 	NSWindow *window = [[NSApplication sharedApplication] mainWindow];
 	float     scale  = [window backingScaleFactor];
 	return (int)(iron_window_height() - [event locationInWindow].y * scale);
@@ -318,67 +267,67 @@ static int getMouseY(NSEvent *event) {
 
 - (void)mouseDown:(NSEvent *)theEvent {
 	if ([theEvent modifierFlags] & NSControlKeyMask) {
-		controlKeyMouseButton = true;
-		iron_internal_mouse_trigger_press(1, getMouseX(theEvent), getMouseY(theEvent));
+		controlkey_mouse_button = true;
+		iron_internal_mouse_trigger_press(1, get_mouse_x(theEvent), get_mouse_y(theEvent));
 	}
 	else {
-		controlKeyMouseButton = false;
-		iron_internal_mouse_trigger_press(0, getMouseX(theEvent), getMouseY(theEvent));
+		controlkey_mouse_button = false;
+		iron_internal_mouse_trigger_press(0, get_mouse_x(theEvent), get_mouse_y(theEvent));
 	}
 
 	if ([theEvent subtype] == NSTabletPointEventSubtype) {
-		iron_internal_pen_trigger_press(getMouseX(theEvent), getMouseY(theEvent), theEvent.pressure);
+		iron_internal_pen_trigger_press(get_mouse_x(theEvent), get_mouse_y(theEvent), theEvent.pressure);
 	}
 }
 
 - (void)mouseUp:(NSEvent *)theEvent {
-	if (controlKeyMouseButton) {
-		iron_internal_mouse_trigger_release(1, getMouseX(theEvent), getMouseY(theEvent));
+	if (controlkey_mouse_button) {
+		iron_internal_mouse_trigger_release(1, get_mouse_x(theEvent), get_mouse_y(theEvent));
 	}
 	else {
-		iron_internal_mouse_trigger_release(0, getMouseX(theEvent), getMouseY(theEvent));
+		iron_internal_mouse_trigger_release(0, get_mouse_x(theEvent), get_mouse_y(theEvent));
 	}
-	controlKeyMouseButton = false;
+	controlkey_mouse_button = false;
 
 	if ([theEvent subtype] == NSTabletPointEventSubtype) {
-		iron_internal_pen_trigger_release(getMouseX(theEvent), getMouseY(theEvent), theEvent.pressure);
+		iron_internal_pen_trigger_release(get_mouse_x(theEvent), get_mouse_y(theEvent), theEvent.pressure);
 	}
 }
 
 - (void)mouseMoved:(NSEvent *)theEvent {
-	iron_internal_mouse_trigger_move(getMouseX(theEvent), getMouseY(theEvent));
+	iron_internal_mouse_trigger_move(get_mouse_x(theEvent), get_mouse_y(theEvent));
 }
 
 - (void)mouseDragged:(NSEvent *)theEvent {
-	iron_internal_mouse_trigger_move(getMouseX(theEvent), getMouseY(theEvent));
+	iron_internal_mouse_trigger_move(get_mouse_x(theEvent), get_mouse_y(theEvent));
 
 	if ([theEvent subtype] == NSTabletPointEventSubtype) {
-		iron_internal_pen_trigger_move(getMouseX(theEvent), getMouseY(theEvent), theEvent.pressure);
+		iron_internal_pen_trigger_move(get_mouse_x(theEvent), get_mouse_y(theEvent), theEvent.pressure);
 	}
 }
 
 - (void)rightMouseDown:(NSEvent *)theEvent {
-	iron_internal_mouse_trigger_press(1, getMouseX(theEvent), getMouseY(theEvent));
+	iron_internal_mouse_trigger_press(1, get_mouse_x(theEvent), get_mouse_y(theEvent));
 }
 
 - (void)rightMouseUp:(NSEvent *)theEvent {
-	iron_internal_mouse_trigger_release(1, getMouseX(theEvent), getMouseY(theEvent));
+	iron_internal_mouse_trigger_release(1, get_mouse_x(theEvent), get_mouse_y(theEvent));
 }
 
 - (void)rightMouseDragged:(NSEvent *)theEvent {
-	iron_internal_mouse_trigger_move(getMouseX(theEvent), getMouseY(theEvent));
+	iron_internal_mouse_trigger_move(get_mouse_x(theEvent), get_mouse_y(theEvent));
 }
 
 - (void)otherMouseDown:(NSEvent *)theEvent {
-	iron_internal_mouse_trigger_press(2, getMouseX(theEvent), getMouseY(theEvent));
+	iron_internal_mouse_trigger_press(2, get_mouse_x(theEvent), get_mouse_y(theEvent));
 }
 
 - (void)otherMouseUp:(NSEvent *)theEvent {
-	iron_internal_mouse_trigger_release(2, getMouseX(theEvent), getMouseY(theEvent));
+	iron_internal_mouse_trigger_release(2, get_mouse_x(theEvent), get_mouse_y(theEvent));
 }
 
 - (void)otherMouseDragged:(NSEvent *)theEvent {
-	iron_internal_mouse_trigger_move(getMouseX(theEvent), getMouseY(theEvent));
+	iron_internal_mouse_trigger_move(get_mouse_x(theEvent), get_mouse_y(theEvent));
 }
 
 - (void)scrollWheel:(NSEvent *)theEvent {
@@ -555,15 +504,15 @@ void iron_mouse_set_cursor(iron_cursor_t cursor_index) {
 }
 
 void iron_keyboard_show(void) {
-	keyboardShown = true;
+	keyboard_shown = true;
 }
 
 void iron_keyboard_hide(void) {
-	keyboardShown = false;
+	keyboard_shown = false;
 }
 
 bool iron_keyboard_active(void) {
-	return keyboardShown;
+	return keyboard_shown;
 }
 
 const char *iron_system_id(void) {
@@ -571,7 +520,7 @@ const char *iron_system_id(void) {
 }
 
 const char **iron_video_formats(void) {
-	return videoFormats;
+	return video_formats;
 }
 
 void iron_set_keep_screen_on(bool on) {}
@@ -642,7 +591,7 @@ bool iron_internal_handle_messages(void) {
 	return true;
 }
 
-static void createWindow(iron_window_options_t *options) {
+static void create_window(iron_window_options_t *options) {
 	int width     = options->width / [[NSScreen mainScreen] backingScaleFactor];
 	int height    = options->height / [[NSScreen mainScreen] backingScaleFactor];
 	int styleMask = NSWindowStyleMaskTitled | NSWindowStyleMaskClosable;
@@ -692,8 +641,8 @@ void iron_window_change_window_mode(iron_window_mode_t mode) {
 }
 
 void iron_window_set_close_callback(bool (*callback)(void *), void *data) {
-	windows[0].closeCallback     = callback;
-	windows[0].closeCallbackData = data;
+	windows[0].close_callback     = callback;
+	windows[0].close_callback_data = data;
 }
 
 static void add_menubar(void) {
@@ -713,6 +662,7 @@ static void add_menubar(void) {
 }
 
 void iron_init(iron_window_options_t *win) {
+	init_key_translation();
 	@autoreleasepool {
 		myapp = [IronApplication sharedApplication];
 		[myapp finishLaunching];
@@ -726,7 +676,7 @@ void iron_init(iron_window_options_t *win) {
 #endif
 	}
 
-	createWindow(win);
+	create_window(win);
 	gpu_init(win->depth_bits, true);
 }
 
@@ -788,8 +738,8 @@ int main(int argc, char **argv) {
 
 @implementation IronAppDelegate
 - (BOOL)windowShouldClose:(NSWindow *)sender {
-	if (windows[0].closeCallback != NULL) {
-		if (windows[0].closeCallback(windows[0].closeCallbackData)) {
+	if (windows[0].close_callback != NULL) {
+		if (windows[0].close_callback(windows[0].close_callback_data)) {
 			return YES;
 		}
 		else {
@@ -804,8 +754,8 @@ int main(int argc, char **argv) {
 }
 
 void iron_internal_call_resize_callback(int width, int height) {
-	if (windows[0].resizeCallback != NULL) {
-		windows[0].resizeCallback(width, height, windows[0].resizeCallbackData);
+	if (windows[0].resize_callback != NULL) {
+		windows[0].resize_callback(width, height, windows[0].resize_callback_data);
 	}
 }
 
@@ -862,8 +812,8 @@ void iron_window_set_title(const char *title) {
 }
 
 void iron_window_set_resize_callback(void (*callback)(int x, int y, void *data), void *data) {
-	windows[0].resizeCallback     = callback;
-	windows[0].resizeCallbackData = data;
+	windows[0].resize_callback     = callback;
+	windows[0].resize_callback_data = data;
 }
 
 iron_window_mode_t iron_window_get_mode() {
