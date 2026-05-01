@@ -329,28 +329,10 @@ static void read_store_array(uint32_t count) { // Store in any/i32/../_array_t f
 		}
 		// Arrays
 		else if (flag == 0xdd) {
-			// Array pointers
-			uint32_t _ei           = ei;
-			uint32_t arrays_length = 0;
+			uint32_t outer_start = di;
+			bottom               = outer_start + count * PTR_SIZE;
 			for (uint32_t i = 0; i < count; ++i) {
-				store_ptr(bottom + count * PTR_SIZE + arrays_length);
-				if (i < count - 1) {
-					ei += 1;                      // Array flag
-					uint32_t length = read_u32(); // Array length
-					ei += length;
-					length += pad(length, PTR_SIZE);
-					arrays_length += length;
-					arrays_length += PTR_SIZE + 4 + 4;
-				}
-			}
-			ei = _ei;
-
-			// Array contents
-			bottom = pad(di, PTR_SIZE) + di;
-
-			array_count = count;
-
-			for (uint32_t i = 0; i < count; ++i) {
+				di = outer_start + i * PTR_SIZE;
 				/*uint8_t flag =*/read_u8();
 				read_store_array(read_u32());
 			}
