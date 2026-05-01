@@ -1204,11 +1204,9 @@ void iron_internal_shutdown() {
 	iron_internal_shutdown_callback();
 }
 
-#ifndef IRON_NO_MAIN
 int main(int argc, char **argv) {
 	return kickstart(argc, argv);
 }
-#endif
 
 void iron_copy_to_clipboard(const char *text) {
 	size_t textLength = strlen(text);

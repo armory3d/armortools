@@ -722,11 +722,9 @@ const char *iron_internal_save_path(void) {
 	return [resolvedPath cStringUsingEncoding:NSUTF8StringEncoding];
 }
 
-#ifndef IRON_NO_MAIN
 int main(int argc, char **argv) {
 	return kickstart(argc, argv);
 }
-#endif
 
 @implementation IronApplication
 
