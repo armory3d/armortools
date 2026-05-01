@@ -1885,7 +1885,6 @@ void gpu_vertex_buffer_unlock(gpu_buffer_t *buffer) {
 	}
 	vkUnmapMemory(device, buffer->impl.cpu_mem);
 	_gpu_buffer_copy(buffer->impl.buf, buffer->impl.cpu_buf, buffer->count * buffer->stride);
-	gpu_execute_and_wait(); ////
 
 	if (!buffer->cpu_write) {
 		assert(buffers_to_destroy_count < 512);
@@ -1917,7 +1916,6 @@ void gpu_index_buffer_unlock(gpu_buffer_t *buffer) {
 	_gpu_buffer_init(&buffer->impl.buf, &buffer->impl.mem, buffer->count * buffer->stride, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
 	                 VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 	_gpu_buffer_copy(buffer->impl.buf, upload_buffer, buffer->count * buffer->stride);
-	gpu_execute_and_wait(); ////
 }
 
 void gpu_constant_buffer_init(gpu_buffer_t *buffer, int size) {
