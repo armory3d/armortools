@@ -160,17 +160,6 @@ void project_cleanup() {
 		}
 	}
 
-	mesh_object_t_array_t *meshes = scene_meshes;
-	i32                    len    = meshes->length;
-	for (i32 i = 0; i < len; ++i) {
-		mesh_object_t *m = meshes->buffer[len - i - 1];
-		if (array_index_of(g_context->project_objects, m) == -1 && !string_equals(m->base->name, ".ParticleEmitter") &&
-		    !string_equals(m->base->name, ".Particle")) {
-			data_delete_mesh(m->data->_->handle);
-			mesh_object_remove(m);
-		}
-	}
-
 	if (g_context->paint_object != NULL) {
 		char *handle = g_context->paint_object->data->_->handle;
 		data_delete_mesh(handle);

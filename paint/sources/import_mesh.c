@@ -85,13 +85,13 @@ void import_mesh_finish_import() {
 
 		// Sort by name
 		array_sort(project_paint_objects, &import_mesh_finish_import_sort);
+
+		// Reparent
 		mesh_object_t *new_parent = project_paint_objects->buffer[0];
 		object_set_parent(new_parent->base, NULL);
-		for (i32 i = 0; i < project_paint_objects->length; ++i) {
+		for (i32 i = 1; i < project_paint_objects->length; ++i) {
 			mesh_object_t *p = project_paint_objects->buffer[i];
-			if (p != new_parent) {
-				object_set_parent(p->base, new_parent->base);
-			}
+			object_set_parent(p->base, new_parent->base);
 		}
 		context_select_paint_object(context_main_object());
 

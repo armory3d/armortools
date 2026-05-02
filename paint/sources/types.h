@@ -221,7 +221,6 @@ typedef struct context {
 	bool                        show_compass;
 	i32                         project_type;
 	i32                         project_aspect_ratio;
-	struct mesh_object_t_array *project_objects;
 	f32                         last_paint_vec_x;
 	f32                         last_paint_vec_y;
 	f32                         prev_paint_vec_x;

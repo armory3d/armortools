@@ -630,12 +630,6 @@ void ui_base_init() {
 		sys_notify_on_next_frame(&ui_base_init_on_next_frame, NULL);
 	}
 
-	g_context->project_objects = any_array_create_from_raw((void *[]){}, 0);
-	for (i32 i = 0; i < scene_meshes->length; ++i) {
-		mesh_object_t *m = scene_meshes->buffer[i];
-		any_array_push(g_context->project_objects, m);
-	}
-
 	operator_register("view_top", ui_base_view_top);
 }
 
