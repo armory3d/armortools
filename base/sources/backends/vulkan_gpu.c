@@ -1851,6 +1851,17 @@ void _gpu_buffer_copy(VkBuffer dest, VkBuffer source, uint32_t size) {
 	    .size = size,
 	};
 	vkCmdCopyBuffer(command_buffer, source, dest, 1, &copy_region);
+	VkBufferMemoryBarrier buf_barrier = {
+	    .sType               = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER,
+	    .srcAccessMask       = VK_ACCESS_TRANSFER_WRITE_BIT,
+	    .dstAccessMask       = VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT | VK_ACCESS_INDEX_READ_BIT,
+	    .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+	    .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+	    .buffer              = dest,
+	    .offset              = 0,
+	    .size                = VK_WHOLE_SIZE,
+	};
+	vkCmdPipelineBarrier(command_buffer, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_VERTEX_INPUT_BIT, 0, 0, NULL, 1, &buf_barrier, 0, NULL);
 	if (gpu_in_use) {
 		vkCmdBeginRendering(command_buffer, &current_rendering_info);
 	}
@@ -2177,6 +2188,8 @@ void _gpu_raytrace_acceleration_structure_destroy_top(gpu_acceleration_structure
 }
 
 void gpu_raytrace_acceleration_structure_build(gpu_acceleration_structure_t *accel, gpu_buffer_t *_vb_full, gpu_buffer_t *_ib_full) {
+	gpu_execute_and_wait();
+
 	bool build_bottom = false;
 	for (int i = 0; i < 16; ++i) {
 		if (vb_last[i] != vb[i]) {
