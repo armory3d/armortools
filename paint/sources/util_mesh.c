@@ -422,22 +422,6 @@ void util_mesh_apply_displacement(gpu_texture_t *texpaint_pack, f32 strength, f3
 	mesh_data_build_vertices(g->_->vertex_buffer, o->data->vertex_arrays);
 }
 
-void util_mesh_equirect_unwrap(raw_mesh_t *mesh) {
-	i32 verts  = math_floor(mesh->posa->length / 4.0);
-	mesh->texa = i16_array_create(verts * 2);
-	vec4_t n   = (vec4_t){0.0, 0.0, 0.0, 1.0};
-	for (i32 i = 0; i < verts; ++i) {
-		n = (vec4_t){mesh->posa->buffer[i * 4] / 32767.0, mesh->posa->buffer[i * 4 + 1] / 32767.0, mesh->posa->buffer[i * 4 + 2] / 32767.0, 1.0};
-		n = vec4_norm(n);
-		// Sphere projection
-		// mesh.texa[i * 2    ] = math_atan2(n.x, n.y) / (math_pi() * 2) + 0.5;
-		// mesh.texa[i * 2 + 1] = n.z * 0.5 + 0.5;
-		// Equirect
-		mesh->texa->buffer[i * 2]     = math_floor(((math_atan2(-n.z, n.x) + math_pi()) / (float)(math_pi() * 2)) * 32767);
-		mesh->texa->buffer[i * 2 + 1] = math_floor((math_acos(n.y) / (float)math_pi()) * 32767);
-	}
-}
-
 i32 util_mesh_decimate_sort(i32 *pa, i32 *pb) {
 	i32 a    = *(pa);
 	i32 b    = *(pb);

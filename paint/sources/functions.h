@@ -364,7 +364,7 @@ void                      project_import_mesh(bool replace_existing, void (*done
 void                      project_append_mesh();
 void                      project_import_mesh_box(char *path, bool replace_existing, bool clear_layers, void (*done)(void));
 void                      project_reimport_mesh();
-void                      project_unwrap_mesh_box(raw_mesh_t *mesh, void (*done)(raw_mesh_t *), bool skip_ui);
+void                      project_unwrap_mesh_box();
 void                      project_import_asset(char *filters, bool hdr_as_envmap);
 void                      project_import_swatches(bool replace_existing);
 void                      project_reimport_textures();
