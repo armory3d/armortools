@@ -1566,7 +1566,6 @@ void minic_register_builtins() {
 	R(render_path_set_target, "v(p,p,p,i,i,f)");
 	R(render_path_end, "v()");
 	R(render_path_draw_meshes, "v(p)");
-	R(render_path_submit_draw, "v(p)");
 	R(render_path_draw_skydome, "v(p)");
 	R(render_path_bind_target, "v(p,p)");
 	R(render_path_draw_shader, "v(p)");
