@@ -1879,6 +1879,8 @@ void gpu_vertex_buffer_unlock(gpu_buffer_t *buffer) {
 		buffers_to_destroy[buffers_to_destroy_count]         = buffer->impl.cpu_buf;
 		buffer_memories_to_destroy[buffers_to_destroy_count] = buffer->impl.cpu_mem;
 		buffers_to_destroy_count++;
+		buffer->impl.cpu_buf = NULL;
+		buffer->impl.cpu_mem = VK_NULL_HANDLE;
 	}
 }
 
