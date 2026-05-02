@@ -74,6 +74,9 @@ void render_path_base_begin() {
 
 	scene_camera->frame = skip_taa ? 0 : render_path_base_taa_frame;
 	camera_object_proj_jitter(scene_camera);
+	if (skip_taa) {
+		scene_camera->p = scene_camera->no_jitter_p;
+	}
 	camera_object_build_mat(scene_camera);
 }
 

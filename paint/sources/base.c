@@ -916,7 +916,6 @@ void ui_base_update_ui() {
 		g_context->brush_time       = 0;
 		g_context->prev_paint_vec_x = -1;
 		g_context->prev_paint_vec_y = -1;
-		// g_context->ddirty              = 3; // Keep accumulated samples for D3D12
 		g_context->brush_blend_dirty = true; // Update brush mask
 
 		g_context->layer_preview_dirty = true; // Update layer preview
