@@ -1052,7 +1052,7 @@ void gpu_begin_internal(gpu_clear_t flags, unsigned color, float depth) {
 		    .imageLayout        = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
 		    .resolveMode        = VK_RESOLVE_MODE_NONE,
 		    .resolveImageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-		    .loadOp             = (flags & GPU_CLEAR_COLOR) ? VK_ATTACHMENT_LOAD_OP_DONT_CARE : VK_ATTACHMENT_LOAD_OP_LOAD,
+		    .loadOp             = (flags & GPU_CLEAR_COLOR) ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_LOAD,
 		    .storeOp            = VK_ATTACHMENT_STORE_OP_STORE,
 		    .clearValue         = clear_value,
 		};
@@ -1065,9 +1065,9 @@ void gpu_begin_internal(gpu_clear_t flags, unsigned color, float depth) {
 		    .imageLayout        = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL,
 		    .resolveMode        = VK_RESOLVE_MODE_NONE,
 		    .resolveImageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-		    .loadOp             = (flags & GPU_CLEAR_DEPTH) ? VK_ATTACHMENT_LOAD_OP_DONT_CARE : VK_ATTACHMENT_LOAD_OP_LOAD,
+		    .loadOp             = (flags & GPU_CLEAR_DEPTH) ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_LOAD,
 		    .storeOp            = VK_ATTACHMENT_STORE_OP_STORE,
-		    .clearValue         = 1.0,
+		    .clearValue         = depth,
 		};
 	}
 
@@ -1082,39 +1082,16 @@ void gpu_begin_internal(gpu_clear_t flags, unsigned color, float depth) {
 	};
 	vkCmdBeginRendering(command_buffer, &current_rendering_info);
 
+	for (size_t i = 0; i < current_render_targets_count; ++i) {
+		current_color_attachment_infos[i].loadOp = VK_ATTACHMENT_LOAD_OP_LOAD;
+	}
+	if (current_depth_buffer != NULL) {
+		current_depth_attachment_info.loadOp = VK_ATTACHMENT_LOAD_OP_LOAD;
+	}
+
 	gpu_viewport(0, 0, current_render_targets[0]->width, current_render_targets[0]->height);
 	gpu_scissor(0, 0, current_render_targets[0]->width, current_render_targets[0]->height);
 
-	if (flags != GPU_CLEAR_NONE) {
-		int               count = 0;
-		VkClearAttachment attachments[2];
-		if (flags & GPU_CLEAR_COLOR) {
-			VkClearColorValue clear_color       = {0};
-			clear_color.float32[0]              = ((color & 0x00ff0000) >> 16) / 255.0f;
-			clear_color.float32[1]              = ((color & 0x0000ff00) >> 8) / 255.0f;
-			clear_color.float32[2]              = (color & 0x000000ff) / 255.0f;
-			clear_color.float32[3]              = ((color & 0xff000000) >> 24) / 255.0f;
-			attachments[count].aspectMask       = VK_IMAGE_ASPECT_COLOR_BIT;
-			attachments[count].colorAttachment  = 0;
-			attachments[count].clearValue.color = clear_color;
-			count++;
-		}
-		if (flags & GPU_CLEAR_DEPTH) {
-			attachments[count].aspectMask                      = VK_IMAGE_ASPECT_DEPTH_BIT;
-			attachments[count].clearValue.depthStencil.depth   = depth;
-			attachments[count].clearValue.depthStencil.stencil = 0;
-			count++;
-		}
-		VkClearRect clear_rect = {
-		    .rect.offset.x      = 0,
-		    .rect.offset.y      = 0,
-		    .rect.extent.width  = current_render_targets[0]->width,
-		    .rect.extent.height = current_render_targets[0]->height,
-		    .baseArrayLayer     = 0,
-		    .layerCount         = 1,
-		};
-		vkCmdClearAttachments(command_buffer, count, attachments, 1, &clear_rect);
-	}
 }
 
 void gpu_end_internal() {
