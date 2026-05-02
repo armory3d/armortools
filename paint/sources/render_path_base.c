@@ -266,7 +266,7 @@ void render_path_base_init_ssao() {
 
 void render_path_base_draw_ssao() {
 	bool ssao = g_config->rp_ssao != false && g_context->camera_type == CAMERA_TYPE_PERSPECTIVE;
-	if (ssao && g_context->ddirty > 0 && _render_path_frame > 0) {
+	if (ssao && g_context->ddirty > -6 && _render_path_frame > 0) {
 		if (any_map_get(render_path_render_targets, "singlea") == NULL) {
 			render_path_base_init_ssao();
 		}
