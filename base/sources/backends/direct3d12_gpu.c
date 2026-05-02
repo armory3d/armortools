@@ -1124,6 +1124,7 @@ void gpu_vertex_buffer_unlock(gpu_buffer_t *buffer) {
 		assert(resources_to_destroy_count < 512);
 		resources_to_destroy[resources_to_destroy_count] = buffer->impl.cpu_buffer;
 		resources_to_destroy_count++;
+		buffer->impl.cpu_buffer = NULL;
 	}
 }
 
