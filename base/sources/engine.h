@@ -377,7 +377,6 @@ camera_data_t *camera_data_get_raw_by_name(any_array_t *datas, char *name);
 //  ╚═════╝╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝     ╚═════╝ ╚═════╝  ╚════╝ ╚══════╝ ╚═════╝   ╚═╝
 
 extern vec4_t    _camera_object_sphere_center;
-extern i32       camera_object_taa_frames;
 camera_object_t *camera_object_create(camera_data_t *data);
 void             camera_object_build_proj(camera_object_t *raw, f32 screen_aspect);
 void             camera_object_remove(camera_object_t *raw);

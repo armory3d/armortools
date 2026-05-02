@@ -11,7 +11,6 @@ f32 sys_time(void);
 
 gpu_pipeline_t *_mesh_object_last_pipeline   = NULL;
 vec4_t          _camera_object_sphere_center = {0};
-i32             camera_object_taa_frames     = 1;
 
 gpu_buffer_t   *gpu_create_vertex_buffer(i32 count, gpu_vertex_structure_t *structure);
 gpu_buffer_t   *gpu_create_index_buffer(i32 count);
@@ -1087,38 +1086,9 @@ void camera_object_proj_jitter(camera_object_t *raw) {
 	i32 w  = render_path_current_w;
 	i32 h  = render_path_current_h;
 	raw->p = raw->no_jitter_p;
-
-	i32 i = raw->frame % camera_object_taa_frames;
-	f32 x = 0.0;
-	f32 y = 0.0;
-
-	if (i == 0) {
-		x = 0.5;
-		y = 0.333;
-	}
-	else if (i == 1) {
-		x = -0.5;
-		y = -0.333;
-	}
-	else if (i == 2) {
-		x = 0.25;
-		y = 0.111;
-	}
-	else if (i == 3) {
-		x = -0.25;
-		y = -0.111;
-	}
-	else if (i == 4) {
-		x = 0.375;
-		y = 0.444;
-	}
-	else {
-		x = -0.375;
-		y = -0.444;
-	}
-	x *= 2;
-	y *= 2;
-
+	i32 i = raw->frame % 2;
+	f32 x = i == 0 ? -0.5 : 0.5;
+	f32 y = i == 0 ? -0.5 : 0.5;
 	raw->p.m20 += x / w;
 	raw->p.m21 += y / h;
 	raw->frame++;
