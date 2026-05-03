@@ -1850,7 +1850,7 @@ void base_resize() {
 		cam->data->ortho->buffer[3] = 2 * (sys_h() / (float)sys_w());
 	}
 	camera_object_build_proj(cam, -1.0);
-	render_path_base_taa_frame = 0;
+	scene_camera->frame = 0;
 
 	if (g_context->camera_type == CAMERA_TYPE_ORTHOGRAPHIC) {
 		viewport_update_camera_type(g_context->camera_type);

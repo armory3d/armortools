@@ -109,7 +109,7 @@ f32 uniforms_ext_f32_link(object_t *object, material_data_t *mat, char *link) {
 		return g_context->picked_color->height;
 	}
 	else if (string_equals(link, "_taa_blend")) {
-		return render_path_base_taa_frame == 0 ? 0.0 : 0.5;
+		return scene_camera->frame == 0 ? 0.0 : 0.5;
 	}
 	if (parser_material_script_links != NULL) {
 		string_array_t *keys = map_keys(parser_material_script_links);

@@ -380,7 +380,6 @@ extern vec4_t    _camera_object_sphere_center;
 camera_object_t *camera_object_create(camera_data_t *data);
 void             camera_object_build_proj(camera_object_t *raw, f32 screen_aspect);
 void             camera_object_remove(camera_object_t *raw);
-void             camera_object_render_frame(camera_object_t *raw);
 void             camera_object_proj_jitter(camera_object_t *raw);
 void             camera_object_build_mat(camera_object_t *raw);
 vec4_t           camera_object_right(camera_object_t *raw);

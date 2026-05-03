@@ -150,7 +150,6 @@ i32                       ui_menu_h                          = 0;
 bool                      ui_menu_keep_open                  = false;
 void (*ui_menu_commands)(void)                               = NULL;
 bool                      ui_menu_show_first                 = true;
-i32                       render_path_base_taa_frame         = 0;
 i32                       render_path_base_bloom_current_mip = 0;
 f32                       render_path_base_bloom_sample_scale;
 bool                      render_path_base_buf_swapped = false;

@@ -68,15 +68,16 @@ void render_path_base_begin() {
 	bool skip_taa = g_context->split_view || g_context->viewport_mode == VIEWPORT_MODE_PATH_TRACE || g_context->camera_type == CAMERA_TYPE_ORTHOGRAPHIC ||
 	                ((g_context->tool == TOOL_TYPE_CLONE || g_context->tool == TOOL_TYPE_BLUR || g_context->tool == TOOL_TYPE_SMUDGE) && g_context->pdirty > 0);
 
-	if (g_config->brush_live) {
-		render_path_base_taa_frame = 0;
+	if (skip_taa || g_config->brush_live) {
+		scene_camera->frame = 0;
 	}
 
-	scene_camera->frame = skip_taa ? 0 : render_path_base_taa_frame;
 	camera_object_proj_jitter(scene_camera);
+
 	if (skip_taa) {
 		scene_camera->p = scene_camera->no_jitter_p;
 	}
+
 	camera_object_build_mat(scene_camera);
 }
 
@@ -89,8 +90,6 @@ void render_path_base_end() {
 		g_context->foreground_event = false;
 		g_context->pdirty           = 0;
 	}
-
-	render_path_base_taa_frame++;
 }
 
 bool render_path_base_ssaa4() {
@@ -344,16 +343,16 @@ void render_path_base_draw_taa(char *bufa, char *bufb) {
 		render_path_draw_shader("Scene/copy_pass/copy_pass");
 	}
 
-	render_path_base_swap_buf(bufb);
+	render_path_base_swap_buf(bufa);
 }
 
-void render_path_base_swap_buf(char *bufb) {
+void render_path_base_swap_buf(char *bufa) {
 	// Swap buf and last targets
 	render_target_t *last_target = any_map_get(render_path_render_targets, "last");
-	last_target->name            = string_copy(bufb);
-	render_target_t *buf_target  = any_map_get(render_path_render_targets, bufb);
+	last_target->name            = string_copy(bufa);
+	render_target_t *buf_target  = any_map_get(render_path_render_targets, bufa);
 	buf_target->name             = "last";
-	any_map_set(render_path_render_targets, bufb, last_target);
+	any_map_set(render_path_render_targets, bufa, last_target);
 	any_map_set(render_path_render_targets, "last", buf_target);
 	render_path_base_buf_swapped = !render_path_base_buf_swapped;
 }

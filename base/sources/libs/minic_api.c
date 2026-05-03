@@ -1441,7 +1441,6 @@ void minic_register_builtins() {
 	R(camera_object_create, "p(p)");
 	R(camera_object_build_proj, "v(p,f)");
 	R(camera_object_remove, "v(p)");
-	R(camera_object_render_frame, "v(p)");
 	R(camera_object_proj_jitter, "v(p)");
 	R(camera_object_build_mat, "v(p)");
 	R(camera_object_sphere_in_frustum, "i(p,p,f,f,f,f)");

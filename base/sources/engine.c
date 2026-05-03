@@ -1076,22 +1076,15 @@ void camera_object_remove(camera_object_t *raw) {
 	object_remove_super(raw->base);
 }
 
-void camera_object_render_frame(camera_object_t *raw) {
-	camera_object_proj_jitter(raw);
-	camera_object_build_mat(raw);
-	render_path_render_frame();
-}
-
 void camera_object_proj_jitter(camera_object_t *raw) {
 	i32 w  = render_path_current_w;
 	i32 h  = render_path_current_h;
 	raw->p = raw->no_jitter_p;
 	i32 i = raw->frame % 2;
-	f32 x = i == 0 ? -0.5 : 0.5;
-	f32 y = i == 0 ? -0.5 : 0.5;
+	f32 x = i == 0 ? -0.5 :  0.5;
+	f32 y = i == 0 ?  0.5 : -0.5;
 	raw->p.m20 += x / w;
 	raw->p.m21 += y / h;
-	raw->frame++;
 }
 
 void camera_object_build_mat(camera_object_t *raw) {
@@ -2224,7 +2217,11 @@ void scene_render_frame(void) {
 			transform_update(e->transform);
 		}
 	}
-	camera_object_render_frame(scene_camera);
+
+	camera_object_proj_jitter(scene_camera);
+	camera_object_build_mat(scene_camera);
+	render_path_render_frame();
+	scene_camera->frame++;
 }
 
 object_t *scene_add_object(object_t *parent) {
