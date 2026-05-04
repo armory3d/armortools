@@ -372,11 +372,36 @@ void gpu_end_internal() {
 }
 
 void gpu_execute_and_wait() {
+	bool in_render_pass = (render_pass_encoder != NULL);
+	if (in_render_pass) {
+		wgpuRenderPassEncoderEnd(render_pass_encoder);
+		wgpuRenderPassEncoderRelease(render_pass_encoder);
+		render_pass_encoder = NULL;
+	}
+
 	WGPUCommandBuffer command_buffer = wgpuCommandEncoderFinish(command_encoder, NULL);
 	wgpuQueueSubmit(queue, 1, &command_buffer);
 	wgpuCommandBufferRelease(command_buffer);
 	wgpuCommandEncoderRelease(command_encoder);
 	command_encoder = wgpuDeviceCreateCommandEncoder(device, NULL);
+
+	if (in_render_pass) {
+		for (size_t i = 0; i < (size_t)current_render_targets_count; ++i) {
+			current_color_attachment_infos[i].loadOp = WGPULoadOp_Load;
+		}
+		if (current_depth_buffer != NULL) {
+			current_depth_attachment_info.depthLoadOp = WGPULoadOp_Load;
+		}
+		WGPURenderPassDescriptor render_pass_desc = {
+		    .colorAttachmentCount   = (uint32_t)current_render_targets_count,
+		    .colorAttachments       = current_color_attachment_infos,
+		    .depthStencilAttachment = current_depth_buffer ? &current_depth_attachment_info : NULL,
+		};
+		render_pass_encoder   = wgpuCommandEncoderBeginRenderPass(command_encoder, &render_pass_desc);
+		gpu_texture_t *target = current_render_targets[0];
+		gpu_viewport(0, 0, target->width, target->height);
+		gpu_scissor(0, 0, target->width, target->height);
+	}
 }
 
 void gpu_present_internal() {
@@ -421,12 +446,12 @@ void gpu_set_pipeline_internal(gpu_pipeline_t *pipeline) {
 
 void gpu_set_vertex_buffer(gpu_buffer_t *buffer) {
 	current_vb = buffer;
-	wgpuRenderPassEncoderSetVertexBuffer(render_pass_encoder, 0, buffer->impl.buf, 0, buffer->count * buffer->stride);
+	wgpuRenderPassEncoderSetVertexBuffer(render_pass_encoder, 0, buffer->impl.buf, 0, buffer->impl.allocated_size);
 }
 
 void gpu_set_index_buffer(gpu_buffer_t *buffer) {
 	current_ib = buffer;
-	wgpuRenderPassEncoderSetIndexBuffer(render_pass_encoder, buffer->impl.buf, WGPUIndexFormat_Uint32, 0, buffer->count * buffer->stride);
+	wgpuRenderPassEncoderSetIndexBuffer(render_pass_encoder, buffer->impl.buf, WGPUIndexFormat_Uint32, 0, buffer->impl.allocated_size);
 }
 
 void gpu_get_render_target_pixels(gpu_texture_t *render_target, uint8_t *data) {
@@ -762,9 +787,10 @@ void gpu_vertex_buffer_init(gpu_buffer_t *buffer, int count, gpu_vertex_structur
 		buffer->stride += gpu_vertex_data_size(structure->elements[i].data);
 	}
 
-	WGPUBufferDescriptor desc = {.size = buffer->count * buffer->stride, .usage = WGPUBufferUsage_Vertex, .mappedAtCreation = true};
-	buffer->impl.buf          = wgpuDeviceCreateBuffer(device, &desc);
-	buffer->impl.mem          = malloc(buffer->count * buffer->stride);
+	WGPUBufferDescriptor desc   = {.size = buffer->count * buffer->stride, .usage = WGPUBufferUsage_Vertex | WGPUBufferUsage_CopyDst};
+	buffer->impl.buf            = wgpuDeviceCreateBuffer(device, &desc);
+	buffer->impl.mem            = malloc(buffer->count * buffer->stride);
+	buffer->impl.allocated_size = buffer->count * buffer->stride;
 }
 
 void *gpu_vertex_buffer_lock(gpu_buffer_t *buffer) {
@@ -772,16 +798,17 @@ void *gpu_vertex_buffer_lock(gpu_buffer_t *buffer) {
 }
 
 void gpu_vertex_buffer_unlock(gpu_buffer_t *buffer) {
-	wgpuBufferUnmap2(buffer->impl.buf, buffer->impl.mem, 0, buffer->count * buffer->stride);
+	wgpuQueueWriteBuffer(queue, buffer->impl.buf, 0, buffer->impl.mem, buffer->count * buffer->stride);
 }
 
 void gpu_index_buffer_init(gpu_buffer_t *buffer, int count) {
 	buffer->count  = count;
 	buffer->stride = sizeof(uint32_t);
 
-	WGPUBufferDescriptor desc = {.size = buffer->count * buffer->stride, .usage = WGPUBufferUsage_Index, .mappedAtCreation = true};
-	buffer->impl.buf          = wgpuDeviceCreateBuffer(device, &desc);
-	buffer->impl.mem          = malloc(buffer->count * buffer->stride);
+	WGPUBufferDescriptor desc   = {.size = buffer->count * buffer->stride, .usage = WGPUBufferUsage_Index | WGPUBufferUsage_CopyDst};
+	buffer->impl.buf            = wgpuDeviceCreateBuffer(device, &desc);
+	buffer->impl.mem            = malloc(buffer->count * buffer->stride);
+	buffer->impl.allocated_size = buffer->count * buffer->stride;
 }
 
 void *gpu_index_buffer_lock(gpu_buffer_t *buffer) {
@@ -789,7 +816,7 @@ void *gpu_index_buffer_lock(gpu_buffer_t *buffer) {
 }
 
 void gpu_index_buffer_unlock(gpu_buffer_t *buffer) {
-	wgpuBufferUnmap2(buffer->impl.buf, buffer->impl.mem, 0, buffer->count * buffer->stride);
+	wgpuQueueWriteBuffer(queue, buffer->impl.buf, 0, buffer->impl.mem, buffer->count * buffer->stride);
 }
 
 void gpu_constant_buffer_init(gpu_buffer_t *buffer, int size) {
