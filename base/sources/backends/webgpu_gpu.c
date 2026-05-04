@@ -851,7 +851,7 @@ char *gpu_device_name() {
 bool gpu_bc7_supported(int width, int height, gpu_texture_format_t format) {
 	bool bc7_supported = false;
 #ifdef WITH_BC7
-	bc7_supported = wgpuDeviceHasFeature(device, WGPUFeatureName_TextureCompressionBC);
+	// bc7_supported = wgpuDeviceHasFeature(device, WGPUFeatureName_TextureCompressionBC);
 #endif
 	return bc7_supported && format == GPU_TEXTURE_FORMAT_RGBA32 && width >= 2048 && height >= 2048 && (width & (width - 1)) == 0 &&
 	       (height & (height - 1)) == 0;

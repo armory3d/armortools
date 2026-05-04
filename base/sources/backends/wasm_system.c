@@ -179,7 +179,7 @@ iron_window_mode_t iron_window_get_mode() {
 
 volatile uint64_t iron_net_bytes_downloaded = 0;
 
-#define MAX_CALLBACKS 32
+#define MAX_CALLBACKS 512
 
 static struct {
 	iron_https_callback_t callback;

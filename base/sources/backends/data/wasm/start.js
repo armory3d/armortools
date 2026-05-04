@@ -13,6 +13,7 @@ let wgpu_free_ids   = [];
 let file_buffer     = null;
 let file_buffer_pos = 0;
 let file_dropped    = null;
+let virtual_fs      = new Map();
 let config_json     = "";
 
 function ptr_to_id(ptr) {
@@ -624,6 +625,17 @@ async function init() {
 				if (read_string(filename) === "/./data/config.json" || read_string(filename) === "/./data//config.json") { ////
 					str = config_json;
 				}
+				else if (file_dropped != null) {
+					file_buffer_pos = 0;
+					file_buffer     = file_dropped;
+					file_dropped    = null;
+					return 1;
+				}
+				else if (virtual_fs.has(read_string(filename))) {
+					file_buffer_pos = 0;
+					file_buffer     = virtual_fs.get(read_string(filename));
+					return 1;
+				}
 				else {
 					let req = new XMLHttpRequest();
 					req.open("GET", read_string(filename), false);
@@ -635,16 +647,10 @@ async function init() {
 					str = req.response;
 				}
 				file_buffer_pos = 0;
-				if (file_dropped != null) {
-					file_buffer  = file_dropped;
-					file_dropped = null;
-				}
-				else {
-					file_buffer  = new ArrayBuffer(str.length);
-					let buf_view = new Uint8Array(file_buffer);
-					for (let i = 0; i < str.length; ++i) {
-						buf_view[i] = str.charCodeAt(i);
-					}
+				file_buffer  = new ArrayBuffer(str.length);
+				let buf_view = new Uint8Array(file_buffer);
+				for (let i = 0; i < str.length; ++i) {
+					buf_view[i] = str.charCodeAt(i);
 				}
 				return 1;
 			},
@@ -753,27 +759,31 @@ async function init() {
 				worker.postMessage({ wasm_module: module, memory, func_ptr, param_ptr, done_ptr });
 			},
 			js_net_request : function(purl_base, purl_path, pdata, port, method, callback_id, callbackdata, pdst_path) {
-				let url_base    = read_string(purl_base);
-				let url_path    = read_string(purl_path);
-				let dst_path    = pdst_path !== 0 ? read_string(pdst_path) : null;
-				let url         = `https://${url_base}:${port}/${url_path}`;
-				let options     = {method : 'GET', headers : {}};
-				fetch(url, options)
-					.then(response => {
-						if (dst_path) {
-						}
-						else {
-							return response.text();
-						}
-					})
-					.then(text => {
-						let buffer_ptr = 0;
-						if (text !== null) {
-							buffer_ptr = instance.exports.wasm_malloc(text.length + 1);
-							write_string(buffer_ptr, text);
-						}
-						instance.exports.wasm_net_callback(callback_id, buffer_ptr);
-					});
+				let url_base = read_string(purl_base);
+				let url_path = read_string(purl_path);
+				let dst_path = pdst_path !== 0 ? read_string(pdst_path) : null;
+				let url      = `https://${url_base}:${port}/${url_path}`;
+				let options  = {method : 'GET', headers : {}};
+				if (dst_path) {
+					fetch(url, options)
+						.then(response => response.arrayBuffer())
+						.then(buffer => {
+							virtual_fs.set(dst_path, buffer);
+							instance.exports.wasm_net_callback(callback_id, 0);
+						});
+				}
+				else {
+					fetch(url, options)
+						.then(response => response.text())
+						.then(text => {
+							let buffer_ptr = 0;
+							if (text !== null) {
+								buffer_ptr = instance.exports.wasm_malloc(text.length + 1);
+								write_string(buffer_ptr, text);
+							}
+							instance.exports.wasm_net_callback(callback_id, buffer_ptr);
+						});
+				}
 			},
 		}
 	});

@@ -59,6 +59,8 @@ char *iron_internal_files_location(void) {
 	strcat(path, IRON_OUTDIR);
 	strcat(path, "/");
 	return path;
+#elif defined(IRON_WASM)
+	return "";
 #else
 	return fileslocation;
 #endif
@@ -162,12 +164,12 @@ bool iron_internal_file_reader_open(iron_file_reader_t *reader, const char *file
 
 #ifdef IRON_WINDOWS
 	// Drive letter or network
-	bool isAbsolute = (filename[1] == ':' && filename[2] == '\\') || (filename[0] == '\\' && filename[1] == '\\');
+	bool is_abs = (filename[1] == ':' && filename[2] == '\\') || (filename[0] == '\\' && filename[1] == '\\');
 #else
-	bool isAbsolute = filename[0] == '/';
+	bool is_abs = filename[0] == '/';
 #endif
 
-	if (isAbsolute) {
+	if (is_abs) {
 		strcpy(filepath, filename);
 	}
 	else if (fileslocation != NULL && type != IRON_FILE_TYPE_SAVE) {
@@ -353,6 +355,8 @@ void iron_create_directory(char *path) {
 	strcat(cmd, path);
 	strcat(cmd, "\"");
 	iron_sys_command(cmd);
+#elif defined(IRON_WASM)
+	(void)path;
 #else
 	char cmd[1024];
 	strcpy(cmd, "mkdir -p \"");
