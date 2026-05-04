@@ -285,15 +285,6 @@ async function init() {
 				let buffer = id_to_ptr(pbuffer);
 				buffer.unmap();
 			},
-			wgpuBufferUnmap2 : function(pbuffer, pdata, start, count) {
-				let buffer = id_to_ptr(pbuffer);
-				let ab     = buffer.getMappedRange(start, count);
-				let u8     = new Uint8Array(ab);
-				for (let i = 0; i < u8.length; ++i) {
-					u8[i] = heapu8[pdata + i];
-				}
-				buffer.unmap();
-			},
 			wgpuDeviceCreateCommandEncoder : function(pdevice, pdescriptor) {
 				let device = id_to_ptr(pdevice);
 				// WGPUCommandBufferDescriptor
@@ -756,6 +747,10 @@ async function init() {
 			},
 			js_save_dialog : function() {
 				alert("Not implemented yet.")
+			},
+			js_thread_create : function(func_ptr, param_ptr, done_ptr) {
+				const worker = new Worker('worker.js');
+				worker.postMessage({ wasm_module: module, memory, func_ptr, param_ptr, done_ptr });
 			},
 			js_net_request : function(purl_base, purl_path, pdata, port, method, callback_id, callbackdata, pdst_path) {
 				let url_base    = read_string(purl_base);

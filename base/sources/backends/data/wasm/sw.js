@@ -3,6 +3,7 @@ const ASSETS_TO_CACHE = [
 	'/index.html',
 	'/start.js',
 	'/start.wasm',
+	'/worker.js',
 	'/manifest.json',
 	'/icon.png'
 ];
