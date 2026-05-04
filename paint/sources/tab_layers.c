@@ -259,7 +259,7 @@ ui_handle_t *tab_layers_combo_object(slot_layer_t *l, bool label) {
 	if (object_handle->changed) {
 		context_set_layer(l);
 		make_material_parse_mesh_material();
-		if (l->fill_layer != NULL) { // Fill layer
+		if (l->fill_layer != NULL) {
 			sys_notify_on_next_frame(&tab_layers_combo_object_layer_clear, l);
 		}
 		else {

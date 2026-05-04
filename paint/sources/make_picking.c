@@ -15,7 +15,7 @@ fun get_nor_from_depth(p0: float3, uv: float2, invVP: float4x4, tex_step: float2
 } \
 ";
 
-void make_colorid_picker_run(node_shader_t *kong) {
+void make_picking_run(node_shader_t *kong) {
 	// Mangle vertices to form full screen triangle
 	node_shader_write_vert(kong, "output.pos = float4(-1.0 + float((vertex_id() & 1) << 2), -1.0 + float((vertex_id() & 2) << 1), 0.0, 1.0);");
 
@@ -66,5 +66,14 @@ void make_colorid_picker_run(node_shader_t *kong) {
 			node_shader_write_frag(kong, "output[2] = sample_lod(texpaint_pack, sampler_linear, tex_coord_inp, 0.0);");
 			node_shader_write_frag(kong, "output[3].rg = tex_coord_inp.xy;");
 		}
+	}
+	else if (g_context->tool == TOOL_TYPE_CURSOR) {
+		kong->frag_out = "float4";
+		node_shader_add_texture(kong, "gbuffer1", NULL);
+		node_shader_add_constant(kong, "gbuffer_size: float2", "_gbuffer_size");
+		node_shader_add_constant(kong, "inp: float4", "_input_brush");
+		node_shader_write_frag(
+		    kong, "var inp_co: uint2 = uint2(uint(constants.inp.x * constants.gbuffer_size.x), uint(constants.inp.y * constants.gbuffer_size.y));");
+		node_shader_write_frag(kong, "output = gbuffer1[inp_co];");
 	}
 }

@@ -320,7 +320,7 @@ void tab_meshes_append_shape(char *mesh_name) {
 		raw         = scene_raw->mesh_datas->buffer[0];
 	}
 
-	util_mesh_pack_uvs(raw->vertex_arrays->buffer[2]->values);
+	// util_mesh_pack_uvs(raw->vertex_arrays->buffer[2]->values);
 	mesh_data_t *md   = mesh_data_create(raw);
 	md->_->handle     = md->name;
 	mesh_object_t *mo = scene_add_mesh_object(md, project_paint_objects->buffer[0]->material, NULL);

@@ -283,6 +283,50 @@ void render_path_paint_commands_paint(bool dilation) {
 			g_context->material = _material;
 		}
 	}
+	else if (g_context->tool == TOOL_TYPE_CURSOR) {
+		if (g_context->pick_object_id) {
+			viewport_mode_t _viewport_mode = g_context->viewport_mode;
+			g_context->viewport_mode       = VIEWPORT_MODE_OBJECT_ID;
+			make_material_parse_mesh_material();
+			render_path_base_draw_gbuffer();
+			g_context->viewport_mode = _viewport_mode;
+			make_material_parse_mesh_material();
+
+			g_context->pdirty = 1;
+			make_material_parse_paint_material(false);
+			render_path_set_target("texpaint_picker", NULL, NULL, GPU_CLEAR_NONE, 0, 0.0);
+			render_path_bind_target("gbuffer1", "gbuffer1");
+			render_path_bind_target("gbuffer2", "gbuffer2");
+			render_path_paint_draw_fullscreen_triangle("paint");
+
+			render_target_t *rt    = any_map_get(render_path_render_targets, "texpaint_picker");
+			buffer_t        *pixel = gpu_get_texture_pixels(rt->_image);
+			if (buffer_get_u8(pixel, 3) > 0) {
+#ifdef IRON_BGRA
+				i32 r_byte = buffer_get_u8(pixel, 2);
+#else
+				i32 r_byte = buffer_get_u8(pixel, 0);
+#endif
+				i32 index = r_byte - 1;
+				if (index >= 0 && index < project_paint_objects->length) {
+
+					// tab_scene_select_object(project_paint_objects->buffer[index]);
+					g_context->paint_object = project_paint_objects->buffer[index];
+
+					// g_context->layer->object_mask = index + 1;
+					// context_set_layer(g_context->layer);
+					// make_material_parse_mesh_material();
+					// layers_set_object_mask();
+
+					base_redraw_status();
+				}
+			}
+
+			g_context->pick_object_id = false;
+			make_material_parse_paint_material(false);
+			render_path_base_draw_gbuffer();
+		}
+	}
 	else {
 		char *texpaint = string("texpaint%d", tid);
 		if (g_context->tool == TOOL_TYPE_BAKE && g_context->brush_time == sys_delta()) {
@@ -575,7 +619,6 @@ bool render_path_paint_paint_enabled() {
 	bool fill_layer = g_context->layer->fill_layer != NULL && g_context->tool != TOOL_TYPE_PICKER && g_context->tool != TOOL_TYPE_MATERIAL &&
 	                  g_context->tool != TOOL_TYPE_COLORID;
 	bool group_layer = slot_layer_is_group(g_context->layer);
-	bool cursor      = g_context->tool == TOOL_TYPE_CURSOR;
 
 	// Skip paint if material references this layer and wants to paint into it at the same time
 	bool               self_in_material = false;
@@ -589,7 +632,7 @@ bool render_path_paint_paint_enabled() {
 		}
 	}
 
-	return !fill_layer && !group_layer && !g_context->foreground_event && !cursor && !self_in_material;
+	return !fill_layer && !group_layer && !g_context->foreground_event && !self_in_material;
 }
 
 void render_path_paint_live_brush_dirty() {

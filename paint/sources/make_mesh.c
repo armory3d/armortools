@@ -614,11 +614,16 @@ node_shader_context_t *make_mesh_run(material_t *data, i32 layer_pass) {
 		}
 		else if (g_context->viewport_mode == VIEWPORT_MODE_OBJECT_ID) {
 			node_shader_add_constant(kong, "object_id: float", "_object_id");
-			node_shader_write_frag(kong, "var obid: float = constants.object_id + 1.0 / 255.0;");
-			node_shader_write_frag(kong, "var id_r: float = frac(sin(dot(float2(obid, obid * 20.0), float2(12.9898, 78.233))) * 43758.5453);");
-			node_shader_write_frag(kong, "var id_g: float = frac(sin(dot(float2(obid * 20.0, obid), float2(12.9898, 78.233))) * 43758.5453);");
-			node_shader_write_frag(kong, "var id_b: float = frac(sin(dot(float2(obid, obid * 40.0), float2(12.9898, 78.233))) * 43758.5453);");
-			node_shader_write_frag(kong, "output[1] = float4(id_r, id_g, id_b, 1.0);");
+			if (g_context->pick_object_id) {
+				node_shader_write_frag(kong, "output[1] = float4((constants.object_id + 1.0) / 255.0, 0.0, 0.0, 1.0);");
+			}
+			else {
+				node_shader_write_frag(kong, "var obid: float = constants.object_id + 1.0 / 255.0;");
+				node_shader_write_frag(kong, "var id_r: float = frac(sin(dot(float2(obid, obid * 20.0), float2(12.9898, 78.233))) * 43758.5453);");
+				node_shader_write_frag(kong, "var id_g: float = frac(sin(dot(float2(obid * 20.0, obid), float2(12.9898, 78.233))) * 43758.5453);");
+				node_shader_write_frag(kong, "var id_b: float = frac(sin(dot(float2(obid, obid * 40.0), float2(12.9898, 78.233))) * 43758.5453);");
+				node_shader_write_frag(kong, "output[1] = float4(id_r, id_g, id_b, 1.0);");
+			}
 		}
 		else if (g_context->viewport_mode == VIEWPORT_MODE_MASK &&
 		         (slot_layer_get_masks(g_context->layer, true) != NULL || slot_layer_is_mask(g_context->layer))) {

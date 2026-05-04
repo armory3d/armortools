@@ -262,6 +262,7 @@ typedef struct context {
 	bool                        picker_select_material;
 	struct ui_handle           *picker_mask_handle;
 	bool                        pick_pos_nor_tex;
+	bool                        pick_object_id;
 	f32                         posx_picked;
 	f32                         posy_picked;
 	f32                         posz_picked;

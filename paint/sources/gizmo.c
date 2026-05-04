@@ -24,7 +24,8 @@ void gizmo_update() {
 	}
 
 	if (is_object) {
-		gizmo->transform->loc = paint_object->transform->loc;
+		gizmo->transform->loc =
+		    (vec4_t){transform_world_x(paint_object->transform), transform_world_y(paint_object->transform), transform_world_z(paint_object->transform), 1.0};
 	}
 	else if (is_decal) {
 		gizmo->transform->loc = (vec4_t){g_context->layer->decal_mat.m30, g_context->layer->decal_mat.m31, g_context->layer->decal_mat.m32, 1.0};
@@ -50,13 +51,22 @@ void gizmo_update() {
 		if (g_context->translate_x || g_context->translate_y || g_context->translate_z || g_context->scale_x || g_context->scale_y || g_context->scale_z ||
 		    g_context->rotate_x || g_context->rotate_y || g_context->rotate_z) {
 			if (g_context->translate_x) {
-				paint_object->transform->loc.x = g_context->gizmo_drag;
+				mat4_t p                     = paint_object->parent != NULL ? mat4_inv(paint_object->parent->transform->world) : mat4_identity();
+				vec4_t v                     = {g_context->gizmo_drag, gizmo_v.y, gizmo_v.z, 1.0};
+				v                            = vec4_apply_mat4(v, p);
+				paint_object->transform->loc = (vec4_t){v.x, v.y, v.z, 1.0};
 			}
 			else if (g_context->translate_y) {
-				paint_object->transform->loc.y = g_context->gizmo_drag;
+				mat4_t p                     = paint_object->parent != NULL ? mat4_inv(paint_object->parent->transform->world) : mat4_identity();
+				vec4_t v                     = {gizmo_v.x, g_context->gizmo_drag, gizmo_v.z, 1.0};
+				v                            = vec4_apply_mat4(v, p);
+				paint_object->transform->loc = (vec4_t){v.x, v.y, v.z, 1.0};
 			}
 			else if (g_context->translate_z) {
-				paint_object->transform->loc.z = g_context->gizmo_drag;
+				mat4_t p                     = paint_object->parent != NULL ? mat4_inv(paint_object->parent->transform->world) : mat4_identity();
+				vec4_t v                     = {gizmo_v.x, gizmo_v.y, g_context->gizmo_drag, 1.0};
+				v                            = vec4_apply_mat4(v, p);
+				paint_object->transform->loc = (vec4_t){v.x, v.y, v.z, 1.0};
 			}
 			else if (g_context->scale_x) {
 				paint_object->transform->scale.x += g_context->gizmo_drag - g_context->gizmo_drag_last;
@@ -224,6 +234,9 @@ void gizmo_update() {
 					g_context->gizmo_offset  = 0.0;
 					g_context->gizmo_started = true;
 				}
+			}
+			else if (mouse_view_x() < base_w()) {
+				g_context->pick_object_id = true;
 			}
 		}
 	}

@@ -74,6 +74,7 @@ context_t *context_create() {
 	c->picker_select_material  = false;
 	c->picker_mask_handle      = ui_handle_create();
 	c->pick_pos_nor_tex        = false;
+	c->pick_object_id          = false;
 	c->posx_picked             = 0.0;
 	c->posy_picked             = 0.0;
 	c->posz_picked             = 0.0;

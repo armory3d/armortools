@@ -73,12 +73,12 @@ f32 uniforms_ext_f32_link(object_t *object, material_data_t *mat, char *link) {
 		return val;
 	}
 	else if (string_equals(link, "_brush_scale")) {
-		if (g_context->tool == TOOL_TYPE_CURSOR) {
-			i32 atlas_w      = config_get_scene_atlas_res();
-			i32 item_w       = config_get_layer_res();
-			i32 atlas_stride = atlas_w / (float)item_w;
-			return atlas_stride;
-		}
+		// if (g_context->tool == TOOL_TYPE_CURSOR) {
+		// 	i32 atlas_w      = config_get_scene_atlas_res();
+		// 	i32 item_w       = config_get_layer_res();
+		// 	i32 atlas_stride = atlas_w / (float)item_w;
+		// 	return atlas_stride;
+		// }
 		bool fill = g_context->layer->fill_layer != NULL;
 		f32  val  = (fill ? g_context->layer->scale : g_context->brush_scale) * g_context->brush_nodes_scale;
 		return val;

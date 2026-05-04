@@ -387,7 +387,7 @@ any_map_t                *keymap_get_default();
 void                      ui_view2d_init();
 void                      ui_view2d_render(void *_);
 void                      ui_view2d_update(void *_);
-void                      make_colorid_picker_run(node_shader_t *kong);
+void                      make_picking_run(node_shader_t *kong);
 void                      sim_init();
 void                      sim_update();
 void                      sim_play();

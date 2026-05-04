@@ -403,7 +403,7 @@ void base_render(void *_) {
 		base_init_undo_layers();
 		make_material_parse_mesh_material();
 		make_material_parse_paint_material(true);
-		g_context->ddirty          = 0;
+		g_context->ddirty = 0;
 	}
 	else if (g_context->frame == 3) {
 		g_context->ddirty = 3;
@@ -638,7 +638,7 @@ void ui_base_menu_draw_viewport_mode() {
 	mode_handle->i           = g_context->viewport_mode;
 	ui_text(tr("Viewport Mode"), UI_ALIGN_RIGHT, 0x00000000);
 
-	string_array_t *modes = base_get_viewport_modes();
+	string_array_t *modes     = base_get_viewport_modes();
 	string_array_t *shortcuts = base_get_viewport_mode_shortcuts();
 	if (gpu_raytrace_supported()) {
 		any_array_push(modes, tr("Path Traced"));
@@ -757,6 +757,8 @@ void ui_base_update_ui() {
 		return;
 	}
 
+	gizmo_update();
+
 	// Same mapping for paint and rotate (predefined in touch keymap)
 	if (context_in_3d_view()) {
 		char *paint_key  = any_map_get(config_keymap, "action_paint");
@@ -843,6 +845,7 @@ void ui_base_update_ui() {
 		g_context->brush_stencil_x += (old_w - new_w) / (float)base_w() / 2.0;
 		g_context->brush_stencil_y += (old_h - new_h) / (float)base_h() / 2.0;
 	}
+
 	bool set_clone_source =
 	    g_context->tool == TOOL_TYPE_CLONE &&
 	    operator_shortcut(string("%s+%s", any_map_get(config_keymap, "set_clone_source"), any_map_get(config_keymap, "action_paint")), SHORTCUT_TYPE_DOWN);
@@ -913,9 +916,9 @@ void ui_base_update_ui() {
 		}
 	}
 	else if (g_context->brush_time > 0) { // Brush released
-		g_context->brush_time       = 0;
-		g_context->prev_paint_vec_x = -1;
-		g_context->prev_paint_vec_y = -1;
+		g_context->brush_time        = 0;
+		g_context->prev_paint_vec_x  = -1;
+		g_context->prev_paint_vec_y  = -1;
 		g_context->brush_blend_dirty = true; // Update brush mask
 
 		g_context->layer_preview_dirty = true; // Update layer preview
@@ -999,8 +1002,6 @@ void ui_base_update_ui() {
 	else if (redo_pressed) {
 		history_redo();
 	}
-
-	gizmo_update();
 }
 
 void ui_base_update(void *_) {

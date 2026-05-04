@@ -6,7 +6,7 @@ bool make_paint_is_raytraced_bake() {
 }
 
 string_array_t *make_paint_color_attachments() {
-	if (g_context->tool == TOOL_TYPE_COLORID) {
+	if (g_context->tool == TOOL_TYPE_COLORID || g_context->tool == TOOL_TYPE_CURSOR) {
 		string_array_t *res = any_array_create_from_raw(
 		    (void *[]){
 		        "RGBA32",
@@ -168,8 +168,9 @@ node_shader_context_t *make_paint_run(material_t *data, material_context_t *matc
 		make_bake_set_color_writes(con_paint);
 	}
 
-	if (g_context->tool == TOOL_TYPE_COLORID || g_context->tool == TOOL_TYPE_PICKER || g_context->tool == TOOL_TYPE_MATERIAL) {
-		make_colorid_picker_run(kong);
+	if (g_context->tool == TOOL_TYPE_COLORID || g_context->tool == TOOL_TYPE_PICKER || g_context->tool == TOOL_TYPE_MATERIAL ||
+	    g_context->tool == TOOL_TYPE_CURSOR) {
+		make_picking_run(kong);
 		con_paint->data->shader_from_source = true;
 		gpu_create_shaders_from_kong(node_shader_get(kong), &con_paint->data->vertex_shader, &con_paint->data->fragment_shader,
 		                             &con_paint->data->_->vertex_shader_size, &con_paint->data->_->fragment_shader_size);
@@ -345,14 +346,10 @@ node_shader_context_t *make_paint_run(material_t *data, material_context_t *matc
 			node_shader_write_frag(kong, "var opacity: float = mat_opacity;");
 		}
 
-		if (g_context->tool == TOOL_TYPE_CURSOR) {
-			node_shader_write_frag(kong, "opacity = 1.0;");
+		if (g_context->layer->fill_layer == NULL) {
+			node_shader_write_frag(kong, "opacity *= constants.brush_opacity;");
 		}
-		else {
-			if (g_context->layer->fill_layer == NULL) {
-				node_shader_write_frag(kong, "opacity *= constants.brush_opacity;");
-			}
-		}
+
 		if (g_context->material->paint_emis) {
 			node_shader_write_frag(kong, string("var emis: float = %s;", emis));
 		}
@@ -515,7 +512,7 @@ node_shader_context_t *make_paint_run(material_t *data, material_context_t *matc
 		node_shader_write_frag(kong,
 		                       "output[0] = float4((basecol * t_blur + sample_undo.rgb * sample_undo.a * (1.0 - t_blur)) / max(out_a, 0.0000001), out_a);");
 	}
-	else if (g_context->material->paint_opac_mode == OPACITY_MODE_TRANSLUC || g_context->tool == TOOL_TYPE_CURSOR || g_context->layer->fill_layer != NULL) {
+	else if (g_context->material->paint_opac_mode == OPACITY_MODE_TRANSLUC || g_context->layer->fill_layer != NULL) {
 		node_shader_write_frag(kong, string("output[0] = float4(%s, %s);",
 		                                    make_material_blend_mode(kong, g_context->brush_blending, "sample_undo.rgb", "basecol", "str"), "mat_opacity"));
 	}

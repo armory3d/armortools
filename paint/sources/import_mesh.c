@@ -1,8 +1,8 @@
 
 #include "global.h"
 
-bool         import_mesh_clear_layers     = true;
-bool         import_mesh_needs_unwrap     = false;
+bool import_mesh_clear_layers = true;
+bool import_mesh_needs_unwrap = false;
 
 void import_mesh_run(char *path, bool _clear_layers, bool replace_existing) {
 	if (!path_is_mesh(path)) {
@@ -216,11 +216,7 @@ void import_mesh_add_mesh(raw_mesh_t *mesh) {
 	}
 
 	mesh_data_t *raw = import_mesh_raw_mesh(mesh);
-
-	if (g_context->tool == TOOL_TYPE_CURSOR) {
-		util_mesh_pack_uvs(mesh->texa);
-	}
-
+	// util_mesh_pack_uvs(mesh->texa);
 	mesh_data_t *md = mesh_data_create(raw);
 
 	mesh_object_t *object = scene_add_mesh_object(md, g_context->paint_object->material, g_context->paint_object->base);

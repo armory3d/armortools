@@ -16,9 +16,9 @@ void render_path_raytrace_commands(bool use_live_layer) {
 			render_path_raytrace_init_shader = true;
 		}
 		char *ext = "";
-		if (g_context->tool == TOOL_TYPE_CURSOR) {
-			ext = "forge_";
-		}
+		// if (g_context->tool == TOOL_TYPE_CURSOR) {
+		// 	ext = "forge_";
+		// }
 		char *mode = g_config->pathtrace_mode == PATHTRACE_MODE_FAST ? "core" : "full";
 		render_path_raytrace_raytrace_init(string("raytrace_brute_%s%s%s", ext, mode, render_path_raytrace_ext), true);
 		gc_unroot(render_path_raytrace_last_envmap);
@@ -110,10 +110,6 @@ void render_path_raytrace_commands(bool use_live_layer) {
 	g_context->rdirty--;
 
 	// g_context->ddirty = 1; // _RENDER
-
-	if (g_context->tool == TOOL_TYPE_CURSOR) {
-		g_context->ddirty = 1;
-	}
 }
 
 void render_path_raytrace_build_data() {
@@ -123,12 +119,12 @@ void render_path_raytrace_build_data() {
 
 	mesh_object_t *mo = !context_layer_filter_used() ? g_context->merged_object : g_context->paint_object;
 
-	if (g_context->tool == TOOL_TYPE_CURSOR) {
-		render_path_raytrace_transform = mo->base->transform->world_unpack;
-	}
-	else {
-		render_path_raytrace_transform = mat4_identity();
-	}
+	// if (g_context->tool == TOOL_TYPE_CURSOR) {
+	// 	render_path_raytrace_transform = mo->base->transform->world_unpack;
+	// }
+	// else {
+	render_path_raytrace_transform = mat4_identity();
+	// }
 
 	f32 sc = mo->base->transform->scale.x * mo->data->scale_pos;
 	if (mo->base->parent != NULL) {
@@ -162,18 +158,18 @@ void render_path_raytrace_raytrace_init(char *shader_name, bool build) {
 	{
 		_gpu_raytrace_as_init();
 
-		if (g_context->tool == TOOL_TYPE_CURSOR) {
-			for (i32 i = 0; i < project_paint_objects->length; ++i) {
-				mesh_object_t *po = project_paint_objects->buffer[i];
-				if (!po->base->visible) {
-					continue;
-				}
-				_gpu_raytrace_as_add(po->data->_->vertex_buffer, po->data->_->index_buffer, po->base->transform->world_unpack);
-			}
-		}
-		else {
-			_gpu_raytrace_as_add(render_path_raytrace_vb, render_path_raytrace_ib, render_path_raytrace_transform);
-		}
+		// if (g_context->tool == TOOL_TYPE_CURSOR) {
+		// 	for (i32 i = 0; i < project_paint_objects->length; ++i) {
+		// 		mesh_object_t *po = project_paint_objects->buffer[i];
+		// 		if (!po->base->visible) {
+		// 			continue;
+		// 		}
+		// 		_gpu_raytrace_as_add(po->data->_->vertex_buffer, po->data->_->index_buffer, po->base->transform->world_unpack);
+		// 	}
+		// }
+		// else {
+		_gpu_raytrace_as_add(render_path_raytrace_vb, render_path_raytrace_ib, render_path_raytrace_transform);
+		// }
 
 		gpu_buffer_t *vb_full = g_context->merged_object->data->_->vertex_buffer;
 		gpu_buffer_t *ib_full = g_context->merged_object->data->_->index_buffer;
