@@ -243,6 +243,7 @@ void tab_meshes_draw_context_menu() {
 	h             = ui_handle(__ID__);
 	h->text       = string_copy(o->base->name);
 	o->base->name = string_copy(ui_text_input(h, "", UI_ALIGN_LEFT, true, false));
+	o->data->name = string_copy(o->base->name);
 
 	if (ui->changed || ui->is_typing) {
 		ui_menu_keep_open = true;
