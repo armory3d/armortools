@@ -61,6 +61,11 @@ static VkBuffer           upload_buffer;
 static int                upload_buffer_size = 0;
 static VkDeviceMemory     upload_mem;
 static bool               is_amd = false;
+#ifdef IRON_ANDROID
+static bool unified_memory = true;
+#else
+static bool unified_memory = false;
+#endif
 
 void     iron_vulkan_get_instance_extensions(const char **extensions, int *index);
 VkBool32 iron_vulkan_get_physical_device_presentation_support(VkPhysicalDevice physical_device, uint32_t queue_family_index);
@@ -1091,7 +1096,6 @@ void gpu_begin_internal(gpu_clear_t flags, unsigned color, float depth) {
 
 	gpu_viewport(0, 0, current_render_targets[0]->width, current_render_targets[0]->height);
 	gpu_scissor(0, 0, current_render_targets[0]->width, current_render_targets[0]->height);
-
 }
 
 void gpu_end_internal() {
@@ -1857,6 +1861,17 @@ void gpu_vertex_buffer_init(gpu_buffer_t *buffer, int count, gpu_vertex_structur
 }
 
 void *gpu_vertex_buffer_lock(gpu_buffer_t *buffer) {
+
+	if (unified_memory && buffer->cpu_write) {
+		if (buffer->impl.buf == NULL) {
+			_gpu_buffer_init(&buffer->impl.buf, &buffer->impl.mem, buffer->count * buffer->stride, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+			                 VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+		}
+		void *p;
+		vkMapMemory(device, buffer->impl.mem, 0, buffer->count * buffer->stride, 0, (void **)&p);
+		return p;
+	}
+
 	if (!buffer->cpu_write || buffer->impl.cpu_buf == NULL) {
 		_gpu_buffer_init(&buffer->impl.cpu_buf, &buffer->impl.cpu_mem, buffer->count * buffer->stride, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
 		                 VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
@@ -1867,6 +1882,12 @@ void *gpu_vertex_buffer_lock(gpu_buffer_t *buffer) {
 }
 
 void gpu_vertex_buffer_unlock(gpu_buffer_t *buffer) {
+
+	if (unified_memory && buffer->cpu_write) {
+		vkUnmapMemory(device, buffer->impl.mem);
+		return;
+	}
+
 	if (!buffer->cpu_write || buffer->impl.buf == NULL) {
 		_gpu_buffer_init(&buffer->impl.buf, &buffer->impl.mem, buffer->count * buffer->stride,
 		                 VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
