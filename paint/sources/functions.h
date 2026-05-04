@@ -280,7 +280,7 @@ void                      render_path_preview_commands_decal();
 node_shader_context_t    *make_paint_run(material_t *data, material_context_t *matcon);
 node_shader_context_t    *make_mesh_preview_run(material_t *data, material_context_t *matcon);
 void                      import_mesh_run(char *path, bool _clear_layers, bool replace_existing);
-void                      import_mesh_finish_import();
+void                      import_mesh_finish_import(void *_);
 void                      import_mesh_make_mesh(raw_mesh_t *mesh);
 void                      import_mesh_add_mesh(raw_mesh_t *mesh);
 mesh_data_t              *import_mesh_raw_mesh(raw_mesh_t *mesh);
