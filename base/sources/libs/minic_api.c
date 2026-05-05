@@ -1,9 +1,12 @@
 #include "iron_array.h"
 #include "iron_string.h"
+#include "iron_input.h"
+#include "engine.h"
 #include "minic.h"
 #include <math.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -838,10 +841,20 @@ void minic_register_builtins() {
 	static const char *quat_fields[] = {"x", "y", "z", "w"};
 	static const char *mat3_fields[] = {"m00", "m01", "m02", "m10", "m11", "m12", "m20", "m21", "m22"};
 	static const char *mat4_fields[] = {"m00", "m01", "m02", "m03", "m10", "m11", "m12", "m13", "m20", "m21", "m22", "m23", "m30", "m31", "m32", "m33"};
-	minic_register_struct("vec2_t", vec2_fields, 2);
-	minic_register_struct("vec3_t", vec3_fields, 3);
-	minic_register_struct("vec4_t", vec4_fields, 4);
-	minic_register_struct("quat_t", quat_fields, 4);
+	static const int vec2_offsets[] = {(int)offsetof(vec2_t, x), (int)offsetof(vec2_t, y)};
+	static const int vec3_offsets[] = {(int)offsetof(vec3_t, x), (int)offsetof(vec3_t, y), (int)offsetof(vec3_t, z)};
+	static const int vec4_offsets[] = {(int)offsetof(vec4_t, x), (int)offsetof(vec4_t, y), (int)offsetof(vec4_t, z), (int)offsetof(vec4_t, w)};
+	static const minic_type_t vec2_types[] = {MINIC_T_FLOAT, MINIC_T_FLOAT};
+	static const minic_type_t vec3_types[] = {MINIC_T_FLOAT, MINIC_T_FLOAT, MINIC_T_FLOAT};
+	static const minic_type_t vec4_types[] = {MINIC_T_FLOAT, MINIC_T_FLOAT, MINIC_T_FLOAT, MINIC_T_FLOAT};
+	minic_register_struct_native("vec2_t", vec2_fields, vec2_offsets, vec2_types, NULL, 2);
+	minic_register_struct_native("vec3_t", vec3_fields, vec3_offsets, vec3_types, NULL, 3);
+	minic_register_struct_native("vec4_t", vec4_fields, vec4_offsets, vec4_types, NULL, 4);
+	minic_register_struct_native("quat_t", quat_fields, vec4_offsets, vec4_types, NULL, 4);
+	minic_struct_set_size("vec2_t", (int)sizeof(vec2_t));
+	minic_struct_set_size("vec3_t", (int)sizeof(vec3_t));
+	minic_struct_set_size("vec4_t", (int)sizeof(vec4_t));
+	minic_struct_set_size("quat_t", (int)sizeof(quat_t));
 	minic_register_struct("mat3_t", mat3_fields, 9);
 	minic_register_struct("mat4_t", mat4_fields, 16);
 
@@ -1456,7 +1469,7 @@ void minic_register_builtins() {
 	R(camera_object_remove, "v(p)");
 	R(camera_object_proj_jitter, "v(p)");
 	R(camera_object_build_mat, "v(p)");
-	R(camera_object_sphere_in_frustum, "i(p,p,f,f,f,f)");
+	R(camera_object_sphere_in_frustum, "b(p,p,f,f,f,f)");
 
 	// frustum_plane
 	R(frustum_plane_create, "p()");
@@ -1513,16 +1526,16 @@ void minic_register_builtins() {
 	R(mesh_object_create, "p(p,p)");
 	R(mesh_object_set_data, "v(p,p)");
 	R(mesh_object_remove, "v(p)");
-	R(mesh_object_cull_material, "i(p,p)");
-	R(mesh_object_cull_mesh, "i(p,p,p)");
+	R(mesh_object_cull_material, "b(p,p)");
+	R(mesh_object_cull_mesh, "b(p,p,p)");
 	R(mesh_object_render, "v(p,p,p)");
-	R(mesh_object_valid_context, "i(p,p,p)");
+	R(mesh_object_valid_context, "b(p,p,p)");
 
 	// uniforms
 	R(uniforms_set_context_consts, "v(p,p)");
 	R(uniforms_set_obj_consts, "v(p,p)");
 	R(uniforms_bind_render_target, "v(p,p,p)");
-	R(uniforms_set_context_const, "i(i,p)");
+	R(uniforms_set_context_const, "b(i,p)");
 	R(uniforms_set_obj_const, "v(p,i,p)");
 	R(uniforms_set_material_consts, "v(p,p)");
 	R(current_material, "p(p)");
@@ -1544,8 +1557,8 @@ void minic_register_builtins() {
 	R(data_delete_image, "v(p)");
 	R(data_delete_video, "v(p)");
 	R(data_delete_font, "v(p)");
-	R(data_is_abs, "i(p)");
-	R(data_is_up, "i(p)");
+	R(data_is_abs, "b(p)");
+	R(data_is_up, "b(p)");
 	R(data_resolve_path, "p(p)");
 	R(data_path, "p()");
 
@@ -1573,7 +1586,7 @@ void minic_register_builtins() {
 	R(scene_embed_data, "v(p)");
 
 	// render_path
-	R(render_path_ready, "i()");
+	R(render_path_ready, "b()");
 	R(render_path_render_frame, "v()");
 	R(render_path_set_target, "v(p,p,p,i,i,f)");
 	R(render_path_end, "v()");
@@ -1640,15 +1653,15 @@ void minic_register_builtins() {
 	R(ui_handle_create, "p()");
 	R(ui_nest, "p(p,i)");
 	R(ui_set_scale, "v(f)");
-	R(ui_get_hover, "i(f)");
-	R(ui_get_released, "i(f)");
-	R(ui_input_in_rect, "i(f,f,f,f)");
+	R(ui_get_hover, "b(f)");
+	R(ui_get_released, "b(f)");
+	R(ui_input_in_rect, "b(f,f,f,f)");
 	R(ui_fill, "v(f,f,f,f,i)");
 	R(ui_rect, "v(f,f,f,f,i,f)");
 	R(ui_line_count, "i(p)");
 	R(ui_extract_line, "p(p,i)");
 	R(ui_extract_line_off, "p(p,i,p)");
-	R(ui_is_visible, "i(f)");
+	R(ui_is_visible, "b(f)");
 	R(ui_end_element, "v()");
 	R(ui_end_element_of_size, "v(f)");
 	R(ui_end_input, "v()");
@@ -1683,7 +1696,7 @@ void minic_register_builtins() {
 	R(ui_text_area, "p(p,i,i,p,i)");
 	R(ui_begin_menu, "v()");
 	R(ui_end_menu, "v()");
-	R(ui_menubar_button, "i(p)");
+	R(ui_menubar_button, "b(p)");
 	R(ui_hsv_to_rgb, "v(f,f,f,p)");
 	R(ui_rgb_to_hsv, "v(f,f,f,p)");
 	R(ui_color_r, "i(i)");
@@ -1805,11 +1818,11 @@ void minic_register_builtins() {
 	R(draw_get_color, "i()");
 	R(draw_set_pipeline, "v(p)");
 	minic_register_native("draw_set_transform", mn_draw_set_transform);
-	R(draw_set_font, "i(p,i)");
+	R(draw_set_font, "b(p,i)");
 	R(draw_font_init, "v(p)");
 	R(draw_font_destroy, "v(p)");
 	R(draw_font_13, "v(p)");
-	R(draw_font_has_glyph, "i(i)");
+	R(draw_font_has_glyph, "b(i)");
 	R(draw_font_add_glyph, "v(i)");
 	R(draw_font_init_glyphs, "v(i,i)");
 	R(draw_font_count, "i(p)");
@@ -1824,7 +1837,7 @@ void minic_register_builtins() {
 	R(string_alloc, "p(i)");
 	R(string_copy, "p(p)");
 	R(string_length, "i(p)");
-	R(string_equals, "i(p,p)");
+	R(string_equals, "b(p,p)");
 	R(i32_to_string, "p(i)");
 	R(i32_to_string_hex, "p(i)");
 	R(i64_to_string, "p(i)");
@@ -1842,30 +1855,30 @@ void minic_register_builtins() {
 	R(string_from_char_code, "p(i)");
 	R(char_code_at, "i(p,i)");
 	R(char_at, "p(p,i)");
-	R(starts_with, "i(p,p)");
-	R(ends_with, "i(p,p)");
+	R(starts_with, "b(p,p)");
+	R(ends_with, "b(p,p)");
 	R(to_lower_case, "p(p)");
 	R(to_upper_case, "p(p)");
 	R(trim_end, "p(p)");
 	R(string_utf8_decode, "i(p,p)");
 
 	// iron_file
-	R(iron_file_reader_open, "i(p,p,i)");
-	R(iron_file_reader_close, "i(p)");
+	R(iron_file_reader_open, "b(p,p,i)");
+	R(iron_file_reader_close, "b(p)");
 	R(iron_file_reader_read, "i(p,p,i)");
 	R(iron_file_reader_size, "i(p)");
 	R(iron_file_reader_pos, "i(p)");
-	R(iron_file_reader_seek, "i(p,i)");
+	R(iron_file_reader_seek, "b(p,i)");
 	R(iron_internal_set_files_location, "v(p)");
 	R(iron_internal_files_location, "p()");
-	R(iron_internal_file_reader_open, "i(p,p,i)");
-	R(iron_file_writer_open, "i(p,p)");
+	R(iron_internal_file_reader_open, "b(p,p,i)");
+	R(iron_file_writer_open, "b(p,p)");
 	R(iron_file_writer_write, "v(p,p,i)");
 	R(iron_file_writer_close, "v(p)");
 	R(iron_read_directory, "p(p)");
 	R(iron_create_directory, "v(p)");
-	R(iron_is_directory, "i(p)");
-	R(iron_file_exists, "i(p)");
+	R(iron_is_directory, "b(p)");
+	R(iron_file_exists, "b(p)");
 	R(iron_delete_file, "v(p)");
 	R(iron_file_save_bytes, "v(p,p,i)");
 	R(iron_file_download, "v(p,p,i,p)");
@@ -2007,11 +2020,11 @@ void minic_register_builtins() {
 	R(mouse_end_frame, "v()");
 	R(mouse_reset, "v()");
 	R(mouse_button_index, "i(p)");
-	R(mouse_down, "i(p)");
-	R(mouse_down_any, "i()");
-	R(mouse_started, "i(p)");
-	R(mouse_started_any, "i()");
-	R(mouse_released, "i(p)");
+	R(mouse_down, "b(p)");
+	R(mouse_down_any, "b()");
+	R(mouse_started, "b(p)");
+	R(mouse_started_any, "b()");
+	R(mouse_released, "b(p)");
 	R(mouse_down_listener, "v(i,i,i)");
 	R(mouse_up_listener, "v(i,i,i)");
 	R(mouse_move_listener, "v(i,i,i,i)");
@@ -2020,11 +2033,11 @@ void minic_register_builtins() {
 	R(mouse_view_y, "f()");
 	R(keyboard_end_frame, "v()");
 	R(keyboard_reset, "v()");
-	R(keyboard_down, "i(p)");
-	R(keyboard_started, "i(p)");
-	R(keyboard_started_any, "i()");
-	R(keyboard_released, "i(p)");
-	R(keyboard_repeat, "i(p)");
+	R(keyboard_down, "b(p)");
+	R(keyboard_started, "b(p)");
+	R(keyboard_started_any, "b()");
+	R(keyboard_released, "b(p)");
+	R(keyboard_repeat, "b(p)");
 	R(keyboard_key_code, "p(i)");
 	R(keyboard_down_listener, "v(i)");
 	R(keyboard_up_listener, "v(i)");

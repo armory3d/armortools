@@ -1,5 +1,5 @@
 
-#ifdef is_debug
+#ifndef NDEBUG
 
 #include "minic.h"
 #include <stdio.h>
