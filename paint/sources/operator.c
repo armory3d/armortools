@@ -25,7 +25,7 @@ void operator_update() {
 }
 
 bool operator_shortcut(char *s, shortcut_type_t type) {
-	if (string_equals(s, "") || base_player_lock) {
+	if (string_equals(s, "") || g_config->workspace == WORKSPACE_PLAYER) {
 		return false;
 	}
 	bool shift = string_index_of(s, "shift") >= 0;

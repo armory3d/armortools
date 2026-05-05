@@ -41,7 +41,7 @@ void config_load() {
 }
 
 void config_save() {
-	if (base_player_lock) {
+	if (g_config->workspace == WORKSPACE_PLAYER) {
 		return;
 	}
 

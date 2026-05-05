@@ -20,6 +20,7 @@ i32            base_appx               = 0;
 i32            base_appy               = 0;
 i32            base_last_window_width  = 0;
 i32            base_last_window_height = 0;
+bool           base_start_arm_found    = false;
 i32            _base_material_count;
 i32            ui_base_border_started         = 0;
 ui_handle_t   *ui_base_border_handle          = NULL;
@@ -58,6 +59,9 @@ void base_on_drop_files(char *drop_path) {
 }
 
 void base_init_on_start_arm(void *_) {
+	if (base_start_arm_found) {
+		import_arm_run_project(project_filepath);
+	}
 	g_context->tool = TOOL_TYPE_CURSOR;
 	// Auto-run script
 	if (g_project->script_datas != NULL && g_project->script_datas->length > 0) {
@@ -312,7 +316,7 @@ void base_update(void *_) {
 
 	compass_update();
 
-	if (base_player_lock) {
+	if (g_config->workspace == WORKSPACE_PLAYER) {
 		player_update();
 	}
 }
@@ -1079,11 +1083,9 @@ void ui_base_update(void *_) {
 	if (keyboard_started(any_map_get(config_keymap, "view_distract_free")) || (keyboard_started("escape") && !ui_base_show && !ui_box_show)) {
 		ui_base_toggle_distract_free();
 	}
-	// if (g_config->experimental && keyboard_started("f5") && g_config->workspace != WORKSPACE_PLAYER) {
-	// 	g_config->workspace = WORKSPACE_PLAYER;
-	// 	base_update_workspace();
-	// }
-	if (g_config->experimental && keyboard_started("f5") && !base_player_lock) {
+	if (g_config->experimental && keyboard_started("f5") && g_config->workspace != WORKSPACE_PLAYER) {
+		// g_config->workspace = WORKSPACE_PLAYER;
+		// base_update_workspace();
 		base_run_in_player();
 	}
 
@@ -1724,11 +1726,12 @@ void base_init() {
 		gc_unroot(project_filepath);
 		project_filepath = start_arm;
 		gc_root(project_filepath);
+		base_start_arm_found = true;
 		args_player = true;
 	}
 
 	if (args_player) {
-		base_player_lock = true;
+		// base_player_lock = true;
 		g_config->workspace = WORKSPACE_PLAYER;
 		base_update_workspace();
 		make_material_parse_paint_material(true);
@@ -2079,9 +2082,9 @@ tab_draw_array_t_array_t *ui_base_init_hwnd_tabs() {
 }
 
 void ui_base_toggle_distract_free() {
-	// if (base_player_lock) {
-		// return;
-	// }
+	if (base_player_lock) {
+		return;
+	}
 
 	ui_base_show = !ui_base_show;
 	if (ui_base_show) {
