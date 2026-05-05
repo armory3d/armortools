@@ -31,7 +31,9 @@ void tab_plugins_draw(ui_handle_t *htab) {
 }
 
 #ifdef WITH_PLUGINS
+
 void proc_uv_unwrap(void *mesh);
+
 void plugin_uv_unwrap_button() {
 	util_mesh_merge(project_paint_objects);
 	if (g_context->merged_object == NULL) {
@@ -111,20 +113,18 @@ void plugin_uv_unwrap_button() {
 	util_mesh_merge(NULL);
 }
 
-// void plugin_uv_unwrap_per_object_button() {
-// 	for (i32 i = 0; i < project_paint_objects->length; ++i) {
-// 		mesh_data_t *md = project_paint_objects->buffer[i]->data;
-// 		raw_mesh_t  *mesh =
-// 		    GC_ALLOC_INIT(raw_mesh_t,
-// 		                  {.posa = md->vertex_arrays->buffer[0]->values, .nora = md->vertex_arrays->buffer[1]->values, .texa = NULL, .inda = md->index_array});
-// 		proc_uv_unwrap(mesh);
-// 		md->vertex_arrays->buffer[0]->values = mesh->posa;
-// 		md->vertex_arrays->buffer[1]->values = mesh->nora;
-// 		md->vertex_arrays->buffer[2]->values = mesh->texa;
-// 		md->index_array                      = mesh->inda;
-// 		mesh_data_build(md);
-// 	}
-// 	util_mesh_merge(NULL);
-// }
+void plugin_uv_unwrap_per_object_button(mesh_object_t *mo) {
+		mesh_data_t *md = mo->data;
+		raw_mesh_t  *mesh =
+		    GC_ALLOC_INIT(raw_mesh_t,
+		                  {.posa = md->vertex_arrays->buffer[0]->values, .nora = md->vertex_arrays->buffer[1]->values, .texa = NULL, .inda = md->index_array});
+		proc_uv_unwrap(mesh);
+		md->vertex_arrays->buffer[0]->values = mesh->posa;
+		md->vertex_arrays->buffer[1]->values = mesh->nora;
+		md->vertex_arrays->buffer[2]->values = mesh->texa;
+		md->index_array                      = mesh->inda;
+		mesh_data_build(md);
+
+}
 
 #endif

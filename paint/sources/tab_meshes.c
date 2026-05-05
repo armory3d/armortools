@@ -49,6 +49,10 @@ void tab_meshes_draw_context_menu() {
 		sim_duplicate();
 	}
 
+	if (ui_menu_button(tr("UV Unwrap"), "", ICON_NONE)) {
+		plugin_uv_unwrap_per_object_button(o);
+	}
+
 	g_context->selected_object = o->base;
 	ui_handle_t *h             = ui_handle(__ID__);
 
