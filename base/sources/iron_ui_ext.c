@@ -873,6 +873,14 @@ char *ui_text_area(ui_handle_t *handle, int align, bool editable, char *label, b
 			current->highlight_anchor = current->cursor_x;
 			ui_remove_chars_at(lines, ui_line_pos(lines, handle->i + 1) - 1, 1); // Remove '\n' at end of current line
 		}
+		// Tab indent
+		if (editable && current->key_code == KEY_CODE_TAB) {
+			int pos = ui_line_pos(lines, handle->i) + current->cursor_x;
+			ui_insert_chars_at(lines, pos, "    ");
+			current->cursor_x += 4;
+			current->highlight_anchor = current->cursor_x;
+			current->cursor_sticky_x  = current->cursor_x;
+		}
 		strcpy(current->text_selected, ui_extract_line(lines, handle->i));
 	}
 
