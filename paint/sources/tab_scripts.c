@@ -86,8 +86,10 @@ void tab_scripts_draw(ui_handle_t *htab) {
 		        -70,
 		        -70,
 		        -140,
+		        -90,
 		    },
-		    3);
+		    4);
+
 		ui_row(row);
 
 		if (ui_icon_button(tr("Run"), ICON_PLAY, UI_ALIGN_CENTER)) {
@@ -107,10 +109,12 @@ void tab_scripts_draw(ui_handle_t *htab) {
 		ui_handle_t *file_handle = ui_handle(__ID__);
 		ui_combo(file_handle, ar, tr("File"), false, UI_ALIGN_LEFT, true);
 
-#ifdef is_debug
-		if (ui_icon_button("Run Tests", ICON_PLAY, UI_ALIGN_CENTER)) {
+#ifndef NDEBUG
+		if (g_config->experimental && ui_icon_button("Run Tests", ICON_PLAY, UI_ALIGN_CENTER)) {
 			minic_tests();
 		}
+#else
+		ui_end_element();
 #endif
 
 		ui_end_sticky();
