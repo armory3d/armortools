@@ -114,17 +114,34 @@ void plugin_uv_unwrap_button() {
 }
 
 void plugin_uv_unwrap_per_object_button(mesh_object_t *mo) {
-		mesh_data_t *md = mo->data;
-		raw_mesh_t  *mesh =
-		    GC_ALLOC_INIT(raw_mesh_t,
-		                  {.posa = md->vertex_arrays->buffer[0]->values, .nora = md->vertex_arrays->buffer[1]->values, .texa = NULL, .inda = md->index_array});
-		proc_uv_unwrap(mesh);
-		md->vertex_arrays->buffer[0]->values = mesh->posa;
-		md->vertex_arrays->buffer[1]->values = mesh->nora;
-		md->vertex_arrays->buffer[2]->values = mesh->texa;
-		md->index_array                      = mesh->inda;
-		mesh_data_build(md);
+	mesh_data_t *md      = mo->data;
+	i16_array_t *md_posa = md->vertex_arrays->buffer[0]->values;
+	i16_array_t *md_nora = md->vertex_arrays->buffer[1]->values;
+	u32_array_t *md_inda = md->index_array;
 
+	i16_array_t *posa = malloc(sizeof(i16_array_t));
+	posa->length = posa->capacity = md_posa->length;
+	posa->buffer                  = malloc(md_posa->length * sizeof(i16));
+	memcpy(posa->buffer, md_posa->buffer, md_posa->length * sizeof(i16));
+
+	i16_array_t *nora = malloc(sizeof(i16_array_t));
+	nora->length = nora->capacity = md_nora->length;
+	nora->buffer                  = malloc(md_nora->length * sizeof(i16));
+	memcpy(nora->buffer, md_nora->buffer, md_nora->length * sizeof(i16));
+
+	u32_array_t *inda = malloc(sizeof(u32_array_t));
+	inda->length = inda->capacity = md_inda->length;
+	inda->buffer                  = malloc(md_inda->length * sizeof(u32));
+	memcpy(inda->buffer, md_inda->buffer, md_inda->length * sizeof(u32));
+
+	raw_mesh_t *mesh = GC_ALLOC_INIT(raw_mesh_t, {.posa = posa, .nora = nora, .texa = NULL, .inda = inda});
+
+	proc_uv_unwrap(mesh);
+	md->vertex_arrays->buffer[0]->values = mesh->posa;
+	md->vertex_arrays->buffer[1]->values = mesh->nora;
+	md->vertex_arrays->buffer[2]->values = mesh->texa;
+	md->index_array                      = mesh->inda;
+	mesh_data_build(md);
 }
 
 #endif
