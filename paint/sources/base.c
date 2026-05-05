@@ -58,7 +58,6 @@ void base_on_drop_files(char *drop_path) {
 }
 
 void base_init_on_start_arm(void *_) {
-	import_arm_run_project(project_filepath);
 	g_context->tool = TOOL_TYPE_CURSOR;
 	// Auto-run script
 	if (g_project->script_datas != NULL && g_project->script_datas->length > 0) {
@@ -312,6 +311,10 @@ void base_update(void *_) {
 	}
 
 	compass_update();
+
+	if (base_player_lock) {
+		player_update();
+	}
 }
 
 gpu_texture_t *base_get_drag_image() {
@@ -438,6 +441,7 @@ void base_render(void *_) {
 
 	bool using_menu = ui_menu_show && mouse_y > ui_header_h;
 	base_ui_enabled = !ui_box_show && !using_menu && ui->combo_selected_handle == NULL;
+
 	if (ui_box_show) {
 		ui_box_render();
 	}
@@ -1079,7 +1083,7 @@ void ui_base_update(void *_) {
 	// 	g_config->workspace = WORKSPACE_PLAYER;
 	// 	base_update_workspace();
 	// }
-	if (g_config->experimental && keyboard_started("f5")) {
+	if (g_config->experimental && keyboard_started("f5") && !base_player_lock) {
 		base_run_in_player();
 	}
 
@@ -1724,11 +1728,11 @@ void base_init() {
 	}
 
 	if (args_player) {
-		sys_notify_on_next_frame(&base_init_on_start_arm, NULL);
-		make_material_parse_paint_material(true);
+		base_player_lock = true;
 		g_config->workspace = WORKSPACE_PLAYER;
 		base_update_workspace();
-		base_player_lock = true;
+		make_material_parse_paint_material(true);
+		sys_notify_on_next_frame(&base_init_on_start_arm, NULL);
 	}
 }
 
@@ -2075,9 +2079,9 @@ tab_draw_array_t_array_t *ui_base_init_hwnd_tabs() {
 }
 
 void ui_base_toggle_distract_free() {
-	if (base_player_lock) {
-		return;
-	}
+	// if (base_player_lock) {
+		// return;
+	// }
 
 	ui_base_show = !ui_base_show;
 	if (ui_base_show) {
@@ -2273,9 +2277,11 @@ void base_update_workspace() {
 		float h                                          = UI_ELEMENT_H() + UI_ELEMENT_OFFSET() + 2;
 		g_config->layout->buffer[LAYOUT_SIZE_SIDEBAR_H0] = iron_window_height() - h;
 		g_config->layout->buffer[LAYOUT_SIZE_SIDEBAR_H1] = h;
+		render_path_resize();
 	}
 	else if (g_config->workspace == WORKSPACE_PLAYER) {
 		ui_base_show = false;
+		render_path_resize();
 	}
 
 	base_resize();

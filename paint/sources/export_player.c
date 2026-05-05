@@ -109,6 +109,11 @@ static char *export_player_index = "\
 static void export_player_run_on_download(char *url, buffer_t *ab) {}
 
 void export_player_run(char *path) {
+	#ifndef NDEBUG
+	console_error(tr("Not available in debug build"));
+	return;
+	#endif
+
 	char *path_base = path_base_dir(path);
 
 	char *_project_filepath        = string_copy(project_filepath);
@@ -143,6 +148,6 @@ void export_player_run(char *path) {
 		file_copy(player_bin_src, player_bin_to);
 	}
 	else if (box_export_h_export_player_target->i == PLAYER_TARGET_MACOS) {
-		console_error("Not implemented");
+		console_error(tr("Not implemented"));
 	}
 }

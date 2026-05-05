@@ -168,10 +168,10 @@ void tab_meshes_draw_context_menu() {
 	}
 
 	if (changed) {
-		rot                                        = vec4_mult(rot, 3.141592 / 180.0);
-		g_context->selected_object->transform->rot = quat_from_euler(rot.x, rot.y, rot.z);
-		transform_build_matrix(g_context->selected_object->transform);
-		transform_compute_dim(g_context->selected_object->transform);
+		rot    = vec4_mult(rot, 3.141592 / 180.0);
+		t->rot = quat_from_euler(rot.x, rot.y, rot.z);
+		transform_build_matrix(t);
+		transform_compute_dim(t);
 
 		// physics_body_t *pb = any_imap_get(physics_body_object_map, g_context->selected_object->uid);
 		// if (pb != NULL) {

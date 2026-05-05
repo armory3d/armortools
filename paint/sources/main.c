@@ -150,6 +150,7 @@
 #include "physics_sim.c"
 #include "physics_world.c"
 #include "pipes.c"
+#include "player.c"
 #include "plugin.c"
 #include "project.c"
 #include "render_path_base.c"

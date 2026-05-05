@@ -448,6 +448,7 @@ void      util_mesh_pack_uvs(i16_array_t *texa);
 void      ui_header_init();
 void      ui_header_render_ui();
 void      ui_header_draw_tool_properties();
+void      player_update();
 plugin_t *plugin_create();
 void      plugin_start(char *plugin);
 void      plugin_stop(char *plugin);

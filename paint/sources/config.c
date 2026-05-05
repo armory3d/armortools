@@ -41,6 +41,10 @@ void config_load() {
 }
 
 void config_save() {
+	if (base_player_lock) {
+		return;
+	}
+
 	// Use system application data folder
 	// when running from protected path like "Program Files"
 	char *path;
