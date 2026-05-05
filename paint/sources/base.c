@@ -2063,9 +2063,9 @@ tab_draw_array_t_array_t *ui_base_init_hwnd_tabs() {
 	}
 #endif
 
-	if (g_config->experimental) {
-		any_array_push(a0, _draw_callback_create(tab_debug_draw));
-	}
+#ifdef is_debug
+	any_array_push(a0, _draw_callback_create(tab_debug_draw));
+#endif
 
 	tab_draw_array_t_array_t *r = any_array_create_from_raw((void *[]){}, 0);
 	any_array_push(r, a0);
