@@ -121,9 +121,6 @@ void sim_duplicate() {
 		pbdup->mass           = pb->mass;
 		physics_body_init(pbdup, dup->base);
 	}
-
-	_tab_scene_paint_object_length++;
-	tab_scene_sort();
 }
 
 void sim_delete() {
@@ -131,6 +128,4 @@ void sim_delete() {
 	array_remove(project_paint_objects, so);
 	mesh_object_remove(so);
 	sim_remove_body(so->base->uid);
-	_tab_scene_paint_object_length--;
-	tab_scene_sort();
 }

@@ -406,7 +406,6 @@ ui_handle_t    *ui_box_hwnd;
 bool            ui_box_click_to_hide           = true;
 i32             ui_box_modalw                  = 400;
 i32             ui_box_modalh                  = 170;
-i32             _tab_scene_paint_object_length = 1;
 ui_handle_t    *tab_layers_layer_name_handle;
 gpu_texture_t  *util_uv_uvmap                    = NULL;
 bool            util_uv_uvmap_cached             = false;

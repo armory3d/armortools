@@ -309,8 +309,6 @@ void render_path_paint_commands_paint(bool dilation) {
 #endif
 				i32 index = r_byte - 1;
 				if (index >= 0 && index < project_paint_objects->length) {
-
-					// tab_scene_select_object(project_paint_objects->buffer[index]);
 					g_context->paint_object = project_paint_objects->buffer[index];
 
 					// g_context->layer->object_mask = index + 1;

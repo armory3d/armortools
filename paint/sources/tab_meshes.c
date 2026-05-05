@@ -335,11 +335,6 @@ void tab_meshes_append_shape(char *mesh_name) {
 	mo->base->raw     = o;
 	any_map_set(data_cached_meshes, md->_->handle, md);
 	any_array_push(project_paint_objects, mo);
-
-	// tab_scene_import_mesh_done();
-	// sys_notify_on_next_frame(function(mo: mesh_object_t) {
-	// 	tab_scene_select_object(mo);
-	// }, mo);
 }
 
 void tab_meshes_draw_append_shape() {

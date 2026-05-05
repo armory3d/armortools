@@ -274,6 +274,7 @@ void                      history_delete_material_group(node_group_t *group);
 void                      tab_scripts_set(char *s);
 void                      tab_scripts_draw(ui_handle_t *htab);
 ui_text_coloring_t       *tab_scripts_get_text_coloring();
+void                      tab_debug_draw(ui_handle_t *htab);
 void                      render_path_preview_init();
 void                      render_path_preview_commands_preview();
 void                      render_path_preview_commands_decal();
@@ -562,9 +563,6 @@ void                         ui_box_show_custom(void (*commands)(void), i32 mw, 
 void                         ui_box_hide();
 void                         tab_meshes_draw(ui_handle_t *htab);
 void                         tab_meshes_reset_preview_map();
-void                         tab_scene_select_object(mesh_object_t *mo);
-void                         tab_scene_sort();
-void                         tab_scene_import_mesh_done();
 void                         util_particle_init();
 void                         util_particle_init_physics();
 void                         tab_layers_draw(ui_handle_t *htab);

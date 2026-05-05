@@ -27,16 +27,6 @@ void tab_plugins_draw(ui_handle_t *htab) {
 				minic_ctx_call_fn(p->ctx, p->on_ui, NULL, 0);
 			}
 		}
-
-#ifdef is_debug
-		string_array_t *rt_keys = map_keys(render_path_render_targets);
-		array_sort(rt_keys, NULL);
-		for (i32 i = 0; i < rt_keys->length; ++i) {
-			render_target_t *rt = any_map_get(render_path_render_targets, rt_keys->buffer[i]);
-			ui_text(rt_keys->buffer[i], UI_ALIGN_LEFT, 0x00000000);
-			ui_image(rt->_image, 0xffffffff, -1.0);
-		}
-#endif
 	}
 }
 
