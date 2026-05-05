@@ -21,6 +21,7 @@ typedef enum {
 	MINIC_T_BOOL  = 3, // used in extern-call ABI, stored as INT in vals
 	MINIC_T_CHAR  = 4, // used in extern-call ABI, stored as INT in vals
 	MINIC_T_VOID  = 5, // void return only; stored as INT/0 in vals
+	MINIC_T_EMBED = 6, // embedded struct field; field address is the pointer (no indirection)
 } minic_type_t;
 
 typedef struct {

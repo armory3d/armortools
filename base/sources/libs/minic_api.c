@@ -644,6 +644,7 @@ extern char      *project_filepath;
 extern context_t *g_context;
 extern config_t  *g_config;
 extern project_t *g_project;
+extern mesh_object_t_array_t *project_paint_objects;
 char             *project_filepath_get() {
     return project_filepath;
 }
@@ -659,6 +660,16 @@ config_t *script_get_config() {
 project_t *script_get_project() {
 	return g_project;
 }
+
+object_t *script_get_object(char *s) {
+	for (int i = 0; i < project_paint_objects->length; ++i) {
+		if (string_equals(project_paint_objects->buffer[i]->base->name, s)) {
+			return project_paint_objects->buffer[i]->base;
+		}
+	}
+	return NULL;
+}
+
 void           context_set_viewport_shader(void *viewport_shader);
 void           context_set_viewport_mode(int mode);
 void           context_set_camera_controls(int i);
@@ -1204,17 +1215,19 @@ void minic_register_builtins() {
 	minic_struct_field_set_type("mesh_object_t", "material", "material_data_t");
 
 	// transform_t
-	static const char *transform_fields[]  = {"scale_world", "dirty", "object", "radius"};
+	static const char *transform_fields[]  = {"loc", "scale_world", "dirty", "object", "radius"};
 	static const int   transform_offsets[] = {
+        (int)offsetof(transform_t, loc),
         (int)offsetof(transform_t, scale_world),
         (int)offsetof(transform_t, dirty),
         (int)offsetof(transform_t, object),
         (int)offsetof(transform_t, radius),
     };
-	static const minic_type_t transform_types[]       = {MINIC_T_FLOAT, MINIC_T_INT, MINIC_T_PTR, MINIC_T_FLOAT};
-	static const minic_type_t transform_deref_types[] = {MINIC_T_FLOAT, MINIC_T_INT, MINIC_T_PTR, MINIC_T_FLOAT};
-	minic_register_struct_native("transform_t", transform_fields, transform_offsets, transform_types, transform_deref_types, 4);
+	static const minic_type_t transform_types[]       = {MINIC_T_EMBED, MINIC_T_FLOAT, MINIC_T_INT, MINIC_T_PTR, MINIC_T_FLOAT};
+	static const minic_type_t transform_deref_types[] = {MINIC_T_PTR,   MINIC_T_FLOAT, MINIC_T_INT, MINIC_T_PTR, MINIC_T_FLOAT};
+	minic_register_struct_native("transform_t", transform_fields, transform_offsets, transform_types, transform_deref_types, 5);
 	minic_struct_set_size("transform_t", (int)sizeof(transform_t));
+	minic_struct_field_set_type("transform_t", "loc", "vec4_t");
 	minic_struct_field_set_type("transform_t", "object", "object_t");
 
 	// camera_object_t
@@ -2034,6 +2047,7 @@ void minic_register_builtins() {
 	R(script_get_context, "p()");
 	R(script_get_config, "p()");
 	R(script_get_project, "p()");
+	R(script_get_object, "p(p)");
 	R(context_set_viewport_shader, "v(p)");
 	R(context_set_viewport_mode, "v(i)");
 	R(context_set_camera_controls, "v(i)");

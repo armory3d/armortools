@@ -177,6 +177,18 @@ const char *test11 = " \n\
     } \n\
 ";
 
+const char *test12 = " \n\
+    float main() { \n\
+        object_t *o = scene_get_child(\"Scene\"); \n\
+        transform_t *t = o->transform; \n\
+        vec4_t *v = &t->loc; \n\
+        v->x = 3.0; \n\
+        v->y = 2.0; \n\
+        if (t->loc.x == 3.0 && v->y == 2.0) { return 0.0; } \n\
+        return 1.0; \n\
+    } \n\
+";
+
 #define MINIC_TEST(n, src)                                                            \
 	do {                                                                              \
 		minic_ctx_t *_c = minic_eval(src);                                            \
@@ -203,6 +215,7 @@ void minic_tests() {
 	MINIC_TEST(9, test9);
 	MINIC_TEST(10, test10);
 	MINIC_TEST(11, test11);
+	MINIC_TEST(12, test12);
 }
 
 #endif

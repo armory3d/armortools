@@ -6,6 +6,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdarg.h>
 #include <string.h>
 
 // ████████╗ ██████╗ ██╗  ██╗███████╗███╗   ██╗
@@ -690,8 +691,13 @@ static int minic_current_line(minic_env_t *e) {
 	return line;
 }
 
-static void minic_error(minic_env_t *e, const char *msg) {
+static void minic_error(minic_env_t *e, const char *fmt, ...) {
 	if (!e->error) {
+		char msg[256];
+		va_list args;
+		va_start(args, fmt);
+		vsnprintf(msg, sizeof(msg), fmt, args);
+		va_end(args);
 		fprintf(stderr, "%s:%d: error: %s (got %s)\n", e->filename, minic_current_line(e), msg, minic_tok_name(e->lex.cur.type));
 		e->error     = true;
 		e->returning = true;
@@ -700,9 +706,7 @@ static void minic_error(minic_env_t *e, const char *msg) {
 
 static void minic_expect(minic_env_t *e, minic_tok_type_t expected) {
 	if (e->lex.cur.type != expected) {
-		char msg[128];
-		snprintf(msg, sizeof(msg), "expected %s", minic_tok_name(expected));
-		minic_error(e, msg);
+		minic_error(e, "expected %s", minic_tok_name(expected));
 		return;
 	}
 	minic_lex_next(&e->lex);
@@ -940,8 +944,7 @@ static int minic_struct_field_idx(minic_struct_def_t *def, const char *field) {
 static minic_val_t minic_struct_field_get_base(minic_env_t *e, void *base, minic_struct_def_t *def, const char *field) {
 	int idx = minic_struct_field_idx(def, field);
 	if (idx < 0) {
-		fprintf(stderr, "%s:%d: error: struct '%s' has no field '%s'\n", e->filename, minic_current_line(e), def->name, field);
-		e->error = e->returning = true;
+		minic_error(e, "struct '%s' has no field '%s'", def->name, field);
 		return minic_val_int(0);
 	}
 	bool in_arena = (base != NULL && (minic_u8 *)base >= minic_active_mem && (minic_u8 *)base < minic_active_mem + MINIC_MEM_SIZE);
@@ -950,6 +953,8 @@ static minic_val_t minic_struct_field_get_base(minic_env_t *e, void *base, minic
 		switch (def->field_native_types[idx]) {
 		case MINIC_T_PTR:
 			return minic_val_typed_ptr(*(void **)p, def->field_deref_types[idx]);
+		case MINIC_T_EMBED:
+			return minic_val_typed_ptr(p, def->field_deref_types[idx]);
 		case MINIC_T_FLOAT:
 			return minic_val_float(*(float *)p);
 		default:
@@ -964,8 +969,7 @@ static minic_val_t minic_struct_field_get_base(minic_env_t *e, void *base, minic
 static void minic_struct_field_set_base(minic_env_t *e, void *base, minic_struct_def_t *def, const char *field, minic_val_t val) {
 	int idx = minic_struct_field_idx(def, field);
 	if (idx < 0) {
-		fprintf(stderr, "%s:%d: error: struct '%s' has no field '%s'\n", e->filename, minic_current_line(e), def->name, field);
-		e->error = e->returning = true;
+		minic_error(e, "struct '%s' has no field '%s'", def->name, field);
 		return;
 	}
 	bool in_arena = (base != NULL && (minic_u8 *)base >= minic_active_mem && (minic_u8 *)base < minic_active_mem + MINIC_MEM_SIZE);
@@ -975,6 +979,8 @@ static void minic_struct_field_set_base(minic_env_t *e, void *base, minic_struct
 		case MINIC_T_PTR:
 			*(void **)p = minic_val_to_ptr(val);
 			break;
+		case MINIC_T_EMBED:
+			break; // embedded structs are mutated through their own field accessors
 		case MINIC_T_FLOAT:
 			*(float *)p = (float)minic_val_to_d(val);
 			break;
@@ -1105,7 +1111,23 @@ static minic_val_t minic_parse_primary(minic_env_t *e) {
 		else {
 			addr = minic_var_addr(e, aname);
 		}
+		// Handle &var->field or &var.field: follow member-access chain
+		minic_struct_def_t *def = minic_var_struct(e, aname);
 		minic_lex_next(&e->lex); // Consume ident
+		while (def != NULL && (e->lex.cur.type == TOK_ARROW || e->lex.cur.type == TOK_DOT)) {
+			minic_lex_next(&e->lex); // Consume '->' or '.'
+			char field[64];
+			strncpy(field, e->lex.cur.text, 63);
+			minic_lex_next(&e->lex); // Consume field name
+			void *base = minic_val_to_ptr(addr);
+			addr = minic_struct_field_get_base(e, base, def, field);
+			// Advance def to the field's struct type for further chaining
+			int fidx = minic_struct_field_idx(def, field);
+			if (fidx >= 0 && def->field_struct_names[fidx][0] != '\0')
+				def = minic_struct_get(e, def->field_struct_names[fidx]);
+			else
+				def = NULL;
+		}
 		return addr;
 	}
 	if (e->lex.cur.type == TOK_STAR) {
@@ -1204,9 +1226,7 @@ static minic_val_t minic_parse_primary(minic_env_t *e) {
 			if (ext != NULL) {
 				return minic_dispatch(ext, args, argc);
 			}
-			fprintf(stderr, "%s:%d: error: unknown function '%s'\n", e->filename, minic_current_line(e), name);
-			e->error     = true;
-			e->returning = true;
+			minic_error(e, "unknown function '%s'", name);
 			return minic_val_int(0);
 		}
 
@@ -1217,8 +1237,7 @@ static minic_val_t minic_parse_primary(minic_env_t *e) {
 			minic_lex_next(&e->lex);
 			minic_struct_def_t *def = minic_var_struct(e, name);
 			if (def == NULL) {
-				fprintf(stderr, "%s:%d: error: '%s' is not a struct\n", e->filename, minic_current_line(e), name);
-				e->error = e->returning = true;
+				minic_error(e, "'%s' is not a struct", name);
 				return minic_val_int(0);
 			}
 			return minic_struct_field_get(e, name, def, field);
@@ -1231,8 +1250,7 @@ static minic_val_t minic_parse_primary(minic_env_t *e) {
 			minic_lex_next(&e->lex);
 			minic_struct_def_t *def = minic_var_struct(e, name);
 			if (def == NULL) {
-				fprintf(stderr, "%s:%d: error: '%s' is not a struct pointer\n", e->filename, minic_current_line(e), name);
-				e->error = e->returning = true;
+				minic_error(e, "'%s' is not a struct pointer", name);
 				return minic_val_int(0);
 			}
 			minic_val_t base_val  = minic_var_get(e, name);
@@ -1421,8 +1439,7 @@ static void minic_parse_stmt(minic_env_t *e) {
 
 		minic_struct_def_t *def = minic_struct_get(e, sname);
 		if (def == NULL) {
-			fprintf(stderr, "%s:%d: error: unknown struct '%s'\n", e->filename, minic_current_line(e), sname);
-			e->error = e->returning = true;
+			minic_error(e, "unknown struct '%s'", sname);
 			return;
 		}
 		minic_vartype_set(e, vname, sname);
@@ -1588,8 +1605,7 @@ static void minic_parse_stmt(minic_env_t *e) {
 			minic_lex_next(&e->lex);
 			minic_struct_def_t *def = minic_var_struct(e, name);
 			if (def == NULL) {
-				fprintf(stderr, "%s:%d: error: '%s' is not a struct%s\n", e->filename, minic_current_line(e), name, is_arrow ? " pointer" : "");
-				e->error = e->returning = true;
+				minic_error(e, "'%s' is not a struct%s", name, is_arrow ? " pointer" : "");
 				return;
 			}
 			void *base;
@@ -1652,9 +1668,7 @@ static void minic_parse_stmt(minic_env_t *e) {
 					minic_dispatch(ext, args, argc);
 				}
 				else {
-					fprintf(stderr, "%s:%d: error: unknown function '%s'\n", e->filename, minic_current_line(e), name);
-					e->error     = true;
-					e->returning = true;
+					minic_error(e, "unknown function '%s'", name);
 				}
 			}
 			minic_expect(e, TOK_SEMICOLON);
@@ -1963,11 +1977,7 @@ static void minic_parse_stmt(minic_env_t *e) {
 		return;
 	}
 
-	{
-		char msg[128];
-		snprintf(msg, sizeof(msg), "unexpected token at start of statement");
-		minic_error(e, msg);
-	}
+	minic_error(e, "unexpected token at start of statement");
 }
 
 static void minic_parse_block(minic_env_t *e) {
