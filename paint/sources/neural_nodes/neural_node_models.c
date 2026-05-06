@@ -17,6 +17,7 @@ void neural_node_models_init() {
                                1),
 	                       .web     = "https://huggingface.co/stable-diffusion-v1-5/stable-diffusion-v1-5",
 	                       .license = "openrail"}),
+
 	        GC_ALLOC_INIT(neural_node_model_t, {.name   = "Z-Image-Turbo",
 	                                            .memory = "4GB",
 	                                            .size   = "6.7GB",
@@ -30,6 +31,7 @@ void neural_node_models_init() {
                                                     3),
 	                                            .web     = "https://huggingface.co/armory3d/z_image_turbo",
 	                                            .license = "apache-2.0"}),
+
 	        GC_ALLOC_INIT(neural_node_model_t,
 	                      {.name   = "Qwen Image",
 	                       .memory = "13GB",
@@ -44,6 +46,7 @@ void neural_node_models_init() {
                                3),
 	                       .web     = "https://huggingface.co/unsloth/Qwen-Image-2512-GGUF",
 	                       .license = "apache-2.0"}),
+
 	        GC_ALLOC_INIT(neural_node_model_t,
 	                      {.name   = "Qwen Image Edit",
 	                       .memory = "13GB",
@@ -59,6 +62,7 @@ void neural_node_models_init() {
                                4),
 	                       .web     = "https://huggingface.co/unsloth/Qwen-Image-Edit-2511-GGUF",
 	                       .license = "apache-2.0"}),
+
 	        GC_ALLOC_INIT(neural_node_model_t,
 	                      {.name   = "Wan",
 	                       .memory = "10GB",
@@ -74,6 +78,7 @@ void neural_node_models_init() {
                                4),
 	                       .web     = "https://huggingface.co/QuantStack/Wan2.2-T2V-A14B-GGUF",
 	                       .license = "apache-2.0"}),
+
 	        GC_ALLOC_INIT(neural_node_model_t,
 	                      {.name   = "Marigold",
 	                       .memory = "6GB",
@@ -89,6 +94,7 @@ void neural_node_models_init() {
                                4),
 	                       .web     = "https://huggingface.co/armory3d/marigold-v1-1-gguf",
 	                       .license = "openrail"}),
+
 	        GC_ALLOC_INIT(neural_node_model_t, {.name   = "Real-ESRGAN",
 	                                            .memory = "1GB",
 	                                            .size   = "0.07GB",
@@ -112,8 +118,19 @@ void neural_node_models_init() {
                                                     1),
 	                                            .web     = "https://huggingface.co/armory3d/hunyuan3d21_portable",
 	                                            .license = "hunyuan3d"}),
+
+			GC_ALLOC_INIT(neural_node_model_t, {.name   = "Qwen 3.6 27B",
+	                                            .memory = "16GB",
+	                                            .size   = "15.7GB",
+	                                            .nodes  = "Text to Text",
+	                                            .urls   = any_array_create_from_raw(
+                                                    (void *[]){
+														"https://huggingface.co/unsloth/Qwen3.6-27B-GGUF/resolve/main/Qwen3.6-27B-Q4_K_M.gguf",
+                                                    },
+                                                    1),
+	                                            .web     = "https://huggingface.co/unsloth/Qwen3.6-27B-GGUF",
+	                                            .license = "apache-2.0"}),
 	    },
-	    8);
+	    9);
 	gc_root(neural_node_models);
-	// https://huggingface.co/webui/stable-diffusion-inpainting/resolve/main/sd-v1-5-inpainting.safetensors
 }

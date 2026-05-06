@@ -82,7 +82,7 @@ void neural_node_check_result(ui_node_t *node) {
 	}
 }
 
-char *neural_node_sd_bin_ext() {
+char *neural_node_bin_ext() {
 #ifdef IRON_WINDOWS
 	return ".exe";
 #else
@@ -92,12 +92,25 @@ char *neural_node_sd_bin_ext() {
 
 char *neural_node_sd_bin() {
 	if (g_config->neural_backend == NEURAL_BACKEND_VULKAN) {
-		return string("sd_vulkan%s", neural_node_sd_bin_ext());
+		return string("sd_vulkan%s", neural_node_bin_ext());
 	}
 	if (g_config->neural_backend == NEURAL_BACKEND_CUDA) {
-		return string("sd_cuda%s", neural_node_sd_bin_ext());
+		return string("sd_cuda%s", neural_node_bin_ext());
 	}
-	return string("sd_cpu%s", neural_node_sd_bin_ext());
+	return string("sd_cpu%s", neural_node_bin_ext());
+}
+
+char *neural_node_llama_bin() {
+#ifdef IRON_MACOS
+	return "llama_metal";
+#endif
+	if (g_config->neural_backend == NEURAL_BACKEND_VULKAN) {
+		return string("llama_vulkan%s", neural_node_bin_ext());
+	}
+	if (g_config->neural_backend == NEURAL_BACKEND_CUDA) {
+		return string("llama_cuda%s", neural_node_bin_ext());
+	}
+	return string("llama_cpu%s", neural_node_bin_ext());
 }
 
 char *neural_node_dir() {
@@ -120,20 +133,24 @@ void neural_node_download_done_untar(void *_) {
 
 #endif
 
+#ifdef IRON_LINUX
+static void neural_node_chmod_x(char *url, char *bin_name) {
+	if (ends_with(url, bin_name)) {
+		char *bin = string("%s/%s", neural_node_dir(), bin_name);
+		iron_sys_command(string("chmod +x \"%s\"", bin));
+	}
+}
+#endif
+
 void neural_node_download_done(char *url) {
 	neural_node_downloading--;
 	console_log(string("%s %s", tr("Downloaded file from"), url));
 
 #ifdef IRON_LINUX
-	// todo
-	if (ends_with(url, "sd_vulkan")) {
-		char *bin = string("%s/sd_vulkan", neural_node_dir());
-		iron_sys_command(string("chmod +x \"%s\"", bin));
-	}
-	else if (ends_with(url, "sd_cpu")) {
-		char *bin = string("%s/sd_cpu", neural_node_dir());
-		iron_sys_command(string("chmod +x \"%s\"", bin));
-	}
+	neural_node_chmod_x(url, "sd_vulkan");
+	neural_node_chmod_x(url, "sd_cpu");
+	neural_node_chmod_x(url, "llama_vulkan");
+	neural_node_chmod_x(url, "llama_cpu");
 #endif
 
 #ifdef WITH_COMPRESS
@@ -165,12 +182,18 @@ void neural_node_download_models(string_array_t *models) {
 	neural_node_download("https://huggingface.co/armory3d/sd_bin/resolve/main/windows_x64/sd_cpu.exe");
 	neural_node_download("https://huggingface.co/armory3d/sd_bin/resolve/main/windows_x64/sd_vulkan.exe");
 	neural_node_download("https://huggingface.co/armory3d/sd_bin/resolve/main/windows_x64/sd_cuda.exe");
+	neural_node_download("https://huggingface.co/armory3d/llamacpp_bin/resolve/main/windows_x64/llama_cpu.exe");
+	neural_node_download("https://huggingface.co/armory3d/llamacpp_bin/resolve/main/windows_x64/llama_vulkan.exe");
+	neural_node_download("https://huggingface.co/armory3d/llamacpp_bin/resolve/main/windows_x64/llama_cuda.exe");
 #elif defined(IRON_LINUX)
 	neural_node_download("https://huggingface.co/armory3d/sd_bin/resolve/main/linux_x64/sd_cpu");
 	neural_node_download("https://huggingface.co/armory3d/sd_bin/resolve/main/linux_x64/sd_vulkan");
+	neural_node_download("https://huggingface.co/armory3d/llamacpp_bin/resolve/main/linux_x64/llama_cpu");
+	neural_node_download("https://huggingface.co/armory3d/llamacpp_bin/resolve/main/linux_x64/llama_vulkan");
 #else
 	neural_node_download("https://huggingface.co/armory3d/sd_bin/resolve/main/macos/sd_cpu");
 	neural_node_download("https://huggingface.co/armory3d/sd_bin/resolve/main/macos/sd_vulkan");
+	neural_node_download("https://huggingface.co/armory3d/llamacpp_bin/resolve/main/macos/llama_metal");
 #endif
 
 	iron_net_bytes_downloaded = 0;

@@ -666,6 +666,8 @@ void                    upscale_image_node_init();
 void                    image_to_pbr_node_init();
 void                    inpaint_image_node_init();
 void                    text_to_image_node_init();
+void                    text_to_text_node_clear();
+void                    text_to_text_node_run(char *prompt, void (*done)(char *));
 void                    outpaint_image_node_init();
 char                   *neural_node_vector(ui_node_t *node, ui_node_socket_t *socket);
 char                   *neural_node_value(ui_node_t *node, ui_node_socket_t *socket);
