@@ -392,7 +392,14 @@ char *ui_files_file_browser(ui_handle_t *handle, bool drag_files, char *search, 
 
 					buffer_t  *buffer = iron_load_blob(blob_path);
 					project_t *raw;
-					if (import_arm_is_old(buffer)) {
+
+#ifdef IRON_WINDOWS
+					bool is_cloud_cache = string_index_of(handle->text, "\\cloud\\") >= 0;
+#else
+					bool is_cloud_cache = string_index_of(handle->text, "/cloud/") >= 0;
+#endif
+
+					if (import_arm_is_old(buffer) && !is_cloud_cache) {
 						raw = import_arm_from_old(buffer);
 					}
 					else if (import_arm_has_version(buffer)) {
