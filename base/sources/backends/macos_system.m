@@ -1179,6 +1179,12 @@ void iron_exec_async(const char *path, char *argv[]) {
 		i++;
 	}
 	[task setArguments:args];
+	if (iron_exec_async_output_file != NULL) {
+		NSString *output_path = [NSString stringWithUTF8String:iron_exec_async_output_file];
+		[[NSFileManager defaultManager] createFileAtPath:output_path contents:nil attributes:nil];
+		NSFileHandle *file_handle = [NSFileHandle fileHandleForWritingAtPath:output_path];
+		[task setStandardOutput:file_handle];
+	}
 	task.terminationHandler = ^(NSTask *t) {
 		iron_exec_async_done = 1;
 	};
