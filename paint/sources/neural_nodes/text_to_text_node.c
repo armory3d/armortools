@@ -1,14 +1,9 @@
 
 #include "../global.h"
 
-static char *text_to_text_node_prompt = NULL;
-
-string_array_t *text_to_text_node_qwen_args(char *dir, char *prompt) {
+string_array_t *text_to_text_node_qwen_args(char *dir) {
 	char *history_file = string("%s%shistory.txt", dir, PATH_SEP);
-	char *full_prompt  = prompt;
-	if (iron_file_exists(history_file)) {
-		full_prompt = string("%s%s", sys_buffer_to_string(iron_load_blob(history_file)), prompt);
-	}
+	char *prompt       = sys_buffer_to_string(iron_load_blob(history_file));
 
 	string_array_t *argv = any_array_create_from_raw(
 	    (void *[]){
@@ -24,7 +19,7 @@ string_array_t *text_to_text_node_qwen_args(char *dir, char *prompt) {
 	        string("%s/context.bin", dir),
 	        "--prompt-cache-all",
 	        "--prompt",
-	        string("'%s'", full_prompt),
+	        string("'%s'", prompt),
 	        NULL,
 	    },
 	    14);
@@ -41,8 +36,8 @@ void text_to_text_node_check_result(void (*done)(char *)) {
 			s           = substring(s, string_last_index_of(s, "</think>\n\n") + 10, string_last_index_of(s, "[end of text]"));
 
 			char *history_file = string("%s%shistory.txt", neural_node_dir(), PATH_SEP);
-			char *existing     = iron_file_exists(history_file) ? sys_buffer_to_string(iron_load_blob(history_file)) : "";
-			char *entry        = string("%s%s\n%s\n\n", existing, text_to_text_node_prompt, s);
+			char *existing     = sys_buffer_to_string(iron_load_blob(history_file));
+			char *entry        = string("%s%s\n", existing, s);
 			iron_file_save_bytes(history_file, (buffer_t *)u8_array_create_from_string(entry), 0);
 
 			done(s);
@@ -59,10 +54,14 @@ void text_to_text_node_clear(void) {
 }
 
 void text_to_text_node_run(char *prompt, void (*done)(char *)) {
-	char *dir                   = neural_node_dir();
-	text_to_text_node_prompt    = prompt;
+	char *dir          = neural_node_dir();
+	char *history_file = string("%s%shistory.txt", dir, PATH_SEP);
+	char *existing     = iron_file_exists(history_file) ? sys_buffer_to_string(iron_load_blob(history_file)) : "";
+	char *entry        = string("%suser\n%s\nassistant\n", existing, prompt);
+	iron_file_save_bytes(history_file, (buffer_t *)u8_array_create_from_string(entry), 0);
+
 	iron_exec_async_output_file = string("%s%soutput.txt", dir, PATH_SEP);
-	string_array_t *argv        = text_to_text_node_qwen_args(dir, prompt);
+	string_array_t *argv        = text_to_text_node_qwen_args(dir);
 	iron_exec_async(argv->buffer[0], argv->buffer);
 	sys_notify_on_update(text_to_text_node_check_result, done);
 }
