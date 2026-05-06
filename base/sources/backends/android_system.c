@@ -955,8 +955,16 @@ int iron_android_height() {
 	return ANativeWindow_getHeight(app->window);
 }
 
+static char internal_data_path[512];
+static bool internal_data_path_initialized = false;
+
 const char *iron_internal_save_path() {
-	return iron_android_get_activity()->internalDataPath;
+	if (!internal_data_path_initialized) {
+		internal_data_path_initialized = true;
+		strcpy(internal_data_path, iron_android_get_activity()->internalDataPath);
+		strcat(internal_data_path, "/");
+	}
+	return internal_data_path;
 }
 
 const char *iron_system_id() {
