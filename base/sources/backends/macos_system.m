@@ -642,7 +642,7 @@ void iron_window_change_window_mode(iron_window_mode_t mode) {
 }
 
 void iron_window_set_close_callback(bool (*callback)(void *), void *data) {
-	windows[0].close_callback     = callback;
+	windows[0].close_callback      = callback;
 	windows[0].close_callback_data = data;
 }
 
@@ -811,7 +811,7 @@ void iron_window_set_title(const char *title) {
 }
 
 void iron_window_set_resize_callback(void (*callback)(int x, int y, void *data), void *data) {
-	windows[0].resize_callback     = callback;
+	windows[0].resize_callback      = callback;
 	windows[0].resize_callback_data = data;
 }
 
@@ -1165,7 +1165,8 @@ bool _save_and_quit_callback_internal() {
 	return false;
 }
 
-volatile int iron_exec_async_done = 1;
+volatile int iron_exec_async_done        = 1;
+char        *iron_exec_async_output_file = NULL;
 
 void iron_exec_async(const char *path, char *argv[]) {
 	iron_exec_async_done = 0;

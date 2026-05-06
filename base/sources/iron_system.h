@@ -102,6 +102,7 @@ void                iron_stop(void);
 void                iron_set_keep_screen_on(bool on);
 void                iron_exec_async(const char *path, char *argv[]);
 extern volatile int iron_exec_async_done;
+extern char        *iron_exec_async_output_file;
 
 void iron_copy_to_clipboard(const char *text);
 void iron_set_update_callback(void (*callback)(void));

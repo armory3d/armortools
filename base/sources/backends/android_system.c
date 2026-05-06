@@ -1269,6 +1269,7 @@ bool _save_and_quit_callback_internal() {
 	return false;
 }
 
-volatile int iron_exec_async_done = 1;
+volatile int iron_exec_async_done        = 1;
+char        *iron_exec_async_output_file = NULL;
 
 void iron_exec_async(const char *path, char *argv[]) {}

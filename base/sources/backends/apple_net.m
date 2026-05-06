@@ -25,7 +25,7 @@ static NSURLSession *download_session          = nil;
 		NSURL   *destURL = [NSURL fileURLWithPath:dstPath];
 		[[NSFileManager defaultManager] moveItemAtURL:location toURL:destURL error:&error];
 		// todo
-		if ([dstPath hasSuffix:@"sd_vulkan"] || [dstPath hasSuffix:@"sd_cpu"]) {
+		if ([dstPath hasSuffix:@"sd_vulkan"] || [dstPath hasSuffix:@"sd_cpu"] || [dstPath hasSuffix:@"llama_metal"]) {
 			NSDictionary *attrs      = @{NSFilePosixPermissions : @0755};
 			NSError      *chmodError = nil;
 			[[NSFileManager defaultManager] setAttributes:attrs ofItemAtPath:dstPath error:&chmodError];

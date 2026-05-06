@@ -1766,9 +1766,10 @@ void iron_gamepad_handle_messages() {
 
 #include <process.h>
 
-volatile int  iron_exec_async_done = 1;
-static HANDLE child_handle         = NULL;
-static HANDLE wait_handle          = NULL;
+volatile int  iron_exec_async_done        = 1;
+char         *iron_exec_async_output_file = NULL;
+static HANDLE child_handle                = NULL;
+static HANDLE wait_handle                 = NULL;
 
 static void CALLBACK exec_wait_callback(PVOID lparam, BOOLEAN b) {
 	iron_exec_async_done = 1;
@@ -1792,7 +1793,22 @@ void iron_exec_async(const char *path, char *argv[]) {
 	si.cb                  = sizeof(si);
 	si.dwFlags             = STARTF_USESHOWWINDOW;
 	si.wShowWindow         = SW_HIDE;
-	BOOL success           = CreateProcessW(NULL, wcmd, NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi);
+
+	HANDLE out_handle = INVALID_HANDLE_VALUE;
+	if (iron_exec_async_output_file != NULL) {
+		wchar_t wpath[1024];
+		MultiByteToWideChar(CP_UTF8, 0, iron_exec_async_output_file, -1, wpath, 1024);
+		SECURITY_ATTRIBUTES sa = {sizeof(sa), NULL, TRUE};
+		out_handle             = CreateFileW(wpath, GENERIC_WRITE, 0, &sa, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+		si.dwFlags |= STARTF_USESTDHANDLES;
+		si.hStdOutput = out_handle;
+		si.hStdError  = out_handle;
+	}
+
+	BOOL success = CreateProcessW(NULL, wcmd, NULL, NULL, TRUE, 0, NULL, NULL, &si, &pi);
+	if (out_handle != INVALID_HANDLE_VALUE) {
+		CloseHandle(out_handle);
+	}
 	if (!success) {
 		iron_exec_async_done = 1;
 		return;
