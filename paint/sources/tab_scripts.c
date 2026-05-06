@@ -109,12 +109,21 @@ void tab_scripts_draw(ui_handle_t *htab) {
 		ui_handle_t *file_handle = ui_handle(__ID__);
 		ui_combo(file_handle, ar, tr("File"), false, UI_ALIGN_LEFT, true);
 
+
+#ifndef NDEBUG
+		bool is_debug = true;
+#else
+		bool is_debug = false;
+#endif
+
+		if (!g_config->experimental || !is_debug) {
+			ui_end_element();
+		}
+
 #ifndef NDEBUG
 		if (g_config->experimental && ui_icon_button("Run Tests", ICON_PLAY, UI_ALIGN_CENTER)) {
 			minic_tests();
 		}
-#else
-		ui_end_element();
 #endif
 
 		ui_end_sticky();
