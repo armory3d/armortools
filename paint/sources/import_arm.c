@@ -224,7 +224,11 @@ void import_arm_run_project(char *path) {
 	buffer_t  *b = data_get_blob(path);
 	project_t *project;
 	bool       import_as_mesh = false;
-	bool       is_cloud       = string_index_of(path, "/cloud/") >= 0;
+	#ifdef IRON_WINDOWS
+	bool is_cloud = string_index_of(path, "\\cloud\\") >= 0;
+	#else
+	bool is_cloud = string_index_of(path, "/cloud/") >= 0;
+	#endif
 	if (import_arm_is_old(b) && !is_cloud) {
 		project = import_arm_from_old(b);
 	}
