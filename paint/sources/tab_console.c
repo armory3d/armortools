@@ -17,13 +17,22 @@ void tab_console_draw_export_on_file_picked(char *path) {
 }
 
 void tab_console_run_done(char *s) {
-	any_array_t *parts = string_split(s, "\n\n");
-	for (i32 i = 0; i < parts->length; ++i) {
-		console_log(parts->buffer[i]);
-		if (i < parts->length - 1) {
-			console_log(""); // new-line
-		}
+	console_log(tr("Script updated."));
+
+	if (starts_with(s, "```c")) {
+		s = substring(s, 5, string_length(s) - 4);
 	}
+	g_project->script_datas->buffer[0] = string_copy(s);
+
+	ui_base_hwnds->buffer[TAB_AREA_SIDEBAR0]->redraws = 2;
+
+	// any_array_t *parts = string_split(s, "\n\n");
+	// for (i32 i = 0; i < parts->length; ++i) {
+	// 	console_log(parts->buffer[i]);
+	// 	if (i < parts->length - 1) {
+	// 		console_log(""); // new-line
+	// 	}
+	// }
 }
 
 #if defined(IRON_WINDOWS) || defined(IRON_LINUX) || defined(IRON_MACOS)
@@ -45,12 +54,21 @@ bool tab_console_run_button(ui_handle_t *h_input, bool press_run) {
 		sys_notify_on_next_frame(&tab_console_run_button_on_next_frame, NULL);
 	}
 	else if (found && (ui_icon_button(tr("Run"), ICON_PLAY, UI_ALIGN_CENTER) || press_run)) {
+
+		char *prompt = h_input->text;
+
 		if (!tab_console_prompt_entered) {
 			tab_console_prompt_entered = true;
 			text_to_text_node_clear();
+
+			buffer_t *api_blob = data_get_blob("api.h");
+			char     *api      = sys_buffer_to_string(api_blob);
+			char     *guide    = "Write C code only. Do not chain statements - declare intermediary variables. Place the code inside 'void main()' function.";
+			prompt             = string("%s\n%s\n%s", api, guide, prompt);
 		}
+
 		console_log(string(">%s", h_input->text));
-		text_to_text_node_run(h_input->text, tab_console_run_done);
+		text_to_text_node_run(prompt, tab_console_run_done);
 		h_input->text = "";
 
 		return true;
@@ -164,7 +182,6 @@ void tab_console_draw(ui_handle_t *htab) {
 
 		ui_set_font(ui, _font);
 		ui->font_size = _font_size;
-
 
 #if defined(IRON_WINDOWS) || defined(IRON_LINUX) || defined(IRON_MACOS)
 		tab_console_run_button(h_input, press_run);
