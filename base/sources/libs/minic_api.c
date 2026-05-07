@@ -1,12 +1,12 @@
-#include "iron_array.h"
-#include "iron_string.h"
-#include "iron_input.h"
 #include "engine.h"
+#include "iron_array.h"
+#include "iron_input.h"
+#include "iron_string.h"
 #include "minic.h"
 #include <math.h>
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -642,13 +642,13 @@ void ui_files_show2(char *filters, bool is_save, bool open_multiple, void *files
 	_ui_files_done = files_done;
 	ui_files_show(filters, is_save, open_multiple, _ui_files_show_done);
 }
-void              project_save(bool save_and_quit);
-extern char      *project_filepath;
-extern context_t *g_context;
-extern config_t  *g_config;
-extern project_t *g_project;
+void                          project_save(bool save_and_quit);
+extern char                  *project_filepath;
+extern context_t             *g_context;
+extern config_t              *g_config;
+extern project_t             *g_project;
 extern mesh_object_t_array_t *project_paint_objects;
-char             *project_filepath_get() {
+char                         *project_filepath_get() {
     return project_filepath;
 }
 void project_filepath_set(char *s) {
@@ -715,10 +715,12 @@ void plugin_register_texture(char *format, void *fn) {
 	}
 	any_map_set(custom_texture_importers, format, fn);
 }
+
 void plugin_unregister_texture(char *format) {
 	map_delete(import_texture_importers, format);
 	array_splice(_path_texture_formats, string_array_index_of(_path_texture_formats, format), 1);
 }
+
 void plugin_register_mesh(char *format, void *fn) {
 	any_map_set(import_mesh_importers, format, plugin_import_custom_mesh);
 	any_array_push(_path_mesh_formats, format);
@@ -729,10 +731,12 @@ void plugin_register_mesh(char *format, void *fn) {
 	}
 	any_map_set(custom_mesh_importers, format, fn);
 }
+
 void plugin_unregister_mesh(char *format) {
 	map_delete(import_mesh_importers, format);
 	array_splice(_path_mesh_formats, string_array_index_of(_path_mesh_formats, format), 1);
 }
+
 raw_mesh_t *plugin_make_raw_mesh(char *name, i16_array_t *posa, i16_array_t *nora, u32_array_t *inda, float scale_pos) {
 	raw_mesh_t *mesh = gc_alloc(sizeof(raw_mesh_t));
 	memset(mesh, 0, sizeof(raw_mesh_t));
@@ -753,10 +757,11 @@ extern void *nodes_material_list;
 extern void *nodes_brush_list;
 void         nodes_material_init();
 void         nodes_brush_list_init();
-void         plugin_material_category_add(char *category_name, any_array_t *node_list) {
-    any_array_push(nodes_material_categories, category_name);
-    nodes_material_init();
-    any_array_push(nodes_material_list, node_list);
+
+void plugin_material_category_add(char *category_name, any_array_t *node_list) {
+	any_array_push(nodes_material_categories, category_name);
+	nodes_material_init();
+	any_array_push(nodes_material_list, node_list);
 }
 
 void plugin_brush_category_add(char *category_name, any_array_t *node_list) {
@@ -835,18 +840,18 @@ void minic_register_builtins() {
 	minic_struct_set_size("buffer_t", (int)sizeof(buffer_t));
 
 	// iron_math
-	static const char *vec2_fields[] = {"x", "y"};
-	static const char *vec3_fields[] = {"x", "y", "z"};
-	static const char *vec4_fields[] = {"x", "y", "z", "w"};
-	static const char *quat_fields[] = {"x", "y", "z", "w"};
-	static const char *mat3_fields[] = {"m00", "m01", "m02", "m10", "m11", "m12", "m20", "m21", "m22"};
-	static const char *mat4_fields[] = {"m00", "m01", "m02", "m03", "m10", "m11", "m12", "m13", "m20", "m21", "m22", "m23", "m30", "m31", "m32", "m33"};
-	static const int vec2_offsets[] = {(int)offsetof(vec2_t, x), (int)offsetof(vec2_t, y)};
-	static const int vec3_offsets[] = {(int)offsetof(vec3_t, x), (int)offsetof(vec3_t, y), (int)offsetof(vec3_t, z)};
-	static const int vec4_offsets[] = {(int)offsetof(vec4_t, x), (int)offsetof(vec4_t, y), (int)offsetof(vec4_t, z), (int)offsetof(vec4_t, w)};
-	static const minic_type_t vec2_types[] = {MINIC_T_FLOAT, MINIC_T_FLOAT};
-	static const minic_type_t vec3_types[] = {MINIC_T_FLOAT, MINIC_T_FLOAT, MINIC_T_FLOAT};
-	static const minic_type_t vec4_types[] = {MINIC_T_FLOAT, MINIC_T_FLOAT, MINIC_T_FLOAT, MINIC_T_FLOAT};
+	static const char        *vec2_fields[]  = {"x", "y"};
+	static const char        *vec3_fields[]  = {"x", "y", "z"};
+	static const char        *vec4_fields[]  = {"x", "y", "z", "w"};
+	static const char        *quat_fields[]  = {"x", "y", "z", "w"};
+	static const char        *mat3_fields[]  = {"m00", "m01", "m02", "m10", "m11", "m12", "m20", "m21", "m22"};
+	static const char        *mat4_fields[]  = {"m00", "m01", "m02", "m03", "m10", "m11", "m12", "m13", "m20", "m21", "m22", "m23", "m30", "m31", "m32", "m33"};
+	static const int          vec2_offsets[] = {(int)offsetof(vec2_t, x), (int)offsetof(vec2_t, y)};
+	static const int          vec3_offsets[] = {(int)offsetof(vec3_t, x), (int)offsetof(vec3_t, y), (int)offsetof(vec3_t, z)};
+	static const int          vec4_offsets[] = {(int)offsetof(vec4_t, x), (int)offsetof(vec4_t, y), (int)offsetof(vec4_t, z), (int)offsetof(vec4_t, w)};
+	static const minic_type_t vec2_types[]   = {MINIC_T_FLOAT, MINIC_T_FLOAT};
+	static const minic_type_t vec3_types[]   = {MINIC_T_FLOAT, MINIC_T_FLOAT, MINIC_T_FLOAT};
+	static const minic_type_t vec4_types[]   = {MINIC_T_FLOAT, MINIC_T_FLOAT, MINIC_T_FLOAT, MINIC_T_FLOAT};
 	minic_register_struct_native("vec2_t", vec2_fields, vec2_offsets, vec2_types, NULL, 2);
 	minic_register_struct_native("vec3_t", vec3_fields, vec3_offsets, vec3_types, NULL, 3);
 	minic_register_struct_native("vec4_t", vec4_fields, vec4_offsets, vec4_types, NULL, 4);
@@ -870,10 +875,6 @@ void minic_register_builtins() {
 	static const char *ui_state_names[]  = {"UI_STATE_IDLE", "UI_STATE_STARTED", "UI_STATE_DOWN", "UI_STATE_RELEASED", "UI_STATE_HOVERED"};
 	static const int   ui_state_values[] = {0, 1, 2, 3, 4};
 	minic_register_enum("ui_state_t", ui_state_names, ui_state_values, 5);
-
-	static const char *ui_link_style_names[]  = {"UI_LINK_STYLE_LINE", "UI_LINK_STYLE_CUBIC_BEZIER"};
-	static const int   ui_link_style_values[] = {0, 1};
-	minic_register_enum("ui_link_style_t", ui_link_style_names, ui_link_style_values, 2);
 
 	static const char *ui_node_flag_names[]  = {"UI_NODE_FLAG_NONE", "UI_NODE_FLAG_COLLAPSED", "UI_NODE_FLAG_PREVIEW"};
 	static const int   ui_node_flag_values[] = {0, 1, 2};
@@ -960,28 +961,6 @@ void minic_register_builtins() {
 	minic_struct_field_set_type("ui_node_t", "inputs", "any_array_t");
 	minic_struct_field_set_type("ui_node_t", "outputs", "any_array_t");
 	minic_struct_field_set_type("ui_node_t", "buttons", "any_array_t");
-
-	// engine.h array types
-	minic_register_struct_native("obj_t_array_t", array_fields, array_offsets, array_types, array_ptr_derefs, 3);
-	minic_register_struct_native("vertex_array_t_array_t", array_fields, array_offsets, array_types, array_ptr_derefs, 3);
-	minic_register_struct_native("shader_data_t_array_t", array_fields, array_offsets, array_types, array_ptr_derefs, 3);
-	minic_register_struct_native("tex_unit_t_array_t", array_fields, array_offsets, array_types, array_ptr_derefs, 3);
-	minic_register_struct_native("shader_const_t_array_t", array_fields, array_offsets, array_types, array_ptr_derefs, 3);
-	minic_register_struct_native("vertex_element_t_array_t", array_fields, array_offsets, array_types, array_ptr_derefs, 3);
-	minic_register_struct_native("bind_const_t_array_t", array_fields, array_offsets, array_types, array_ptr_derefs, 3);
-	minic_register_struct_native("bind_tex_t_array_t", array_fields, array_offsets, array_types, array_ptr_derefs, 3);
-	minic_register_struct_native("material_context_t_array_t", array_fields, array_offsets, array_types, array_ptr_derefs, 3);
-	minic_register_struct_native("frustum_plane_array_t", array_fields, array_offsets, array_types, array_ptr_derefs, 3);
-	minic_struct_set_size("obj_t_array_t", (int)sizeof(obj_t_array_t));
-	minic_struct_set_size("vertex_array_t_array_t", (int)sizeof(vertex_array_t_array_t));
-	minic_struct_set_size("shader_data_t_array_t", (int)sizeof(shader_data_t_array_t));
-	minic_struct_set_size("tex_unit_t_array_t", (int)sizeof(tex_unit_t_array_t));
-	minic_struct_set_size("shader_const_t_array_t", (int)sizeof(shader_const_t_array_t));
-	minic_struct_set_size("vertex_element_t_array_t", (int)sizeof(vertex_element_t_array_t));
-	minic_struct_set_size("bind_const_t_array_t", (int)sizeof(bind_const_t_array_t));
-	minic_struct_set_size("bind_tex_t_array_t", (int)sizeof(bind_tex_t_array_t));
-	minic_struct_set_size("material_context_t_array_t", (int)sizeof(material_context_t_array_t));
-	minic_struct_set_size("frustum_plane_array_t", (int)sizeof(frustum_plane_array_t));
 
 	// engine.h structs
 	// obj_t
@@ -1230,14 +1209,11 @@ void minic_register_builtins() {
 	// transform_t
 	static const char *transform_fields[]  = {"loc", "scale_world", "dirty", "object", "radius"};
 	static const int   transform_offsets[] = {
-        (int)offsetof(transform_t, loc),
-        (int)offsetof(transform_t, scale_world),
-        (int)offsetof(transform_t, dirty),
-        (int)offsetof(transform_t, object),
-        (int)offsetof(transform_t, radius),
+        (int)offsetof(transform_t, loc),    (int)offsetof(transform_t, scale_world), (int)offsetof(transform_t, dirty),
+        (int)offsetof(transform_t, object), (int)offsetof(transform_t, radius),
     };
 	static const minic_type_t transform_types[]       = {MINIC_T_EMBED, MINIC_T_FLOAT, MINIC_T_INT, MINIC_T_PTR, MINIC_T_FLOAT};
-	static const minic_type_t transform_deref_types[] = {MINIC_T_PTR,   MINIC_T_FLOAT, MINIC_T_INT, MINIC_T_PTR, MINIC_T_FLOAT};
+	static const minic_type_t transform_deref_types[] = {MINIC_T_PTR, MINIC_T_FLOAT, MINIC_T_INT, MINIC_T_PTR, MINIC_T_FLOAT};
 	minic_register_struct_native("transform_t", transform_fields, transform_offsets, transform_types, transform_deref_types, 5);
 	minic_struct_set_size("transform_t", (int)sizeof(transform_t));
 	minic_struct_field_set_type("transform_t", "loc", "vec4_t");
@@ -1276,7 +1252,7 @@ void minic_register_builtins() {
 	minic_struct_set_size("cached_shader_context_t", (int)sizeof(cached_shader_context_t));
 	minic_struct_field_set_type("cached_shader_context_t", "context", "shader_context_t");
 
-	// config_t (16 of 62 fields; most script-relevant)
+	// config_t
 	static const char *config_fields[]  = {"window_w",      "window_h",      "window_scale", "rp_supersample", "recent_projects", "plugins",
 	                                       "keymap",        "theme",         "undo_steps",   "camera_fov",     "layer_res",       "brush_live",
 	                                       "node_previews", "material_live", "workspace",    "workflow"};
@@ -1298,7 +1274,7 @@ void minic_register_builtins() {
 	minic_struct_field_set_type("config_t", "recent_projects", "string_array_t");
 	minic_struct_field_set_type("config_t", "plugins", "string_array_t");
 
-	// context_t (16 of many fields; most script-relevant)
+	// context_t
 	static const char *ctx_fields[]  = {"paint_object", "ddirty",         "pdirty",        "rdirty",        "material",       "layer",
 	                                    "brush",        "tool",           "brush_radius",  "brush_opacity", "brush_hardness", "brush_scale",
 	                                    "brush_angle",  "brush_blending", "viewport_mode", "xray"};
@@ -1319,7 +1295,7 @@ void minic_register_builtins() {
 	minic_struct_set_size("context_t", (int)sizeof(context_t));
 	minic_struct_field_set_type("context_t", "paint_object", "mesh_object_t");
 
-	// project_t (16 of 25 fields; packed_assets, icons, mesh_assets, atlas, envmap_blur omitted)
+	// project_t
 	static const char *pf_fields[]  = {"version",     "assets",       "is_bgra",       "envmap",      "envmap_strength", "envmap_angle",
 	                                   "camera_fov",  "camera_world", "camera_origin", "swatches",    "brush_nodes",     "material_nodes",
 	                                   "font_assets", "layer_datas",  "mesh_datas",    "script_datas"};
@@ -1345,7 +1321,6 @@ void minic_register_builtins() {
 	minic_struct_field_set_type("project_t", "script_datas", "string_array_t");
 
 	// iron_math
-	R(iron_random_init, "v(i)");
 	R(iron_random_get, "i()");
 	R(iron_random_get_max, "i(i)");
 	R(iron_random_get_in, "i(i,i)");
@@ -1354,7 +1329,6 @@ void minic_register_builtins() {
 	R(cosf, "f(f)");
 	R(sinf, "f(f)");
 
-	// iron_math
 #define MR(sym) minic_register_native(#sym, mn_##sym)
 	MR(vec2_len);
 	MR(vec2_set_len);
@@ -1490,13 +1464,15 @@ void minic_register_builtins() {
 	R(material_data_get_context, "p(p,p)");
 	R(material_context_load, "v(p)");
 
-	// shader_data / shader_context
+	// shader_data
 	R(shader_data_create, "p(p)");
 	R(shader_data_ext, "p()");
 	R(shader_data_parse, "p(p,p)");
 	R(shader_data_get_raw_by_name, "p(p,p)");
 	R(shader_data_delete, "v(p)");
 	R(shader_data_get_context, "p(p,p)");
+
+	// shader_context
 	R(shader_context_load, "v(p)");
 	R(shader_context_compile, "v(p)");
 	R(shader_context_type_size, "i(p)");
@@ -1733,7 +1709,6 @@ void minic_register_builtins() {
 	R(ui_next_node_id, "i(p)");
 
 	// sys
-	R(sys_start, "v(p)");
 	R(sys_time, "f()");
 	R(sys_delta, "f()");
 	R(sys_real_delta, "f()");
@@ -1759,31 +1734,6 @@ void minic_register_builtins() {
 	R(sys_remove_update, "v(p)");
 	R(sys_remove_render, "v(p)");
 	R(sys_remove_end_frame, "v(p)");
-	R(sys_render, "v()");
-	R(sys_foreground, "v()");
-	R(sys_resume, "v()");
-	R(sys_pause, "v()");
-	R(sys_background, "v()");
-	R(sys_shutdown, "v()");
-	R(sys_drop_files, "v(p)");
-	R(sys_foreground_callback, "v()");
-	R(sys_resume_callback, "v()");
-	R(sys_pause_callback, "v()");
-	R(sys_background_callback, "v()");
-	R(sys_shutdown_callback, "v()");
-	R(sys_drop_files_callback, "v(p)");
-	R(sys_keyboard_down_callback, "v(i)");
-	R(sys_keyboard_up_callback, "v(i)");
-	R(sys_mouse_down_callback, "v(i,i,i)");
-	R(sys_mouse_up_callback, "v(i,i,i)");
-	R(sys_mouse_move_callback, "v(i,i,i,i)");
-	R(sys_mouse_wheel_callback, "v(f)");
-	R(sys_touch_down_callback, "v(i,i,i)");
-	R(sys_touch_up_callback, "v(i,i,i)");
-	R(sys_touch_move_callback, "v(i,i,i)");
-	R(sys_pen_down_callback, "v(i,i,f)");
-	R(sys_pen_up_callback, "v(i,i,f)");
-	R(sys_pen_move_callback, "v(i,i,f)");
 	R(data_path, "p()");
 	R(video_unload, "v(p)");
 	R(sys_buffer_to_string, "p(p)");
@@ -1800,7 +1750,6 @@ void minic_register_builtins() {
 	minic_register_native("shape_draw_sphere", mn_shape_draw_sphere);
 
 	// iron_draw
-	R(draw_init, "v(p,p,p,p,p,p,p,p)");
 	R(draw_begin, "v(p,i,i)");
 	R(draw_scaled_sub_image, "v(p,f,f,f,f,f,f,f,f)");
 	R(draw_scaled_image, "v(p,f,f,f,f)");
@@ -1869,9 +1818,6 @@ void minic_register_builtins() {
 	R(iron_file_reader_size, "i(p)");
 	R(iron_file_reader_pos, "i(p)");
 	R(iron_file_reader_seek, "b(p,i)");
-	R(iron_internal_set_files_location, "v(p)");
-	R(iron_internal_files_location, "p()");
-	R(iron_internal_file_reader_open, "b(p,p,i)");
 	R(iron_file_writer_open, "b(p,p)");
 	R(iron_file_writer_write, "v(p,p,i)");
 	R(iron_file_writer_close, "v(p)");
