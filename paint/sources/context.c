@@ -17,6 +17,8 @@ context_t *context_create() {
 	c->show_envmap_handle      = ui_handle_create();
 	c->show_envmap_blur        = false;
 	c->show_envmap_blur_handle = ui_handle_create();
+	c->capturing_screenshot    = false;
+	c->capture_background      = false;
 	c->envmap_angle            = 0.0;
 	c->light_angle             = 0.0;
 	c->cull_backfaces          = true;

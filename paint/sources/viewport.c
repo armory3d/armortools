@@ -126,6 +126,8 @@ void viewport_capture_screenshot() {
 	any_array_push(g_project->packed_assets, pa);
 	any_map_set(data_cached_images, abs, screenshot);
 	import_texture_run(abs, true);
+	g_context->capturing_screenshot = false;
+	g_context->ddirty               = 2;
 }
 
 void viewport_capture_video_update(void *_) {

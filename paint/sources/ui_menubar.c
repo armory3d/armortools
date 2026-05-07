@@ -17,6 +17,7 @@ typedef struct update_info {
 } update_info_t;
 
 i32 ui_menubar_category = 0;
+int ui_menubar_capture_screenshot_frame = 0;
 
 void ui_menubar_init() {
 	ui_menubar_hwnd->layout        = UI_LAYOUT_HORIZONTAL;
@@ -162,11 +163,15 @@ void ui_menubar_draw_category_items_on_check_for_updates_downloaded(char *url, b
 	}
 }
 
-void ui_menubar_draw_category_items_capture_screenshot(void *_) {
-	viewport_capture_screenshot();
+void ui_menubar_capture_screenshot(void *_) {
+	ui_menubar_capture_screenshot_frame++;
+	if (ui_menubar_capture_screenshot_frame == 2) {
+		viewport_capture_screenshot();
+		sys_remove_update(ui_menubar_capture_screenshot);
+	}
 }
 
-void ui_menubar_draw_category_items_import_envmap(char *path) {
+void ui_menubar_import_envmap(char *path) {
 	if (!ends_with(path, ".hdr")) {
 		console_error(tr("Error: .hdr file expected"));
 		return;
@@ -279,7 +284,7 @@ void ui_menubar_draw_category_items() {
 				project_import_asset(string_array_join(path_texture_formats(), ","), false);
 			}
 			if (ui_menu_button(tr("Envmap..."), "", ICON_LANDSCAPE)) {
-				ui_files_show("hdr", false, false, &ui_menubar_draw_category_items_import_envmap);
+				ui_files_show("hdr", false, false, &ui_menubar_import_envmap);
 			}
 			if (ui_menu_button(tr("Font..."), "", ICON_FONT)) {
 				project_import_asset("ttf,ttc,otf", true);
@@ -470,9 +475,17 @@ void ui_menubar_draw_category_items() {
 		}
 
 		if (ui_menu_button(tr("Capture Screenshot"), "", ICON_PHOTO)) {
-			sys_notify_on_next_frame(&ui_menubar_draw_category_items_capture_screenshot, NULL);
+			g_context->capturing_screenshot = true;
+			ui_menubar_capture_screenshot_frame = 0;
+			sys_notify_on_update(&ui_menubar_capture_screenshot, NULL);
 			ui->changed = false; // Close menu
 		}
+
+		// if (g_config->experimental) {
+		// 	ui_handle_t *h = ui_handle(__ID__);
+		// 	h->b = g_context->capture_background;
+		// 	g_context->capture_background = ui_check(h, tr("Capture Background"), "");
+		// }
 
 		if (g_config->experimental && !viewport_recording && ui_menu_button(tr("Capture Video"), "", ICON_MOVIE)) {
 			viewport_capture_video_begin();

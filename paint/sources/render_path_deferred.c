@@ -115,7 +115,7 @@ void render_path_deferred_draw_deferred() {
 	render_path_draw_shader("Scene/compositor_pass/compositor_pass");
 
 	render_path_set_target("gbuffer1", NULL, NULL, GPU_CLEAR_NONE, 0, 0.0);
-	render_path_base_draw_compass();
+	compass_render();
 	render_path_draw_meshes("overlay");
 	render_path_base_draw_taa("gbuffer1", "buf");
 }

@@ -30,10 +30,6 @@ f32 render_path_base_get_super_sampling() {
 	return render_path_base_super_sample;
 }
 
-void render_path_base_draw_compass() {
-	compass_render();
-}
-
 void render_path_base_begin() {
 	// Begin split
 	if (g_context->split_view && !g_context->paint2d_view) {

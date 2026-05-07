@@ -8,7 +8,7 @@ object_t *_compass_hovered      = NULL;
 object_t *_compass_hovered_last = NULL;
 
 void compass_render() {
-	if (!g_context->show_compass || g_config->workspace == WORKSPACE_PLAYER) {
+	if (!g_context->show_compass || g_config->workspace == WORKSPACE_PLAYER || g_context->capturing_screenshot) {
 		return;
 	}
 

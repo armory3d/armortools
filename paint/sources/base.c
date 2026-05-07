@@ -1391,13 +1391,18 @@ void ui_base_update(void *_) {
 		base_is_resizing      = false;
 	}
 
-	if (g_context->tool == TOOL_TYPE_PARTICLE && context_in_paint_area() && !g_context->paint2d) {
+	if (g_context->tool == TOOL_TYPE_PARTICLE) {
 		util_particle_init_physics();
 		physics_world_t *world = physics_world_active;
 		physics_world_update(world);
-		g_context->ddirty = 2;
-		g_context->rdirty = 2;
-		if (mouse_started("left")) {
+
+		if (g_context->particle_timer != NULL) {
+			g_context->ddirty = 2;
+			g_context->rdirty = 2;
+			iron_delay_idle_sleep();
+		}
+
+		if (mouse_started("left") && context_in_paint_area() && !g_context->paint2d) {
 			if (g_context->particle_timer != NULL) {
 				tween_stop(g_context->particle_timer);
 				tween_anim_t *timer = g_context->particle_timer;
@@ -1429,7 +1434,6 @@ void ui_base_update(void *_) {
 		}
 
 #ifdef arm_physics
-
 		physics_pair_t_array_t *pairs = physics_world_get_contact_pairs(world, g_context->paint_body);
 		if (pairs != NULL) {
 			for (i32 i = 0; i < pairs->length; ++i) {
@@ -1444,7 +1448,6 @@ void ui_base_update(void *_) {
 				break; // 1 pair for now
 			}
 		}
-
 #endif
 	}
 }
