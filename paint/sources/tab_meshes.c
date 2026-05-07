@@ -301,6 +301,10 @@ void tab_meshes_draw_edit() {
 		ui_menu_sub_end();
 	}
 
+	if (ui_menu_button(tr("Edit UV Map"), "", ICON_NONE)) {
+		ui_base_show_2d_view(VIEW_2D_TYPE_UVMAP);
+	}
+
 #ifdef WITH_PLUGINS
 	if (ui_menu_button(tr("UV Unwrap"), "", ICON_NONE)) {
 		plugin_uv_unwrap_button();

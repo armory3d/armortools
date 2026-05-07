@@ -101,7 +101,7 @@ void ui_view2d_render(void *_) {
 	}
 
 	// Ensure UV map is drawn
-	if (ui_view2d_uvmap_show) {
+	if (ui_view2d_uvmap_show || ui_view2d_type == VIEW_2D_TYPE_UVMAP) {
 		util_uv_cache_uv_map();
 	}
 
@@ -178,7 +178,7 @@ void ui_view2d_render(void *_) {
 				}
 			}
 		}
-		else if (ui_view2d_type == VIEW_2D_TYPE_LAYER) {
+		else if (ui_view2d_type == VIEW_2D_TYPE_LAYER || ui_view2d_type == VIEW_2D_TYPE_UVMAP) {
 			slot_layer_t *layer = l;
 
 			if (g_config->brush_live && render_path_paint_live_layer_drawn > 0) {
@@ -271,6 +271,11 @@ void ui_view2d_render(void *_) {
 		// UV map
 		if (ui_view2d_type == VIEW_2D_TYPE_LAYER && ui_view2d_uvmap_show) {
 			draw_scaled_image(util_uv_uvmap, tx, ty, tw, th);
+		}
+
+		if (ui_view2d_type == VIEW_2D_TYPE_UVMAP) {
+			draw_scaled_image(util_uv_uvmap, tx, ty, tw, th);
+			edit_uvmap_update();
 		}
 
 		// Menu
@@ -414,10 +419,11 @@ void ui_view2d_render(void *_) {
 				ui->_y = 2 + start_y;
 			}
 
-			char *view_type = ui_view2d_type == VIEW_2D_TYPE_ASSET  ? tr("Asset")
-			                  : ui_view2d_type == VIEW_2D_TYPE_NODE ? tr("Node")
-			                  : ui_view2d_type == VIEW_2D_TYPE_FONT ? tr("Font")
-			                                                        : tr("Layer");
+			char *view_type = ui_view2d_type == VIEW_2D_TYPE_ASSET   ? tr("Asset")
+			                  : ui_view2d_type == VIEW_2D_TYPE_NODE  ? tr("Node")
+			                  : ui_view2d_type == VIEW_2D_TYPE_FONT  ? tr("Font")
+			                  : ui_view2d_type == VIEW_2D_TYPE_UVMAP ? tr("UVMap")
+			                                                         : tr("Layer");
 
 			ui->_w = math_floor(ew * 0.5 + 3);
 			ui_text(view_type, UI_ALIGN_LEFT, 0x00000000);

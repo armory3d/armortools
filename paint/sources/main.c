@@ -101,6 +101,7 @@
 #include "config.c"
 #include "console.c"
 #include "context.c"
+#include "edit_uvmap.c"
 #include "export_arm.c"
 #include "export_exr.c"
 #include "export_mesh.c"

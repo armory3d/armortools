@@ -700,3 +700,4 @@ float_node_t           *float_node_create(ui_node_t *raw, f32_array_t *args);
 integer_node_t         *integer_node_create(ui_node_t *raw, f32_array_t *args);
 separate_vector_node_t *separate_vector_node_create(ui_node_t *raw, f32_array_t *args);
 brush_output_node_t    *brush_output_node_create(ui_node_t *raw, f32_array_t *args);
+void                    edit_uvmap_update();
