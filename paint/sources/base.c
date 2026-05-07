@@ -1130,7 +1130,6 @@ void ui_base_update(void *_) {
 					g_context->brush_radius += mouse_movement_x / 150.0;
 					g_context->brush_radius           = math_max(0.01, math_min(4.0, g_context->brush_radius));
 					g_context->brush_radius           = math_round(g_context->brush_radius * 100) / 100.0;
-					g_context->brush_radius_handle->f = g_context->brush_radius;
 				}
 				ui_header_handle->redraws = 2;
 			}
@@ -1225,13 +1224,11 @@ void ui_base_update(void *_) {
 			else if (operator_shortcut(any_map_get(config_keymap, "brush_radius_decrease"), SHORTCUT_TYPE_REPEAT)) {
 				g_context->brush_radius -= ui_base_get_radius_increment();
 				g_context->brush_radius           = math_max(math_round(g_context->brush_radius * 100) / 100.0, 0.01);
-				g_context->brush_radius_handle->f = g_context->brush_radius;
 				ui_header_handle->redraws         = 2;
 			}
 			else if (operator_shortcut(any_map_get(config_keymap, "brush_radius_increase"), SHORTCUT_TYPE_REPEAT)) {
 				g_context->brush_radius += ui_base_get_radius_increment();
 				g_context->brush_radius           = math_round(g_context->brush_radius * 100) / 100.0;
-				g_context->brush_radius_handle->f = g_context->brush_radius;
 				ui_header_handle->redraws         = 2;
 			}
 			else if (decal_mask) {

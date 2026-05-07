@@ -416,7 +416,9 @@ void ui_header_draw_tool_properties() {
 				}
 			}
 			else {
-				g_context->brush_radius = ui_slider(g_context->brush_radius_handle, tr("Radius"), 0.01, 2.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
+				ui_handle_t *brush_radius_handle = ui_handle(__ID__);
+				brush_radius_handle->f = g_context->brush_radius;
+				g_context->brush_radius = ui_slider(brush_radius_handle, tr("Radius"), 0.01, 2.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
 				if (ui->is_hovered) {
 					any_map_t *vars = any_map_create();
 					any_map_set(vars, "brush_radius", any_map_get(config_keymap, "brush_radius"));

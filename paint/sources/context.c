@@ -126,7 +126,6 @@ context_t *context_create() {
 	c->brush_nodes_angle                 = 0.0;
 	c->brush_nodes_hardness              = 1.0;
 	c->brush_directional                 = false;
-	c->brush_radius_handle               = ui_handle_create();
 	c->brush_scale_x                     = 1.0;
 	c->brush_decal_mask_radius           = 0.5;
 	c->brush_decal_mask_radius_handle    = ui_handle_create();
@@ -176,7 +175,6 @@ void context_init() {
 	g_context->tool                       = TOOL_TYPE_BRUSH;
 	g_context->color_picker_previous_tool = TOOL_TYPE_BRUSH;
 	g_context->brush_radius               = 0.5;
-	g_context->brush_radius_handle->f     = 0.5;
 	g_context->brush_hardness             = 1.0;
 }
 

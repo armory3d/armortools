@@ -327,7 +327,6 @@ typedef struct context {
 	f32                  brush_nodes_hardness;
 	bool                 brush_directional;
 	f32                  brush_radius;
-	struct ui_handle    *brush_radius_handle;
 	f32                  brush_scale_x;
 	f32                  brush_decal_mask_radius;
 	struct ui_handle    *brush_decal_mask_radius_handle;
