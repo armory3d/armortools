@@ -17,7 +17,6 @@ void tab_console_draw_export_on_file_picked(char *path) {
 }
 
 void tab_console_run_done(char *s) {
-	array_pop(console_last_traces);
 	any_array_t *parts = string_split(s, "\n\n");
 	for (i32 i = 0; i < parts->length; ++i) {
 		console_log(parts->buffer[i]);
@@ -26,6 +25,40 @@ void tab_console_run_done(char *s) {
 		}
 	}
 }
+
+#if defined(IRON_WINDOWS) || defined(IRON_LINUX) || defined(IRON_MACOS)
+
+void tab_console_run_button_on_next_frame(void *_) {
+	box_preferences_htab->i = PREFERENCES_TAB_NEURAL;
+	box_preferences_show();
+}
+
+bool tab_console_run_button(ui_handle_t *h_input, bool press_run) {
+	char *url       = box_preferneces_model_url_from_name("Qwen");
+	char *file_name = box_preferences_file_name_from_url(url);
+	bool  found     = box_preferences_model_exists(file_name);
+
+	if (iron_exec_async_done == 0) {
+		ui_icon_button(tr("Processing..."), ICON_STOP, UI_ALIGN_CENTER);
+	}
+	else if (!found && ui_icon_button(tr("Setup"), ICON_COG, UI_ALIGN_CENTER)) {
+		sys_notify_on_next_frame(&tab_console_run_button_on_next_frame, NULL);
+	}
+	else if (found && (ui_icon_button(tr("Run"), ICON_PLAY, UI_ALIGN_CENTER) || press_run)) {
+		if (!tab_console_prompt_entered) {
+			tab_console_prompt_entered = true;
+			text_to_text_node_clear();
+		}
+		console_log(string(">%s", h_input->text));
+		text_to_text_node_run(h_input->text, tab_console_run_done);
+		h_input->text = "";
+
+		return true;
+	}
+	return false;
+}
+
+#endif
 
 void tab_console_draw(ui_handle_t *htab) {
 	char *title = console_message_timer > 0 ? string("%s        ", console_message) : tr("Console");
@@ -73,17 +106,20 @@ void tab_console_draw(ui_handle_t *htab) {
 
 		ui_end_sticky();
 
-		draw_font_t *_font      = ui->ops->font;
-		i32          _font_size = ui->font_size;
-		draw_font_t *f          = data_get_font("font_mono.ttf");
+		draw_font_t *_font             = ui->ops->font;
+		i32          _font_size        = ui->font_size;
+		i32          _element_offset   = ui->ops->theme->ELEMENT_OFFSET;
+		ui->ops->theme->ELEMENT_OFFSET = 0;
+		draw_font_t *f                 = data_get_font("font_mono.ttf");
 		ui_set_font(ui, f);
 		ui->font_size = math_floor(15 * UI_SCALE());
 		for (i32 i = 0; i < console_last_traces->length; ++i) {
-			char *t     = console_last_traces->buffer[i];
-			i32   len   = string_length(t);
-			float max_w = ui->_w;
+			char    *t     = console_last_traces->buffer[i];
+			i32      len   = string_length(t);
+			float    max_w = ui->_w;
+			uint32_t bg    = starts_with(t, ">") ? 0x22000000 : 0x00000000;
 			if (draw_string_width(f, ui->font_size, t) <= max_w) {
-				ui_text(t, UI_ALIGN_LEFT, 0x00000000);
+				ui_text(t, UI_ALIGN_LEFT, bg);
 				continue;
 			}
 
@@ -99,19 +135,21 @@ void tab_console_draw(ui_handle_t *htab) {
 					end++;
 				}
 				if (end == len) {
-					ui_text(substring(t, start, end), UI_ALIGN_LEFT, 0x00000000);
+					ui_text(substring(t, start, end), UI_ALIGN_LEFT, bg);
 					break;
 				}
 				if (last_space > start) {
-					ui_text(substring(t, start, last_space), UI_ALIGN_LEFT, 0x00000000);
+					ui_text(substring(t, start, last_space), UI_ALIGN_LEFT, bg);
 					start = last_space + 1;
 				}
 				else {
-					ui_text(substring(t, start, end > start ? end : start + 1), UI_ALIGN_LEFT, 0x00000000);
+					ui_text(substring(t, start, end > start ? end : start + 1), UI_ALIGN_LEFT, bg);
 					start = end > start ? end : start + 1;
 				}
 			}
 		}
+
+		ui->ops->theme->ELEMENT_OFFSET = _element_offset;
 
 		row = f32_array_create_from_raw(
 		    (f32[]){
@@ -122,24 +160,20 @@ void tab_console_draw(ui_handle_t *htab) {
 		ui_row(row);
 
 		ui_text_input(h_input, "", UI_ALIGN_LEFT, true, false);
+		bool press_run = h_input->changed && ui->is_return_down;
 
 		ui_set_font(ui, _font);
 		ui->font_size = _font_size;
 
-		if (ui_icon_button(tr("Run"), ICON_PLAY, UI_ALIGN_CENTER)) {
 
-			// if (!tab_console_prompt_entered) {
-			// 	tab_console_prompt_entered = true;
-			// 	text_to_text_node_clear();
-			// }
-
-			// console_log(string(">%s", h_input->text));
-			// console_log("Thinking...");
-			// text_to_text_node_run(h_input->text, tab_console_run_done);
-
+#if defined(IRON_WINDOWS) || defined(IRON_LINUX) || defined(IRON_MACOS)
+		tab_console_run_button(h_input, press_run);
+#else
+		if (ui_icon_button(tr("Run"), ICON_PLAY, UI_ALIGN_CENTER) || press_run) {
+			console_log(string(">%s", h_input->text));
 			minic_ctx_free(minic_eval(string("float main() { %s }", h_input->text)));
-
 			h_input->text = "";
 		}
+#endif
 	}
 }
