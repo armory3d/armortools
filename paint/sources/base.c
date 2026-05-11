@@ -1418,9 +1418,8 @@ void ui_base_update(void *_) {
 		}
 
 		static f64 particle_last_spawn_time = 0.0;
-		bool particle_just_fired = false;
-		if (mouse_down("left") && context_in_paint_area() && !g_context->paint2d &&
-		    (mouse_started("left") || sys_time() - particle_last_spawn_time >= 0.2)) {
+		bool       particle_just_fired      = false;
+		if (mouse_down("left") && context_in_paint_area() && !g_context->paint2d && (mouse_started("left") || sys_time() - particle_last_spawn_time >= 0.2)) {
 			particle_last_spawn_time = sys_time();
 
 			i32 slot = -1;
@@ -1431,17 +1430,24 @@ void ui_base_update(void *_) {
 				}
 			}
 			if (slot >= 0) {
-				history_push_undo            = true;
-				g_context->brush_blend_dirty = true;
+				if (mouse_started("left")) {
+					history_push_undo            = true;
+					g_context->brush_blend_dirty = true;
+				}
 
 				object_t      *o  = scene_spawn_object(".Sphere", NULL, true);
 				mesh_object_t *mo = o->ext;
 				mo->base->name    = ".Bullet";
 				mo->base->visible = true;
 
-				camera_object_t *camera    = scene_camera;
-				transform_t     *ct        = camera->base->transform;
-				mo->base->transform->loc   = (vec4_t){transform_world_x(ct), transform_world_y(ct), transform_world_z(ct), 1.0};
+				util_render_pick_pos_nor_tex();
+				f32 nx            = g_context->norx_picked;
+				f32 ny            = g_context->nory_picked;
+				f32 nz            = g_context->norz_picked;
+				f32 sphere_radius = g_context->brush_radius * 0.1f;
+				f32 spawn_h       = -(sphere_radius + g_context->particle_spawn_distance) + 0.01;
+				mo->base->transform->loc =
+				    (vec4_t){g_context->posx_picked + nx * spawn_h, g_context->posy_picked + ny * spawn_h, g_context->posz_picked + nz * spawn_h, 1.0};
 				mo->base->transform->scale = (vec4_t){g_context->brush_radius * 0.2, g_context->brush_radius * 0.2, g_context->brush_radius * 0.2, 1.0};
 				transform_build_matrix(mo->base->transform);
 
@@ -1450,8 +1456,27 @@ void ui_base_update(void *_) {
 				body->mass           = g_context->particle_mass;
 				physics_body_init(body, mo->base);
 
-				ray_t *ray = raycast_get_ray(mouse_view_x(), mouse_view_y(), camera);
-				physics_body_apply_impulse(body, vec4_mult(ray->dir, 0.12));
+				// Random direction
+				f32 rx   = math_random() * 2.0f - 1.0f;
+				f32 ry   = math_random() * 2.0f - 1.0f;
+				f32 rz   = math_random() * 2.0f - 1.0f;
+				f32 rlen = sqrtf(rx * rx + ry * ry + rz * rz);
+				if (rlen < 0.0001f)
+					rlen = 0.0001f;
+				rx /= rlen;
+				ry /= rlen;
+				rz /= rlen;
+				if (rx * nx + ry * ny + rz * nz < 0.0f) {
+					rx = -rx;
+					ry = -ry;
+					rz = -rz;
+				}
+				f32 r       = g_context->particle_random;
+				f32 dx      = nx + (rx - nx) * r;
+				f32 dy      = ny + (ry - ny) * r;
+				f32 dz      = nz + (rz - nz) * r;
+				f32 impulse = g_context->particle_spawn_distance * 30.0f;
+				physics_body_apply_impulse(body, (vec4_t){dx * impulse, dy * impulse, dz * impulse, 0.0});
 
 				g_context->particles[slot].body   = body;
 				g_context->particles[slot].bullet = mo->base;

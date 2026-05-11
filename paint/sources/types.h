@@ -403,6 +403,8 @@ typedef struct context {
 	f32 particle_bounciness;
 	f32 particle_lifetime;
 	f32 particle_mass;
+	f32 particle_random;
+	f32 particle_spawn_distance;
 } context_t;
 
 typedef struct node_shader {

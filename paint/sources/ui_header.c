@@ -417,8 +417,8 @@ void ui_header_draw_tool_properties() {
 			}
 			else {
 				ui_handle_t *brush_radius_handle = ui_handle(__ID__);
-				brush_radius_handle->f = g_context->brush_radius;
-				g_context->brush_radius = ui_slider(brush_radius_handle, tr("Radius"), 0.01, 2.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
+				brush_radius_handle->f           = g_context->brush_radius;
+				g_context->brush_radius          = ui_slider(brush_radius_handle, tr("Radius"), 0.01, 2.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
 				if (ui->is_hovered) {
 					any_map_t *vars = any_map_create();
 					any_map_set(vars, "brush_radius", any_map_get(config_keymap, "brush_radius"));
@@ -475,7 +475,8 @@ void ui_header_draw_tool_properties() {
 			               vars));
 		}
 
-		if (g_context->tool == TOOL_TYPE_BRUSH || g_context->tool == TOOL_TYPE_ERASER || g_context->tool == TOOL_TYPE_CLONE || decal_mask || g_context->tool == TOOL_TYPE_PARTICLE) {
+		if (g_context->tool == TOOL_TYPE_BRUSH || g_context->tool == TOOL_TYPE_ERASER || g_context->tool == TOOL_TYPE_CLONE || decal_mask ||
+		    g_context->tool == TOOL_TYPE_PARTICLE) {
 			ui_handle_t *h = ui_handle(__ID__);
 			if (h->init) {
 				h->f = g_context->brush_hardness;
@@ -550,19 +551,31 @@ void ui_header_draw_tool_properties() {
 		}
 
 		if (g_context->tool == TOOL_TYPE_PARTICLE) {
-			ui_handle_t *hlifetime           = ui_handle(__ID__);
+			ui_handle_t *hlifetime = ui_handle(__ID__);
 			if (hlifetime->init) {
 				hlifetime->f = g_context->particle_lifetime;
 			}
 			g_context->particle_lifetime = ui_slider(hlifetime, tr("Lifetime"), 0.0, 10.0, true, 1.0, true, UI_ALIGN_RIGHT, true);
 
-			ui_handle_t *hmass               = ui_handle(__ID__);
+			ui_handle_t *hspawn_distance = ui_handle(__ID__);
+			if (hspawn_distance->init) {
+				hspawn_distance->f = g_context->particle_spawn_distance;
+			}
+			g_context->particle_spawn_distance = ui_slider(hspawn_distance, tr("Distance"), 0.0, 1.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
+
+			ui_handle_t *hmass = ui_handle(__ID__);
 			if (hmass->init) {
 				hmass->f = g_context->particle_mass;
 			}
 			g_context->particle_mass = ui_slider(hmass, tr("Mass"), 0.0, 3.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
 
-			ui_handle_t *hfriction           = ui_handle(__ID__);
+			ui_handle_t *hrandom = ui_handle(__ID__);
+			if (hrandom->init) {
+				hrandom->f = g_context->particle_random;
+			}
+			g_context->particle_random = ui_slider(hrandom, tr("Random"), 0.0, 1.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
+
+			ui_handle_t *hfriction = ui_handle(__ID__);
 			if (hfriction->init) {
 				hfriction->f = g_context->particle_friction;
 			}
@@ -571,11 +584,11 @@ void ui_header_draw_tool_properties() {
 				asim_set_friction(g_context->particle_friction);
 			}
 
-			ui_handle_t *hbounciness           = ui_handle(__ID__);
+			ui_handle_t *hbounciness = ui_handle(__ID__);
 			if (hbounciness->init) {
 				hbounciness->f = g_context->particle_bounciness;
 			}
-			g_context->particle_bounciness = ui_slider(hbounciness, tr("Bounciness"), 0.0, 1.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
+			g_context->particle_bounciness = ui_slider(hbounciness, tr("Bounce"), 0.0, 1.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
 			if (hbounciness->changed) {
 				asim_set_bounciness(g_context->particle_bounciness);
 			}
