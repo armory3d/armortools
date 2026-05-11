@@ -47,6 +47,8 @@ static physics_pair_t ppairs[MAX_SPHERES];
 static float          ppair_best_dist;
 static mesh_t         mesh;
 static aabb_t         root_bounds = {{-10, -10, -10}, {10, 10, 10}};
+static float          asim_bounciness = 0.0f;
+static float          asim_friction    = 0.01f;
 
 static inline aabb_t merge_aabbs(aabb_t a, aabb_t b) {
 	return (aabb_t){.min = {fminf(a.min.x, b.min.x), fminf(a.min.y, b.min.y), fminf(a.min.z, b.min.z)},
@@ -122,9 +124,7 @@ static void collide_sphere_triangle(sphere_t *s, int si, triangle_t *t) {
 		if (v_dot_n < 0.0f) {
 			vec4_t n_vel       = vec4_mult(t->normal, v_dot_n);
 			vec4_t t_vel       = vec4_sub(s->velocity, n_vel);
-			float  restitution = 0.0f;
-			float  friction    = 0.99f;
-			s->velocity        = vec4_add(vec4_mult(n_vel, -restitution), vec4_mult(t_vel, friction));
+			s->velocity = vec4_add(vec4_mult(n_vel, -asim_bounciness), vec4_mult(t_vel, 1.0f - asim_friction));
 		}
 
 		vec4_t contact_point = vec4_sub(s->position, vec4_mult(t->normal, s->radius));
@@ -335,4 +335,12 @@ float asim_body_get_speed(void *body) {
 	int slot = (int)(uintptr_t)body;
 	return sqrtf(spheres[slot].velocity.x * spheres[slot].velocity.x + spheres[slot].velocity.y * spheres[slot].velocity.y +
 	             spheres[slot].velocity.z * spheres[slot].velocity.z);
+}
+
+void asim_set_friction(float v) {
+	asim_friction = v * 0.1f;
+}
+
+void asim_set_bounciness(float v) {
+	asim_bounciness = v;
 }

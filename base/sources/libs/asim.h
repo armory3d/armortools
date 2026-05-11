@@ -24,3 +24,5 @@ void  asim_body_get_rot(void *body, quat_t *rot);
 void  asim_body_sync_transform(void *body, vec4_t pos, quat_t rot);
 void  asim_body_remove(void *body);
 float asim_body_get_speed(void *body);
+void  asim_set_friction(float v);
+void  asim_set_bounciness(float v);
