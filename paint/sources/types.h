@@ -399,6 +399,10 @@ typedef struct context {
 		struct object       *bullet;
 	} particles[32];
 	i32 particle_index;
+	f32 particle_friction;
+	f32 particle_bounciness;
+	f32 particle_lifetime;
+	f32 particle_mass;
 } context_t;
 
 typedef struct node_shader {

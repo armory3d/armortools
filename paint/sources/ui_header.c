@@ -549,6 +549,38 @@ void ui_header_draw_tool_properties() {
 			}
 		}
 
+		if (g_context->tool == TOOL_TYPE_PARTICLE) {
+			ui_handle_t *hlifetime           = ui_handle(__ID__);
+			if (hlifetime->init) {
+				hlifetime->f = g_context->particle_lifetime;
+			}
+			g_context->particle_lifetime = ui_slider(hlifetime, tr("Lifetime"), 0.0, 10.0, true, 1.0, true, UI_ALIGN_RIGHT, true);
+
+			ui_handle_t *hmass               = ui_handle(__ID__);
+			if (hmass->init) {
+				hmass->f = g_context->particle_mass;
+			}
+			g_context->particle_mass = ui_slider(hmass, tr("Mass"), 0.0, 3.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
+
+			ui_handle_t *hfriction           = ui_handle(__ID__);
+			if (hfriction->init) {
+				hfriction->f = g_context->particle_friction;
+			}
+			g_context->particle_friction = ui_slider(hfriction, tr("Friction"), 0.0, 1.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
+			if (hfriction->changed) {
+				asim_set_friction(g_context->particle_friction);
+			}
+
+			ui_handle_t *hbounciness           = ui_handle(__ID__);
+			if (hbounciness->init) {
+				hbounciness->f = g_context->particle_bounciness;
+			}
+			g_context->particle_bounciness = ui_slider(hbounciness, tr("Bounciness"), 0.0, 1.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
+			if (hbounciness->changed) {
+				asim_set_bounciness(g_context->particle_bounciness);
+			}
+		}
+
 		if (g_context->tool == TOOL_TYPE_FILL) {
 			string_array_t *fill_mode_combo = any_array_create_from_raw(
 			    (void *[]){
@@ -643,6 +675,7 @@ void ui_header_draw_tool_properties() {
 			}
 		}
 	}
+
 	if (g_context->tool == TOOL_TYPE_CURSOR) {
 		// if (!sim_running && ui_button("Play")) {
 		// 	sim_play();

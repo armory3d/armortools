@@ -100,6 +100,10 @@ context_t *context_create() {
 	c->last_particle_hit_x               = 0.0;
 	c->last_particle_hit_y               = 0.0;
 	c->last_particle_hit_z               = 0.0;
+	c->particle_friction                 = 0.1;
+	c->particle_bounciness               = 0.0;
+	c->particle_lifetime                 = 5.0;
+	c->particle_mass                     = 1.0;
 	c->layer_filter                      = 0;
 	c->gizmo_started                     = false;
 	c->gizmo_offset                      = 0.0;

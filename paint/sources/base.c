@@ -1417,8 +1417,11 @@ void ui_base_update(void *_) {
 			iron_delay_idle_sleep();
 		}
 
+		static f64 particle_last_spawn_time = 0.0;
 		bool particle_just_fired = false;
-		if (mouse_started("left") && context_in_paint_area() && !g_context->paint2d) {
+		if (mouse_down("left") && context_in_paint_area() && !g_context->paint2d &&
+		    (mouse_started("left") || sys_time() - particle_last_spawn_time >= 0.2)) {
+			particle_last_spawn_time = sys_time();
 
 			i32 slot = -1;
 			for (i32 i = 0; i < 32; ++i) {
@@ -1444,7 +1447,7 @@ void ui_base_update(void *_) {
 
 				physics_body_t *body = physics_body_create();
 				body->shape          = PHYSICS_SHAPE_SPHERE;
-				body->mass           = 1.0;
+				body->mass           = g_context->particle_mass;
 				physics_body_init(body, mo->base);
 
 				ray_t *ray = raycast_get_ray(mouse_view_x(), mouse_view_y(), camera);
@@ -1452,7 +1455,7 @@ void ui_base_update(void *_) {
 
 				g_context->particles[slot].body   = body;
 				g_context->particles[slot].bullet = mo->base;
-				g_context->particles[slot].timer  = tween_timer(3, NULL, NULL);
+				g_context->particles[slot].timer  = tween_timer(g_context->particle_lifetime, NULL, NULL);
 				particle_just_fired               = true;
 			}
 		}
