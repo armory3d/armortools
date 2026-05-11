@@ -867,7 +867,7 @@ void layers_init() {
 }
 
 void layers_resize() {
-	if (base_res_handle->i >= math_floor(TEXTURE_RES_RES16384)) { // Save memory for >=16k
+	if (config_get_texture_res_x() >= 16384 || config_get_texture_res_y() >= 16384) { // Save memory for >=16k
 		g_config->undo_steps = 1;
 		while (history_undo_layers->length > g_config->undo_steps) {
 			slot_layer_t *l = array_pop(history_undo_layers);

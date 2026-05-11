@@ -413,7 +413,12 @@ void util_render_make_brush_preview() {
 	texpreview_icon->_image          = g_context->brush->image_icon;
 	render_path_set_target("texpreview_icon", NULL, NULL, GPU_CLEAR_NONE, 0, 0.0);
 	render_path_bind_target("texpreview", "tex");
-	render_path_draw_shader("Scene/supersample_resolve/supersample_resolve");
+	if (g_context->pixel_art_preview) {
+		render_path_draw_shader("Scene/copy_pass/copy_pass");
+	}
+	else {
+		render_path_draw_shader("Scene/supersample_resolve/supersample_resolve");
+	}
 
 	g_context->brush->preview_ready = true;
 	g_context->brush_blend_dirty    = true;

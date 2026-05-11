@@ -50,8 +50,10 @@ void box_export_tab_export_textures(char *title, bool bake_material) {
 		        "1024",
 		        "2048",
 		        "4096",
+		        "32",
+		        "64",
 		    },
-		    6);
+		    8);
 #else
 		string_array_t *base_res_combo = any_array_create_from_raw(
 		    (void *[]){
@@ -63,8 +65,10 @@ void box_export_tab_export_textures(char *title, bool bake_material) {
 		        "4096",
 		        "8192",
 		        "16384",
+		        "32",
+		        "64",
 		    },
-		    8);
+		    10);
 #endif
 
 		ui_combo(base_res_handle, base_res_combo, tr("Resolution"), true, UI_ALIGN_LEFT, true);

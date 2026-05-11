@@ -197,6 +197,16 @@ typedef struct context {
 	f32                         light_angle;
 	bool                        cull_backfaces;
 	bool                        texture_filter;
+	bool                        pixel_art_preview;
+	bool                        pixel_art_preview_saved;
+	bool                        pixel_art_preview_texture_filter;
+	bool                        pixel_art_preview_draw_texels;
+	f32                         pixel_art_preview_rp_supersample;
+	bool                        pixel_art_preview_rp_ssao;
+	bool                        pixel_art_preview_rp_bloom;
+	f32                         pixel_art_preview_rp_vignette;
+	f32                         pixel_art_preview_rp_grain;
+	render_mode_t               pixel_art_preview_render_mode;
 	texture_ldr_format_t        format_type;
 	f32                         format_quality;
 	export_destination_t        layers_destination;

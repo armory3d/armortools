@@ -97,7 +97,12 @@ void render_path_preview_commands_preview() {
 
 	render_path_set_target("texpreview_icon", NULL, NULL, GPU_CLEAR_NONE, 0, 0.0);
 	render_path_bind_target("texpreview", "tex");
-	render_path_draw_shader("Scene/supersample_resolve/supersample_resolveRGBA64");
+	if (g_context->pixel_art_preview) {
+		render_path_draw_shader("Scene/copy_pass/copyRGBA64_pass");
+	}
+	else {
+		render_path_draw_shader("Scene/supersample_resolve/supersample_resolveRGBA64");
+	}
 }
 
 void render_path_preview_commands_decal() {

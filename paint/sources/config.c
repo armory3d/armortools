@@ -409,7 +409,9 @@ f32 config_get_super_sample_size(i32 i) {
 }
 
 i32 config_texture_res_size(i32 pos) {
-	return pos == TEXTURE_RES_RES128     ? 128
+	return pos == TEXTURE_RES_RES32      ? 32
+	       : pos == TEXTURE_RES_RES64    ? 64
+	       : pos == TEXTURE_RES_RES128   ? 128
 	       : pos == TEXTURE_RES_RES256   ? 256
 	       : pos == TEXTURE_RES_RES512   ? 512
 	       : pos == TEXTURE_RES_RES1024  ? 1024
@@ -444,7 +446,9 @@ i32 config_get_texture_res_y() {
 }
 
 i32 config_get_texture_res_pos(i32 i) {
-	return i == 128     ? TEXTURE_RES_RES128
+	return i == 32      ? TEXTURE_RES_RES32
+	       : i == 64    ? TEXTURE_RES_RES64
+	       : i == 128   ? TEXTURE_RES_RES128
 	       : i == 256   ? TEXTURE_RES_RES256
 	       : i == 512   ? TEXTURE_RES_RES512
 	       : i == 1024  ? TEXTURE_RES_RES1024

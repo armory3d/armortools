@@ -412,8 +412,10 @@ void box_preferences_usage_tab() {
 	        "1024",
 	        "2048",
 	        "4096",
+	        "32",
+	        "64",
 	    },
-	    6);
+	    8);
 #else
 	string_array_t *res_combo = any_array_create_from_raw(
 	    (void *[]){
@@ -425,8 +427,10 @@ void box_preferences_usage_tab() {
 	        "4096",
 	        "8192",
 	        "16384",
+	        "32",
+	        "64",
 	    },
-	    8);
+	    10);
 #endif
 	g_config->layer_res = ui_combo(h_layer_res, res_combo, tr("Default Layer Resolution"), true, UI_ALIGN_LEFT, true);
 

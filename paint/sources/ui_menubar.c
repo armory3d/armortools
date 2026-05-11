@@ -19,6 +19,47 @@ typedef struct update_info {
 i32 ui_menubar_category = 0;
 int ui_menubar_capture_screenshot_frame = 0;
 
+void ui_menubar_apply_pixel_art_preview() {
+	if (g_context->pixel_art_preview) {
+		if (!g_context->pixel_art_preview_saved) {
+			g_context->pixel_art_preview_texture_filter = g_context->texture_filter;
+			g_context->pixel_art_preview_draw_texels    = g_context->draw_texels;
+			g_context->pixel_art_preview_rp_supersample = g_config->rp_supersample;
+			g_context->pixel_art_preview_rp_ssao        = g_config->rp_ssao;
+			g_context->pixel_art_preview_rp_bloom       = g_config->rp_bloom;
+			g_context->pixel_art_preview_rp_vignette    = g_config->rp_vignette;
+			g_context->pixel_art_preview_rp_grain       = g_config->rp_grain;
+			g_context->pixel_art_preview_render_mode    = g_config->render_mode;
+			g_context->pixel_art_preview_saved          = true;
+		}
+		g_context->texture_filter = false;
+		g_context->draw_texels    = true;
+		g_config->rp_supersample  = 1.0;
+		g_config->rp_ssao         = false;
+		g_config->rp_bloom        = false;
+		g_config->rp_vignette     = 0.0;
+		g_config->rp_grain        = 0.0;
+		g_config->render_mode     = RENDER_MODE_FORWARD;
+	}
+	else if (g_context->pixel_art_preview_saved) {
+		g_context->texture_filter = g_context->pixel_art_preview_texture_filter;
+		g_context->draw_texels    = g_context->pixel_art_preview_draw_texels;
+		g_config->rp_supersample  = g_context->pixel_art_preview_rp_supersample;
+		g_config->rp_ssao         = g_context->pixel_art_preview_rp_ssao;
+		g_config->rp_bloom        = g_context->pixel_art_preview_rp_bloom;
+		g_config->rp_vignette     = g_context->pixel_art_preview_rp_vignette;
+		g_config->rp_grain        = g_context->pixel_art_preview_rp_grain;
+		g_config->render_mode     = g_context->pixel_art_preview_render_mode;
+		g_context->pixel_art_preview_saved = false;
+	}
+
+	g_context->texels_handle->b = g_context->draw_texels;
+	gpu_use_linear_sampling(g_context->texture_filter);
+	config_apply();
+	context_set_render_path();
+	make_material_parse_mesh_material();
+}
+
 void ui_menubar_init() {
 	ui_menubar_hwnd->layout        = UI_LAYOUT_HORIZONTAL;
 	ui_menubar_menu_handle->layout = UI_LAYOUT_HORIZONTAL;
@@ -425,12 +466,27 @@ void ui_menubar_draw_category_items() {
 			make_material_parse_mesh_material();
 		}
 
+		ui_handle_t *pixel_art_preview_handle = ui_handle(__ID__);
+		if (pixel_art_preview_handle->init) {
+			pixel_art_preview_handle->b = g_context->pixel_art_preview;
+		}
+		g_context->pixel_art_preview = ui_check(pixel_art_preview_handle, string(" %s", tr("Pixel Art Preview")), "");
+		if (pixel_art_preview_handle->changed) {
+			ui_menubar_apply_pixel_art_preview();
+		}
+
 		ui_handle_t *filter_handle = ui_handle(__ID__);
 		if (filter_handle->init) {
 			filter_handle->b = g_context->texture_filter;
 		}
 		g_context->texture_filter = ui_check(filter_handle, string(" %s", tr("Filter Textures")), "");
 		if (filter_handle->changed) {
+			if (g_context->pixel_art_preview) {
+				bool texture_filter = g_context->texture_filter;
+				g_context->pixel_art_preview = false;
+				ui_menubar_apply_pixel_art_preview();
+				g_context->texture_filter = texture_filter;
+			}
 			gpu_use_linear_sampling(g_context->texture_filter);
 		}
 
@@ -445,6 +501,12 @@ void ui_menubar_draw_category_items() {
 
 		g_context->draw_texels = ui_check(g_context->texels_handle, string(" %s", tr("Texels")), "");
 		if (g_context->texels_handle->changed) {
+			if (g_context->pixel_art_preview) {
+				bool draw_texels = g_context->draw_texels;
+				g_context->pixel_art_preview = false;
+				ui_menubar_apply_pixel_art_preview();
+				g_context->draw_texels = draw_texels;
+			}
 			make_material_parse_mesh_material();
 		}
 

@@ -124,6 +124,44 @@ void project_new_box_draw() {
 	    3);
 	g_context->project_aspect_ratio = ui_combo(h_project_aspect_ratio, project_aspect_ratio_combo, tr("Aspect Ratio"), true, UI_ALIGN_LEFT, true);
 	ui_end_element();
+
+	ui_row2();
+	ui_handle_t *h_project_res = ui_handle(__ID__);
+	if (h_project_res->init) {
+		h_project_res->i = base_res_handle->i;
+	}
+#if defined(IRON_ANDROID) || defined(IRON_IOS)
+	string_array_t *project_res_combo = any_array_create_from_raw(
+	    (void *[]){
+	        "128",
+	        "256",
+	        "512",
+	        "1024",
+	        "2048",
+	        "4096",
+	        "32",
+	        "64",
+	    },
+	    8);
+#else
+	string_array_t *project_res_combo = any_array_create_from_raw(
+	    (void *[]){
+	        "128",
+	        "256",
+	        "512",
+	        "1024",
+	        "2048",
+	        "4096",
+	        "8192",
+	        "16384",
+	        "32",
+	        "64",
+	    },
+	    10);
+#endif
+	base_res_handle->i = ui_combo(h_project_res, project_res_combo, tr("Texture Resolution"), true, UI_ALIGN_LEFT, true);
+	ui_end_element();
+
 	ui_row2();
 	if (ui_icon_button(tr("Cancel"), ICON_CLOSE, UI_ALIGN_CENTER)) {
 		ui_box_hide();
@@ -135,7 +173,7 @@ void project_new_box_draw() {
 }
 
 void project_new_box() {
-	ui_box_show_custom(&project_new_box_draw, 400, 200, NULL, true, tr("New Project"));
+	ui_box_show_custom(&project_new_box_draw, 400, 240, NULL, true, tr("New Project"));
 }
 
 void project_cleanup() {

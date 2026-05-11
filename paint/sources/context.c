@@ -23,6 +23,8 @@ context_t *context_create() {
 	c->light_angle             = 0.0;
 	c->cull_backfaces          = true;
 	c->texture_filter          = true;
+	c->pixel_art_preview       = false;
+	c->pixel_art_preview_saved = false;
 	c->format_type             = TEXTURE_LDR_FORMAT_PNG;
 	c->format_quality          = 100.0;
 	c->layers_destination      = EXPORT_DESTINATION_DISK;

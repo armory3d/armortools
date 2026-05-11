@@ -729,8 +729,10 @@ void tab_layers_draw_layer_context_menu_draw() {
 		        "1024",
 		        "2048",
 		        "4096",
+		        "32",
+		        "64",
 		    },
-		    6);
+		    8);
 #else
 		string_array_t *ar = any_array_create_from_raw(
 		    (void *[]){
@@ -742,8 +744,10 @@ void tab_layers_draw_layer_context_menu_draw() {
 		        "4096",
 		        "8192",
 		        "16384",
+		        "32",
+		        "64",
 		    },
-		    8);
+		    10);
 #endif
 		ui_handle_t *h            = ui_handle(__ID__);
 		bool         changed_last = h->changed;

@@ -61,7 +61,8 @@ void render_path_base_begin() {
 	}
 
 	// Match projection matrix jitter
-	bool skip_taa = g_context->split_view || g_context->viewport_mode == VIEWPORT_MODE_PATH_TRACE || g_context->camera_type == CAMERA_TYPE_ORTHOGRAPHIC ||
+	bool skip_taa = g_context->pixel_art_preview || g_context->split_view || g_context->viewport_mode == VIEWPORT_MODE_PATH_TRACE ||
+	                g_context->camera_type == CAMERA_TYPE_ORTHOGRAPHIC ||
 	                ((g_context->tool == TOOL_TYPE_CLONE || g_context->tool == TOOL_TYPE_BLUR || g_context->tool == TOOL_TYPE_SMUDGE) && g_context->pdirty > 0);
 
 	if (skip_taa || g_config->brush_live) {
@@ -321,7 +322,7 @@ void render_path_base_draw_taa(char *bufa, char *bufb) {
 	render_path_set_target(bufb, NULL, NULL, GPU_CLEAR_NONE, 0, 0.0);
 	render_path_bind_target(bufa, "tex");
 
-	bool skip_taa = g_context->split_view;
+	bool skip_taa = g_context->pixel_art_preview || g_context->split_view;
 	if (skip_taa) {
 		render_path_draw_shader("Scene/copy_pass/copyRGBA64_pass");
 	}

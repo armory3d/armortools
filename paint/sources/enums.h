@@ -253,6 +253,8 @@ typedef enum {
 	TEXTURE_RES_RES4096  = 5,
 	TEXTURE_RES_RES8192  = 6,
 	TEXTURE_RES_RES16384 = 7,
+	TEXTURE_RES_RES32    = 8,
+	TEXTURE_RES_RES64    = 9,
 } texture_res_t;
 
 typedef enum {
