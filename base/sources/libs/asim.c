@@ -6,6 +6,7 @@
 
 #define GRAVITY       -9.81f
 #define MAX_BVH_DEPTH 20
+#define MAX_SPHERES   32
 
 typedef struct {
 	vec4_t min;
@@ -17,6 +18,7 @@ typedef struct {
 	vec4_t velocity;
 	float  radius;
 	float  mass;
+	int    active;
 } sphere_t;
 
 typedef struct {
@@ -29,7 +31,8 @@ typedef struct {
 
 typedef struct bvh_node {
 	aabb_t           bounds;
-	struct bvh_node *left, *right;
+	struct bvh_node *left;
+	struct bvh_node *right;
 	triangle_t      *triangles;
 	int              num_tris;
 	int              is_leaf;
@@ -39,17 +42,11 @@ typedef struct {
 	bvh_node_t *root;
 } mesh_t;
 
-sphere_t sphere = {.position = {0, 0, 0},
-                   .velocity = {0, 0, 0},
-                   // .radius = 1.0f,
-                   .radius = 0.2f,
-                   .mass   = 1.0f};
-
-mesh_t mesh;
-
-aabb_t root_bounds = {{-10, -10, -10}, {10, 10, 10}};
-
-physics_pair_t ppair;
+static sphere_t       spheres[MAX_SPHERES];
+static physics_pair_t ppairs[MAX_SPHERES];
+static float          ppair_best_dist;
+static mesh_t         mesh;
+static aabb_t         root_bounds = {{-10, -10, -10}, {10, 10, 10}};
 
 static inline aabb_t merge_aabbs(aabb_t a, aabb_t b) {
 	return (aabb_t){.min = {fminf(a.min.x, b.min.x), fminf(a.min.y, b.min.y), fminf(a.min.z, b.min.z)},
@@ -64,7 +61,6 @@ static inline int sphere_aabb_intersect(sphere_t *s, aabb_t *a) {
 	return dx * dx + dy * dy + dz * dz <= s->radius * s->radius;
 }
 
-// Comparison function for sorting triangles by x-coordinate of centroid
 static int compare_triangles(const void *a, const void *b) {
 	triangle_t *ta = (triangle_t *)a;
 	triangle_t *tb = (triangle_t *)b;
@@ -101,14 +97,14 @@ static bvh_node_t *create_bvh_node(triangle_t *tris, int num_tris, int depth) {
 	return node;
 }
 
-static void collide_sphere_triangle(sphere_t *s, triangle_t *t) {
+static void collide_sphere_triangle(sphere_t *s, int si, triangle_t *t) {
 	if (!sphere_aabb_intersect(s, &t->bounds)) {
 		return;
 	}
 
 	vec4_t to_sphere = vec4_sub(s->position, t->v0);
 	float  dist      = vec4_dot(to_sphere, t->normal);
-	if (fabsf(dist) > s->radius) {
+	if (dist < 0.0f || dist > s->radius) {
 		return;
 	}
 
@@ -118,35 +114,45 @@ static void collide_sphere_triangle(sphere_t *s, triangle_t *t) {
 
 	if (vec4_dot(t->normal, vec4_cross(e0, c0)) >= 0 && vec4_dot(t->normal, vec4_cross(e1, c1)) >= 0 && vec4_dot(t->normal, vec4_cross(e2, c2)) >= 0) {
 
-		float penetration = s->radius - dist;
-		if (dist < 0) {
-			penetration = -penetration;
+		float orig_dist = dist;
+
+		s->position = vec4_add(s->position, vec4_mult(t->normal, s->radius - dist));
+
+		float v_dot_n = vec4_dot(s->velocity, t->normal);
+		if (v_dot_n < 0.0f) {
+			vec4_t n_vel       = vec4_mult(t->normal, v_dot_n);
+			vec4_t t_vel       = vec4_sub(s->velocity, n_vel);
+			float  restitution = 0.0f;
+			float  friction    = 0.99f;
+			s->velocity        = vec4_add(vec4_mult(n_vel, -restitution), vec4_mult(t_vel, friction));
 		}
-		s->position    = vec4_add(s->position, vec4_mult(t->normal, penetration));
-		float  v_dot_n = vec4_dot(s->velocity, t->normal);
-		vec4_t n_vel   = vec4_mult(t->normal, v_dot_n);
-		s->velocity    = vec4_add(vec4_sub(s->velocity, n_vel), vec4_mult(n_vel, -0.01f));
 
 		vec4_t contact_point = vec4_sub(s->position, vec4_mult(t->normal, s->radius));
-		ppair.pos_a_x        = contact_point.x;
-		ppair.pos_a_y        = contact_point.y;
-		ppair.pos_a_z        = contact_point.z;
+		if (orig_dist < ppair_best_dist) {
+			ppair_best_dist       = orig_dist;
+			ppairs[si].pos_a_x = contact_point.x;
+			ppairs[si].pos_a_y = contact_point.y;
+			ppairs[si].pos_a_z = contact_point.z;
+			ppairs[si].nor_x   = t->normal.x;
+			ppairs[si].nor_y   = t->normal.y;
+			ppairs[si].nor_z   = t->normal.z;
+		}
 	}
 }
 
-static void query_bvh(sphere_t *s, bvh_node_t *n) {
+static void query_bvh(sphere_t *s, int si, bvh_node_t *n) {
 	if (!n || !sphere_aabb_intersect(s, &n->bounds)) {
 		return;
 	}
 
 	if (n->is_leaf) {
 		for (int i = 0; i < n->num_tris; i++) {
-			collide_sphere_triangle(s, &n->triangles[i]);
+			collide_sphere_triangle(s, si, &n->triangles[i]);
 		}
 	}
 	else {
-		query_bvh(s, n->left);
-		query_bvh(s, n->right);
+		query_bvh(s, si, n->left);
+		query_bvh(s, si, n->right);
 	}
 }
 
@@ -164,7 +170,10 @@ static void free_bvh(bvh_node_t *n) {
 	free(n);
 }
 
-void asim_world_create() {}
+void asim_world_create() {
+	memset(spheres, 0, sizeof(spheres));
+	memset(ppairs, 0, sizeof(ppairs));
+}
 
 void asim_world_destroy() {
 	free_bvh(mesh.root);
@@ -172,35 +181,94 @@ void asim_world_destroy() {
 }
 
 void asim_world_update(float time_step) {
-	ppair.pos_a_x = 0;
-	ppair.pos_a_y = 0;
-	ppair.pos_a_z = 0;
-
 	const int sub_steps = 2;
 	float     dt        = time_step / sub_steps;
-	for (int i = 0; i < sub_steps; i++) {
-		sphere.velocity.z += GRAVITY * dt;
-		sphere.position = vec4_add(sphere.position, vec4_mult(sphere.velocity, dt));
-		query_bvh(&sphere, mesh.root);
+
+	for (int s = 0; s < MAX_SPHERES; s++) {
+		if (!spheres[s].active) {
+			continue;
+		}
+		ppairs[s].pos_a_x = 0;
+		ppairs[s].pos_a_y = 0;
+		ppairs[s].pos_a_z = 0;
+		ppairs[s].nor_x   = 0;
+		ppairs[s].nor_y   = 0;
+		ppairs[s].nor_z   = 0;
+	}
+
+	for (int step = 0; step < sub_steps; step++) {
+		// Sphere-mesh collision
+		for (int s = 0; s < MAX_SPHERES; s++) {
+			if (!spheres[s].active) {
+				continue;
+			}
+			ppair_best_dist = spheres[s].radius;
+			spheres[s].velocity.z += GRAVITY * dt;
+			spheres[s].position = vec4_add(spheres[s].position, vec4_mult(spheres[s].velocity, dt));
+			query_bvh(&spheres[s], s, mesh.root);
+		}
+
+		// Sphere-sphere collision
+		for (int i = 0; i < MAX_SPHERES; i++) {
+			if (!spheres[i].active) {
+				continue;
+			}
+			for (int j = i + 1; j < MAX_SPHERES; j++) {
+				if (!spheres[j].active) {
+					continue;
+				}
+				vec4_t delta    = vec4_sub(spheres[i].position, spheres[j].position);
+				float  dist     = vec4_len(delta);
+				float  min_dist = spheres[i].radius + spheres[j].radius;
+				if (dist >= min_dist || dist < 0.0001f) {
+					continue;
+				}
+				vec4_t n            = vec4_mult(delta, 1.0f / dist);
+				float  overlap      = (min_dist - dist) * 0.5f;
+				spheres[i].position = vec4_add(spheres[i].position, vec4_mult(n, overlap));
+				spheres[j].position = vec4_sub(spheres[j].position, vec4_mult(n, overlap));
+				float vi_n          = vec4_dot(spheres[i].velocity, n);
+				float vj_n          = vec4_dot(spheres[j].velocity, n);
+				if (vi_n - vj_n < 0.0f) {
+					float restitution   = 0.3f;
+					float impulse       = (1.0f + restitution) * (vi_n - vj_n) * 0.5f;
+					spheres[i].velocity = vec4_sub(spheres[i].velocity, vec4_mult(n, impulse));
+					spheres[j].velocity = vec4_add(spheres[j].velocity, vec4_mult(n, impulse));
+				}
+			}
+		}
 	}
 }
 
-physics_pair_t *asim_world_get_contact() {
-	return &ppair;
+physics_pair_t *asim_world_get_contact(void *body) {
+	int slot = (int)(uintptr_t)body;
+	return &ppairs[slot];
 }
 
 void *asim_body_create(int shape, float mass, float dimx, float dimy, float dimz, float x, float y, float z, void *posa, void *inda, float scale_pos) {
 
 	if (shape == 1) { // SPHERE
+		int slot = -1;
+		for (int i = 0; i < MAX_SPHERES; i++) {
+			if (!spheres[i].active) {
+				slot = i;
+				break;
+			}
+		}
+		if (slot < 0) {
+			return NULL;
+		}
 
-		sphere.position.x = x;
-		sphere.position.y = y;
-		sphere.position.z = z;
-		sphere.velocity.x = 0;
-		sphere.velocity.y = 0;
-		sphere.velocity.z = 0;
+		spheres[slot].position.x = x;
+		spheres[slot].position.y = y;
+		spheres[slot].position.z = z;
+		spheres[slot].velocity.x = 0;
+		spheres[slot].velocity.y = 0;
+		spheres[slot].velocity.z = 0;
+		spheres[slot].radius     = dimx / 2.0f;
+		spheres[slot].active     = 1;
 
-		return NULL;
+		return (void *)(uintptr_t)slot;
 	}
 
 	i16_array_t *pa       = posa;
@@ -234,23 +302,37 @@ void *asim_body_create(int shape, float mass, float dimx, float dimy, float dimz
 }
 
 void asim_body_apply_impulse(void *body, float x, float y, float z) {
-	sphere.velocity.x += x;
-	sphere.velocity.y += y;
-	sphere.velocity.z += z;
+	int slot = (int)(uintptr_t)body;
+	spheres[slot].velocity.x += x;
+	spheres[slot].velocity.y += y;
+	spheres[slot].velocity.z += z;
 }
 
 void asim_body_get_pos(void *body, vec4_t *pos) {
-	pos->x = sphere.position.x;
-	pos->y = sphere.position.y;
-	pos->z = sphere.position.z;
+	int slot = (int)(uintptr_t)body;
+	pos->x   = spheres[slot].position.x;
+	pos->y   = spheres[slot].position.y;
+	pos->z   = spheres[slot].position.z;
 }
 
 void asim_body_get_rot(void *body, quat_t *rot) {}
 
 void asim_body_sync_transform(void *body, vec4_t pos, quat_t rot) {
-	sphere.position.x = pos.x;
-	sphere.position.y = pos.y;
-	sphere.position.z = pos.z;
+	int slot                 = (int)(uintptr_t)body;
+	spheres[slot].position.x = pos.x;
+	spheres[slot].position.y = pos.y;
+	spheres[slot].position.z = pos.z;
 }
 
-void asim_body_remove(void *body) {}
+void asim_body_remove(void *body) {
+	int slot = (int)(uintptr_t)body;
+	if (slot >= 0 && slot < MAX_SPHERES) {
+		spheres[slot].active = 0;
+	}
+}
+
+float asim_body_get_speed(void *body) {
+	int slot = (int)(uintptr_t)body;
+	return sqrtf(spheres[slot].velocity.x * spheres[slot].velocity.x + spheres[slot].velocity.y * spheres[slot].velocity.y +
+	             spheres[slot].velocity.z * spheres[slot].velocity.z);
+}
