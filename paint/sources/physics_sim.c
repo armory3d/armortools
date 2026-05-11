@@ -97,8 +97,8 @@ void sim_add_body(object_t *o, physics_shape_t shape, f32 mass) {
 	physics_body_init(body, o);
 }
 
-void sim_remove_body(i32 uid) {
-	physics_body_remove(uid);
+void sim_remove_body(physics_body_t *pb) {
+	physics_body_remove(pb);
 }
 
 void sim_duplicate() {
@@ -127,5 +127,6 @@ void sim_delete() {
 	mesh_object_t *so = g_context->selected_object->ext;
 	array_remove(project_paint_objects, so);
 	mesh_object_remove(so);
-	sim_remove_body(so->base->uid);
+	physics_body_t *pb = any_imap_get(physics_body_object_map, so->base->uid);
+	sim_remove_body(pb);
 }

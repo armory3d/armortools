@@ -475,7 +475,7 @@ void ui_header_draw_tool_properties() {
 			               vars));
 		}
 
-		if (g_context->tool == TOOL_TYPE_BRUSH || g_context->tool == TOOL_TYPE_ERASER || g_context->tool == TOOL_TYPE_CLONE || decal_mask) {
+		if (g_context->tool == TOOL_TYPE_BRUSH || g_context->tool == TOOL_TYPE_ERASER || g_context->tool == TOOL_TYPE_CLONE || decal_mask || g_context->tool == TOOL_TYPE_PARTICLE) {
 			ui_handle_t *h = ui_handle(__ID__);
 			if (h->init) {
 				h->f = g_context->brush_hardness;

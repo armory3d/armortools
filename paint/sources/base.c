@@ -1128,8 +1128,8 @@ void ui_base_update(void *_) {
 				}
 				else {
 					g_context->brush_radius += mouse_movement_x / 150.0;
-					g_context->brush_radius           = math_max(0.01, math_min(4.0, g_context->brush_radius));
-					g_context->brush_radius           = math_round(g_context->brush_radius * 100) / 100.0;
+					g_context->brush_radius = math_max(0.01, math_min(4.0, g_context->brush_radius));
+					g_context->brush_radius = math_round(g_context->brush_radius * 100) / 100.0;
 				}
 				ui_header_handle->redraws = 2;
 			}
@@ -1223,13 +1223,13 @@ void ui_base_update(void *_) {
 			}
 			else if (operator_shortcut(any_map_get(config_keymap, "brush_radius_decrease"), SHORTCUT_TYPE_REPEAT)) {
 				g_context->brush_radius -= ui_base_get_radius_increment();
-				g_context->brush_radius           = math_max(math_round(g_context->brush_radius * 100) / 100.0, 0.01);
-				ui_header_handle->redraws         = 2;
+				g_context->brush_radius   = math_max(math_round(g_context->brush_radius * 100) / 100.0, 0.01);
+				ui_header_handle->redraws = 2;
 			}
 			else if (operator_shortcut(any_map_get(config_keymap, "brush_radius_increase"), SHORTCUT_TYPE_REPEAT)) {
 				g_context->brush_radius += ui_base_get_radius_increment();
-				g_context->brush_radius           = math_round(g_context->brush_radius * 100) / 100.0;
-				ui_header_handle->redraws         = 2;
+				g_context->brush_radius   = math_round(g_context->brush_radius * 100) / 100.0;
+				ui_header_handle->redraws = 2;
 			}
 			else if (decal_mask) {
 				if (operator_shortcut(string("%s+%s", any_map_get(config_keymap, "decal_mask"), any_map_get(config_keymap, "brush_radius_decrease")),
@@ -1396,56 +1396,88 @@ void ui_base_update(void *_) {
 		physics_world_t *world = physics_world_active;
 		physics_world_update(world);
 
-		if (g_context->particle_timer != NULL) {
+		for (i32 i = 0; i < 32; ++i) {
+			if (g_context->particles[i].timer != NULL && g_context->particles[i].timer->delay <= 0) {
+				physics_body_remove(g_context->particles[i].body);
+				mesh_object_remove((mesh_object_t *)g_context->particles[i].bullet->ext);
+				memset(&g_context->particles[i], 0, sizeof(g_context->particles[i]));
+			}
+		}
+
+		bool any_active = false;
+		for (i32 i = 0; i < 32; ++i) {
+			if (g_context->particles[i].timer != NULL) {
+				any_active = true;
+				break;
+			}
+		}
+		if (any_active) {
 			g_context->ddirty = 2;
 			g_context->rdirty = 2;
 			iron_delay_idle_sleep();
 		}
 
+		bool particle_just_fired = false;
 		if (mouse_started("left") && context_in_paint_area() && !g_context->paint2d) {
-			if (g_context->particle_timer != NULL) {
-				tween_stop(g_context->particle_timer);
-				tween_anim_t *timer = g_context->particle_timer;
-				timer->done(timer->done_data);
-				g_context->particle_timer = NULL;
+
+			i32 slot = -1;
+			for (i32 i = 0; i < 32; ++i) {
+				if (g_context->particles[i].timer == NULL) {
+					slot = i;
+					break;
+				}
 			}
-			history_push_undo         = true;
-			g_context->particle_hit_x = g_context->particle_hit_y = g_context->particle_hit_z = 0;
-			object_t      *o                                                                  = scene_spawn_object(".Sphere", NULL, true);
-			mesh_object_t *mo                                                                 = o->ext;
-			mo->base->name                                                                    = ".Bullet";
-			mo->base->visible                                                                 = true;
+			if (slot >= 0) {
+				history_push_undo            = true;
+				g_context->brush_blend_dirty = true;
 
-			camera_object_t *camera    = scene_camera;
-			transform_t     *ct        = camera->base->transform;
-			mo->base->transform->loc   = (vec4_t){transform_world_x(ct), transform_world_y(ct), transform_world_z(ct), 1.0};
-			mo->base->transform->scale = (vec4_t){g_context->brush_radius * 0.2, g_context->brush_radius * 0.2, g_context->brush_radius * 0.2, 1.0};
-			transform_build_matrix(mo->base->transform);
+				object_t      *o  = scene_spawn_object(".Sphere", NULL, true);
+				mesh_object_t *mo = o->ext;
+				mo->base->name    = ".Bullet";
+				mo->base->visible = true;
 
-			physics_body_t *body = physics_body_create();
-			body->shape          = PHYSICS_SHAPE_SPHERE;
-			body->mass           = 1.0;
-			physics_body_init(body, mo->base);
+				camera_object_t *camera    = scene_camera;
+				transform_t     *ct        = camera->base->transform;
+				mo->base->transform->loc   = (vec4_t){transform_world_x(ct), transform_world_y(ct), transform_world_z(ct), 1.0};
+				mo->base->transform->scale = (vec4_t){g_context->brush_radius * 0.2, g_context->brush_radius * 0.2, g_context->brush_radius * 0.2, 1.0};
+				transform_build_matrix(mo->base->transform);
 
-			ray_t *ray = raycast_get_ray(mouse_view_x(), mouse_view_y(), camera);
-			physics_body_apply_impulse(body, vec4_mult(ray->dir, 0.15));
+				physics_body_t *body = physics_body_create();
+				body->shape          = PHYSICS_SHAPE_SPHERE;
+				body->mass           = 1.0;
+				physics_body_init(body, mo->base);
 
-			g_context->particle_timer = tween_timer(5, &mesh_object_remove, mo);
+				ray_t *ray = raycast_get_ray(mouse_view_x(), mouse_view_y(), camera);
+				physics_body_apply_impulse(body, vec4_mult(ray->dir, 0.12));
+
+				g_context->particles[slot].body   = body;
+				g_context->particles[slot].bullet = mo->base;
+				g_context->particles[slot].timer  = tween_timer(3, NULL, NULL);
+				particle_just_fired               = true;
+			}
 		}
 
 #ifdef arm_physics
-		physics_pair_t_array_t *pairs = physics_world_get_contact_pairs(world, g_context->paint_body);
-		if (pairs != NULL) {
-			for (i32 i = 0; i < pairs->length; ++i) {
-				physics_pair_t *p              = pairs->buffer[i];
-				g_context->last_particle_hit_x = g_context->particle_hit_x != 0 ? g_context->particle_hit_x : p->pos_a_x;
-				g_context->last_particle_hit_y = g_context->particle_hit_y != 0 ? g_context->particle_hit_y : p->pos_a_y;
-				g_context->last_particle_hit_z = g_context->particle_hit_z != 0 ? g_context->particle_hit_z : p->pos_a_z;
-				g_context->particle_hit_x      = p->pos_a_x;
-				g_context->particle_hit_y      = p->pos_a_y;
-				g_context->particle_hit_z      = p->pos_a_z;
-				g_context->pdirty              = 1;
-				break; // 1 pair for now
+		if (!particle_just_fired) {
+			for (i32 i = 0; i < 32; ++i) {
+				if (g_context->particles[i].timer == NULL) {
+					continue;
+				}
+				physics_pair_t_array_t *pairs = physics_world_get_contact_pairs(world, g_context->particles[i].body);
+				if (pairs != NULL && pairs->length > 0) {
+					physics_pair_t *p                  = pairs->buffer[0];
+					g_context->particles[i].hit_last_x = g_context->particles[i].hit_x != 0 ? g_context->particles[i].hit_x : p->pos_a_x;
+					g_context->particles[i].hit_last_y = g_context->particles[i].hit_y != 0 ? g_context->particles[i].hit_y : p->pos_a_y;
+					g_context->particles[i].hit_last_z = g_context->particles[i].hit_z != 0 ? g_context->particles[i].hit_z : p->pos_a_z;
+					g_context->particles[i].hit_x      = p->pos_a_x;
+					g_context->particles[i].hit_y      = p->pos_a_y;
+					g_context->particles[i].hit_z      = p->pos_a_z;
+					g_context->particles[i].hit_nor_x  = p->nor_x;
+					g_context->particles[i].hit_nor_y  = p->nor_y;
+					g_context->particles[i].hit_nor_z  = p->nor_z;
+					g_context->particles[i].contact_time += sys_delta();
+					g_context->pdirty = 1;
+				}
 			}
 		}
 #endif
@@ -1727,7 +1759,7 @@ void base_init() {
 		project_filepath = start_arm;
 		gc_root(project_filepath);
 		base_start_arm_found = true;
-		args_player = true;
+		args_player          = true;
 	}
 
 	if (args_player) {

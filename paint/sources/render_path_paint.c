@@ -102,7 +102,7 @@ void render_path_paint_init() {
 }
 
 void render_path_paint_draw_fullscreen_triangle(char *ctx) {
-	// Note that vertices are mangled in vertex shader to form a fullscreen triangle,
+	// Vertices are mangled in vertex shader to form a fullscreen triangle,
 	// so plane transform does not matter
 	mesh_object_t *plane    = scene_get_child(".Plane")->ext;
 	bool           _visible = plane->base->visible;
@@ -110,6 +110,60 @@ void render_path_paint_draw_fullscreen_triangle(char *ctx) {
 	mesh_object_render(plane, ctx, _render_path_bind_params);
 	plane->base->visible = _visible;
 	render_path_end();
+}
+
+void render_path_paint_commands_particle(i32 tid, char *texpaint, bool is_mask) {
+	// Hide bullets to avoid self-painting
+	for (i32 _pi = 0; _pi < 32; ++_pi) {
+		if (g_context->particles[_pi].bullet != NULL) {
+			g_context->particles[_pi].bullet->visible = false;
+		}
+	}
+	// Paint pass per particle
+	for (i32 _pi = 0; _pi < 32; ++_pi) {
+		if (g_context->particles[_pi].timer == NULL || g_context->particles[_pi].hit_x == 0) {
+			continue;
+		}
+		g_context->particle_index        = _pi;
+		g_context->particle_hit_x        = g_context->particles[_pi].hit_x;
+		g_context->particle_hit_y        = g_context->particles[_pi].hit_y;
+		g_context->particle_hit_z        = g_context->particles[_pi].hit_z;
+		g_context->last_particle_hit_x   = g_context->particles[_pi].hit_last_x;
+		g_context->last_particle_hit_y   = g_context->particles[_pi].hit_last_y;
+		g_context->last_particle_hit_z   = g_context->particles[_pi].hit_last_z;
+		if (is_mask) {
+			i32 ptid = g_context->layer->parent->id;
+			if (slot_layer_is_group(g_context->layer->parent)) {
+				for (i32 i = 0; i < slot_layer_get_children(g_context->layer->parent)->length; ++i) {
+					slot_layer_t *c = slot_layer_get_children(g_context->layer->parent)->buffer[i];
+					ptid            = c->id;
+					break;
+				}
+			}
+			string_array_t *additional =
+			    any_array_create_from_raw((void *[]){string("texpaint_nor%d", ptid), string("texpaint_pack%d", ptid), "texpaint_blend0"}, 3);
+			render_path_set_target(texpaint, additional, NULL, GPU_CLEAR_NONE, 0, 0.0);
+		}
+		else {
+			string_array_t *additional =
+			    any_array_create_from_raw((void *[]){string("texpaint_nor%d", tid), string("texpaint_pack%d", tid), "texpaint_blend0"}, 3);
+			render_path_set_target(texpaint, additional, NULL, GPU_CLEAR_NONE, 0, 0.0);
+		}
+		render_path_bind_target("main", "gbufferD");
+		if (g_context->xray || g_config->brush_angle_reject) {
+			render_path_bind_target("gbuffer0", "gbuffer0");
+		}
+		render_path_bind_target("texpaint_blend1", "paintmask");
+		if (g_context->colorid_picked) {
+			render_path_bind_target("texpaint_colorid", "texpaint_colorid");
+		}
+		render_path_draw_meshes("paint");
+	}
+	for (i32 _pi = 0; _pi < 32; ++_pi) {
+		if (g_context->particles[_pi].bullet != NULL) {
+			g_context->particles[_pi].bullet->visible = true;
+		}
+	}
 }
 
 void render_path_paint_commands_paint(bool dilation) {
@@ -336,51 +390,64 @@ void render_path_paint_commands_paint(bool dilation) {
 		render_path_bind_target("texpaint_blend0", "tex");
 		render_path_draw_shader("Scene/copy_pass/copyR8_pass");
 		bool is_mask = slot_layer_is_mask(g_context->layer);
-		if (is_mask) {
-			i32 ptid = g_context->layer->parent->id;
-			if (slot_layer_is_group(g_context->layer->parent)) { // Group mask
-				for (i32 i = 0; i < slot_layer_get_children(g_context->layer->parent)->length; ++i) {
-					slot_layer_t *c = slot_layer_get_children(g_context->layer->parent)->buffer[i];
-					ptid            = c->id;
-					break;
-				}
-			}
-			string_array_t *additional = any_array_create_from_raw(
-			    (void *[]){
-			        string("texpaint_nor%d", ptid),
-			        string("texpaint_pack%d", ptid),
-			        "texpaint_blend0",
-			    },
-			    3);
-			render_path_set_target(texpaint, additional, NULL, GPU_CLEAR_NONE, 0, 0.0);
-		}
-		else {
-			string_array_t *additional = any_array_create_from_raw(
-			    (void *[]){
-			        string("texpaint_nor%d", tid),
-			        string("texpaint_pack%d", tid),
-			        "texpaint_blend0",
-			    },
-			    3);
-			render_path_set_target(texpaint, additional, NULL, GPU_CLEAR_NONE, 0, 0.0);
-		}
-		render_path_bind_target("main", "gbufferD");
-		if (g_context->xray || g_config->brush_angle_reject) {
-			render_path_bind_target("gbuffer0", "gbuffer0");
-		}
-		render_path_bind_target("texpaint_blend1", "paintmask");
-		if (g_context->colorid_picked) {
-			render_path_bind_target("texpaint_colorid", "texpaint_colorid");
-		}
 
 		// Read texcoords from gbuffer
 		bool read_tc = (g_context->tool == TOOL_TYPE_FILL && g_context->fill_type_handle->i == FILL_TYPE_FACE) || g_context->tool == TOOL_TYPE_CLONE ||
 		               g_context->tool == TOOL_TYPE_BLUR || g_context->tool == TOOL_TYPE_SMUDGE;
-		if (read_tc) {
-			render_path_bind_target("gbuffer2", "gbuffer2");
-		}
 
-		render_path_draw_meshes("paint");
+		if (g_context->tool == TOOL_TYPE_PARTICLE) {
+			render_path_paint_commands_particle(tid, texpaint, is_mask);
+		}
+		else {
+			if (is_mask) {
+				i32 ptid = g_context->layer->parent->id;
+				if (slot_layer_is_group(g_context->layer->parent)) { // Group mask
+					for (i32 i = 0; i < slot_layer_get_children(g_context->layer->parent)->length; ++i) {
+						slot_layer_t *c = slot_layer_get_children(g_context->layer->parent)->buffer[i];
+						ptid            = c->id;
+						break;
+					}
+				}
+				string_array_t *additional = any_array_create_from_raw(
+				    (void *[]){
+				        string("texpaint_nor%d", ptid),
+				        string("texpaint_pack%d", ptid),
+				        "texpaint_blend0",
+				    },
+				    3);
+				render_path_set_target(texpaint, additional, NULL, GPU_CLEAR_NONE, 0, 0.0);
+			}
+			else {
+				string_array_t *additional = any_array_create_from_raw(
+				    (void *[]){
+				        string("texpaint_nor%d", tid),
+				        string("texpaint_pack%d", tid),
+				        "texpaint_blend0",
+				    },
+				    3);
+				render_path_set_target(texpaint, additional, NULL, GPU_CLEAR_NONE, 0, 0.0);
+			}
+			render_path_bind_target("main", "gbufferD");
+			if (g_context->xray || g_config->brush_angle_reject) {
+				render_path_bind_target("gbuffer0", "gbuffer0");
+			}
+			render_path_bind_target("texpaint_blend1", "paintmask");
+			if (g_context->colorid_picked) {
+				render_path_bind_target("texpaint_colorid", "texpaint_colorid");
+			}
+			if (read_tc) {
+				render_path_bind_target("gbuffer2", "gbuffer2");
+			}
+			object_t *bullet     = scene_get_child(".Bullet");
+			bool      bullet_vis = bullet != NULL && bullet->visible;
+			if (bullet != NULL) {
+				bullet->visible = false;
+			}
+			render_path_draw_meshes("paint");
+			if (bullet != NULL) {
+				bullet->visible = bullet_vis;
+			}
+		}
 
 		if (g_context->tool == TOOL_TYPE_BAKE && g_context->bake_type == BAKE_TYPE_CURVATURE && g_context->bake_curv_smooth > 0) {
 			if (any_map_get(render_path_render_targets, "texpaint_blur") == NULL) {

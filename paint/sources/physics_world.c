@@ -25,9 +25,15 @@ void physics_world_update(physics_world_t *world) {
 
 physics_pair_t_array_t *physics_world_get_contact_pairs(physics_world_t *world, physics_body_t *body) {
 	physics_pair_t_array_t *pairs = any_array_create_from_raw((void *[]){}, 0);
-	physics_pair_t         *p     = asim_world_get_contact();
-	any_array_push(pairs, p);
+	physics_pair_t         *p     = asim_world_get_contact(body->_body);
+	if (p->pos_a_x != 0 || p->pos_a_y != 0 || p->pos_a_z != 0) {
+		any_array_push(pairs, p);
+	}
 	return pairs;
+}
+
+float physics_world_get_speed(physics_world_t *world, physics_body_t *body) {
+	return asim_body_get_speed(body->_body);
 }
 
 #endif

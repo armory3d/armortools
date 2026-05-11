@@ -382,8 +382,23 @@ typedef struct context {
 	f32                  last_particle_hit_x;
 	f32                  last_particle_hit_y;
 	f32                  last_particle_hit_z;
-	struct tween_anim   *particle_timer;
 	struct physics_body *paint_body;
+	struct {
+		f32                  hit_x;
+		f32                  hit_y;
+		f32                  hit_z;
+		f32                  hit_last_x;
+		f32                  hit_last_y;
+		f32                  hit_last_z;
+		f32                  hit_nor_x;
+		f32                  hit_nor_y;
+		f32                  hit_nor_z;
+		f32                  contact_time;
+		struct tween_anim   *timer;
+		struct physics_body *body;
+		struct object       *bullet;
+	} particles[32];
+	i32 particle_index;
 } context_t;
 
 typedef struct node_shader {

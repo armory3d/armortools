@@ -89,6 +89,15 @@ f32 uniforms_ext_f32_link(object_t *object, material_data_t *mat, char *link) {
 	else if (string_equals(link, "_dilate_radius")) {
 		return util_uv_dilatemap != NULL ? g_config->dilate_radius : 0.0;
 	}
+	else if (string_equals(link, "_particle_radius")) {
+		i32 idx           = g_context->particle_index;
+		f32 speed         = (physics_world_active != NULL && g_context->particles[idx].body != NULL)
+		                        ? physics_world_get_speed(physics_world_active, g_context->particles[idx].body)
+		                        : 0.0f;
+		f32 vel_scale     = fminf(speed / 0.12f, 1.0f);
+		f32 contact_scale = 1.0f - fminf(g_context->particles[idx].contact_time, 1.0f);
+		return fmaxf(g_context->brush_radius * vel_scale * contact_scale, 0.1f);
+	}
 	else if (string_equals(link, "_decal_layer_dim")) {
 		vec4_t sc = mat4_get_scale(g_context->layer->decal_mat);
 		return sc.z * 0.5;

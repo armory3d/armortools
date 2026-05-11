@@ -53,12 +53,11 @@ void physics_body_init(physics_body_t *body, object_t *obj) {
 	body->_body = asim_body_create(body->shape, body->mass, body->dimx, body->dimy, body->dimz, loc.x, loc.y, loc.z, posa, inda, scale_pos);
 }
 
-void physics_body_remove(i32 uid) {
-	physics_body_t *body = any_imap_get(physics_body_object_map, uid);
+void physics_body_remove(physics_body_t *body) {
 	if (body == NULL) {
 		return;
 	}
-	imap_delete(physics_body_object_map, uid);
+	imap_delete(physics_body_object_map, body->obj->uid);
 	asim_body_remove(body->_body);
 }
 
