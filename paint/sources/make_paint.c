@@ -243,7 +243,7 @@ node_shader_context_t *make_paint_run(material_t *data, material_context_t *matc
 			}
 		}
 
-		if (depth_reject) {
+		if (depth_reject && !particle) {
 			node_shader_write_frag(kong, "if (sp.z > sample_lod(gbufferD, sampler_linear, sp.xy, 0.0).r - 0.00008) { discard; }");
 		}
 
