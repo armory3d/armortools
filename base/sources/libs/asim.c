@@ -181,7 +181,7 @@ void asim_world_destroy() {
 }
 
 void asim_world_update(float time_step) {
-	const int sub_steps = 2;
+	const int sub_steps = 8;
 	float     dt        = time_step / sub_steps;
 
 	for (int s = 0; s < MAX_SPHERES; s++) {
