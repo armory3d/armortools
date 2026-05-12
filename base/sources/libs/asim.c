@@ -46,9 +46,12 @@ static sphere_t       spheres[MAX_SPHERES];
 static physics_pair_t ppairs[MAX_SPHERES];
 static float          ppair_best_dist;
 static mesh_t         mesh;
-static aabb_t         root_bounds = {{-10, -10, -10}, {10, 10, 10}};
+static aabb_t         root_bounds     = {{-10, -10, -10}, {10, 10, 10}};
 static float          asim_bounciness = 0.0f;
-static float          asim_friction    = 0.01f;
+static float          asim_friction   = 0.01f;
+static float          asim_gravity_x  = 0.0f;
+static float          asim_gravity_y  = 0.0f;
+static float          asim_gravity_z  = -9.81f;
 
 static inline aabb_t merge_aabbs(aabb_t a, aabb_t b) {
 	return (aabb_t){.min = {fminf(a.min.x, b.min.x), fminf(a.min.y, b.min.y), fminf(a.min.z, b.min.z)},
@@ -122,14 +125,14 @@ static void collide_sphere_triangle(sphere_t *s, int si, triangle_t *t) {
 
 		float v_dot_n = vec4_dot(s->velocity, t->normal);
 		if (v_dot_n < 0.0f) {
-			vec4_t n_vel       = vec4_mult(t->normal, v_dot_n);
-			vec4_t t_vel       = vec4_sub(s->velocity, n_vel);
-			s->velocity = vec4_add(vec4_mult(n_vel, -asim_bounciness), vec4_mult(t_vel, 1.0f - asim_friction));
+			vec4_t n_vel = vec4_mult(t->normal, v_dot_n);
+			vec4_t t_vel = vec4_sub(s->velocity, n_vel);
+			s->velocity  = vec4_add(vec4_mult(n_vel, -asim_bounciness), vec4_mult(t_vel, 1.0f - asim_friction));
 		}
 
 		vec4_t contact_point = vec4_sub(s->position, vec4_mult(t->normal, s->radius));
 		if (orig_dist < ppair_best_dist) {
-			ppair_best_dist       = orig_dist;
+			ppair_best_dist    = orig_dist;
 			ppairs[si].pos_a_x = contact_point.x;
 			ppairs[si].pos_a_y = contact_point.y;
 			ppairs[si].pos_a_z = contact_point.z;
@@ -203,7 +206,9 @@ void asim_world_update(float time_step) {
 				continue;
 			}
 			ppair_best_dist = spheres[s].radius;
-			spheres[s].velocity.z += GRAVITY * dt;
+			spheres[s].velocity.x += asim_gravity_x * dt;
+			spheres[s].velocity.y += asim_gravity_y * dt;
+			spheres[s].velocity.z += asim_gravity_z * dt;
 			spheres[s].position = vec4_add(spheres[s].position, vec4_mult(spheres[s].velocity, dt));
 			query_bvh(&spheres[s], s, mesh.root);
 		}
@@ -343,4 +348,10 @@ void asim_set_friction(float v) {
 
 void asim_set_bounciness(float v) {
 	asim_bounciness = v;
+}
+
+void asim_set_gravity(float x, float y, float z) {
+	asim_gravity_x = x;
+	asim_gravity_y = y;
+	asim_gravity_z = z;
 }

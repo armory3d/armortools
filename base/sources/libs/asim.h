@@ -26,3 +26,4 @@ void  asim_body_remove(void *body);
 float asim_body_get_speed(void *body);
 void  asim_set_friction(float v);
 void  asim_set_bounciness(float v);
+void  asim_set_gravity(float x, float y, float z);
