@@ -224,11 +224,11 @@ void import_arm_run_project(char *path) {
 	buffer_t  *b = data_get_blob(path);
 	project_t *project;
 	bool       import_as_mesh = false;
-	#ifdef IRON_WINDOWS
+#ifdef IRON_WINDOWS
 	bool is_cloud = string_index_of(path, "\\cloud\\") >= 0;
-	#else
+#else
 	bool is_cloud = string_index_of(path, "/cloud/") >= 0;
-	#endif
+#endif
 	if (import_arm_is_old(b) && !is_cloud) {
 		project = import_arm_from_old(b);
 	}
@@ -434,15 +434,17 @@ void import_arm_run_project(char *path) {
 		render_target_t *blend0           = any_map_get(rts, "texpaint_blend0");
 		gpu_texture_t   *_texpaint_blend0 = blend0->_image;
 		gpu_delete_texture(_texpaint_blend0);
-		blend0->width                     = config_get_texture_res_x();
-		blend0->height                    = config_get_texture_res_y();
-		blend0->_image                    = gpu_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), GPU_TEXTURE_FORMAT_R8);
+		blend0->width  = config_get_texture_res_x();
+		blend0->height = config_get_texture_res_y();
+		blend0->_image = gpu_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), GPU_TEXTURE_FORMAT_R8);
+
 		render_target_t *blend1           = any_map_get(rts, "texpaint_blend1");
 		gpu_texture_t   *_texpaint_blend1 = blend1->_image;
 		gpu_delete_texture(_texpaint_blend1);
-		blend1->width                = config_get_texture_res_x();
-		blend1->height               = config_get_texture_res_y();
-		blend1->_image               = gpu_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), GPU_TEXTURE_FORMAT_R8);
+		blend1->width  = config_get_texture_res_x();
+		blend1->height = config_get_texture_res_y();
+		blend1->_image = gpu_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), GPU_TEXTURE_FORMAT_R8);
+
 		g_context->brush_blend_dirty = true;
 	}
 

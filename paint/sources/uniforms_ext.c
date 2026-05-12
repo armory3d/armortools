@@ -334,10 +334,6 @@ gpu_texture_t *uniforms_ext_tex_link(object_t *object, material_data_t *mat, cha
 	else if (string_equals(link, "_texbrushstencil")) {
 		return g_context->brush_stencil_image;
 	}
-	else if (string_equals(link, "_texparticle")) {
-		render_target_t *rt = any_map_get(render_path_render_targets, "texparticle");
-		return rt->_image;
-	}
 	else if (string_equals(link, "_texuvmap")) {
 		if (!util_uv_uvmap_cached) {
 			sys_notify_on_next_frame(&uniforms_ext_cache_uv_map, NULL);

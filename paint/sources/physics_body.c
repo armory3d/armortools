@@ -27,26 +27,18 @@ void physics_body_init(physics_body_t *body, object_t *obj) {
 		mesh_data_t   *data  = mo->data;
 		vec4_t         scale = obj->transform->scale;
 
+		if (obj->parent != NULL) {
+			scale.x *= obj->parent->transform->scale.x;
+			scale.y *= obj->parent->transform->scale.y;
+			scale.z *= obj->parent->transform->scale.z;
+		}
+
 		i16_array_t *positions = mesh_data_get_vertex_array(data, "pos")->values;
 		u32_array_t *indices0  = data->index_array;
 
 		scale_pos = scale.x * data->scale_pos;
 		posa      = positions;
 		inda      = indices0;
-
-		// triangles = f32_array_create(indices0.length * 3);
-		// let ar: u32_array_t = indices[0];
-		// for (let i: i32 = 0; i < math_floor(ar.length / 3); ++i) {
-		// 	triangles[i * 9    ] = positions[ar[i * 3    ] * 4    ] * sx;
-		// 	triangles[i * 9 + 1] = positions[ar[i * 3    ] * 4 + 1] * sy;
-		// 	triangles[i * 9 + 2] = positions[ar[i * 3    ] * 4 + 2] * sz;
-		// 	triangles[i * 9 + 3] = positions[ar[i * 3 + 1] * 4    ] * sx;
-		// 	triangles[i * 9 + 4] = positions[ar[i * 3 + 1] * 4 + 1] * sy;
-		// 	triangles[i * 9 + 5] = positions[ar[i * 3 + 1] * 4 + 2] * sz;
-		// 	triangles[i * 9 + 6] = positions[ar[i * 3 + 2] * 4    ] * sx;
-		// 	triangles[i * 9 + 7] = positions[ar[i * 3 + 2] * 4 + 1] * sy;
-		// 	triangles[i * 9 + 8] = positions[ar[i * 3 + 2] * 4 + 2] * sz;
-		// }
 	}
 
 	vec4_t loc  = obj->transform->loc;

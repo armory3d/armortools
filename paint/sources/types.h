@@ -284,7 +284,6 @@ typedef struct context {
 	bool                        write_icon_on_export;
 	struct gpu_texture         *text_tool_image;
 	char                       *text_tool_text;
-	struct material_data       *particle_material;
 	i32                         layer_filter;
 	struct brush_output_node   *brush_output_node_inst;
 	void (*run_brush)(void *, i32);
@@ -401,6 +400,9 @@ typedef struct context {
 	i32 particle_index;
 	f32 particle_friction;
 	f32 particle_bounciness;
+	f32 particle_gravity_x;
+	f32 particle_gravity_y;
+	f32 particle_gravity_z;
 	f32 particle_lifetime;
 	f32 particle_mass;
 	f32 particle_random;

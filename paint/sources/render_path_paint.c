@@ -124,31 +124,26 @@ void render_path_paint_commands_particle(i32 tid, char *texpaint, bool is_mask) 
 		if (g_context->particles[_pi].timer == NULL || g_context->particles[_pi].hit_x == 0) {
 			continue;
 		}
-		g_context->particle_index        = _pi;
-		g_context->particle_hit_x        = g_context->particles[_pi].hit_x;
-		g_context->particle_hit_y        = g_context->particles[_pi].hit_y;
-		g_context->particle_hit_z        = g_context->particles[_pi].hit_z;
-		g_context->last_particle_hit_x   = g_context->particles[_pi].hit_last_x;
-		g_context->last_particle_hit_y   = g_context->particles[_pi].hit_last_y;
-		g_context->last_particle_hit_z   = g_context->particles[_pi].hit_last_z;
+		g_context->particle_index      = _pi;
+		g_context->particle_hit_x      = g_context->particles[_pi].hit_x;
+		g_context->particle_hit_y      = g_context->particles[_pi].hit_y;
+		g_context->particle_hit_z      = g_context->particles[_pi].hit_z;
+		g_context->last_particle_hit_x = g_context->particles[_pi].hit_last_x;
+		g_context->last_particle_hit_y = g_context->particles[_pi].hit_last_y;
+		g_context->last_particle_hit_z = g_context->particles[_pi].hit_last_z;
 		if (is_mask) {
-			i32 ptid = g_context->layer->parent->id;
+			tid = g_context->layer->parent->id;
 			if (slot_layer_is_group(g_context->layer->parent)) {
 				for (i32 i = 0; i < slot_layer_get_children(g_context->layer->parent)->length; ++i) {
 					slot_layer_t *c = slot_layer_get_children(g_context->layer->parent)->buffer[i];
-					ptid            = c->id;
+					tid             = c->id;
 					break;
 				}
 			}
-			string_array_t *additional =
-			    any_array_create_from_raw((void *[]){string("texpaint_nor%d", ptid), string("texpaint_pack%d", ptid), "texpaint_blend0"}, 3);
-			render_path_set_target(texpaint, additional, NULL, GPU_CLEAR_NONE, 0, 0.0);
 		}
-		else {
-			string_array_t *additional =
-			    any_array_create_from_raw((void *[]){string("texpaint_nor%d", tid), string("texpaint_pack%d", tid), "texpaint_blend0"}, 3);
-			render_path_set_target(texpaint, additional, NULL, GPU_CLEAR_NONE, 0, 0.0);
-		}
+
+		string_array_t *additional = any_array_create_from_raw((void *[]){string("texpaint_nor%d", tid), string("texpaint_pack%d", tid), "texpaint_blend0"}, 3);
+		render_path_set_target(texpaint, additional, NULL, GPU_CLEAR_NONE, 0, 0.0);
 		render_path_bind_target("main", "gbufferD");
 		if (g_context->xray || g_config->brush_angle_reject) {
 			render_path_bind_target("gbuffer0", "gbuffer0");

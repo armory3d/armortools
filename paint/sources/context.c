@@ -102,6 +102,9 @@ context_t *context_create() {
 	c->last_particle_hit_z               = 0.0;
 	c->particle_friction                 = 0.1;
 	c->particle_bounciness               = 0.0;
+	c->particle_gravity_x                = 0.0;
+	c->particle_gravity_y                = 0.0;
+	c->particle_gravity_z                = -9.81;
 	c->particle_lifetime                 = 5.0;
 	c->particle_mass                     = 1.0;
 	c->particle_random                   = 0.1;
@@ -301,15 +304,11 @@ void context_select_tool(i32 i) {
 }
 
 void context_init_tool() {
-	bool decal = context_is_decal();
-	if (decal) {
+	if (context_is_decal()) {
 		if (g_context->tool == TOOL_TYPE_TEXT) {
 			util_render_make_text_preview();
 		}
 		util_render_make_decal_preview();
-	}
-	else if (g_context->tool == TOOL_TYPE_PARTICLE) {
-		util_particle_init();
 	}
 	else if (g_context->tool == TOOL_TYPE_BAKE) {
 		// Bake in lit mode for now

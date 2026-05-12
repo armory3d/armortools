@@ -37,6 +37,81 @@ void ui_header_render_ui() {
 	}
 }
 
+void ui_header_particle_menu_draw() {
+	ui_handle_t *hlifetime = ui_handle(__ID__);
+	if (hlifetime->init) {
+		hlifetime->f = g_context->particle_lifetime;
+	}
+	g_context->particle_lifetime = ui_slider(hlifetime, tr("Lifetime"), 0.0, 10.0, true, 1.0, true, UI_ALIGN_RIGHT, true);
+
+	ui_handle_t *hspawn_distance = ui_handle(__ID__);
+	if (hspawn_distance->init) {
+		hspawn_distance->f = g_context->particle_spawn_distance;
+	}
+	g_context->particle_spawn_distance = ui_slider(hspawn_distance, tr("Distance"), 0.0, 1.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
+
+	ui_handle_t *hmass = ui_handle(__ID__);
+	if (hmass->init) {
+		hmass->f = g_context->particle_mass;
+	}
+	g_context->particle_mass = ui_slider(hmass, tr("Mass"), 0.0, 3.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
+
+	ui_handle_t *hrandom = ui_handle(__ID__);
+	if (hrandom->init) {
+		hrandom->f = g_context->particle_random;
+	}
+	g_context->particle_random = ui_slider(hrandom, tr("Random"), 0.0, 1.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
+
+	ui_handle_t *hfriction = ui_handle(__ID__);
+	if (hfriction->init) {
+		hfriction->f = g_context->particle_friction;
+	}
+	g_context->particle_friction = ui_slider(hfriction, tr("Friction"), 0.0, 1.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
+	if (hfriction->changed) {
+		asim_set_friction(g_context->particle_friction);
+	}
+
+	ui_handle_t *hbounciness = ui_handle(__ID__);
+	if (hbounciness->init) {
+		hbounciness->f = g_context->particle_bounciness;
+	}
+	g_context->particle_bounciness = ui_slider(hbounciness, tr("Bounce"), 0.0, 1.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
+	if (hbounciness->changed) {
+		asim_set_bounciness(g_context->particle_bounciness);
+	}
+
+	ui_handle_t *hgravx = ui_handle(__ID__);
+	if (hgravx->init) {
+		hgravx->f = g_context->particle_gravity_x;
+	}
+	g_context->particle_gravity_x = ui_slider(hgravx, tr("Gravity X"), -10.0, 10.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
+	if (hgravx->changed) {
+		asim_set_gravity(g_context->particle_gravity_x, g_context->particle_gravity_y, g_context->particle_gravity_z);
+	}
+
+	ui_handle_t *hgravy = ui_handle(__ID__);
+	if (hgravy->init) {
+		hgravy->f = g_context->particle_gravity_y;
+	}
+	g_context->particle_gravity_y = ui_slider(hgravy, tr("Gravity Y"), -10.0, 10.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
+	if (hgravy->changed) {
+		asim_set_gravity(g_context->particle_gravity_x, g_context->particle_gravity_y, g_context->particle_gravity_z);
+	}
+
+	ui_handle_t *hgravz = ui_handle(__ID__);
+	if (hgravz->init) {
+		hgravz->f = g_context->particle_gravity_z;
+	}
+	g_context->particle_gravity_z = ui_slider(hgravz, tr("Gravity Z"), -10.0, 10.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
+	if (hgravz->changed) {
+		asim_set_gravity(g_context->particle_gravity_x, g_context->particle_gravity_y, g_context->particle_gravity_z);
+	}
+
+	if (ui->changed || ui->is_typing) {
+		ui_menu_keep_open = true;
+	}
+}
+
 void ui_header_draw_tool_properties_layer_preview_dirty(void *_) {
 	g_context->layer_preview_dirty = true;
 }
@@ -551,46 +626,8 @@ void ui_header_draw_tool_properties() {
 		}
 
 		if (g_context->tool == TOOL_TYPE_PARTICLE) {
-			ui_handle_t *hlifetime = ui_handle(__ID__);
-			if (hlifetime->init) {
-				hlifetime->f = g_context->particle_lifetime;
-			}
-			g_context->particle_lifetime = ui_slider(hlifetime, tr("Lifetime"), 0.0, 10.0, true, 1.0, true, UI_ALIGN_RIGHT, true);
-
-			ui_handle_t *hspawn_distance = ui_handle(__ID__);
-			if (hspawn_distance->init) {
-				hspawn_distance->f = g_context->particle_spawn_distance;
-			}
-			g_context->particle_spawn_distance = ui_slider(hspawn_distance, tr("Distance"), 0.0, 1.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
-
-			ui_handle_t *hmass = ui_handle(__ID__);
-			if (hmass->init) {
-				hmass->f = g_context->particle_mass;
-			}
-			g_context->particle_mass = ui_slider(hmass, tr("Mass"), 0.0, 3.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
-
-			ui_handle_t *hrandom = ui_handle(__ID__);
-			if (hrandom->init) {
-				hrandom->f = g_context->particle_random;
-			}
-			g_context->particle_random = ui_slider(hrandom, tr("Random"), 0.0, 1.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
-
-			ui_handle_t *hfriction = ui_handle(__ID__);
-			if (hfriction->init) {
-				hfriction->f = g_context->particle_friction;
-			}
-			g_context->particle_friction = ui_slider(hfriction, tr("Friction"), 0.0, 1.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
-			if (hfriction->changed) {
-				asim_set_friction(g_context->particle_friction);
-			}
-
-			ui_handle_t *hbounciness = ui_handle(__ID__);
-			if (hbounciness->init) {
-				hbounciness->f = g_context->particle_bounciness;
-			}
-			g_context->particle_bounciness = ui_slider(hbounciness, tr("Bounce"), 0.0, 1.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
-			if (hbounciness->changed) {
-				asim_set_bounciness(g_context->particle_bounciness);
+			if (ui_button(tr("Particle"), UI_ALIGN_CENTER, "")) {
+				ui_menu_draw(&ui_header_particle_menu_draw, -1, -1);
 			}
 		}
 

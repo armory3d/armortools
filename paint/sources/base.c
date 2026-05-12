@@ -1485,6 +1485,10 @@ void ui_base_update(void *_) {
 			}
 		}
 
+		if (mouse_released("left")) {
+			g_context->layer_preview_dirty = true;
+		}
+
 #ifdef arm_physics
 		if (!particle_just_fired) {
 			for (i32 i = 0; i < 32; ++i) {
@@ -1505,6 +1509,9 @@ void ui_base_update(void *_) {
 					g_context->particles[i].hit_nor_z  = p->nor_z;
 					g_context->particles[i].contact_time += sys_delta();
 					g_context->pdirty = 1;
+				}
+				else {
+					g_context->particles[i].hit_x = 0.0;
 				}
 			}
 		}

@@ -565,7 +565,6 @@ void                         ui_box_show_custom(void (*commands)(void), i32 mw, 
 void                         ui_box_hide();
 void                         tab_meshes_draw(ui_handle_t *htab);
 void                         tab_meshes_reset_preview_map();
-void                         util_particle_init();
 void                         util_particle_init_physics();
 void                         tab_layers_draw(ui_handle_t *htab);
 void                         tab_layers_remap_layer_pointers(ui_node_t_array_t *nodes, i32_imap_t *pointer_map);
