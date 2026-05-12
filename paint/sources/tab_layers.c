@@ -1026,8 +1026,10 @@ void tab_layers_button_new_menu() {
 	if (ui_menu_button(tr("Fill Layer"), "", ICON_SPHERE)) {
 		layers_create_fill_layer(UV_TYPE_UVMAP, mat4_nan(), -1);
 	}
-	if (ui_menu_button(tr("Decal Layer"), "", ICON_DECAL)) {
+	if (ui_menu_button(tr("Decal"), "", ICON_DECAL)) {
 		layers_create_fill_layer(UV_TYPE_PROJECT, mat4_nan(), -1);
+	}
+	if (ui_menu_button(tr("Path"), "", ICON_RULER)) {
 	}
 	if (ui_menu_button(tr("Black Mask"), "", ICON_MASK)) {
 		if (slot_layer_is_mask(l) || slot_layer_is_filter(l)) {
