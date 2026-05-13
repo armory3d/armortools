@@ -874,3 +874,10 @@ int armpack_map_get_i32(any_map_t *map, char *key) {
 	}
 	return ps.type == 1 ? ps.i : (int)ps.f;
 }
+
+void armpack_map_set_i32(any_map_t *map, char *key, int value) {
+	ptr_storage_t s;
+	s.i    = value;
+	s.type = 1;
+	any_map_set(map, key, s.p);
+}
