@@ -80,11 +80,6 @@ static void layers_repaint_path_layer(slot_layer_t *l) {
 	g_context->material         = l->path_material;
 	g_context->tool             = l->path_tool;
 
-	bool _depth_reject           = g_config->brush_depth_reject;
-	bool _angle_reject           = g_config->brush_angle_reject;
-	g_config->brush_depth_reject = false;
-	g_config->brush_angle_reject = false;
-
 	make_material_parse_paint_material(false);
 	layers_set_object_mask();
 
@@ -113,28 +108,67 @@ static void layers_repaint_path_layer(slot_layer_t *l) {
 		prev_py = pt0y;
 		path_paint(pt0x, pt0y, is_decal, &prev_px, &prev_py);
 
-		// Paint curve - anchor[k], control[k+1], anchor[k+2]
-		for (i32 k = 0; k + 2 < num_world; k += 2) {
-			f32 ax0 = k * 2 + 1 < (i32)points->length ? points->buffer[k * 2] : 0.5f;
-			f32 ay0 = k * 2 + 1 < (i32)points->length ? points->buffer[k * 2 + 1] : 0.5f;
-			f32 cx  = (k + 1) * 2 + 1 < (i32)points->length ? points->buffer[(k + 1) * 2] : 0.5f;
-			f32 cy  = (k + 1) * 2 + 1 < (i32)points->length ? points->buffer[(k + 1) * 2 + 1] : 0.5f;
-			f32 ax1 = (k + 2) * 2 + 1 < (i32)points->length ? points->buffer[(k + 2) * 2] : 0.5f;
-			f32 ay1 = (k + 2) * 2 + 1 < (i32)points->length ? points->buffer[(k + 2) * 2 + 1] : 0.5f;
+		// Paint curve - anchor[p], control[j-1], anchor[j]
+		for (i32 j = 2; j < num_world; j += 2) {
+			i32 p   = (j < num_parent) ? points_parent->buffer[j] : j - 2;
+			f32 ax1 = j * 2 + 1 < (i32)points->length ? points->buffer[j * 2] : 0.5f;
+			f32 ay1 = j * 2 + 1 < (i32)points->length ? points->buffer[j * 2 + 1] : 0.5f;
+
+			f32 wx0 = points_world->buffer[p * 3];
+			f32 wy0 = points_world->buffer[p * 3 + 1];
+			f32 wz0 = points_world->buffer[p * 3 + 2];
+			f32 wcx = points_world->buffer[(j - 1) * 3];
+			f32 wcy = points_world->buffer[(j - 1) * 3 + 1];
+			f32 wcz = points_world->buffer[(j - 1) * 3 + 2];
+			f32 wx1 = points_world->buffer[j * 3];
+			f32 wy1 = points_world->buffer[j * 3 + 1];
+			f32 wz1 = points_world->buffer[j * 3 + 2];
+
+			// Restore the start anchor camera and re-project its position as prev
+			if (p < num_camera) {
+				path_set_camera(points_camera, num_camera, p);
+				vec4_t pp = vec4_apply_mat4((vec4_t){wx0, wy0, wz0, 1.0f}, scene_camera->vp);
+				if (pp.w > 0.0f) {
+					prev_px = (pp.x / pp.w + 1.0f) * 0.5f;
+					prev_py = (-pp.y / pp.w + 1.0f) * 0.5f;
+				}
+			}
 
 			// 16 intermediate points + final anchor
-			bool have_k2 = k + 2 < num_camera;
+			bool have_j   = j < num_camera;
+			f32  prev_bwx = wx0;
+			f32  prev_bwy = wy0;
+			f32  prev_bwz = wz0;
 			for (i32 s = 1; s <= 17; s++) {
-				f32 t  = s / 17.0f;
-				f32 t1 = 1.0f - t;
-				f32 bx = t1 * t1 * t1 * ax0 + 3.0f * t * t1 * cx + t * t * t * ax1;
-				f32 by = t1 * t1 * t1 * ay0 + 3.0f * t * t1 * cy + t * t * t * ay1;
-				// f32 bx = t1 * t1 * ax0 + 2.0f * t * t1 * cx + t * t * ax1;
-				// f32 by = t1 * t1 * ay0 + 2.0f * t * t1 * cy + t * t * ay1;
-				if (s == 17 && have_k2) {
-					path_set_camera(points_camera, num_camera, k + 2);
+				f32 t   = s / 17.0f;
+				f32 t1  = 1.0f - t;
+				f32 bwx = t1 * t1 * t1 * wx0 + 3.0f * t * t1 * wcx + t * t * t * wx1;
+				f32 bwy = t1 * t1 * t1 * wy0 + 3.0f * t * t1 * wcy + t * t * t * wy1;
+				f32 bwz = t1 * t1 * t1 * wz0 + 3.0f * t * t1 * wcz + t * t * t * wz1;
+				if (s == 17 && have_j) {
+					path_set_camera(points_camera, num_camera, j);
+					// Re-project the previous world pos from the new camera so that
+					// last_paint_vec and paint_vec are in the same screen space
+					vec4_t pc = vec4_apply_mat4((vec4_t){prev_bwx, prev_bwy, prev_bwz, 1.0f}, scene_camera->vp);
+					if (pc.w > 0.0f) {
+						prev_px = (pc.x / pc.w + 1.0f) * 0.5f;
+						prev_py = (-pc.y / pc.w + 1.0f) * 0.5f;
+					}
+				}
+				vec4_t clip = vec4_apply_mat4((vec4_t){bwx, bwy, bwz, 1.0f}, scene_camera->vp);
+				f32    bx, by;
+				if (clip.w > 0.0f) {
+					bx = (clip.x / clip.w + 1.0f) * 0.5f;
+					by = (-clip.y / clip.w + 1.0f) * 0.5f;
+				}
+				else {
+					bx = ax1;
+					by = ay1;
 				}
 				path_paint(bx, by, is_decal, &prev_px, &prev_py);
+				prev_bwx = bwx;
+				prev_bwy = bwy;
+				prev_bwz = bwz;
 			}
 		}
 
@@ -170,9 +204,7 @@ static void layers_repaint_path_layer(slot_layer_t *l) {
 		render_path_paint_dilate(true, true);
 	}
 
-	g_config->brush_depth_reject = _depth_reject;
-	g_config->brush_angle_reject = _angle_reject;
-	g_context->tool              = _tool;
+	g_context->tool = _tool;
 
 	scene_camera->base->transform->loc = _camera_loc;
 	scene_camera->base->transform->rot = _camera_rot;
@@ -235,7 +267,18 @@ void util_layer_add_path_point(slot_layer_t *l, f32 screen_x, f32 screen_y) {
 	f32_array_push(points_world, g_context->posy_picked);
 	f32_array_push(points_world, g_context->posz_picked);
 	path_layer_push_camera(points_camera);
-	i32_array_push(points_parent, path_layer_last_active);
+
+	// For curved paths the parent must be an anchor
+	i32 parent = path_layer_last_active;
+	if (l->path_curved && parent % 2 == 1) {
+		if (parent < (i32)points_parent->length) {
+			parent = points_parent->buffer[parent];
+		}
+		else {
+			parent -= 1;
+		}
+	}
+	i32_array_push(points_parent, parent);
 
 	// New point becomes the parent for the next stroke
 	i32 new_index          = points->length / 2 - 1;
