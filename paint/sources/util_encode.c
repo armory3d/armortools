@@ -275,7 +275,7 @@ buffer_t *util_encode_project(project_t *raw) {
 	if (raw->layer_datas != NULL) {
 		armpack_encode_array(raw->layer_datas->length);
 		for (i32 i = 0; i < raw->layer_datas->length; ++i) {
-			armpack_encode_map(28);
+			armpack_encode_map(35);
 			armpack_encode_string("name");
 			armpack_encode_string(raw->layer_datas->buffer[i]->name);
 			armpack_encode_string("res");
@@ -294,8 +294,8 @@ buffer_t *util_encode_project(project_t *raw) {
 			armpack_encode_array_f32(raw->layer_datas->buffer[i]->decal_mat);
 			armpack_encode_string("opacity_mask");
 			armpack_encode_f32(raw->layer_datas->buffer[i]->opacity_mask);
-			armpack_encode_string("fill_layer");
-			armpack_encode_i32(raw->layer_datas->buffer[i]->fill_layer);
+			armpack_encode_string("fill_material");
+			armpack_encode_i32(raw->layer_datas->buffer[i]->fill_material);
 			armpack_encode_string("object_mask");
 			armpack_encode_i32(raw->layer_datas->buffer[i]->object_mask);
 			armpack_encode_string("blending");
@@ -332,6 +332,20 @@ buffer_t *util_encode_project(project_t *raw) {
 			armpack_encode_bool(raw->layer_datas->buffer[i]->paint_subs);
 			armpack_encode_string("uv_map");
 			armpack_encode_i32(raw->layer_datas->buffer[i]->uv_map);
+			armpack_encode_string("path_points");
+			armpack_encode_array_f32(raw->layer_datas->buffer[i]->path_points);
+			armpack_encode_string("path_points_world");
+			armpack_encode_array_f32(raw->layer_datas->buffer[i]->path_points_world);
+			armpack_encode_string("path_points_camera");
+			armpack_encode_array_f32(raw->layer_datas->buffer[i]->path_points_camera);
+			armpack_encode_string("path_points_parent");
+			armpack_encode_array_i32(raw->layer_datas->buffer[i]->path_points_parent);
+			armpack_encode_string("path_tool");
+			armpack_encode_i32(raw->layer_datas->buffer[i]->path_tool);
+			armpack_encode_string("path_curved");
+			armpack_encode_bool(raw->layer_datas->buffer[i]->path_curved);
+			armpack_encode_string("path_material");
+			armpack_encode_i32(raw->layer_datas->buffer[i]->path_material);
 		}
 	}
 	else {

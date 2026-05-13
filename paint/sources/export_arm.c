@@ -113,7 +113,7 @@ buffer_t *export_arm_rgba64_to_rgba32(buffer_t *buffer) {
 void export_arm_run_project() {
 
 	workflow_t _workflow = g_config->workflow;
-	g_config->workflow = WORKFLOW_PBR;
+	g_config->workflow   = WORKFLOW_PBR;
 	base_update_workflow();
 
 	ui_node_canvas_t_array_t *mnodes = any_array_create_from_raw((void *[]){}, 0);
@@ -182,7 +182,7 @@ void export_arm_run_project() {
 		                                               .uv_map        = l->uv_map,
 		                                               .decal_mat     = l->uv_type == UV_TYPE_PROJECT ? mat4_to_f32_array(l->decal_mat) : NULL,
 		                                               .opacity_mask  = l->mask_opacity,
-		                                               .fill_layer    = l->fill_layer != NULL ? array_index_of(project_materials, l->fill_layer) : -1,
+		                                               .fill_material = l->fill_material != NULL ? array_index_of(project_materials, l->fill_material) : -1,
 		                                               .object_mask   = l->object_mask,
 		                                               .blending      = l->blending,
 		                                               .parent        = l->parent != NULL ? array_index_of(project_layers, l->parent) : -1,
@@ -199,7 +199,14 @@ void export_arm_run_project() {
 		                                               .paint_height       = l->paint_height,
 		                                               .paint_height_blend = l->paint_height_blend,
 		                                               .paint_emis         = l->paint_emis,
-		                                               .paint_subs         = l->paint_subs});
+		                                               .paint_subs         = l->paint_subs,
+		                                               .path_points        = l->path_points,
+		                                               .path_points_world  = l->path_points_world,
+		                                               .path_points_camera = l->path_points_camera,
+		                                               .path_points_parent = l->path_points_parent,
+		                                               .path_tool          = l->path_tool,
+		                                               .path_curved        = l->path_curved,
+		                                               .path_material = l->path_material != NULL ? array_index_of(project_materials, l->path_material) : -1});
 		any_array_push(ld, d);
 	}
 
@@ -236,8 +243,8 @@ void export_arm_run_project() {
 
 	f32_array_t_array_t *mesh_transforms = any_array_create_from_raw((void *[]){}, 0);
 	for (i32 i = 0; i < project_paint_objects->length; ++i) {
-		mesh_object_t *p = project_paint_objects->buffer[i];
-		f32_array_t *ar = f32_array_create_from_raw(p->base->transform->local.m, 16);
+		mesh_object_t *p  = project_paint_objects->buffer[i];
+		f32_array_t   *ar = f32_array_create_from_raw(p->base->transform->local.m, 16);
 		any_array_push(mesh_transforms, ar);
 	}
 	g_project->mesh_transforms = mesh_transforms;

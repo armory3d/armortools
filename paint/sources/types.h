@@ -24,7 +24,7 @@ typedef struct slot_layer {
 	struct gpu_texture   *texpaint_pack;
 	struct gpu_texture   *texpaint_preview; // Layer preview
 	f32                   mask_opacity;     // Opacity mask
-	struct slot_material *fill_layer;
+	struct slot_material *fill_material;
 	bool                  show_panel;
 	blend_type_t          blending;
 	i32                   object_mask;
@@ -45,6 +45,13 @@ typedef struct slot_layer {
 	bool                  paint_subs;
 	mat4_t                decal_mat; // Decal layer
 	struct gpu_texture   *texpaint_sculpt;
+	f32_array_t          *path_points;        // uv-space [x, y, ..]
+	f32_array_t          *path_points_world;  // world-space [x, y, z, ..]
+	f32_array_t          *path_points_camera; // [loc.xyzw, rot.xyzw, aspect, ..] at time of point placement
+	i32_array_t          *path_points_parent;
+	i32                   path_tool;
+	bool                  path_curved;
+	struct slot_material *path_material;
 } slot_layer_t;
 
 typedef struct slot_font {
@@ -572,7 +579,7 @@ typedef struct layer_data {
 	i32               uv_type;
 	struct f32_array *decal_mat;
 	f32               opacity_mask;
-	i32               fill_layer;
+	i32               fill_material;
 	i32               object_mask;
 	i32               blending;
 	i32               parent;
@@ -591,6 +598,13 @@ typedef struct layer_data {
 	bool              paint_emis;
 	bool              paint_subs;
 	i32               uv_map;
+	f32_array_t      *path_points;
+	f32_array_t      *path_points_world;
+	f32_array_t      *path_points_camera;
+	i32_array_t      *path_points_parent;
+	i32               path_tool;
+	bool              path_curved;
+	i32               path_material;
 } layer_data_t;
 
 typedef struct shader_out {

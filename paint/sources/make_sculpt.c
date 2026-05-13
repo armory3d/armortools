@@ -183,7 +183,7 @@ node_shader_context_t *sculpt_make_sculpt_run(material_t *data, material_context
 	node_shader_write_frag(kong, "var sample_undo: float4 = sample_lod(texpaint_sculpt_undo, sampler_linear, sculpt_uv, 0.0);");
 	node_shader_write_frag(kong, "var raw_undo: float4 = texpaint_sculpt_undo[uint2(uint(tex_coord.x * 2048.0), uint(tex_coord.y * 2048.0))];");
 
-	if (g_context->layer->fill_layer != NULL) {
+	if (g_context->layer->fill_material != NULL) {
 		node_shader_add_function(kong, str_octahedron_wrap);
 		node_shader_write_frag(kong, "var nor_v: float = floor(raw_undo.a) / 255.0;");
 		node_shader_write_frag(kong, "var nor_oct: float2 = float2(raw_undo.a - floor(raw_undo.a), nor_v) * 2.0 - 1.0;");

@@ -64,12 +64,23 @@ void brush_output_node_parse_inputs(brush_output_node_t *self) {
 }
 
 void brush_output_paint(brush_output_node_t *self) {
-	bool down = mouse_down("left") || pen_down("tip");
+	bool down    = mouse_down("left") || pen_down("tip");
+	bool started = mouse_started("left") || pen_started("tip");
 
 	// Set color pick
 	if (down && g_context->tool == TOOL_TYPE_COLORID && project_assets->length > 0) {
 		g_context->colorid_picked  = true;
 		ui_toolbar_handle->redraws = 1;
+	}
+
+	// Path layer - add path points only
+	if (slot_layer_is_path(g_context->layer) && !started) {
+		return;
+	}
+
+	// Path layer - dragging existing path point
+	if (slot_layer_is_path(g_context->layer) && util_layer_is_path_point_dragging()) {
+		return;
 	}
 
 	// Prevent painting the same spot
@@ -90,6 +101,12 @@ void brush_output_paint(brush_output_node_t *self) {
 
 	if (g_context->painted == 0) {
 		brush_output_node_parse_inputs(self);
+	}
+
+	// Path layer - add point and repaint
+	if (slot_layer_is_path(g_context->layer)) {
+		util_layer_add_path_point(g_context->layer, g_context->paint_vec.x, g_context->paint_vec.y);
+		return;
 	}
 
 	if (g_context->painted <= 1) {
@@ -135,7 +152,7 @@ void brush_output_node_run(brush_output_node_t *self, i32 from) {
 	}
 
 	// Do not paint over fill layer
-	if (g_context->layer->fill_layer != NULL && g_context->tool != TOOL_TYPE_PICKER && g_context->tool != TOOL_TYPE_MATERIAL &&
+	if (g_context->layer->fill_material != NULL && g_context->tool != TOOL_TYPE_PICKER && g_context->tool != TOOL_TYPE_MATERIAL &&
 	    g_context->tool != TOOL_TYPE_COLORID) {
 		return;
 	}

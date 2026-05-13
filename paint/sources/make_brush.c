@@ -9,7 +9,7 @@ void make_brush_run(node_shader_t *kong) {
 		return;
 	}
 
-	bool fill_layer = g_context->layer->fill_layer != NULL;
+	bool fill_layer = g_context->layer->fill_material != NULL;
 	bool decal      = context_is_decal();
 	if (decal && !fill_layer) {
 		node_shader_write_frag(kong, "if (constants.decal_mask.z > 0.0) {");

@@ -63,8 +63,11 @@ void tab_layers_handle_layer_icon_state(slot_layer_t *l, i32 i, ui_state_t state
 		if (sys_time() - g_context->select_time > 0.2) {
 			g_context->select_time = sys_time();
 		}
-		if (l->fill_layer != NULL) {
-			context_set_material(l->fill_layer);
+		if (l->fill_material != NULL) {
+			context_set_material(l->fill_material);
+		}
+		else if (l->path_material != NULL) {
+			context_set_material(l->path_material);
 		}
 	}
 }
@@ -90,17 +93,17 @@ ui_state_t tab_layers_draw_layer_icon(slot_layer_t *l, i32 i, f32 uix, f32 uiy, 
 		gpu_texture_t *texpaint_preview = l->texpaint_preview;
 
 		gpu_texture_t *icon;
-		if (l->fill_layer == NULL) {
-			icon = texpaint_preview;
+		if (l->fill_material != NULL) {
+			icon = g_config->window_scale > 1 ? l->fill_material->image : l->fill_material->image_icon;
 		}
-		else if (g_config->window_scale > 1) {
-			icon = l->fill_layer->image;
+		else if (l->path_material != NULL) {
+			icon = g_config->window_scale > 1 ? l->path_material->image : l->path_material->image_icon;
 		}
 		else {
-			icon = l->fill_layer->image_icon;
+			icon = texpaint_preview;
 		}
 
-		if (l->fill_layer == NULL) {
+		if (l->fill_material == NULL && l->path_material == NULL) {
 			// Checker
 			rect_t *r  = resource_tile50(icons, ICON_CHECKER);
 			f32     _x = ui->_x;
@@ -111,14 +114,14 @@ ui_state_t tab_layers_draw_layer_icon(slot_layer_t *l, i32 i, f32 uix, f32 uiy, 
 			ui->_y = _y;
 			ui->_w = _w;
 		}
-		if (l->fill_layer == NULL && slot_layer_is_mask(l)) {
+		if (l->fill_material == NULL && slot_layer_is_mask(l)) {
 			draw_set_pipeline(ui_view2d_pipe);
 			gpu_set_int(ui_view2d_channel_loc, 1);
 		}
 
 		ui_state_t state = ui_image(icon, 0xffffffff, icon_h);
 
-		if (l->fill_layer == NULL && slot_layer_is_mask(l)) {
+		if (l->fill_material == NULL && slot_layer_is_mask(l)) {
 			draw_set_pipeline(NULL);
 		}
 
@@ -231,7 +234,7 @@ void tab_layers_draw_layer_slot_full_delete_layer(void *_) {
 }
 
 void tab_layers_combo_object_layer_clear(slot_layer_t *l) {
-	g_context->material = l->fill_layer;
+	g_context->material = l->fill_material;
 	slot_layer_clear(l, 0x00000000, NULL, 1.0, layers_default_rough, 0.0);
 	layers_update_fill_layers();
 }
@@ -259,7 +262,7 @@ ui_handle_t *tab_layers_combo_object(slot_layer_t *l, bool label) {
 	if (object_handle->changed) {
 		context_set_layer(l);
 		make_material_parse_mesh_material();
-		if (l->fill_layer != NULL) {
+		if (l->fill_material != NULL) {
 			sys_notify_on_next_frame(&tab_layers_combo_object_layer_clear, l);
 		}
 		else {
@@ -574,7 +577,7 @@ void tab_layers_draw_layer_context_menu_merge_down(void *_) {
 	context_set_layer(l);
 	history_merge_layers();
 	layers_merge_down();
-	if (g_context->layer->fill_layer != NULL)
+	if (g_context->layer->fill_material != NULL)
 		slot_layer_to_paint_layer(g_context->layer);
 }
 
@@ -611,6 +614,7 @@ void tab_layers_draw_layer_context_menu_clear(void *_) {
 	if (!slot_layer_is_group(l)) {
 		history_clear_layer();
 		slot_layer_clear(l, 0x00000000, NULL, 1.0, layers_default_rough, 0.0);
+		util_layer_clear_path_points(l);
 	}
 	else {
 		for (i32 i = 0; i < slot_layer_get_children(l)->length; ++i) {
@@ -663,15 +667,15 @@ void tab_layers_draw_layer_context_menu_draw() {
 		char *to_fill_string  = slot_layer_is_layer(l) ? tr("To Fill Layer") : tr("To Fill Mask");
 		char *to_paint_string = slot_layer_is_layer(l) ? tr("To Paint Layer") : tr("To Paint Mask");
 
-		if (l->fill_layer == NULL && ui_menu_button(to_fill_string, "", ICON_SPHERE)) {
+		if (l->fill_material == NULL && ui_menu_button(to_fill_string, "", ICON_SPHERE)) {
 			sys_notify_on_next_frame(&tab_layers_draw_layer_context_menu_to_fill_layer, NULL);
 		}
-		if (l->fill_layer != NULL && ui_menu_button(to_paint_string, "", ICON_PAINT)) {
+		if (l->fill_material != NULL && ui_menu_button(to_paint_string, "", ICON_PAINT)) {
 			sys_notify_on_next_frame(&tab_layers_draw_layer_context_menu_to_paint_layer, NULL);
 		}
 	}
 
-	if (slot_layer_is_layer(l) && l->fill_layer != NULL && l->texpaint_sculpt != NULL && ui_menu_button(tr("Apply"), "", ICON_CHECK)) {
+	if (slot_layer_is_layer(l) && l->fill_material != NULL && l->texpaint_sculpt != NULL && ui_menu_button(tr("Apply"), "", ICON_CHECK)) {
 		sys_notify_on_next_frame(&tab_layers_draw_layer_context_menu_apply_sculpt, NULL);
 	}
 
@@ -681,11 +685,11 @@ void tab_layers_draw_layer_context_menu_draw() {
 	}
 	ui->enabled = true;
 
-	if (l->fill_layer == NULL && ui_menu_button(tr("Clear"), "", ICON_ERASE)) {
+	if (l->fill_material == NULL && ui_menu_button(tr("Clear"), "", ICON_ERASE)) {
 		context_set_layer(l);
 		sys_notify_on_next_frame(&tab_layers_draw_layer_context_menu_clear, NULL);
 	}
-	if (slot_layer_is_mask(l) && l->fill_layer == NULL && ui_menu_button(tr("Invert"), "", ICON_INVERT)) {
+	if (slot_layer_is_mask(l) && l->fill_material == NULL && ui_menu_button(tr("Invert"), "", ICON_INVERT)) {
 		sys_notify_on_next_frame(&tab_layers_draw_layer_context_menu_invert, NULL);
 	}
 	if (slot_layer_is_mask(l) && ui_menu_button(tr("Apply"), "", ICON_CHECK)) {
@@ -798,13 +802,13 @@ void tab_layers_draw_layer_context_menu_draw() {
 			ui_menu_keep_open = true;
 		}
 	}
-	if (l->fill_layer != NULL) {
+	if (l->fill_material != NULL) {
 		ui_menu_align();
 		ui_handle_t *scale_handle = ui_nest(ui_handle(__ID__), l->id);
 		scale_handle->f           = l->scale;
 		l->scale                  = ui_slider(scale_handle, tr("UV Scale"), 0.0, 5.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
 		if (scale_handle->changed) {
-			context_set_material(l->fill_layer);
+			context_set_material(l->fill_material);
 			context_set_layer(l);
 			sys_notify_on_next_frame(&tab_layers_draw_layer_context_menu_update_fill_layers, NULL);
 			ui_menu_keep_open = true;
@@ -815,7 +819,7 @@ void tab_layers_draw_layer_context_menu_draw() {
 		angle_handle->f           = l->angle;
 		l->angle                  = ui_slider(angle_handle, tr("Angle"), 0.0, 360, true, 1, true, UI_ALIGN_RIGHT, true);
 		if (angle_handle->changed) {
-			context_set_material(l->fill_layer);
+			context_set_material(l->fill_material);
 			context_set_layer(l);
 			make_material_parse_paint_material(true);
 			sys_notify_on_next_frame(&tab_layers_draw_layer_context_menu_update_fill_layers, NULL);
@@ -834,7 +838,7 @@ void tab_layers_draw_layer_context_menu_draw() {
 		    3);
 		l->uv_type = ui_inline_radio(uv_type_handle, uv_type_items, UI_ALIGN_LEFT);
 		if (uv_type_handle->changed) {
-			context_set_material(l->fill_layer);
+			context_set_material(l->fill_material);
 			context_set_layer(l);
 			make_material_parse_paint_material(true);
 			sys_notify_on_next_frame(&tab_layers_draw_layer_context_menu_update_fill_layers, NULL);
@@ -1029,7 +1033,13 @@ void tab_layers_button_new_menu() {
 	if (ui_menu_button(tr("Decal"), "", ICON_DECAL)) {
 		layers_create_fill_layer(UV_TYPE_PROJECT, mat4_nan(), -1);
 	}
-	if (ui_menu_button(tr("Path"), "", ICON_RULER)) {
+	if (ui_menu_button(tr("Path"), "", ICON_PATH)) {
+		layers_new_path_layer(false);
+		history_new_layer();
+	}
+	if (ui_menu_button(tr("Curve"), "", ICON_CURVE)) {
+		layers_new_path_layer(true);
+		history_new_layer();
 	}
 	if (ui_menu_button(tr("Black Mask"), "", ICON_MASK)) {
 		if (slot_layer_is_mask(l) || slot_layer_is_filter(l)) {

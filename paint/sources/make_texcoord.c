@@ -3,7 +3,7 @@
 
 void make_texcoord_run(node_shader_t *kong) {
 
-	bool      fill_layer = g_context->layer->fill_layer != NULL;
+	bool      fill_layer = g_context->layer->fill_material != NULL;
 	uv_type_t uv_type    = fill_layer ? g_context->layer->uv_type : g_context->brush_paint;
 	bool      decal      = context_is_decal();
 	f32       angle      = g_context->brush_angle + g_context->brush_nodes_angle;

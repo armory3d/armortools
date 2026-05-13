@@ -60,8 +60,8 @@ void tab_materials_delete_material(slot_material_t *m) {
 	i32 i = array_index_of(project_materials, m);
 	for (i32 i = 0; i < project_layers->length; ++i) {
 		slot_layer_t *l = project_layers->buffer[i];
-		if (l->fill_layer == m) {
-			l->fill_layer = NULL;
+		if (l->fill_material == m) {
+			l->fill_material = NULL;
 		}
 	}
 	history_delete_material();

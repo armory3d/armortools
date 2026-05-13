@@ -79,7 +79,7 @@ f32 uniforms_ext_f32_link(object_t *object, material_data_t *mat, char *link) {
 		// 	i32 atlas_stride = atlas_w / (float)item_w;
 		// 	return atlas_stride;
 		// }
-		bool fill = g_context->layer->fill_layer != NULL;
+		bool fill = g_context->layer->fill_material != NULL;
 		f32  val  = (fill ? g_context->layer->scale : g_context->brush_scale) * g_context->brush_nodes_scale;
 		return val;
 	}
@@ -153,7 +153,7 @@ vec2_t uniforms_ext_vec2_link(object_t *object, material_data_t *mat, char *link
 	}
 	else if (string_equals(link, "_brush_angle")) {
 		f32 brush_angle = g_context->brush_angle + g_context->brush_nodes_angle;
-		f32 angle       = g_context->layer->fill_layer != NULL ? g_context->layer->angle : brush_angle;
+		f32 angle       = g_context->layer->fill_material != NULL ? g_context->layer->angle : brush_angle;
 		angle *= (math_pi() / 180.0);
 		if (g_config->pressure_angle && pen_down("tip")) {
 			angle *= pen_pressure * g_config->pressure_sensitivity;

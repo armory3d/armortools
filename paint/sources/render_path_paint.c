@@ -662,7 +662,7 @@ void render_path_paint_commands_cursor() {
 		return;
 	}
 
-	bool fill_layer  = g_context->layer->fill_layer != NULL;
+	bool fill_layer  = g_context->layer->fill_material != NULL;
 	bool group_layer = slot_layer_is_group(g_context->layer);
 	if (!base_ui_enabled || base_is_dragging || fill_layer || group_layer) {
 		return;
@@ -676,7 +676,7 @@ void render_path_paint_commands_cursor() {
 }
 
 bool render_path_paint_paint_enabled() {
-	bool fill_layer = g_context->layer->fill_layer != NULL && g_context->tool != TOOL_TYPE_PICKER && g_context->tool != TOOL_TYPE_MATERIAL &&
+	bool fill_layer = g_context->layer->fill_material != NULL && g_context->tool != TOOL_TYPE_PICKER && g_context->tool != TOOL_TYPE_MATERIAL &&
 	                  g_context->tool != TOOL_TYPE_COLORID;
 	bool group_layer = slot_layer_is_group(g_context->layer);
 

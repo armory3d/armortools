@@ -264,7 +264,7 @@ void history_undo() {
 			history_undo_i    = history_undo_i - 1 < 0 ? g_config->undo_steps - 1 : history_undo_i - 1;
 			slot_layer_t *lay = history_undo_layers->buffer[history_undo_i];
 			slot_layer_swap(g_context->layer, lay);
-			g_context->layer->fill_layer = project_materials->buffer[step->material];
+			g_context->layer->fill_material = project_materials->buffer[step->material];
 		}
 		else if (step->action == HISTORY_ACTION_LAYER_OPACITY) {
 			context_set_layer(project_layers->buffer[step->layer]);
@@ -536,7 +536,7 @@ void history_redo() {
 		else if (step->action == HISTORY_ACTION_TO_FILL_LAYER || step->action == HISTORY_ACTION_TO_FILL_MASK) {
 			slot_layer_t *lay = history_undo_layers->buffer[history_undo_i];
 			slot_layer_swap(g_context->layer, lay);
-			g_context->layer->fill_layer = project_materials->buffer[step->material];
+			g_context->layer->fill_material = project_materials->buffer[step->material];
 			history_undo_i               = (history_undo_i + 1) % g_config->undo_steps;
 		}
 		else if (step->action == HISTORY_ACTION_TO_PAINT_LAYER || step->action == HISTORY_ACTION_TO_PAINT_MASK) {

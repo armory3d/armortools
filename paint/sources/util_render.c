@@ -264,8 +264,8 @@ void util_render_make_brush_preview() {
 		g_context->layer = g_context->layer->parent;
 	}
 
-	slot_material_t *_fill_layer = g_context->layer->fill_layer;
-	g_context->layer->fill_layer = NULL;
+	slot_material_t *_fill_material = g_context->layer->fill_material;
+	g_context->layer->fill_material = NULL;
 
 	render_path_paint_use_live_layer(true);
 	make_material_parse_paint_material(false);
@@ -375,10 +375,10 @@ void util_render_make_brush_preview() {
 	g_context->prev_paint_vec_y = -1;
 	g_context->pdirty           = _pdirty;
 	render_path_paint_use_live_layer(false);
-	g_context->layer->fill_layer = _fill_layer;
-	g_context->layer             = _layer;
-	g_context->material          = _material;
-	g_context->tool              = _tool;
+	g_context->layer->fill_material = _fill_material;
+	g_context->layer                = _layer;
+	g_context->material             = _material;
+	g_context->tool                 = _tool;
 	sys_notify_on_next_frame(&util_render_make_brush_preview_parse_paint_material, NULL);
 
 	// Restore paint mesh

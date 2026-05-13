@@ -787,7 +787,16 @@ void ui_nodes_recompile() {
 			if (ui_nodes_is_tab_selected()) {
 				g_context->material = ui_nodes_tabs->buffer[ui_nodes_tab_index()];
 			}
-			layers_is_fill_material() ? layers_update_fill_layers() : util_render_make_material_preview();
+			if (layers_is_fill_material()) {
+				layers_update_fill_layers();
+			}
+			else if (layers_is_path_material()) {
+				layers_update_path_layers();
+			}
+			else {
+				util_render_make_material_preview();
+			}
+
 			g_context->material = _material;
 
 			if (ui_view2d_show && ui_view2d_type == VIEW_2D_TYPE_NODE) {
@@ -805,9 +814,15 @@ void ui_nodes_recompile() {
 	else if (ui_nodes_recompile_mat_final) {
 		make_material_parse_paint_material(true);
 
-		if (ui_nodes_canvas_type == CANVAS_TYPE_MATERIAL && layers_is_fill_material()) {
-			layers_update_fill_layers();
-			util_render_make_material_preview();
+		if (ui_nodes_canvas_type == CANVAS_TYPE_MATERIAL) {
+			if (layers_is_fill_material()) {
+				layers_update_fill_layers();
+				util_render_make_material_preview();
+			}
+			if (layers_is_path_material()) {
+				layers_update_path_layers();
+				util_render_make_material_preview();
+			}
 		}
 
 		bool decal = context_is_decal();

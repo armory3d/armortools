@@ -165,8 +165,8 @@ void gizmo_update() {
 			}
 			g_context->gizmo_drag_last = g_context->gizmo_drag;
 
-			if (g_context->material != g_context->layer->fill_layer) {
-				context_set_material(g_context->layer->fill_layer);
+			if (g_context->material != g_context->layer->fill_material) {
+				context_set_material(g_context->layer->fill_material);
 			}
 			layers_update_fill_layer(g_context->gizmo_started);
 		}

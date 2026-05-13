@@ -159,7 +159,7 @@ project_t *import_arm_from_map_to_arm(any_map_t *old) {
 			ld->uv_type            = armpack_map_get_i32(old, "uv_type");
 			ld->decal_mat          = any_map_get(old, "decal_mat");
 			ld->opacity_mask       = armpack_map_get_f32(old, "opacity_mask");
-			ld->fill_layer         = armpack_map_get_i32(old, "fill_layer");
+			ld->fill_material      = armpack_map_get_i32(old, "fill_material");
 			ld->object_mask        = armpack_map_get_i32(old, "object_mask");
 			ld->blending           = armpack_map_get_i32(old, "blending");
 			ld->parent             = armpack_map_get_i32(old, "parent");
@@ -215,6 +215,24 @@ project_t *import_arm_from_map_to_arm(any_map_t *old) {
 	return project;
 }
 
+project_t *import_arm_from_version_6(any_map_t *old) {
+	any_array_t *lds = any_map_get(old, "layer_datas");
+	if (lds != NULL) {
+		for (i32 i = 0; i < lds->length; ++i) {
+			any_map_t *ld = lds->buffer[i];
+			armpack_map_set_i32(ld, "fill_material", armpack_map_get_i32(ld, "fill_layer"));
+			any_map_set(ld, "path_points", NULL);
+			any_map_set(ld, "path_points_world", NULL);
+			any_map_set(ld, "path_points_camera", NULL);
+			any_map_set(ld, "path_points_parent", NULL);
+			armpack_map_set_i32(ld, "path_tool", 0);
+			armpack_map_set_i32(ld, "path_curved", 0);
+			armpack_map_set_i32(ld, "path_material", -1);
+		}
+	}
+	return import_arm_from_map_to_arm(old);
+}
+
 project_t *import_arm_from_version_5(any_map_t *old) {
 	any_array_t *mds = any_map_get(old, "mesh_datas");
 	any_array_t *mts = any_array_create_from_raw((void *[]){}, 0);
@@ -222,7 +240,7 @@ project_t *import_arm_from_version_5(any_map_t *old) {
 		any_array_push(mts, mat4_to_f32_array(mat4_identity()));
 	}
 	any_map_set(old, "mesh_transforms", mts);
-	return import_arm_from_map_to_arm(old);
+	return import_arm_from_version_6(old);
 }
 
 project_t *import_arm_from_version_4(any_map_t *old) {
@@ -255,6 +273,9 @@ project_t *import_arm_from_version_2(any_map_t *old) {
 
 project_t *import_arm_from_old(buffer_t *b) {
 	any_map_t *old = armpack_decode_to_map(b);
+	if (import_arm_is_version(b, '6')) {
+		return import_arm_from_version_6(old);
+	}
 	if (import_arm_is_version(b, '5')) {
 		return import_arm_from_version_5(old);
 	}

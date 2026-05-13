@@ -365,19 +365,19 @@ gpu_texture_t *base_get_drag_image() {
 		base_drag_tint = base_darker(ui->ops->theme->LABEL_COL, 0x00202020);
 		return icons;
 	}
-	if (base_drag_layer != NULL && slot_layer_is_mask(base_drag_layer) && base_drag_layer->fill_layer == NULL) {
+	if (base_drag_layer != NULL && slot_layer_is_mask(base_drag_layer) && base_drag_layer->fill_material == NULL) {
 		tab_layers_make_mask_preview_rgba32(base_drag_layer);
 		return g_context->mask_preview_rgba32;
 	}
 	if (base_drag_layer != NULL) {
-		return base_drag_layer->fill_layer != NULL ? base_drag_layer->fill_layer->image_icon : base_drag_layer->texpaint_preview;
+		return base_drag_layer->fill_material != NULL ? base_drag_layer->fill_material->image_icon : base_drag_layer->texpaint_preview;
 	}
 	return NULL;
 }
 
 rect_t *base_get_drag_background() {
 	gpu_texture_t *icons = resource_get("icons.k");
-	if (base_drag_layer != NULL && !slot_layer_is_group(base_drag_layer) && base_drag_layer->fill_layer == NULL) {
+	if (base_drag_layer != NULL && !slot_layer_is_group(base_drag_layer) && base_drag_layer->fill_material == NULL) {
 		return resource_tile50(icons, ICON_CHECKER);
 	}
 	return NULL;
@@ -766,6 +766,7 @@ void ui_base_update_ui() {
 	}
 
 	gizmo_update();
+	util_layer_update_path();
 
 	// Same mapping for paint and rotate (predefined in touch keymap)
 	if (context_in_3d_view()) {
@@ -932,7 +933,7 @@ void ui_base_update_ui() {
 		g_context->layer_preview_dirty = true; // Update layer preview
 
 		// New color id picked, update fill layer
-		if (g_context->tool == TOOL_TYPE_COLORID && g_context->layer->fill_layer != NULL) {
+		if (g_context->tool == TOOL_TYPE_COLORID && g_context->layer->fill_material != NULL) {
 			sys_notify_on_next_frame(&ui_base_update_ui_on_next_frame, NULL);
 		}
 	}
@@ -2066,7 +2067,7 @@ void base_toggle_fullscreen() {
 
 bool base_is_decal_layer() {
 	bool is_painting = g_context->tool != TOOL_TYPE_MATERIAL && g_context->tool != TOOL_TYPE_BAKE;
-	return is_painting && g_context->layer->fill_layer != NULL && g_context->layer->uv_type == UV_TYPE_PROJECT;
+	return is_painting && g_context->layer->fill_material != NULL && g_context->layer->uv_type == UV_TYPE_PROJECT;
 }
 
 void base_redraw_status() {

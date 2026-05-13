@@ -526,6 +526,12 @@ void import_arm_run_project(char *path) {
 			l->paint_height_blend = ld->paint_height_blend;
 			l->paint_emis         = ld->paint_emis;
 			l->paint_subs         = ld->paint_subs;
+			l->path_points        = ld->path_points;
+			l->path_points_world  = ld->path_points_world;
+			l->path_points_camera = ld->path_points_camera;
+			l->path_points_parent = ld->path_points_parent;
+			l->path_tool          = ld->path_tool;
+			l->path_curved        = ld->path_curved;
 
 			gpu_delete_texture(_texpaint);
 			if (_texpaint_nor != NULL) {
@@ -594,13 +600,14 @@ void import_arm_run_project(char *path) {
 		util_render_make_brush_preview();
 	}
 
-	// Fill layers
+	// Fill layers and path layers materials
 	for (i32 i = 0; i < project->layer_datas->length; ++i) {
 		layer_data_t *ld       = project->layer_datas->buffer[i];
 		slot_layer_t *l        = project_layers->buffer[i];
 		bool          is_group = ld->texpaint == NULL;
 		if (!is_group) {
-			l->fill_layer = ld->fill_layer > -1 ? project_materials->buffer[ld->fill_layer] : NULL;
+			l->fill_material = ld->fill_material > -1 ? project_materials->buffer[ld->fill_material] : NULL;
+			l->path_material = ld->path_material > -1 ? project_materials->buffer[ld->path_material] : NULL;
 		}
 	}
 

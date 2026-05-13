@@ -190,7 +190,7 @@ node_shader_context_t *make_paint_run(material_t *data, material_context_t *matc
 
 	node_shader_write_vert(kong, "output.pos = float4(tpos, 0.0, 1.0);");
 
-	bool decal_layer = g_context->layer->fill_layer != NULL && g_context->layer->uv_type == UV_TYPE_PROJECT;
+	bool decal_layer = g_context->layer->fill_material != NULL && g_context->layer->uv_type == UV_TYPE_PROJECT;
 	if (decal_layer) {
 		node_shader_add_constant(kong, "WVP: float4x4", "_decal_layer_matrix");
 	}
@@ -207,7 +207,7 @@ node_shader_context_t *make_paint_run(material_t *data, material_context_t *matc
 	node_shader_write_attrib_frag(kong, "sp.y = 1.0 - sp.y;");
 	node_shader_write_attrib_frag(kong, "sp.z -= 0.0001;"); // small bias
 
-	uv_type_t uv_type = g_context->layer->fill_layer != NULL ? g_context->layer->uv_type : g_context->brush_paint;
+	uv_type_t uv_type = g_context->layer->fill_material != NULL ? g_context->layer->uv_type : g_context->brush_paint;
 	if (uv_type == UV_TYPE_PROJECT) {
 		kong->frag_ndcpos = true;
 	}
@@ -311,7 +311,7 @@ node_shader_context_t *make_paint_run(material_t *data, material_context_t *matc
 		parser_material_parse_subsurface        = g_context->material->paint_subs;
 		parser_material_parse_height            = g_context->material->paint_height;
 		parser_material_parse_height_as_channel = true;
-		uv_type_t uv_type                       = g_context->layer->fill_layer != NULL ? g_context->layer->uv_type : g_context->brush_paint;
+		uv_type_t uv_type                       = g_context->layer->fill_material != NULL ? g_context->layer->uv_type : g_context->brush_paint;
 		parser_material_triplanar               = uv_type == UV_TYPE_TRIPLANAR && !decal;
 		parser_material_sample_keep_aspect      = decal;
 		gc_unroot(parser_material_sample_uv_scale);
@@ -346,7 +346,7 @@ node_shader_context_t *make_paint_run(material_t *data, material_context_t *matc
 			node_shader_write_frag(kong, "var opacity: float = mat_opacity;");
 		}
 
-		if (g_context->layer->fill_layer == NULL) {
+		if (g_context->layer->fill_material == NULL) {
 			node_shader_write_frag(kong, "opacity *= constants.brush_opacity;");
 		}
 
@@ -512,7 +512,7 @@ node_shader_context_t *make_paint_run(material_t *data, material_context_t *matc
 		node_shader_write_frag(kong,
 		                       "output[0] = float4((basecol * t_blur + sample_undo.rgb * sample_undo.a * (1.0 - t_blur)) / max(out_a, 0.0000001), out_a);");
 	}
-	else if (g_context->material->paint_opac_mode == OPACITY_MODE_TRANSLUC || g_context->layer->fill_layer != NULL) {
+	else if (g_context->material->paint_opac_mode == OPACITY_MODE_TRANSLUC || g_context->layer->fill_material != NULL) {
 		node_shader_write_frag(kong, string("output[0] = float4(%s, %s);",
 		                                    make_material_blend_mode(kong, g_context->brush_blending, "sample_undo.rgb", "basecol", "str"), "mat_opacity"));
 	}
