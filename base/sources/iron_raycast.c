@@ -98,18 +98,12 @@ vec4_t ray_at(ray_t *raw, f32 t) {
 }
 
 f32 ray_dist_to_point(ray_t *raw, vec4_t point) {
-	vec4_t v1       = (vec4_t){0.0, 0.0, 0.0, 0.0};
-	f32    dir_dist = vec4_dot(vec4_sub(point, raw->origin), raw->dir);
-
-	// Point behind the ray
-	if (dir_dist < 0) {
-		return vec4_dist(raw->origin, point);
-	}
-
-	raw->dir = vec4_mult(raw->dir, dir_dist);
-	raw->dir = vec4_add(raw->dir, raw->origin);
-
-	return vec4_dist(v1, point);
+	vec4_t dir = vec4_norm(raw->dir);
+	f32    t   = vec4_dot(vec4_sub(point, raw->origin), dir);
+	if (t < 0.0f)
+		t = 0.0f;
+	vec4_t closest = vec4_add(raw->origin, vec4_mult(dir, t));
+	return vec4_dist(closest, point);
 }
 
 bool ray_intersects_sphere(ray_t *raw, vec4_t sphere_center, f32 sphere_radius) {
