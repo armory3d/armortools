@@ -41,6 +41,7 @@ void base_on_background() {
 	// Release keys after alt-tab / win-tab
 	_key_up(KEY_CODE_ALT, NULL);
 	_key_up(KEY_CODE_WIN, NULL);
+	_key_up(KEY_CODE_CONTROL, NULL);
 }
 
 void base_on_pause() {}
