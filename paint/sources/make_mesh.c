@@ -318,7 +318,7 @@ node_shader_context_t *make_mesh_run(material_t *data, i32 layer_pass) {
 			node_shader_write_frag(kong, string("texpaint_sample = sample_lod(texpaint%s, sampler_linear, %s, 0.0);", i32_to_string(l->id), tex_coord));
 			node_shader_write_frag(kong, "texpaint_opac = texpaint_sample.a;");
 
-			if (g_context->viewport_mode == VIEWPORT_MODE_LIT && make_material_transluc_used) {
+			if (make_material_transluc_used && g_context->viewport_mode != VIEWPORT_MODE_PATH_TRACE) {
 				con_mesh->data->cull_mode = "none";
 				kong->frag_wvpposition    = true;
 				node_shader_add_function(kong, str_dither_bayer);
@@ -326,7 +326,7 @@ node_shader_context_t *make_mesh_run(material_t *data, i32 layer_pass) {
 				node_shader_write_frag(
 				    kong, "var fragcoord1: float2 = float2(input.wvpposition.x / input.wvpposition.w, input.wvpposition.y / input.wvpposition.w) * 0.5 + 0.5;");
 				node_shader_write_frag(kong, "var dither: float = dither_bayer(fragcoord1 * constants.gbuffer_size);");
-				node_shader_write_frag(kong, "if (texpaint_opac < dither) { discard; }");
+				node_shader_write_frag(kong, "if (texpaint_opac <= dither) { discard; }");
 			}
 
 			slot_layer_t_array_t *masks = slot_layer_get_masks(l, true);
