@@ -315,17 +315,25 @@ void util_layer_add_path_point(slot_layer_t *l, f32 screen_x, f32 screen_y) {
 		return;
 	}
 
+	bool _paint2d = g_context->paint2d;
+	if (_paint2d) {
+		// Convert 2D view x-coordinate [1, 1+ww/base_w] to 3D range [0, 1]
+		screen_x = (screen_x * base_w() - base_w()) / (float)ui_view2d_ww;
+		render_path_paint_set_plane_mesh();
+		g_context->paint2d = false;
+	}
+
+	f32_array_t *points        = l->path_points;
+	f32_array_t *points_world  = l->path_points_world;
+	f32_array_t *points_camera = l->path_points_camera;
+	i32_array_t *points_parent = l->path_points_parent;
+
 	for (i32 j = 0; j < path_point_sphere_count; j++) {
 		path_point_spheres[j]->visible = false;
 	}
 
 	// Re-render gbuffer without spheres so gbufferD is clean
 	render_path_base_draw_gbuffer();
-
-	f32_array_t *points        = l->path_points;
-	f32_array_t *points_world  = l->path_points_world;
-	f32_array_t *points_camera = l->path_points_camera;
-	i32_array_t *points_parent = l->path_points_parent;
 
 	f32_array_push(points, screen_x);
 	f32_array_push(points, screen_y);
@@ -361,6 +369,11 @@ void util_layer_add_path_point(slot_layer_t *l, f32 screen_x, f32 screen_y) {
 
 	for (i32 j = 0; j < path_point_sphere_count; j++) {
 		path_point_spheres[j]->visible = true;
+	}
+
+	if (_paint2d) {
+		g_context->paint2d = true;
+		render_path_paint_restore_plane_mesh();
 	}
 }
 
