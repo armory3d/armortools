@@ -52,7 +52,7 @@ void input_node_update(float_node_t *self) {
 		g_context->brush_lazy_x = paint_x;
 		g_context->brush_lazy_y = paint_y;
 	}
-	if (!lazy_paint) {
+	if (!lazy_paint || slot_layer_is_path(g_context->layer)) {
 		input_node_coords.x = paint_x;
 		input_node_coords.y = paint_y;
 	}
@@ -84,7 +84,7 @@ void input_node_update(float_node_t *self) {
 		input_node_lock_x = input_node_lock_y = input_node_lock_begin = false;
 	}
 
-	if (g_context->brush_lazy_radius > 0) {
+	if (g_context->brush_lazy_radius > 0 && !slot_layer_is_path(g_context->layer)) {
 		vec4_t v1 = (vec4_t){g_context->brush_lazy_x * sys_w(), g_context->brush_lazy_y * sys_h(), 0.0, 1.0};
 		vec4_t v2 = (vec4_t){input_node_coords.x * sys_w(), input_node_coords.y * sys_h(), 0.0, 1.0};
 		f32    d  = vec4_dist(v1, v2);

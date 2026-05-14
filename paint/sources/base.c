@@ -1683,7 +1683,7 @@ void ui_base_render_cursor(void *_) {
 		}
 	}
 
-	if (g_context->brush_lazy_radius > 0 && !g_context->brush_locked &&
+	if (g_context->brush_lazy_radius > 0 && !g_context->brush_locked && !slot_layer_is_path(g_context->layer) &&
 	    (g_context->tool == TOOL_TYPE_BRUSH || g_context->tool == TOOL_TYPE_ERASER || g_context->tool == TOOL_TYPE_DECAL || g_context->tool == TOOL_TYPE_TEXT ||
 	     g_context->tool == TOOL_TYPE_CLONE || g_context->tool == TOOL_TYPE_BLUR || g_context->tool == TOOL_TYPE_SMUDGE ||
 	     g_context->tool == TOOL_TYPE_PARTICLE)) {
