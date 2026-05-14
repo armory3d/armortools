@@ -473,7 +473,7 @@ void ui_header_draw_tool_properties() {
 	}
 	else if (g_context->tool == TOOL_TYPE_BRUSH || g_context->tool == TOOL_TYPE_ERASER || g_context->tool == TOOL_TYPE_FILL ||
 	         g_context->tool == TOOL_TYPE_DECAL || g_context->tool == TOOL_TYPE_TEXT || g_context->tool == TOOL_TYPE_CLONE ||
-	         g_context->tool == TOOL_TYPE_BLUR || g_context->tool == TOOL_TYPE_SMUDGE || g_context->tool == TOOL_TYPE_PARTICLE) {
+	         g_context->tool == TOOL_TYPE_BLUR || g_context->tool == TOOL_TYPE_PARTICLE) {
 		bool decal_mask = context_is_decal_mask();
 		if (g_context->tool != TOOL_TYPE_FILL) {
 			if (decal_mask) {
@@ -628,6 +628,19 @@ void ui_header_draw_tool_properties() {
 		if (g_context->tool == TOOL_TYPE_PARTICLE) {
 			if (ui_button(tr("Particle"), UI_ALIGN_CENTER, "")) {
 				ui_menu_draw(&ui_header_particle_menu_draw, -1, -1);
+			}
+		}
+
+		if (g_context->tool == TOOL_TYPE_BLUR) {
+			string_array_t *blur_type_combo = any_array_create_from_raw(
+			    (void *[]){
+			        tr("Blur"),
+			        tr("Smudge"),
+			    },
+			    2);
+			g_context->blur_type = ui_combo(g_context->blur_type_handle, blur_type_combo, tr("Blur Type"), false, UI_ALIGN_LEFT, true);
+			if (g_context->blur_type_handle->changed) {
+				make_material_parse_paint_material(true);
 			}
 		}
 

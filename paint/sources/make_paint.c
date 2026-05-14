@@ -228,7 +228,7 @@ node_shader_context_t *make_paint_run(material_t *data, material_context_t *matc
 	node_shader_add_constant(kong, "brush_hardness: float", "_brush_hardness");
 
 	if (g_context->tool == TOOL_TYPE_BRUSH || g_context->tool == TOOL_TYPE_ERASER || g_context->tool == TOOL_TYPE_CLONE || g_context->tool == TOOL_TYPE_BLUR ||
-	    g_context->tool == TOOL_TYPE_SMUDGE || g_context->tool == TOOL_TYPE_PARTICLE || decal) {
+	    g_context->tool == TOOL_TYPE_PARTICLE || decal) {
 
 		bool depth_reject = !g_context->xray;
 		if (!g_config->brush_depth_reject) {
@@ -292,7 +292,7 @@ node_shader_context_t *make_paint_run(material_t *data, material_context_t *matc
 
 	make_texcoord_run(kong);
 
-	if (g_context->tool == TOOL_TYPE_CLONE || g_context->tool == TOOL_TYPE_BLUR || g_context->tool == TOOL_TYPE_SMUDGE) {
+	if (g_context->tool == TOOL_TYPE_CLONE || g_context->tool == TOOL_TYPE_BLUR) {
 		node_shader_add_texture(kong, "gbuffer2", NULL);
 		node_shader_add_constant(kong, "gbuffer_size: float2", "_gbuffer_size");
 		node_shader_add_texture(kong, "texpaint_undo", "_texpaint_undo");
@@ -382,7 +382,7 @@ node_shader_context_t *make_paint_run(material_t *data, material_context_t *matc
 
 	if (g_context->brush_stencil_image != NULL &&
 	    (g_context->tool == TOOL_TYPE_BRUSH || g_context->tool == TOOL_TYPE_ERASER || g_context->tool == TOOL_TYPE_FILL || g_context->tool == TOOL_TYPE_CLONE ||
-	     g_context->tool == TOOL_TYPE_BLUR || g_context->tool == TOOL_TYPE_SMUDGE || g_context->tool == TOOL_TYPE_PARTICLE || decal)) {
+	     g_context->tool == TOOL_TYPE_BLUR || g_context->tool == TOOL_TYPE_PARTICLE || decal)) {
 		node_shader_add_texture(kong, "texbrushstencil", "_texbrushstencil");
 		node_shader_add_constant(kong, "texbrushstencil_size: float2", "_size(_texbrushstencil)");
 		node_shader_add_constant(kong, "stencil_transform: float4", "_stencil_transform");
@@ -506,7 +506,7 @@ node_shader_context_t *make_paint_run(material_t *data, material_context_t *matc
 		node_shader_write_frag(kong, "var out_a: float = sample_undo.a * (1.0 - str);");
 		node_shader_write_frag(kong, "output[0] = float4(sample_undo.rgb, out_a);");
 	}
-	else if ((g_context->tool == TOOL_TYPE_BLUR || g_context->tool == TOOL_TYPE_SMUDGE) && !is_mask) {
+	else if (g_context->tool == TOOL_TYPE_BLUR && !is_mask) {
 		node_shader_write_frag(kong, "var t_blur: float = str / max(blur_src_alpha, 0.0000001);");
 		node_shader_write_frag(kong, "var out_a: float = str + sample_undo.a * (1.0 - t_blur);");
 		node_shader_write_frag(kong,

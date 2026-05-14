@@ -369,6 +369,8 @@ typedef struct context {
 	bool                 sym_y;
 	bool                 sym_z;
 	struct ui_handle    *fill_type_handle;
+	struct ui_handle    *blur_type_handle;
+	i32                  blur_type;
 	bool                 paint2d;
 	i32                  maximized_sidebar_width;
 	i32                  drag_dest;

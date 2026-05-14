@@ -94,7 +94,6 @@ any_map_t *keymap_get_default() {
 	any_map_set(keymap, "tool_text", "t");
 	any_map_set(keymap, "tool_clone", "l");
 	any_map_set(keymap, "tool_blur", "u");
-	any_map_set(keymap, "tool_smudge", "m");
 	any_map_set(keymap, "tool_particle", "p");
 	any_map_set(keymap, "tool_colorid", "c");
 	any_map_set(keymap, "tool_picker", "v");

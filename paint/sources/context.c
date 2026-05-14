@@ -174,6 +174,8 @@ context_t *context_create() {
 	c->sym_y                             = false;
 	c->sym_z                             = false;
 	c->fill_type_handle                  = ui_handle_create();
+	c->blur_type_handle                  = ui_handle_create();
+	c->blur_type                         = BLUR_TYPE_BLUR;
 	c->paint2d                           = false;
 	c->maximized_sidebar_width           = 0;
 	c->drag_dest                         = 0;

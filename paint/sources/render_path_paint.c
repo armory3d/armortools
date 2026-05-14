@@ -388,7 +388,7 @@ void render_path_paint_commands_paint(bool dilation) {
 
 		// Read texcoords from gbuffer
 		bool read_tc = (g_context->tool == TOOL_TYPE_FILL && g_context->fill_type_handle->i == FILL_TYPE_FACE) || g_context->tool == TOOL_TYPE_CLONE ||
-		               g_context->tool == TOOL_TYPE_BLUR || g_context->tool == TOOL_TYPE_SMUDGE;
+		               g_context->tool == TOOL_TYPE_BLUR;
 
 		if (g_context->tool == TOOL_TYPE_PARTICLE) {
 			render_path_paint_commands_particle(tid, texpaint, is_mask);
@@ -565,7 +565,7 @@ void render_path_paint_commands_symmetry() {
 void render_path_paint_commands_live_brush() {
 	tool_type_t tool = g_context->tool;
 	if (tool != TOOL_TYPE_BRUSH && tool != TOOL_TYPE_ERASER && tool != TOOL_TYPE_CLONE && tool != TOOL_TYPE_DECAL && tool != TOOL_TYPE_TEXT &&
-	    tool != TOOL_TYPE_BLUR && tool != TOOL_TYPE_SMUDGE) {
+	    tool != TOOL_TYPE_BLUR) {
 		return;
 	}
 
@@ -657,7 +657,7 @@ void render_path_paint_draw_cursor(f32 mx, f32 my, f32 radius, f32 tint_r, f32 t
 void render_path_paint_commands_cursor() {
 	bool        decal_mask = context_is_decal_mask();
 	tool_type_t tool       = g_context->tool;
-	if (tool != TOOL_TYPE_BRUSH && tool != TOOL_TYPE_ERASER && tool != TOOL_TYPE_CLONE && tool != TOOL_TYPE_BLUR && tool != TOOL_TYPE_SMUDGE &&
+	if (tool != TOOL_TYPE_BRUSH && tool != TOOL_TYPE_ERASER && tool != TOOL_TYPE_CLONE && tool != TOOL_TYPE_BLUR &&
 	    tool != TOOL_TYPE_PARTICLE && !decal_mask) {
 		return;
 	}

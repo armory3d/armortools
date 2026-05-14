@@ -1185,9 +1185,6 @@ void ui_base_update(void *_) {
 			else if (operator_shortcut(any_map_get(config_keymap, "tool_blur"), SHORTCUT_TYPE_STARTED)) {
 				context_select_tool(TOOL_TYPE_BLUR);
 			}
-			else if (operator_shortcut(any_map_get(config_keymap, "tool_smudge"), SHORTCUT_TYPE_STARTED)) {
-				context_select_tool(TOOL_TYPE_SMUDGE);
-			}
 			else if (operator_shortcut(any_map_get(config_keymap, "tool_particle"), SHORTCUT_TYPE_STARTED)) {
 				context_select_tool(TOOL_TYPE_PARTICLE);
 			}
@@ -1211,7 +1208,7 @@ void ui_base_update(void *_) {
 		// Radius
 		if (g_context->tool == TOOL_TYPE_BRUSH || g_context->tool == TOOL_TYPE_ERASER || g_context->tool == TOOL_TYPE_DECAL ||
 		    g_context->tool == TOOL_TYPE_TEXT || g_context->tool == TOOL_TYPE_CLONE || g_context->tool == TOOL_TYPE_BLUR ||
-		    g_context->tool == TOOL_TYPE_SMUDGE || g_context->tool == TOOL_TYPE_PARTICLE) {
+		    g_context->tool == TOOL_TYPE_PARTICLE) {
 			if (operator_shortcut(any_map_get(config_keymap, "brush_radius"), SHORTCUT_TYPE_STARTED) ||
 			    operator_shortcut(any_map_get(config_keymap, "brush_opacity"), SHORTCUT_TYPE_STARTED) ||
 			    operator_shortcut(any_map_get(config_keymap, "brush_angle"), SHORTCUT_TYPE_STARTED) ||
@@ -1671,7 +1668,7 @@ void ui_base_render_cursor(void *_) {
 			}
 		}
 		if (g_context->tool == TOOL_TYPE_BRUSH || g_context->tool == TOOL_TYPE_ERASER || g_context->tool == TOOL_TYPE_CLONE ||
-		    g_context->tool == TOOL_TYPE_BLUR || g_context->tool == TOOL_TYPE_SMUDGE || g_context->tool == TOOL_TYPE_PARTICLE ||
+		    g_context->tool == TOOL_TYPE_BLUR || g_context->tool == TOOL_TYPE_PARTICLE ||
 		    (decal_mask && context_in_2d_view(VIEW_2D_TYPE_LAYER))) {
 			if (decal_mask) {
 				psize = math_floor(cursor_img->width * (g_context->brush_decal_mask_radius * g_context->brush_nodes_radius) * UI_SCALE());
@@ -1685,7 +1682,7 @@ void ui_base_render_cursor(void *_) {
 
 	if (g_context->brush_lazy_radius > 0 && !g_context->brush_locked && !slot_layer_is_path(g_context->layer) &&
 	    (g_context->tool == TOOL_TYPE_BRUSH || g_context->tool == TOOL_TYPE_ERASER || g_context->tool == TOOL_TYPE_DECAL || g_context->tool == TOOL_TYPE_TEXT ||
-	     g_context->tool == TOOL_TYPE_CLONE || g_context->tool == TOOL_TYPE_BLUR || g_context->tool == TOOL_TYPE_SMUDGE ||
+	     g_context->tool == TOOL_TYPE_CLONE || g_context->tool == TOOL_TYPE_BLUR ||
 	     g_context->tool == TOOL_TYPE_PARTICLE)) {
 		draw_filled_rect(mx - 1, my - 1, 2, 2);
 		mx         = g_context->brush_lazy_x * base_w() + base_x();

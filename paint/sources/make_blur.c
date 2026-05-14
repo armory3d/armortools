@@ -61,7 +61,7 @@ void make_blur_run(node_shader_t *kong) {
 
 	node_shader_add_constant(kong, "texpaint_size: float2", "_texpaint_size");
 	node_shader_write_frag(kong, "var blur_step: float = 1.0 / constants.texpaint_size.x;");
-	if (g_context->tool == TOOL_TYPE_SMUDGE) {
+	if (g_context->blur_type == BLUR_TYPE_SMUDGE) {
 		// node_shader_write_frag(kong, "const blur_weight: float[7] = {1.0 / 28.0, 2.0 / 28.0, 3.0 / 28.0, 4.0 / 28.0, 5.0 / 28.0, 6.0 / 28.0, 7.0 / 28.0};");
 		node_shader_add_function(kong, str_get_smudge_tool_weight);
 		node_shader_add_constant(kong, "brush_direction: float3", "_brush_direction");

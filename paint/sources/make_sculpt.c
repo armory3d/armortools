@@ -101,7 +101,7 @@ node_shader_context_t *sculpt_make_sculpt_run(material_t *data, material_context
 	node_shader_add_constant(kong, "brush_hardness: float", "_brush_hardness");
 
 	if (g_context->tool == TOOL_TYPE_BRUSH || g_context->tool == TOOL_TYPE_ERASER || g_context->tool == TOOL_TYPE_CLONE || g_context->tool == TOOL_TYPE_BLUR ||
-	    g_context->tool == TOOL_TYPE_SMUDGE || g_context->tool == TOOL_TYPE_PARTICLE || decal) {
+	    g_context->tool == TOOL_TYPE_PARTICLE || decal) {
 		node_shader_write_frag(kong, "var dist: float = 0.0;");
 		node_shader_write_frag(kong, "var depth: float = sample_lod(gbufferD, sampler_linear, constants.inp.xy, 0.0).r;");
 		node_shader_add_constant(kong, "invVP: float4x4", "_inv_view_proj_matrix");
