@@ -148,7 +148,7 @@ buffer_t *util_encode_project(project_t *raw) {
 	buffer_t *encoded = buffer_create(size);
 
 	armpack_encode_start(encoded->buffer);
-	armpack_encode_map(26);
+	armpack_encode_map(27);
 
 	armpack_encode_string("version");
 	armpack_encode_string(raw->version);
@@ -262,6 +262,37 @@ buffer_t *util_encode_project(project_t *raw) {
 		armpack_encode_array(raw->material_icons->length);
 		for (i32 i = 0; i < raw->material_icons->length; ++i) {
 			armpack_encode_array_u8(raw->material_icons->buffer[i]);
+		}
+	}
+	else {
+		armpack_encode_null();
+	}
+
+	armpack_encode_string("material_datas");
+	if (raw->material_datas != NULL) {
+		armpack_encode_array(raw->material_datas->length);
+		for (i32 i = 0; i < raw->material_datas->length; ++i) {
+			armpack_encode_map(10);
+			armpack_encode_string("paint_base");
+			armpack_encode_bool(raw->material_datas->buffer[i]->paint_base);
+			armpack_encode_string("paint_opac");
+			armpack_encode_bool(raw->material_datas->buffer[i]->paint_opac);
+			armpack_encode_string("paint_occ");
+			armpack_encode_bool(raw->material_datas->buffer[i]->paint_occ);
+			armpack_encode_string("paint_rough");
+			armpack_encode_bool(raw->material_datas->buffer[i]->paint_rough);
+			armpack_encode_string("paint_met");
+			armpack_encode_bool(raw->material_datas->buffer[i]->paint_met);
+			armpack_encode_string("paint_nor");
+			armpack_encode_bool(raw->material_datas->buffer[i]->paint_nor);
+			armpack_encode_string("paint_height");
+			armpack_encode_bool(raw->material_datas->buffer[i]->paint_height);
+			armpack_encode_string("paint_emis");
+			armpack_encode_bool(raw->material_datas->buffer[i]->paint_emis);
+			armpack_encode_string("paint_subs");
+			armpack_encode_bool(raw->material_datas->buffer[i]->paint_subs);
+			armpack_encode_string("opac_mode");
+			armpack_encode_i32(raw->material_datas->buffer[i]->opac_mode);
 		}
 	}
 	else {

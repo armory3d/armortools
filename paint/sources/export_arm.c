@@ -155,6 +155,27 @@ void export_arm_run_project() {
 		}
 	}
 
+	material_data2_t_array_t *mdata2 = NULL;
+	if (project_materials->length > 0) {
+		mdata2 = any_array_create_from_raw((void *[]){}, 0);
+		for (i32 i = 0; i < project_materials->length; ++i) {
+			slot_material_t  *m = project_materials->buffer[i];
+			material_data2_t *d = GC_ALLOC_INIT(material_data2_t, {
+			                                                          .paint_base   = m->paint_base,
+			                                                          .paint_opac   = m->paint_opac,
+			                                                          .paint_occ    = m->paint_occ,
+			                                                          .paint_rough  = m->paint_rough,
+			                                                          .paint_met    = m->paint_met,
+			                                                          .paint_nor    = m->paint_nor,
+			                                                          .paint_height = m->paint_height,
+			                                                          .paint_emis   = m->paint_emis,
+			                                                          .paint_subs   = m->paint_subs,
+			                                                          .opac_mode    = m->paint_opac_mode,
+			                                                      });
+			any_array_push(mdata2, d);
+		}
+	}
+
 	mesh_data_t_array_t *md = any_array_create_from_raw((void *[]){}, 0);
 	for (i32 i = 0; i < project_paint_objects->length; ++i) {
 		mesh_object_t *p = project_paint_objects->buffer[i];
@@ -219,6 +240,7 @@ void export_arm_run_project() {
 
 	g_project->version         = string_copy(manifest_version_project);
 	g_project->material_groups = mgroups;
+	g_project->material_datas  = mdata2;
 	g_project->assets          = texture_files;
 	g_project->packed_assets   = packed_assets;
 	g_project->swatches        = g_project->swatches;
@@ -376,12 +398,29 @@ void export_arm_run_material(char *path) {
 	    },
 	    1);
 
+	material_data2_t_array_t *mdata2 = any_array_create_from_raw((void *[]){}, 0);
+	material_data2_t         *md2    = GC_ALLOC_INIT(material_data2_t, {
+	                                                                       .paint_base   = m->paint_base,
+	                                                                       .paint_opac   = m->paint_opac,
+	                                                                       .paint_occ    = m->paint_occ,
+	                                                                       .paint_rough  = m->paint_rough,
+	                                                                       .paint_met    = m->paint_met,
+	                                                                       .paint_nor    = m->paint_nor,
+	                                                                       .paint_height = m->paint_height,
+	                                                                       .paint_emis   = m->paint_emis,
+	                                                                       .paint_subs   = m->paint_subs,
+	                                                                       .opac_mode    = m->paint_opac_mode,
+                                                            });
+	any_array_push(mdata2, md2);
+
 	project_t *raw = GC_ALLOC_INIT(project_t, {.version         = manifest_version_project,
 	                                           .material_nodes  = mnodes,
 	                                           .material_groups = mgroups,
 	                                           .material_icons  = micons,
+	                                           .material_datas  = mdata2,
 	                                           .assets          = texture_files,
 	                                           .packed_assets   = packed_assets});
+
 	if (g_context->write_icon_on_export) { // Separate icon files
 		buffer_t *buf = export_arm_rgba64_to_rgba32(gpu_get_texture_pixels(m->image));
 #ifdef IRON_BGRA

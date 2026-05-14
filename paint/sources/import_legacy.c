@@ -142,7 +142,28 @@ project_t *import_arm_from_map_to_arm(any_map_t *old) {
 		project->material_groups = import_arm_get_node_canvas_array(old, "material_groups");
 	}
 	project->material_icons = any_map_get(old, "material_icons");
-	project->font_assets    = any_map_get(old, "font_assets");
+
+	any_array_t *mds = any_map_get(old, "material_datas");
+	if (mds != NULL) {
+		project->material_datas = any_array_create_from_raw((void *[]){}, 0);
+		for (i32 i = 0; i < mds->length; ++i) {
+			any_map_t        *old = mds->buffer[i];
+			material_data2_t *md  = GC_ALLOC_INIT(layer_data_t, {0});
+			md->paint_base        = armpack_map_get_i32(old, "paint_base") > 0;
+			md->paint_opac        = armpack_map_get_i32(old, "paint_opac") > 0;
+			md->paint_occ         = armpack_map_get_i32(old, "paint_occ") > 0;
+			md->paint_rough       = armpack_map_get_i32(old, "paint_rough") > 0;
+			md->paint_met         = armpack_map_get_i32(old, "paint_met") > 0;
+			md->paint_nor         = armpack_map_get_i32(old, "paint_nor") > 0;
+			md->paint_height      = armpack_map_get_i32(old, "paint_height") > 0;
+			md->paint_emis        = armpack_map_get_i32(old, "paint_emis") > 0;
+			md->paint_subs        = armpack_map_get_i32(old, "paint_subs") > 0;
+			md->opac_mode         = armpack_map_get_i32(old, "opac_mode");
+			any_array_push(project->material_datas, md);
+		}
+	}
+
+	project->font_assets = any_map_get(old, "font_assets");
 
 	any_array_t *lds = any_map_get(old, "layer_datas");
 	if (lds != NULL) {
@@ -230,6 +251,25 @@ project_t *import_arm_from_version_6(any_map_t *old) {
 			armpack_map_set_i32(ld, "path_material", -1);
 		}
 	}
+
+	any_array_t *mds = any_array_create_from_raw((void *[]){}, 0);
+	any_array_t *mns = any_map_get(old, "material_nodes");
+	for (i32 i = 0; i < mns->length; ++i) {
+		any_map_t *m = any_map_create();
+		armpack_map_set_i32(m, "paint_base", 1);
+		armpack_map_set_i32(m, "paint_opac", 1);
+		armpack_map_set_i32(m, "paint_occ", 1);
+		armpack_map_set_i32(m, "paint_rough", 1);
+		armpack_map_set_i32(m, "paint_met", 1);
+		armpack_map_set_i32(m, "paint_nor", 1);
+		armpack_map_set_i32(m, "paint_height", 1);
+		armpack_map_set_i32(m, "paint_emis", 1);
+		armpack_map_set_i32(m, "paint_subs", 1);
+		armpack_map_set_i32(m, "opac_mode", 0);
+		any_array_push(mds, m);
+	}
+	any_map_set(old, "material_datas", mds);
+
 	return import_arm_from_map_to_arm(old);
 }
 

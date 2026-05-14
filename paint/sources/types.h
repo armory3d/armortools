@@ -537,6 +537,7 @@ typedef struct project_format {
 	struct ui_node_canvas_t_array *material_nodes;
 	struct ui_node_canvas_t_array *material_groups;
 	struct buffer_t_array         *material_icons;
+	struct material_data2_t_array *material_datas;
 	struct string_array           *font_assets;
 	struct layer_data_t_array     *layer_datas;
 	struct mesh_data_t_array      *mesh_datas;
@@ -930,6 +931,25 @@ typedef struct layer_data_t_array {
 	int            length;
 	int            capacity;
 } layer_data_t_array_t;
+
+typedef struct material_data2 {
+	bool paint_base;
+	bool paint_opac;
+	bool paint_occ;
+	bool paint_rough;
+	bool paint_met;
+	bool paint_nor;
+	bool paint_height;
+	bool paint_emis;
+	bool paint_subs;
+	int  opac_mode;
+} material_data2_t;
+
+typedef struct material_data2_t_array {
+	material_data2_t **buffer;
+	int                length;
+	int                capacity;
+} material_data2_t_array_t;
 
 typedef struct ui_node_t_array {
 	ui_node_t **buffer;
