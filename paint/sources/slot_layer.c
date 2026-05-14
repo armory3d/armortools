@@ -461,6 +461,11 @@ void slot_layer_to_fill_layer(slot_layer_t *raw) {
 void slot_layer_to_paint_layer(slot_layer_t *raw) {
 	context_set_layer(raw);
 	raw->fill_material = NULL;
+	if (raw->path_material != NULL) {
+		raw->path_material = NULL;
+		raw->path_points   = NULL;
+		util_layer_update_path();
+	}
 	make_material_parse_paint_material(true);
 	g_context->layer_preview_dirty                    = true;
 	ui_base_hwnds->buffer[TAB_AREA_SIDEBAR0]->redraws = 2;

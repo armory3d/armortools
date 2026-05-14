@@ -396,7 +396,7 @@ void util_layer_update_path() {
 	bool          is_path = slot_layer_is_path(l);
 
 	// Clear spheres when switching away from path layer
-	if (path_layer_current != l) {
+	if (path_layer_current != l || !is_path) {
 		path_destroy_spheres();
 		path_point_dragging    = -1;
 		path_layer_current     = is_path ? l : NULL;

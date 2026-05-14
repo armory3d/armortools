@@ -666,11 +666,12 @@ void tab_layers_draw_layer_context_menu_draw() {
 	if (!slot_layer_is_group(l)) {
 		char *to_fill_string  = slot_layer_is_layer(l) ? tr("To Fill Layer") : tr("To Fill Mask");
 		char *to_paint_string = slot_layer_is_layer(l) ? tr("To Paint Layer") : tr("To Paint Mask");
+		bool  fill_layer      = l->fill_material != NULL || l->path_material != NULL;
 
-		if (l->fill_material == NULL && ui_menu_button(to_fill_string, "", ICON_SPHERE)) {
+		if (!fill_layer && ui_menu_button(to_fill_string, "", ICON_SPHERE)) {
 			sys_notify_on_next_frame(&tab_layers_draw_layer_context_menu_to_fill_layer, NULL);
 		}
-		if (l->fill_material != NULL && ui_menu_button(to_paint_string, "", ICON_PAINT)) {
+		if (fill_layer && ui_menu_button(to_paint_string, "", ICON_PAINT)) {
 			sys_notify_on_next_frame(&tab_layers_draw_layer_context_menu_to_paint_layer, NULL);
 		}
 	}
