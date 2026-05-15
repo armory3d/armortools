@@ -42,6 +42,7 @@ void base_on_background() {
 	_key_up(KEY_CODE_ALT, NULL);
 	_key_up(KEY_CODE_WIN, NULL);
 	_key_up(KEY_CODE_CONTROL, NULL);
+	_key_up(KEY_CODE_SHIFT, NULL);
 }
 
 void base_on_pause() {}
