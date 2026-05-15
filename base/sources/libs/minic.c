@@ -691,6 +691,8 @@ static int minic_current_line(minic_env_t *e) {
 	return line;
 }
 
+void console_log(char *s);
+
 static void minic_error(minic_env_t *e, const char *fmt, ...) {
 	if (!e->error) {
 		char msg[256];
@@ -698,7 +700,9 @@ static void minic_error(minic_env_t *e, const char *fmt, ...) {
 		va_start(args, fmt);
 		vsnprintf(msg, sizeof(msg), fmt, args);
 		va_end(args);
-		fprintf(stderr, "%s:%d: error: %s (got %s)\n", e->filename, minic_current_line(e), msg, minic_tok_name(e->lex.cur.type));
+		char log[512];
+		snprintf(log, sizeof(log), "%s:%d: error: %s (got %s)", e->filename, minic_current_line(e), msg, minic_tok_name(e->lex.cur.type));
+		console_log(log);
 		e->error     = true;
 		e->returning = true;
 	}
