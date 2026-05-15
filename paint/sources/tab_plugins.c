@@ -111,6 +111,7 @@ void plugin_uv_unwrap_button() {
 	free(mesh->inda);
 
 	util_mesh_merge(NULL);
+	util_uv_uvmap_cached = false;
 }
 
 void plugin_uv_unwrap_per_object_button(mesh_object_t *mo) {
@@ -142,6 +143,7 @@ void plugin_uv_unwrap_per_object_button(mesh_object_t *mo) {
 	md->vertex_arrays->buffer[2]->values = mesh->texa;
 	md->index_array                      = mesh->inda;
 	mesh_data_build(md);
+	util_uv_uvmap_cached = false;
 }
 
 #endif

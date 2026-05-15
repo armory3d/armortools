@@ -655,8 +655,8 @@ void proc_uv_unwrap(raw_mesh_t *mesh) {
 			v = 0.0f;
 		if (v > 1.0f)
 			v = 1.0f;
-		ta_out[i * 2]     = (int16_t)(u * 32767.0f);
-		ta_out[i * 2 + 1] = (int16_t)((1.0f - v) * 32767.0f);
+		ta_out[i * 2]     = (int16_t)((1.0f - u) * 32767.0f);
+		ta_out[i * 2 + 1] = (int16_t)(v * 32767.0f);
 
 		ia_out[i] = i;
 	}
