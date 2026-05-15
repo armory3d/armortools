@@ -83,8 +83,10 @@ static void path_paint_curved(f32_array_t *points, f32_array_t *points_world, f3
 	f32 pt0x = points->length >= 2 ? points->buffer[0] : 0.5f;
 	f32 pt0y = points->length >= 2 ? points->buffer[1] : 0.5f;
 	path_set_camera(points_camera, num_camera, 0);
-	prev_px = pt0x;
-	prev_py = pt0y;
+	prev_px                     = pt0x;
+	prev_py                     = pt0y;
+	g_context->prev_paint_vec_x = pt0x;
+	g_context->prev_paint_vec_y = pt0y;
 	path_paint(pt0x, pt0y, &prev_px, &prev_py);
 
 	// Paint curve - anchor[p], control[j-1], anchor[j]
@@ -151,6 +153,8 @@ static void path_paint_curved(f32_array_t *points, f32_array_t *points_world, f3
 				if (s == n && have_j) {
 					path_set_camera(points_camera, num_camera, j);
 					project_to_screen((vec4_t){prev_bwx, prev_bwy, prev_bwz, 1.0f}, &prev_px, &prev_py);
+					g_context->prev_paint_vec_x = prev_px;
+					g_context->prev_paint_vec_y = prev_py;
 				}
 				f32 bx = ax1, by = ay1;
 				project_to_screen((vec4_t){bwx, bwy, bwz, 1.0f}, &bx, &by);
@@ -171,6 +175,8 @@ static void path_paint_curved(f32_array_t *points, f32_array_t *points_world, f3
 					// Re-project the previous world pos from the new camera so that
 					// last_paint_vec and paint_vec are in the same screen space
 					project_to_screen((vec4_t){prev_bwx, prev_bwy, prev_bwz, 1.0f}, &prev_px, &prev_py);
+					g_context->prev_paint_vec_x = prev_px;
+					g_context->prev_paint_vec_y = prev_py;
 				}
 				f32 bx = ax1, by = ay1;
 				project_to_screen((vec4_t){bwx, bwy, bwz, 1.0f}, &bx, &by);
@@ -187,6 +193,10 @@ static void path_paint_curved(f32_array_t *points, f32_array_t *points_world, f3
 
 static void path_paint_straight(f32_array_t *points, f32_array_t *points_world, f32_array_t *points_camera, i32_array_t *points_parent, i32 num_world,
                                 i32 num_camera, bool sphere_mode, f32 dot_spacing) {
+	if (num_world > 0 && points->length >= 2) {
+		g_context->prev_paint_vec_x = points->buffer[0];
+		g_context->prev_paint_vec_y = points->buffer[1];
+	}
 	for (i32 i = 0; i < num_world; i++) {
 		path_set_camera(points_camera, num_camera, i);
 
@@ -205,12 +215,14 @@ static void path_paint_straight(f32_array_t *points, f32_array_t *points_world, 
 			f32 cwz = points_world->buffer[i * 3 + 2];
 			f32 ppx = cur_px, ppy = cur_py;
 			project_to_screen((vec4_t){pwx, pwy, pwz, 1.0f}, &ppx, &ppy);
+			prev_px = ppx;
+			prev_py = ppy;
 			f32 dx  = (cur_px - ppx) * (f32)sys_w();
 			f32 dy  = (cur_py - ppy) * (f32)sys_h();
 			f32 len = sqrtf(dx * dx + dy * dy);
 			i32 n   = dot_spacing > 0.5f ? (i32)ceilf(len / dot_spacing) : 17;
 			n       = n < 1 ? 1 : n > 64 ? 64 : n;
-			for (i32 s = 0; s <= n; s++) {
+			for (i32 s = 1; s <= n; s++) {
 				f32 t   = s / (f32)n;
 				f32 iwx = pwx + t * (cwx - pwx);
 				f32 iwy = pwy + t * (cwy - pwy);
