@@ -181,7 +181,7 @@ void util_render_make_text_preview() {
 	if (g_context->text_tool_image == NULL) {
 		g_context->text_tool_image = gpu_create_render_target(tex_w, tex_w, GPU_TEXTURE_FORMAT_RGBA32);
 	}
-	draw_begin(g_context->text_tool_image, true, 0xff000000);
+	draw_begin(g_context->text_tool_image, true, 0x00000000);
 	draw_set_font(font, font_size);
 	draw_set_color(0xffffffff);
 	draw_string(text, tex_w / 2.0 - text_w / 2.0, tex_w / 2.0 - text_h / 2.0);

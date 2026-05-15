@@ -145,7 +145,7 @@ void render_path_paint_commands_particle(i32 tid, char *texpaint, bool is_mask) 
 		string_array_t *additional = any_array_create_from_raw((void *[]){string("texpaint_nor%d", tid), string("texpaint_pack%d", tid), "texpaint_blend0"}, 3);
 		render_path_set_target(texpaint, additional, NULL, GPU_CLEAR_NONE, 0, 0.0);
 		render_path_bind_target("main", "gbufferD");
-		if (g_context->xray || g_config->brush_angle_reject) {
+		if (g_context->xray || g_config->brush_angle_reject || context_is_decal()) {
 			render_path_bind_target("gbuffer0", "gbuffer0");
 		}
 		render_path_bind_target("texpaint_blend1", "paintmask");
@@ -423,7 +423,7 @@ void render_path_paint_commands_paint(bool dilation) {
 				render_path_set_target(texpaint, additional, NULL, GPU_CLEAR_NONE, 0, 0.0);
 			}
 			render_path_bind_target("main", "gbufferD");
-			if (g_context->xray || g_config->brush_angle_reject) {
+			if (g_context->xray || g_config->brush_angle_reject || context_is_decal()) {
 				render_path_bind_target("gbuffer0", "gbuffer0");
 			}
 			render_path_bind_target("texpaint_blend1", "paintmask");
@@ -654,11 +654,46 @@ void render_path_paint_draw_cursor(f32 mx, f32 my, f32 radius, f32 tint_r, f32 t
 	render_path_end();
 }
 
+void render_path_paint_draw_cursor_decal(f32 mx, f32 my, f32 radius, f32 opacity_scale, gpu_texture_t *image) {
+	if (image == NULL) {
+		return;
+	}
+
+	mesh_object_t *plane = scene_get_child(".Plane")->ext;
+	mesh_data_t   *geom  = plane->data;
+
+	render_path_set_target("", NULL, NULL, GPU_CLEAR_NONE, 0, 0.0);
+	gpu_set_pipeline(pipes_cursor_decal);
+	render_target_t *rt   = any_map_get(render_path_render_targets, "main");
+	gpu_texture_t   *main = rt->_image;
+	gpu_set_texture(pipes_cursor_decal_gbufferd, main);
+	gpu_set_texture(pipes_cursor_decal_texdecal, image);
+	render_target_t *gbuffer0_rt = any_map_get(render_path_render_targets, "gbuffer0");
+	gpu_set_texture(pipes_cursor_decal_gbuffer0, gbuffer0_rt->_image);
+	gpu_set_float2(pipes_cursor_decal_mouse, mx, my);
+	gpu_set_float2(pipes_cursor_decal_tex_step, 1 / (float)main->width, 1 / (float)main->height);
+	gpu_set_float(pipes_cursor_decal_radius, radius);
+	vec4_t right = vec4_norm(camera_object_right_world(scene_camera));
+	gpu_set_float3(pipes_cursor_decal_camera_right, right.x, right.y, right.z);
+	f32 opacity = g_context->brush_opacity * g_context->brush_nodes_opacity * opacity_scale;
+	gpu_set_float(pipes_cursor_decal_opacity, opacity);
+	f32 angle = (g_context->brush_angle + g_context->brush_nodes_angle) * (math_pi() / 180.0);
+	gpu_set_float2(pipes_cursor_decal_angle, math_cos(angle), math_sin(angle));
+	gpu_set_float(pipes_cursor_decal_scale_x, g_context->brush_scale_x);
+	gpu_set_mat4(pipes_cursor_decal_vp, scene_camera->vp);
+	mat4_t inv_vp = mat4_inv(scene_camera->vp);
+	gpu_set_mat4(pipes_cursor_decal_inv_vp, inv_vp);
+	gpu_set_vertex_buffer(geom->_->vertex_buffer);
+	gpu_set_index_buffer(geom->_->index_buffer);
+	gpu_draw();
+	render_path_end();
+}
+
 void render_path_paint_commands_cursor() {
 	bool        decal_mask = context_is_decal_mask();
 	tool_type_t tool       = g_context->tool;
-	if (tool != TOOL_TYPE_BRUSH && tool != TOOL_TYPE_ERASER && tool != TOOL_TYPE_CLONE && tool != TOOL_TYPE_BLUR &&
-	    tool != TOOL_TYPE_PARTICLE && !decal_mask) {
+	if (tool != TOOL_TYPE_BRUSH && tool != TOOL_TYPE_ERASER && tool != TOOL_TYPE_CLONE && tool != TOOL_TYPE_BLUR && tool != TOOL_TYPE_PARTICLE &&
+	    !context_is_decal() && !decal_mask) {
 		return;
 	}
 
@@ -670,6 +705,19 @@ void render_path_paint_commands_cursor() {
 
 	f32 mx = g_context->paint_vec.x;
 	f32 my = 1.0 - g_context->paint_vec.y;
+
+	if (context_is_decal() && !g_context->paint2d) {
+		f32            scale2d = (900 / (f32)base_h()) * g_config->window_scale;
+		f32            radius  = g_context->brush_nodes_radius * g_context->brush_radius / 15.0 * scale2d * 2.0;
+		f32            cmx     = decal_mask ? g_context->decal_x : mx;
+		f32            cmy     = decal_mask ? 1.0f - g_context->decal_y : my;
+		gpu_texture_t *image   = tool == TOOL_TYPE_TEXT ? g_context->text_tool_image : g_context->decal_image;
+		render_path_paint_draw_cursor_decal(cmx, cmy, radius, decal_mask ? 0.3f : 1.0f, image);
+		if (decal_mask) {
+			render_path_paint_draw_cursor(mx, my, g_context->brush_nodes_radius * g_context->brush_decal_mask_radius / 3.4, 1.0, 1.0, 1.0);
+		}
+		return;
+	}
 
 	f32 radius = decal_mask ? g_context->brush_decal_mask_radius : g_context->brush_radius;
 	render_path_paint_draw_cursor(mx, my, g_context->brush_nodes_radius * radius / 3.4, 1.0, 1.0, 1.0);

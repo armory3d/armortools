@@ -34,10 +34,43 @@ void make_texcoord_run(node_shader_t *kong) {
 			    kong, "if (abs(dot(constants.decal_layer_nor, constants.decal_layer_loc - input.wposition)) > constants.decal_layer_dim) { discard; }");
 		}
 		else if (decal) {
+			kong->frag_wposition = true;
+			node_shader_add_function(kong, str_octahedron_wrap);
+			node_shader_add_texture(kong, "gbuffer0", NULL);
 			node_shader_add_constant(kong, "decal_mask: float4", "_decal_mask");
-			node_shader_write_attrib_frag(kong, "uvsp = uvsp - constants.decal_mask.xy;");
-			node_shader_write_attrib_frag(kong, "uvsp.x *= constants.aspect_ratio;");
-			node_shader_write_attrib_frag(kong, "uvsp = uvsp * (0.21 / (constants.decal_mask.w * 0.9));");
+			node_shader_add_constant(kong, "invVP: float4x4", "_inv_view_proj_matrix");
+			node_shader_add_constant(kong, "camera_right: float3", "_camera_right");
+
+			// When mask is active, anchor the decal at the frozen position; otherwise follow the mouse
+			node_shader_write_attrib_frag(kong, "var decal_xy: float2 = constants.inp.xy;");
+			node_shader_write_attrib_frag(kong, "if (constants.decal_mask.z > 0.0) { decal_xy = constants.decal_mask.xy; }");
+
+			// Unproject the decal anchor point from the depth buffer
+			node_shader_write_attrib_frag(kong, "var decal_depth: float = sample_lod(gbufferD, sampler_linear, decal_xy, 0.0).r;");
+			node_shader_write_attrib_frag(kong, "var decal_wpos4: float4 = float4(float2(decal_xy.x, 1.0 - decal_xy.y) * 2.0 - 1.0, decal_depth, 1.0);");
+			node_shader_write_attrib_frag(kong, "decal_wpos4 = constants.invVP * decal_wpos4;");
+			node_shader_write_attrib_frag(kong, "var decal_wpos: float3 = decal_wpos4.xyz / decal_wpos4.w;");
+
+			// Decode face normal at anchor point
+			node_shader_write_attrib_frag(kong, "var dg0: float2 = sample_lod(gbuffer0, sampler_linear, decal_xy, 0.0).rg;");
+			node_shader_write_attrib_frag(kong, "var dn: float3;");
+			node_shader_write_attrib_frag(kong, "dn.z = 1.0 - abs(dg0.x) - abs(dg0.y);");
+			node_shader_write_attrib_frag(
+			    kong, "if (dn.z >= 0.0) { dn.x = dg0.x; dn.y = dg0.y; } else { var fw: float2 = octahedron_wrap(dg0.xy); dn.x = fw.x; dn.y = fw.y; }");
+			node_shader_write_attrib_frag(kong, "dn = normalize(dn);");
+
+			// Build tangent basis
+			node_shader_write_attrib_frag(kong, "var d_right: float3 = constants.camera_right;");
+			node_shader_write_attrib_frag(kong, "if (abs(dot(dn, d_right)) > 0.999) { d_right = float3(0.0, 0.0, 1.0); }");
+			node_shader_write_attrib_frag(kong, "var d_tan: float3 = normalize(d_right - dn * dot(d_right, dn));");
+			node_shader_write_attrib_frag(kong, "var d_bin: float3 = cross(d_tan, dn);");
+
+			node_shader_write_attrib_frag(kong, "var d_offset: float3 = input.wposition - decal_wpos;");
+			node_shader_write_attrib_frag(kong, "var decal_radius: float = constants.brush_radius;");
+			node_shader_write_attrib_frag(kong, "if (constants.decal_mask.z > 0.0) { decal_radius = constants.decal_mask.w; }");
+			node_shader_write_attrib_frag(kong, "if (abs(dot(d_offset, dn)) > decal_radius) { discard; }");
+			node_shader_write_attrib_frag(kong, "uvsp = float2(dot(d_offset, d_tan), dot(d_offset, d_bin));");
+			node_shader_write_attrib_frag(kong, "uvsp = uvsp / decal_radius * 0.5;");
 
 			if (g_context->brush_directional) {
 				node_shader_add_constant(kong, "brush_direction: float3", "_brush_direction");

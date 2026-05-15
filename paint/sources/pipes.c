@@ -216,6 +216,36 @@ void pipes_init() {
 		pipes_cursor_tint         = pipes_get_constant_location("vec3");
 		pipes_cursor_gbufferd     = 0;
 	}
+
+	{
+		pipes_cursor_decal = gpu_create_pipeline();
+		gc_root(pipes_cursor_decal);
+		pipes_cursor_decal->vertex_shader   = sys_get_shader("cursor_decal.vert");
+		pipes_cursor_decal->fragment_shader = sys_get_shader("cursor_decal.frag");
+		gpu_vertex_structure_t *vs          = GC_ALLOC_INIT(gpu_vertex_structure_t, {0});
+		gpu_vertex_structure_add(vs, "pos", GPU_VERTEX_DATA_I16_4X_NORM);
+		gpu_vertex_structure_add(vs, "nor", GPU_VERTEX_DATA_I16_2X_NORM);
+		gpu_vertex_structure_add(vs, "tex", GPU_VERTEX_DATA_I16_2X_NORM);
+		pipes_cursor_decal->input_layout      = vs;
+		pipes_cursor_decal->blend_source      = GPU_BLEND_SOURCE_ALPHA;
+		pipes_cursor_decal->blend_destination = GPU_BLEND_INV_SOURCE_ALPHA;
+		pipes_cursor_decal->depth_write       = false;
+		pipes_cursor_decal->depth_mode        = GPU_COMPARE_MODE_ALWAYS;
+		gpu_pipeline_compile(pipes_cursor_decal);
+		pipes_offset                    = 0;
+		pipes_cursor_decal_vp           = pipes_get_constant_location("mat4");
+		pipes_cursor_decal_inv_vp       = pipes_get_constant_location("mat4");
+		pipes_cursor_decal_mouse        = pipes_get_constant_location("vec2");
+		pipes_cursor_decal_tex_step     = pipes_get_constant_location("vec2");
+		pipes_cursor_decal_radius       = pipes_get_constant_location("float");
+		pipes_cursor_decal_camera_right = pipes_get_constant_location("vec3");
+		pipes_cursor_decal_opacity      = pipes_get_constant_location("float");
+		pipes_cursor_decal_angle        = pipes_get_constant_location("vec2");
+		pipes_cursor_decal_scale_x      = pipes_get_constant_location("float");
+		pipes_cursor_decal_gbufferd     = 0;
+		pipes_cursor_decal_texdecal     = 1;
+		pipes_cursor_decal_gbuffer0     = 2;
+	}
 }
 
 i32 pipes_get_constant_location(char *type) {

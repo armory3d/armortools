@@ -15,7 +15,7 @@ f32 uniforms_ext_f32_link(object_t *object, material_data_t *mat, char *link) {
 		                                             SHORTCUT_TYPE_DOWN);
 		f32  brush_decal_mask_radius = g_context->brush_decal_mask_radius;
 		bool paint2d                 = g_context->paint2d || g_context->paint2d_view;
-		brush_decal_mask_radius *= paint2d ? 0.35 * ui_view2d_pan_scale : 2.0;
+		brush_decal_mask_radius *= 2.0;
 		f32 radius = decal_mask ? brush_decal_mask_radius : g_context->brush_radius;
 		f32 val    = (radius * g_context->brush_nodes_radius) / 15.0;
 		if (g_config->pressure_radius && pen_down("tip")) {
@@ -25,8 +25,11 @@ f32 uniforms_ext_f32_link(object_t *object, material_data_t *mat, char *link) {
 		if (!decal) {
 			val *= paint2d ? 0.5 * 0.5 * scale2d * ui_view2d_pan_scale : 2;
 		}
+		else if (decal_mask) {
+			val *= paint2d ? 0.5 * 0.5 * scale2d * ui_view2d_pan_scale : scale2d;
+		}
 		else {
-			val *= scale2d; // Projection ratio
+			val *= paint2d ? 0.5 * 0.5 * scale2d * ui_view2d_pan_scale : scale2d * 2.0;
 		}
 		return val;
 	}
@@ -65,12 +68,7 @@ f32 uniforms_ext_f32_link(object_t *object, material_data_t *mat, char *link) {
 		if (g_config->pressure_hardness && pen_down("tip")) {
 			val *= pen_pressure * g_config->pressure_sensitivity;
 		}
-		if (g_context->paint2d || g_context->paint2d_view) {
-			val *= 1.0 / (float)ui_view2d_pan_scale;
-		}
-		else {
-			val *= val;
-		}
+		val *= val;
 		return val;
 	}
 	else if (string_equals(link, "_brush_scale")) {
@@ -219,6 +217,10 @@ vec4_t uniforms_ext_vec3_link(object_t *object, material_data_t *mat, char *link
 		v = (vec4_t){g_context->last_particle_hit_x, g_context->last_particle_hit_y, g_context->last_particle_hit_z, 1.0};
 		return v;
 	}
+	else if (string_equals(link, "_camera_right")) {
+		v = camera_object_right_world(scene_camera);
+		return v;
+	}
 	return v;
 }
 
@@ -260,12 +262,11 @@ vec4_t uniforms_ext_vec4_link(object_t *object, material_data_t *mat, char *link
 		bool decal_mask = context_is_decal_mask_paint();
 		f32  val        = (g_context->brush_radius * g_context->brush_nodes_radius) / 15.0;
 		f32  scale2d    = (900 / (float)base_h()) * g_config->window_scale;
-		val *= scale2d; // Projection ratio
+		val *= g_context->paint2d ? 0.5 * 0.5 * scale2d * ui_view2d_pan_scale : scale2d * 2.0;
 		vec4_t v = (vec4_t){g_context->decal_x, g_context->decal_y, decal_mask ? 1 : 0, val};
 		if (g_context->paint2d) {
 			v.x = uniforms_ext_vec2d(v.x);
 		}
-
 		return v;
 	}
 
