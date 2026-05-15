@@ -608,6 +608,15 @@ void tab_meshes_draw(ui_handle_t *htab) {
 				if (state == UI_STATE_STARTED && ui->input_y > ui->_window_y) {
 					g_context->paint_object = o;
 				}
+				// Double click to show only this mesh
+				if (state == UI_STATE_RELEASED && ui->input_y > ui->_window_y) {
+					if (sys_time() - g_context->select_time < 0.2) {
+						tab_layers_apply_filter(i + 1);
+					}
+					if (sys_time() - g_context->select_time > 0.2) {
+						g_context->select_time = sys_time();
+					}
+				}
 
 				// Context menu
 				if (ui->is_hovered && ui->input_released_r) {

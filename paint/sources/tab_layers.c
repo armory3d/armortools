@@ -1131,6 +1131,41 @@ void tab_layers_button_new(char *text) {
 	}
 }
 
+void tab_layers_apply_filter(i32 filter) {
+	g_context->layer_filter = filter;
+	char *filter_name       = NULL;
+	if (filter > 0 && filter <= project_paint_objects->length) {
+		filter_name = project_paint_objects->buffer[filter - 1]->base->name;
+	}
+	else if (filter > project_paint_objects->length) {
+		string_array_t *atlases = project_get_used_atlases();
+		if (atlases != NULL) {
+			filter_name = atlases->buffer[filter - project_paint_objects->length - 1];
+		}
+	}
+	for (i32 i = 0; i < project_paint_objects->length; ++i) {
+		mesh_object_t *p = project_paint_objects->buffer[i];
+		p->base->visible = filter == 0 || (filter_name != NULL && string_equals(p->base->name, filter_name)) || project_is_atlas_object(p);
+	}
+	if (filter == 0 && g_context->merged_object_is_atlas) {
+		util_mesh_merge(NULL);
+	}
+	else if (filter > project_paint_objects->length) {
+		mesh_object_t_array_t *visibles = any_array_create_from_raw((void *[]){}, 0);
+		for (i32 i = 0; i < project_paint_objects->length; ++i) {
+			mesh_object_t *p = project_paint_objects->buffer[i];
+			if (p->base->visible) {
+				any_array_push(visibles, p);
+			}
+		}
+		util_mesh_merge(visibles);
+	}
+	layers_set_object_mask();
+	util_uv_uvmap_cached       = false;
+	g_context->ddirty          = 2;
+	render_path_raytrace_ready = false;
+}
+
 void tab_layers_combo_filter() {
 	string_array_t *ar = any_array_create_from_raw(
 	    (void *[]){
@@ -1152,28 +1187,7 @@ void tab_layers_combo_filter() {
 	filter_handle->i           = g_context->layer_filter;
 	g_context->layer_filter    = ui_combo(filter_handle, ar, tr("Filter"), false, UI_ALIGN_LEFT, true);
 	if (filter_handle->changed) {
-		for (i32 i = 0; i < project_paint_objects->length; ++i) {
-			mesh_object_t *p           = project_paint_objects->buffer[i];
-			char          *filter_name = ar->buffer[g_context->layer_filter];
-			p->base->visible           = g_context->layer_filter == 0 || string_equals(p->base->name, filter_name) || project_is_atlas_object(p);
-		}
-		if (g_context->layer_filter == 0 && g_context->merged_object_is_atlas) { // All
-			util_mesh_merge(NULL);
-		}
-		else if (g_context->layer_filter > project_paint_objects->length) { // Atlas
-			mesh_object_t_array_t *visibles = any_array_create_from_raw((void *[]){}, 0);
-			for (i32 i = 0; i < project_paint_objects->length; ++i) {
-				mesh_object_t *p = project_paint_objects->buffer[i];
-				if (p->base->visible) {
-					any_array_push(visibles, p);
-				}
-			}
-			util_mesh_merge(visibles);
-		}
-		layers_set_object_mask();
-		util_uv_uvmap_cached       = false;
-		g_context->ddirty          = 2;
-		render_path_raytrace_ready = false;
+		tab_layers_apply_filter(g_context->layer_filter);
 	}
 }
 
