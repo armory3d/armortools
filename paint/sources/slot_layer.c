@@ -1254,7 +1254,8 @@ void layers_update_fill_layer(bool parse_paint) {
 }
 
 void layers_update_linked_layers() {
-	slot_material_t *_material = g_context->material;
+	slot_material_t *_material  = g_context->material;
+	bool             any_linked = false;
 	for (i32 i = 0; i < project_materials->length; ++i) {
 		slot_material_t *m          = project_materials->buffer[i];
 		bool             has_linked = false;
@@ -1268,11 +1269,14 @@ void layers_update_linked_layers() {
 		if (!has_linked) {
 			continue;
 		}
+		any_linked          = true;
 		g_context->material = m;
 		layers_update_fill_layers();
 	}
 	g_context->material = _material;
-	make_material_parse_paint_material(false);
+	if (any_linked) {
+		make_material_parse_paint_material(false);
+	}
 }
 
 void layers_set_object_mask() {
