@@ -3,6 +3,8 @@
 
 shader_context_t   *make_material_default_scon = NULL;
 material_context_t *make_material_default_mcon = NULL;
+static shader_context_t   *make_material_saved_scon = NULL;
+static material_context_t *make_material_saved_mcon = NULL;
 
 bool make_material_get_mout() {
 	for (i32 i = 0; i < g_context->material->canvas->nodes->length; ++i) {
@@ -296,7 +298,7 @@ void make_material_parse_paint_material(bool bake_previews) {
 		shader_context_t *c = m->_->shader->contexts->buffer[i];
 		if (string_equals(c->name, "paint")) {
 			array_remove(m->_->shader->contexts, c);
-			if (c != make_material_default_scon) {
+			if (c != make_material_default_scon && c != make_material_saved_scon) {
 				make_material_delete_context(c);
 			}
 			break;
@@ -340,6 +342,58 @@ void make_material_parse_paint_material(bool bake_previews) {
 		make_material_default_mcon = mcon;
 		gc_root(make_material_default_mcon);
 	}
+}
+
+void make_material_save_paint_material() {
+	material_data_t *m = project_materials->buffer[0]->data;
+	for (i32 i = 0; i < m->_->shader->contexts->length; ++i) {
+		shader_context_t *c = m->_->shader->contexts->buffer[i];
+		if (string_equals(c->name, "paint")) {
+			gc_unroot(make_material_saved_scon);
+			make_material_saved_scon = c;
+			gc_root(make_material_saved_scon);
+			break;
+		}
+	}
+	for (i32 i = 0; i < m->contexts->length; ++i) {
+		material_context_t *c = m->contexts->buffer[i];
+		if (string_equals(c->name, "paint")) {
+			gc_unroot(make_material_saved_mcon);
+			make_material_saved_mcon = c;
+			gc_root(make_material_saved_mcon);
+			break;
+		}
+	}
+}
+
+void make_material_restore_paint_material() {
+	if (make_material_saved_scon == NULL) {
+		return;
+	}
+	material_data_t *m = project_materials->buffer[0]->data;
+	for (i32 i = 0; i < m->_->shader->contexts->length; ++i) {
+		shader_context_t *c = m->_->shader->contexts->buffer[i];
+		if (string_equals(c->name, "paint")) {
+			array_remove(m->_->shader->contexts, c);
+			if (c != make_material_default_scon && c != make_material_saved_scon) {
+				make_material_delete_context(c);
+			}
+			break;
+		}
+	}
+	for (i32 i = 0; i < m->contexts->length; ++i) {
+		material_context_t *c = m->contexts->buffer[i];
+		if (string_equals(c->name, "paint")) {
+			array_remove(m->contexts, c);
+			break;
+		}
+	}
+	any_array_push(m->_->shader->contexts, make_material_saved_scon);
+	any_array_push(m->contexts, make_material_saved_mcon);
+	gc_unroot(make_material_saved_scon);
+	gc_unroot(make_material_saved_mcon);
+	make_material_saved_scon = NULL;
+	make_material_saved_mcon = NULL;
 }
 
 parse_node_preview_result_t *make_material_parse_node_preview_material(ui_node_t *node, ui_node_canvas_t *group, ui_node_t_array_t *parents) {

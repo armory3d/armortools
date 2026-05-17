@@ -266,6 +266,7 @@ static void path_repaint(slot_layer_t *l) {
 	g_context->material         = l->path_material;
 	g_context->tool             = l->path_tool;
 
+	make_material_save_paint_material();
 	make_material_parse_paint_material(false);
 	layers_set_object_mask();
 
@@ -308,7 +309,7 @@ static void path_repaint(slot_layer_t *l) {
 	g_context->last_paint_vec_x = _last_x;
 	g_context->last_paint_vec_y = _last_y;
 	g_context->paint_vec        = _paint_vec;
-	make_material_parse_paint_material(false);
+	make_material_restore_paint_material();
 }
 
 void util_layer_clear_path_points(slot_layer_t *l) {

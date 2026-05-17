@@ -536,7 +536,8 @@ void util_render_pick_pos_nor_tex() {
 	g_context->pdirty           = 1;
 	tool_type_t _tool           = g_context->tool;
 	g_context->tool             = TOOL_TYPE_PICKER;
-	make_material_parse_paint_material(true);
+	make_material_save_paint_material();
+	make_material_parse_paint_material(false);
 	if (g_context->paint2d) {
 		render_path_paint_set_plane_mesh();
 	}
@@ -546,7 +547,7 @@ void util_render_pick_pos_nor_tex() {
 	}
 	g_context->tool             = _tool;
 	g_context->pick_pos_nor_tex = false;
-	make_material_parse_paint_material(true);
+	make_material_restore_paint_material();
 	g_context->pdirty = 0;
 }
 

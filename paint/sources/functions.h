@@ -475,6 +475,8 @@ void                         make_material_parse_mesh_material();
 void                         make_material_parse_depth_material();
 void                         make_material_parse_mesh_preview_material();
 void                         make_material_parse_paint_material(bool bake_previews);
+void                         make_material_save_paint_material();
+void                         make_material_restore_paint_material();
 parse_node_preview_result_t *make_material_parse_node_preview_material(ui_node_t *node, ui_node_canvas_t *group, ui_node_t_array_t *parents);
 void                         make_material_parse_brush();
 char                        *make_material_blend_mode(node_shader_t *kong, i32 blending, char *cola, char *colb, char *opac);
