@@ -12,6 +12,7 @@
 #include "iron_string.h"
 #include "iron_sys.h"
 #include "iron_system.h"
+#include "iron_thread.h"
 #include <math.h>
 #include <string.h>
 

@@ -19,6 +19,18 @@ f32             math_floor(f32 x);
 gpu_shader_t   *gpu_create_shader(buffer_t *data, i32 shader_type);
 gpu_shader_t   *gpu_create_shader_from_source(char *source, int source_size, gpu_shader_type_t shader_type);
 gpu_pipeline_t *gpu_create_pipeline();
+
+typedef struct {
+	char             *source;
+	int               source_size;
+	gpu_shader_type_t shader_type;
+	gpu_shader_t     *result;
+} shader_compile_job_t;
+
+static void shader_compile_worker(void *param) {
+	shader_compile_job_t *job = (shader_compile_job_t *)param;
+	job->result = gpu_create_shader_from_source(job->source, job->source_size, job->shader_type);
+}
 void            gpu_delete_pipeline(gpu_pipeline_t *pipeline);
 #ifdef arm_embed
 gpu_shader_t *sys_get_shader(char *name);
@@ -567,8 +579,18 @@ void shader_context_compile(shader_context_t *raw) {
 	}
 
 	if (raw->shader_from_source) {
-		raw->_->pipe->vertex_shader   = gpu_create_shader_from_source(raw->vertex_shader, raw->_->vertex_shader_size, GPU_SHADER_TYPE_VERTEX);
-		raw->_->pipe->fragment_shader = gpu_create_shader_from_source(raw->fragment_shader, raw->_->fragment_shader_size, GPU_SHADER_TYPE_FRAGMENT);
+		// raw->_->pipe->vertex_shader   = gpu_create_shader_from_source(raw->vertex_shader, raw->_->vertex_shader_size, GPU_SHADER_TYPE_VERTEX);
+		// raw->_->pipe->fragment_shader = gpu_create_shader_from_source(raw->fragment_shader, raw->_->fragment_shader_size, GPU_SHADER_TYPE_FRAGMENT);
+
+		shader_compile_job_t vs_job = {raw->vertex_shader,   raw->_->vertex_shader_size,   GPU_SHADER_TYPE_VERTEX,   NULL};
+		shader_compile_job_t fs_job = {raw->fragment_shader, raw->_->fragment_shader_size, GPU_SHADER_TYPE_FRAGMENT, NULL};
+		iron_thread_t vs_thread;
+		iron_thread_init(&vs_thread, shader_compile_worker, &vs_job);
+		shader_compile_worker(&fs_job);
+		iron_thread_wait_and_destroy(&vs_thread);
+		raw->_->pipe->vertex_shader   = vs_job.result;
+		raw->_->pipe->fragment_shader = fs_job.result;
+
 		if (raw->_->pipe->vertex_shader == NULL || raw->_->pipe->fragment_shader == NULL) {
 			return;
 		}
