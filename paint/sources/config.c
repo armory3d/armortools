@@ -229,7 +229,7 @@ void config_init() {
 		g_config->pressure_hardness = true;
 		g_config->pressure_angle    = false;
 		g_config->pressure_opacity  = false;
-#if defined(IRON_ANDROID) || defined(IRON_IOS)
+#if defined(IRON_ANDROID) || defined(IRON_IOS) || defined(IRON_MACOS)
 		g_config->material_live = false;
 #else
 		g_config->material_live = true;

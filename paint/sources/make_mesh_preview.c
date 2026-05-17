@@ -66,8 +66,6 @@ node_shader_context_t *make_mesh_preview_run(material_t *data, material_context_
 			node_shader_add_texture(kong, "textexttool", "_textexttool");
 			node_shader_write_frag(kong, string("opacity *= sample_lod(textexttool, sampler_linear, tex_coord / float(%s), 0.0).r;", brush_scale));
 		}
-	}
-	if (decal) {
 		f32 opac = g_config->brush_alpha_discard;
 		node_shader_write_frag(kong, string("if (opacity <= float(%s)) { discard; }", f32_to_string(opac)));
 	}

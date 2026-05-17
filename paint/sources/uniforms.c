@@ -18,7 +18,7 @@ f32 uniforms_ext_f32_link(object_t *object, material_data_t *mat, char *link) {
 		brush_decal_mask_radius *= 2.0;
 		f32 radius = decal_mask ? brush_decal_mask_radius : g_context->brush_radius;
 		f32 val    = (radius * g_context->brush_nodes_radius) / 15.0;
-		if (g_config->pressure_radius && pen_down("tip")) {
+		if (g_config->pressure_radius && pen_down("tip") && !decal && !slot_layer_is_path(g_context->layer)) {
 			val *= pen_pressure * g_config->pressure_sensitivity;
 		}
 		f32 scale2d = (900 / (float)base_h()) * g_config->window_scale;
