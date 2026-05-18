@@ -776,6 +776,7 @@ uint32_t draw_get_color() {
 }
 
 void draw_set_pipeline(gpu_pipeline_t *pipeline) {
+	draw_flush();
 	draw_custom_pipeline = pipeline;
 }
 
