@@ -350,6 +350,7 @@ slot_layer_t *slot_layer_duplicate(slot_layer_t *raw) {
 	l->object_mask        = raw->object_mask;
 	l->blending           = raw->blending;
 	l->uv_type            = raw->uv_type;
+	l->decal_mat          = raw->decal_mat;
 	l->scale              = raw->scale;
 	l->angle              = raw->angle;
 	l->paint_base         = raw->paint_base;
@@ -363,6 +364,16 @@ slot_layer_t *slot_layer_duplicate(slot_layer_t *raw) {
 	l->paint_height_blend = raw->paint_height_blend;
 	l->paint_emis         = raw->paint_emis;
 	l->paint_subs         = raw->paint_subs;
+
+	if (raw->path_points != NULL) {
+		l->path_points        = f32_array_create_from_raw(raw->path_points->buffer, raw->path_points->length);
+		l->path_points_world  = f32_array_create_from_raw(raw->path_points_world->buffer, raw->path_points_world->length);
+		l->path_points_camera = f32_array_create_from_raw(raw->path_points_camera->buffer, raw->path_points_camera->length);
+		l->path_points_parent = i32_array_create_from_raw(raw->path_points_parent->buffer, raw->path_points_parent->length);
+		l->path_tool          = raw->path_tool;
+		l->path_curved        = raw->path_curved;
+		l->path_material      = raw->path_material;
+	}
 
 	return l;
 }
