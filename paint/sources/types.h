@@ -292,9 +292,6 @@ typedef struct context {
 	struct gpu_texture         *text_tool_image;
 	char                       *text_tool_text;
 	i32                         layer_filter;
-	struct brush_output_node   *brush_output_node_inst;
-	void (*run_brush)(void *, i32);
-	void (*parse_brush_inputs)(void *);
 	struct object       *gizmo;
 	struct object       *gizmo_translate_x;
 	struct object       *gizmo_translate_y;

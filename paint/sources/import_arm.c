@@ -610,6 +610,7 @@ void import_arm_run_project(char *path) {
 		g_context->brush = slot_brush_create(n);
 		any_array_push(project_brushes, g_context->brush);
 		make_material_parse_brush();
+		brush_output_node_parse_inputs();
 		util_render_make_brush_preview();
 	}
 
@@ -660,15 +661,6 @@ void import_arm_run_brush(char *path) {
 	import_arm_run_brush_from_project(project, path);
 }
 
-void import_arm_run_brush_from_project_on_next_frame(slot_brush_t_array_t *imported) {
-	for (i32 i = 0; i < imported->length; ++i) {
-		slot_brush_t *b = imported->buffer[i];
-		context_set_brush(b);
-		make_material_parse_brush();
-		util_render_make_brush_preview();
-	}
-}
-
 void import_arm_run_brush_from_project(project_t *project, char *path) {
 	char *base = path_base_dir(path);
 	for (i32 i = 0; i < project->assets->length; ++i) {
@@ -698,9 +690,11 @@ void import_arm_run_brush_from_project(project_t *project, char *path) {
 		g_context->brush = slot_brush_create(c);
 		any_array_push(project_brushes, g_context->brush);
 		any_array_push(imported, g_context->brush);
+		make_material_parse_brush();
+		brush_output_node_parse_inputs();
+		util_render_make_brush_preview();
 	}
 
-	sys_notify_on_next_frame(&import_arm_run_brush_from_project_on_next_frame, imported);
 	ui_base_hwnds->buffer[TAB_AREA_SIDEBAR1]->redraws = 2;
 	data_delete_blob(path);
 }

@@ -105,7 +105,7 @@ void input_node_update(float_node_t *self) {
 		g_context->last_paint_y = -1;
 	}
 
-	g_context->parse_brush_inputs(g_context->brush_output_node_inst);
+	brush_output_node_parse_inputs();
 }
 
 logic_node_value_t *input_node_get(input_node_t *self, i32 from) {

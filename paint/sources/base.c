@@ -919,10 +919,7 @@ void ui_base_update_ui() {
 				}
 
 				g_context->brush_time += sys_delta();
-
-				if (g_context->run_brush != NULL) {
-					g_context->run_brush(g_context->brush_output_node_inst, 0);
-				}
+				brush_output_node_run();
 			}
 		}
 	}
