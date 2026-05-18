@@ -27,23 +27,40 @@ struct vert_out {
 	tex: float2;
 }
 
+fun safe_normalize(v: float3, fallback: float3): float3 {
+	var len: float = length(v);
+	if (len > 0.000001) {
+		return v / len;
+	}
+	return fallback;
+}
+
 fun get_pos(uv: float2): float3 {
 	var depth: float = sample_lod(gbufferD, sampler_linear, float2(uv.x, 1.0 - uv.y), 0.0).r;
 	var wpos: float4 = float4(uv * 2.0 - 1.0, depth, 1.0);
 	wpos = constants.invVP * wpos;
-	return wpos.xyz / wpos.w;
+	if (abs(wpos.w) > 0.000001) {
+		return wpos.xyz / wpos.w;
+	}
+	return float3(0.0, 0.0, 0.0);
 }
 
 fun get_normal(p0: float3, uv: float2): float3 {
 	var p1: float3 = get_pos(uv + float2(constants.tex_step.x * 4.0, 0.0));
 	var p2: float3 = get_pos(uv + float2(0.0, constants.tex_step.y * 4.0));
-	return normalize(cross(p2 - p0, p1 - p0));
+	return safe_normalize(cross(p2 - p0, p1 - p0), float3(0.0, 0.0, 1.0));
 }
 
-// fun create_basis(normal: float3, out tangent: float3, out binormal: float3) {
-// 	tangent = normalize(constants.camera_right - normal * dot(constants.camera_right, normal));
-// 	binormal = cross(tangent, normal);
-// }
+fun get_tangent(n: float3): float3 {
+	var right: float3 = constants.camera_right;
+	if (abs(dot(n, right)) > 0.999) {
+		right = float3(0.0, 0.0, 1.0);
+	}
+	if (abs(dot(n, right)) > 0.999) {
+		right = float3(0.0, 1.0, 0.0);
+	}
+	return safe_normalize(right - n * dot(right, n), float3(1.0, 0.0, 0.0));
+}
 
 fun cursor_vert(input: vert_in): vert_out {
 	var keep: float = input.pos.x + input.nor.x; // hlsl
@@ -55,25 +72,24 @@ fun cursor_vert(input: vert_in): vert_out {
 	var uv2: float2 = constants.mouse - constants.tex_step * float2(4.0, 4.0);
 	var wpos1: float3 = get_pos(uv1);
 	var wpos2: float3 = get_pos(uv2);
-	var n: float3 = normalize(get_normal(wpos, constants.mouse) + get_normal(wpos1, uv1) + get_normal(wpos2, uv2));
+	var n: float3 = safe_normalize(get_normal(wpos, constants.mouse) + get_normal(wpos1, uv1) + get_normal(wpos2, uv2), float3(0.0, 0.0, 1.0));
 	var n_tan: float3;
 	var n_bin: float3;
 
-	// create_basis(n, n_tan, n_bin);
-	n_tan = normalize(constants.camera_right - n * dot(constants.camera_right, n));
-	n_bin = cross(n_tan, n);
+	n_tan = get_tangent(n);
+	n_bin = safe_normalize(cross(n_tan, n), float3(0.0, 1.0, 0.0));
 
 	if (vertex_id() == 0) {
-		wpos += normalize(-n_tan - n_bin) * 0.7 * constants.radius;
+		wpos += safe_normalize(-n_tan - n_bin, -n_tan) * 0.7 * constants.radius;
 	}
 	/*else */if (vertex_id() == 1) {
-		wpos += normalize( n_tan - n_bin) * 0.7 * constants.radius;
+		wpos += safe_normalize( n_tan - n_bin,  n_tan) * 0.7 * constants.radius;
 	}
 	/*else */if (vertex_id() == 2) {
-		wpos += normalize( n_tan + n_bin) * 0.7 * constants.radius;
+		wpos += safe_normalize( n_tan + n_bin,  n_tan) * 0.7 * constants.radius;
 	}
 	/*else */if (vertex_id() == 3) {
-		wpos += normalize(-n_tan + n_bin) * 0.7 * constants.radius;
+		wpos += safe_normalize(-n_tan + n_bin, -n_tan) * 0.7 * constants.radius;
 	}
 
 	output.pos = constants.VP * float4(wpos, 1.0);
