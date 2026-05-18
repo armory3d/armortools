@@ -71,6 +71,9 @@ logic_node_ext_t *parser_logic_create_node_instance(char *node_type, ui_node_t *
 		nodes_brush_init();
 	}
 	logic_node_ext_t *(*create)(ui_node_t *, f32_array_t *) = any_map_get(nodes_brush_creates, node_type);
+	if (create == NULL) {
+		return NULL;
+	}
 	return create(raw, args);
 }
 
@@ -122,10 +125,13 @@ char *parser_logic_build_node(ui_node_t *node) {
 		return name;
 	}
 
-	any_array_push(parser_logic_parsed_nodes, name);
-
 	// Create node
 	logic_node_ext_t *v = parser_logic_create_node_instance(node->type, node, NULL);
+	if (v == NULL) {
+		return NULL;
+	}
+
+	any_array_push(parser_logic_parsed_nodes, name);
 	any_map_set(parser_logic_node_map, name, v);
 
 	// Create inputs
@@ -138,8 +144,10 @@ char *parser_logic_build_node(ui_node_t *node) {
 		if (l != NULL) {
 			ui_node_t *n = parser_logic_get_node(l->from_id);
 			char      *s = parser_logic_build_node(n);
-			inp_node     = any_map_get(parser_logic_node_map, s);
-			inp_from     = l->from_socket;
+			if (s != NULL) {
+				inp_node = any_map_get(parser_logic_node_map, s);
+				inp_from = l->from_socket;
+			}
 		}
 		// Not linked - create node with default values
 		else {
@@ -160,7 +168,9 @@ char *parser_logic_build_node(ui_node_t *node) {
 				ui_node_link_t *l        = ls->buffer[i];
 				ui_node_t      *n        = parser_logic_get_node(l->to_id);
 				char           *out_name = parser_logic_build_node(n);
-				any_array_push(out_nodes, any_map_get(parser_logic_node_map, out_name));
+				if (out_name != NULL) {
+					any_array_push(out_nodes, any_map_get(parser_logic_node_map, out_name));
+				}
 			}
 		}
 		// Not linked - create node with default values
