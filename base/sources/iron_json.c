@@ -337,6 +337,11 @@ void json_encode_key(char *k) {
 	keys++;
 }
 
+void json_encode_null(char *k) {
+	json_encode_key(k);
+	encoded = string("%snull", encoded);
+}
+
 void json_encode_string_value(char *v) {
 	encoded = string("%s\"%s\"", encoded, v);
 }
@@ -347,6 +352,10 @@ void json_encode_string(char *k, char *v) {
 }
 
 void json_encode_string_array(char *k, string_array_t *a) {
+	if (a == NULL) {
+		json_encode_null(k);
+		return;
+	}
 	json_encode_begin_array(k);
 	for (uint32_t i = 0; i < a->length; ++i) {
 		if (i > 0) {
@@ -367,12 +376,11 @@ void json_encode_i32(char *k, int i) {
 	encoded = string("%s%s", encoded, i32_to_string(i));
 }
 
-void json_encode_null(char *k) {
-	json_encode_key(k);
-	encoded = string("%snull", encoded);
-}
-
 void json_encode_f32_array(char *k, f32_array_t *a) {
+	if (a == NULL) {
+		json_encode_null(k);
+		return;
+	}
 	json_encode_begin_array(k);
 	for (uint32_t i = 0; i < a->length; ++i) {
 		if (i > 0) {
@@ -384,6 +392,10 @@ void json_encode_f32_array(char *k, f32_array_t *a) {
 }
 
 void json_encode_i32_array(char *k, i32_array_t *a) {
+	if (a == NULL) {
+		json_encode_null(k);
+		return;
+	}
 	json_encode_begin_array(k);
 	for (uint32_t i = 0; i < a->length; ++i) {
 		if (i > 0) {
