@@ -407,11 +407,23 @@ node_shader_context_t *make_paint_run(material_t *data, material_context_t *matc
 	}
 
 	if (g_context->brush_mask_image != NULL && (g_context->tool == TOOL_TYPE_BRUSH || g_context->tool == TOOL_TYPE_ERASER)) {
+		// Project mask onto mesh surface
 		node_shader_add_texture(kong, "texbrushmask", "_texbrushmask");
-		node_shader_write_frag(kong, "var binp_mask: float2 = constants.inp.xy * 2.0 - 1.0;");
-		node_shader_write_frag(kong, "binp_mask.x *= constants.aspect_ratio;");
-		node_shader_write_frag(kong, "binp_mask = binp_mask * 0.5 + 0.5;");
-		node_shader_write_frag(kong, "var pa_mask: float2 = bsp.xy - binp_mask.xy;");
+		node_shader_add_function(kong, str_octahedron_wrap);
+		node_shader_add_texture(kong, "gbuffer0", NULL);
+		node_shader_add_constant(kong, "camera_right: float3", "_camera_right");
+		node_shader_write_frag(kong, "var mn0: float2 = sample_lod(gbuffer0, sampler_linear, constants.inp.xy, 0.0).rg;");
+		node_shader_write_frag(kong, "var mn: float3;");
+		node_shader_write_frag(kong, "mn.z = 1.0 - abs(mn0.x) - abs(mn0.y);");
+		node_shader_write_frag(
+		    kong, "if (mn.z >= 0.0) { mn.x = mn0.x; mn.y = mn0.y; } else { var mfw: float2 = octahedron_wrap(mn0.xy); mn.x = mfw.x; mn.y = mfw.y; }");
+		node_shader_write_frag(kong, "mn = normalize(mn);");
+		node_shader_write_frag(kong, "var mr: float3 = constants.camera_right;");
+		node_shader_write_frag(kong, "if (abs(dot(mn, mr)) > 0.999) { mr = float3(0.0, 0.0, 1.0); }");
+		node_shader_write_frag(kong, "var mt: float3 = normalize(mr - mn * dot(mr, mn));");
+		node_shader_write_frag(kong, "var mb: float3 = cross(mt, mn);");
+		node_shader_write_frag(kong, "var pa_mask_3d: float3 = input.wposition - winp.xyz;");
+		node_shader_write_frag(kong, "var pa_mask: float2 = float2(dot(pa_mask_3d, mt), dot(pa_mask_3d, mb));");
 		if (g_context->brush_directional) {
 			node_shader_add_constant(kong, "brush_direction: float3", "_brush_direction");
 			node_shader_write_frag(kong, "if (constants.brush_direction.z == 0.0) { discard; }");
@@ -424,10 +436,7 @@ node_shader_context_t *make_paint_run(material_t *data, material_context_t *matc
 			node_shader_write_frag(kong, "pa_mask.xy = float2(pa_mask.x * constants.brush_angle.x - pa_mask.y * constants.brush_angle.y, pa_mask.x * "
 			                             "constants.brush_angle.y + pa_mask.y * constants.brush_angle.x);");
 		}
-		node_shader_write_frag(kong, "pa_mask = pa_mask / constants.brush_radius;");
-		node_shader_add_constant(kong, "eye: float3", "_camera_pos");
-		node_shader_write_frag(kong, "pa_mask = pa_mask * (distance(constants.eye, winp.xyz) / 1.5);");
-		node_shader_write_frag(kong, "pa_mask = pa_mask.xy * 0.5 + 0.5;");
+		node_shader_write_frag(kong, "pa_mask = pa_mask / constants.brush_radius * 0.5 + 0.5;");
 		node_shader_write_frag(kong, "var mask_sample: float4 = sample_lod(texbrushmask, sampler_linear, pa_mask, 0.0);");
 		if (g_context->brush_mask_image_is_alpha) {
 			node_shader_write_frag(kong, "opacity *= mask_sample.a;");
