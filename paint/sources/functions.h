@@ -480,7 +480,6 @@ void                         make_material_restore_paint_material();
 parse_node_preview_result_t *make_material_parse_node_preview_material(ui_node_t *node, ui_node_canvas_t *group, ui_node_t_array_t *parents);
 void                         make_material_parse_brush();
 char                        *make_material_blend_mode(node_shader_t *kong, i32 blending, char *cola, char *colb, char *opac);
-char                        *make_material_blend_mode_mask(node_shader_t *kong, i32 blending, char *cola, char *colb, char *opac);
 f32                          make_material_get_displace_strength();
 void                         ui_viewnodes_init();
 void                         ui_viewnodes_on_node_remove(ui_node_t *n);

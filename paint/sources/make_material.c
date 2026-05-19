@@ -1,10 +1,10 @@
 
 #include "global.h"
 
-shader_context_t   *make_material_default_scon = NULL;
-material_context_t *make_material_default_mcon = NULL;
-static shader_context_t   *make_material_saved_scon = NULL;
-static material_context_t *make_material_saved_mcon = NULL;
+shader_context_t          *make_material_default_scon = NULL;
+material_context_t        *make_material_default_mcon = NULL;
+static shader_context_t   *make_material_saved_scon   = NULL;
+static material_context_t *make_material_saved_mcon   = NULL;
 
 bool make_material_get_mout() {
 	for (i32 i = 0; i < g_context->material->canvas->nodes->length; ++i) {
@@ -509,61 +509,6 @@ char *make_material_blend_mode(node_shader_t *kong, i32 blending, char *cola, ch
 	else { // BlendValue
 		node_shader_add_function(kong, str_hue_sat);
 		return string("lerp3(%s, hsv_to_rgb(float3(rgb_to_hsv(%s).r, rgb_to_hsv(%s).g, rgb_to_hsv(%s).b)), %s)", cola, cola, cola, colb, opac);
-	}
-}
-
-char *make_material_blend_mode_mask(node_shader_t *kong, i32 blending, char *cola, char *colb, char *opac) {
-	if (blending == BLEND_TYPE_MIX) {
-		return string("lerp(%s, %s, %s)", cola, colb, opac);
-	}
-	else if (blending == BLEND_TYPE_DARKEN) {
-		return string("lerp(%s, min(%s, %s), %s)", cola, cola, colb, opac);
-	}
-	else if (blending == BLEND_TYPE_MULTIPLY) {
-		return string("lerp(%s, %s * %s, %s)", cola, cola, colb, opac);
-	}
-	else if (blending == BLEND_TYPE_BURN) {
-		return string("lerp(%s, 1.0 - (1.0 - %s) / %s, %s)", cola, cola, colb, opac);
-	}
-	else if (blending == BLEND_TYPE_LIGHTEN) {
-		return string("max(%s, %s * %s)", cola, colb, opac);
-	}
-	else if (blending == BLEND_TYPE_SCREEN) {
-		return string("(1.0 - ((1.0 - %s) + %s * (1.0 - %s)) * (1.0 - %s))", opac, opac, colb, cola);
-	}
-	else if (blending == BLEND_TYPE_DODGE) {
-		return string("lerp(%s, %s / (1.0 - %s), %s)", cola, cola, colb, opac);
-	}
-	else if (blending == BLEND_TYPE_ADD) {
-		return string("lerp(%s, %s + %s, %s)", cola, cola, colb, opac);
-	}
-	else if (blending == BLEND_TYPE_OVERLAY) {
-		// return "lerp(" + cola + ", " + cola + " < 0.5 ? 2.0 * " + cola + " * " + colb + " : 1.0 - 2.0 * (1.0 - " + cola + ") * (1.0 - " + colb + "), " + opac
-		// + ")";
-		char *res = string("%s_res", string_replace_all(cola, ".", "_"));
-		node_shader_write_frag(kong, string("var %s: float;", res));
-		node_shader_write_frag(kong, string("if (%s < 0.5) { %s = 2.0 * %s * %s; } else { %s = 1.0 - 2.0 * (1.0 - %s) * (1.0 - %s); }", cola, res, cola, colb,
-		                                    res, cola, colb));
-		return string("lerp(%s, %s, %s)", cola, res, opac);
-	}
-	else if (blending == BLEND_TYPE_SOFT_LIGHT) {
-		return string("((1.0 - %s) * %s + %s * ((1.0 - %s) * %s * %s + %s * (1.0 - (1.0 - %s) * (1.0 - %s))))", opac, cola, opac, cola, colb, cola, cola, colb,
-		              cola);
-	}
-	else if (blending == BLEND_TYPE_LINEAR_LIGHT) {
-		return string("(%s + %s * (2.0 * (%s - 0.5)))", cola, opac, colb);
-	}
-	else if (blending == BLEND_TYPE_DIFFERENCE) {
-		return string("lerp(%s, abs(%s - %s), %s)", cola, cola, colb, opac);
-	}
-	else if (blending == BLEND_TYPE_SUBTRACT) {
-		return string("lerp(%s, %s - %s, %s)", cola, cola, colb, opac);
-	}
-	else if (blending == BLEND_TYPE_DIVIDE) {
-		return string("(1.0 - %s) * %s + %s * %s / %s", opac, cola, opac, cola, colb);
-	}
-	else { // BlendHue, BlendSaturation, BlendColor, BlendValue
-		return string("lerp(%s, %s, %s)", cola, colb, opac);
 	}
 }
 

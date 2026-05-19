@@ -219,19 +219,14 @@ void export_texture_run_layers(char *path, slot_layer_t_array_t *layers, char *o
 		gpu_texture_t        *mask    = empty;
 		slot_layer_t_array_t *l1masks = slot_layer_get_masks(l1, true);
 		if (l1masks != NULL && !bake_material) {
-			if (l1masks->length > 1) {
-				layers_make_temp_mask_img();
-				draw_begin(pipes_temp_mask_image, true, 0x00000000);
-				draw_end();
-				slot_layer_t *l1 = GC_ALLOC_INIT(slot_layer_t, {.texpaint = pipes_temp_mask_image});
-				for (i32 i = 0; i < l1masks->length; ++i) {
-					layers_merge_layer(l1, l1masks->buffer[i], false);
-				}
-				mask = pipes_temp_mask_image;
+			layers_make_temp_mask_img();
+			draw_begin(pipes_temp_mask_image, true, 0xffffffff);
+			draw_end();
+			slot_layer_t *l1 = GC_ALLOC_INIT(slot_layer_t, {.texpaint = pipes_temp_mask_image});
+			for (i32 i = 0; i < l1masks->length; ++i) {
+				layers_merge_layer(l1, l1masks->buffer[i], false);
 			}
-			else {
-				mask = l1masks->buffer[0]->texpaint;
-			}
+			mask = pipes_temp_mask_image;
 		}
 
 		if (l1->paint_base) {

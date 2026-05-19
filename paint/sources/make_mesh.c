@@ -341,7 +341,7 @@ node_shader_context_t *make_mesh_run(material_t *data, i32 layer_pass) {
 				}
 				if (has_visible) {
 					char *texpaint_mask = string("texpaint_mask%s", i32_to_string(l->id));
-					node_shader_write_frag(kong, string("var %s: float = 0.0;", texpaint_mask));
+					node_shader_write_frag(kong, string("var %s: float = 1.0;", texpaint_mask));
 					for (i32 i = 0; i < masks->length; ++i) {
 						slot_layer_t *m = masks->buffer[i];
 						if (!slot_layer_is_visible(m)) {
@@ -352,10 +352,9 @@ node_shader_context_t *make_mesh_run(material_t *data, i32 layer_pass) {
 						node_shader_write_frag(kong, string("var texpaint_mask_sample%s: float = sample_lod(texpaint%s, sampler_linear, %s, 0.0).r;",
 						                                    i32_to_string(m->id), i32_to_string(m->id), tex_coord));
 
-						f32   opac = slot_layer_get_opacity(m);
-						char *mask = make_material_blend_mode_mask(kong, m->blending, texpaint_mask, string("texpaint_mask_sample%s", i32_to_string(m->id)),
-						                                           string("float(%s)", f32_to_string(opac)));
-						node_shader_write_frag(kong, string("%s = %s;", texpaint_mask, mask));
+						f32 opac = slot_layer_get_opacity(m);
+						node_shader_write_frag(kong, string("%s *= lerp(1.0, %s, float(%s));", texpaint_mask,
+						                                    string("texpaint_mask_sample%s", i32_to_string(m->id)), f32_to_string(opac)));
 						node_shader_write_frag(kong, "}");
 					}
 					node_shader_write_frag(kong, string("texpaint_opac *= clamp(%s, 0.0, 1.0);", texpaint_mask));
@@ -632,7 +631,7 @@ node_shader_context_t *make_mesh_run(material_t *data, i32 layer_pass) {
 				node_shader_write_frag(kong, string("var mask_view: float = sample_lod(texpaint%s, sampler_linear, tex_coord, 0.0).r;", i32_to_string(id)));
 			}
 			else {
-				node_shader_write_frag(kong, "var mask_view: float = 0.0;");
+				node_shader_write_frag(kong, "var mask_view: float = 1.0;");
 				for (i32 i = 0; i < slot_layer_get_masks(g_context->layer, true)->length; ++i) {
 					slot_layer_t *m = slot_layer_get_masks(g_context->layer, true)->buffer[i];
 					if (!slot_layer_is_visible(m)) {
@@ -640,10 +639,8 @@ node_shader_context_t *make_mesh_run(material_t *data, i32 layer_pass) {
 					}
 					node_shader_write_frag(kong, string("var mask_sample%s: float = sample_lod(texpaint_view_mask%s, sampler_linear, tex_coord, 0.0).r;",
 					                                    i32_to_string(m->id), i32_to_string(m->id)));
-					f32   opac = slot_layer_get_opacity(m);
-					char *mask = make_material_blend_mode_mask(kong, m->blending, "mask_view", string("mask_sample%s", i32_to_string(m->id)),
-					                                           string("float(%s)", f32_to_string(opac)));
-					node_shader_write_frag(kong, string("mask_view = %s;", mask));
+					f32 opac = slot_layer_get_opacity(m);
+					node_shader_write_frag(kong, string("mask_view *= lerp(1.0, mask_sample%s, float(%s));", i32_to_string(m->id), f32_to_string(opac)));
 				}
 			}
 			node_shader_write_frag(kong, "output[1] = float4(mask_view, mask_view, mask_view, 1.0);");

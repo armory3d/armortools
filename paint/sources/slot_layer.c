@@ -99,7 +99,7 @@ slot_layer_t *slot_layer_create(char *ext, layer_slot_type_t type, slot_layer_t 
 		i32 id        = (raw->id + 1);
 		raw->name     = string("Mask %d", id);
 		char *format  = "RGBA32"; // Full bits for undo support, R8 is used
-		raw->blending = BLEND_TYPE_ADD;
+		raw->blending = BLEND_TYPE_MIX;
 
 		{
 			render_target_t *t = render_target_create();
@@ -1696,7 +1696,18 @@ void layers_merge_layer(slot_layer_t *l0, slot_layer_t *l1, bool use_mask) {
 		// for (let i: i32 = 1; i < l1masks.length - 1; ++i) {
 		// 	merge_layer(l1masks[i + 1], l1masks[i]);
 		// }
-		mask = l1masks->buffer[0]->texpaint;
+		layers_make_temp_mask_img();
+		_gpu_begin(pipes_temp_mask_image, NULL, NULL, GPU_CLEAR_NONE, 0, 0.0);
+		gpu_set_pipeline(pipes_merge_mask);
+		gpu_set_texture(pipes_tex0_merge_mask, l1masks->buffer[0]->texpaint);
+		gpu_set_texture(pipes_texa_merge_mask, empty);
+		gpu_set_float(pipes_opac_merge_mask, l1masks->buffer[0]->mask_opacity);
+		gpu_set_int(pipes_blending_merge_mask, BLEND_TYPE_MIX);
+		gpu_set_vertex_buffer(const_data_screen_aligned_vb);
+		gpu_set_index_buffer(const_data_screen_aligned_ib);
+		gpu_draw();
+		gpu_end();
+		mask = pipes_temp_mask_image;
 	}
 
 	if (slot_layer_is_mask(l1)) {
@@ -1705,7 +1716,7 @@ void layers_merge_layer(slot_layer_t *l0, slot_layer_t *l1, bool use_mask) {
 		gpu_set_texture(pipes_tex0_merge_mask, l1->texpaint);
 		gpu_set_texture(pipes_texa_merge_mask, layers_temp_image);
 		gpu_set_float(pipes_opac_merge_mask, slot_layer_get_opacity(l1));
-		gpu_set_int(pipes_blending_merge_mask, l1->blending);
+		gpu_set_int(pipes_blending_merge_mask, BLEND_TYPE_MIX);
 		gpu_set_vertex_buffer(const_data_screen_aligned_vb);
 		gpu_set_index_buffer(const_data_screen_aligned_ib);
 		gpu_draw();
@@ -1814,19 +1825,14 @@ slot_layer_t *layers_flatten(bool height_to_normal, slot_layer_t_array_t *layers
 		gpu_texture_t        *mask    = empty;
 		slot_layer_t_array_t *l1masks = slot_layer_get_masks(l1, true);
 		if (l1masks != NULL) {
-			if (l1masks->length > 1) {
-				layers_make_temp_mask_img();
-				draw_begin(pipes_temp_mask_image, GPU_CLEAR_COLOR, 0x00000000);
-				draw_end();
-				slot_layer_t *l1 = GC_ALLOC_INIT(slot_layer_t, {.texpaint = pipes_temp_mask_image});
-				for (i32 i = 0; i < l1masks->length; ++i) {
-					layers_merge_layer(l1, l1masks->buffer[i], false);
-				}
-				mask = pipes_temp_mask_image;
+			layers_make_temp_mask_img();
+			draw_begin(pipes_temp_mask_image, GPU_CLEAR_COLOR, 0xffffffff);
+			draw_end();
+			slot_layer_t *l1 = GC_ALLOC_INIT(slot_layer_t, {.texpaint = pipes_temp_mask_image});
+			for (i32 i = 0; i < l1masks->length; ++i) {
+				layers_merge_layer(l1, l1masks->buffer[i], false);
 			}
-			else {
-				mask = l1masks->buffer[0]->texpaint;
-			}
+			mask = pipes_temp_mask_image;
 		}
 
 		if (l1->paint_base) {

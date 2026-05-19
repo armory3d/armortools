@@ -447,13 +447,10 @@ void tab_layers_draw_layer_slot_full(slot_layer_t *l, i32 i) {
 	}
 
 	// Blending combo
-	if (!slot_layer_is_group(l)) {
+	if (!slot_layer_is_group(l) && !slot_layer_is_mask(l)) {
 		ui->_x = uix + uiw * 0.60;
 		ui->_y = uiy;
 		ui->_w = uiw * 0.30;
-		if (slot_layer_is_mask(l)) {
-			ui->_y += center;
-		}
 		tab_layers_combo_blending(l, false);
 	}
 
@@ -641,7 +638,7 @@ void tab_layers_draw_layer_context_menu_draw() {
 			ui_menu_keep_open = true;
 		}
 
-		if (!slot_layer_is_group(l)) {
+		if (!slot_layer_is_group(l) && !slot_layer_is_mask(l)) {
 			if (tab_layers_combo_blending(l, true)->changed) {
 				ui_menu_keep_open = true;
 			}
