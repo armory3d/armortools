@@ -597,6 +597,13 @@ void box_preferences_pen_tab() {
 	}
 }
 
+void box_preferences_lut_picked(char *path) {
+	import_lut_run(path);
+	g_config->lut_path = string_copy(path);
+	config_save();
+	g_context->ddirty = 2;
+}
+
 // ██╗   ██╗██╗███████╗██╗    ██╗██████╗  ██████╗ ██████╗ ████████╗
 // ██║   ██║██║██╔════╝██║    ██║██╔══██╗██╔═══██╗██╔══██╗╚══██╔══╝
 // ██║   ██║██║█████╗  ██║ █╗ ██║██████╔╝██║   ██║██████╔╝   ██║
@@ -707,6 +714,31 @@ void box_preferences_viewport_tab() {
 	if (h_disp->changed) {
 		g_context->ddirty = 2;
 		make_material_parse_mesh_material();
+	}
+
+	ui_text(tr(".cube LUT"), UI_ALIGN_LEFT, 0x00000000);
+	f32_array_t *lut_ar = f32_array_create_from_raw(
+	    (f32[]){
+	        7 / 8.0,
+	        1 / 8.0,
+	    },
+	    2);
+	ui_row(lut_ar);
+	ui_handle_t *h_lut = ui_handle(__ID__);
+	h_lut->text        = string_copy(g_config->lut_path);
+	g_config->lut_path = string_copy(ui_text_input(h_lut, "", UI_ALIGN_LEFT, true, false));
+	if (h_lut->changed) {
+		if (string_equals(g_config->lut_path, "")) {
+			import_lut_free();
+			config_save();
+			g_context->ddirty = 2;
+		}
+		else {
+			box_preferences_lut_picked(g_config->lut_path);
+		}
+	}
+	if (ui_icon_button("", ICON_FOLDER_OPEN, UI_ALIGN_CENTER)) {
+		ui_files_show("cube", false, false, &box_preferences_lut_picked);
 	}
 }
 

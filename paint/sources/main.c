@@ -120,6 +120,7 @@
 #include "import_font.c"
 #include "import_keymap.c"
 #include "import_legacy.c"
+#include "import_lut.c"
 #include "import_mesh.c"
 #include "import_obj.c"
 #include "import_plugin.c"

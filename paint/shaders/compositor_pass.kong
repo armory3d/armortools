@@ -4,6 +4,7 @@ const constants: {
 	vignette_strength: float;
 	grain_strength: float;
 	tonemap_strength: float; // 0.0 or 1.0
+	lut_size: float;
 };
 
 #[set(everything)]
@@ -11,6 +12,9 @@ const sampler_linear: sampler;
 
 #[set(everything)]
 const tex: tex2d;
+
+#[set(everything)]
+const lut_tex: tex2d;
 
 // #[set(everything)]
 // const histogram: tex2d;
@@ -58,8 +62,28 @@ fun compositor_pass_frag(input: vert_out): float4 {
 	// var expo: float = 2.0 - clamp(length(sample_lod(histogram, sampler_linear, float2(0.5, 0.5), 0.0).rgb), 0.0, 1.0);
 	// color.rgb *= pow(expo, auto_exposure_strength * 2.0);
 
-	// Tonemap with gamma
-	color.rgb = lerp3(color.rgb, tonemap_filmic(color.rgb), constants.tonemap_strength);
+	if (constants.lut_size > 0.0) {
+		// .cube lut color grading
+		color.rgb = pow3(max3(color.rgb, float3(0.0, 0.0, 0.0)), float3(0.4545, 0.4545, 0.4545));
+		var r_s: float = min(max(color.x, 0.0), 1.0) * (constants.lut_size - 1.0);
+		var g_s: float = min(max(color.y, 0.0), 1.0) * (constants.lut_size - 1.0);
+		var b_s: float = min(max(color.z, 0.0), 1.0) * (constants.lut_size - 1.0);
+		var b0: float = floor(b_s);
+		var b1: float = min(b0 + 1.0, constants.lut_size - 1.0);
+		var b_frac: float = b_s - b0;
+		var strip_w: float = constants.lut_size * constants.lut_size;
+		var u0: float = (b0 * constants.lut_size + r_s + 0.5) / strip_w;
+		var u1: float = (b1 * constants.lut_size + r_s + 0.5) / strip_w;
+		var v: float = (g_s + 0.5) / constants.lut_size;
+		var s0: float4 = sample_lod(lut_tex, sampler_linear, float2(u0, v), 0.0);
+		var s1: float4 = sample_lod(lut_tex, sampler_linear, float2(u1, v), 0.0);
+		color.rgb = lerp3(s0.rgb, s1.rgb, float3(b_frac, b_frac, b_frac));
+	}
+	else {
+		// Tonemap with gamma
+		color.rgb = lerp3(color.rgb, tonemap_filmic(color.rgb), constants.tonemap_strength);
+	}
+
 	return color;
 }
 

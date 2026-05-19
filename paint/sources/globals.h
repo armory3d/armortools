@@ -15,6 +15,8 @@ char *manifest_url_ios         = "https://apps.apple.com/app/armorpaint/id153396
 
 any_map_t       *ui_children;
 any_map_t       *ui_nodes_custom_buttons;
+gpu_texture_t   *lut_image            = NULL;
+i32              lut_size             = 0;
 gpu_texture_t   *layers_temp_image    = NULL;
 gpu_texture_t   *layers_expa          = NULL;
 gpu_texture_t   *layers_expb          = NULL;

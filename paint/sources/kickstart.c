@@ -350,6 +350,10 @@ void _kickstart() {
 	plugins_init();
 #endif
 
+	if (!string_equals(g_config->lut_path, "")) {
+		import_lut_run(g_config->lut_path);
+	}
+
 	base_init();
 
 #ifdef is_debug

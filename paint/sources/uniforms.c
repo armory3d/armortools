@@ -43,6 +43,9 @@ f32 uniforms_ext_f32_link(object_t *object, material_data_t *mat, char *link) {
 		bool tonemap = g_context->viewport_mode == VIEWPORT_MODE_LIT || g_context->viewport_mode == VIEWPORT_MODE_PATH_TRACE;
 		return tonemap ? 1.0 : 0.0;
 	}
+	else if (string_equals(link, "_lut_size")) {
+		return lut_image != NULL ? (f32)lut_size : 0.0;
+	}
 	else if (string_equals(link, "_bloom_sample_scale")) {
 		return render_path_base_bloom_sample_scale;
 	}
@@ -419,6 +422,13 @@ gpu_texture_t *uniforms_ext_tex_link(object_t *object, material_data_t *mat, cha
 	if (string_equals(link, "_camera_texture")) {
 		render_target_t *rt = any_map_get(render_path_render_targets, "last");
 		return rt->_image;
+	}
+	if (string_equals(link, "_lut_tex")) {
+		if (lut_image == NULL) {
+			render_target_t *rt = any_map_get(render_path_render_targets, "empty_white");
+			return rt->_image;
+		}
+		return lut_image;
 	}
 	return NULL;
 }

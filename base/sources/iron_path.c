@@ -270,9 +270,14 @@ bool path_is_ext_format(char *path) {
 	return ends_with(p, ".stl") || ends_with(p, ".svg");
 }
 
+bool path_is_lut(char *path) {
+	char *p = to_lower_case(path);
+	return ends_with(p, ".cube");
+}
+
 bool path_is_known(char *path) {
 	return path_is_mesh(path) || path_is_texture(path) || path_is_font(path) || path_is_project(path) || path_is_plugin(path) || path_is_text(path) ||
-	       path_is_ext_format(path);
+	       path_is_ext_format(path) || path_is_lut(path);
 }
 
 bool path_check_ext(char *p, string_array_t *exts) {
