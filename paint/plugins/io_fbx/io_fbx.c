@@ -20,6 +20,44 @@ static int          mat_split_count   = 0;
 static int          mat_split_idx     = 0;
 extern int          plugins_split_by;
 
+static bool valid_mesh(ufbx_node *n) {
+	return n->mesh != NULL && n->mesh->num_triangles > 0;
+}
+
+static bool mixed_uvs(ufbx_scene *scene) {
+	bool found_tex    = false;
+	bool found_no_tex = false;
+	for (int i = 0; i < (int)scene->nodes.count; ++i) {
+		ufbx_node *n = scene->nodes.data[i];
+		if (valid_mesh(n)) {
+			if (n->mesh->vertex_uv.exists) {
+				found_tex = true;
+			}
+			else {
+				found_no_tex = true;
+			}
+		}
+	}
+	return found_tex && found_no_tex;
+}
+
+static bool mixed_cols(ufbx_scene *scene) {
+	bool found_col    = false;
+	bool found_no_col = false;
+	for (int i = 0; i < (int)scene->nodes.count; ++i) {
+		ufbx_node *n = scene->nodes.data[i];
+		if (valid_mesh(n)) {
+			if (n->mesh->vertex_color.exists) {
+				found_col = true;
+			}
+			else {
+				found_no_col = true;
+			}
+		}
+	}
+	return found_col && found_no_col;
+}
+
 typedef struct {
 	float *data;
 	int    count;
@@ -274,7 +312,7 @@ static void build_udim_split(ufbx_scene *scene) {
 	}
 }
 
-void io_fbx_parse_mesh(raw_mesh_t *raw, ufbx_mesh *mesh, ufbx_matrix *to_world, ufbx_matrix *to_world_unscaled) {
+void io_fbx_parse_mesh(raw_mesh_t *raw, ufbx_mesh *mesh, ufbx_matrix *to_world, ufbx_matrix *to_world_unscaled, bool force_tex, bool force_col) {
 	uint32_t  indices_size = mesh->max_face_triangles * 3;
 	uint32_t *indices      = (uint32_t *)malloc(sizeof(uint32_t) * indices_size);
 
@@ -285,9 +323,9 @@ void io_fbx_parse_mesh(raw_mesh_t *raw, ufbx_mesh *mesh, ufbx_matrix *to_world, 
 	int    numtri  = mesh->num_triangles;
 	float *posa32  = (float *)malloc(sizeof(float) * numtri * 3 * 3);
 	float *nora32  = (float *)malloc(sizeof(float) * numtri * 3 * 3);
-	float *texa32  = has_tex ? (float *)malloc(sizeof(float) * numtri * 3 * 2) : NULL;
+	float *texa32  = (has_tex || force_tex) ? (float *)malloc(sizeof(float) * numtri * 3 * 2) : NULL;
 	float *texa132 = has_tex1 ? (float *)malloc(sizeof(float) * numtri * 3 * 2) : NULL;
-	float *cola32  = has_col ? (float *)malloc(sizeof(float) * numtri * 3 * 4) : NULL;
+	float *cola32  = (has_col || force_col) ? (float *)malloc(sizeof(float) * numtri * 3 * 4) : NULL;
 	int    pi      = 0;
 	int    ni      = 0;
 	int    ti      = 0;
@@ -320,6 +358,10 @@ void io_fbx_parse_mesh(raw_mesh_t *raw, ufbx_mesh *mesh, ufbx_matrix *to_world, 
 				texa32[ti++] = ufbx_get_vertex_vec2(&mesh->vertex_uv, a).x;
 				texa32[ti++] = ufbx_get_vertex_vec2(&mesh->vertex_uv, a).y;
 			}
+			else if (force_tex) {
+				texa32[ti++] = 0;
+				texa32[ti++] = 0;
+			}
 
 			if (has_tex1) {
 				texa132[ti1++] = ufbx_get_vertex_vec2(&mesh->uv_sets.data[1].vertex_uv, a).x;
@@ -331,6 +373,12 @@ void io_fbx_parse_mesh(raw_mesh_t *raw, ufbx_mesh *mesh, ufbx_matrix *to_world, 
 				cola32[ci++] = ufbx_get_vertex_vec4(&mesh->vertex_color, a).y;
 				cola32[ci++] = ufbx_get_vertex_vec4(&mesh->vertex_color, a).z;
 				cola32[ci++] = ufbx_get_vertex_vec4(&mesh->vertex_color, a).w;
+			}
+			else if (force_col) {
+				cola32[ci++] = 0;
+				cola32[ci++] = 0;
+				cola32[ci++] = 0;
+				cola32[ci++] = 0;
 			}
 		}
 	}
@@ -458,7 +506,7 @@ void *io_fbx_parse(char *buf, size_t size) {
 		active_tex1                           = true;
 		for (size_t i = 0; i < active_eval_scene->nodes.count; ++i) {
 			ufbx_node *n = active_eval_scene->nodes.data[i];
-			if (n->mesh != NULL && n->mesh->uv_sets.count < 2) {
+			if (valid_mesh(n) && n->mesh->uv_sets.count < 2) {
 				active_tex1 = false;
 				break;
 			}
@@ -492,13 +540,16 @@ void *io_fbx_parse(char *buf, size_t size) {
 
 	raw_mesh_t *raw = (raw_mesh_t *)calloc(sizeof(raw_mesh_t), 1);
 
+	bool force_tex = mixed_uvs(active_eval_scene);
+	bool force_col = mixed_cols(active_eval_scene);
+
 	for (; current_node < (int)active_eval_scene->nodes.count; ++current_node) {
 		ufbx_node *n = active_eval_scene->nodes.data[current_node];
-		if (n->mesh != NULL) {
+		if (valid_mesh(n)) {
 			raw->name = malloc(strlen(n->name.data) + 1);
 			strcpy(raw->name, n->name.data);
 			ufbx_matrix normal_mat = ufbx_get_compatible_matrix_for_normals(n);
-			io_fbx_parse_mesh(raw, n->mesh, &n->geometry_to_world, &normal_mat);
+			io_fbx_parse_mesh(raw, n->mesh, &n->geometry_to_world, &normal_mat, force_tex, force_col);
 			break;
 		}
 	}
@@ -507,7 +558,7 @@ void *io_fbx_parse(char *buf, size_t size) {
 	has_next = false;
 	for (int i = current_node; i < (int)active_eval_scene->nodes.count; ++i) {
 		ufbx_node *n = active_eval_scene->nodes.data[i];
-		if (n->mesh != NULL) {
+		if (valid_mesh(n)) {
 			has_next = true;
 			break;
 		}
@@ -551,7 +602,7 @@ void *io_fbx_parse_skinned(char *buf, size_t size, int frame) {
 		active_tex1 = true;
 		for (size_t i = 0; i < active_eval_scene->nodes.count; ++i) {
 			ufbx_node *n = active_eval_scene->nodes.data[i];
-			if (n->mesh != NULL && n->mesh->uv_sets.count < 2) {
+			if (valid_mesh(n) && n->mesh->uv_sets.count < 2) {
 				active_tex1 = false;
 				break;
 			}
@@ -562,7 +613,7 @@ void *io_fbx_parse_skinned(char *buf, size_t size, int frame) {
 	ufbx_node *mesh_node = NULL;
 	for (; current_node < (int)active_eval_scene->nodes.count; ++current_node) {
 		ufbx_node *n = active_eval_scene->nodes.data[current_node];
-		if (n->mesh != NULL) {
+		if (valid_mesh(n)) {
 			mesh_node = n;
 			break;
 		}
@@ -587,13 +638,14 @@ void *io_fbx_parse_skinned(char *buf, size_t size, int frame) {
 	uint32_t  indices_size = mesh->max_face_triangles * 3;
 	uint32_t *indices      = (uint32_t *)malloc(sizeof(uint32_t) * indices_size);
 
-	bool   has_tex  = mesh->vertex_uv.exists;
-	bool   has_tex1 = active_tex1 && mesh->uv_sets.count > 1;
-	int    numtri   = mesh->num_triangles;
-	float *posa32   = (float *)malloc(sizeof(float) * numtri * 3 * 3);
-	float *nora32   = (float *)malloc(sizeof(float) * numtri * 3 * 3);
-	float *texa32   = has_tex ? (float *)malloc(sizeof(float) * numtri * 3 * 2) : NULL;
-	float *texa132  = has_tex1 ? (float *)malloc(sizeof(float) * numtri * 3 * 2) : NULL;
+	bool   force_tex = mixed_uvs(active_eval_scene);
+	bool   has_tex   = mesh->vertex_uv.exists;
+	bool   has_tex1  = active_tex1 && mesh->uv_sets.count > 1;
+	int    numtri    = mesh->num_triangles;
+	float *posa32    = (float *)malloc(sizeof(float) * numtri * 3 * 3);
+	float *nora32    = (float *)malloc(sizeof(float) * numtri * 3 * 3);
+	float *texa32    = (has_tex || force_tex) ? (float *)malloc(sizeof(float) * numtri * 3 * 2) : NULL;
+	float *texa132   = has_tex1 ? (float *)malloc(sizeof(float) * numtri * 3 * 2) : NULL;
 	int    pi = 0, ni = 0, ti = 0, ti1 = 0;
 
 	for (int j = 0; j < mesh->faces.count; ++j) {
@@ -627,6 +679,10 @@ void *io_fbx_parse_skinned(char *buf, size_t size, int frame) {
 			if (has_tex) {
 				texa32[ti++] = ufbx_get_vertex_vec2(&mesh->vertex_uv, a).x;
 				texa32[ti++] = ufbx_get_vertex_vec2(&mesh->vertex_uv, a).y;
+			}
+			else if (force_tex) {
+				texa32[ti++] = 0;
+				texa32[ti++] = 0;
 			}
 
 			if (has_tex1) {
@@ -735,7 +791,7 @@ void *io_fbx_parse_skinned(char *buf, size_t size, int frame) {
 	has_next = false;
 	for (int i = current_node; i < (int)active_eval_scene->nodes.count; ++i) {
 		ufbx_node *n = active_eval_scene->nodes.data[i];
-		if (n->mesh != NULL) {
+		if (valid_mesh(n)) {
 			has_next = true;
 			break;
 		}
