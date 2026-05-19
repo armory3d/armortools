@@ -758,7 +758,7 @@ void ui_node_draw(ui_node_t *node, ui_node_canvas_t *canvas) {
 	ui_draw_shadow(nx, ny, w, h);
 
 	// Outline
-	draw_set_color(ui_is_selected(node) ? current->ops->theme->LABEL_COL : current->ops->theme->PRESSED_COL);
+	draw_set_color(ui_is_selected(node) ? current->ops->theme->HIGHLIGHT_COL : current->ops->theme->PRESSED_COL);
 	ui_draw_rect(true, nx - 1, ny - 1, w + 2, h + 2);
 
 	// Body
