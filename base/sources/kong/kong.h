@@ -10,7 +10,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define OPCODES_SIZE                         (1024 * 1024)
+#define OPCODES_SIZE                         (1024 * 1024 * 2)
 #define OP_SIZE(op, opmember)                offsetof(opcode, opmember) + sizeof(op.opmember)
 #define NO_FUNCTION                          0xFFFFFFFF
 #define NO_NAME                              0
