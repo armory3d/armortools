@@ -48,7 +48,7 @@ gpu_pipeline_t  *pipes_merge_r  = NULL;
 gpu_pipeline_t  *pipes_merge_g  = NULL;
 gpu_pipeline_t  *pipes_merge_b  = NULL;
 gpu_pipeline_t  *pipes_merge_mask;
-gpu_pipeline_t  *pipes_invert8;
+gpu_pipeline_t  *pipes_invert_mask;
 gpu_pipeline_t  *pipes_apply_mask;
 gpu_pipeline_t  *pipes_colorid_to_mask;
 i32              pipes_tex0;

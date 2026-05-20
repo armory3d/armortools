@@ -242,7 +242,7 @@ void slot_layer_clear(slot_layer_t *raw, i32 base_color, gpu_texture_t *base_ima
 void slot_layer_invert_mask(slot_layer_t *raw) {
 	gpu_texture_t *inverted = gpu_create_render_target(raw->texpaint->width, raw->texpaint->height, GPU_TEXTURE_FORMAT_RGBA32);
 	draw_begin(inverted, false, 0);
-	draw_set_pipeline(pipes_invert8);
+	draw_set_pipeline(pipes_invert_mask);
 	draw_image(raw->texpaint, 0, 0);
 	draw_set_pipeline(NULL);
 	draw_end();

@@ -116,18 +116,16 @@ void pipes_init() {
 
 	{
 
-		pipes_invert8 = gpu_create_pipeline();
-		gc_root(pipes_invert8);
-		pipes_invert8->vertex_shader   = sys_get_shader("layer_invert.vert");
-		pipes_invert8->fragment_shader = sys_get_shader("layer_invert.frag");
+		pipes_invert_mask = gpu_create_pipeline();
+		gc_root(pipes_invert_mask);
+		pipes_invert_mask->vertex_shader   = sys_get_shader("layer_invert.vert");
+		pipes_invert_mask->fragment_shader = sys_get_shader("layer_invert.frag");
 		gpu_vertex_structure_t *vs     = GC_ALLOC_INIT(gpu_vertex_structure_t, {0});
 		gpu_vertex_structure_add(vs, "pos", GPU_VERTEX_DATA_F32_2X);
 		gpu_vertex_structure_add(vs, "tex", GPU_VERTEX_DATA_F32_2X);
 		gpu_vertex_structure_add(vs, "col", GPU_VERTEX_DATA_F32_4X);
-		pipes_invert8->input_layout           = vs;
-		pipes_invert8->color_attachment_count = 1;
-		pipes_invert8->color_attachment[0]    = GPU_TEXTURE_FORMAT_R8;
-		gpu_pipeline_compile(pipes_invert8);
+		pipes_invert_mask->input_layout           = vs;
+		gpu_pipeline_compile(pipes_invert_mask);
 	}
 
 	{
