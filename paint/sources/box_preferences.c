@@ -598,8 +598,13 @@ void box_preferences_pen_tab() {
 }
 
 void box_preferences_lut_picked(char *path) {
-	import_lut_run(path);
 	g_config->lut_path = string_copy(path);
+	if (iron_file_exists(g_config->lut_path)) {
+		import_lut_run(path);
+	}
+	else {
+		g_config->lut_path = "";
+	}
 	config_save();
 	g_context->ddirty = 2;
 }
