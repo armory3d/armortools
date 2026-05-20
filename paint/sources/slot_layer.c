@@ -987,7 +987,8 @@ void layers_make_temp_mask_img() {
 
 	if (pipes_temp_mask_image == NULL) {
 		gc_unroot(pipes_temp_mask_image);
-		pipes_temp_mask_image = gpu_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), GPU_TEXTURE_FORMAT_R8);
+		// pipes_temp_mask_image = gpu_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), GPU_TEXTURE_FORMAT_R8);
+		pipes_temp_mask_image = gpu_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), GPU_TEXTURE_FORMAT_RGBA32);
 		gc_root(pipes_temp_mask_image);
 	}
 }
