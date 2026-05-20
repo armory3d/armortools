@@ -1287,7 +1287,6 @@ void ui_nodes_render(void *_) {
 			_ui_nodes_render_tmp = ui_nodes->color_picker_callback;
 			gc_root(_ui_nodes_render_tmp);
 			g_context->color_picker_callback = &ui_nodes_render_color_picker_callback;
-			;
 			ui_nodes->color_picker_callback = NULL;
 		}
 
