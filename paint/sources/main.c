@@ -156,6 +156,7 @@
 #include "player.c"
 #include "plugin.c"
 #include "project.c"
+#include "render_envsphere.c"
 #include "render_path_base.c"
 #include "render_path_deferred.c"
 #include "render_path_forward.c"

@@ -85,6 +85,7 @@ void                      operator_update();
 bool                      operator_shortcut(char *s, shortcut_type_t type);
 void                      compass_render();
 void                      compass_update();
+void                      render_envsphere();
 void                      config_load();
 void                      config_save();
 void                      config_init();

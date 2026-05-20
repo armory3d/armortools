@@ -200,6 +200,8 @@ typedef struct context {
 	struct ui_handle           *show_envmap_handle;
 	bool                        show_envmap_blur;
 	struct ui_handle           *show_envmap_blur_handle;
+	bool                        show_envmap_spheres;
+	struct ui_handle           *show_envmap_spheres_handle;
 	bool                        capturing_screenshot;
 	bool                        capture_background;
 	f32                         envmap_angle;

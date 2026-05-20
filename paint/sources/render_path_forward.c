@@ -13,6 +13,7 @@ void render_path_forward_draw_forward() {
 
 	render_path_set_target("buf", NULL, NULL, GPU_CLEAR_NONE, 0, 0.0);
 	compass_render();
+	render_envsphere();
 	render_path_draw_meshes("overlay");
 
 	render_path_base_draw_taa("buf", "gbuffer1");

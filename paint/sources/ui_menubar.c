@@ -16,7 +16,7 @@ typedef struct update_info {
 	char *version_name;
 } update_info_t;
 
-i32 ui_menubar_category = 0;
+i32 ui_menubar_category                 = 0;
 int ui_menubar_capture_screenshot_frame = 0;
 
 void ui_menubar_init() {
@@ -470,12 +470,20 @@ void ui_menubar_draw_category_items() {
 			g_context->ddirty = 2;
 		}
 
+		if (g_config->experimental) {
+			g_context->show_envmap_spheres_handle->b = g_context->show_envmap_spheres;
+			g_context->show_envmap_spheres           = ui_check(g_context->show_envmap_spheres_handle, string(" %s", tr("Envmap Spheres")), "");
+			if (g_context->show_envmap_spheres_handle->changed) {
+				g_context->ddirty = 2;
+			}
+		}
+
 		if (ui_menu_button(tr("Reset Envmap"), "", ICON_NONE)) {
 			project_set_default_envmap();
 		}
 
 		if (ui_menu_button(tr("Capture Screenshot"), "", ICON_PHOTO)) {
-			g_context->capturing_screenshot = true;
+			g_context->capturing_screenshot     = true;
 			ui_menubar_capture_screenshot_frame = 0;
 			sys_notify_on_update(&ui_menubar_capture_screenshot, NULL);
 			ui->changed = false; // Close menu
@@ -508,9 +516,9 @@ void ui_menubar_draw_category_items() {
 		}
 	}
 	else if (ui_menubar_category == MENUBAR_CATEGORY_MODE) {
-		ui_handle_t *mode_handle = ui_handle(__ID__);
-		mode_handle->i           = g_context->viewport_mode;
-		string_array_t *modes    = base_get_viewport_modes();
+		ui_handle_t *mode_handle  = ui_handle(__ID__);
+		mode_handle->i            = g_context->viewport_mode;
+		string_array_t *modes     = base_get_viewport_modes();
 		string_array_t *shortcuts = base_get_viewport_mode_shortcuts();
 
 		if (g_config->workflow == WORKFLOW_BASE) {
