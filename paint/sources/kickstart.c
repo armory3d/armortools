@@ -350,7 +350,7 @@ void _kickstart() {
 	plugins_init();
 #endif
 
-	if (!string_equals(g_config->lut_path, "")) {
+	if (!string_equals(g_config->lut_path, "") && iron_file_exists(g_config->lut_path)) {
 		import_lut_run(g_config->lut_path);
 	}
 
