@@ -1615,15 +1615,18 @@ void ui_base_render_cursor(void *_) {
 		}
 	}
 
-	// Show picked material next to cursor
-	if (g_context->tool == TOOL_TYPE_PICKER && g_context->picker_select_material && g_context->color_picker_callback == NULL) {
-		gpu_texture_t *img = g_context->material->image_icon;
-		draw_image(img, mx + 10, my + 10);
-	}
-	if (g_context->tool == TOOL_TYPE_PICKER && g_context->color_picker_callback != NULL) {
-		gpu_texture_t *img  = resource_get("icons.k");
-		rect_t        *rect = resource_tile50(img, TOOL_TYPE_PICKER);
-		draw_sub_image(img, mx + 10, my + 10, rect->x, rect->y, rect->w, rect->h);
+	if (g_context->tool == TOOL_TYPE_PICKER) {
+		// Show picker icon when picking
+		if (g_context->color_picker_callback != NULL) {
+			gpu_texture_t *img  = resource_get("icons.k");
+			rect_t        *rect = resource_tile50(img, TOOL_TYPE_PICKER);
+			draw_sub_image(img, rect->x, rect->y, rect->w, rect->h, mx + 10, my + 10);
+		}
+		// Show picked material next to cursor
+		else if (g_context->picker_select_material) {
+			gpu_texture_t *img = g_context->material->image_icon;
+			draw_image(img, mx + 10, my + 10);
+		}
 	}
 
 	gpu_texture_t *cursor_img = resource_get("cursor.k");
