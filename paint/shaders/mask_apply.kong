@@ -1,7 +1,7 @@
 
 #[set(everything)]
 const constants: {
-	empty: float4;
+	mask_opacity: float;
 };
 
 #[set(everything)]
@@ -33,6 +33,7 @@ fun mask_apply_vert(input: vert_in): vert_out {
 fun mask_apply_frag(input: vert_out): float4 {
 	var col0: float4 = sample_lod(tex0, sampler_linear, input.tex, 0.0);
 	var mask: float = sample_lod(texa, sampler_linear, input.tex, 0.0).r;
+	mask = lerp(1.0, mask, constants.mask_opacity);
 	return float4(col0.rgb, col0.a * mask);
 }
 

@@ -273,6 +273,7 @@ void layers_apply_mask(slot_layer_t *l, slot_layer_t *m) {
 	gpu_set_pipeline(pipes_apply_mask);
 	gpu_set_texture(pipes_tex0_mask, layers_temp_image);
 	gpu_set_texture(pipes_texa_mask, m->texpaint);
+	gpu_set_float(pipes_opac_apply_mask, m->mask_opacity);
 	gpu_set_vertex_buffer(const_data_screen_aligned_vb);
 	gpu_set_index_buffer(const_data_screen_aligned_ib);
 	gpu_draw();

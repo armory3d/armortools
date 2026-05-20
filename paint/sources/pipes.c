@@ -142,6 +142,8 @@ void pipes_init() {
 		gpu_pipeline_compile(pipes_apply_mask);
 		pipes_tex0_mask = 0;
 		pipes_texa_mask = 1;
+		pipes_offset           = 0;
+		pipes_opac_apply_mask  = pipes_get_constant_location("float");
 	}
 
 	{

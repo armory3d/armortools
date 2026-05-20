@@ -60,6 +60,7 @@ i32              pipes_blending;
 i32              pipes_tex1w;
 i32              pipes_tex0_mask;
 i32              pipes_texa_mask;
+i32              pipes_opac_apply_mask;
 i32              pipes_tex0_merge_mask;
 i32              pipes_texa_merge_mask;
 i32              pipes_tex_colorid;
