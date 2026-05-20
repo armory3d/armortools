@@ -1,12 +1,12 @@
 
 #include "global.h"
 
-vec4_t gizmo_v  = (vec4_t){0.0, 0.0, 0.0, 1.0};
-vec4_t gizmo_v0 = (vec4_t){0.0, 0.0, 0.0, 1.0};
-quat_t gizmo_q  = (quat_t){0.0, 0.0, 0.0, 1.0};
-quat_t gizmo_q0 = (quat_t){0.0, 0.0, 0.0, 1.0};
+static vec4_t gizmo_v  = (vec4_t){0.0, 0.0, 0.0, 1.0};
+static vec4_t gizmo_v0 = (vec4_t){0.0, 0.0, 0.0, 1.0};
+static quat_t gizmo_q  = (quat_t){0.0, 0.0, 0.0, 1.0};
+static quat_t gizmo_q0 = (quat_t){0.0, 0.0, 0.0, 1.0};
 
-void gizmo_update() {
+void render_gizmo_update() {
 	bool is_object = g_context->tool == TOOL_TYPE_CURSOR;
 	bool is_decal  = base_is_decal_layer();
 

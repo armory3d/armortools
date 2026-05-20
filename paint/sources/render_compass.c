@@ -1,13 +1,46 @@
 
 #include "global.h"
 
-object_t *_compass_hitbox_x;
-object_t *_compass_hitbox_y;
-object_t *_compass_hitbox_z;
-object_t *_compass_hovered      = NULL;
-object_t *_compass_hovered_last = NULL;
+static object_t *_compass_hitbox_x;
+static object_t *_compass_hitbox_y;
+static object_t *_compass_hitbox_z;
+static object_t *_compass_hovered      = NULL;
+static object_t *_compass_hovered_last = NULL;
 
-void compass_render() {
+static void _compass_init_hitbox() {
+	if (_compass_hitbox_x != NULL) {
+		return;
+	}
+
+	gc_unroot(_compass_hitbox_x);
+	_compass_hitbox_x = object_create(true);
+	gc_root(_compass_hitbox_x);
+	gc_unroot(_compass_hitbox_y);
+	_compass_hitbox_y = object_create(true);
+	gc_root(_compass_hitbox_y);
+	gc_unroot(_compass_hitbox_z);
+	_compass_hitbox_z = object_create(true);
+	gc_root(_compass_hitbox_z);
+
+	_compass_hitbox_x->transform->scale = (vec4_t){0.15, 0.15, 0.15, 1.0};
+	_compass_hitbox_y->transform->scale = (vec4_t){0.15, 0.15, 0.15, 1.0};
+	_compass_hitbox_z->transform->scale = (vec4_t){0.15, 0.15, 0.15, 1.0};
+
+	_compass_hitbox_x->transform->loc = (vec4_t){1.5, 0, 0, 1.0};
+	_compass_hitbox_y->transform->loc = (vec4_t){0, 1.5, 0, 1.0};
+	_compass_hitbox_z->transform->loc = (vec4_t){0, 0, 1.5, 1.0};
+
+	object_t *compass = scene_get_child(".Compass");
+	object_set_parent(_compass_hitbox_x, compass);
+	object_set_parent(_compass_hitbox_y, compass);
+	object_set_parent(_compass_hitbox_z, compass);
+}
+
+static bool _compass_compare_quat(quat_t a, quat_t b) {
+	return a.x == b.x && a.y == b.y && a.z == b.z && a.w == b.w;
+}
+
+void render_compass() {
 	if (!g_context->show_compass || g_config->workspace == WORKSPACE_PLAYER || g_context->capturing_screenshot) {
 		return;
 	}
@@ -57,40 +90,7 @@ void compass_render() {
 	compass->base->parent  = _parent;
 }
 
-void compass_init_hitbox() {
-	if (_compass_hitbox_x != NULL) {
-		return;
-	}
-
-	gc_unroot(_compass_hitbox_x);
-	_compass_hitbox_x = object_create(true);
-	gc_root(_compass_hitbox_x);
-	gc_unroot(_compass_hitbox_y);
-	_compass_hitbox_y = object_create(true);
-	gc_root(_compass_hitbox_y);
-	gc_unroot(_compass_hitbox_z);
-	_compass_hitbox_z = object_create(true);
-	gc_root(_compass_hitbox_z);
-
-	_compass_hitbox_x->transform->scale = (vec4_t){0.15, 0.15, 0.15, 1.0};
-	_compass_hitbox_y->transform->scale = (vec4_t){0.15, 0.15, 0.15, 1.0};
-	_compass_hitbox_z->transform->scale = (vec4_t){0.15, 0.15, 0.15, 1.0};
-
-	_compass_hitbox_x->transform->loc = (vec4_t){1.5, 0, 0, 1.0};
-	_compass_hitbox_y->transform->loc = (vec4_t){0, 1.5, 0, 1.0};
-	_compass_hitbox_z->transform->loc = (vec4_t){0, 0, 1.5, 1.0};
-
-	object_t *compass = scene_get_child(".Compass");
-	object_set_parent(_compass_hitbox_x, compass);
-	object_set_parent(_compass_hitbox_y, compass);
-	object_set_parent(_compass_hitbox_z, compass);
-}
-
-bool _compass_compare_quat(quat_t a, quat_t b) {
-	return a.x == b.x && a.y == b.y && a.z == b.z && a.w == b.w;
-}
-
-void compass_update() {
+void render_compass_update() {
 	if (!g_context->show_compass) {
 		return;
 	}
@@ -109,7 +109,7 @@ void compass_update() {
 	bool hover = x > 0.9 && x < 1.0 && y < 0.14 && y > 0.0;
 	if (hover) {
 
-		compass_init_hitbox();
+		_compass_init_hitbox();
 
 		f32    ratio    = sys_w() / (float)sys_h();
 		mat4_t _P       = scene_camera->p;

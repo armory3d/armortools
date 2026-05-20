@@ -316,7 +316,7 @@ void base_update(void *_) {
 		}
 	}
 
-	compass_update();
+	render_compass_update();
 
 	if (g_config->workspace == WORKSPACE_PLAYER) {
 		player_update();
@@ -767,7 +767,7 @@ void ui_base_update_ui() {
 		return;
 	}
 
-	gizmo_update();
+	render_gizmo_update();
 	util_layer_update_path();
 
 	// Same mapping for paint and rotate (predefined in touch keymap)
