@@ -178,9 +178,10 @@ typedef struct context {
 	struct mesh_object  *paint_object;
 	struct mesh_object  *merged_object;
 	bool                 merged_object_is_atlas;
-	i32                  ddirty;
-	i32                  pdirty;
-	i32                  rdirty;
+	i32                  ddirty; // depth
+	i32                  pdirty; // paint
+	i32                  rdirty; // render
+	i32                  rtdirty; // raytrace
 	bool                 brush_blend_dirty;
 	bool                 split_view;
 	i32                  view_index;

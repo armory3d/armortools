@@ -297,11 +297,8 @@ static void path_repaint(slot_layer_t *l) {
 	camera_object_build_mat(scene_camera);
 	render_path_base_draw_gbuffer();
 
-	if (g_context->viewport_mode == VIEWPORT_MODE_PATH_TRACE) {
-		layers_flatten(true, NULL);
-	}
-
 	g_context->pdirty           = 0;
+	g_context->rtdirty          = 1;
 	g_context->rdirty           = 2;
 	g_context->tool             = _tool;
 	g_context->layer            = _layer;

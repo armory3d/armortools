@@ -313,7 +313,8 @@ void history_undo() {
 
 		history_undos--;
 		history_redos++;
-		g_context->ddirty = 2;
+		g_context->rtdirty = 1;
+		g_context->ddirty  = 2;
 
 		ui_base_hwnds->buffer[TAB_AREA_SIDEBAR0]->redraws = 2;
 		ui_base_hwnds->buffer[TAB_AREA_SIDEBAR1]->redraws = 2;
@@ -593,7 +594,8 @@ void history_redo() {
 
 		history_undos++;
 		history_redos--;
-		g_context->ddirty = 2;
+		g_context->rtdirty = 1;
+		g_context->ddirty  = 2;
 
 		ui_base_hwnds->buffer[TAB_AREA_SIDEBAR0]->redraws = 2;
 		ui_base_hwnds->buffer[TAB_AREA_SIDEBAR1]->redraws = 2;

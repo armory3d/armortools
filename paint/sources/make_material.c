@@ -86,9 +86,7 @@ void make_material_parse_mesh_material() {
 	}
 
 	g_context->ddirty = 2;
-	if (g_context->viewport_mode == VIEWPORT_MODE_PATH_TRACE) {
-		g_context->pdirty = 1;
-	}
+	g_context->rtdirty = 1;
 
 	if (make_material_transluc_used) {
 		make_material_parse_depth_material();

@@ -48,8 +48,9 @@ void render_path_raytrace_commands(bool use_live_layer) {
 	}
 	////
 
-	if (g_context->pdirty > 0) {
+	if (g_context->pdirty > 0 || g_context->rtdirty > 0) {
 		layers_flatten(true, NULL);
+		g_context->rtdirty = 0;
 	}
 
 	camera_object_t *cam                 = scene_camera;
