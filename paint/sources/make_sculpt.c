@@ -260,10 +260,6 @@ void sculpt_init_sculpt_texture(slot_layer_t *l, mesh_data_t *md) {
 }
 
 void sculpt_init() {
-	if (any_map_get(render_path_render_targets, "gbuffer0_undo") != NULL) {
-		return;
-	}
-
 	mesh_data_t *md   = g_context->paint_object->data;
 	i16_array_t *posa = i16_array_create(md->index_array->length * 4);
 	i16_array_t *nora = i16_array_create(md->index_array->length * 2);
@@ -302,6 +298,11 @@ void sculpt_init() {
 
 	make_material_parse_paint_material(true);
 	make_material_parse_mesh_material();
+
+	if (any_map_get(render_path_render_targets, "gbuffer0_undo") != NULL) {
+		return;
+	}
+
 	{
 		render_target_t *t = render_target_create();
 		t->name            = "gbuffer0_undo";
