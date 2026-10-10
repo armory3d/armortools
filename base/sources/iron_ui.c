@@ -728,7 +728,9 @@ char *ui_extract_line_off(char *str, int line, int *off) {
 		if (line_i > line) {
 			break;
 		}
-		temp[pos++] = str[i];
+		if (pos < (int)sizeof(temp) - 1) {
+			temp[pos++] = str[i];
+		}
 	}
 	temp[pos] = 0;
 	*off += i;
@@ -2778,7 +2780,7 @@ void ui_key_down(ui_t *ui, int key_code) {
 	case KEY_CODE_CONTROL:
 		ui->is_ctrl_down = true;
 		break;
-#ifdef IRON_DARWIN
+#ifdef IRON_MACOS
 	case KEY_CODE_META:
 		ui->is_ctrl_down = true;
 		break;
@@ -2825,7 +2827,7 @@ void ui_key_up(ui_t *ui, int key_code) {
 	case KEY_CODE_CONTROL:
 		ui->is_ctrl_down = false;
 		break;
-#ifdef IRON_DARWIN
+#ifdef IRON_MACOS
 	case KEY_CODE_META:
 		ui->is_ctrl_down = false;
 		break;
