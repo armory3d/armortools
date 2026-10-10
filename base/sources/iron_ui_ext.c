@@ -889,25 +889,35 @@ char *ui_text_area(char **value, int *line_index, int align, bool editable, char
 			sel_bot_col  = text_area_selection_start_col;
 		}
 
+		bool copy_truncated = false;
 		if (ui_is_copy || ui_is_cut) {
 			// Build the selected text spanning multiple lines
-			ui_text_to_copy[0] = '\0';
-			for (int i = sel_top_line; i <= sel_bot_line; ++i) {
+			// The copy buffer holds UI_TEXT_MAX chars, the rest of the selection is dropped
+			int copied = 0;
+			for (int i = sel_top_line; i <= sel_bot_line && !copy_truncated; ++i) {
 				char *ln        = ui_extract_line(lines, i);
 				int   col_start = (i == sel_top_line) ? sel_top_col : 0;
 				int   col_end   = (i == sel_bot_line) ? sel_bot_col : (int)strlen(ln);
 				int   len       = col_end - col_start;
-				if (len > 0) {
-					strncat(ui_text_to_copy, ln + col_start, len);
+				if (len < 0) {
+					len = 0;
 				}
-				if (i < sel_bot_line) {
-					strcat(ui_text_to_copy, "\n");
+				if (copied + len + 1 > UI_TEXT_MAX - 1) {
+					len            = UI_TEXT_MAX - 1 - copied;
+					copy_truncated = true;
+				}
+				memcpy(ui_text_to_copy + copied, ln + col_start, len);
+				copied += len;
+				if (i < sel_bot_line && !copy_truncated) {
+					ui_text_to_copy[copied++] = '\n';
 				}
 			}
+			ui_text_to_copy[copied] = '\0';
 			iron_copy_to_clipboard(ui_text_to_copy);
 			ui_is_copy = false;
 		}
-		if (editable && (ui_is_cut || current->key_code == KEY_CODE_BACKSPACE || current->key_code == KEY_CODE_DELETE)) {
+		// A cut which did not fit into the copy buffer keeps the text
+		if (editable && ((ui_is_cut && !copy_truncated) || current->key_code == KEY_CODE_BACKSPACE || current->key_code == KEY_CODE_DELETE)) {
 			// Delete from sel_top_col on sel_top_line to sel_bot_col on sel_bot_line
 			int pos_start = ui_line_pos(lines, sel_top_line) + sel_top_col;
 			int pos_end   = ui_line_pos(lines, sel_bot_line) + sel_bot_col;
@@ -990,11 +1000,25 @@ char *ui_text_area(char **value, int *line_index, int align, bool editable, char
 			text_area_selection_start = -1; // Home/End are single-line operations, cancel multi-line selection
 		}
 		else if (current->is_ctrl_down && current->is_a_down) { // Select all lines
+			// The selection ends at the last line which still fits into the copy buffer
+			int last_line = 0;
+			int last_len  = 0;
+			int size      = 0;
+			int off       = 0;
+			for (int i = 0; i < line_count; ++i) {
+				int len = (int)strlen(ui_extract_line_off(lines, 0, &off));
+				if (i > 0 && size + len > UI_TEXT_MAX - 1) {
+					break;
+				}
+				last_line = i;
+				last_len  = len;
+				size += len + 1;
+			}
 			text_area_selection_start     = 0;
 			text_area_selection_start_col = 0;
-			(*line_index)                 = line_count - 1;
+			(*line_index)                 = last_line;
 			current->highlight_anchor     = 0;
-			current->cursor_x             = (int)strlen(ui_extract_line(lines, (*line_index)));
+			current->cursor_x             = last_len;
 			current->cursor_sticky_x      = current->cursor_x;
 			strcpy(current->text_selected, ui_extract_line(lines, (*line_index)));
 			(*value) = string_copy(current->text_selected);
