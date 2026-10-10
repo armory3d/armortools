@@ -150,6 +150,7 @@ project_t *main() {
 	}
 
 	if (flags->with_raytrace) {
+		add_define(project, "WITH_RAYTRACE");
 		add_assets(project, "assets/raytrace/*", "data/{name}", 0);
 		if (graphics == GRAPHICS_DIRECT3D12) {
 			add_assets(project, "shaders/raytrace/*.cso", "data/{name}", 0);
