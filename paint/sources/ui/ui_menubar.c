@@ -775,7 +775,7 @@ void ui_menubar_draw_category_items() {
                 tr("3D View"),
                 tr("2D View"),
                 tr("Nodes"),
-                tr("Script"),
+                tr("Scripts"),
                 tr("Player"),
             },
             5);
@@ -798,21 +798,17 @@ void ui_menubar_draw_category_items() {
 		ui_menu_separator();
 		ui_menu_align();
 		ui_menu_label(tr("Workflow"), NULL);
-		bool            workflow_changed = false;
-		string_array_t *workflows        = any_array_create_from_raw(
-            (void *[]){
-                tr("PBR"),
-                tr("Base"),
-                tr("Sculpt"),
-            },
-            3);
+		ui_menu_align();
+		string_array_t *workflow_items = any_array_create_from_raw(
+		    (void *[]){
+		        tr("PBR"),
+		        tr("Base"),
+		        tr("Sculpt"),
+		    },
+		    3);
 
-		for (i32 i = 0; i < workflows->length; ++i) {
-			ui_radio((int *)&g_config->workflow, i, workflows->buffer[i], "");
-			workflow_changed |= ui_item_changed();
-		}
-
-		if (workflow_changed) {
+		ui_inline_radio((int *)&g_config->workflow, workflow_items, UI_ALIGN_LEFT);
+		if (ui_item_changed()) {
 			config_save();
 			base_update_workflow();
 		}
