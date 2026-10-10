@@ -42,5 +42,8 @@ project_t *main() {
 	add_assets(project, "assets/meshes/default/*", "data/meshes/{name}", 0); // Embed default mesh
 	add_assets(project, "assets/locale/*", "data/locale/{name}", 0);
 	add_assets(project, "assets/readme/readme.txt", "{name}", 0);
+	if (!flags->embed) {
+		add_assets(project, "../base/assets/extra/*", "data/{name}", 0); // font_cjk.ttc
+	}
 	return project;
 }
