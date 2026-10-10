@@ -510,6 +510,7 @@ static void import_arm_trust_scripts_on_next_frame(void *_) {
 	g_context->material = current;
 	make_material_parse_paint_material(true);
 	layers_update_fill_layers();
+	nodes_mesh_update_scripts();
 	g_context->ddirty = 2;
 }
 
@@ -527,11 +528,12 @@ static void import_arm_trust_scripts_box_draw() {
 	}
 }
 
-static void import_arm_check_scripts(project_t *project) {
+static void import_arm_check_scripts(project_t *project, bool meshes) {
 	if (args_player) {
 		return;
 	}
-	if (!import_arm_canvases_have_script(project->material_nodes) && !import_arm_canvases_have_script(project->material_groups)) {
+	if (!import_arm_canvases_have_script(project->material_nodes) && !import_arm_canvases_have_script(project->material_groups) &&
+	    !(meshes && nodes_mesh_canvases_have_script(project->mesh_nodes))) {
 		return;
 	}
 	project_scripts_trusted = false;
@@ -539,7 +541,7 @@ static void import_arm_check_scripts(project_t *project) {
 }
 
 static void import_arm_import_materials(project_t *project, char *path, i32_array_t *selected, bool delete_blob) {
-	import_arm_check_scripts(project);
+	import_arm_check_scripts(project, false);
 	if (project->material_nodes == NULL || project->material_nodes->length == 0) {
 		if (delete_blob) {
 			data_delete_blob(path);
@@ -799,7 +801,7 @@ void import_arm_run_project(char *path) {
 		project_scripts_trusted = was_trusted;
 	}
 	else {
-		import_arm_check_scripts(project);
+		import_arm_check_scripts(project, true);
 	}
 	layer_data_t *l0                     = g_project->layer_datas->buffer[0];
 	base_res                             = config_get_texture_res_pos(l0->res);
@@ -1240,6 +1242,8 @@ void import_arm_run_project(char *path) {
 			util_physics_store(g_project->_->paint_objects->buffer[i]->base, shape, mass);
 		}
 	}
+
+	nodes_mesh_import();
 
 	import_arm_progress(0.95);
 	tab_meshes_sort_hierarchy();

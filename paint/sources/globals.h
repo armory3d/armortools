@@ -292,6 +292,8 @@ ui_node_t_array_t        *nodes_material_utilities;
 ui_node_t_array_t        *nodes_material_neural;
 ui_node_t_array_t        *nodes_material_group;
 node_list_t_array_t      *nodes_material_list        = NULL;
+string_array_t           *nodes_mesh_categories      = NULL;
+node_list_t_array_t      *nodes_mesh_list            = NULL;
 i32                       make_mesh_layer_pass_count = 1;
 
 i32             ui_sidebar_default_w_mini = 56;

@@ -5,6 +5,7 @@ extern buffer_t *slot_material_default_canvas;
 
 i32        _tab_meshes_draw_i;
 i32        tab_meshes_mesh_name_edit = -1;
+char      *tab_meshes_mesh_name_prev = NULL;
 any_map_t *tab_meshes_preview_map    = NULL;
 any_map_t *tab_meshes_override_map   = NULL; // object uid -> overridden material index
 
@@ -493,9 +494,10 @@ void tab_meshes_draw_context_menu_delete(mesh_object_t *o) {
 
 	array_remove(g_project->_->paint_objects, o);
 	tab_timeline_on_mesh_deleted(mesh_name);
+	nodes_mesh_remove(o);
 
 	// Last user of the data, freed on the next frame
-	if (util_mesh_data_owner(o->data) == -1) {
+	if (util_mesh_data_owner(o->data) == -1 && !nodes_mesh_holds(o->data)) {
 		if (tab_meshes_pending_data == NULL) {
 			tab_meshes_pending_data = any_array_create(0);
 		}
@@ -656,6 +658,17 @@ void tab_meshes_draw_context_menu() {
 		tab_timeline_edit_mesh(o);
 		return;
 	}
+	if (ui_menu_button(tr("Edit Nodes"), "", ICON_NONE)) {
+		if (!ui_nodes_show || ui_nodes_canvas_type != CANVAS_TYPE_MESH) {
+			ui_base_show_mesh_nodes();
+		}
+		return;
+	}
+	if (nodes_mesh_has_nodes(o) && ui_menu_button(tr("Apply Nodes"), "", ICON_NONE)) {
+		nodes_mesh_apply(o);
+		g_context->ddirty = 2;
+		return;
+	}
 
 	ui_menu_separator();
 
@@ -683,12 +696,6 @@ void tab_meshes_draw_context_menu() {
 		ui_menu_sub_end();
 	}
 
-	if (ui_menu_button(tr("Flip Normals"), "", ICON_NONE)) {
-		util_mesh_flip_normals(util_mesh_get_hierarchy(o));
-		g_context->ddirty = 2;
-		return;
-	}
-
 	if (ui_menu_button(tr("Apply Displacement"), "", ICON_NONE)) {
 		mesh_object_t_array_t *objects = util_mesh_get_hierarchy(o);
 		util_mesh_apply_displacement(objects, g_project->_->layers->buffer[0]->texpaint_pack, 0.1, 1.0);
@@ -713,23 +720,6 @@ void tab_meshes_draw_context_menu() {
 			util_mesh_swap_axis(util_mesh_get_hierarchy(o), 0, 1);
 			g_context->ddirty = 2;
 			ui_menu_keep_open = true;
-		}
-		ui_menu_sub_end();
-	}
-
-	if (ui_menu_sub_button(tr("Modifiers"))) {
-		ui_menu_sub_begin(4);
-		if (ui_menu_button(tr("Decimate"), "", ICON_NONE)) {
-			util_mesh_decimate(util_mesh_get_hierarchy(o), 0.5);
-		}
-		if (ui_menu_button(tr("Smooth"), "", ICON_NONE)) {
-			util_mesh_smooth(util_mesh_get_hierarchy(o));
-		}
-		if (ui_menu_button(tr("Subdivide"), "", ICON_NONE)) {
-			util_mesh_subdivide(util_mesh_get_hierarchy(o));
-		}
-		if (ui_menu_button(tr("Bevel"), "", ICON_NONE)) {
-			util_mesh_bevel(util_mesh_get_hierarchy(o), 0.1);
 		}
 		ui_menu_sub_end();
 	}
@@ -1203,16 +1193,15 @@ void tab_meshes_draw_mesh_slot(mesh_object_t *o, i32 i) {
 
 	if (tab_meshes_mesh_name_edit == o->base->uid) {
 		tab_meshes_mesh_name = string_copy(o->base->name);
-		char *new_name       = string_copy(ui_text_input(&tab_meshes_mesh_name, "", UI_ALIGN_LEFT, true, false));
-		tab_stages_rename_object(o->base->name, new_name);
-		o->base->name = new_name;
-		// Mesh data shared by linked duplicates is named after the object holding it
-		if (util_mesh_data_owner(o->data) == i) {
-			o->data->name = string_copy(o->base->name);
-		}
+		char *new_name       = ui_text_input(&tab_meshes_mesh_name, "", UI_ALIGN_LEFT, true, false);
 		if (g_ui->text_selected_id != ui_widget_id(&tab_meshes_mesh_name, UI_ID_TEXT)) {
 			tab_meshes_mesh_name_edit = -1;
+			if (string_equals(new_name, "") && tab_meshes_mesh_name_prev != NULL) {
+				new_name = tab_meshes_mesh_name_prev;
+			}
+			new_name = util_mesh_unique_name(o, new_name);
 		}
+		util_mesh_rename(o, new_name);
 	}
 	else {
 		ui_text(o->base->name, UI_ALIGN_LEFT, 0x00000000);
@@ -1234,11 +1223,12 @@ void tab_meshes_draw_mesh_slot(mesh_object_t *o, i32 i) {
 						// Double click name to rename
 						tab_meshes_mesh_name_edit = o->base->uid;
 						tab_meshes_mesh_name      = string_copy(o->base->name);
+						tab_meshes_mesh_name_prev = tab_meshes_mesh_name;
 						ui_start_text_edit(&tab_meshes_mesh_name, UI_ALIGN_LEFT);
 					}
-					else {
-						// Double click to show only this mesh
-						tab_layers_apply_filter(i + 1);
+					else if (g_ui->input_x < g_ui->_window_x + name_x) {
+						// Double click icon to toggle nodes
+						ui_base_show_mesh_nodes();
 					}
 				}
 				if (sys_time() - g_context->select_time > 0.2) {

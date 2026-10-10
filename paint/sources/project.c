@@ -90,6 +90,7 @@ void project_save_as(bool save_and_quit) {
 
 void project_cleanup() {
 	util_mesh_remove_merged();
+	nodes_mesh_reset();
 
 	if (g_project->_->paint_objects != NULL) {
 		for (i32 i = 0; i < g_project->_->paint_objects->length; ++i) {

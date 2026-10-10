@@ -168,7 +168,20 @@ i32 ui_nodes_tab_index() {
 	return (int)(ui_nodes_tab / 2.0);
 }
 
+node_list_t_array_t *ui_nodes_get_node_list() {
+	return ui_nodes_canvas_type == CANVAS_TYPE_MATERIAL ? nodes_material_list : ui_nodes_canvas_type == CANVAS_TYPE_MESH ? nodes_mesh_list : nodes_brush_list;
+}
+
+string_array_t *ui_nodes_get_categories() {
+	return ui_nodes_canvas_type == CANVAS_TYPE_MATERIAL ? nodes_material_categories
+	       : ui_nodes_canvas_type == CANVAS_TYPE_MESH   ? nodes_mesh_categories
+	                                                    : nodes_brush_categories;
+}
+
 ui_node_canvas_t *ui_nodes_get_canvas(bool groups) {
+	if (ui_nodes_canvas_type == CANVAS_TYPE_MESH) {
+		return nodes_mesh_get(g_context->paint_object, true)->canvas;
+	}
 	if (ui_nodes_canvas_type == CANVAS_TYPE_MATERIAL) {
 		if (groups && ui_nodes_group_stack->length > 0) {
 			return ui_nodes_group_stack->buffer[ui_nodes_group_stack->length - 1]->canvas;
@@ -186,6 +199,9 @@ ui_node_canvas_t *ui_nodes_get_canvas(bool groups) {
 }
 
 ui_nodes_t *ui_nodes_get_nodes() {
+	if (ui_nodes_canvas_type == CANVAS_TYPE_MESH) {
+		return nodes_mesh_get(g_context->paint_object, true)->nodes;
+	}
 	if (ui_nodes_canvas_type == CANVAS_TYPE_MATERIAL) {
 		if (ui_nodes_group_stack->length > 0) {
 			return ui_nodes_group_stack->buffer[ui_nodes_group_stack->length - 1]->nodes;
@@ -212,7 +228,7 @@ void ui_nodes_push_undo(ui_node_canvas_t *last_canvas) {
 		last_canvas = ui_nodes_get_canvas(true);
 	}
 	i32 canvas_group = -1;
-	if (ui_nodes_group_stack->length > 0) {
+	if (ui_nodes_canvas_type == CANVAS_TYPE_MATERIAL && ui_nodes_group_stack->length > 0) {
 		canvas_group = array_index_of(g_project->_->material_groups, ui_nodes_group_stack->buffer[ui_nodes_group_stack->length - 1]);
 	}
 	ui_base_hwnds->buffer[TAB_AREA_SIDEBAR0]->redraws = 2;
@@ -284,6 +300,18 @@ void ui_viewnodes_on_canvas_cut(void *_) {
 }
 
 void ui_nodes_recompile() {
+	nodes_mesh_refresh();
+
+	if (ui_nodes_canvas_type == CANVAS_TYPE_MESH) {
+		// Meshes are rebuilt once the change is done
+		if (ui_nodes_recompile_mat_final) {
+			nodes_mesh_update(g_context->paint_object, false);
+		}
+		ui_nodes_recompile_mat       = false;
+		ui_nodes_recompile_mat_final = false;
+		return;
+	}
+
 	if (ui_nodes_recompile_mat) {
 		if (ui_nodes_canvas_type == CANVAS_TYPE_BRUSH) {
 			make_material_parse_brush();
@@ -394,7 +422,7 @@ void ui_nodes_make_node_preview(ui_node_t *node) {
 		return;
 	}
 
-	if (ui_nodes_canvas_type == CANVAS_TYPE_BRUSH) {
+	if (ui_nodes_canvas_type != CANVAS_TYPE_MATERIAL) {
 		return;
 	}
 
@@ -448,7 +476,7 @@ ui_node_t *ui_nodes_make_node(ui_node_t *n, ui_nodes_t *nodes, ui_node_canvas_t 
 	node->inputs    = any_array_create_from_raw((void *[]){}, 0);
 	node->outputs   = any_array_create_from_raw((void *[]){}, 0);
 	node->buttons   = any_array_create_from_raw((void *[]){}, 0);
-	node->width     = 0;
+	node->width     = n->width;
 	node->flags     = g_config->node_previews ? UI_NODE_FLAG_PREVIEW : UI_NODE_FLAG_NONE;
 	i32 count       = 0;
 	for (i32 i = 0; i < n->inputs->length; ++i) {

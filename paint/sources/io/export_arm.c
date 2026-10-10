@@ -212,6 +212,8 @@ buffer_t *export_arm_encode_project(char *path) {
 		}
 	}
 
+	nodes_mesh_export_begin();
+
 	mesh_data_t_array_t *md = any_array_create_from_raw((void *[]){}, 0);
 	for (i32 i = 0; i < g_project->_->paint_objects->length; ++i) {
 		mesh_object_t *p      = g_project->_->paint_objects->buffer[i];
@@ -381,6 +383,7 @@ buffer_t *export_arm_encode_project(char *path) {
 	}
 
 	buffer_t *buffer = util_encode_project(g_project);
+	nodes_mesh_export_end();
 
 	for (i32 i = 0; i < ld->length; ++i) {
 		layer_data_t *d = ld->buffer[i];

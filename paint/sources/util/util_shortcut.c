@@ -37,7 +37,15 @@ void util_shortcut_undo_redo() {
 void util_shortcut_global() {
 	if (!g_ui->is_typing) {
 		if (keymap_shortcut(any_map_get(g_keymap, "toggle_node_editor"), SHORTCUT_TYPE_STARTED)) {
-			ui_nodes_canvas_type == CANVAS_TYPE_MATERIAL ? ui_base_show_material_nodes() : ui_base_show_brush_nodes();
+			if (ui_nodes_canvas_type == CANVAS_TYPE_MATERIAL) {
+				ui_base_show_material_nodes();
+			}
+			else if (ui_nodes_canvas_type == CANVAS_TYPE_MESH) {
+				ui_base_show_mesh_nodes();
+			}
+			else {
+				ui_base_show_brush_nodes();
+			}
 		}
 		else if (keymap_shortcut(any_map_get(g_keymap, "toggle_browser"), SHORTCUT_TYPE_STARTED)) {
 			ui_base_toggle_browser();

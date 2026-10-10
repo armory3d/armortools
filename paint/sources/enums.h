@@ -198,7 +198,14 @@ typedef enum {
 typedef enum {
 	CANVAS_TYPE_MATERIAL = 0,
 	CANVAS_TYPE_BRUSH    = 1,
+	CANVAS_TYPE_MESH     = 2,
 } canvas_type_t;
+
+typedef enum {
+	MESH_BOOLEAN_UNION      = 0,
+	MESH_BOOLEAN_DIFFERENCE = 1,
+	MESH_BOOLEAN_INTERSECT  = 2,
+} mesh_boolean_t;
 
 typedef enum {
 	VIEW_2D_TYPE_ASSET = 0,

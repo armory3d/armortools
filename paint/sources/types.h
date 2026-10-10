@@ -14,6 +14,26 @@ typedef struct slot_brush {
 	i32                    id;
 } slot_brush_t;
 
+typedef struct mesh_nodes {
+	i32                    uid; // Object
+	struct ui_nodes       *nodes;
+	struct ui_node_canvas *canvas;
+	struct mesh_data      *input;  // Original mesh
+	struct mesh_data      *output; // Mesh assigned to the object, equals input unless the nodes change it
+	u32                    hash;
+} mesh_nodes_t;
+
+typedef struct mesh_geo {
+	f32 *pos;
+	f32 *nor;
+	f32 *tex;
+	u32 *ind;
+	i32  vertex_count;
+	i32  index_count;
+	i32  vertex_capacity; // Allocated sizes, counts can be lowered
+	i32  index_capacity;
+} mesh_geo_t;
+
 typedef struct slot_layer {
 	i32                   id;
 	char                 *name;
@@ -594,6 +614,8 @@ typedef struct project {
 	struct timeline_layer_keyframe_data_t_array *timeline_layers;
 	struct timeline_mesh_keyframe_data_t_array  *timeline_meshes;
 	struct stage_t_array                        *stages;
+	struct ui_node_canvas_t_array               *mesh_nodes;
+	struct i32_array                            *mesh_nodes_objects; // Object index for each mesh_nodes canvas
 	project_runtime_t                           *_;
 } project_t;
 

@@ -46,6 +46,50 @@ ui_nodes_editor_state_t *ui_nodes_editor_state(ui_node_t *node) {
 	return state;
 }
 
+draw_font_t *_ui_nodes_code_font = NULL;
+
+// Mono font and syntax coloring for code edited inside of a node
+void ui_nodes_code_begin() {
+	_ui_nodes_code_font = g_ui->ops->font;
+	ui_set_font(g_ui, data_get_font("font_mono.ttf"));
+	ui_text_area_coloring = tab_scripts_get_text_coloring();
+}
+
+void ui_nodes_code_end() {
+	ui_text_area_coloring = NULL;
+	ui_set_font(g_ui, _ui_nodes_code_font);
+	draw_set_font(_ui_nodes_code_font, g_ui->font_size); // Nodes draw labels without setting the font
+}
+
+// Row toggling the code area of a node, the state is saved with the node
+bool ui_nodes_code_panel(ui_node_t *node) {
+	bool expanded = !(node->flags & UI_NODE_FLAG_CODE_HIDE);
+	if (ui_is_visible(UI_ELEMENT_H())) {
+		if (ui_get_released(UI_ELEMENT_H())) {
+			expanded = !expanded;
+		}
+		// Down or right pointing triangle
+		f32 x = g_ui->_x + g_ui->arrow_offset_x;
+		f32 y = g_ui->_y + g_ui->arrow_offset_y;
+		f32 s = UI_ARROW_SIZE();
+		draw_set_color(g_ui->ops->theme->LABEL_COL);
+		if (expanded) {
+			draw_filled_triangle(x, y, x + s, y, x + s / 2.0, y + s);
+		}
+		else {
+			draw_filled_triangle(x, y, x + s, y + s / 2.0, x, y + s);
+		}
+	}
+	ui_end_element();
+	if (expanded) {
+		node->flags &= ~UI_NODE_FLAG_CODE_HIDE;
+	}
+	else {
+		node->flags |= UI_NODE_FLAG_CODE_HIDE;
+	}
+	return expanded;
+}
+
 void ui_viewnodes_on_link_drag_on_node_search_done() {
 	ui_nodes_t *ui_nodes = ui_nodes_get_nodes();
 
@@ -112,7 +156,7 @@ void ui_nodes_node_search_menu() {
 	bool _SHADOWS           = g_theme->SHADOWS;
 	g_theme->SHADOWS        = false;
 
-	node_list_t_array_t *node_list = ui_nodes_canvas_type == CANVAS_TYPE_MATERIAL ? nodes_material_list : nodes_brush_list;
+	node_list_t_array_t *node_list = ui_nodes_get_node_list();
 
 	for (i32 i = 0; i < node_list->length; ++i) {
 		ui_node_t_array_t *list = node_list->buffer[i];
@@ -237,6 +281,9 @@ void ui_viewnodes_on_socket_released_group_edit_box() {
 		default_value = f32_array_create_x(f);
 	}
 	if (ui_icon_button(tr("OK"), ICON_CHECK, UI_ALIGN_CENTER)) {
+		if (ui_nodes_canvas_type == CANVAS_TYPE_MESH) {
+			ui_nodes_push_undo(NULL);
+		}
 		socket->name          = string_copy(name);
 		socket->type          = type == 0 ? "RGBA" : type == 1 ? "VECTOR" : "VALUE";
 		socket->color         = nodes_material_get_socket_color(socket->type);
@@ -244,7 +291,13 @@ void ui_viewnodes_on_socket_released_group_edit_box() {
 		socket->max           = max;
 		socket->default_value = default_value;
 		ui_box_hide();
-		nodes_material_sync_sockets(node);
+		if (ui_nodes_canvas_type == CANVAS_TYPE_MESH) {
+			socket->display = type == 1 ? 1 : 0;
+			ui_nodes_canvas_changed();
+		}
+		else {
+			nodes_material_sync_sockets(node);
+		}
 		ui_nodes_hwnd->redraws = 2;
 	}
 }
@@ -276,23 +329,39 @@ void ui_viewnodes_on_socket_released_group_menu_draw() {
 		sys_notify_on_next_frame(&ui_viewnodes_on_socket_released_group_edit, NULL);
 	}
 	if (ui_menu_button(tr("Delete"), "", ICON_DELETE)) {
+		if (ui_nodes_canvas_type == CANVAS_TYPE_MESH) {
+			ui_nodes_push_undo(NULL);
+		}
 		i32               i      = 0;
 		ui_node_canvas_t *canvas = ui_nodes_get_canvas(true);
+		i32               output = array_index_of(node->outputs, socket);
+		i32               input  = array_index_of(node->inputs, socket);
 		// Remove links connected to the socket
 		while (i < canvas->links->length) {
 			ui_node_link_t *l = canvas->links->buffer[i];
-			if ((l->from_id == node->id && l->from_socket == array_index_of(node->outputs, socket)) ||
-			    (l->to_id == node->id && l->to_socket == array_index_of(node->inputs, socket))) {
+			if ((l->from_id == node->id && l->from_socket == output) || (l->to_id == node->id && l->to_socket == input)) {
 				array_splice(canvas->links, i, 1);
 			}
 			else {
+				// Links of the sockets below move up
+				if (l->from_id == node->id && output > -1 && l->from_socket > output) {
+					l->from_socket--;
+				}
+				if (l->to_id == node->id && input > -1 && l->to_socket > input) {
+					l->to_socket--;
+				}
 				i++;
 			}
 		}
 		// Remove socket
 		array_remove(node->inputs, socket);
 		array_remove(node->outputs, socket);
-		nodes_material_sync_sockets(node);
+		if (ui_nodes_canvas_type == CANVAS_TYPE_MESH) {
+			ui_nodes_canvas_changed();
+		}
+		else {
+			nodes_material_sync_sockets(node);
+		}
 	}
 }
 
@@ -304,7 +373,8 @@ void ui_viewnodes_on_canvas_context_menu() {
 	ui_node_t *selected = _ui_nodes_on_canvas_released_selected;
 	g_ui->_y += 1;
 	bool is_protected = selected == NULL || string_equals(selected->type, "OUTPUT_MATERIAL_PBR") || string_equals(selected->type, "GROUP_INPUT") ||
-	                    string_equals(selected->type, "GROUP_OUTPUT") || string_equals(selected->type, "brush_output_node");
+	                    string_equals(selected->type, "GROUP_OUTPUT") || string_equals(selected->type, "brush_output_node") ||
+	                    string_equals(selected->type, "MESH_OUTPUT");
 	g_ui->enabled = !is_protected;
 	if (ui_menu_button(tr("Cut"), "ctrl+x", ICON_CUT)) {
 		sys_notify_on_next_frame(&ui_viewnodes_on_canvas_cut, NULL);
@@ -333,7 +403,7 @@ void ui_viewnodes_on_canvas_context_menu() {
 			ui_base_hwnds->buffer[TAB_AREA_STATUS]->redraws = 1;
 		}
 	}
-	if (ui_menu_button(tr("Capture Output"), "", ICON_PHOTO)) {
+	if (ui_nodes_canvas_type != CANVAS_TYPE_MESH && ui_menu_button(tr("Capture Output"), "", ICON_PHOTO)) {
 		sys_notify_on_next_frame(&ui_viewnodes_on_canvas_capture_output, NULL);
 	}
 	if (ui_nodes_canvas_type == CANVAS_TYPE_MATERIAL) {
@@ -386,7 +456,7 @@ void ui_viewnodes_on_canvas_released() {
 			if (ui_input_in_rect(g_ui->_window_x + UI_NODE_X(node), g_ui->_window_y + UI_NODE_Y(node), UI_NODE_W(node), UI_NODE_H(canvas, node))) {
 				if (nodes->nodes_selected_id->length > 0 && node->id == nodes->nodes_selected_id->buffer[0]) {
 					ui_view2d_hwnd->redraws = 2;
-					if (sys_time() - g_context->select_time < 0.2)
+					if (sys_time() - g_context->select_time < 0.2 && ui_nodes_canvas_type != CANVAS_TYPE_MESH)
 						ui_base_show_2d_view(VIEW_2D_TYPE_NODE);
 					g_context->select_time = sys_time();
 				}
@@ -401,7 +471,8 @@ void ui_viewnodes_on_socket_released(i32 socket_id) {
 	ui_node_socket_t *socket = ui_get_socket(canvas->nodes, socket_id);
 	ui_node_t        *node   = ui_get_node(canvas->nodes, socket->node_id);
 	if (g_ui->input_released_r) {
-		if (string_equals(node->type, "GROUP_INPUT") || string_equals(node->type, "GROUP_OUTPUT")) {
+		bool is_script_input = string_equals(node->type, "MESH_SCRIPT") && array_index_of(node->inputs, socket) > 0;
+		if (string_equals(node->type, "GROUP_INPUT") || string_equals(node->type, "GROUP_OUTPUT") || is_script_input) {
 
 			_ui_nodes_on_socket_released_socket = socket;
 			_ui_nodes_on_socket_released_node   = node;
@@ -561,6 +632,13 @@ void ui_nodes_draw_menubar_search(void *_) {
 	ui_nodes_node_search(math_floor(ui_nodes_node_search_x), math_floor(ui_nodes_node_search_y), NULL);
 }
 
+static void ui_nodes_rename_mesh(ui_node_canvas_t *c, char *name) {
+	mesh_object_t *o = g_context->paint_object;
+	util_mesh_rename(o, name);
+	c->name = o->base->name;
+	ui_base_hwnds->buffer[TAB_AREA_SIDEBAR0]->redraws = 2;
+}
+
 void ui_nodes_draw_menubar() {
 	ui_node_canvas_t *c     = ui_nodes_get_canvas(true);
 	i32               ew    = math_floor(UI_ELEMENT_W() * 0.7);
@@ -593,8 +671,32 @@ void ui_nodes_draw_menubar() {
 	}
 #endif
 
+	// Mesh canvas is named after the mesh, editing renames the mesh
+	if (full && ui_nodes_canvas_type == CANVAS_TYPE_MESH) {
+		char *new_name = c->name;
+		g_ui->_w       = math_floor(math_min(draw_string_width(g_font, g_ui->font_size, new_name) + 15 * UI_SCALE(), 100 * UI_SCALE()));
+		ui_id_t name_id     = ui_widget_id(&c->name, UI_ID_TEXT);
+		bool    was_editing = g_ui->text_selected_id == name_id;
+		if (!was_editing) {
+			ui_nodes_canvas_name_prev = c->name;
+		}
+		ui_set_next_id((ui_id_t)&c->name);
+		ui_text_input(&new_name, "", UI_ALIGN_LEFT, true, false);
+		bool name_changed = ui_item_changed();
+		bool commit       = was_editing && g_ui->text_selected_id != name_id;
+		g_ui->_x += g_ui->_w + 3;
+		g_ui->_y = 2 + start_y;
+		g_ui->_w = ew;
+		if (name_changed) {
+			ui_nodes_rename_mesh(c, new_name);
+		}
+		if (commit) {
+			char *name = string_equals(c->name, "") ? ui_nodes_canvas_name_prev : c->name;
+			ui_nodes_rename_mesh(c, util_mesh_unique_name(g_context->paint_object, name));
+		}
+	}
 	// Editable canvas name
-	if (full) {
+	else if (full) {
 		char *new_name = c->name; // Applied below once the rename is validated
 		g_ui->_w       = math_floor(math_min(draw_string_width(g_font, g_ui->font_size, new_name) + 15 * UI_SCALE(), 100 * UI_SCALE()));
 		ui_id_t name_id     = ui_widget_id(&c->name, UI_ID_TEXT);
@@ -660,7 +762,7 @@ void ui_nodes_draw_menubar() {
 	bool _SHADOWS        = g_theme->SHADOWS;
 	g_theme->BUTTON_COL  = g_theme->WINDOW_BG_COL;
 	g_theme->SHADOWS     = false;
-	string_array_t *cats = ui_nodes_canvas_type == CANVAS_TYPE_MATERIAL ? nodes_material_categories : nodes_brush_categories;
+	string_array_t *cats = ui_nodes_get_categories();
 	for (i32 i = 0; i < cats->length; ++i) {
 
 		if (!full && i == 4) { // MATERIAL_NODE_CATEGORY_GROUP
@@ -996,7 +1098,7 @@ void ui_nodes_update(void *_) {
 
 		// Remove nodes with unknown id for this canvas type
 		if (ui_is_paste) {
-			node_list_t_array_t *node_list = ui_nodes_canvas_type == CANVAS_TYPE_MATERIAL ? nodes_material_list : nodes_brush_list;
+			node_list_t_array_t *node_list = ui_nodes_get_node_list();
 
 			i32 i = 0;
 			while (i++ < c->nodes->length) {
@@ -1083,7 +1185,7 @@ void ui_nodes_update(void *_) {
 	ui_end();
 
 	if (ui_nodes_show_menu) {
-		node_list_t_array_t *list     = ui_nodes_canvas_type == CANVAS_TYPE_MATERIAL ? nodes_material_list : nodes_brush_list;
+		node_list_t_array_t *list     = ui_nodes_get_node_list();
 		ui_node_t_array_t   *category = list->buffer[ui_nodes_menu_category];
 		bool                 is_group_category =
 		    ui_nodes_canvas_type == CANVAS_TYPE_MATERIAL && string_equals(nodes_material_categories->buffer[ui_nodes_menu_category], "Group");
@@ -1175,6 +1277,9 @@ void ui_nodes_update(void *_) {
 }
 
 void ui_nodes_accept_asset_drop(i32 index) {
+	if (ui_nodes_canvas_type == CANVAS_TYPE_MESH) {
+		return;
+	}
 	ui_nodes_push_undo(NULL);
 	node_group_t *g = ui_nodes_group_stack->length > 0 ? ui_nodes_group_stack->buffer[ui_nodes_group_stack->length - 1] : NULL;
 	ui_node_t    *n = ui_nodes_canvas_type == CANVAS_TYPE_MATERIAL ? nodes_material_create_node("TEX_IMAGE", g) : nodes_brush_create_node("TEX_IMAGE");
@@ -1187,6 +1292,9 @@ void ui_nodes_accept_asset_drop(i32 index) {
 }
 
 void ui_nodes_accept_layer_drop(i32 index) {
+	if (ui_nodes_canvas_type == CANVAS_TYPE_MESH) {
+		return;
+	}
 	ui_nodes_push_undo(NULL);
 	if (slot_layer_is_group(g_project->_->layers->buffer[index])) {
 		return;
@@ -1202,6 +1310,9 @@ void ui_nodes_accept_layer_drop(i32 index) {
 }
 
 void ui_nodes_accept_material_drop(i32 index) {
+	if (ui_nodes_canvas_type == CANVAS_TYPE_MESH) {
+		return;
+	}
 	ui_nodes_push_undo(NULL);
 	node_group_t *g                                 = ui_nodes_group_stack->length > 0 ? ui_nodes_group_stack->buffer[ui_nodes_group_stack->length - 1] : NULL;
 	ui_node_t    *n                                 = nodes_material_create_node("MATERIAL", g);
@@ -1214,6 +1325,9 @@ void ui_nodes_accept_material_drop(i32 index) {
 }
 
 void ui_nodes_accept_swatch_drop(swatch_color_t *swatch) {
+	if (ui_nodes_canvas_type == CANVAS_TYPE_MESH) {
+		return;
+	}
 	ui_nodes_push_undo(NULL);
 	node_group_t *g                         = ui_nodes_group_stack->length > 0 ? ui_nodes_group_stack->buffer[ui_nodes_group_stack->length - 1] : NULL;
 	ui_node_t    *n                         = nodes_material_create_node("RGB", g);
@@ -1243,4 +1357,5 @@ void ui_viewnodes_init() {
 
 	ui_nodes_grid_snap = g_config->grid_snap;
 	nodes_material_init();
+	nodes_mesh_init();
 }

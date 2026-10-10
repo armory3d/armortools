@@ -421,6 +421,28 @@ void ui_base_show_brush_nodes() {
 	base_resize();
 }
 
+void ui_base_show_mesh_nodes() {
+	// Clear input state as ui receives input events even when not drawn
+	ui_end_input();
+	ui_nodes_show        = !ui_nodes_show || ui_nodes_canvas_type != CANVAS_TYPE_MESH;
+	ui_nodes_canvas_type = CANVAS_TYPE_MESH;
+
+	if (g_config->touch_ui && ui_view2d_show && base_view3d_show) {
+		ui_view2d_show = false;
+	}
+
+	if (g_config->touch_ui && ui_nodes_show && iron_window_width() < iron_window_height()) {
+		ui_view2d_show   = false;
+		base_view3d_show = false;
+	}
+
+	if (g_config->touch_ui && !ui_nodes_show && iron_window_width() < iron_window_height()) {
+		base_view3d_show = true;
+	}
+
+	base_resize();
+}
+
 void ui_base_show_2d_view(view_2d_type_t type) {
 	// Clear input state as ui receives input events even when not drawn
 	ui_end_input();

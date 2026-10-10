@@ -228,6 +228,7 @@ void import_mesh_make_mesh(raw_mesh_t *mesh) {
 		viewport_reset();
 	}
 
+	nodes_mesh_reset();
 	util_mesh_remove_objects(g_project->_->paint_objects, g_context->paint_object);
 
 	char *handle = g_context->paint_object->data->_->handle;

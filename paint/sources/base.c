@@ -787,6 +787,13 @@ string_array_t *base_combo_enum_texts(char *node_type) {
 		return &texts;
 	}
 
+	if (string_equals(node_type, "MESH_OBJECT")) {
+		for (i32 i = 0; i < g_project->_->paint_objects->length; ++i) {
+			string_array_push(&texts, g_project->_->paint_objects->buffer[i]->base->name);
+		}
+		return &texts;
+	}
+
 	return NULL;
 }
 

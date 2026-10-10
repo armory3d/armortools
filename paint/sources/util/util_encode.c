@@ -206,7 +206,7 @@ buffer_t *util_encode_project(project_t *raw) {
 	buffer_t *encoded = buffer_create(size);
 
 	armpack_encode_start(encoded->buffer);
-	armpack_encode_map(39);
+	armpack_encode_map(41);
 
 	armpack_encode_string("version");
 	armpack_encode_string(raw->version);
@@ -585,6 +585,19 @@ buffer_t *util_encode_project(project_t *raw) {
 	else {
 		armpack_encode_null();
 	}
+
+	armpack_encode_string("mesh_nodes");
+	if (raw->mesh_nodes != NULL) {
+		armpack_encode_array(raw->mesh_nodes->length);
+		for (i32 i = 0; i < raw->mesh_nodes->length; ++i) {
+			util_encode_node_canvas(raw->mesh_nodes->buffer[i]);
+		}
+	}
+	else {
+		armpack_encode_null();
+	}
+	armpack_encode_string("mesh_nodes_objects");
+	armpack_encode_array_i32(raw->mesh_nodes_objects);
 
 	i32 ei          = armpack_encode_end();
 	encoded->length = ei;

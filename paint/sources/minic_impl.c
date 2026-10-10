@@ -1366,6 +1366,90 @@ void script_material_set_text(ui_node_t *node, i32 button, char *text) {
 	}
 }
 
+static ui_node_canvas_t *script_mesh_canvas(mesh_object_t *o) {
+	if (o == NULL || g_project == NULL || array_index_of(g_project->_->paint_objects, o) < 0) {
+		return NULL;
+	}
+	return nodes_mesh_get(o, true)->canvas;
+}
+
+static void script_mesh_redraw(void) {
+	if (ui_nodes_hwnd != NULL) {
+		ui_nodes_hwnd->redraws = 2;
+	}
+}
+
+ui_node_t *script_mesh_create_node_at(mesh_object_t *o, char *type, f32 x, f32 y) {
+	if (type == NULL || script_mesh_canvas(o) == NULL) {
+		return NULL;
+	}
+	ui_node_t *node = nodes_mesh_create_node(o, type);
+	if (node != NULL) {
+		node->x = x;
+		node->y = y;
+	}
+	script_mesh_redraw();
+	return node;
+}
+
+ui_node_t *script_mesh_get_node(mesh_object_t *o, char *type) {
+	ui_node_canvas_t *canvas = script_mesh_canvas(o);
+	for (i32 i = 0; canvas != NULL && type != NULL && i < canvas->nodes->length; ++i) {
+		if (string_equals(canvas->nodes->buffer[i]->type, type)) {
+			return canvas->nodes->buffer[i];
+		}
+	}
+	return NULL;
+}
+
+void script_mesh_connect(mesh_object_t *o, ui_node_t *from, i32 from_socket, ui_node_t *to, i32 to_socket) {
+	ui_node_canvas_t *canvas = script_mesh_canvas(o);
+	if (canvas == NULL || from == NULL || to == NULL) {
+		return;
+	}
+	if (from_socket < 0 || from_socket >= from->outputs->length || to_socket < 0 || to_socket >= to->inputs->length) {
+		return;
+	}
+	script_material_remove_links_to(canvas, to->id, to_socket);
+	any_array_push(canvas->links, project_create_node_link(canvas->links, from->id, from_socket, to->id, to_socket));
+	script_mesh_redraw();
+}
+
+void script_mesh_disconnect(mesh_object_t *o, ui_node_t *to, i32 to_socket) {
+	ui_node_canvas_t *canvas = script_mesh_canvas(o);
+	if (canvas == NULL || to == NULL) {
+		return;
+	}
+	script_material_remove_links_to(canvas, to->id, to_socket);
+	script_mesh_redraw();
+}
+
+void script_mesh_remove_node(mesh_object_t *o, ui_node_t *node) {
+	ui_node_canvas_t *canvas = script_mesh_canvas(o);
+	if (canvas == NULL || node == NULL || string_equals(node->type, "MESH_OUTPUT")) {
+		return;
+	}
+	ui_remove_node(node, canvas);
+	script_mesh_redraw();
+}
+
+void script_mesh_add_input(mesh_object_t *o, ui_node_t *node, char *type, char *name) {
+	ui_node_canvas_t *canvas = script_mesh_canvas(o);
+	if (canvas == NULL || node == NULL || type == NULL || !string_equals(node->type, "MESH_SCRIPT")) {
+		return;
+	}
+	nodes_mesh_script_add_socket(canvas, node, type, name);
+	script_mesh_redraw();
+}
+
+void script_mesh_update(mesh_object_t *o) {
+	if (script_mesh_canvas(o) == NULL) {
+		return;
+	}
+	nodes_mesh_update(o, false);
+	script_mesh_redraw();
+}
+
 void script_material_update(void) {
 	if (g_context == NULL || g_context->material == NULL) {
 		return;
@@ -1488,15 +1572,17 @@ void script_object_set_name(object_t *o, char *name) {
 		return;
 	}
 
-	char *new_name = string_copy(name);
-	tab_stages_rename_object(o->name, new_name);
-	o->name = new_name;
-
 	if (o->ext != NULL && string_equals(o->ext_type, "mesh_object_t")) {
 		mesh_object_t *mo = o->ext;
-		if (mo->data != NULL && util_mesh_data_owner(mo->data) == array_index_of(g_project->_->paint_objects, mo)) {
-			mo->data->name = string_copy(new_name);
+		if (array_index_of(g_project->_->paint_objects, mo) >= 0) {
+			name = util_mesh_unique_name(mo, name);
 		}
+		util_mesh_rename(mo, name);
+	}
+	else {
+		char *new_name = string_copy(name);
+		tab_stages_rename_object(o->name, new_name);
+		o->name = new_name;
 	}
 
 	if (ui_base_hwnds != NULL && ui_base_hwnds->length > TAB_AREA_SIDEBAR0) {

@@ -577,6 +577,36 @@ X6(script_material_set_vector, "v(p:ui_node_t node,i is_input,i socket,f x,f y,f
 X3(script_material_set_button, "v(p:ui_node_t node,i button,f value)", v, p, i, f)
 X3(script_material_set_text, "v(p:ui_node_t node,i button,p:char text)", v, p, i, p)
 X0(script_material_update, "v()", v)
+
+// mesh nodes
+X4(script_mesh_create_node_at, "p:ui_node_t(p:mesh_object_t o,p:char type,f x,f y)", p, p, p, f, f)
+X2(script_mesh_get_node, "p:ui_node_t(p:mesh_object_t o,p:char type)", p, p, p)
+X5(script_mesh_connect, "v(p:mesh_object_t o,p:ui_node_t from,i from_socket,p:ui_node_t to,i to_socket)", v, p, p, i, p, i)
+X3(script_mesh_disconnect, "v(p:mesh_object_t o,p:ui_node_t to,i to_socket)", v, p, p, i)
+X2(script_mesh_remove_node, "v(p:mesh_object_t o,p:ui_node_t node)", v, p, p)
+X4(script_mesh_add_input, "v(p:mesh_object_t o,p:ui_node_t node,p:char type,p:char name)", v, p, p, p, p)
+X1(script_mesh_update, "v(p:mesh_object_t o)", v, p)
+
+// mesh script node
+X0(mesh_geo_input, "p:mesh_geo_t()", p)
+X1(mesh_geo_output, "v(p:mesh_geo_t g)", v, p)
+X2(mesh_geo_create, "p:mesh_geo_t(i vertex_count,i index_count)", p, i, i)
+X1(mesh_geo_copy, "p:mesh_geo_t(p:mesh_geo_t g)", p, p)
+X5(mesh_geo_shape, "p:mesh_geo_t(i shape,f size_x,f size_y,f size_z,i segments)", p, i, f, f, f, i)
+X10(mesh_geo_transform, "p:mesh_geo_t(p:mesh_geo_t g,f loc_x,f loc_y,f loc_z,f rot_x,f rot_y,f rot_z,f scale_x,f scale_y,f scale_z)", p, p, f, f, f, f, f, f, f,
+    f, f)
+X6(mesh_geo_array, "p:mesh_geo_t(p:mesh_geo_t g,i count,f offset_x,f offset_y,f offset_z,b relative)", p, p, i, f, f, f, b)
+X2(mesh_geo_mirror, "p:mesh_geo_t(p:mesh_geo_t g,i axis)", p, p, i)
+X2(mesh_geo_join, "p:mesh_geo_t(p:mesh_geo_t a,p:mesh_geo_t b)", p, p, p)
+X3(mesh_geo_boolean, "p:mesh_geo_t(p:mesh_geo_t a,p:mesh_geo_t b,i op)", p, p, p, i)
+X2(mesh_geo_subdivide, "p:mesh_geo_t(p:mesh_geo_t g,i levels)", p, p, i)
+X2(mesh_geo_smooth, "p:mesh_geo_t(p:mesh_geo_t g,i iterations)", p, p, i)
+X2(mesh_geo_decimate, "p:mesh_geo_t(p:mesh_geo_t g,f ratio)", p, p, f)
+X2(mesh_geo_bevel, "p:mesh_geo_t(p:mesh_geo_t g,f amount)", p, p, f)
+X2(mesh_geo_normals, "p:mesh_geo_t(p:mesh_geo_t g,b smooth)", p, p, b)
+X1(mesh_geo_input_value, "f(p:char name)", f, p)
+X2(mesh_geo_input_vector, "f(p:char name,i i)", f, p, i)
+
 X1(context_set_viewport_shader, "v(p viewport_shader)", v, p)
 X1(context_set_viewport_mode, "v(i mode)", v, i)
 X1(context_set_camera_controls, "v(i i)", v, i)

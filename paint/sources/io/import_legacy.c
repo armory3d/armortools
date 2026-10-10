@@ -322,6 +322,8 @@ project_t *import_arm_from_version_16(any_map_t *old) {
 			any_map_set(tls->buffer[i], "texpaint_sculpt", NULL);
 		}
 	}
+	any_map_set(old, "mesh_nodes", NULL);
+	any_map_set(old, "mesh_nodes_objects", NULL);
 	return import_arm_from_map_to_arm(old);
 }
 

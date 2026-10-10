@@ -82,6 +82,9 @@ bool util_mesh_data_is_shared(mesh_data_t *data) {
 			users++;
 		}
 	}
+	if (nodes_mesh_holds(data)) {
+		users++; // Original mesh of an object with mesh nodes
+	}
 	return users > 1;
 }
 
@@ -557,6 +560,7 @@ bool util_mesh_merge_refresh() {
 }
 
 void util_mesh_transform_changed() {
+	nodes_mesh_request_refresh();
 	if (g_context->merged_object != NULL && !util_mesh_merge_refresh()) {
 		mesh_object_t_array_t *objects = any_array_create(0);
 		if (util_mesh_merged_objects != NULL) {
@@ -633,6 +637,7 @@ static void util_mesh_join_geometry(mesh_object_t_array_t *objects) {
 	mesh_object_t *main_object = objects->buffer[0];
 	mat4_t         inv_world   = mat4_inv(main_object->base->transform->world);
 	for (i32 i = 0; i < objects->length; ++i) {
+		nodes_mesh_remove(objects->buffer[i]); // Output meshes are joined
 		util_mesh_unshare_data(objects->buffer[i]);
 	}
 	for (i32 i = 0; i < objects->length; ++i) {
@@ -2706,4 +2711,37 @@ void util_mesh_delete() {
 		return;
 	}
 	tab_meshes_draw_context_menu_delete(g_context->paint_object);
+}
+
+static bool util_mesh_is_unique_name(mesh_object_t *self, char *name) {
+	for (i32 i = 0; i < g_project->_->paint_objects->length; ++i) {
+		mesh_object_t *p = g_project->_->paint_objects->buffer[i];
+		if (p != self && string_equals(p->base->name, name)) {
+			return false;
+		}
+	}
+	return true;
+}
+
+char *util_mesh_unique_name(mesh_object_t *self, char *name) {
+	if (util_mesh_is_unique_name(self, name)) {
+		return name;
+	}
+	char *base;
+	i32   i   = strings_split_number_ext(name, &base);
+	char *res = string_tmp("%s%s", base, strings_number_ext(++i));
+	while (!util_mesh_is_unique_name(self, res)) {
+		res = string_tmp("%s%s", base, strings_number_ext(++i));
+	}
+	return res;
+}
+
+void util_mesh_rename(mesh_object_t *o, char *name) {
+	name = string_copy(name);
+	tab_stages_rename_object(o->base->name, name);
+	o->base->name = name;
+	// Mesh data shared by linked duplicates is named after the object holding it
+	if (o->data != NULL && util_mesh_data_owner(o->data) == array_index_of(g_project->_->paint_objects, o)) {
+		o->data->name = string_copy(name);
+	}
 }

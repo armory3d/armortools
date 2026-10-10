@@ -246,6 +246,19 @@ static char *agent_nodes_reference(void) {
 		}
 	}
 
+	nodes_mesh_init();
+
+	string_buffer_append(&sb, "//\n// Mesh nodes reference:\n");
+
+	for (i32 i = 0; i < nodes_mesh_list->length; ++i) {
+		ui_node_t_array_t *c = (ui_node_t_array_t *)nodes_mesh_list->buffer[i];
+		for (i32 j = 0; j < c->length; ++j) {
+			agent_write_node(&sb, c->buffer[j]);
+		}
+	}
+	string_buffer_append(&sb, "// MESH_OUTPUT | in: 0 Mesh\n");
+	string_buffer_append(&sb, nodes_mesh_reference());
+
 	char *result = string_copy(string_buffer_get(&sb));
 	string_buffer_free(&sb);
 	return result;
