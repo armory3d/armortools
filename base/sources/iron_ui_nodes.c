@@ -199,11 +199,9 @@ int ui_get_node_index(ui_node_t **nodes, int nodes_count, int id) {
 }
 
 int ui_next_node_id(ui_node_array_t *nodes) {
-	if (ui_node_id == -1) {
-		for (int i = 0; i < nodes->length; ++i) {
-			if (ui_node_id < nodes->buffer[i]->id) {
-				ui_node_id = nodes->buffer[i]->id;
-			}
+	for (int i = 0; i < nodes->length; ++i) {
+		if (ui_node_id < nodes->buffer[i]->id) {
+			ui_node_id = nodes->buffer[i]->id;
 		}
 	}
 	return ++ui_node_id;
@@ -1745,8 +1743,9 @@ ui_nodes_t *ui_nodes_create() {
 	        "GROUP_OUTPUT",
 	        "GROUP_INPUT",
 	        "brush_output_node",
+	        "MESH_OUTPUT",
 	    },
-	    4);
+	    5);
 	ui_nodes_on_custom_button = nodes_on_custom_button;
 	return raw;
 }
