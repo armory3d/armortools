@@ -62,10 +62,21 @@ void shader_node_button(i32 node_id) {
 	ui_node_t        *node = ui_get_node(ui_nodes_get_canvas(true)->nodes, node_id);
 	ui_node_button_t *but  = node->buttons->buffer[0];
 	char             *text = shader_node_text(node);
+	if (!ui_nodes_code_panel(node)) {
+		// Apply the edit of a text field hidden while selected
+		if (shader_node_dirty == but) {
+			shader_node_dirty = NULL;
+			g_ui->changed     = true;
+		}
+		but->height = 1;
+		return;
+	}
 	ui_set_next_id((ui_id_t)&but->data);
 	bool selected = g_ui->text_selected_id == ui_widget_id(NULL, UI_ID_TEXT);
 	bool changed  = g_ui->changed;
-	ui_text_area(&text, &ui_nodes_editor_state(node)->line, UI_ALIGN_LEFT, true, "", true);
+	ui_nodes_code_begin();
+	ui_text_area(&text, &ui_nodes_editor_state(node)->line, UI_ALIGN_LEFT, true, "", false); // Word wrap would reflow the code
+	ui_nodes_code_end();
 	if (ui_item_changed()) {
 		but->data = u8_array_create_from_string(text);
 		if (selected) {
@@ -79,7 +90,7 @@ void shader_node_button(i32 node_id) {
 		shader_node_dirty = NULL;
 		g_ui->changed     = true;
 	}
-	but->height = string_split(text, "\n")->length + 1;
+	but->height = ui_line_count(text) + 2;
 }
 
 void shader_node_init() {
@@ -125,10 +136,10 @@ void shader_node_init() {
 	                                                                                          .min           = 0.0,
 	                                                                                          .max           = 1.0,
 	                                                                                          .precision     = 100,
-	                                                                                          .height        = 2}),
+	                                                                                          .height        = 3}),
 	                                                        },
 	                                                        1),
-	                                                    .width = 0,
+	                                                    .width = 300,
 	                                                    .flags = 0});
 
 	any_array_push(nodes_material_input, shader_node_def);
