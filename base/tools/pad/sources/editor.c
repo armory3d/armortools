@@ -1,0 +1,996 @@
+// Text editor panel
+
+#define EDITOR_UNDO_MAX 16
+
+typedef struct editor_undo {
+	char *text;
+	i32   line;
+	i32   col;
+} editor_undo_t;
+
+typedef struct editor_buffer {
+	char      *path;
+	char      *text;
+	char      *saved; // Contents on disk
+	i32        line;
+	f32        scroll;
+	bool       tabs;      // File is indented with tabs
+	any_map_t *tab_lines; // Lines as loaded, by their text with tabs expanded
+	bool       crlf;
+	i64        time; // Modification time of the file when loaded or saved
+	bool       diff; // Read-only git diff of the file at path
+	i32        caret; // Line of the caret in the diff, -1 when not placed
+	gpu_texture_t *image; // Picture shown instead of the text
+	editor_undo_t  undo[EDITOR_UNDO_MAX];
+	editor_undo_t  redo[EDITOR_UNDO_MAX];
+	i32            undo_count;
+	i32            redo_count;
+	editor_undo_t  undo_last; // Text and cursor in the previous frame
+	f64            undo_time; // Time of the last edit
+} editor_buffer_t;
+
+ui_window_t        *editor_hwnd     = NULL;
+any_map_t          *editor_buffers  = NULL; // Opened files by path
+any_array_t        *editor_buffer_list = NULL;
+editor_buffer_t    *editor_current  = NULL;
+ui_text_coloring_t *editor_coloring = NULL;
+
+gpu_texture_t *editor_minimap_tex       = NULL;
+u32            editor_minimap_hash      = 0;
+bool           editor_minimap_scrolling = false;
+bool           editor_minimap_show      = true;
+ui_id_t        editor_text_id           = 0; // Widget ids depend on the window, stored while drawing it
+
+bool  editor_search_show  = false;
+bool  editor_search_focus = false;
+char *editor_search       = "";
+i32   editor_search_pos   = -1; // Text offset of the current match
+
+char *editor_mark     = NULL; // Selected text, its occurrences are highlighted
+i32   editor_mark_pos = -1;   // Text offset of the selection
+
+ui_text_coloring_t *editor_get_coloring() {
+	if (editor_coloring == NULL) {
+		buffer_t *blob = data_get_blob("text_coloring.json");
+		if (blob == NULL) {
+			return NULL;
+		}
+		editor_coloring = json_parse(sys_buffer_to_string(blob));
+	}
+	return editor_coloring;
+}
+
+bool editor_is_modified(editor_buffer_t *b) {
+	return b != NULL && !b->diff && !string_equals(b->text, b->saved);
+}
+
+// The text area holds a line in a fixed buffer
+static bool editor_is_text(buffer_t *blob) {
+	i32 line_len = 0;
+	for (i32 i = 0; i < (i32)blob->length; ++i) {
+		u8 c = blob->buffer[i];
+		if (c == 0) {
+			return false;
+		}
+		line_len = c == '\n' ? 0 : line_len + (c == '\t' ? 4 : 1);
+		if (line_len > UI_TEXT_MAX - 64) {
+			return false;
+		}
+	}
+	return true;
+}
+
+// Text area edits with spaces, turn the indentation back into tabs
+// Untouched lines are written the way they were loaded
+static char *editor_retab(editor_buffer_t *b) {
+	char *text = b->text;
+	char *out  = string_alloc(string_length(text) + 1);
+	i32   o    = 0;
+	i32   i    = 0;
+	while (text[i] != '\0') {
+		i32 end = i;
+		while (text[end] != '\0' && text[end] != '\n') {
+			end++;
+		}
+		char *line = substring(text, i, end);
+		char *raw  = any_map_get(b->tab_lines, line);
+		if (raw != NULL) {
+			strcpy(out + o, raw);
+			o += string_length(raw);
+		}
+		else {
+			i32 spaces = 0;
+			while (b->tabs && line[spaces] == ' ') {
+				spaces++;
+			}
+			for (i32 t = 0; t < spaces / 4; ++t) {
+				out[o++] = '\t';
+			}
+			strcpy(out + o, line + spaces - spaces % 4);
+			o += string_length(line) - spaces + spaces % 4;
+		}
+		i = end;
+		if (text[i] == '\n') {
+			out[o++] = text[i++];
+		}
+	}
+	out[o] = '\0';
+	return out;
+}
+
+static void editor_store_scroll() {
+	if (editor_current != NULL) {
+		editor_current->scroll = editor_hwnd->scroll_offset;
+	}
+}
+
+static void editor_set_current(editor_buffer_t *b) {
+	editor_store_scroll();
+	if (editor_current != NULL && editor_current->image != NULL && editor_current != b) { // Pictures are not kept
+		gpu_delete_texture(editor_current->image);
+		editor_current->image = NULL;
+	}
+	if (g_ui->text_selected_id != 0) {
+		ui_deselect_text(g_ui);
+		g_ui->submit_text_id = 0; // Line edits are already applied to the buffer
+	}
+	ui_text_area_clear_selection();
+	editor_current             = b;
+	editor_hwnd->scroll_offset = b != NULL ? b->scroll : 0;
+	editor_hwnd->redraws       = 2;
+}
+
+// Modification time of the file on disk, 0 when missing
+static i64 editor_file_time(char *path) {
+#ifdef IRON_WINDOWS
+	struct _stat st;
+	return _stat(path, &st) == 0 ? (i64)st.st_mtime : 0;
+#elif defined(IRON_MACOS)
+	struct stat st;
+	return stat(path, &st) == 0 ? (i64)st.st_mtimespec.tv_sec * 1000000000 + st.st_mtimespec.tv_nsec : 0;
+#else
+	struct stat st;
+	return stat(path, &st) == 0 ? (i64)st.st_mtim.tv_sec * 1000000000 + st.st_mtim.tv_nsec : 0;
+#endif
+}
+
+// Reads the file from disk into the buffer
+static bool editor_load(editor_buffer_t *b) {
+	buffer_t *blob = iron_load_blob(b->path);
+	if (blob == NULL) {
+		return false;
+	}
+	if (!editor_is_text(blob)) {
+		iron_delete_blob(blob);
+		return false;
+	}
+
+	char *text = string_alloc(blob->length + 1);
+	memcpy(text, blob->buffer, blob->length);
+	iron_delete_blob(blob);
+
+	b->crlf              = string_index_of(text, "\r\n") > -1;
+	b->tabs              = text[0] == '\t' || string_index_of(text, "\n\t") > -1;
+	text                 = string_replace_all(text, "\r", "");
+	b->text              = string_replace_all(text, "\t", "    ");
+	b->tab_lines         = any_map_create();
+	string_array_t *raws = string_split(text, "\n");
+	for (i32 i = 0; i < (i32)raws->length; ++i) {
+		char *raw = raws->buffer[i];
+		any_map_set(b->tab_lines, string_replace_all(raw, "\t", "    "), raw);
+	}
+	b->saved = string_copy(b->text);
+	b->time  = editor_file_time(b->path);
+	return true;
+}
+
+bool editor_is_image(char *path) {
+	char ext[8];
+	i32  dot = string_last_index_of(path, ".");
+	i32  len = string_length(path);
+	if (dot < 0 || len - dot > 6) {
+		return false;
+	}
+	for (i32 i = dot; i <= len; ++i) {
+		ext[i - dot] = tolower(path[i]);
+	}
+	return string_equals(ext, ".png") || string_equals(ext, ".jpg") || string_equals(ext, ".jpeg");
+}
+
+// Shows the picture, the buffer is not kept with the opened files
+static void editor_open_image(char *path) {
+	buffer_t           *blob = iron_load_blob(path);
+	iron_image_pixels_t pixels;
+	bool                decoded = blob != NULL && iron_decode_image(blob, path, &pixels);
+	if (blob != NULL) {
+		iron_delete_blob(blob);
+	}
+	if (!decoded) {
+		return;
+	}
+	if (pixels.width > 16384 || pixels.height > 16384) { // Texture size limit
+		free(pixels.data);
+		return;
+	}
+	editor_buffer_t *b = ALLOC_INIT(editor_buffer_t, {0});
+	b->path            = string_copy(path);
+	b->text            = "";
+	b->saved           = "";
+	b->image           = gpu_create_texture_from_pixels(&pixels);
+	editor_set_current(b);
+	pad_save_config();
+}
+
+void editor_open(char *path) {
+	if (editor_is_image(path)) {
+		editor_open_image(path);
+		return;
+	}
+	editor_buffer_t *b = any_map_get(editor_buffers, path);
+	if (b != NULL) {
+		editor_set_current(b);
+		return;
+	}
+
+	b       = ALLOC_INIT(editor_buffer_t, {0});
+	b->path = string_copy(path);
+	if (!editor_load(b)) {
+		return;
+	}
+	any_map_set(editor_buffers, b->path, b);
+	any_array_push(editor_buffer_list, b);
+	editor_set_current(b);
+	pad_save_config();
+}
+
+// Shows a diff of the file, the buffer is not kept with the opened files
+bool editor_open_diff(char *path, char *diff, i32 length) {
+	buffer_t blob = {.buffer = (u8 *)diff, .length = length};
+	if (!editor_is_text(&blob)) {
+		return false;
+	}
+	editor_buffer_t *b = ALLOC_INIT(editor_buffer_t, {0});
+	b->path            = string_copy(path);
+	b->text            = string_replace_all(string_replace_all(diff, "\r", ""), "\t", "    ");
+	b->saved           = b->text;
+	b->diff            = true;
+	b->caret           = -1;
+	editor_set_current(b);
+	return true;
+}
+
+// Line of the file at the caret of the shown diff, -1 without a caret
+i32 editor_diff_line() {
+	editor_buffer_t *b = editor_current;
+	if (b == NULL || !b->diff || b->caret < 0) {
+		return -1;
+	}
+	char *text = b->text;
+	i32   line = 1; // Next line of the new file, 1-based
+	for (i32 i = 0, row = 0; text[i] != '\0'; ++row) {
+		char c = text[i];
+		if (c == '@') { // @@ -a,b +c,d @@
+			char *plus = strchr(text + i, '+');
+			if (plus != NULL) {
+				line = atoi(plus + 1);
+			}
+		}
+		if (row == b->caret) {
+			break;
+		}
+		if (c == ' ' || c == '+') {
+			line++;
+		}
+		while (text[i] != '\0' && text[i] != '\n') {
+			i++;
+		}
+		if (text[i] == '\n') {
+			i++;
+		}
+	}
+	return line > 0 ? line - 1 : 0;
+}
+
+// A file was changed by another program
+bool editor_changed_on_disk() {
+	for (i32 i = 0; i < (i32)editor_buffer_list->length; ++i) {
+		editor_buffer_t *b = editor_buffer_list->buffer[i];
+		if (editor_file_time(b->path) != b->time) {
+			return true;
+		}
+	}
+	return false;
+}
+
+// Reloads the files changed on disk, buffers with unsaved changes are kept
+void editor_reload_changed() {
+	for (i32 i = 0; i < (i32)editor_buffer_list->length; ++i) {
+		editor_buffer_t *b    = editor_buffer_list->buffer[i];
+		i64              time = editor_file_time(b->path);
+		if (time == b->time) {
+			continue;
+		}
+		if (time == 0 || editor_is_modified(b)) { // Deleted or edited here
+			b->time = time;
+			continue;
+		}
+		if (b == editor_current && g_ui->text_selected_id != 0) {
+			ui_deselect_text(g_ui);
+			g_ui->submit_text_id = 0;
+			ui_text_area_clear_selection();
+		}
+		if (!editor_load(b)) {
+			b->time = time;
+			continue;
+		}
+		i32 lines = ui_line_count(b->text);
+		if (b->line > lines - 1) {
+			b->line = lines - 1;
+		}
+		editor_hwnd->redraws = 2;
+	}
+}
+
+// Removes the white space at the end of each line
+static char *editor_trim_lines(char *text) {
+	char *out = string_alloc(string_length(text) + 1);
+	i32   o   = 0;
+	for (i32 i = 0;; ++i) {
+		if (text[i] == '\n' || text[i] == '\0') {
+			while (o > 0 && (out[o - 1] == ' ' || out[o - 1] == '\t')) {
+				o--;
+			}
+		}
+		if (text[i] == '\0') {
+			break;
+		}
+		out[o++] = text[i];
+	}
+	out[o] = '\0';
+	return out;
+}
+
+void editor_save_buffer(editor_buffer_t *b) {
+	// Trailing spaces are line breaks in markdown
+	char *trimmed = ends_with(b->path, ".md") ? b->text : editor_trim_lines(b->text);
+	if (!string_equals(trimmed, b->text)) {
+		b->text = trimmed;
+		if (b == editor_current && editor_text_id != 0 && g_ui->text_selected_id == editor_text_id) { // Line being edited
+			i32 len = string_length(g_ui->text_selected);
+			while (len > 0 && g_ui->text_selected[len - 1] == ' ') {
+				g_ui->text_selected[--len] = '\0';
+			}
+			if (g_ui->cursor_x > len) {
+				g_ui->cursor_x = len;
+			}
+			if (g_ui->highlight_anchor > len) {
+				g_ui->highlight_anchor = len;
+			}
+		}
+		editor_hwnd->redraws = 2;
+	}
+	char *out = editor_retab(b);
+	if (b->crlf) {
+		out = string_replace_all(out, "\n", "\r\n");
+	}
+	buffer_t bytes = {.buffer = (u8 *)out, .length = string_length(out)};
+	iron_file_save_bytes(b->path, &bytes, 0);
+	b->saved = string_copy(b->text);
+	b->time  = editor_file_time(b->path);
+}
+
+void editor_save() {
+	if (editor_current != NULL && !editor_current->diff && editor_current->image == NULL) {
+		editor_save_buffer(editor_current);
+	}
+}
+
+void editor_save_all() {
+	for (i32 i = 0; i < (i32)editor_buffer_list->length; ++i) {
+		editor_buffer_t *b = editor_buffer_list->buffer[i];
+		if (editor_is_modified(b)) {
+			editor_save_buffer(b);
+		}
+	}
+}
+
+// Tints the added and removed lines of a diff
+static void editor_draw_diff(char *text, f32 x, f32 y, f32 w) {
+	f32 line_h = UI_ELEMENT_H();
+	for (i32 i = 0; text[i] != '\0'; y += line_h) {
+		char c = text[i];
+		if (y + line_h > 0 && y < g_ui->_window_h && (c == '+' || c == '-' || c == '@')) {
+			draw_set_color(c == '+' ? 0x2200ff00 : (c == '-' ? 0x22ff0000 : 0x220080ff));
+			draw_filled_rect(x, y, w, line_h);
+		}
+		while (text[i] != '\0' && text[i] != '\n') {
+			i++;
+		}
+		if (text[i] == '\n') {
+			i++;
+		}
+	}
+}
+
+// Offset of the first occurrence at or after from, -1 when there is none
+static i32 editor_find(char *text, char *needle, i32 from) {
+	if (needle[0] == '\0') {
+		return -1;
+	}
+	for (i32 i = from < 0 ? 0 : from; text[i] != '\0'; ++i) {
+		i32 j = 0;
+		while (needle[j] != '\0' && tolower(text[i + j]) == tolower(needle[j])) {
+			j++;
+		}
+		if (needle[j] == '\0') {
+			return i;
+		}
+	}
+	return -1;
+}
+
+static bool editor_is_word_char(char c) {
+	return c == '_' || (c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z');
+}
+
+// Offset of the line start
+static i32 editor_line_pos(char *text, i32 line) {
+	i32 pos = 0;
+	for (i32 i = 0; line > 0 && text[i] != '\0'; ++i) {
+		if (text[i] == '\n') {
+			line--;
+			pos = i + 1;
+		}
+	}
+	return pos;
+}
+
+// Selects a part of the line in the text area, runs while drawing the editor window
+static void editor_select(i32 line, i32 col, i32 len) {
+	ui_id_t id = ui_widget_id(&editor_current->text, UI_ID_TEXT);
+	if (g_ui->text_selected_id != 0 && g_ui->text_selected_id != id) {
+		ui_deselect_text(g_ui);
+		g_ui->submit_text_id = 0;
+	}
+	ui_text_area_clear_selection();
+	char *src = editor_current->text + editor_line_pos(editor_current->text, line);
+	i32   n   = 0;
+	while (src[n] != '\0' && src[n] != '\n' && n < UI_TEXT_MAX - 1) {
+		g_ui->text_selected[n] = src[n];
+		n++;
+	}
+	g_ui->text_selected[n] = '\0';
+	strcpy(g_ui->text_original, g_ui->text_selected);
+	g_ui->text_selected_id = id;
+	g_ui->is_typing        = true;
+	g_ui->highlight_anchor = col;
+	g_ui->cursor_x         = col + len;
+	g_ui->cursor_sticky_x  = g_ui->cursor_x;
+	editor_current->line   = line;
+}
+
+// Number of matches and the 1-based index of the current one, 0 when not at a match
+static void editor_search_count(char *text, i32 *current, i32 *total) {
+	i32 len  = string_length(editor_search);
+	*current = 0;
+	*total   = 0;
+	for (i32 p = editor_find(text, editor_search, 0); p != -1; p = editor_find(text, editor_search, p + len)) {
+		(*total)++;
+		if (p == editor_search_pos) {
+			*current = *total;
+		}
+	}
+}
+
+// Scrolls the current file to the line
+void editor_goto_line(i32 line) {
+	editor_current->line       = line;
+	f32 scroll                 = sys_h() / 3.0 - line * UI_ELEMENT_H();
+	editor_hwnd->scroll_offset = scroll < 0 ? scroll : 0;
+	editor_hwnd->redraws       = 2;
+}
+
+// Selects the next match, wraps at the end
+static void editor_search_next() {
+	char *text = editor_current->text;
+	i32   len  = string_length(editor_search);
+	i32   end  = string_length(text);
+	if (editor_search_pos >= end) { // Text got shorter
+		editor_search_pos = -1;
+	}
+	// Step over the current match, or start right after the stored offset
+	i32 from = editor_search_pos + (editor_find(text, editor_search, editor_search_pos) == editor_search_pos ? len : 1);
+	i32 p    = editor_find(text, editor_search, from > end ? end : from);
+	if (p == -1) {
+		p = editor_find(text, editor_search, 0);
+	}
+	if (p == -1) {
+		return;
+	}
+	editor_search_pos = p;
+	i32 line          = 0;
+	i32 line_start    = 0;
+	for (i32 i = 0; i < p; ++i) {
+		if (text[i] == '\n') {
+			line++;
+			line_start = i + 1;
+		}
+	}
+	editor_goto_line(line);
+	editor_select(line, p - line_start, len);
+}
+
+static void editor_undo_push(editor_undo_t *steps, i32 *count, editor_undo_t step) {
+	if (*count == EDITOR_UNDO_MAX) { // Drop the oldest step
+		for (i32 i = 1; i < EDITOR_UNDO_MAX; ++i) {
+			steps[i - 1] = steps[i];
+		}
+		(*count)--;
+	}
+	steps[(*count)++] = step;
+}
+
+// Stores the previous text once the buffer changes, edits typed in a row on a line make a single step
+static void editor_undo_record() {
+	editor_buffer_t *b = editor_current;
+	if (b->undo_last.text != NULL && !string_equals(b->undo_last.text, b->text)) {
+		f64 now = iron_time();
+		if (b->undo_count == 0 || now - b->undo_time > 1.0 || b->undo_last.line != b->line) {
+			editor_undo_push(b->undo, &b->undo_count, b->undo_last);
+		}
+		b->undo_time      = now;
+		b->redo_count     = 0;
+		b->undo_last.text = NULL;
+	}
+	if (b->undo_last.text == NULL) {
+		b->undo_last.text = string_copy(b->text);
+	}
+	b->undo_last.line = b->line;
+	b->undo_last.col  = g_ui->text_selected_id == editor_text_id ? g_ui->cursor_x : 0;
+}
+
+// Undo or redo a step, runs while drawing the editor window
+static void editor_undo_apply(bool redo) {
+	editor_buffer_t *b     = editor_current;
+	editor_undo_t   *from  = redo ? b->redo : b->undo;
+	i32             *count = redo ? &b->redo_count : &b->undo_count;
+	if (*count == 0) {
+		return;
+	}
+	editor_undo_t step = from[--(*count)];
+	editor_undo_t now  = {.text = string_copy(b->text), .line = b->line, .col = g_ui->text_selected_id == editor_text_id ? g_ui->cursor_x : 0};
+	editor_undo_push(redo ? b->undo : b->redo, redo ? &b->undo_count : &b->redo_count, now);
+	b->text           = string_copy(step.text);
+	b->undo_last.text = step.text;
+	b->undo_time      = 0; // The next edit is a new step
+
+	i32 line  = step.line;
+	i32 lines = ui_line_count(b->text);
+	if (line > lines - 1) {
+		line = lines - 1;
+	}
+	i32 len = 0;
+	for (char *c = b->text + editor_line_pos(b->text, line); *c != '\0' && *c != '\n'; ++c) {
+		len++;
+	}
+	f32 y = line * UI_ELEMENT_H() + editor_hwnd->scroll_offset;
+	if (y < 0 || y > g_ui->_window_h - UI_ELEMENT_H() * 2) { // Out of view
+		editor_goto_line(line);
+	}
+	editor_select(line, step.col > len ? len : step.col, 0);
+	editor_hwnd->redraws = 2;
+}
+
+static bool editor_minimap_visible(f32 *x, f32 *y, f32 *w, f32 *h) {
+	if (!editor_minimap_show || g_ui->_window_w <= 600 * UI_SCALE()) {
+		return false;
+	}
+	f32 mm_w = 150 * UI_SCALE();
+	*x       = g_ui->_window_w - mm_w;
+	*y       = g_ui->window_header_h;
+	*w       = mm_w;
+	*h       = g_ui->_window_h - g_ui->window_header_h;
+	return true;
+}
+
+static void editor_cache_minimap(char *text) {
+	f32 line_h = 2 * UI_SCALE();
+	f32 char_w = 1 * UI_SCALE();
+	i32 tex_w  = math_floor(150 * UI_SCALE());
+	i32 tex_h  = math_floor(ui_line_count(text) * line_h);
+	if (tex_h < 1) {
+		tex_h = 1;
+	}
+	if (tex_h > 16384) { // Texture size limit, the rest of a long file is not drawn
+		tex_h = 16384;
+	}
+
+	if (editor_minimap_tex == NULL || editor_minimap_tex->width != tex_w || editor_minimap_tex->height != tex_h) {
+		if (editor_minimap_tex != NULL) {
+			gpu_delete_texture(editor_minimap_tex);
+		}
+		editor_minimap_tex = gpu_create_render_target(tex_w, tex_h, GPU_TEXTURE_FORMAT_RGBA32);
+	}
+
+	// Render each word as a small rect
+	draw_begin(editor_minimap_tex, true, 0x00000000);
+	draw_set_color(g_theme->HOVER_COL + 0x00202020);
+	i32 line = 0;
+	i32 col  = 0;
+	for (i32 i = 0; text[i] != '\0'; ++i) {
+		if (text[i] == '\n') {
+			line++;
+			col = 0;
+			continue;
+		}
+		if (text[i] != ' ') {
+			i32 len = 1;
+			while (text[i + len] != '\0' && text[i + len] != ' ' && text[i + len] != '\n') {
+				len++;
+			}
+			draw_filled_rect(col * char_w, line * line_h, len * char_w, line_h);
+			i += len - 1;
+			col += len - 1;
+		}
+		col++;
+	}
+	draw_end();
+}
+
+static void editor_draw_minimap(char *text, f32 mm_x, f32 mm_y, f32 mm_w, f32 mm_h) {
+	if (editor_minimap_tex == NULL) {
+		return;
+	}
+	f32 line_h          = 2 * UI_SCALE();
+	i32 line_count      = ui_line_count(text);
+	f32 content_h       = line_count * UI_ELEMENT_H();
+	f32 full_h          = line_count * line_h;
+	f32 scroll_progress = content_h > 0 ? -g_ui->current_window->scroll_offset / content_h : 0;
+	f32 out_of_screen   = full_h - mm_h;
+	if (out_of_screen < 0) {
+		out_of_screen = 0;
+	}
+
+	// Draw the visible region of the cached minimap
+	f32 tex_h = editor_minimap_tex->height;
+	f32 sh    = tex_h < mm_h ? tex_h : mm_h;
+	f32 sy    = out_of_screen * scroll_progress;
+	if (sy > tex_h - sh) {
+		sy = tex_h - sh;
+	}
+	if (sy < 0) {
+		sy = 0;
+	}
+	draw_set_color(0xffffffff);
+	draw_sub_image(editor_minimap_tex, 0, sy, mm_w, sh, mm_x, mm_y);
+
+	// Occurrences of the selected text
+	if (editor_mark != NULL) {
+		f32 char_w     = 1 * UI_SCALE();
+		i32 len        = string_length(editor_mark);
+		i32 line       = 0;
+		i32 line_start = 0;
+		i32 scan       = 0;
+		for (i32 p = editor_find(text, editor_mark, 0); p != -1; p = editor_find(text, editor_mark, p + len)) {
+			for (; scan < p; ++scan) {
+				if (text[scan] == '\n') {
+					line++;
+					line_start = scan + 1;
+				}
+			}
+			f32 y = line * line_h - sy;
+			if (y < 0 || y + line_h > mm_h) {
+				continue;
+			}
+			f32 x = (p - line_start) * char_w;
+			f32 w = len * char_w < 4 * UI_SCALE() ? 4 * UI_SCALE() : len * char_w;
+			if (x + w > mm_w) { // Long lines are marked at the edge
+				x = mm_w - w > 0 ? mm_w - w : 0;
+			}
+			draw_set_color(p == editor_mark_pos ? 0xffffee00 : 0xbbffee00);
+			draw_filled_rect(mm_x + x, mm_y + y, w, line_h);
+		}
+	}
+
+	i32 offset = math_floor(sy / line_h);
+
+	// View box
+	f32 visible_area = out_of_screen > 0 ? mm_h : full_h;
+	f32 box_h        = (mm_h / UI_ELEMENT_H()) * line_h;
+	f32 box_y        = mm_y + scroll_progress * visible_area;
+	if (box_y < mm_y) {
+		box_y = mm_y;
+	}
+	else if (box_y > mm_y + mm_h - box_h) {
+		box_y = mm_y + mm_h - box_h;
+	}
+	draw_set_color(0x11ffffff);
+	draw_filled_rect(mm_x, box_y, mm_w, box_h);
+
+	// Drag the minimap to scroll the text area
+	if (editor_minimap_scrolling && content_h > mm_h) {
+		f32 my_local      = g_ui->input_y - (g_ui->_window_y + mm_y);
+		i32 picked        = offset + math_floor(my_local / line_h);
+		f32 visible_lines = mm_h / UI_ELEMENT_H();
+		f32 target        = (picked - visible_lines / 2) * UI_ELEMENT_H();
+		f32 max_scroll    = (line_count - 1) * UI_ELEMENT_H(); // Last line at the top
+		if (target < 0) {
+			target = 0;
+		}
+		else if (target > max_scroll) {
+			target = max_scroll;
+		}
+		g_ui->current_window->scroll_offset = -target;
+	}
+}
+
+// Closes the current file
+void editor_close() {
+	editor_buffer_t *b = editor_current;
+	if (b == NULL) {
+		return;
+	}
+	editor_set_current(NULL);
+	i32 i = array_index_of(editor_buffer_list, b); // Diffs and pictures are not kept
+	if (i >= 0) {
+		array_splice(editor_buffer_list, i, 1);
+		map_delete(editor_buffers, b->path);
+	}
+	pad_save_config();
+}
+
+void editor_close_all() {
+	editor_set_current(NULL);
+	editor_buffers     = any_map_create();
+	editor_buffer_list = any_array_create(0);
+}
+
+void editor_init() {
+	editor_hwnd        = ui_window_create();
+	editor_buffers     = any_map_create();
+	editor_buffer_list = any_array_create(0);
+}
+
+void editor_render(i32 x, i32 y, i32 w, i32 h) {
+	if (!ui_window(editor_hwnd, x, y, w, h, false)) {
+		return;
+	}
+
+	if (editor_current == NULL) {
+		// Faded shortcuts in the middle of the panel
+		static char *shortcuts[] = {"Ctrl+P - Go to file", "Ctrl+S - Save", "Ctrl+F - Search", "Ctrl+D - Select word", "Ctrl+Z - Undo", "Ctrl+Shift+Z - Redo", "Ctrl+Shift+F - Search in files", "Ctrl+B - Toggle project tree", "Ctrl+G - Toggle git changes", "Ctrl+J - Toggle output", "Ctrl+M - Toggle minimap", "Ctrl+K - Open config", "Ctrl+E - Show in explorer", "Ctrl+W - Close file or project", "F5 - Build and run"};
+		i32          count       = sizeof(shortcuts) / sizeof(shortcuts[0]) + 1;
+		i32          _TEXT_COL   = g_theme->TEXT_COL;
+		g_theme->TEXT_COL        = 0xff606060;
+		g_ui->_y += math_floor((h - count * (UI_ELEMENT_H() + UI_ELEMENT_OFFSET())) / 2.0);
+		ui_text(pad_project_dir == NULL ? "Drop a folder to open a project" : "Select a file", UI_ALIGN_CENTER, 0x00000000);
+		for (i32 i = 0; i < count - 1; ++i) {
+			ui_text(shortcuts[i], UI_ALIGN_CENTER, 0x00000000);
+		}
+		g_theme->TEXT_COL = _TEXT_COL;
+		return;
+	}
+
+	// Picture, scaled down to fit the panel
+	if (editor_current->image != NULL) {
+		gpu_texture_t *image = editor_current->image;
+		f32            pad   = 16 * UI_SCALE();
+		f32            scale = 1.0;
+		if (image->width * scale > w - pad * 2) {
+			scale = (w - pad * 2) / image->width;
+		}
+		f32 label_h = UI_ELEMENT_H() + UI_ELEMENT_OFFSET(); // Size is shown below the picture
+		if (image->height * scale > h - pad * 2 - label_h) {
+			scale = (h - pad * 2 - label_h) / image->height;
+		}
+		f32 iw                     = math_floor(image->width * scale);
+		f32 ih                     = math_floor(image->height * scale);
+		f32 iy                     = math_floor((h - label_h - ih) / 2.0);
+		editor_hwnd->scroll_offset = 0;
+		draw_set_color(0xffffffff);
+		draw_scaled_image(image, math_floor((w - iw) / 2.0), iy, iw, ih);
+		g_ui->_y = iy + ih + UI_ELEMENT_OFFSET();
+		pad_fade_begin();
+		ui_text(string_tmp("%d x %d", image->width, image->height), UI_ALIGN_CENTER, 0x00000000);
+		pad_fade_end();
+		return;
+	}
+
+	// Cache minimap
+	char *text = editor_current->text;
+	u32   hash = 2166136261u;
+	for (i32 i = 0; text[i] != '\0'; ++i) {
+		hash = (hash ^ (u8)text[i]) * 16777619u;
+	}
+	f32  mm_x, mm_y, mm_w, mm_h;
+	bool minimap_on = editor_minimap_visible(&mm_x, &mm_y, &mm_w, &mm_h);
+	if (minimap_on && (editor_minimap_tex == NULL || editor_minimap_hash != hash)) {
+		editor_minimap_hash = hash;
+		draw_end();
+		editor_cache_minimap(text);
+		draw_begin(&g_ui->current_window->texture, false, 0);
+	}
+	if (minimap_on && g_ui->input_started && ui_input_in_rect(g_ui->_window_x + mm_x, g_ui->_window_y + mm_y, mm_w, mm_h)) {
+		editor_minimap_scrolling = true;
+	}
+	if (!g_ui->input_down) {
+		editor_minimap_scrolling = false;
+	}
+
+	draw_font_t *_font      = g_ui->ops->font;
+	i32          _font_size = g_ui->font_size;
+	ui_set_font(g_ui, g_font_mono);
+	g_ui->font_size              = math_floor(15 * UI_SCALE());
+	ui_text_area_line_numbers    = true;
+	ui_text_area_scroll_past_end = true;
+	ui_text_area_coloring        = editor_get_coloring();
+
+	// Open the search box on ctrl+f
+	editor_text_id        = ui_widget_id(&editor_current->text, UI_ID_TEXT);
+	bool is_text_selected = g_ui->text_selected_id == editor_text_id;
+	bool search_selected  = g_ui->text_selected_id == ui_widget_id(&editor_search, UI_ID_TEXT);
+	if (g_ui->input_enabled && g_ui->is_ctrl_down && g_ui->is_key_pressed && g_ui->key_code == KEY_CODE_F) { // Not below the file picker
+		editor_search_show  = true;
+		editor_search_focus = true;
+		// Start at the current line
+		editor_search_pos = editor_line_pos(editor_current->text, editor_current->line) - 1;
+		// Pre-fill the search with selected text
+		if (is_text_selected && g_ui->cursor_x != g_ui->highlight_anchor) {
+			i32 a   = g_ui->cursor_x < g_ui->highlight_anchor ? g_ui->cursor_x : g_ui->highlight_anchor;
+			i32 b   = g_ui->cursor_x < g_ui->highlight_anchor ? g_ui->highlight_anchor : g_ui->cursor_x;
+			i32 len = string_length(g_ui->text_selected);
+			if (a < 0) {
+				a = 0;
+			}
+			if (b > len) {
+				b = len;
+			}
+			if (a < b) {
+				editor_search = substring(g_ui->text_selected, a, b);
+			}
+		}
+		g_ui->is_key_pressed = false;
+		g_ui->key_code       = 0;
+	}
+	// ctrl+d to select the word at the cursor
+	if (is_text_selected && g_ui->is_ctrl_down && g_ui->is_key_pressed && g_ui->key_code == KEY_CODE_D) {
+		char *line  = g_ui->text_selected;
+		i32   len   = string_length(line);
+		i32   start = g_ui->cursor_x > len ? len : g_ui->cursor_x;
+		i32   end   = start;
+		while (start > 0 && editor_is_word_char(line[start - 1])) {
+			start--;
+		}
+		while (end < len && editor_is_word_char(line[end])) {
+			end++;
+		}
+		if (end > start) {
+			ui_text_area_clear_selection();
+			g_ui->highlight_anchor = start;
+			g_ui->cursor_x         = end;
+			g_ui->cursor_sticky_x  = end;
+		}
+		g_ui->is_key_pressed = false; // Consume so the editor ignores ctrl+d
+		g_ui->key_code       = 0;
+	}
+
+	// ctrl+z to undo, ctrl+shift+z to redo
+	if (g_ui->input_enabled && !editor_current->diff && (is_text_selected || g_ui->text_selected_id == 0) && g_ui->is_ctrl_down && g_ui->is_key_pressed &&
+	    g_ui->key_code == KEY_CODE_Z) {
+		editor_undo_apply(g_ui->is_shift_down);
+		is_text_selected     = g_ui->text_selected_id == editor_text_id;
+		g_ui->is_key_pressed = false;
+		g_ui->key_code       = 0;
+	}
+
+	// Enter in the search box selects the next match, the editor takes the focus
+	// Enter goes on to the next one while a match is selected
+	bool match_selected = false;
+	if (editor_search_show && is_text_selected && editor_search[0] != '\0') {
+		i32 a          = g_ui->cursor_x < g_ui->highlight_anchor ? g_ui->cursor_x : g_ui->highlight_anchor;
+		i32 b          = g_ui->cursor_x < g_ui->highlight_anchor ? g_ui->highlight_anchor : g_ui->cursor_x;
+		i32 len        = string_length(editor_search);
+		match_selected = a >= 0 && b - a == len && b <= string_length(g_ui->text_selected) && editor_find(g_ui->text_selected + a, editor_search, 0) == 0;
+	}
+	if (editor_search_show && (search_selected || match_selected) && g_ui->is_key_pressed && g_ui->key_code == KEY_CODE_RETURN) {
+		if (search_selected) {
+			editor_search = string_copy(g_ui->text_selected);
+		}
+		editor_search_next();
+		g_ui->is_key_pressed = false; // Not a new line
+		g_ui->key_code       = 0;
+	}
+
+	// Occurrences of the selected text are highlighted in the text and on the minimap
+	static char mark[UI_TEXT_MAX];
+	editor_mark = NULL;
+	if (g_ui->text_selected_id == ui_widget_id(&editor_current->text, UI_ID_TEXT) && g_ui->cursor_x != g_ui->highlight_anchor) {
+		i32 a   = g_ui->cursor_x < g_ui->highlight_anchor ? g_ui->cursor_x : g_ui->highlight_anchor;
+		i32 b   = g_ui->cursor_x < g_ui->highlight_anchor ? g_ui->highlight_anchor : g_ui->cursor_x;
+		i32 len = string_length(g_ui->text_selected);
+		a       = a < 0 ? 0 : a;
+		b       = b > len ? len : b;
+		bool blank = true;
+		for (i32 i = a; i < b; ++i) {
+			mark[i - a] = g_ui->text_selected[i];
+			blank       = blank && g_ui->text_selected[i] == ' ';
+		}
+		if (b - a >= 2 && !blank) { // A single character would mark the whole file
+			mark[b - a]     = '\0';
+			editor_mark     = mark;
+			editor_mark_pos = editor_line_pos(editor_current->text, editor_current->line) + a;
+		}
+	}
+
+	// Search box
+	f32  sb_h           = UI_ELEMENT_H() + UI_ELEMENT_OFFSET() * 2;
+	f32  sb_y           = g_ui->_window_h - sb_h;
+	f32  sb_w           = minimap_on ? mm_x : g_ui->_window_w;
+	bool sb_hover       = editor_search_show && ui_input_in_rect(g_ui->_window_x, g_ui->_window_y + sb_y, sb_w, sb_h);
+	ui_text_area_search = editor_mark;
+
+	// Prevent text area clicks while scrolling the minimap or using the search box
+	bool _input_enabled = g_ui->input_enabled;
+	if (editor_minimap_scrolling || sb_hover) {
+		g_ui->input_enabled = false;
+	}
+	f32 text_x = g_ui->_x;
+	f32 text_y = g_ui->_y;
+	f32 text_w = g_ui->_w;
+	ui_text_area(&editor_current->text, &editor_current->line, UI_ALIGN_LEFT, !editor_current->diff, "", false);
+	g_ui->input_enabled = _input_enabled;
+	ui_text_area_search = NULL;
+	if (!editor_current->diff) {
+		editor_undo_record();
+	}
+	if (editor_current->diff) {
+		if (g_ui->text_selected_id == editor_text_id) {
+			editor_current->caret = editor_current->line;
+		}
+		editor_draw_diff(editor_current->text, text_x, text_y, text_w);
+	}
+
+	if (minimap_on) {
+		editor_draw_minimap(editor_current->text, mm_x, mm_y, mm_w, mm_h);
+	}
+
+	ui_text_area_line_numbers    = false;
+	ui_text_area_scroll_past_end = false;
+	ui_text_area_coloring        = NULL;
+	ui_set_font(g_ui, _font);
+	g_ui->font_size = _font_size;
+
+	if (editor_search_show) {
+		f32 _x = g_ui->_x;
+		f32 _y = g_ui->_y;
+		f32 _w = g_ui->_w;
+		draw_set_color(g_theme->WINDOW_BG_COL);
+		draw_filled_rect(0, sb_y, sb_w, sb_h);
+		draw_set_color(g_theme->BUTTON_COL);
+		draw_filled_rect(0, sb_y, sb_w, 1);
+		g_ui->_x = 0;
+		g_ui->_y = sb_y + UI_ELEMENT_OFFSET();
+		g_ui->_w = sb_w;
+		// Current match and the number of matches, 0 before the first enter
+		char *label = "Search";
+		if (editor_search[0] != '\0') {
+			i32 current, total;
+			editor_search_count(editor_current->text, &current, &total);
+			label = string_tmp("%d/%d", current, total);
+		}
+		ui_text_input(&editor_search, label, UI_ALIGN_LEFT, true, true);
+		if (editor_search_focus) { // Ctrl+f to open
+			editor_search_focus = false;
+			ui_start_text_edit(&editor_search, UI_ALIGN_LEFT);
+			g_ui->cursor_x         = string_length(editor_search);
+			g_ui->highlight_anchor = 0;
+		}
+		// Esc to close
+		if (g_ui->is_escape_down) {
+			editor_search_show = false;
+		}
+		g_ui->_x = _x;
+		g_ui->_y = _y;
+		g_ui->_w = _w;
+	}
+}
