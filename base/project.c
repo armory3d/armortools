@@ -144,9 +144,6 @@ project_t *main() {
 		add_define(project, "WITH_EMBED");
 		add_define(project, "arm_embed");
 	}
-	else {
-		add_assets(project, "assets/extra/*", "data/{name}", 0);
-	}
 
 	if (flags->with_physics) {
 		add_define(project, "WITH_PHYSICS");
