@@ -165,7 +165,7 @@ static void pad_update_window_rect() {
 	i32 h = iron_window_height();
 	i32 x = iron_window_x();
 	i32 y = iron_window_y();
-	if (w == 0 || h == 0) {
+	if (w == 0 || h == 0 || iron_window_get_mode() != IRON_WINDOW_MODE_WINDOW) { // Keep the windowed rect while in fullscreen
 		return;
 	}
 	if (w != pad_window_w || h != pad_window_h || x != pad_window_x || y != pad_window_y) {
@@ -221,24 +221,6 @@ static void pad_close_project() {
 	pad_save_config();
 }
 
-// Shows the current file in explorer / finder, the project folder when no file is opened
-static void pad_show_in_explorer() {
-	char *path = editor_current != NULL ? editor_current->path : pad_project_dir;
-	if (path == NULL) {
-		return;
-	}
-#ifdef IRON_WINDOWS
-	iron_sys_command(string_tmp(iron_is_directory(path) ? "explorer \"%s\"" : "explorer /select,\"%s\"", path));
-#elif defined(IRON_MACOS)
-	iron_sys_command(string_tmp(iron_is_directory(path) ? "open \"%s\"" : "open -R \"%s\"", path));
-#else
-	char *dir = iron_is_directory(path) ? path : pad_parent_dir(path);
-	if (dir != NULL) {
-		file_start(dir);
-	}
-#endif
-}
-
 void pad_drop_files(char *path) {
 	pad_dropped = string_copy(path); // Handled in the next frame
 }
@@ -269,6 +251,10 @@ static void pad_update_input() {
 		picker_update_input();
 		return;
 	}
+	if (browser_menu_show) {
+		browser_menu_update_input();
+		return;
+	}
 	if (!g_ui->is_key_pressed) {
 		return;
 	}
@@ -288,7 +274,10 @@ static void pad_update_input() {
 	else if (g_ui->key_code == KEY_CODE_F5) {
 		build_run();
 	}
-	else if (g_ui->is_ctrl_down && (g_ui->key_code == KEY_CODE_J || g_ui->key_code == KEY_CODE_B)) {
+	else if (g_ui->key_code == KEY_CODE_F11) {
+		iron_window_change_mode(iron_window_get_mode() == IRON_WINDOW_MODE_WINDOW ? IRON_WINDOW_MODE_FULLSCREEN : IRON_WINDOW_MODE_WINDOW);
+	}
+	else if (g_ui->is_ctrl_down && (g_ui->key_code == KEY_CODE_J || g_ui->key_code == KEY_CODE_E)) {
 		if (g_ui->key_code == KEY_CODE_J) {
 			build_show = !build_show;
 			if (search_show) {
@@ -304,11 +293,6 @@ static void pad_update_input() {
 	}
 	else if (g_ui->is_ctrl_down && g_ui->key_code == KEY_CODE_K) {
 		editor_open(pad_config_path());
-		g_ui->is_key_pressed = false;
-		g_ui->key_code       = 0;
-	}
-	else if (g_ui->is_ctrl_down && g_ui->key_code == KEY_CODE_E) {
-		pad_show_in_explorer();
 		g_ui->is_key_pressed = false;
 		g_ui->key_code       = 0;
 	}
@@ -373,8 +357,8 @@ static void pad_update_resize(i32 w, i32 main_h, i32 *browser_w, i32 *output_w) 
 	i32 space   = w - math_floor(200 * scale); // Keep some room for the editor
 	bool left   = pad_browser_show || git_show; // Browser and git share the left panel
 	bool right  = build_show || search_show;    // Output and search share the right panel
-	bool over_b = !picker_show && left && g_ui->input_y < main_h && math_abs(g_ui->input_x - *browser_w) <= grab;
-	bool over_o = !picker_show && right && g_ui->input_y < main_h && math_abs(g_ui->input_x - (w - *output_w)) <= grab;
+	bool over_b = !picker_show && !browser_menu_show && left && g_ui->input_y < main_h && math_abs(g_ui->input_x - *browser_w) <= grab;
+	bool over_o = !picker_show && !browser_menu_show && right && g_ui->input_y < main_h && math_abs(g_ui->input_x - (w - *output_w)) <= grab;
 
 	if (g_ui->input_started && pad_resizing == 0) {
 		pad_resizing = over_b ? 1 : (over_o ? 2 : 0);
@@ -446,7 +430,7 @@ void pad_render(void *_) {
 	draw_end();
 
 	ui_begin(g_ui);
-	g_ui->input_enabled = !picker_show && !pad_resize_hover; // Popup or panel resizing takes the input
+	g_ui->input_enabled = !picker_show && !browser_menu_show && !pad_resize_hover; // Popup or panel resizing takes the input
 	i32 editor_x = 0;
 	if (git_show) {
 		git_render(0, 0, browser_w, main_h);
@@ -467,6 +451,9 @@ void pad_render(void *_) {
 	if (picker_show) {
 		picker_render();
 	}
+	if (browser_menu_show) {
+		browser_menu_render();
+	}
 	ui_end();
 }
 
@@ -479,7 +466,7 @@ void _kickstart() {
 	                                       .y          = -1,
 	                                       .features   = IRON_WINDOW_FEATURES_RESIZABLE | IRON_WINDOW_FEATURES_MINIMIZABLE | IRON_WINDOW_FEATURES_MAXIMIZABLE,
 	                                       .mode       = IRON_WINDOW_MODE_WINDOW,
-	                                       .frequency  = 60,
+	                                       .frequency  = sys_display_frequency(),
 	                                       .vsync      = true,
 	                                       .depth_bits = 0});
 	f32 scale = 1.0;
@@ -539,8 +526,7 @@ void _kickstart() {
 	}
 
 	iron_start();
-	pad_window_w = 0; // Store the final window rect
-	pad_update_window_rect();
+	pad_update_window_rect(); // Store the final window rect, kept as is when the window is already destroyed
 	pad_save_config();
 }
 

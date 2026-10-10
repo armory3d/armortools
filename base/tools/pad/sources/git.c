@@ -18,6 +18,8 @@ char        *git_message  = ""; // Commit message
 ui_id_t      git_input_id = 0;
 
 void build_exec(char *cmd);
+bool browser_menu_clicked();
+void browser_menu_open_git(git_file_t *f);
 
 // Runs the command and returns its output
 static char *git_exec(char *cmd, i32 *length) {
@@ -137,16 +139,18 @@ void git_toggle() {
 	}
 }
 
-// Shows the changes against the last commit, files without a diff are opened as they are
+// Shows the whole file with its changes against the last commit marked, files without a diff are opened as they are
 static void git_open(git_file_t *f) {
 	bool shown = editor_current != NULL && editor_current->diff && string_equals(editor_current->path, f->path);
 	if (f->status != 'U' && !shown && !editor_is_image(f->path)) { // Clicking the shown diff again opens the file
 		i32   len;
-		char *diff = git_exec(string("git -C \"%s\" diff --no-color --no-ext-diff HEAD -- \"%s\"", git_root, f->rel), &len);
-		// Skip the header with the command, index and file names
+		char *diff = git_exec(string("git -C \"%s\" diff --no-color --no-ext-diff --unified=1000000 HEAD -- \"%s\"", git_root, f->rel), &len);
+		// Skip the header with the command, index and file names, and the line of the only hunk
 		char *hunk = starts_with(diff, "@@") ? diff : strstr(diff, "\n@@");
 		if (hunk != NULL) {
 			hunk += hunk[0] == '\n' ? 1 : 0;
+			char *end = strchr(hunk, '\n');
+			hunk      = end != NULL ? end + 1 : hunk;
 			len -= (i32)(hunk - diff);
 			diff = hunk;
 		}
@@ -174,6 +178,46 @@ static void git_stage(git_file_t *f) {
 	else {
 		git_exec(string("git -C \"%s\" reset -q -- \"%s\"", git_root, f->rel), &len);
 	}
+	git_refresh();
+}
+
+// Discards the changes of the file, staged or not, a new file is removed
+void git_revert(git_file_t *f) {
+	i32 len;
+	if (f->orig != NULL) { // Renamed, the original file is restored
+		git_exec(string("git -C \"%s\" reset -q -- \"%s\" \"%s\"", git_root, f->rel, f->orig), &len);
+		git_exec(string("git -C \"%s\" checkout -q HEAD -- \"%s\"", git_root, f->orig), &len);
+	}
+	else {
+		git_exec(string("git -C \"%s\" reset -q -- \"%s\"", git_root, f->rel), &len);
+	}
+	git_exec(string("git -C \"%s\" checkout -q HEAD -- \"%s\"", git_root, f->rel), &len); // Fails for a file which is not in the last commit
+	git_exec(string("git -C \"%s\" clean -f -q -- \"%s\"", git_root, f->rel), &len);      // Removes it when left untracked
+
+	// Opened file follows the disk, unsaved changes included
+	if (editor_current != NULL && editor_current->diff && string_equals(editor_current->path, f->path)) {
+		editor_close();
+	}
+	editor_buffer_t *b = any_map_get(editor_buffers, f->path);
+	if (b != NULL) {
+		if (b == editor_current && g_ui->text_selected_id != 0) {
+			ui_deselect_text(g_ui);
+			g_ui->submit_text_id = 0;
+			ui_text_area_clear_selection();
+		}
+		if (!iron_file_exists(f->path) || !editor_load(b)) {
+			if (b == editor_current) {
+				editor_set_current(NULL);
+			}
+			array_splice(editor_buffer_list, array_index_of(editor_buffer_list, b), 1);
+			map_delete(editor_buffers, b->path);
+		}
+		else if (b->line > ui_line_count(b->text) - 1) {
+			b->line = ui_line_count(b->text) - 1;
+		}
+		editor_hwnd->redraws = 2;
+	}
+	browser_refresh();
 	git_refresh();
 }
 
@@ -296,8 +340,15 @@ void git_render(i32 x, i32 y, i32 w, i32 h) {
 		i32   slash = string_last_index_of(f->rel, "/");
 		char *label = slash > -1 ? string_tmp("%c  %s  %s", f->status, f->rel + slash + 1, substring(f->rel, 0, slash))
 		                         : string_tmp("%c  %s", f->status, f->rel);
-		bool stage = false;
-		if (git_row(f, label, editor_current != NULL && string_equals(editor_current->path, f->path), &stage)) {
+		bool stage    = false;
+		bool selected = editor_current != NULL && string_equals(editor_current->path, f->path);
+		if (browser_menu_show) {
+			selected = f == browser_menu_git; // Mark the row the menu belongs to
+		}
+		else if (browser_menu_clicked()) {
+			browser_menu_open_git(f);
+		}
+		if (git_row(f, label, selected, &stage)) {
 			opened = f;
 		}
 		if (stage) {

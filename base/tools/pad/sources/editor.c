@@ -243,6 +243,8 @@ void editor_open(char *path) {
 	pad_save_config();
 }
 
+void editor_goto_line(i32 line);
+
 // Shows a diff of the file, the buffer is not kept with the opened files
 bool editor_open_diff(char *path, char *diff, i32 length) {
 	buffer_t blob = {.buffer = (u8 *)diff, .length = length};
@@ -256,6 +258,18 @@ bool editor_open_diff(char *path, char *diff, i32 length) {
 	b->diff            = true;
 	b->caret           = -1;
 	editor_set_current(b);
+	// Scroll to the first change
+	for (i32 i = 0, row = 0; b->text[i] != '\0'; ++row) {
+		if (b->text[i] == '+' || b->text[i] == '-') {
+			editor_goto_line(row);
+			break;
+		}
+		char *end = strchr(b->text + i, '\n');
+		if (end == NULL) {
+			break;
+		}
+		i = (i32)(end - b->text) + 1;
+	}
 	return true;
 }
 
@@ -637,7 +651,7 @@ static void editor_cache_minimap(char *text) {
 	draw_end();
 }
 
-static void editor_draw_minimap(char *text, f32 mm_x, f32 mm_y, f32 mm_w, f32 mm_h) {
+static void editor_draw_minimap(char *text, bool diff, f32 mm_x, f32 mm_y, f32 mm_w, f32 mm_h) {
 	if (editor_minimap_tex == NULL) {
 		return;
 	}
@@ -663,6 +677,24 @@ static void editor_draw_minimap(char *text, f32 mm_x, f32 mm_y, f32 mm_w, f32 mm
 	}
 	draw_set_color(0xffffffff);
 	draw_sub_image(editor_minimap_tex, 0, sy, mm_w, sh, mm_x, mm_y);
+
+	// Added and removed lines of a diff
+	if (diff) {
+		f32 y = -sy;
+		for (i32 i = 0; text[i] != '\0' && y < mm_h; y += line_h) {
+			char c = text[i];
+			if (y >= 0 && y + line_h <= mm_h && (c == '+' || c == '-')) {
+				draw_set_color(c == '+' ? 0x6600ff00 : 0x66ff0000);
+				draw_filled_rect(mm_x, mm_y + y, mm_w, line_h);
+			}
+			while (text[i] != '\0' && text[i] != '\n') {
+				i++;
+			}
+			if (text[i] == '\n') {
+				i++;
+			}
+		}
+	}
 
 	// Occurrences of the selected text
 	if (editor_mark != NULL) {
@@ -757,16 +789,27 @@ void editor_render(i32 x, i32 y, i32 w, i32 h) {
 	}
 
 	if (editor_current == NULL) {
-		// Faded shortcuts in the middle of the panel
-		static char *shortcuts[] = {"Ctrl+P - Go to file", "Ctrl+S - Save", "Ctrl+F - Search", "Ctrl+D - Select word", "Ctrl+Z - Undo", "Ctrl+Shift+Z - Redo", "Ctrl+Shift+F - Search in files", "Ctrl+B - Toggle project tree", "Ctrl+G - Toggle git changes", "Ctrl+J - Toggle output", "Ctrl+M - Toggle minimap", "Ctrl+K - Open config", "Ctrl+E - Show in explorer", "Ctrl+W - Close file or project", "F5 - Build and run"};
-		i32          count       = sizeof(shortcuts) / sizeof(shortcuts[0]) + 1;
-		i32          _TEXT_COL   = g_theme->TEXT_COL;
-		g_theme->TEXT_COL        = 0xff606060;
-		g_ui->_y += math_floor((h - count * (UI_ELEMENT_H() + UI_ELEMENT_OFFSET())) / 2.0);
-		ui_text(pad_project_dir == NULL ? "Drop a folder to open a project" : "Select a file", UI_ALIGN_CENTER, 0x00000000);
-		for (i32 i = 0; i < count - 1; ++i) {
-			ui_text(shortcuts[i], UI_ALIGN_CENTER, 0x00000000);
+		// Faded shortcuts in the middle of the panel, the names end and the keys start at its center
+		static char *names[] = {"Go to file", "Save", "Search", "Select word", "Undo", "Redo", "Search in files", "Toggle project tree", "Toggle git changes", "Toggle output", "Toggle minimap", "Open config", "Close file or project", "Build and run", "Toggle fullscreen"};
+		static char *keys[]  = {"Ctrl+P", "Ctrl+S", "Ctrl+F", "Ctrl+D", "Ctrl+Z", "Ctrl+Shift+Z", "Ctrl+Shift+F", "Ctrl+E", "Ctrl+G", "Ctrl+J", "Ctrl+M", "Ctrl+K", "Ctrl+W", "F5", "F11"};
+		static f32         ratio[2] = {0.5, 0.5};
+		static f32_array_t ratios   = {.buffer = ratio, .length = 2};
+		i32                count     = sizeof(names) / sizeof(names[0]);
+		i32                rows      = pad_project_dir == NULL ? count + 1 : count;
+		i32                _TEXT_COL = g_theme->TEXT_COL;
+		g_theme->TEXT_COL            = 0xff606060;
+		g_ui->_y += math_floor((h - rows * (UI_ELEMENT_H() + UI_ELEMENT_OFFSET())) / 2.0);
+		if (pad_project_dir == NULL) {
+			ui_text("Drop a folder to open a project", UI_ALIGN_CENTER, 0x00000000);
 		}
+		i32 _TEXT_OFFSET     = g_theme->TEXT_OFFSET;
+		g_theme->TEXT_OFFSET = 10; // Half of the gap between the columns
+		for (i32 i = 0; i < count; ++i) {
+			ui_row(&ratios);
+			ui_text(names[i], UI_ALIGN_RIGHT, 0x00000000);
+			ui_text(keys[i], UI_ALIGN_LEFT, 0x00000000);
+		}
+		g_theme->TEXT_OFFSET = _TEXT_OFFSET;
 		g_theme->TEXT_COL = _TEXT_COL;
 		return;
 	}
@@ -934,10 +977,15 @@ void editor_render(i32 x, i32 y, i32 w, i32 h) {
 	if (editor_minimap_scrolling || sb_hover) {
 		g_ui->input_enabled = false;
 	}
+	f32 _w = g_ui->_w;
+	if (minimap_on) {
+		g_ui->_w = mm_x - g_ui->_x; // Text ends where the minimap starts
+	}
 	f32 text_x = g_ui->_x;
 	f32 text_y = g_ui->_y;
 	f32 text_w = g_ui->_w;
 	ui_text_area(&editor_current->text, &editor_current->line, UI_ALIGN_LEFT, !editor_current->diff, "", false);
+	g_ui->_w            = _w;
 	g_ui->input_enabled = _input_enabled;
 	ui_text_area_search = NULL;
 	if (!editor_current->diff) {
@@ -951,7 +999,7 @@ void editor_render(i32 x, i32 y, i32 w, i32 h) {
 	}
 
 	if (minimap_on) {
-		editor_draw_minimap(editor_current->text, mm_x, mm_y, mm_w, mm_h);
+		editor_draw_minimap(editor_current->text, editor_current->diff, mm_x, mm_y, mm_w, mm_h);
 	}
 
 	ui_text_area_line_numbers    = false;
