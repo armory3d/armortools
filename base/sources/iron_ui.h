@@ -495,6 +495,7 @@ typedef enum ui_node_flag {
 	UI_NODE_FLAG_NONE      = 0,
 	UI_NODE_FLAG_COLLAPSED = 1,
 	UI_NODE_FLAG_PREVIEW   = 2,
+	UI_NODE_FLAG_CODE_HIDE = 4,
 } ui_node_flag_t;
 
 typedef struct ui_node {
