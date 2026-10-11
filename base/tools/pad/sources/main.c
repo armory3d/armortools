@@ -12,7 +12,7 @@ draw_font_t *g_font_mono;
 
 char *pad_project_dir = NULL;
 char *pad_dropped     = NULL;
-#define PAD_UI_SCALE 1.2
+#define PAD_UI_SCALE 1.3
 
 f32   pad_browser_w     = 220; // Panel sizes before scaling
 f32   pad_output_w      = 420;

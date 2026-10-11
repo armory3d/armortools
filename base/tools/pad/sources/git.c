@@ -211,15 +211,20 @@ void git_revert(git_file_t *f) {
 			g_ui->submit_text_id = 0;
 			ui_text_area_clear_selection();
 		}
+		char *old = b->text;
 		if (!iron_file_exists(f->path) || !editor_load(b)) {
 			if (b == editor_current) {
 				editor_set_current(NULL);
 			}
 			array_splice(editor_buffer_list, array_index_of(editor_buffer_list, b), 1);
 			map_delete(editor_buffers, b->path);
+			editor_free_buffer(b);
 		}
-		else if (b->line > ui_line_count(b->text) - 1) {
-			b->line = ui_line_count(b->text) - 1;
+		else {
+			free(old);
+			if (b->line > ui_line_count(b->text) - 1) {
+				b->line = ui_line_count(b->text) - 1;
+			}
 		}
 		editor_hwnd->redraws = 2;
 	}

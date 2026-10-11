@@ -80,6 +80,7 @@ void             editor_open(char *path);
 void             editor_save_all();
 bool             editor_changed_on_disk();
 static void      editor_set_current(editor_buffer_t *b);
+void             editor_free_buffer(editor_buffer_t *b);
 
 static browser_node_t *browser_find(any_array_t *nodes, char *name) {
 	if (nodes == NULL) {
@@ -297,6 +298,7 @@ static void browser_delete(browser_node_t *node) {
 		}
 		array_splice(editor_buffer_list, i, 1);
 		map_delete(editor_buffers, b->path);
+		editor_free_buffer(b);
 	}
 	if (editor_current != NULL && browser_is_inside(editor_current->path, node->path)) { // Diff or picture
 		editor_set_current(NULL);

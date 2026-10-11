@@ -83,6 +83,7 @@ static char *editor_retab(editor_buffer_t *b) {
 			strcpy(out + o, line + spaces - spaces % 4);
 			o += string_length(line) - spaces + spaces % 4;
 		}
+		free(line);
 		i = end;
 		if (text[i] == '\n') {
 			out[o++] = text[i++];
@@ -108,12 +109,47 @@ void editor_autosave() {
 	}
 }
 
+// Lines without a tab are stored once, as the key and the value
+static void editor_free_tab_lines(any_map_t *m) {
+	if (m == NULL) {
+		return;
+	}
+	for (i32 i = 0; i < (i32)m->keys->capacity; ++i) {
+		char *line = m->keys->buffer[i];
+		if (line == NULL) {
+			continue;
+		}
+		if (m->values->buffer[i] != line) {
+			free(m->values->buffer[i]);
+		}
+		free(line);
+	}
+	map_free(m);
+}
+
+// The buffer has to be out of the opened files and not the current one
+void editor_free_buffer(editor_buffer_t *b) {
+	if (b->image != NULL) {
+		gpu_delete_texture(b->image);
+	}
+	if (b->saved != b->text) { // Diff has a single text
+		free(b->saved);
+	}
+	free(b->text);
+	editor_free_tab_lines(b->tab_lines);
+	for (i32 i = 0; i < b->undo_count; ++i) {
+		free(b->undo[i].text);
+	}
+	for (i32 i = 0; i < b->redo_count; ++i) {
+		free(b->redo[i].text);
+	}
+	free(b->undo_last.text);
+	free(b); // The path stays, the config keeps the pointer of the last opened file
+}
+
 static void editor_set_current(editor_buffer_t *b) {
 	editor_store_scroll();
-	if (editor_current != NULL && editor_current->image != NULL && editor_current != b) { // Pictures are not kept
-		gpu_delete_texture(editor_current->image);
-		editor_current->image = NULL;
-	}
+	editor_buffer_t *prev = editor_current;
 	if (g_ui->text_selected_id != 0) {
 		ui_deselect_text(g_ui);
 		g_ui->submit_text_id = 0; // Line edits are already applied to the buffer
@@ -125,6 +161,9 @@ static void editor_set_current(editor_buffer_t *b) {
 	editor_current             = b;
 	editor_hwnd->scroll_offset = b != NULL ? b->scroll : 0;
 	editor_hwnd->redraws       = 2;
+	if (prev != NULL && prev != b && array_index_of(editor_buffer_list, prev) < 0) { // Diffs and pictures are not kept
+		editor_free_buffer(prev);
+	}
 }
 
 // Modification time of the file on disk, 0 when missing
@@ -141,7 +180,7 @@ static i64 editor_file_time(char *path) {
 #endif
 }
 
-// Reads the file from disk into the buffer
+// Reads the file from disk into the buffer, the previous text is left to the caller to free
 static bool editor_load(editor_buffer_t *b) {
 	buffer_t *blob = iron_load_blob(b->path);
 	if (blob == NULL) {
@@ -152,20 +191,33 @@ static bool editor_load(editor_buffer_t *b) {
 		return false;
 	}
 
-	char *text = string_alloc(blob->length + 1);
-	memcpy(text, blob->buffer, blob->length);
+	char *file = string_alloc(blob->length + 1);
+	memcpy(file, blob->buffer, blob->length);
 	iron_delete_blob(blob);
 
-	b->crlf              = string_index_of(text, "\r\n") > -1;
-	b->tabs              = text[0] == '\t' || string_index_of(text, "\n\t") > -1;
-	text                 = string_replace_all(text, "\r", "");
-	b->text              = string_replace_all(text, "\t", "    ");
+	b->crlf    = string_index_of(file, "\r\n") > -1;
+	b->tabs    = file[0] == '\t' || string_index_of(file, "\n\t") > -1;
+	char *text = string_replace_all(file, "\r", "");
+	free(file);
+	b->text = string_replace_all(text, "\t", "    ");
+	editor_free_tab_lines(b->tab_lines);
 	b->tab_lines         = any_map_create();
 	string_array_t *raws = string_split(text, "\n");
-	for (i32 i = 0; i < (i32)raws->length; ++i) {
-		char *raw = raws->buffer[i];
-		any_map_set(b->tab_lines, string_replace_all(raw, "\t", "    "), raw);
+	free(text);
+	for (i32 i = (i32)raws->length - 1; i >= 0; --i) { // The last one of the lines with the same text is used
+		char *raw  = raws->buffer[i];
+		char *line = strchr(raw, '\t') != NULL ? string_replace_all(raw, "\t", "    ") : raw;
+		if (any_map_get(b->tab_lines, line) != NULL) {
+			if (line != raw) {
+				free(line);
+			}
+			free(raw);
+			continue;
+		}
+		any_map_set(b->tab_lines, line, raw);
 	}
+	array_delete(raws);
+	free(b->saved);
 	b->saved = string_copy(b->text);
 	b->time  = editor_file_time(b->path);
 	return true;
@@ -201,8 +253,8 @@ static void editor_open_image(char *path) {
 	}
 	editor_buffer_t *b = ALLOC_INIT(editor_buffer_t, {0});
 	b->path            = string_copy(path);
-	b->text            = "";
-	b->saved           = "";
+	b->text            = string_copy("");
+	b->saved           = string_copy("");
 	b->image           = gpu_create_texture_from_pixels(&pixels);
 	editor_set_current(b);
 	pad_save_config();
@@ -222,6 +274,8 @@ void editor_open(char *path) {
 	b       = ALLOC_INIT(editor_buffer_t, {0});
 	b->path = string_copy(path);
 	if (!editor_load(b)) {
+		free(b->path);
+		free(b);
 		return;
 	}
 	any_map_set(editor_buffers, b->path, b);
@@ -320,10 +374,12 @@ void editor_reload_changed() {
 			g_ui->submit_text_id = 0;
 			ui_text_area_clear_selection();
 		}
+		char *old = b->text;
 		if (!editor_load(b)) {
 			b->time = time;
 			continue;
 		}
+		free(old);
 		i32 lines = ui_line_count(b->text);
 		if (b->line > lines - 1) {
 			b->line = lines - 1;
@@ -361,6 +417,7 @@ static void editor_format(editor_buffer_t *b) {
 		return;
 	}
 	if (string_equals(old, b->text)) {
+		free(old);
 		return;
 	}
 
@@ -415,7 +472,7 @@ static void editor_format(editor_buffer_t *b) {
 	}
 
 	if (b == editor_current) {
-		editor_hwnd->scroll_offset -= (line - b->line) * UI_ELEMENT_H(); // Keep the line in place
+		editor_hwnd->scroll_offset -= (line - b->line) * UI_TEXT_AREA_LINE_H(); // Keep the line in place
 		if (editor_hwnd->scroll_offset > 0) {
 			editor_hwnd->scroll_offset = 0;
 		}
@@ -435,15 +492,20 @@ static void editor_format(editor_buffer_t *b) {
 		g_ui->highlight_anchor = g_ui->cursor_x;
 		g_ui->cursor_sticky_x  = g_ui->cursor_x;
 	}
+	free(old);
 }
 
 void editor_save_buffer(editor_buffer_t *b) {
 	char *out = editor_retab(b);
 	if (b->crlf) {
-		out = string_replace_all(out, "\n", "\r\n");
+		char *lf = out;
+		out      = string_replace_all(lf, "\n", "\r\n");
+		free(lf);
 	}
 	buffer_t bytes = {.buffer = (u8 *)out, .length = string_length(out)};
 	iron_file_save_bytes(b->path, &bytes, 0);
+	free(out);
+	free(b->saved);
 	b->saved = string_copy(b->text);
 	b->time  = editor_file_time(b->path);
 	editor_format(b);
@@ -466,7 +528,7 @@ void editor_save_all() {
 
 // Tints the added and removed lines of a diff
 static void editor_draw_diff(char *text, f32 x, f32 y, f32 w) {
-	f32 line_h = UI_ELEMENT_H();
+	f32 line_h = UI_TEXT_AREA_LINE_H();
 	for (i32 i = 0; text[i] != '\0'; y += line_h) {
 		char c = text[i];
 		if (y + line_h > 0 && y < g_ui->_window_h && (c == '+' || c == '-' || c == '@')) {
@@ -547,7 +609,7 @@ static void editor_word_next(i32 pos, i32 len) {
 				line_start = i + 1;
 			}
 		}
-		f32 y = line * UI_ELEMENT_H() + editor_hwnd->scroll_offset;
+		f32 y = line * UI_TEXT_AREA_LINE_H() + editor_hwnd->scroll_offset;
 		if (y < 0 || y > g_ui->_window_h - UI_ELEMENT_H() * 2) { // Out of view
 			editor_goto_line(line);
 		}
@@ -572,7 +634,7 @@ static void editor_search_count(char *text, i32 *current, i32 *total) {
 // Scrolls the current file to the line
 void editor_goto_line(i32 line) {
 	editor_current->line       = line;
-	f32 scroll                 = sys_h() / 3.0 - line * UI_ELEMENT_H();
+	f32 scroll                 = sys_h() / 3.0 - line * UI_TEXT_AREA_LINE_H();
 	editor_hwnd->scroll_offset = scroll < 0 ? scroll : 0;
 	editor_hwnd->redraws       = 2;
 }
@@ -607,8 +669,31 @@ static void editor_search_next() {
 	editor_select(line, p - line_start, len);
 }
 
+// Scrolls to the first match from the search start as the query is typed, the search box keeps the focus
+static void editor_search_typed() {
+	char *text = editor_current->text;
+	i32   p    = editor_find(text, editor_search, editor_search_pos < string_length(text) ? editor_search_pos : 0);
+	if (p == -1) {
+		p = editor_find(text, editor_search, 0);
+	}
+	if (p == -1) {
+		return;
+	}
+	i32 line = 0;
+	for (i32 i = 0; i < p; ++i) {
+		if (text[i] == '\n') {
+			line++;
+		}
+	}
+	f32 y = line * UI_TEXT_AREA_LINE_H() + editor_hwnd->scroll_offset;
+	if (y < 0 || y > g_ui->_window_h - UI_ELEMENT_H() * 3) { // Out of view or below the search box
+		editor_goto_line(line);
+	}
+}
+
 static void editor_undo_push(editor_undo_t *steps, i32 *count, editor_undo_t step) {
 	if (*count == EDITOR_UNDO_MAX) { // Drop the oldest step
+		free(steps[0].text);
 		for (i32 i = 1; i < EDITOR_UNDO_MAX; ++i) {
 			steps[i - 1] = steps[i];
 		}
@@ -623,7 +708,13 @@ static void editor_undo_record() {
 	if (b->undo_last.text != NULL && !string_equals(b->undo_last.text, b->text)) {
 		f64 now = iron_time();
 		if (b->undo_count == 0 || now - b->undo_time > 1.0 || b->undo_last.line != b->line) {
-			editor_undo_push(b->undo, &b->undo_count, b->undo_last);
+			editor_undo_push(b->undo, &b->undo_count, b->undo_last); // Step owns the text now
+		}
+		else {
+			free(b->undo_last.text);
+		}
+		for (i32 i = 0; i < b->redo_count; ++i) {
+			free(b->redo[i].text);
 		}
 		b->undo_time      = now;
 		b->redo_count     = 0;
@@ -647,6 +738,8 @@ static void editor_undo_apply(bool redo) {
 	editor_undo_t step = from[--(*count)];
 	editor_undo_t now  = {.text = string_copy(b->text), .line = b->line, .col = g_ui->text_selected_id == editor_text_id ? g_ui->cursor_x : 0};
 	editor_undo_push(redo ? b->undo : b->redo, redo ? &b->undo_count : &b->redo_count, now);
+	free(b->text);
+	free(b->undo_last.text);
 	b->text           = string_copy(step.text);
 	b->undo_last.text = step.text;
 	b->undo_time      = 0; // The next edit is a new step
@@ -660,7 +753,7 @@ static void editor_undo_apply(bool redo) {
 	for (char *c = b->text + editor_line_pos(b->text, line); *c != '\0' && *c != '\n'; ++c) {
 		len++;
 	}
-	f32 y = line * UI_ELEMENT_H() + editor_hwnd->scroll_offset;
+	f32 y = line * UI_TEXT_AREA_LINE_H() + editor_hwnd->scroll_offset;
 	if (y < 0 || y > g_ui->_window_h - UI_ELEMENT_H() * 2) { // Out of view
 		editor_goto_line(line);
 	}
@@ -730,7 +823,7 @@ static void editor_draw_minimap(char *text, bool diff, f32 mm_x, f32 mm_y, f32 m
 	}
 	f32 line_h          = 2 * UI_SCALE();
 	i32 line_count      = ui_line_count(text);
-	f32 content_h       = line_count * UI_ELEMENT_H();
+	f32 content_h       = line_count * UI_TEXT_AREA_LINE_H();
 	f32 full_h          = line_count * line_h;
 	f32 scroll_progress = content_h > 0 ? -g_ui->current_window->scroll_offset / content_h : 0;
 	f32 out_of_screen   = full_h - mm_h;
@@ -801,7 +894,7 @@ static void editor_draw_minimap(char *text, bool diff, f32 mm_x, f32 mm_y, f32 m
 
 	// View box
 	f32 visible_area = out_of_screen > 0 ? mm_h : full_h;
-	f32 box_h        = (mm_h / UI_ELEMENT_H()) * line_h;
+	f32 box_h        = (mm_h / UI_TEXT_AREA_LINE_H()) * line_h;
 	f32 box_y        = mm_y + scroll_progress * visible_area;
 	if (box_y < mm_y) {
 		box_y = mm_y;
@@ -816,9 +909,9 @@ static void editor_draw_minimap(char *text, bool diff, f32 mm_x, f32 mm_y, f32 m
 	if (editor_minimap_scrolling && content_h > mm_h) {
 		f32 my_local      = g_ui->input_y - (g_ui->_window_y + mm_y);
 		i32 picked        = offset + math_floor(my_local / line_h);
-		f32 visible_lines = mm_h / UI_ELEMENT_H();
-		f32 target        = (picked - visible_lines / 2) * UI_ELEMENT_H();
-		f32 max_scroll    = (line_count - 1) * UI_ELEMENT_H(); // Last line at the top
+		f32 visible_lines = mm_h / UI_TEXT_AREA_LINE_H();
+		f32 target        = (picked - visible_lines / 2) * UI_TEXT_AREA_LINE_H();
+		f32 max_scroll    = (line_count - 1) * UI_TEXT_AREA_LINE_H(); // Last line at the top
 		if (target < 0) {
 			target = 0;
 		}
@@ -837,10 +930,11 @@ void editor_close() {
 	}
 	editor_autosave();
 	editor_set_current(NULL);
-	i32 i = array_index_of(editor_buffer_list, b); // Diffs and pictures are not kept
+	i32 i = array_index_of(editor_buffer_list, b); // Diffs and pictures are not kept, those are freed already
 	if (i >= 0) {
 		array_splice(editor_buffer_list, i, 1);
 		map_delete(editor_buffers, b->path);
+		editor_free_buffer(b);
 	}
 	pad_save_config();
 }
@@ -848,6 +942,11 @@ void editor_close() {
 void editor_close_all() {
 	editor_autosave();
 	editor_set_current(NULL);
+	for (i32 i = 0; i < (i32)editor_buffer_list->length; ++i) {
+		editor_free_buffer(editor_buffer_list->buffer[i]);
+	}
+	map_free(editor_buffers);
+	array_delete(editor_buffer_list);
 	editor_buffers     = any_map_create();
 	editor_buffer_list = any_array_create(0);
 }
@@ -1070,6 +1169,16 @@ void editor_render(i32 x, i32 y, i32 w, i32 h) {
 		}
 	}
 
+	// Search box query, as typed
+	if (editor_mark == NULL && editor_search_show && search_selected) {
+		i32 len = string_length(editor_search);
+		if (len >= 2 && len < UI_TEXT_MAX) {
+			strcpy(mark, editor_search);
+			editor_mark     = mark;
+			editor_mark_pos = -1;
+		}
+	}
+
 	// Search box
 	f32  sb_h           = UI_ELEMENT_H() + UI_ELEMENT_OFFSET() * 2;
 	f32  sb_y           = g_ui->_window_h - sb_h;
@@ -1089,7 +1198,11 @@ void editor_render(i32 x, i32 y, i32 w, i32 h) {
 	f32 text_x = g_ui->_x;
 	f32 text_y = g_ui->_y;
 	f32 text_w = g_ui->_w;
+	char *prev_text = editor_current->text;
 	ui_text_area(&editor_current->text, &editor_current->line, UI_ALIGN_LEFT, !editor_current->diff, "", false);
+	if (editor_current->text != prev_text && editor_current->saved != prev_text) { // Edited, the text area made a new string
+		free(prev_text);
+	}
 	if (g_ui->input_enabled && g_ui->input_released_r && ui_input_in_rect(g_ui->_window_x, g_ui->_window_y, g_ui->_window_w, g_ui->_window_h)) {
 		browser_menu_open_editor();
 	}
@@ -1134,7 +1247,11 @@ void editor_render(i32 x, i32 y, i32 w, i32 h) {
 			editor_search_count(editor_current->text, &current, &total);
 			label = string_tmp("%d/%d", current, total);
 		}
+		char *prev_search = editor_search;
 		ui_text_input(&editor_search, label, UI_ALIGN_LEFT, true, true);
+		if (editor_search != prev_search) {
+			editor_search_typed();
+		}
 		if (editor_search_focus) { // Ctrl+f to open
 			editor_search_focus = false;
 			ui_start_text_edit(&editor_search, UI_ALIGN_LEFT);
