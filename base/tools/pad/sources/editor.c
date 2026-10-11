@@ -1,34 +1,5 @@
 // Text editor panel
 
-#define EDITOR_UNDO_MAX 16
-
-typedef struct editor_undo {
-	char *text;
-	i32   line;
-	i32   col;
-} editor_undo_t;
-
-typedef struct editor_buffer {
-	char          *path;
-	char          *text;
-	char          *saved; // Contents on disk
-	i32            line;
-	f32            scroll;
-	bool           tabs;      // File is indented with tabs
-	any_map_t     *tab_lines; // Lines as loaded, by their text with tabs expanded
-	bool           crlf;
-	i64            time;  // Modification time of the file when loaded or saved
-	bool           diff;  // Read-only git diff of the file at path
-	i32            caret; // Line of the caret in the diff, -1 when not placed
-	gpu_texture_t *image; // Picture shown instead of the text
-	editor_undo_t  undo[EDITOR_UNDO_MAX];
-	editor_undo_t  redo[EDITOR_UNDO_MAX];
-	i32            undo_count;
-	i32            redo_count;
-	editor_undo_t  undo_last; // Text and cursor in the previous frame
-	f64            undo_time; // Time of the last edit
-} editor_buffer_t;
-
 ui_window_t        *editor_hwnd        = NULL;
 any_map_t          *editor_buffers     = NULL; // Opened files by path
 any_array_t        *editor_buffer_list = NULL;

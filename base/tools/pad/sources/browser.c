@@ -38,11 +38,48 @@ bool            browser_menu_confirm = false; // Delete or revert was pressed on
 char           *browser_menu_name    = "";
 bool            browser_menu_focus   = false;
 
-void         build_exec(char *cmd, bool show);
-void         git_refresh();
-void         git_revert(git_file_t *f);
-bool         git_show;
-ui_window_t *git_hwnd;
+// Opened file, used by the panels included before the editor
+#define EDITOR_UNDO_MAX 16
+
+typedef struct editor_undo {
+	char *text;
+	i32   line;
+	i32   col;
+} editor_undo_t;
+
+typedef struct editor_buffer {
+	char          *path;
+	char          *text;
+	char          *saved; // Contents on disk
+	i32            line;
+	f32            scroll;
+	bool           tabs;      // File is indented with tabs
+	any_map_t     *tab_lines; // Lines as loaded, by their text with tabs expanded
+	bool           crlf;
+	i64            time;  // Modification time of the file when loaded or saved
+	bool           diff;  // Read-only git diff of the file at path
+	i32            caret; // Line of the caret in the diff, -1 when not placed
+	gpu_texture_t *image; // Picture shown instead of the text
+	editor_undo_t  undo[EDITOR_UNDO_MAX];
+	editor_undo_t  redo[EDITOR_UNDO_MAX];
+	i32            undo_count;
+	i32            redo_count;
+	editor_undo_t  undo_last; // Text and cursor in the previous frame
+	f64            undo_time; // Time of the last edit
+} editor_buffer_t;
+
+void             build_exec(char *cmd, bool show);
+void             git_refresh();
+void             git_revert(git_file_t *f);
+bool             git_show;
+ui_window_t     *git_hwnd;
+any_map_t       *editor_buffers;
+any_array_t     *editor_buffer_list;
+editor_buffer_t *editor_current;
+void             editor_open(char *path);
+void             editor_save_all();
+bool             editor_changed_on_disk();
+static void      editor_set_current(editor_buffer_t *b);
 
 static browser_node_t *browser_find(any_array_t *nodes, char *name) {
 	if (nodes == NULL) {
