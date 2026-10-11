@@ -22,6 +22,8 @@ static i32           build_log_len = 0;
 static char          build_log_view[BUILD_LOG_MAX];
 static bool          build_follow = true; // Scroll with the output
 static bool          build_filter = false; // Show error lines only
+static i32           build_config = 0; // Debug or release
+static bool          build_clean_next = false;
 static f32           build_bottom = 0; // Scroll offset of the last row
 
 // Called from the build thread
@@ -99,31 +101,70 @@ static char *build_find_make(char *dir) {
 	return NULL;
 }
 
-void build_run() {
+// Folder with the project.c to build
+static char *build_dir() {
 	if (pad_project_dir == NULL) {
+		return NULL;
+	}
+	char *dir = pad_project_dir;
+	if (!iron_file_exists(path_join(dir, "project.c"))) {
+		dir = path_join(pad_project_dir, "paint"); // Repository root is opened
+		if (!iron_file_exists(path_join(dir, "project.c"))) {
+			return NULL;
+		}
+	}
+	return dir;
+}
+
+// Deletes the build folder, debug and release builds do not mix
+static void build_clean() {
+	char *dir = build_dir();
+	if (dir == NULL) {
 		return;
 	}
+	if (build_running) { // Folder is in use, clean with the next build
+		build_clean_next = true;
+		return;
+	}
+	char *path = path_join(dir, "build");
+	if (!iron_is_directory(path)) {
+		return;
+	}
+#ifdef IRON_WINDOWS
+	iron_sys_command(string_tmp("rmdir /s /q \"%s\"", path));
+#else
+	iron_sys_command(string_tmp("rm -rf \"%s\"", path));
+#endif
+	browser_refresh();
+}
+
+// Debug builds compile faster and are the default, clean deletes the build folder first
+void build_run(bool run, bool clean) {
 	if (build_running) {
 		return;
 	}
-	if (!iron_file_exists(path_join(pad_project_dir, "project.c"))) {
+	char *dir = build_dir();
+	if (dir == NULL) {
 		return;
 	}
-	char *make = build_find_make(pad_project_dir);
+	char *make = build_find_make(dir);
 	if (make == NULL) {
 		return;
 	}
 
 	editor_save_all();
+	clean            = clean || build_clean_next;
+	build_clean_next = false;
+	char *debug = build_config == 0 ? " --debug" : "";
 #ifdef IRON_WINDOWS
-	build_exec(string("cd /d \"%s\" && \"%s\" --run 2>&1", pad_project_dir, make));
+	build_exec(string("cd /d \"%s\" && %s\"%s\" %s%s 2>&1", dir, clean ? "(if exist build rmdir /s /q build) && " : "", make, run ? "--run" : "--compile", debug), false);
 #else
-	build_exec(string("cd \"%s\" && \"%s\" --run 2>&1", pad_project_dir, make));
+	build_exec(string("cd \"%s\" && %s\"%s\" %s%s 2>&1", dir, clean ? "rm -rf build && " : "", make, run ? "--run" : "--compile", debug), false);
 #endif
 }
 
-// Runs the command in a thread, its output is shown in the panel
-void build_exec(char *cmd) {
+// Runs the command in a thread, its output goes to the output panel
+void build_exec(char *cmd, bool show) {
 	if (build_running) {
 		return;
 	}
@@ -131,8 +172,10 @@ void build_exec(char *cmd) {
 	build_log_len    = 0;
 	build_log[0]     = '\0';
 	build_log_dirty  = true;
-	build_show       = true;
-	search_show      = false;
+	if (show) {
+		build_show  = true;
+		search_show = false;
+	}
 	build_follow     = true;
 	build_finished   = false;
 	build_running    = true;
@@ -144,6 +187,10 @@ void build_update() {
 		iron_thread_wait_and_destroy(&build_thread);
 		build_finished = false;
 		build_running  = false;
+		if (build_exit_code != 0 && !build_show) { // Failed
+			build_show  = true;
+			search_show = false;
+		}
 		browser_refresh(); // Build may have created files
 		if (git_show) {
 			git_refresh();
@@ -213,11 +260,23 @@ void build_render(i32 x, i32 y, i32 w, i32 h) {
 	pad_fade_begin();
 	static f32_array_t *row_ratios = NULL;
 	if (row_ratios == NULL) {
-		row_ratios = f32_array_create_from_raw((f32[]){0.75, 0.25}, 2);
+		row_ratios = f32_array_create_from_raw((f32[]){0.5, 0.25, 0.25}, 3);
+	}
+	static string_array_t *configs = NULL;
+	if (configs == NULL) {
+		configs            = string_array_create(2);
+		configs->buffer[0] = "Debug";
+		configs->buffer[1] = "Release";
 	}
 	ui_begin_sticky();
 	ui_row(row_ratios);
 	ui_text("", UI_ALIGN_LEFT, 0x00000000);
+	static i32 last_config = 0;
+	ui_combo(&build_config, configs, "", false, UI_ALIGN_LEFT, false);
+	if (build_config != last_config) {
+		last_config = build_config;
+		build_clean();
+	}
 	i32 _BUTTON_COL = g_theme->BUTTON_COL;
 	if (build_filter) {
 		g_theme->BUTTON_COL = g_theme->HIGHLIGHT_COL;

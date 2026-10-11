@@ -25,6 +25,7 @@ ui_window_t    *browser_menu_hwnd    = NULL;
 bool            browser_menu_show    = false;
 browser_node_t *browser_menu_node    = NULL;
 git_file_t     *browser_menu_git     = NULL;
+bool            browser_menu_editor  = false; // Opened in the code editor
 i32             browser_menu_mode    = BROWSER_MENU_ITEMS;
 i32             browser_menu_x       = 0;
 i32             browser_menu_y       = 0;
@@ -32,7 +33,7 @@ bool            browser_menu_confirm = false; // Delete or revert was pressed on
 char           *browser_menu_name    = "";
 bool            browser_menu_focus   = false;
 
-void build_exec(char *cmd);
+void build_exec(char *cmd, bool show);
 void git_refresh();
 void git_revert(git_file_t *f);
 bool         git_show;
@@ -97,6 +98,15 @@ void browser_init() {
 	browser_menu_hwnd = ui_window_create();
 }
 
+// Number of rows the node takes in the panel
+static i32 browser_rows(browser_node_t *node) {
+	i32 rows = 1;
+	for (i32 i = 0; node->is_dir && node->expanded && i < (i32)node->children->length; ++i) {
+		rows += browser_rows(node->children->buffer[i]);
+	}
+	return rows;
+}
+
 static bool browser_is_inside(char *path, char *dir) {
 	i32 len = string_length(dir);
 	return string_equals(path, dir) || (starts_with(path, dir) && starts_with(path + len, PATH_SEP));
@@ -112,6 +122,7 @@ bool browser_menu_clicked() {
 static void browser_menu_open(browser_node_t *node) {
 	browser_menu_node     = node;
 	browser_menu_git      = NULL;
+	browser_menu_editor   = false;
 	browser_menu_mode     = BROWSER_MENU_ITEMS;
 	browser_menu_x        = g_ui->input_x;
 	browser_menu_y        = g_ui->input_y;
@@ -126,6 +137,15 @@ void browser_menu_open_git(git_file_t *f) {
 	git_hwnd->redraws = 2;
 }
 
+// Menu of the code editor, the file has to be in the project to be revealed
+void browser_menu_open_editor() {
+	if (browser_root == NULL || !browser_is_inside(editor_current->path, browser_root->path)) {
+		return;
+	}
+	browser_menu_open(NULL);
+	browser_menu_editor = true;
+}
+
 void browser_menu_close() {
 	if (!browser_menu_show) {
 		return;
@@ -137,6 +157,7 @@ void browser_menu_close() {
 	browser_menu_show     = false;
 	browser_menu_node     = NULL;
 	browser_menu_git      = NULL;
+	browser_menu_editor   = false;
 	browser_hwnd->redraws = 2;
 	git_hwnd->redraws     = 2;
 }
@@ -245,14 +266,23 @@ static void browser_delete(browser_node_t *node) {
 	pad_save_config();
 }
 
-// Runs clang-format on the sources in the folder and its sub-folders, the progress is shown in the output panel
+// Folders and the sources clang-format handles
+static bool browser_can_format(browser_node_t *node) {
+	return node->is_dir || ends_with(node->path, ".c") || ends_with(node->path, ".h") || ends_with(node->path, ".m");
+}
+
+// Runs clang-format on the file or on the sources in the folder and its sub-folders, the progress is shown in the output panel
 static void browser_format(browser_node_t *node) {
 	editor_save_all(); // Formatted files are reloaded from disk
+	if (!node->is_dir) {
+		build_exec(string("clang-format -i --verbose \"%s\" 2>&1", node->path), true);
+		return;
+	}
 #ifdef IRON_WINDOWS
-	build_exec(string("for /r \"%s\" %%f in (*.c *.h *.m) do @clang-format -i --verbose \"%%f\" 2>&1", node->path));
+	build_exec(string("for /r \"%s\" %%f in (*.c *.h *.m) do @clang-format -i --verbose \"%%f\" 2>&1", node->path), true);
 #else
 	build_exec(string("find \"%s\" -name .git -prune -o -type f \\( -name '*.c' -o -name '*.h' -o -name '*.m' \\) -exec clang-format -i --verbose {} + 2>&1",
-	                  node->path));
+	                  node->path), true);
 #endif
 }
 
@@ -270,9 +300,46 @@ static void browser_show_in_explorer(char *path) {
 #endif
 }
 
+// Expands the folders the file is in and scrolls the project panel to it
+static void browser_reveal(char *path) {
+	browser_node_t *node = browser_root;
+	i32             row  = 0;
+	while (node != NULL && node->is_dir) {
+		browser_node_t *next = NULL;
+		for (i32 i = 0; i < (i32)node->children->length && next == NULL; ++i) {
+			browser_node_t *n = node->children->buffer[i];
+			if (browser_is_inside(path, n->path)) {
+				next = n;
+			}
+			else {
+				row += browser_rows(n);
+			}
+		}
+		if (next == NULL || !next->is_dir) {
+			break;
+		}
+		row++;
+		if (!next->expanded) {
+			next->expanded = true;
+			browser_load(next);
+		}
+		node = next;
+	}
+	pad_browser_show = true;
+	git_show         = false; // One left panel at a time
+	f32 row_h        = UI_ELEMENT_H() + UI_ELEMENT_OFFSET();
+	f32 y            = row * row_h + browser_hwnd->scroll_offset;
+	if (y < 0 || y > sys_h() - row_h * 2) { // Out of view
+		f32 scroll                  = sys_h() / 3.0 - row * row_h;
+		browser_hwnd->scroll_offset = scroll < 0 ? scroll : 0;
+	}
+	browser_hwnd->redraws = 2;
+	pad_save_config();
+}
+
 static void browser_menu_rect(i32 *x, i32 *y, i32 *w, i32 *h) {
-	i32 rows = 3; // File
-	if (browser_menu_mode != BROWSER_MENU_ITEMS || browser_menu_git != NULL) {
+	i32 rows = browser_menu_node != NULL && browser_can_format(browser_menu_node) ? 4 : 3; // File
+	if (browser_menu_mode != BROWSER_MENU_ITEMS || browser_menu_git != NULL || browser_menu_editor) {
 		rows = 1;
 	}
 	else if (browser_menu_node->is_dir) {
@@ -417,7 +484,7 @@ void browser_menu_render() {
 	}
 
 	if (browser_menu_mode != BROWSER_MENU_ITEMS) {
-		char *label = browser_menu_mode == BROWSER_MENU_NEW_FILE ? "New file" : (browser_menu_mode == BROWSER_MENU_NEW_FOLDER ? "New folder" : "");
+		char *label = browser_menu_mode == BROWSER_MENU_NEW_FILE ? "New File" : (browser_menu_mode == BROWSER_MENU_NEW_FOLDER ? "New Folder" : "");
 		ui_text_input(&browser_menu_name, label, UI_ALIGN_LEFT, true, true);
 		if (browser_menu_focus) {
 			browser_menu_focus = false;
@@ -431,7 +498,7 @@ void browser_menu_render() {
 	g_theme->FILL_BUTTON_BG         = false;
 	if (browser_menu_git != NULL) {
 		// The first press asks to confirm, the changes are lost
-		if (browser_menu_button(browser_menu_confirm ? "Confirm revert" : "Revert", BROWSER_ICON_REVERT)) {
+		if (browser_menu_button(browser_menu_confirm ? "Confirm Revert" : "Revert", BROWSER_ICON_REVERT)) {
 			if (browser_menu_confirm) {
 				git_file_t *f = browser_menu_git;
 				browser_menu_close();
@@ -442,13 +509,19 @@ void browser_menu_render() {
 			}
 		}
 	}
-	else if (node->is_dir && browser_menu_button("New file", BROWSER_ICON_FILE)) {
+	else if (browser_menu_editor) {
+		if (browser_menu_button("Reveal in Project", BROWSER_ICON_FOLDER_OPEN)) {
+			browser_menu_close();
+			browser_reveal(editor_current->path);
+		}
+	}
+	else if (node->is_dir && browser_menu_button("New File", BROWSER_ICON_FILE)) {
 		browser_menu_mode          = BROWSER_MENU_NEW_FILE;
 		browser_menu_name          = "";
 		browser_menu_focus         = true;
 		browser_menu_hwnd->redraws = 2;
 	}
-	else if (node->is_dir && browser_menu_button("New folder", BROWSER_ICON_FOLDER)) {
+	else if (node->is_dir && browser_menu_button("New Folder", BROWSER_ICON_FOLDER)) {
 		browser_menu_mode          = BROWSER_MENU_NEW_FOLDER;
 		browser_menu_name          = "";
 		browser_menu_focus         = true;
@@ -461,7 +534,7 @@ void browser_menu_render() {
 		browser_menu_hwnd->redraws = 2; // Menu turns into the name field
 	}
 	// The first press asks to confirm, deleted files are not moved to the trash
-	else if (node != browser_root && browser_menu_button(browser_menu_confirm ? "Confirm delete" : "Delete", BROWSER_ICON_DELETE)) {
+	else if (node != browser_root && browser_menu_button(browser_menu_confirm ? "Confirm Delete" : "Delete", BROWSER_ICON_DELETE)) {
 		if (browser_menu_confirm) {
 			browser_menu_close();
 			browser_delete(node);
@@ -470,11 +543,11 @@ void browser_menu_render() {
 			browser_menu_confirm = true;
 		}
 	}
-	else if (node->is_dir && browser_menu_button("Format", BROWSER_ICON_FORMAT)) {
+	else if (browser_can_format(node) && browser_menu_button("Format", BROWSER_ICON_FORMAT)) {
 		browser_menu_close();
 		browser_format(node);
 	}
-	else if (browser_menu_button("Show in explorer", BROWSER_ICON_FOLDER_OPEN)) {
+	else if (browser_menu_button("Show in Explorer", BROWSER_ICON_FOLDER_OPEN)) {
 		browser_menu_close();
 		browser_show_in_explorer(node->path);
 	}
@@ -495,7 +568,9 @@ static void browser_draw(browser_node_t *node, i32 depth) {
 		f32 icon_y        = g_ui->_y;
 		bool selected     = !n->is_dir && editor_current != NULL && string_equals(editor_current->path, n->path);
 		if (browser_menu_show) {
-			selected = n == browser_menu_node; // Mark the row the menu belongs to
+			if (!browser_menu_editor) {
+				selected = n == browser_menu_node; // Mark the row the menu belongs to
+			}
 		}
 		else if (browser_menu_clicked()) {
 			browser_menu_open(n);
@@ -534,6 +609,12 @@ void browser_render(i32 x, i32 y, i32 w, i32 h) {
 		return;
 	}
 	if (browser_root == NULL) {
+		// Faded hint in the middle of the panel
+		i32 _TEXT_COL     = g_theme->TEXT_COL;
+		g_theme->TEXT_COL = 0xff606060;
+		g_ui->_y += math_floor((h - UI_ELEMENT_H()) / 2.0);
+		ui_text("Drop a folder to open a project", UI_ALIGN_CENTER, 0x00000000);
+		g_theme->TEXT_COL = _TEXT_COL;
 		return;
 	}
 	pad_fade_begin();

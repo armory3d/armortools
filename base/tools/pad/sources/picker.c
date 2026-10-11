@@ -200,7 +200,7 @@ void picker_render() {
 		return;
 	}
 
-	ui_text_input(&picker_query, "Go to file", UI_ALIGN_LEFT, true, true);
+	ui_text_input(&picker_query, "Go to File", UI_ALIGN_LEFT, true, true);
 	if (picker_focus) {
 		picker_focus = false;
 		ui_start_text_edit(&picker_query, UI_ALIGN_LEFT);

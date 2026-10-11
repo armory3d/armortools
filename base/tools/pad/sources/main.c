@@ -27,6 +27,7 @@ i32          pad_window_y     = -1;
 i32          pad_window_frames = 0; // Frames since the window rect changed
 char        *pad_config_dir    = NULL;
 char        *pad_config_file   = NULL;
+char        *pad_config_notes  = ""; // Kept as is when the config is saved
 
 char *pad_file_name(char *path) {
 	return path + string_last_index_of(path, PATH_SEP) + 1;
@@ -38,6 +39,7 @@ char *pad_parent_dir(char *dir) {
 }
 
 void pad_save_config();
+void pad_saved(char *path);
 
 // Side panels use dimmer text than the editor
 static i32 pad_text_col;
@@ -83,7 +85,10 @@ static i32 pad_panels() {
 	return (pad_browser_show ? 1 : 0) | (git_show ? 2 : 0) | (build_show ? 4 : 0) | (search_show ? 8 : 0);
 }
 
+#define PAD_CONFIG_LINES 10
+
 // Remembers the last opened project and file, panel sizes, the window rect and the shown panels
+// Anything below these lines is free text
 static char *pad_config_path() {
 	return string("%sconfig.txt", iron_internal_save_path());
 }
@@ -96,8 +101,8 @@ void pad_save_config() {
 		file = pad_config_file != NULL ? pad_config_file : "";
 	}
 	pad_config_file = file;
-	char    *s     = string("%s\n%s\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n", dir, file, (i32)pad_browser_w,
-	                        (i32)pad_output_w, pad_window_w, pad_window_h, pad_window_x, pad_window_y, editor_minimap_show ? 1 : 0, pad_panels());
+	char    *s     = string("%s\n%s\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n%s", dir, file, (i32)pad_browser_w, (i32)pad_output_w,
+	                        pad_window_w, pad_window_h, pad_window_x, pad_window_y, editor_minimap_show ? 1 : 0, pad_panels(), pad_config_notes);
 	buffer_t bytes = {.buffer = (u8 *)s, .length = string_length(s)};
 	iron_file_save_bytes(pad_config_path(), &bytes, 0);
 }
@@ -111,6 +116,14 @@ static void pad_load_config() {
 	editor_minimap_show = true;
 	char *s = string_alloc(blob->length + 1);
 	memcpy(s, blob->buffer, blob->length);
+	char *notes = s; // Free text after the settings lines
+	for (i32 i = 0; i < PAD_CONFIG_LINES && notes != NULL; i++) {
+		notes = strchr(notes, '\n');
+		if (notes != NULL) {
+			notes++;
+		}
+	}
+	pad_config_notes = notes != NULL ? string_copy(notes) : "";
 	string_array_t *lines = string_split(s, "\n");
 	pad_config_dir        = lines->buffer[0];
 	pad_config_file       = lines->length > 1 ? lines->buffer[1] : "";
@@ -136,6 +149,16 @@ static void pad_load_config() {
 	}
 	if (pad_config_dir[0] == '\0') {
 		pad_config_dir = NULL;
+	}
+}
+
+// A file was written by the editor
+void pad_saved(char *path) {
+	if (string_equals(path, pad_config_path())) { // Apply the edited config
+		pad_load_config();
+	}
+	if (git_show) {
+		git_refresh();
 	}
 }
 
@@ -196,20 +219,10 @@ void pad_open_project(char *dir) {
 	pad_save_config();
 }
 
-// With unsaved changes the first press is ignored, the second one discards them
 static void pad_close_project() {
-	static char *confirm = NULL;
 	if (pad_project_dir == NULL) {
 		return;
 	}
-	for (i32 i = 0; i < (i32)editor_buffer_list->length; ++i) {
-		editor_buffer_t *b = editor_buffer_list->buffer[i];
-		if (editor_is_modified(b) && confirm != pad_project_dir) {
-			confirm = pad_project_dir;
-			return;
-		}
-	}
-	confirm         = NULL;
 	pad_project_dir = NULL;
 	pad_config_dir  = NULL; // Not restored on the next start
 	pad_config_file = "";
@@ -223,6 +236,11 @@ static void pad_close_project() {
 
 void pad_drop_files(char *path) {
 	pad_dropped = string_copy(path); // Handled in the next frame
+}
+
+// Unsaved changes are written when the app quits
+void pad_shutdown() {
+	editor_save_all();
 }
 
 void pad_foreground() {
@@ -272,7 +290,12 @@ static void pad_update_input() {
 		g_ui->key_code       = 0;
 	}
 	else if (g_ui->key_code == KEY_CODE_F5) {
-		build_run();
+		build_run(true, g_ui->is_shift_down); // Shift for a clean build
+	}
+	else if (g_ui->is_ctrl_down && g_ui->key_code == KEY_CODE_B) {
+		build_run(false, false);
+		g_ui->is_key_pressed = false;
+		g_ui->key_code       = 0;
 	}
 	else if (g_ui->key_code == KEY_CODE_F11) {
 		iron_window_change_mode(iron_window_get_mode() == IRON_WINDOW_MODE_WINDOW ? IRON_WINDOW_MODE_FULLSCREEN : IRON_WINDOW_MODE_WINDOW);
@@ -300,7 +323,7 @@ static void pad_update_input() {
 		if (editor_current == NULL) {
 			pad_close_project();
 		}
-		else if (!editor_is_modified(editor_current)) { // Unsaved file is kept opened
+		else {
 			editor_close();
 		}
 		g_ui->is_key_pressed = false;
@@ -322,26 +345,21 @@ static void pad_update_input() {
 	}
 	else if (g_ui->is_ctrl_down && g_ui->key_code == KEY_CODE_S) {
 		editor_save();
-		if (editor_current != NULL && string_equals(editor_current->path, pad_config_path())) { // Apply the edited config
-			pad_load_config();
-		}
-		if (git_show) {
-			git_refresh();
-		}
+		pad_saved(editor_current != NULL ? editor_current->path : "");
 		g_ui->is_key_pressed = false; // Consume so the editor ignores ctrl+s
 		g_ui->key_code       = 0;
 	}
 }
 
-// Window title shows the project, the current file and whether it has unsaved changes
+// Window title shows the current file and whether it has unsaved changes, then the project
 static void pad_update_title() {
 	static char last[512] = "";
 	char       *title     = "ArmorPad";
 	if (pad_project_dir != NULL) {
-		title = string_tmp("ArmorPad - %s", pad_file_name(pad_project_dir));
+		title = string_tmp("%s - ArmorPad", pad_file_name(pad_project_dir));
 	}
 	if (editor_current != NULL) {
-		title = string_tmp("%s - %s%s", title, pad_file_name(editor_current->path), editor_is_modified(editor_current) ? " *" : "");
+		title = string_tmp("%s%s - %s", pad_file_name(editor_current->path), editor_is_modified(editor_current) ? " *" : "", title);
 	}
 	if (!string_equals(title, last) && string_length(title) < (i32)sizeof(last)) {
 		strcpy(last, title);
@@ -515,7 +533,7 @@ void _kickstart() {
 
 	sys_notify_on_update(pad_render, NULL);
 	sys_notify_on_drop_files(pad_drop_files);
-	sys_notify_on_app_state(pad_foreground, NULL, NULL);
+	sys_notify_on_app_state(pad_foreground, NULL, pad_shutdown);
 
 	// armorpad <folder>
 	if (iron_get_arg_count() > 1 && iron_is_directory(iron_get_arg(1))) {

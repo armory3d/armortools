@@ -124,6 +124,16 @@ static void editor_store_scroll() {
 	}
 }
 
+void editor_save_buffer(editor_buffer_t *b);
+
+// Unsaved changes are written when the file is closed or left for another one
+void editor_autosave() {
+	if (editor_is_modified(editor_current)) {
+		editor_save_buffer(editor_current);
+		pad_saved(editor_current->path);
+	}
+}
+
 static void editor_set_current(editor_buffer_t *b) {
 	editor_store_scroll();
 	if (editor_current != NULL && editor_current->image != NULL && editor_current != b) { // Pictures are not kept
@@ -135,6 +145,9 @@ static void editor_set_current(editor_buffer_t *b) {
 		g_ui->submit_text_id = 0; // Line edits are already applied to the buffer
 	}
 	ui_text_area_clear_selection();
+	if (b != NULL && b != editor_current) { // Not for a deleted or reverted file
+		editor_autosave();
+	}
 	editor_current             = b;
 	editor_hwnd->scroll_offset = b != NULL ? b->scroll : 0;
 	editor_hwnd->redraws       = 2;
@@ -345,44 +358,112 @@ void editor_reload_changed() {
 	}
 }
 
-// Removes the white space at the end of each line
-static char *editor_trim_lines(char *text) {
-	char *out = string_alloc(string_length(text) + 1);
-	i32   o   = 0;
-	for (i32 i = 0;; ++i) {
-		if (text[i] == '\n' || text[i] == '\0') {
-			while (o > 0 && (out[o - 1] == ' ' || out[o - 1] == '\t')) {
-				o--;
-			}
+// Offset of the line start
+static i32 editor_line_pos(char *text, i32 line) {
+	i32 pos = 0;
+	for (i32 i = 0; line > 0 && text[i] != '\0'; ++i) {
+		if (text[i] == '\n') {
+			line--;
+			pos = i + 1;
 		}
-		if (text[i] == '\0') {
-			break;
-		}
-		out[o++] = text[i];
 	}
-	out[o] = '\0';
-	return out;
+	return pos;
 }
 
-void editor_save_buffer(editor_buffer_t *b) {
-	// Trailing spaces are line breaks in markdown
-	char *trimmed = ends_with(b->path, ".md") ? b->text : editor_trim_lines(b->text);
-	if (!string_equals(trimmed, b->text)) {
-		b->text = trimmed;
-		if (b == editor_current && editor_text_id != 0 && g_ui->text_selected_id == editor_text_id) { // Line being edited
-			i32 len = string_length(g_ui->text_selected);
-			while (len > 0 && g_ui->text_selected[len - 1] == ' ') {
-				g_ui->text_selected[--len] = '\0';
-			}
-			if (g_ui->cursor_x > len) {
-				g_ui->cursor_x = len;
-			}
-			if (g_ui->highlight_anchor > len) {
-				g_ui->highlight_anchor = len;
-			}
+// Runs clang-format on the saved source and reads it back, the cursor stays at the code it was at
+// Sources without a .clang-format file in the folders above are left as they are
+static void editor_format(editor_buffer_t *b) {
+	if (!ends_with(b->path, ".c") && !ends_with(b->path, ".h") && !ends_with(b->path, ".m")) {
+		return;
+	}
+#ifdef IRON_WINDOWS
+	iron_sys_command(string_tmp("clang-format -i --fallback-style=none \"%s\" >nul 2>&1", b->path));
+#else
+	iron_sys_command(string_tmp("clang-format -i --fallback-style=none \"%s\" >/dev/null 2>&1", b->path));
+#endif
+	char *old = b->text;
+	if (!editor_load(b)) {
+		b->time = editor_file_time(b->path);
+		return;
+	}
+	if (string_equals(old, b->text)) {
+		return;
+	}
+
+	// Formatting moves the white space only, count the other characters in front of the cursor
+	bool editing = b == editor_current && editor_text_id != 0 && g_ui->text_selected_id == editor_text_id;
+	i32  pos     = editor_line_pos(old, b->line);
+	for (i32 i = 0; editing && i < g_ui->cursor_x && old[pos] != '\0' && old[pos] != '\n'; ++i) {
+		pos++;
+	}
+	i32 chars  = 0;
+	i32 breaks = 0; // White space between the last character and the cursor
+	i32 spaces = 0;
+	for (i32 i = 0; i < pos; ++i) {
+		if (old[i] == '\n') {
+			breaks++;
+			spaces = 0;
+		}
+		else if (old[i] == ' ') {
+			spaces++;
+		}
+		else {
+			chars++;
+			breaks = 0;
+			spaces = 0;
+		}
+	}
+	char *text = b->text;
+	i32   p    = 0;
+	while (chars > 0 && text[p] != '\0') {
+		if (text[p] != ' ' && text[p] != '\n') {
+			chars--;
+		}
+		p++;
+	}
+	while (breaks > 0 && (text[p] == ' ' || text[p] == '\n')) {
+		if (text[p] == '\n') {
+			breaks--;
+		}
+		p++;
+	}
+	while (spaces > 0 && text[p] == ' ') {
+		spaces--;
+		p++;
+	}
+	i32 line       = 0;
+	i32 line_start = 0;
+	for (i32 i = 0; i < p; ++i) {
+		if (text[i] == '\n') {
+			line++;
+			line_start = i + 1;
+		}
+	}
+
+	if (b == editor_current) {
+		editor_hwnd->scroll_offset -= (line - b->line) * UI_ELEMENT_H(); // Keep the line in place
+		if (editor_hwnd->scroll_offset > 0) {
+			editor_hwnd->scroll_offset = 0;
 		}
 		editor_hwnd->redraws = 2;
 	}
+	b->line = line;
+	if (editing) { // Line being edited
+		ui_text_area_clear_selection();
+		i32 n = 0;
+		while (text[line_start + n] != '\0' && text[line_start + n] != '\n' && n < UI_TEXT_MAX - 1) {
+			g_ui->text_selected[n] = text[line_start + n];
+			n++;
+		}
+		g_ui->text_selected[n] = '\0';
+		strcpy(g_ui->text_original, g_ui->text_selected);
+		g_ui->cursor_x         = p - line_start > n ? n : p - line_start;
+		g_ui->highlight_anchor = g_ui->cursor_x;
+		g_ui->cursor_sticky_x  = g_ui->cursor_x;
+	}
+}
+
+void editor_save_buffer(editor_buffer_t *b) {
 	char *out = editor_retab(b);
 	if (b->crlf) {
 		out = string_replace_all(out, "\n", "\r\n");
@@ -391,6 +472,7 @@ void editor_save_buffer(editor_buffer_t *b) {
 	iron_file_save_bytes(b->path, &bytes, 0);
 	b->saved = string_copy(b->text);
 	b->time  = editor_file_time(b->path);
+	editor_format(b);
 }
 
 void editor_save() {
@@ -445,18 +527,6 @@ static i32 editor_find(char *text, char *needle, i32 from) {
 
 static bool editor_is_word_char(char c) {
 	return c == '_' || (c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z');
-}
-
-// Offset of the line start
-static i32 editor_line_pos(char *text, i32 line) {
-	i32 pos = 0;
-	for (i32 i = 0; line > 0 && text[i] != '\0'; ++i) {
-		if (text[i] == '\n') {
-			line--;
-			pos = i + 1;
-		}
-	}
-	return pos;
 }
 
 // Selects a part of the line in the text area, runs while drawing the editor window
@@ -762,6 +832,7 @@ void editor_close() {
 	if (b == NULL) {
 		return;
 	}
+	editor_autosave();
 	editor_set_current(NULL);
 	i32 i = array_index_of(editor_buffer_list, b); // Diffs and pictures are not kept
 	if (i >= 0) {
@@ -772,6 +843,7 @@ void editor_close() {
 }
 
 void editor_close_all() {
+	editor_autosave();
 	editor_set_current(NULL);
 	editor_buffers     = any_map_create();
 	editor_buffer_list = any_array_create(0);
@@ -783,6 +855,8 @@ void editor_init() {
 	editor_buffer_list = any_array_create(0);
 }
 
+void browser_menu_open_editor();
+
 void editor_render(i32 x, i32 y, i32 w, i32 h) {
 	if (!ui_window(editor_hwnd, x, y, w, h, false)) {
 		return;
@@ -790,18 +864,14 @@ void editor_render(i32 x, i32 y, i32 w, i32 h) {
 
 	if (editor_current == NULL) {
 		// Faded shortcuts in the middle of the panel, the names end and the keys start at its center
-		static char *names[] = {"Go to file", "Save", "Search", "Select word", "Undo", "Redo", "Search in files", "Toggle project tree", "Toggle git changes", "Toggle output", "Toggle minimap", "Open config", "Close file or project", "Build and run", "Toggle fullscreen"};
-		static char *keys[]  = {"Ctrl+P", "Ctrl+S", "Ctrl+F", "Ctrl+D", "Ctrl+Z", "Ctrl+Shift+Z", "Ctrl+Shift+F", "Ctrl+E", "Ctrl+G", "Ctrl+J", "Ctrl+M", "Ctrl+K", "Ctrl+W", "F5", "F11"};
+		static char *names[] = {"Go to File", "Save", "Search", "Select Word", "Undo", "Redo", "Search in Files", "Toggle Project Tree", "Toggle Git Changes", "Toggle Output", "Toggle Minimap", "Open Config", "Close File or Project", "Build", "Build and Run", "Clean Build and Run", "Toggle Fullscreen"};
+		static char *keys[]  = {"Ctrl+P", "Ctrl+S", "Ctrl+F", "Ctrl+D", "Ctrl+Z", "Ctrl+Shift+Z", "Ctrl+Shift+F", "Ctrl+E", "Ctrl+G", "Ctrl+J", "Ctrl+M", "Ctrl+K", "Ctrl+W", "Ctrl+B", "F5", "Shift+F5", "F11"};
 		static f32         ratio[2] = {0.5, 0.5};
 		static f32_array_t ratios   = {.buffer = ratio, .length = 2};
 		i32                count     = sizeof(names) / sizeof(names[0]);
-		i32                rows      = pad_project_dir == NULL ? count + 1 : count;
 		i32                _TEXT_COL = g_theme->TEXT_COL;
 		g_theme->TEXT_COL            = 0xff606060;
-		g_ui->_y += math_floor((h - rows * (UI_ELEMENT_H() + UI_ELEMENT_OFFSET())) / 2.0);
-		if (pad_project_dir == NULL) {
-			ui_text("Drop a folder to open a project", UI_ALIGN_CENTER, 0x00000000);
-		}
+		g_ui->_y += math_floor((h - count * (UI_ELEMENT_H() + UI_ELEMENT_OFFSET())) / 2.0);
 		i32 _TEXT_OFFSET     = g_theme->TEXT_OFFSET;
 		g_theme->TEXT_OFFSET = 10; // Half of the gap between the columns
 		for (i32 i = 0; i < count; ++i) {
@@ -985,6 +1055,9 @@ void editor_render(i32 x, i32 y, i32 w, i32 h) {
 	f32 text_y = g_ui->_y;
 	f32 text_w = g_ui->_w;
 	ui_text_area(&editor_current->text, &editor_current->line, UI_ALIGN_LEFT, !editor_current->diff, "", false);
+	if (g_ui->input_enabled && g_ui->input_released_r && ui_input_in_rect(g_ui->_window_x, g_ui->_window_y, g_ui->_window_w, g_ui->_window_h)) {
+		browser_menu_open_editor();
+	}
 	g_ui->_w            = _w;
 	g_ui->input_enabled = _input_enabled;
 	ui_text_area_search = NULL;

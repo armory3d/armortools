@@ -14,10 +14,11 @@ ui_window_t *git_hwnd  = NULL;
 bool         git_show  = false;
 char        *git_root  = NULL; // NULL when the project is not in a repository
 any_array_t *git_files = NULL;
+i32          git_ahead = 0; // Commits to be pushed
 char        *git_message  = ""; // Commit message
 ui_id_t      git_input_id = 0;
 
-void build_exec(char *cmd);
+void build_exec(char *cmd, bool show);
 bool browser_menu_clicked();
 void browser_menu_open_git(git_file_t *f);
 
@@ -81,6 +82,7 @@ static void git_add_file(char status, char *rel, char *orig, bool staged) {
 void git_refresh() {
 	git_root  = NULL;
 	git_files = any_array_create(0);
+	git_ahead = 0;
 	if (git_hwnd != NULL) {
 		git_hwnd->redraws = 2;
 	}
@@ -97,6 +99,9 @@ void git_refresh() {
 		return;
 	}
 	git_root = root;
+
+	// Nothing is printed when the branch has no upstream
+	git_ahead = atoi(git_exec(string("git -C \"%s\" rev-list --count @{u}..HEAD", git_root), &len));
 
 	// Entries are separated by zero, a renamed file is followed by its original path
 	char *out = git_exec(string("git -C \"%s\" status --porcelain -z -uall", git_root), &len);
@@ -141,6 +146,7 @@ void git_toggle() {
 
 // Shows the whole file with its changes against the last commit marked, files without a diff are opened as they are
 static void git_open(git_file_t *f) {
+	editor_autosave(); // Diff is taken from the disk
 	bool shown = editor_current != NULL && editor_current->diff && string_equals(editor_current->path, f->path);
 	if (f->status != 'U' && !shown && !editor_is_image(f->path)) { // Clicking the shown diff again opens the file
 		i32   len;
@@ -227,8 +233,16 @@ static bool git_has_staged() {
 
 // Commits the staged files, the message is kept when the commit fails
 static void git_commit() {
-	if (git_message[0] == '\0' || !git_has_staged()) {
+	if (git_message[0] == '\0' || git_files->length == 0) {
 		return;
+	}
+	if (!git_has_staged()) { // Nothing staged, all changed files are committed
+		i32 len;
+		git_exec(string("git -C \"%s\" add -A", git_root), &len);
+		git_refresh();
+		if (git_root == NULL || !git_has_staged()) {
+			return;
+		}
 	}
 	// Message is passed in a file, no escaping needed
 	char    *path  = string("%scommit_msg.txt", iron_internal_save_path());
@@ -249,7 +263,7 @@ static void git_commit() {
 
 // Pull and push, printed to the output panel
 static void git_sync() {
-	build_exec(string("git -C \"%s\" pull 2>&1 && git -C \"%s\" push 2>&1", git_root, git_root));
+	build_exec(string("git -C \"%s\" pull 2>&1 && git -C \"%s\" push 2>&1", git_root, git_root), true);
 }
 
 // File row with a button to stage or unstage it shown on hover
@@ -292,19 +306,16 @@ void git_render(i32 x, i32 y, i32 w, i32 h) {
 		return;
 	}
 
-	// Enter commits, consumed so the field ignores it
 	git_input_id = ui_widget_id(&git_message, UI_ID_TEXT);
 	bool commit  = false;
-	if (g_ui->text_selected_id == git_input_id && g_ui->is_key_pressed && g_ui->key_code == KEY_CODE_RETURN) {
-		git_message          = string_copy(g_ui->text_selected);
-		commit               = true;
-		g_ui->is_key_pressed = false;
-		g_ui->key_code       = 0;
-	}
 	ui_begin_sticky();
 	ui_text_input(&git_message, "Message", UI_ALIGN_LEFT, true, true);
-	bool sync = git_files->length == 0; // Everything is committed
-	if (ui_button(sync ? "Sync" : "Commit", UI_ALIGN_CENTER, "")) {
+	bool sync     = git_files->length == 0; // Everything is committed
+	g_ui->enabled = sync || !editor_is_modified(editor_current); // Unsaved changes would be left out of the commit
+	char *sync_label = git_ahead > 0 ? string_tmp("Sync (%d %s)", git_ahead, git_ahead == 1 ? "commit" : "commits") : "Sync";
+	bool  clicked    = ui_button(sync ? sync_label : "Commit", UI_ALIGN_CENTER, "");
+	g_ui->enabled = true;
+	if (clicked) {
 		if (sync) {
 			git_sync();
 		}
