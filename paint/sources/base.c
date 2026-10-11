@@ -369,6 +369,9 @@ void base_update(void *_) {
 		if (keyboard_started("delete")) {
 			util_mesh_delete();
 		}
+		if (keyboard_started("h") && !g_ui->is_typing && g_context->paint_object != NULL) {
+			tab_meshes_toggle_visible(g_context->paint_object);
+		}
 	}
 
 	// Live material when using sys_time() script node

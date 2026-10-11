@@ -2706,6 +2706,176 @@ void util_mesh_duplicate() {
 	g_context->ddirty = 2;
 }
 
+void util_mesh_split(mesh_object_t *o) {
+	// Separate the connected surfaces of a mesh into objects of their own
+	mesh_object_t_array_t  *objects   = g_project->_->paint_objects;
+	i32                     index     = array_index_of(objects, o);
+	mesh_data_t            *g         = o->data;
+	vertex_array_t_array_t *vas       = g->vertex_arrays;
+	i16_array_t            *va0       = vas->buffer[0]->values;
+	u32_array_t            *inda      = g->index_array;
+	i32                     num_verts = math_floor(va0->length / 4.0);
+	i32                     num_inds  = math_floor(inda->length / 3.0) * 3;
+	if (index < 0 || num_inds < 6) {
+		return;
+	}
+
+	// Position-weld, vertices split by uv seams stay connected
+	i32_array_t *weld_sort = i32_array_create(num_verts);
+	i32         *uf        = malloc(num_verts * sizeof(i32));
+	for (i32 i = 0; i < num_verts; ++i) {
+		weld_sort->buffer[i] = i;
+		uf[i]                = i;
+	}
+	util_mesh_va0 = va0;
+	i32_array_sort(weld_sort, &util_mesh_calc_normals_sort);
+	for (i32 i = 1; i < num_verts; ++i) {
+		i32 curr = weld_sort->buffer[i];
+		i32 prev = weld_sort->buffer[i - 1];
+		if (va0->buffer[curr * 4] == va0->buffer[prev * 4] && va0->buffer[curr * 4 + 1] == va0->buffer[prev * 4 + 1] &&
+		    va0->buffer[curr * 4 + 2] == va0->buffer[prev * 4 + 2]) {
+			_util_mesh_bevel_union(uf, curr, prev);
+		}
+	}
+	array_delete(weld_sort);
+
+	for (i32 i = 0; i < num_inds; i += 3) {
+		_util_mesh_bevel_union(uf, inda->buffer[i], inda->buffer[i + 1]);
+		_util_mesh_bevel_union(uf, inda->buffer[i], inda->buffer[i + 2]);
+	}
+
+	// Islands in triangle order
+	i32 *island = malloc(num_verts * sizeof(i32)); // Island of a root vertex
+	i32 *remap  = malloc(num_verts * sizeof(i32)); // Vertex index inside its island
+	for (i32 i = 0; i < num_verts; ++i) {
+		island[i] = -1;
+		remap[i]  = -1;
+	}
+	i32 count = 0;
+	for (i32 i = 0; i < num_inds; i += 3) {
+		i32 root = _util_mesh_bevel_find(uf, inda->buffer[i]);
+		if (island[root] < 0) {
+			island[root] = count++;
+		}
+	}
+	if (count < 2) {
+		free(uf);
+		free(island);
+		free(remap);
+		return;
+	}
+
+	i32 *vcount = calloc(count, sizeof(i32));
+	i32 *icount = calloc(count, sizeof(i32));
+	for (i32 i = 0; i < num_inds; ++i) {
+		i32 v = inda->buffer[i];
+		i32 c = island[_util_mesh_bevel_find(uf, v)];
+		if (remap[v] < 0) {
+			remap[v] = vcount[c]++;
+		}
+		icount[c]++;
+	}
+
+	mesh_data_t **raws = malloc(count * sizeof(mesh_data_t *));
+	for (i32 c = 0; c < count; ++c) {
+		mesh_data_t *raw   = calloc(1, sizeof(mesh_data_t));
+		raw->scale_pos     = g->scale_pos;
+		raw->scale_tex     = g->scale_tex;
+		raw->vertex_arrays = (vertex_array_t_array_t *)any_array_create_from_raw((void *[]){}, 0);
+		for (i32 k = 0; k < vas->length; ++k) {
+			vertex_array_t *src    = vas->buffer[k];
+			i32             stride = math_floor(src->values->length / (f32)num_verts);
+			vertex_array_t *va     = ALLOC_INIT(vertex_array_t, {.attrib = string_copy(src->attrib), .data = string_copy(src->data)});
+			va->values             = i16_array_create(vcount[c] * stride);
+			any_array_push(raw->vertex_arrays, va);
+		}
+		raw->index_array = u32_array_create(icount[c]);
+		icount[c]        = 0;
+		raws[c]          = raw;
+	}
+
+	for (i32 k = 0; k < vas->length; ++k) {
+		i16_array_t *src    = vas->buffer[k]->values;
+		i32          stride = math_floor(src->length / (f32)num_verts);
+		for (i32 v = 0; v < num_verts; ++v) {
+			if (remap[v] < 0) {
+				continue;
+			}
+			i16_array_t *dst = raws[island[_util_mesh_bevel_find(uf, v)]]->vertex_arrays->buffer[k]->values;
+			memcpy(dst->buffer + remap[v] * stride, src->buffer + v * stride, stride * sizeof(i16));
+		}
+	}
+	for (i32 i = 0; i < num_inds; ++i) {
+		i32 v                                     = inda->buffer[i];
+		i32 c                                     = island[_util_mesh_bevel_find(uf, v)];
+		raws[c]->index_array->buffer[icount[c]++] = remap[v];
+	}
+	free(uf);
+	free(island);
+	free(remap);
+	free(vcount);
+	free(icount);
+
+	// The first island stays with the object
+	nodes_mesh_remove(o); // Output mesh is split
+	bool shared        = util_mesh_data_is_shared(g);
+	raws[0]->name      = string_copy(o->base->name);
+	mesh_data_t *md    = mesh_data_create(raws[0]);
+	md->_->owns_arrays = true;
+	md->_->skin_frame  = -1;
+	mesh_object_set_data(o, md);
+	if (!shared) {
+		sys_notify_on_next_frame(&util_mesh_delete_data_uncache, g);
+	}
+
+	char *base;
+	i32   number    = strings_split_number_ext(o->base->name, &base);
+	i32   mat_index = tab_meshes_get_override(o);
+	i32   shape     = util_physics_get_shape(o->base);
+	for (i32 c = 1; c < count; ++c) {
+		char *name = string_tmp("%s%s", base, strings_number_ext(++number));
+		while (!_import_mesh_is_unique_name(name)) {
+			name = string_tmp("%s%s", base, strings_number_ext(++number));
+		}
+		raws[c]->name      = string_copy(name);
+		md                 = mesh_data_create(raws[c]);
+		md->_->owns_arrays = true;
+		md->_->skin_frame  = -1;
+
+		mesh_object_t *p = scene_add_mesh_object(md, o->material, o->base->parent);
+		p->base->name    = string_copy(name);
+		p->base->visible = o->base->visible;
+		transform_set_matrix(p->base->transform, o->base->transform->local);
+		array_insert((any_array_t *)objects, index + c, p);
+		_util_mesh_shift_object_masks(index + 2);
+		tab_stages_add_object(p->base->name);
+
+		if (mat_index >= 0) {
+			tab_meshes_set_override_data(p, mat_index, o->material);
+		}
+		if (shape >= 0) {
+			util_physics_set(p->base, shape, util_physics_get_mass(o->base));
+		}
+	}
+	free(raws);
+
+	if (mat_index >= 0) {
+		g_project->mesh_materials = i32_array_create(0);
+	}
+
+	char          *uid_key = i32_to_string(o->base->uid);
+	gpu_texture_t *preview = tab_meshes_preview_map != NULL ? any_map_get(tab_meshes_preview_map, uid_key) : NULL;
+	if (preview != NULL) {
+		gpu_delete_texture(preview);
+		map_delete(tab_meshes_preview_map, uid_key);
+	}
+
+	tab_meshes_sort_hierarchy();
+	tab_timeline_sync();
+	context_select_paint_object(o);
+	util_mesh_geometry_joined();
+}
+
 void util_mesh_delete() {
 	if (g_project->_->paint_objects->length < 2) {
 		return;

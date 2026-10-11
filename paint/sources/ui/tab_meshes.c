@@ -80,6 +80,18 @@ static void tab_meshes_set_children_visible(object_t *parent, bool visible, bool
 	}
 }
 
+void tab_meshes_toggle_visible(mesh_object_t *o) {
+	bool visible = !o->base->visible;
+	bool merge   = false;
+	tab_meshes_set_children_visible(o->base, visible, &merge);
+	o->base->visible = visible;
+	tab_stages_apply_visible(o);
+	if (merge && tab_meshes_get_linked_override(o) >= 0) {
+		util_mesh_visibility_changed();
+	}
+	ui_base_hwnds->buffer[TAB_AREA_SIDEBAR0]->redraws = 2;
+}
+
 i32 tab_meshes_depth(mesh_object_t *o) {
 	i32       depth = 0;
 	object_t *p     = o->base->parent;
@@ -676,6 +688,10 @@ void tab_meshes_draw_context_menu() {
 		sys_notify_on_next_frame(tab_meshes_merge_down_next_frame, o);
 		return;
 	}
+	if (ui_menu_button(tr("Split"), "", ICON_NONE)) {
+		sys_notify_on_next_frame(util_mesh_split, o);
+		return;
+	}
 
 	// Geometry actions apply to the mesh and its children
 	if (ui_menu_button(tr("UV Unwrap"), "", ICON_NONE)) {
@@ -1124,14 +1140,7 @@ void tab_meshes_draw_mesh_slot(mesh_object_t *o, i32 i) {
 	g_ui->_y             = uiy + 3 + center;
 	i32 col              = g_theme->HOVER_COL + 0x00282828;
 	if (ui_sub_image(icons, col, 18 * UI_SCALE(), r->x, r->y, r->w, r->h) == UI_STATE_RELEASED) {
-		bool visible = !o->base->visible;
-		bool merge   = false;
-		tab_meshes_set_children_visible(o->base, visible, &merge);
-		o->base->visible = visible;
-		tab_stages_apply_visible(o);
-		if (merge && tab_meshes_get_linked_override(o) >= 0) {
-			util_mesh_visibility_changed();
-		}
+		tab_meshes_toggle_visible(o);
 	}
 
 	// Nested offset
