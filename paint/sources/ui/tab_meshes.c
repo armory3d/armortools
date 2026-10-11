@@ -968,6 +968,7 @@ void tab_meshes_make_preview(mesh_object_t *o) {
 	}
 
 	g_context->material_preview = true;
+	i32 _ddirty                 = g_context->ddirty;
 
 	slot_material_t *mat = ALLOC_INIT(slot_material_t, {0});
 	mat->image           = image;
@@ -1065,7 +1066,7 @@ void tab_meshes_make_preview(mesh_object_t *o) {
 	gpu_delete_texture(mat->image_icon);
 
 	make_material_parse_mesh_material();
-	g_context->ddirty = 0;
+	g_context->ddirty = _ddirty > 0 ? _ddirty : 0;
 }
 
 static char *tab_meshes_mesh_info(mesh_object_t *o, i32 i) {
