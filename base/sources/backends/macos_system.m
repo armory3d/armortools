@@ -708,7 +708,9 @@ const char *iron_language(void) {
 	return language;
 }
 
-void iron_internal_shutdown(void) {}
+void iron_internal_shutdown(void) {
+	iron_internal_shutdown_callback();
+}
 
 const char *iron_internal_save_path(void) {
 	NSArray  *paths        = NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES);
