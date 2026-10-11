@@ -531,7 +531,7 @@ void args_run_on_next_frame(void *_) {
 		if (string_equals(f, "")) {
 			f = string_copy(tr("untitled"));
 		}
-		export_mesh_run(string("%s%s%s", args_export_mesh_path, PATH_SEP, f), NULL, true);
+		export_mesh_run(string("%s%s%s", args_export_mesh_path, PATH_SEP, f), NULL);
 	}
 	else if (args_export_material) {
 		g_context->write_icon_on_export = true;

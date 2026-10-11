@@ -1088,7 +1088,7 @@ void script_export_mesh(char *path) {
 	gpu_texture_t *current;
 	bool           in_use;
 	script_gpu_begin(&current, &in_use);
-	export_mesh_run(path, NULL, true);
+	export_mesh_run(path, NULL);
 	script_gpu_end(current, in_use);
 }
 
