@@ -23,14 +23,6 @@ void base_on_shutdown() {
 	config_save();
 }
 
-void base_on_background() {
-	// Release keys after alt-tab / win-tab
-	_key_up(KEY_CODE_ALT, NULL);
-	_key_up(KEY_CODE_WIN, NULL);
-	_key_up(KEY_CODE_CONTROL, NULL);
-	_key_up(KEY_CODE_SHIFT, NULL);
-}
-
 void base_on_foreground() {
 	g_context->foreground_event = true;
 	g_context->last_paint_x     = -1;
@@ -514,7 +506,7 @@ void base_init() {
 	base_last_window_height = iron_window_height();
 
 	sys_notify_on_drop_files(&base_on_drop_files);
-	sys_notify_on_app_state(&base_on_foreground, &base_on_background, &base_on_shutdown);
+	sys_notify_on_app_state(&base_on_foreground, NULL, &base_on_shutdown);
 	iron_set_save_and_quit_callback(base_save_and_quit_callback);
 	agent_init();
 
