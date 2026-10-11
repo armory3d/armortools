@@ -281,7 +281,8 @@ void ui_viewnodes_on_socket_released_group_edit_box() {
 		default_value = f32_array_create_x(f);
 	}
 	if (ui_icon_button(tr("OK"), ICON_CHECK, UI_ALIGN_CENTER)) {
-		if (ui_nodes_canvas_type == CANVAS_TYPE_MESH) {
+		bool is_group = string_equals(node->type, "GROUP_INPUT") || string_equals(node->type, "GROUP_OUTPUT");
+		if (!is_group) {
 			ui_nodes_push_undo(NULL);
 		}
 		socket->name          = string_copy(name);
@@ -291,8 +292,10 @@ void ui_viewnodes_on_socket_released_group_edit_box() {
 		socket->max           = max;
 		socket->default_value = default_value;
 		ui_box_hide();
-		if (ui_nodes_canvas_type == CANVAS_TYPE_MESH) {
-			socket->display = type == 1 ? 1 : 0;
+		if (!is_group) {
+			if (ui_nodes_canvas_type == CANVAS_TYPE_MESH) {
+				socket->display = type == 1 ? 1 : 0;
+			}
 			ui_nodes_canvas_changed();
 		}
 		else {
@@ -329,7 +332,8 @@ void ui_viewnodes_on_socket_released_group_menu_draw() {
 		sys_notify_on_next_frame(&ui_viewnodes_on_socket_released_group_edit, NULL);
 	}
 	if (ui_menu_button(tr("Delete"), "", ICON_DELETE)) {
-		if (ui_nodes_canvas_type == CANVAS_TYPE_MESH) {
+		bool is_group = string_equals(node->type, "GROUP_INPUT") || string_equals(node->type, "GROUP_OUTPUT");
+		if (!is_group) {
 			ui_nodes_push_undo(NULL);
 		}
 		i32               i      = 0;
@@ -356,7 +360,7 @@ void ui_viewnodes_on_socket_released_group_menu_draw() {
 		// Remove socket
 		array_remove(node->inputs, socket);
 		array_remove(node->outputs, socket);
-		if (ui_nodes_canvas_type == CANVAS_TYPE_MESH) {
+		if (!is_group) {
 			ui_nodes_canvas_changed();
 		}
 		else {
@@ -471,7 +475,8 @@ void ui_viewnodes_on_socket_released(i32 socket_id) {
 	ui_node_socket_t *socket = ui_get_socket(canvas->nodes, socket_id);
 	ui_node_t        *node   = ui_get_node(canvas->nodes, socket->node_id);
 	if (g_ui->input_released_r) {
-		bool is_script_input = string_equals(node->type, "MESH_SCRIPT") && array_index_of(node->inputs, socket) > 0;
+		i32  input           = array_index_of(node->inputs, socket);
+		bool is_script_input = (string_equals(node->type, "MESH_SCRIPT") && input > 0) || (string_equals(node->type, "SHADER_GPU") && input > -1);
 		if (string_equals(node->type, "GROUP_INPUT") || string_equals(node->type, "GROUP_OUTPUT") || is_script_input) {
 
 			_ui_nodes_on_socket_released_socket = socket;
