@@ -701,49 +701,67 @@ void util_mesh_merge_geometry() {
 	util_mesh_geometry_joined();
 }
 
-void util_mesh_merge_geometry_down(mesh_object_t *main_object, mesh_object_t *below) {
-	mesh_object_t_array_t *objects    = g_project->_->paint_objects;
-	i32                    main_index = array_index_of(objects, main_object);
-	i32                    index      = array_index_of(objects, below);
-	if (main_index < 0 || index < 0 || main_index == index) {
+void util_mesh_merge_geometry_objects(mesh_object_t_array_t *merged) {
+	// Join the geometry into the first object and remove the rest
+	mesh_object_t_array_t *objects = g_project->_->paint_objects;
+	if (merged->length < 2) {
 		return;
 	}
-
-	util_mesh_join_geometry(any_array_create_from_raw_tmp((void *[]){main_object, below}, 2));
-
-	while (below->base->children->length > 0) {
-		object_t *child  = below->base->children->buffer[0];
-		mat4_t    world  = child->transform->world;
-		object_t *parent = child == main_object->base ? below->base->parent : main_object->base;
-		object_set_parent(child, parent);
-		mat4_t parent_world = child->parent != NULL ? child->parent->transform->world : mat4_identity();
-		transform_set_matrix(child->transform, mat4_mult_mat(world, mat4_inv(parent_world)));
+	for (i32 i = 0; i < merged->length; ++i) {
+		if (array_index_of(objects, merged->buffer[i]) < 0 || array_index_of(merged, merged->buffer[i]) != i) {
+			return;
+		}
 	}
+	mesh_object_t *main_object = merged->buffer[0];
 
-	char *merged_name = string_copy(below->base->name);
-	array_splice(objects, index, 1);
-	if (g_project->atlas_objects != NULL && index < g_project->atlas_objects->length) {
-		i32_array_splice(g_project->atlas_objects, index, 1);
-	}
-	object_set_parent(below->base, NULL);
-	util_mesh_delete_data_uncache(below->data);
-	mesh_object_remove(below);
+	util_mesh_join_geometry(merged);
 
-	i32 merged_mask = index + 1;
-	i32 new_mask    = (main_index < index ? main_index : main_index - 1) + 1;
-	for (i32 i = 0; i < g_project->_->layers->length; ++i) {
-		slot_layer_t *l = g_project->_->layers->buffer[i];
-		l->object_mask  = l->object_mask == merged_mask ? new_mask : l->object_mask > merged_mask ? l->object_mask - 1 : l->object_mask;
+	string_array_t *merged_names = string_array_create(0);
+	for (i32 k = 1; k < merged->length; ++k) {
+		mesh_object_t *o          = merged->buffer[k];
+		i32            main_index = array_index_of(objects, main_object);
+		i32            index      = array_index_of(objects, o);
+
+		while (o->base->children->length > 0) {
+			object_t *child  = o->base->children->buffer[0];
+			mat4_t    world  = child->transform->world;
+			object_t *parent = child == main_object->base ? o->base->parent : main_object->base;
+			object_set_parent(child, parent);
+			mat4_t parent_world = child->parent != NULL ? child->parent->transform->world : mat4_identity();
+			transform_set_matrix(child->transform, mat4_mult_mat(world, mat4_inv(parent_world)));
+		}
+
+		string_array_push(merged_names, string_copy(o->base->name));
+		array_splice(objects, index, 1);
+		if (g_project->atlas_objects != NULL && index < g_project->atlas_objects->length) {
+			i32_array_splice(g_project->atlas_objects, index, 1);
+		}
+		object_set_parent(o->base, NULL);
+		util_mesh_delete_data_uncache(o->data);
+		mesh_object_remove(o);
+
+		i32 merged_mask = index + 1;
+		i32 new_mask    = (main_index < index ? main_index : main_index - 1) + 1;
+		for (i32 i = 0; i < g_project->_->layers->length; ++i) {
+			slot_layer_t *l = g_project->_->layers->buffer[i];
+			l->object_mask  = l->object_mask == merged_mask ? new_mask : l->object_mask > merged_mask ? l->object_mask - 1 : l->object_mask;
+		}
+		g_context->layer_filter = g_context->layer_filter == merged_mask  ? new_mask
+		                          : g_context->layer_filter > merged_mask ? g_context->layer_filter - 1
+		                                                                  : g_context->layer_filter;
 	}
-	g_context->layer_filter = g_context->layer_filter == merged_mask  ? new_mask
-	                          : g_context->layer_filter > merged_mask ? g_context->layer_filter - 1
-	                                                                  : g_context->layer_filter;
 
 	tab_meshes_sort_hierarchy();
 	context_select_paint_object(main_object);
-	tab_timeline_on_mesh_deleted(merged_name);
+	for (i32 i = 0; i < merged_names->length; ++i) {
+		tab_timeline_on_mesh_deleted(merged_names->buffer[i]);
+	}
 	tab_stages_prune();
 	util_mesh_geometry_joined();
+}
+
+void util_mesh_merge_geometry_down(mesh_object_t *main_object, mesh_object_t *below) {
+	util_mesh_merge_geometry_objects(any_array_create_from_raw_tmp((void *[]){main_object, below}, 2));
 }
 
 void util_mesh_swap_axis(mesh_object_t_array_t *objects, i32 a, i32 b) {

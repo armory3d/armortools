@@ -736,6 +736,7 @@ void                      util_mesh_remove_merged();
 void                      util_mesh_visibility_changed();
 void                      util_mesh_merge_geometry();
 void                      util_mesh_merge_geometry_down(mesh_object_t *main_object, mesh_object_t *below);
+void                      util_mesh_merge_geometry_objects(mesh_object_t_array_t *merged);
 void                      util_mesh_split(mesh_object_t *o);
 void                      util_mesh_swap_axis(mesh_object_t_array_t *objects, i32 a, i32 b);
 void                      util_mesh_flip_normals(mesh_object_t_array_t *objects);
