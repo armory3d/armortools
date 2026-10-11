@@ -786,6 +786,19 @@ void iron_internal_call_resize_callback(int width, int height) {
 - (void)windowDidResignMain:(NSNotification *)notification {
 }
 
+- (void)windowDidResignKey:(NSNotification *)notification {
+	iron_internal_background_callback();
+	shift    = false;
+	ctrl     = false;
+	alt      = false;
+	cmd      = false;
+	capslock = false;
+}
+
+- (void)windowDidBecomeKey:(NSNotification *)notification {
+	iron_internal_foreground_callback();
+}
+
 - (void)windowDidBecomeMain:(NSNotification *)notification {
 }
 

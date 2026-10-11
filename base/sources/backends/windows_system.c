@@ -454,6 +454,10 @@ LRESULT WINAPI IronWindowsMessageProcedure(HWND hWnd, UINT msg, WPARAM wParam, L
 		else {
 			iron_internal_mouse_window_deactivated();
 			iron_internal_background_callback();
+			for (int i = 0; i < 256; ++i) {
+				keyPressed[i] = false;
+			}
+			controlDown = false;
 #ifdef HANDLE_ALT_ENTER
 			altDown = false;
 #endif

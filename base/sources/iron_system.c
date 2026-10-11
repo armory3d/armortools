@@ -169,7 +169,10 @@ void iron_internal_foreground_callback(void) {
 	}
 }
 
+static void keyboard_release_all(void);
+
 void iron_internal_background_callback(void) {
+	keyboard_release_all();
 	if (background_callback != NULL) {
 		background_callback(background_callback_data);
 	}
@@ -311,15 +314,31 @@ void iron_keyboard_set_key_press_callback(void (*value)(unsigned /*character*/, 
 	keyboard_key_press_callback_data = data;
 }
 
+static bool keyboard_keys_held[256];
+
 void iron_internal_keyboard_trigger_key_down(int key_code) {
+	if (key_code >= 0 && key_code < 256) {
+		keyboard_keys_held[key_code] = true;
+	}
 	if (keyboard_key_down_callback != NULL) {
 		keyboard_key_down_callback(key_code, keyboard_key_down_callback_data);
 	}
 }
 
 void iron_internal_keyboard_trigger_key_up(int key_code) {
+	if (key_code >= 0 && key_code < 256) {
+		keyboard_keys_held[key_code] = false;
+	}
 	if (keyboard_key_up_callback != NULL) {
 		keyboard_key_up_callback(key_code, keyboard_key_up_callback_data);
+	}
+}
+
+static void keyboard_release_all(void) {
+	for (int i = 0; i < 256; ++i) {
+		if (keyboard_keys_held[i]) {
+			iron_internal_keyboard_trigger_key_up(i);
+		}
 	}
 }
 

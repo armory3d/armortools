@@ -131,6 +131,14 @@ __attribute__((export_name("wasm_keyup"))) void wasm_keyup(int key) {
 	iron_internal_keyboard_trigger_key_up(key);
 }
 
+__attribute__((export_name("wasm_foreground"))) void wasm_foreground(void) {
+	iron_internal_foreground_callback();
+}
+
+__attribute__((export_name("wasm_background"))) void wasm_background(void) {
+	iron_internal_background_callback();
+}
+
 __attribute__((export_name("wasm_keypress"))) void wasm_keypress(int key) {
 	iron_internal_keyboard_trigger_key_press(key);
 }
