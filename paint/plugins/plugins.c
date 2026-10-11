@@ -112,7 +112,7 @@ static void *import_fbx(char *path) {
 }
 
 #ifdef WITH_EXTERNAL
-	void external_init();
+void external_init();
 #endif
 
 void plugins_init() {

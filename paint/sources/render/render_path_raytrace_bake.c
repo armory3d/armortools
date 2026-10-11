@@ -186,11 +186,11 @@ bool render_path_raytrace_bake_commands(void (*parse_paint_material)(bool)) {
 }
 
 typedef struct lightmap_job {
-	i32            object_uid;
-	i32            res;
-	i32            samples;
-	f32            range;
-	char          *path;
+	i32   object_uid;
+	i32   res;
+	i32   samples;
+	f32   range;
+	char *path;
 	void (*done)(void *);
 	void *done_data;
 } lightmap_job_t;
@@ -415,7 +415,7 @@ static void lightmap_write(lightmap_job_t *job) {
 	for (i32 i = 0; i < res * res * 4; ++i) {
 		px[i] = render_path_raytrace_half_to_float(h[i]);
 	}
-	u8       *m   = lightmap_mask;
+	u8 *m = lightmap_mask;
 	lightmap_blur(px, m, res);
 	u8 *m2 = malloc((size_t)res * res);
 	for (i32 pass = 0; pass < LIGHTMAP_MARGIN; ++pass) {

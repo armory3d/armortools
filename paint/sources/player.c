@@ -183,7 +183,7 @@ static void player_stop_reload(void *_) {
 		data_cached_blobs = any_map_create();
 	}
 	any_map_set(data_cached_blobs, player_snapshot_path, player_snapshot);
-	player_snapshot = NULL;
+	player_snapshot              = NULL;
 	import_arm_keep_script_trust = true;
 	import_arm_run_project(player_snapshot_path);
 

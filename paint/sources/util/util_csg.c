@@ -181,7 +181,7 @@ static void csg_split(f64 *plane, csg_poly_t *p, csg_list_t *coplanar_front, csg
 	}
 	memcpy(f->plane, p->plane, sizeof(p->plane));
 	memcpy(b->plane, p->plane, sizeof(p->plane));
-	f->origin  = b->origin  = p->origin;
+	f->origin = b->origin = p->origin;
 	f->flipped = b->flipped = p->flipped;
 	if (f->n >= 3) {
 		csg_list_push(front, f);
@@ -338,8 +338,8 @@ static csg_list_t csg_all_polys(csg_node_t *root) {
 }
 
 static f64 csg_poly_area(csg_poly_t *p) {
-	f64 area = 0.0;
-	f64 *a   = p->v;
+	f64  area = 0.0;
+	f64 *a    = p->v;
 	for (i32 i = 1; i + 1 < p->n; ++i) {
 		f64 *b     = p->v + i * CSG_STRIDE;
 		f64 *c     = p->v + (i + 1) * CSG_STRIDE;
@@ -459,8 +459,8 @@ mesh_geo_t *util_csg_boolean(mesh_geo_t *ga, mesh_geo_t *gb, i32 op) {
 	}
 
 	// Uncut triangles are restored from their pieces
-	csg_list_t result = {0};
-	csg_poly_t *p     = polys.head;
+	csg_list_t  result = {0};
+	csg_poly_t *p      = polys.head;
 	while (p != NULL) {
 		csg_poly_t *next   = p->next;
 		csg_poly_t *origin = origins[p->origin];

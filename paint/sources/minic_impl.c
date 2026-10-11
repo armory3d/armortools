@@ -278,7 +278,7 @@ static void script_cloud_dl_next(void) {
 		script_cloud_ensure(NULL);
 		return;
 	}
-	char *path = script_cloud_dl_paths->buffer[0];
+	char *path             = script_cloud_dl_paths->buffer[0];
 	script_cloud_dl_active = true;
 	if (i32_map_get(file_cloud_sizes, path) < 0) {
 		console_error(string("Cloud file not found: %s", path));
@@ -727,8 +727,8 @@ slot_layer_t *script_layer_new_mask(slot_layer_t *l, i32 type) {
 	}
 	script_gpu_end(current, in_use);
 	g_context->layers_preview_dirty = true;
-	g_context->rtdirty             = 1;
-	g_context->ddirty              = 2;
+	g_context->rtdirty              = 1;
+	g_context->ddirty               = 2;
 	return m;
 }
 
@@ -840,9 +840,9 @@ bool script_layer_set_group(slot_layer_t *l, slot_layer_t *group) {
 	while (anchor > 0 && slot_layer_is_mask(g_project->_->layers->buffer[anchor - 1]) && g_project->_->layers->buffer[anchor - 1]->parent == group) {
 		--anchor;
 	}
-	i32  from       = array_index_of(g_project->_->layers, l);
-	i32  to         = from < anchor ? anchor - 1 : anchor;
-	bool show_panel = group->show_panel;
+	i32  from         = array_index_of(g_project->_->layers, l);
+	i32  to           = from < anchor ? anchor - 1 : anchor;
+	bool show_panel   = group->show_panel;
 	group->show_panel = true; // A collapsed group would make the move skip past its children
 	bool moved        = script_layer_move(l, to);
 	group->show_panel = show_panel;
@@ -1060,8 +1060,7 @@ i32 script_pack_assets(char *search) {
 	asset_t_array_t *assets = any_array_create_from_raw((void *[]){}, 0);
 	for (i32 i = 0; i < g_project->_->assets->length; ++i) {
 		asset_t *a = g_project->_->assets->buffer[i];
-		if (string_index_of(a->file, search) >= 0 &&
-		    (g_project->packed_assets == NULL || !project_packed_asset_exists(g_project->packed_assets, a->file))) {
+		if (string_index_of(a->file, search) >= 0 && (g_project->packed_assets == NULL || !project_packed_asset_exists(g_project->packed_assets, a->file))) {
 			any_array_push(assets, a);
 		}
 	}
@@ -2038,7 +2037,7 @@ typedef struct script_screenshot_request {
 	void (*done)(void);
 } script_screenshot_request_t;
 
-static any_array_t    *_script_screenshot_queue  = NULL;
+static any_array_t   *_script_screenshot_queue  = NULL;
 static gpu_texture_t *_script_screenshot_target = NULL;
 static i32            _script_screenshot_frames = 0;
 

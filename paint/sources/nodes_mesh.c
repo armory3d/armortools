@@ -146,12 +146,9 @@ static ui_node_socket_t *nodes_mesh_socket(char *name, char *type, f32_array_t *
 }
 
 static ui_node_t *nodes_mesh_def(ui_node_t_array_t *category, char *name, char *type, u32 color, char *output_type) {
-	ui_node_t *n = ALLOC_INIT(ui_node_t, {.name    = name,
-	                                      .type    = type,
-	                                      .color   = color,
-	                                      .inputs  = any_array_create(0),
-	                                      .outputs = any_array_create(0),
-	                                      .buttons = any_array_create(0)});
+	ui_node_t *n =
+	    ALLOC_INIT(ui_node_t,
+	               {.name = name, .type = type, .color = color, .inputs = any_array_create(0), .outputs = any_array_create(0), .buttons = any_array_create(0)});
 	if (output_type != NULL) {
 		char        *output_name = string_equals(output_type, "MESH") ? _tr("Mesh") : string_equals(output_type, "VECTOR") ? _tr("Vector") : _tr("Value");
 		f32_array_t *value       = string_equals(output_type, "VECTOR") ? f32_array_create_xyz(0.0, 0.0, 0.0) : f32_array_create_x(0.0);
@@ -385,17 +382,17 @@ static mesh_data_t *nodes_mesh_geo_to_data(mesh_geo_t *g, char *name) {
 	}
 	memcpy(inda->buffer, g->ind, g->index_count * sizeof(u32));
 
-	mesh_data_t *raw = ALLOC_INIT(mesh_data_t, {.name          = string_copy(name),
-	                                            .vertex_arrays = any_array_create_from_raw(
-	                                                (void *[]){
-	                                                    ALLOC_INIT(vertex_array_t, {.values = va0, .attrib = "pos", .data = "short4norm"}),
-	                                                    ALLOC_INIT(vertex_array_t, {.values = va1, .attrib = "nor", .data = "short2norm"}),
-	                                                    ALLOC_INIT(vertex_array_t, {.values = va2, .attrib = "tex", .data = "short2norm"}),
-	                                                },
-	                                                3),
-	                                            .index_array = inda,
-	                                            .scale_pos   = scale_pos,
-	                                            .scale_tex   = scale_tex});
+	mesh_data_t *raw   = ALLOC_INIT(mesh_data_t, {.name          = string_copy(name),
+	                                              .vertex_arrays = any_array_create_from_raw(
+                                                    (void *[]){
+                                                        ALLOC_INIT(vertex_array_t, {.values = va0, .attrib = "pos", .data = "short4norm"}),
+                                                        ALLOC_INIT(vertex_array_t, {.values = va1, .attrib = "nor", .data = "short2norm"}),
+                                                        ALLOC_INIT(vertex_array_t, {.values = va2, .attrib = "tex", .data = "short2norm"}),
+                                                    },
+                                                    3),
+	                                              .index_array = inda,
+	                                              .scale_pos   = scale_pos,
+	                                              .scale_tex   = scale_tex});
 	mesh_data_t *md    = mesh_data_create(raw);
 	md->_->owns_arrays = true;
 	return md;
@@ -556,12 +553,12 @@ static mesh_geo_t *nodes_mesh_shape_cap(i32 segments, f32 z) {
 static mesh_geo_t *nodes_mesh_shape_box() {
 	mesh_geo_t *g = util_geo_create(24, 36);
 	for (i32 face = 0; face < 6; ++face) {
-		i32 axis    = face / 2;
-		f32 sign    = face % 2 == 0 ? 1.0 : -1.0;
-		i32 u       = (axis + 1) % 3;
-		i32 v       = (axis + 2) % 3;
-		f32 cu[4]   = {-0.5, 0.5, 0.5, -0.5};
-		f32 cv[4]   = {-0.5, -0.5, 0.5, 0.5};
+		i32 axis  = face / 2;
+		f32 sign  = face % 2 == 0 ? 1.0 : -1.0;
+		i32 u     = (axis + 1) % 3;
+		i32 v     = (axis + 2) % 3;
+		f32 cu[4] = {-0.5, 0.5, 0.5, -0.5};
+		f32 cv[4] = {-0.5, -0.5, 0.5, 0.5};
 		for (i32 i = 0; i < 4; ++i) {
 			i32 vi                = face * 4 + i;
 			i32 corner            = sign > 0.0 ? i : 3 - i;
@@ -953,9 +950,9 @@ static mesh_geo_t *nodes_mesh_script_arg(mesh_geo_t *g) {
 	if (g == NULL || g->pos == NULL || g->nor == NULL || g->tex == NULL || g->ind == NULL) {
 		return util_geo_create(0, 0);
 	}
-	i32 vertex_count = g->vertex_count < 0 ? 0 : (g->vertex_count > g->vertex_capacity ? g->vertex_capacity : g->vertex_count);
-	i32 index_count  = g->index_count < 0 ? 0 : (g->index_count > g->index_capacity ? g->index_capacity : g->index_count);
-	mesh_geo_t *c    = util_geo_create(vertex_count, index_count - index_count % 3);
+	i32         vertex_count = g->vertex_count < 0 ? 0 : (g->vertex_count > g->vertex_capacity ? g->vertex_capacity : g->vertex_count);
+	i32         index_count  = g->index_count < 0 ? 0 : (g->index_count > g->index_capacity ? g->index_capacity : g->index_count);
+	mesh_geo_t *c            = util_geo_create(vertex_count, index_count - index_count % 3);
 	for (i32 i = 0; i < vertex_count * 3; ++i) {
 		c->pos[i] = isfinite(g->pos[i]) ? g->pos[i] : 0.0;
 		c->nor[i] = isfinite(g->nor[i]) ? g->nor[i] : 0.0;
@@ -1299,10 +1296,10 @@ static bool nodes_mesh_is_default(ui_node_canvas_t *c) {
 
 static ui_node_canvas_t *nodes_mesh_default_canvas(ui_nodes_t *nodes) {
 	nodes_mesh_init();
-	ui_node_canvas_t *c   = ALLOC_INIT(ui_node_canvas_t, {.name = "", .nodes = any_array_create(0), .links = any_array_create(0)});
-	ui_node_t        *in  = ui_nodes_make_node(nodes_mesh_input_def, nodes, c);
-	in->x                 = 100;
-	in->y                 = 200;
+	ui_node_canvas_t *c  = ALLOC_INIT(ui_node_canvas_t, {.name = "", .nodes = any_array_create(0), .links = any_array_create(0)});
+	ui_node_t        *in = ui_nodes_make_node(nodes_mesh_input_def, nodes, c);
+	in->x                = 100;
+	in->y                = 200;
 	any_array_push(c->nodes, in);
 	ui_node_t *out = ui_nodes_make_node(nodes_mesh_output_def, nodes, c);
 	out->x         = 420;

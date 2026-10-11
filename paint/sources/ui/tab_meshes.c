@@ -11,7 +11,7 @@ any_map_t *tab_meshes_override_map   = NULL; // object uid -> overridden materia
 
 static i32 tab_meshes_material_drop_index = -1;
 
-static i32_array_t *tab_meshes_collapsed = NULL;
+static i32_array_t *tab_meshes_collapsed    = NULL;
 static any_array_t *tab_meshes_pending_data = NULL;
 
 static bool tab_meshes_is_collapsed(mesh_object_t *o) {

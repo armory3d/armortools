@@ -1,7 +1,7 @@
 
 #include "../global.h"
 
-scene_t *scene_raw_gc;
+scene_t   *scene_raw_gc;
 static f64 import_arm_progress_last     = 0.0;
 static i32 import_arm_progress_unpacked = 0;
 
@@ -681,13 +681,13 @@ static void import_arm_progress(f32 progress) {
 		return;
 	}
 	import_arm_progress_last = t;
-	i32 w  = iron_window_width();
-	i32 h  = iron_window_height();
-	i32 bw = w / 4;
-	i32 bh = h / 180 > 2 ? h / 180 : 2;
-	i32 bx = (w - bw) / 2;
-	i32 by = (ui_header_h - bh) / 2;
-	bool first_frame = g_context->frame == 0;
+	i32  w                   = iron_window_width();
+	i32  h                   = iron_window_height();
+	i32  bw                  = w / 4;
+	i32  bh                  = h / 180 > 2 ? h / 180 : 2;
+	i32  bx                  = (w - bw) / 2;
+	i32  by                  = (ui_header_h - bh) / 2;
+	bool first_frame         = g_context->frame == 0;
 	draw_begin(NULL, args_player || first_frame, 0xff202020);
 	draw_set_color(g_theme->BUTTON_COL);
 	draw_filled_rect(bx, by, bw, bh);
@@ -795,8 +795,8 @@ void import_arm_run_project(char *path) {
 	array_insert(recent, 0, recent_path);
 	config_save();
 
-	project->_                           = g_project->_; // Carry over runtime arrays set up by project_new
-	g_project                            = project;
+	project->_ = g_project->_; // Carry over runtime arrays set up by project_new
+	g_project  = project;
 	if (keep_script_trust) {
 		project_scripts_trusted = was_trusted;
 	}

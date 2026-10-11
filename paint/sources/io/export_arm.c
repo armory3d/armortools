@@ -417,21 +417,21 @@ void export_arm_run_project(char *path) {
 #else
 	{
 #endif
-	render_target_t *rt        = any_map_get(render_path_render_targets, "buf");
-	gpu_texture_t   *tex       = rt->_image;
-	gpu_texture_t   *mesh_icon = gpu_create_render_target(256, 256, GPU_TEXTURE_FORMAT_RGBA32);
-	f32              r         = sys_w() / (float)sys_h();
-	draw_begin(mesh_icon, false, 0);
-	draw_scaled_image(tex, -(256 * r - 256) / 2.0, 0, 256 * r, 256);
-	draw_end();
+		render_target_t *rt        = any_map_get(render_path_render_targets, "buf");
+		gpu_texture_t   *tex       = rt->_image;
+		gpu_texture_t   *mesh_icon = gpu_create_render_target(256, 256, GPU_TEXTURE_FORMAT_RGBA32);
+		f32              r         = sys_w() / (float)sys_h();
+		draw_begin(mesh_icon, false, 0);
+		draw_scaled_image(tex, -(256 * r - 256) / 2.0, 0, 256 * r, 256);
+		draw_end();
 
-	buffer_t   *mesh_icon_pixels = gpu_get_texture_pixels(mesh_icon);
-	u8_array_t *u8a              = mesh_icon_pixels;
-	for (i32 i = 0; i < 256 * 256 * 4; ++i) {
-		u8a->buffer[i] = math_floor(math_pow(u8a->buffer[i] / 255.0, 1.0 / 2.2) * 255);
-	}
-	iron_write_png(string("%s_icon.png", substring(path, 0, string_length(path) - 4)), mesh_icon_pixels, 256, 256, 0);
-	gpu_delete_texture(mesh_icon);
+		buffer_t   *mesh_icon_pixels = gpu_get_texture_pixels(mesh_icon);
+		u8_array_t *u8a              = mesh_icon_pixels;
+		for (i32 i = 0; i < 256 * 256 * 4; ++i) {
+			u8a->buffer[i] = math_floor(math_pow(u8a->buffer[i] / 255.0, 1.0 / 2.2) * 255);
+		}
+		iron_write_png(string("%s_icon.png", substring(path, 0, string_length(path) - 4)), mesh_icon_pixels, 256, 256, 0);
+		gpu_delete_texture(mesh_icon);
 	}
 #endif
 

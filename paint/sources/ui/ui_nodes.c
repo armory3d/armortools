@@ -635,7 +635,7 @@ void ui_nodes_draw_menubar_search(void *_) {
 static void ui_nodes_rename_mesh(ui_node_canvas_t *c, char *name) {
 	mesh_object_t *o = g_context->paint_object;
 	util_mesh_rename(o, name);
-	c->name = o->base->name;
+	c->name                                           = o->base->name;
 	ui_base_hwnds->buffer[TAB_AREA_SIDEBAR0]->redraws = 2;
 }
 
@@ -673,8 +673,8 @@ void ui_nodes_draw_menubar() {
 
 	// Mesh canvas is named after the mesh, editing renames the mesh
 	if (full && ui_nodes_canvas_type == CANVAS_TYPE_MESH) {
-		char *new_name = c->name;
-		g_ui->_w       = math_floor(math_min(draw_string_width(g_font, g_ui->font_size, new_name) + 15 * UI_SCALE(), 100 * UI_SCALE()));
+		char *new_name      = c->name;
+		g_ui->_w            = math_floor(math_min(draw_string_width(g_font, g_ui->font_size, new_name) + 15 * UI_SCALE(), 100 * UI_SCALE()));
 		ui_id_t name_id     = ui_widget_id(&c->name, UI_ID_TEXT);
 		bool    was_editing = g_ui->text_selected_id == name_id;
 		if (!was_editing) {
@@ -697,8 +697,8 @@ void ui_nodes_draw_menubar() {
 	}
 	// Editable canvas name
 	else if (full) {
-		char *new_name = c->name; // Applied below once the rename is validated
-		g_ui->_w       = math_floor(math_min(draw_string_width(g_font, g_ui->font_size, new_name) + 15 * UI_SCALE(), 100 * UI_SCALE()));
+		char *new_name      = c->name; // Applied below once the rename is validated
+		g_ui->_w            = math_floor(math_min(draw_string_width(g_font, g_ui->font_size, new_name) + 15 * UI_SCALE(), 100 * UI_SCALE()));
 		ui_id_t name_id     = ui_widget_id(&c->name, UI_ID_TEXT);
 		bool    was_editing = g_ui->text_selected_id == name_id;
 		if (!was_editing) {

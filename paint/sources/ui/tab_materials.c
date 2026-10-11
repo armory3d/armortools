@@ -31,7 +31,7 @@ void tab_materials_update_material() {
 }
 
 void tab_materials_draw_slots_duplicate(void *_) {
-	i32   i             = _tab_materials_draw_slots;
+	i32 i               = _tab_materials_draw_slots;
 	g_context->material = slot_material_create(g_project->_->materials->buffer[0]->data, NULL);
 	any_array_push(g_project->_->materials, g_context->material);
 	ui_node_canvas_t *cloned    = util_clone_canvas(g_project->_->materials->buffer[i]->canvas);

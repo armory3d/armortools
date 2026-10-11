@@ -596,7 +596,7 @@ void base_init() {
 	}
 
 	if (args_player) {
-		base_player_lock = true;
+		base_player_lock    = true;
 		g_config->workspace = WORKSPACE_PLAYER;
 		base_update_workspace();
 		make_material_parse_paint_material(true);

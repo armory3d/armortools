@@ -286,12 +286,12 @@ void history_swap_canvas(history_step_t *step) {
 		if (step->object < 0 || step->object >= g_project->_->paint_objects->length) {
 			return;
 		}
-		mesh_object_t    *o       = g_project->_->paint_objects->buffer[step->object];
-		mesh_nodes_t     *slot    = nodes_mesh_get(o, true);
-		ui_node_canvas_t *_canvas = slot->canvas;
-		slot->canvas              = step->canvas;
-		step->canvas              = _canvas;
-		g_context->paint_object   = o;
+		mesh_object_t    *o                    = g_project->_->paint_objects->buffer[step->object];
+		mesh_nodes_t     *slot                 = nodes_mesh_get(o, true);
+		ui_node_canvas_t *_canvas              = slot->canvas;
+		slot->canvas                           = step->canvas;
+		step->canvas                           = _canvas;
+		g_context->paint_object                = o;
 		slot->nodes->nodes_selected_id->length = 0;
 		nodes_mesh_update(o, false);
 		ui_nodes_hwnd->redraws = 2;

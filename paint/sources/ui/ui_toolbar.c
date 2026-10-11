@@ -9,8 +9,7 @@ void ui_toolbar_init() {}
 bool ui_toolbar_tool_visible(i32 tool) {
 	if (g_config->workflow == WORKFLOW_SCULPT) {
 		// Brush is replaced by the sculpt mode icons
-		return tool != TOOL_TYPE_BRUSH && tool != TOOL_TYPE_PARTICLE && tool != TOOL_TYPE_COLORID && tool != TOOL_TYPE_PICKER &&
-		       tool != TOOL_TYPE_MATERIAL;
+		return tool != TOOL_TYPE_BRUSH && tool != TOOL_TYPE_PARTICLE && tool != TOOL_TYPE_COLORID && tool != TOOL_TYPE_PICKER && tool != TOOL_TYPE_MATERIAL;
 	}
 	return true;
 }

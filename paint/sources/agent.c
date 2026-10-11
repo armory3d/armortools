@@ -22,8 +22,7 @@ static bool agent_mcp     = false;
 static char *agent_code_guide = "Reply with C code only in a ```c fence. " AGENT_RULES;
 
 static char *agent_qwen_guide = "Edit the ArmorPaint project in steps, each a C script that modifies the project. Reply with the "
-                                "next step only, in a ```c fence. " AGENT_RULES AGENT_SCRIPTS
-                                "To save a project script, start its fence "
+                                "next step only, in a ```c fence. " AGENT_RULES AGENT_SCRIPTS "To save a project script, start its fence "
                                 "with ```c scripts/<name>.c instead. To run a task script as the next step, reply 'Run: scripts/<name>.c' "
                                 "only. When finished, reply 'Done.'.\n";
 
@@ -301,7 +300,7 @@ static char *agent_exe(void) {
 	}
 #elif !defined(IRON_WASM)
 	// A bare name was found through PATH and resolves the same from any directory
-	char path[4096];
+	char  path[4096];
 	char *exe = iron_get_arg(0);
 	if (exe[0] != '/' && string_index_of(exe, "/") >= 0 && getcwd(path, sizeof(path)) != NULL) {
 		return string("%s/%s", path, exe);
@@ -312,8 +311,7 @@ static char *agent_exe(void) {
 
 static char *agent_mcp_guide(char *dir) {
 	return string("Edit the ArmorPaint project '%s' in steps with the armorpaint tools, each step a C script that modifies the "
-	              "project. " AGENT_RULES AGENT_SCRIPTS
-	              "Run a step with the step tool, it returns the log and a screenshot. The step files are kept in '%s'.\n"
+	              "project. " AGENT_RULES AGENT_SCRIPTS "Run a step with the step tool, it returns the log and a screenshot. The step files are kept in '%s'.\n"
 	              "Start over from the original project with the restore tool, then replay the steps to keep.\n"
 	              "Project scripts are '%s/scripts/<name>.c', edit them as files. Run a task script like a step with the run tool.\n"
 	              "Test by playing with the play tool. It returns the log and a screenshot and rolls the project back. The test "
