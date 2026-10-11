@@ -20,11 +20,11 @@ static i32           build_exit_code = 0;
 static char          build_log[BUILD_LOG_MAX];
 static i32           build_log_len = 0;
 static char          build_log_view[BUILD_LOG_MAX];
-static bool          build_follow = true; // Scroll with the output
-static bool          build_filter = false; // Show error lines only
-static i32           build_config = 0; // Debug or release
+static bool          build_follow     = true;  // Scroll with the output
+static bool          build_filter     = false; // Show error lines only
+static i32           build_config     = 0;     // Debug or release
 static bool          build_clean_next = false;
-static f32           build_bottom = 0; // Scroll offset of the last row
+static f32           build_bottom     = 0; // Scroll offset of the last row
 
 // Called from the build thread
 static void build_log_append(char *s) {
@@ -155,9 +155,11 @@ void build_run(bool run, bool clean) {
 	editor_save_all();
 	clean            = clean || build_clean_next;
 	build_clean_next = false;
-	char *debug = build_config == 0 ? " --debug" : "";
+	char *debug      = build_config == 0 ? " --debug" : "";
 #ifdef IRON_WINDOWS
-	build_exec(string("cd /d \"%s\" && %s\"%s\" %s%s 2>&1", dir, clean ? "(if exist build rmdir /s /q build) && " : "", make, run ? "--run" : "--compile", debug), false);
+	build_exec(string("cd /d \"%s\" && %s\"%s\" %s%s 2>&1", dir, clean ? "(if exist build rmdir /s /q build) && " : "", make, run ? "--run" : "--compile",
+	                  debug),
+	           false);
 #else
 	build_exec(string("cd \"%s\" && %s\"%s\" %s%s 2>&1", dir, clean ? "rm -rf build && " : "", make, run ? "--run" : "--compile", debug), false);
 #endif
@@ -168,17 +170,17 @@ void build_exec(char *cmd, bool show) {
 	if (build_running) {
 		return;
 	}
-	build_cmd     = cmd;
-	build_log_len    = 0;
-	build_log[0]     = '\0';
-	build_log_dirty  = true;
+	build_cmd       = cmd;
+	build_log_len   = 0;
+	build_log[0]    = '\0';
+	build_log_dirty = true;
 	if (show) {
 		build_show  = true;
 		search_show = false;
 	}
-	build_follow     = true;
-	build_finished   = false;
-	build_running    = true;
+	build_follow   = true;
+	build_finished = false;
+	build_running  = true;
 	iron_thread_init(&build_thread, build_thread_func, NULL);
 }
 
@@ -345,7 +347,7 @@ void build_render(i32 x, i32 y, i32 w, i32 h) {
 			}
 		}
 		if (line_start) { // Highlight errors and warnings
-			bool error       = build_line_contains(pos, end, "error") || build_line_contains(pos, end, "failed");
+			bool error        = build_line_contains(pos, end, "error") || build_line_contains(pos, end, "failed");
 			g_theme->TEXT_COL = error ? 0xffff5555 : (build_line_contains(pos, end, "warning") ? 0xffe5c07b : _TEXT_COL);
 		}
 		pos        = build_next_row(pos, end, cols, row);

@@ -10,11 +10,11 @@ typedef struct git_file {
 	bool  staged; // Added to the commit
 } git_file_t;
 
-ui_window_t *git_hwnd  = NULL;
-bool         git_show  = false;
-char        *git_root  = NULL; // NULL when the project is not in a repository
-any_array_t *git_files = NULL;
-i32          git_ahead = 0; // Commits to be pushed
+ui_window_t *git_hwnd     = NULL;
+bool         git_show     = false;
+char        *git_root     = NULL; // NULL when the project is not in a repository
+any_array_t *git_files    = NULL;
+i32          git_ahead    = 0;  // Commits to be pushed
 char        *git_message  = ""; // Commit message
 ui_id_t      git_input_id = 0;
 
@@ -310,11 +310,11 @@ void git_render(i32 x, i32 y, i32 w, i32 h) {
 	bool commit  = false;
 	ui_begin_sticky();
 	ui_text_input(&git_message, "Message", UI_ALIGN_LEFT, true, true);
-	bool sync     = git_files->length == 0; // Everything is committed
-	g_ui->enabled = sync || !editor_is_modified(editor_current); // Unsaved changes would be left out of the commit
+	bool sync        = git_files->length == 0;                      // Everything is committed
+	g_ui->enabled    = sync || !editor_is_modified(editor_current); // Unsaved changes would be left out of the commit
 	char *sync_label = git_ahead > 0 ? string_tmp("Sync (%d %s)", git_ahead, git_ahead == 1 ? "commit" : "commits") : "Sync";
 	bool  clicked    = ui_button(sync ? sync_label : "Commit", UI_ALIGN_CENTER, "");
-	g_ui->enabled = true;
+	g_ui->enabled    = true;
 	if (clicked) {
 		if (sync) {
 			git_sync();
@@ -349,8 +349,8 @@ void git_render(i32 x, i32 y, i32 w, i32 h) {
 		}
 		// File name first, the folder is cut off in a narrow panel
 		i32   slash = string_last_index_of(f->rel, "/");
-		char *label = slash > -1 ? string_tmp("%c  %s  %s", f->status, f->rel + slash + 1, substring(f->rel, 0, slash))
-		                         : string_tmp("%c  %s", f->status, f->rel);
+		char *label =
+		    slash > -1 ? string_tmp("%c  %s  %s", f->status, f->rel + slash + 1, substring(f->rel, 0, slash)) : string_tmp("%c  %s", f->status, f->rel);
 		bool stage    = false;
 		bool selected = editor_current != NULL && string_equals(editor_current->path, f->path);
 		if (browser_menu_show) {

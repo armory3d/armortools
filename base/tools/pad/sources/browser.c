@@ -19,7 +19,12 @@ browser_node_t *browser_root = NULL;
 // Empty space of the project panel opens the menu of the project folder
 typedef struct git_file git_file_t;
 
-enum { BROWSER_MENU_ITEMS, BROWSER_MENU_RENAME, BROWSER_MENU_NEW_FILE, BROWSER_MENU_NEW_FOLDER }; // Other than items show a name field
+enum {
+	BROWSER_MENU_ITEMS,
+	BROWSER_MENU_RENAME,
+	BROWSER_MENU_NEW_FILE,
+	BROWSER_MENU_NEW_FOLDER
+}; // Other than items show a name field
 
 ui_window_t    *browser_menu_hwnd    = NULL;
 bool            browser_menu_show    = false;
@@ -33,9 +38,9 @@ bool            browser_menu_confirm = false; // Delete or revert was pressed on
 char           *browser_menu_name    = "";
 bool            browser_menu_focus   = false;
 
-void build_exec(char *cmd, bool show);
-void git_refresh();
-void git_revert(git_file_t *f);
+void         build_exec(char *cmd, bool show);
+void         git_refresh();
+void         git_revert(git_file_t *f);
 bool         git_show;
 ui_window_t *git_hwnd;
 
@@ -282,7 +287,8 @@ static void browser_format(browser_node_t *node) {
 	build_exec(string("for /r \"%s\" %%f in (*.c *.h *.m) do @clang-format -i --verbose \"%%f\" 2>&1", node->path), true);
 #else
 	build_exec(string("find \"%s\" -name .git -prune -o -type f \\( -name '*.c' -o -name '*.h' -o -name '*.m' \\) -exec clang-format -i --verbose {} + 2>&1",
-	                  node->path), true);
+	                  node->path),
+	           true);
 #endif
 }
 
@@ -346,9 +352,9 @@ static void browser_menu_rect(i32 *x, i32 *y, i32 *w, i32 *h) {
 		rows = browser_menu_node == browser_root ? 4 : 6; // Project folder is not renamed or deleted
 	}
 	*w = math_floor((browser_menu_mode != BROWSER_MENU_ITEMS ? 320 : 160) * UI_SCALE());
-	*h       = math_floor(rows * (UI_ELEMENT_H() + UI_ELEMENT_OFFSET()) + UI_ELEMENT_OFFSET());
-	*x       = browser_menu_x;
-	*y       = browser_menu_y;
+	*h = math_floor(rows * (UI_ELEMENT_H() + UI_ELEMENT_OFFSET()) + UI_ELEMENT_OFFSET());
+	*x = browser_menu_x;
+	*y = browser_menu_y;
 	if (*x + *w > sys_w()) { // Keep inside of the window
 		*x = sys_w() - *w;
 	}
@@ -433,7 +439,7 @@ static void browser_draw_icon(i32 icon, f32 x, f32 y) {
 	}
 	else if (icon == BROWSER_ICON_DELETE) { // Trash can
 		y += math_floor((UI_ELEMENT_H() - 12 * s) / 2.0);
-		draw_filled_rect(x + 4 * s, y, 4 * s, s); // Handle
+		draw_filled_rect(x + 4 * s, y, 4 * s, s);              // Handle
 		draw_filled_rect(x + 1 * s, y + 1 * s, 10 * s, 2 * s); // Lid
 		draw_rect(x + 2.5 * s, y + 4.5 * s, 7 * s, 7 * s, s);
 		draw_filled_rect(x + 5.5 * s, y + 6 * s, s, 4 * s);
@@ -564,8 +570,8 @@ static void browser_draw(browser_node_t *node, i32 depth) {
 		browser_node_t *n = node->children->buffer[i];
 		g_ui->_x          = _x + indent;
 		g_ui->_w          = _w - indent;
-		f32 icon_x        = g_ui->_x + UI_TEXT_OFFSET();
-		f32 icon_y        = g_ui->_y;
+		f32  icon_x       = g_ui->_x + UI_TEXT_OFFSET();
+		f32  icon_y       = g_ui->_y;
 		bool selected     = !n->is_dir && editor_current != NULL && string_equals(editor_current->path, n->path);
 		if (browser_menu_show) {
 			if (!browser_menu_editor) {

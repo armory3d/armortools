@@ -9,17 +9,17 @@ typedef struct editor_undo {
 } editor_undo_t;
 
 typedef struct editor_buffer {
-	char      *path;
-	char      *text;
-	char      *saved; // Contents on disk
-	i32        line;
-	f32        scroll;
-	bool       tabs;      // File is indented with tabs
-	any_map_t *tab_lines; // Lines as loaded, by their text with tabs expanded
-	bool       crlf;
-	i64        time; // Modification time of the file when loaded or saved
-	bool       diff; // Read-only git diff of the file at path
-	i32        caret; // Line of the caret in the diff, -1 when not placed
+	char          *path;
+	char          *text;
+	char          *saved; // Contents on disk
+	i32            line;
+	f32            scroll;
+	bool           tabs;      // File is indented with tabs
+	any_map_t     *tab_lines; // Lines as loaded, by their text with tabs expanded
+	bool           crlf;
+	i64            time;  // Modification time of the file when loaded or saved
+	bool           diff;  // Read-only git diff of the file at path
+	i32            caret; // Line of the caret in the diff, -1 when not placed
 	gpu_texture_t *image; // Picture shown instead of the text
 	editor_undo_t  undo[EDITOR_UNDO_MAX];
 	editor_undo_t  redo[EDITOR_UNDO_MAX];
@@ -29,11 +29,11 @@ typedef struct editor_buffer {
 	f64            undo_time; // Time of the last edit
 } editor_buffer_t;
 
-ui_window_t        *editor_hwnd     = NULL;
-any_map_t          *editor_buffers  = NULL; // Opened files by path
+ui_window_t        *editor_hwnd        = NULL;
+any_map_t          *editor_buffers     = NULL; // Opened files by path
 any_array_t        *editor_buffer_list = NULL;
-editor_buffer_t    *editor_current  = NULL;
-ui_text_coloring_t *editor_coloring = NULL;
+editor_buffer_t    *editor_current     = NULL;
+ui_text_coloring_t *editor_coloring    = NULL;
 
 gpu_texture_t *editor_minimap_tex       = NULL;
 u32            editor_minimap_hash      = 0;
@@ -864,10 +864,27 @@ void editor_render(i32 x, i32 y, i32 w, i32 h) {
 
 	if (editor_current == NULL) {
 		// Faded shortcuts in the middle of the panel, the names end and the keys start at its center
-		static char *names[] = {"Go to File", "Save", "Search", "Select Word", "Undo", "Redo", "Search in Files", "Toggle Project Tree", "Toggle Git Changes", "Toggle Output", "Toggle Minimap", "Open Config", "Close File or Project", "Build", "Build and Run", "Clean Build and Run", "Toggle Fullscreen"};
-		static char *keys[]  = {"Ctrl+P", "Ctrl+S", "Ctrl+F", "Ctrl+D", "Ctrl+Z", "Ctrl+Shift+Z", "Ctrl+Shift+F", "Ctrl+E", "Ctrl+G", "Ctrl+J", "Ctrl+M", "Ctrl+K", "Ctrl+W", "Ctrl+B", "F5", "Shift+F5", "F11"};
-		static f32         ratio[2] = {0.5, 0.5};
-		static f32_array_t ratios   = {.buffer = ratio, .length = 2};
+		static char       *names[]   = {"Go to File",
+		                                "Save",
+		                                "Search",
+		                                "Select Word",
+		                                "Undo",
+		                                "Redo",
+		                                "Search in Files",
+		                                "Toggle Project Tree",
+		                                "Toggle Git Changes",
+		                                "Toggle Output",
+		                                "Toggle Minimap",
+		                                "Open Config",
+		                                "Close File or Project",
+		                                "Build",
+		                                "Build and Run",
+		                                "Clean Build and Run",
+		                                "Toggle Fullscreen"};
+		static char       *keys[]    = {"Ctrl+P", "Ctrl+S", "Ctrl+F", "Ctrl+D", "Ctrl+Z", "Ctrl+Shift+Z", "Ctrl+Shift+F", "Ctrl+E", "Ctrl+G",
+		                                "Ctrl+J", "Ctrl+M", "Ctrl+K", "Ctrl+W", "Ctrl+B", "F5",           "Shift+F5",     "F11"};
+		static f32         ratio[2]  = {0.5, 0.5};
+		static f32_array_t ratios    = {.buffer = ratio, .length = 2};
 		i32                count     = sizeof(names) / sizeof(names[0]);
 		i32                _TEXT_COL = g_theme->TEXT_COL;
 		g_theme->TEXT_COL            = 0xff606060;
@@ -880,7 +897,7 @@ void editor_render(i32 x, i32 y, i32 w, i32 h) {
 			ui_text(keys[i], UI_ALIGN_LEFT, 0x00000000);
 		}
 		g_theme->TEXT_OFFSET = _TEXT_OFFSET;
-		g_theme->TEXT_COL = _TEXT_COL;
+		g_theme->TEXT_COL    = _TEXT_COL;
 		return;
 	}
 
@@ -1018,11 +1035,11 @@ void editor_render(i32 x, i32 y, i32 w, i32 h) {
 	static char mark[UI_TEXT_MAX];
 	editor_mark = NULL;
 	if (g_ui->text_selected_id == ui_widget_id(&editor_current->text, UI_ID_TEXT) && g_ui->cursor_x != g_ui->highlight_anchor) {
-		i32 a   = g_ui->cursor_x < g_ui->highlight_anchor ? g_ui->cursor_x : g_ui->highlight_anchor;
-		i32 b   = g_ui->cursor_x < g_ui->highlight_anchor ? g_ui->highlight_anchor : g_ui->cursor_x;
-		i32 len = string_length(g_ui->text_selected);
-		a       = a < 0 ? 0 : a;
-		b       = b > len ? len : b;
+		i32 a      = g_ui->cursor_x < g_ui->highlight_anchor ? g_ui->cursor_x : g_ui->highlight_anchor;
+		i32 b      = g_ui->cursor_x < g_ui->highlight_anchor ? g_ui->highlight_anchor : g_ui->cursor_x;
+		i32 len    = string_length(g_ui->text_selected);
+		a          = a < 0 ? 0 : a;
+		b          = b > len ? len : b;
 		bool blank = true;
 		for (i32 i = a; i < b; ++i) {
 			mark[i - a] = g_ui->text_selected[i];

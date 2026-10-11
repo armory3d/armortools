@@ -10,24 +10,24 @@ ui_theme_t  *g_theme;
 draw_font_t *g_font;
 draw_font_t *g_font_mono;
 
-char        *pad_project_dir = NULL;
-char        *pad_dropped     = NULL;
+char *pad_project_dir = NULL;
+char *pad_dropped     = NULL;
 #define PAD_UI_SCALE 1.2
 
-f32          pad_browser_w   = 220; // Panel sizes before scaling
-f32          pad_output_w    = 420;
-i32          pad_resizing     = 0; // 1 - browser, 2 - output
-bool         pad_resize_hover = false;
-bool         pad_browser_show = true;
-bool         search_show      = false;
-i32          pad_window_w     = 0; // Last window rect
-i32          pad_window_h     = 0;
-i32          pad_window_x     = -1;
-i32          pad_window_y     = -1;
-i32          pad_window_frames = 0; // Frames since the window rect changed
-char        *pad_config_dir    = NULL;
-char        *pad_config_file   = NULL;
-char        *pad_config_notes  = ""; // Kept as is when the config is saved
+f32   pad_browser_w     = 220; // Panel sizes before scaling
+f32   pad_output_w      = 420;
+i32   pad_resizing      = 0; // 1 - browser, 2 - output
+bool  pad_resize_hover  = false;
+bool  pad_browser_show  = true;
+bool  search_show       = false;
+i32   pad_window_w      = 0; // Last window rect
+i32   pad_window_h      = 0;
+i32   pad_window_x      = -1;
+i32   pad_window_y      = -1;
+i32   pad_window_frames = 0; // Frames since the window rect changed
+char *pad_config_dir    = NULL;
+char *pad_config_file   = NULL;
+char *pad_config_notes  = ""; // Kept as is when the config is saved
 
 char *pad_file_name(char *path) {
 	return path + string_last_index_of(path, PATH_SEP) + 1;
@@ -73,10 +73,10 @@ void pad_fade_end() {
 	g_theme->LABEL_COL = pad_label_col;
 }
 
-#include "editor.c"
 #include "browser.c"
-#include "git.c"
 #include "build.c"
+#include "editor.c"
+#include "git.c"
 #include "picker.c"
 #include "search.c"
 
@@ -101,8 +101,8 @@ void pad_save_config() {
 		file = pad_config_file != NULL ? pad_config_file : "";
 	}
 	pad_config_file = file;
-	char    *s     = string("%s\n%s\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n%s", dir, file, (i32)pad_browser_w, (i32)pad_output_w,
-	                        pad_window_w, pad_window_h, pad_window_x, pad_window_y, editor_minimap_show ? 1 : 0, pad_panels(), pad_config_notes);
+	char *s = string("%s\n%s\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n%s", dir, file, (i32)pad_browser_w, (i32)pad_output_w, pad_window_w, pad_window_h, pad_window_x,
+	                 pad_window_y, editor_minimap_show ? 1 : 0, pad_panels(), pad_config_notes);
 	buffer_t bytes = {.buffer = (u8 *)s, .length = string_length(s)};
 	iron_file_save_bytes(pad_config_path(), &bytes, 0);
 }
@@ -114,7 +114,7 @@ static void pad_load_config() {
 		return;
 	}
 	editor_minimap_show = true;
-	char *s = string_alloc(blob->length + 1);
+	char *s             = string_alloc(blob->length + 1);
 	memcpy(s, blob->buffer, blob->length);
 	char *notes = s; // Free text after the settings lines
 	for (i32 i = 0; i < PAD_CONFIG_LINES && notes != NULL; i++) {
@@ -123,7 +123,7 @@ static void pad_load_config() {
 			notes++;
 		}
 	}
-	pad_config_notes = notes != NULL ? string_copy(notes) : "";
+	pad_config_notes      = notes != NULL ? string_copy(notes) : "";
 	string_array_t *lines = string_split(s, "\n");
 	pad_config_dir        = lines->buffer[0];
 	pad_config_file       = lines->length > 1 ? lines->buffer[1] : "";
@@ -205,7 +205,7 @@ static void pad_update_window_rect() {
 }
 
 void pad_open_project(char *dir) {
-	dir = string_copy(dir);
+	dir     = string_copy(dir);
 	i32 len = string_length(dir);
 	if (len > 1 && ends_with(dir, PATH_SEP)) {
 		dir[len - 1] = '\0';
@@ -369,10 +369,10 @@ static void pad_update_title() {
 
 // Drag the panel dividers to resize the left panel and the output panel
 static void pad_update_resize(i32 w, i32 main_h, i32 *browser_w, i32 *output_w) {
-	f32 scale   = UI_SCALE();
-	i32 min_w   = math_floor(100 * scale);
-	i32 grab    = math_floor(4 * scale);
-	i32 space   = w - math_floor(200 * scale); // Keep some room for the editor
+	f32  scale  = UI_SCALE();
+	i32  min_w  = math_floor(100 * scale);
+	i32  grab   = math_floor(4 * scale);
+	i32  space  = w - math_floor(200 * scale);  // Keep some room for the editor
 	bool left   = pad_browser_show || git_show; // Browser and git share the left panel
 	bool right  = build_show || search_show;    // Output and search share the right panel
 	bool over_b = !picker_show && !browser_menu_show && left && g_ui->input_y < main_h && math_abs(g_ui->input_x - *browser_w) <= grab;
@@ -449,7 +449,7 @@ void pad_render(void *_) {
 
 	ui_begin(g_ui);
 	g_ui->input_enabled = !picker_show && !browser_menu_show && !pad_resize_hover; // Popup or panel resizing takes the input
-	i32 editor_x = 0;
+	i32 editor_x        = 0;
 	if (git_show) {
 		git_render(0, 0, browser_w, main_h);
 		editor_x = browser_w + 1;
@@ -516,8 +516,8 @@ void _kickstart() {
 	g_theme->HOVER_COL     = 0xff232323;
 	g_theme->PRESSED_COL   = 0xff060606;
 	g_theme->VIEWPORT_COL  = 0xff000000;
-	g_font      = data_get_font("font.ttf");
-	g_font_mono = data_get_font("font_mono.ttf");
+	g_font                 = data_get_font("font.ttf");
+	g_font_mono            = data_get_font("font_mono.ttf");
 	draw_font_init(g_font);
 	draw_font_init(g_font_mono);
 	g_ui                = ui_create(ALLOC_INIT(ui_options_t, {.theme = g_theme, .font = g_font, .scale_factor = scale * PAD_UI_SCALE}));

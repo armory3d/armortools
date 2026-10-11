@@ -11,11 +11,11 @@ typedef struct search_result {
 	char *label;
 } search_result_t;
 
-ui_window_t *search_hwnd    = NULL;
-char        *search_query   = "";
-char        *search_summary = NULL; // Result and file counts of the last search
-bool         search_focus   = false;
-any_array_t *search_results = NULL;
+ui_window_t *search_hwnd     = NULL;
+char        *search_query    = "";
+char        *search_summary  = NULL; // Result and file counts of the last search
+bool         search_focus    = false;
+any_array_t *search_results  = NULL;
 ui_id_t      search_input_id = 0; // Widget ids depend on the window, stored while drawing it
 
 // Collects the lines of the file containing the lower case query
