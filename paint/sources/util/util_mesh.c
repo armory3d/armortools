@@ -760,10 +760,6 @@ void util_mesh_merge_geometry_objects(mesh_object_t_array_t *merged) {
 	util_mesh_geometry_joined();
 }
 
-void util_mesh_merge_geometry_down(mesh_object_t *main_object, mesh_object_t *below) {
-	util_mesh_merge_geometry_objects(any_array_create_from_raw_tmp((void *[]){main_object, below}, 2));
-}
-
 void util_mesh_swap_axis(mesh_object_t_array_t *objects, i32 a, i32 b) {
 	if (objects == NULL) {
 		objects = util_mesh_get_unique_data();
@@ -941,11 +937,10 @@ void util_mesh_calc_normals(mesh_object_t_array_t *objects, bool smooth) {
 	render_path_raytrace_ready = false;
 }
 
-void util_mesh_to_origin() {
-	mesh_object_t_array_t *objects = util_mesh_get_unique_data();
-	f32                    dx      = 0.0;
-	f32                    dy      = 0.0;
-	f32                    dz      = 0.0;
+void util_mesh_to_origin(mesh_object_t_array_t *objects) {
+	f32 dx = 0.0;
+	f32 dy = 0.0;
+	f32 dz = 0.0;
 	for (i32 i = 0; i < objects->length; ++i) {
 		mesh_object_t *o    = objects->buffer[i];
 		i32            l    = 4;

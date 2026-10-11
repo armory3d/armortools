@@ -608,20 +608,6 @@ void tab_meshes_duplicate_next_frame(void *_) {
 	util_mesh_duplicate();
 }
 
-void tab_meshes_merge_geometry_next_frame(void *_) {
-	util_mesh_merge_geometry();
-}
-
-static mesh_object_t *tab_meshes_slot_below(mesh_object_t *o) {
-	mesh_object_t_array_t *objects = g_project->_->paint_objects;
-	for (i32 i = array_index_of(objects, o) + 1; i > 0 && i < objects->length; ++i) {
-		if (!tab_meshes_slot_hidden(objects->buffer[i])) {
-			return objects->buffer[i];
-		}
-	}
-	return NULL;
-}
-
 static void tab_meshes_delete_preview(mesh_object_t *o) {
 	char          *uid_key = i32_to_string(o->base->uid);
 	gpu_texture_t *preview = tab_meshes_preview_map != NULL ? any_map_get(tab_meshes_preview_map, uid_key) : NULL;
@@ -629,15 +615,6 @@ static void tab_meshes_delete_preview(mesh_object_t *o) {
 		gpu_delete_texture(preview);
 		map_delete(tab_meshes_preview_map, uid_key);
 	}
-}
-
-void tab_meshes_merge_down_next_frame(mesh_object_t *o) {
-	mesh_object_t *below = tab_meshes_slot_below(o);
-	if (below == NULL) {
-		return;
-	}
-	util_mesh_merge_geometry_down(o, below);
-	tab_meshes_delete_preview(o);
 }
 
 static bool tab_meshes_float_input(f32 *value, void *id, char *label) {
@@ -723,10 +700,87 @@ void tab_meshes_merge_selected_next_frame(void *_) {
 	array_delete(selected);
 }
 
+void tab_meshes_delete_selected_next_frame(void *_) {
+	// Multi-selected meshes or the paint object
+	mesh_object_t_array_t *selected = tab_meshes_get_selected();
+	if (selected->length == 0) {
+		any_array_push(selected, g_context->paint_object);
+	}
+	tab_meshes_clear_selected();
+	// At least one mesh has to remain, keep the first one
+	i32 first = selected->length == g_project->_->paint_objects->length ? 1 : 0;
+	for (i32 i = selected->length - 1; i >= first; --i) {
+		tab_meshes_draw_context_menu_delete(selected->buffer[i]);
+	}
+	array_delete(selected);
+}
+
+static mesh_object_t_array_t *tab_meshes_menu_objects(mesh_object_t *o) {
+	// Geometry actions apply to the mesh and its children, o is NULL for the multi-selected meshes
+	if (o != NULL) {
+		return util_mesh_get_hierarchy(o);
+	}
+	mesh_object_t_array_t *ar = any_array_create_from_raw((void *[]){}, 0);
+	for (i32 i = 0; i < g_project->_->paint_objects->length; ++i) {
+		mesh_object_t *p = g_project->_->paint_objects->buffer[i];
+		for (object_t *q = p->base; q != NULL && q != _scene_root; q = q->parent) {
+			mesh_object_t *qo = q->ext_type != NULL && string_equals(q->ext_type, "mesh_object_t") ? q->ext : NULL;
+			if (qo != NULL && tab_meshes_is_selected(qo)) {
+				any_array_push(ar, p);
+				break;
+			}
+		}
+	}
+	mesh_object_t_array_t *unique = util_mesh_dedup_data(ar);
+	array_delete(ar);
+	return unique;
+}
+
+static bool tab_meshes_menu_delete() {
+	if (g_project->_->paint_objects->length > 1 && ui_menu_button(tr("Delete"), "delete", ICON_DELETE)) {
+		sys_notify_on_next_frame(tab_meshes_delete_selected_next_frame, NULL);
+		return true;
+	}
+	return false;
+}
+
+static bool tab_meshes_menu_uv_unwrap(mesh_object_t *o) {
+	if (ui_menu_button(tr("UV Unwrap"), "", ICON_NONE)) {
+		util_mesh_uv_unwrap(tab_meshes_menu_objects(o));
+		return true;
+	}
+	return false;
+}
+
+static bool tab_meshes_menu_origin(mesh_object_t *o) {
+	if (ui_menu_button(tr("Origin to Geometry"), "", ICON_NONE)) {
+		util_mesh_origin_to_geometry(tab_meshes_menu_objects(o));
+		g_context->ddirty = 2;
+		return true;
+	}
+	if (ui_menu_button(tr("Geometry to Origin"), "", ICON_NONE)) {
+		util_mesh_to_origin(tab_meshes_menu_objects(o));
+		g_context->ddirty = 2;
+		return true;
+	}
+	return false;
+}
+
 void tab_meshes_draw_context_menu_selected() {
+	if (tab_meshes_menu_delete()) {
+		return;
+	}
+
+	ui_menu_separator();
+
 	if (ui_menu_button(tr("Merge Geometry"), "", ICON_NONE)) {
 		sys_notify_on_next_frame(tab_meshes_merge_selected_next_frame, NULL);
+		return;
 	}
+	if (tab_meshes_menu_uv_unwrap(NULL)) {
+		return;
+	}
+	tab_meshes_menu_origin(NULL);
 }
 
 void tab_meshes_draw_context_menu() {
@@ -738,8 +792,7 @@ void tab_meshes_draw_context_menu() {
 		box_export_show_mesh();
 		return;
 	}
-	if (g_project->_->paint_objects->length > 1 && ui_menu_button(tr("Delete"), "delete", ICON_DELETE)) {
-		sys_notify_on_next_frame(tab_meshes_draw_context_menu_delete, o);
+	if (tab_meshes_menu_delete()) {
 		return;
 	}
 	if (ui_menu_button(tr("Duplicate"), "ctrl+d", ICON_DUPLICATE)) {
@@ -777,18 +830,13 @@ void tab_meshes_draw_context_menu() {
 
 	ui_menu_separator();
 
-	if (tab_meshes_slot_below(o) != NULL && ui_menu_button(tr("Merge Down"), "", ICON_NONE)) {
-		sys_notify_on_next_frame(tab_meshes_merge_down_next_frame, o);
-		return;
-	}
 	if (ui_menu_button(tr("Split"), "", ICON_NONE)) {
 		sys_notify_on_next_frame(util_mesh_split, o);
 		return;
 	}
 
 	// Geometry actions apply to the mesh and its children
-	if (ui_menu_button(tr("UV Unwrap"), "", ICON_NONE)) {
-		util_mesh_uv_unwrap(util_mesh_get_hierarchy(o));
+	if (tab_meshes_menu_uv_unwrap(o)) {
 		return;
 	}
 
@@ -833,9 +881,7 @@ void tab_meshes_draw_context_menu() {
 		ui_menu_sub_end();
 	}
 
-	if (ui_menu_button(tr("Origin to Geometry"), "", ICON_NONE)) {
-		util_mesh_origin_to_geometry(util_mesh_get_hierarchy(o));
-		g_context->ddirty = 2;
+	if (tab_meshes_menu_origin(o)) {
 		return;
 	}
 
@@ -965,22 +1011,16 @@ void tab_meshes_draw_edit() {
 		ui_base_show_2d_view(VIEW_2D_TYPE_UVMAP);
 	}
 
+	ui_menu_separator();
+
 	if (ui_menu_button(tr("Sort"), "", ICON_NONE)) {
 		tab_meshes_sort_by_name();
 	}
 
-	ui_menu_separator();
-
-	if (ui_menu_button(tr("Geometry to Origin"), "", ICON_NONE)) {
-		util_mesh_to_origin();
-		g_context->ddirty = 2;
+	if (ui_menu_button(tr("Select All"), "", ICON_NONE)) {
+		tab_meshes_select_range(0, g_project->_->paint_objects->length - 1);
+		ui_base_hwnds->buffer[TAB_AREA_SIDEBAR0]->redraws = 2;
 	}
-
-	g_ui->enabled = g_project->_->paint_objects->length > 1;
-	if (ui_menu_button(tr("Merge Geometry"), "", ICON_NONE)) {
-		sys_notify_on_next_frame(&tab_meshes_merge_geometry_next_frame, NULL);
-	}
-	g_ui->enabled = true;
 }
 
 mesh_object_t *tab_meshes_append_shape(char *mesh_name) {
@@ -1362,7 +1402,7 @@ void tab_meshes_draw_mesh_slot(mesh_object_t *o, i32 i) {
 		                g_ui->input_y < g_ui->_window_y + g_ui->_window_h;
 		if (in_focus && !g_ui->is_typing && g_ui->is_delete_down && g_project->_->paint_objects->length > 1) {
 			g_ui->is_delete_down = false;
-			sys_notify_on_next_frame(&tab_meshes_draw_context_menu_delete, g_context->paint_object);
+			sys_notify_on_next_frame(&tab_meshes_delete_selected_next_frame, NULL);
 		}
 		if (in_focus && g_ui->is_ctrl_down && g_ui->is_key_pressed && g_ui->key_code == KEY_CODE_D) {
 			g_ui->is_key_pressed = false;
