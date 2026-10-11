@@ -70,9 +70,9 @@ bool embed_owns(uint8_t *buffer) {
 #endif
 
 void _kickstart();
-bool enable_window = true;
-bool in_background = false;
-int  paused_frames = 0;
+bool enable_window           = true;
+bool in_background           = false;
+int  paused_frames           = 0;
 bool (*iron_idle_wake)(void) = NULL;
 #ifdef IDLE_SLEEP
 bool input_down         = false;

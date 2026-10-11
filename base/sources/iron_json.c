@@ -426,8 +426,7 @@ static int token_write_to_map(any_map_t *m, int i, char *prefix) {
 		}
 		else {
 			i++;
-			any_map_set(m, key,
-			            v.type == JSMN_STRING ? json_unescape_copy(source + v.start, v.end - v.start) : substring(source, v.start, v.end));
+			any_map_set(m, key, v.type == JSMN_STRING ? json_unescape_copy(source + v.start, v.end - v.start) : substring(source, v.start, v.end));
 		}
 	}
 	return i;

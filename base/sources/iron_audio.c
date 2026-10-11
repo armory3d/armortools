@@ -354,7 +354,7 @@ iron_a1_sound_t *iron_a1_sound_create_from_bytes(uint8_t *filedata, int filedata
 
 	if (strncmp(format, ".ogg", 4) == 0) {
 		int channels, sample_rate;
-		int samples               = stb_vorbis_decode_memory(filedata, (int)filedata_size, &channels, &sample_rate, (short **)&data);
+		int samples = stb_vorbis_decode_memory(filedata, (int)filedata_size, &channels, &sample_rate, (short **)&data);
 		if (samples <= 0) {
 			free(data);
 			sound->in_use = false;

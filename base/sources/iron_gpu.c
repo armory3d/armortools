@@ -26,7 +26,7 @@ gpu_pipeline_t *current_pipeline                   = NULL;
 gpu_texture_t   framebuffers[GPU_FRAMEBUFFER_COUNT];
 gpu_texture_t   framebuffer_depth;
 gpu_texture_t  *gpu_framebuffer_redirect = NULL;
-uint32_t        framebuffer_index = 0;
+uint32_t        framebuffer_index        = 0;
 
 void gpu_init(int depth_buffer_bits, bool vsync) {
 	gpu_init_internal(depth_buffer_bits, vsync);
