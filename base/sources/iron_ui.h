@@ -400,6 +400,7 @@ float UI_SCALE();
 float UI_ELEMENT_W();
 float UI_ELEMENT_H();
 float UI_ELEMENT_OFFSET();
+float UI_TEXT_AREA_LINE_H();
 float UI_ARROW_SIZE();
 float UI_BUTTON_H();
 float UI_CHECK_SIZE();

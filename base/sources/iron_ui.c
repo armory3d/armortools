@@ -56,6 +56,10 @@ float UI_ELEMENT_H() {
 	return theme->ELEMENT_H * UI_SCALE();
 }
 
+float UI_TEXT_AREA_LINE_H() {
+	return (int)(theme->ELEMENT_H * 0.85) * UI_SCALE();
+}
+
 float UI_ELEMENT_OFFSET() {
 	return theme->ELEMENT_OFFSET * UI_SCALE();
 }
@@ -710,10 +714,9 @@ char *ui_extract_line_off(char *str, int line, int *off) {
 	str += *off;
 	static char temp[1024];
 	int         pos    = 0;
-	int         len    = strlen(str);
 	int         line_i = 0;
 	int         i      = 0;
-	for (i = 0; i < len; ++i) {
+	for (i = 0; str[i] != '\0'; ++i) {
 		if (str[i] == '\n') {
 			line_i++;
 			if (line_i > line) {

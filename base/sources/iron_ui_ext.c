@@ -686,11 +686,22 @@ static void ui_text_area_draw_search(char *line) {
 char *ui_text_area(char **value, int *line_index, int align, bool editable, char *label, bool word_wrap) {
 	ui_t   *current       = ui_get_current();
 	ui_id_t text_id       = current->next_id != 0 ? current->next_id : (ui_id_t)value;
-	char   *original_text = string_copy(*value);
+	char   *original_text = (*value);
 	current->item_changed = false;
-	(*value)              = string_replace_all((*value), "\t", "    ");
-	bool selected         = current->text_selected_id == ui_widget_id(value, UI_ID_TEXT); // Text being edited
-	current->next_id      = 0;                                                            // Internal labels must not consume the text areas identity
+	// Lines are edited in a scratch copy, the text of the caller is left untouched
+	char *scratch    = string_replace_all((*value), "\t", "    ");
+	(*value)         = scratch;
+	bool selected    = current->text_selected_id == ui_widget_id(value, UI_ID_TEXT); // Text being edited
+	current->next_id = 0;                                                            // Internal labels must not consume the text areas identity
+
+	// Tighter line spacing
+	ui_theme_t *line_theme     = current->ops->theme;
+	int         _ELEMENT_H     = line_theme->ELEMENT_H;
+	int         _BUTTON_H      = line_theme->BUTTON_H;
+	float       _font_offset_y = current->font_offset_y;
+	line_theme->ELEMENT_H      = (int)(_ELEMENT_H * 0.85);
+	line_theme->BUTTON_H       = _BUTTON_H - (_ELEMENT_H - line_theme->ELEMENT_H);
+	current->font_offset_y     = (UI_ELEMENT_H() - draw_font_height(current->ops->font, current->font_size)) / 2.0;
 
 	int text_size = strlen((*value)) + 1 + UI_TEXT_MAX;
 	if (lines_size < text_size) {
@@ -1074,11 +1085,18 @@ char *ui_text_area(char **value, int *line_index, int align, bool editable, char
 		strcpy(current->text_selected, ui_extract_line(lines, (*line_index)));
 	}
 
+	line_theme->ELEMENT_H        = _ELEMENT_H;
+	line_theme->BUTTON_H         = _BUTTON_H;
+	current->font_offset_y       = _font_offset_y;
 	current->highlight_on_select = true;
 	current->tab_switch_enabled  = true;
-	(*value)                     = string_copy(lines);
-	current->item_changed        = strcmp(original_text, *value) != 0;
-	free(original_text);
+	if ((*value) != scratch) { // Line copy made while editing
+		free((*value));
+	}
+	free(scratch);
+	// Unchanged text is handed back as it is, a new string is made for an edit only
+	current->item_changed = strcmp(original_text, lines) != 0;
+	(*value)              = current->item_changed ? string_copy(lines) : original_text;
 	ui_record_change();
 	return (*value);
 }
