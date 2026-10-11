@@ -421,7 +421,7 @@ static void tab_scripts_draw_minimap(f32 mm_x, f32 mm_y, f32 mm_w, f32 mm_h) {
 	}
 	f32             line_h          = 2 * UI_SCALE();
 	string_array_t *lines           = string_split(tab_scripts_text, "\n");
-	f32             content_h       = lines->length * UI_ELEMENT_H();
+	f32             content_h       = lines->length * UI_TEXT_AREA_LINE_H();
 	f32             full_h          = lines->length * line_h;
 	f32             scroll_progress = content_h > 0 ? -g_ui->current_window->scroll_offset / content_h : 0;
 	f32             out_of_screen   = full_h - mm_h;
@@ -446,7 +446,7 @@ static void tab_scripts_draw_minimap(f32 mm_x, f32 mm_y, f32 mm_w, f32 mm_h) {
 
 	// View box
 	f32 visible_area = out_of_screen > 0 ? mm_h : full_h;
-	f32 box_h        = (mm_h / UI_ELEMENT_H()) * line_h;
+	f32 box_h        = (mm_h / UI_TEXT_AREA_LINE_H()) * line_h;
 	f32 box_y        = mm_y + scroll_progress * visible_area;
 	if (box_y < mm_y) {
 		box_y = mm_y;
@@ -461,9 +461,9 @@ static void tab_scripts_draw_minimap(f32 mm_x, f32 mm_y, f32 mm_w, f32 mm_h) {
 	if (tab_scripts_minimap_scrolling && content_h > mm_h) {
 		f32 my_local      = g_ui->input_y - (g_ui->_window_y + mm_y);
 		i32 picked        = offset + math_floor(my_local / line_h);
-		f32 visible_lines = mm_h / UI_ELEMENT_H();
-		f32 target        = (picked - visible_lines / 2) * UI_ELEMENT_H();
-		f32 max_scroll    = (lines->length - 1) * UI_ELEMENT_H(); // Last line at the top
+		f32 visible_lines = mm_h / UI_TEXT_AREA_LINE_H();
+		f32 target        = (picked - visible_lines / 2) * UI_TEXT_AREA_LINE_H();
+		f32 max_scroll    = (lines->length - 1) * UI_TEXT_AREA_LINE_H(); // Last line at the top
 		if (target < 0) {
 			target = 0;
 		}
@@ -676,7 +676,7 @@ void tab_scripts_draw(i32 *htab) {
 						max_w = w > max_w ? w : max_w;
 					}
 					f32 px = g_ui->cursor_screen_x;
-					f32 py = g_ui->cursor_screen_y + UI_ELEMENT_H();
+					f32 py = g_ui->cursor_screen_y + UI_TEXT_AREA_LINE_H();
 					f32 pw = max_w + pad * 2;
 					f32 ph = row_h * n;
 

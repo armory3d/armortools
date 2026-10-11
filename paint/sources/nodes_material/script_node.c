@@ -60,7 +60,7 @@ void script_node_button(i32 node_id) {
 		script_node_dirty = NULL;
 		g_ui->changed     = true;
 	}
-	but->height = ui_line_count(text) + 3;
+	but->height = ui_line_count(text) * UI_TEXT_AREA_LINE_H() / UI_LINE_H() + 3;
 
 	if (ui_button(tr("Snippets"), UI_ALIGN_CENTER, "")) {
 		script_node_draw_snippets_node = node;

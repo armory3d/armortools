@@ -144,7 +144,7 @@ void shader_node_button(i32 node_id) {
 		shader_node_dirty = NULL;
 		g_ui->changed     = true;
 	}
-	but->height = ui_line_count(text) + 2;
+	but->height = ui_line_count(text) * UI_TEXT_AREA_LINE_H() / UI_LINE_H() + 2;
 }
 
 void shader_node_init() {

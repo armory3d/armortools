@@ -79,7 +79,7 @@ static void nodes_mesh_script_button(i32 node_id) {
 		nodes_mesh_script_dirty = NULL;
 		g_ui->changed           = true;
 	}
-	but->height = ui_line_count(text) + 2;
+	but->height = ui_line_count(text) * UI_TEXT_AREA_LINE_H() / UI_LINE_H() + 2;
 }
 
 // Inputs added to a script node are read by name with mesh_geo_input_value() and mesh_geo_input_vector()
