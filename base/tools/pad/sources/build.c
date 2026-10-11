@@ -203,9 +203,11 @@ void build_update() {
 	}
 }
 
-// Keeps the frames coming while the build prints or an opened file changes on disk
+bool terminal_idle_wake();
+
+// Keeps the frames coming while the build prints, an opened file changes on disk or the terminal opens or closes
 bool build_idle_wake() {
-	return build_finished || build_log_dirty || editor_changed_on_disk();
+	return build_finished || build_log_dirty || editor_changed_on_disk() || terminal_idle_wake();
 }
 
 void build_init() {

@@ -20,6 +20,9 @@ i32   editor_search_pos   = -1; // Text offset of the current match
 char *editor_mark     = NULL; // Selected text, its occurrences are highlighted
 i32   editor_mark_pos = -1;   // Text offset of the selection
 
+extern char   *search_query;
+extern ui_id_t search_input_id;
+
 ui_text_coloring_t *editor_get_coloring() {
 	if (editor_coloring == NULL) {
 		buffer_t *blob = data_get_blob("text_coloring.json");
@@ -524,6 +527,35 @@ static void editor_select(i32 line, i32 col, i32 len) {
 	editor_current->line   = line;
 }
 
+// Selects the next occurrence of the whole word at the text offset, wraps at the end
+static void editor_word_next(i32 pos, i32 len) {
+	char *text = editor_current->text;
+	i32   end  = string_length(text);
+	if (pos + len > end) {
+		return;
+	}
+	for (i32 n = 1; n < end; ++n) {
+		i32 p = (pos + n) % end;
+		if (p + len > end || strncmp(text + p, text + pos, len) != 0 || (p > 0 && editor_is_word_char(text[p - 1])) || editor_is_word_char(text[p + len])) {
+			continue;
+		}
+		i32 line       = 0;
+		i32 line_start = 0;
+		for (i32 i = 0; i < p; ++i) {
+			if (text[i] == '\n') {
+				line++;
+				line_start = i + 1;
+			}
+		}
+		f32 y = line * UI_ELEMENT_H() + editor_hwnd->scroll_offset;
+		if (y < 0 || y > g_ui->_window_h - UI_ELEMENT_H() * 2) { // Out of view
+			editor_goto_line(line);
+		}
+		editor_select(line, p - line_start, len);
+		return;
+	}
+}
+
 // Number of matches and the 1-based index of the current one, 0 when not at a match
 static void editor_search_count(char *text, i32 *current, i32 *total) {
 	i32 len  = string_length(editor_search);
@@ -953,7 +985,7 @@ void editor_render(i32 x, i32 y, i32 w, i32 h) {
 		g_ui->is_key_pressed = false;
 		g_ui->key_code       = 0;
 	}
-	// ctrl+d to select the word at the cursor
+	// ctrl+d to select the word at the cursor, once more for its next occurrence
 	if (is_text_selected && g_ui->is_ctrl_down && g_ui->is_key_pressed && g_ui->key_code == KEY_CODE_D) {
 		char *line  = g_ui->text_selected;
 		i32   len   = string_length(line);
@@ -965,7 +997,12 @@ void editor_render(i32 x, i32 y, i32 w, i32 h) {
 		while (end < len && editor_is_word_char(line[end])) {
 			end++;
 		}
-		if (end > start) {
+		i32 a = g_ui->cursor_x < g_ui->highlight_anchor ? g_ui->cursor_x : g_ui->highlight_anchor;
+		i32 b = g_ui->cursor_x < g_ui->highlight_anchor ? g_ui->highlight_anchor : g_ui->cursor_x;
+		if (end > start && a == start && b == end) { // Word is selected already
+			editor_word_next(editor_line_pos(editor_current->text, editor_current->line) + start, end - start);
+		}
+		else if (end > start) {
 			ui_text_area_clear_selection();
 			g_ui->highlight_anchor = start;
 			g_ui->cursor_x         = end;
@@ -1020,6 +1057,16 @@ void editor_render(i32 x, i32 y, i32 w, i32 h) {
 			mark[b - a]     = '\0';
 			editor_mark     = mark;
 			editor_mark_pos = editor_line_pos(editor_current->text, editor_current->line) + a;
+		}
+	}
+	// Search panel query otherwise, as typed
+	if (editor_mark == NULL && search_show) {
+		char *query = g_ui->text_selected_id == search_input_id ? g_ui->text_selected : search_query;
+		i32   len   = string_length(query);
+		if (len >= 2 && len < UI_TEXT_MAX) {
+			strcpy(mark, query);
+			editor_mark     = mark;
+			editor_mark_pos = -1;
 		}
 	}
 

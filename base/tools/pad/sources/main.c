@@ -79,6 +79,7 @@ void pad_fade_end() {
 #include "git.c"
 #include "picker.c"
 #include "search.c"
+#include "terminal.c"
 
 // Shown panels as bits - browser, git, output, search
 static i32 pad_panels() {
@@ -188,7 +189,8 @@ static void pad_update_window_rect() {
 	i32 h = iron_window_height();
 	i32 x = iron_window_x();
 	i32 y = iron_window_y();
-	if (w == 0 || h == 0 || iron_window_get_mode() != IRON_WINDOW_MODE_WINDOW) { // Keep the windowed rect while in fullscreen
+	// Keep the windowed rect while in fullscreen or split with the terminal
+	if (w == 0 || h == 0 || iron_window_get_mode() != IRON_WINDOW_MODE_WINDOW || terminal_show) {
 		return;
 	}
 	if (w != pad_window_w || h != pad_window_h || x != pad_window_x || y != pad_window_y) {
@@ -241,6 +243,7 @@ void pad_drop_files(char *path) {
 // Unsaved changes are written when the app quits
 void pad_shutdown() {
 	editor_save_all();
+	terminal_shutdown();
 }
 
 void pad_foreground() {
@@ -311,6 +314,11 @@ static void pad_update_input() {
 			pad_browser_show = !pad_browser_show;
 			git_show         = false; // One left panel at a time
 		}
+		g_ui->is_key_pressed = false;
+		g_ui->key_code       = 0;
+	}
+	else if (g_ui->is_ctrl_down && g_ui->key_code == KEY_CODE_T) {
+		terminal_toggle();
 		g_ui->is_key_pressed = false;
 		g_ui->key_code       = 0;
 	}
@@ -429,6 +437,7 @@ static void pad_update_resize(i32 w, i32 main_h, i32 *browser_w, i32 *output_w) 
 
 void pad_render(void *_) {
 	build_update();
+	terminal_update();
 	pad_update_input();
 	pad_update_window_rect();
 	pad_update_title();
