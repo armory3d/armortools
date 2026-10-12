@@ -101,6 +101,7 @@ void                      render_compass();
 void                      render_compass_update();
 bool                      render_compass_is_hitbox(object_t *o);
 void                      render_envsphere();
+void                      render_grid();
 void                      render_pathsphere();
 void                      account_init();
 void                      account_sign_in();

@@ -44,6 +44,7 @@ void context_init() {
 	g_context->clone_delta_y                = 0.0;
 	g_context->clone_set_source             = false;
 	g_context->show_compass                 = true;
+	g_context->show_grid                    = false;
 	g_context->last_paint_vec_x             = -1.0;
 	g_context->last_paint_vec_y             = -1.0;
 	g_context->prev_paint_vec_x             = -1.0;

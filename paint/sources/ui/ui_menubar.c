@@ -434,6 +434,11 @@ void ui_menubar_draw_category_items() {
 			make_material_parse_mesh_material();
 		}
 
+		ui_check(&g_context->show_grid, string_tmp(" %s", tr("Grid")), "");
+		if (ui_item_changed()) {
+			g_context->ddirty = 2;
+		}
+
 		ui_check(&g_context->show_compass, string_tmp(" %s", tr("Compass")), "");
 		if (ui_item_changed()) {
 			g_context->ddirty = 2;
@@ -965,7 +970,6 @@ void ui_menubar_render_ui() {
 
 		ui_end_menu();
 	}
-
 }
 
 bool ui_menubar_icon_button(i32 i) {
