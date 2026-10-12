@@ -1,9 +1,6 @@
 
 #include "../global.h"
 
-extern gpu_texture_t *base_color_wheel;
-extern gpu_texture_t *base_color_wheel_gradient;
-
 void ui_base_init_on_next_frame(void *_) {
 	layers_init();
 }
@@ -121,9 +118,7 @@ void ui_base_init() {
 	resource_load(resources);
 
 	f32           scale = g_config->window_scale;
-	ui_options_t *ops   = ALLOC_INIT(
-        ui_options_t,
-        {.theme = g_theme, .font = g_font, .scale_factor = scale, .color_wheel = base_color_wheel, .black_white_gradient = base_color_wheel_gradient});
+	ui_options_t *ops   = ALLOC_INIT(ui_options_t, {.theme = g_theme, .font = g_font, .scale_factor = scale});
 
 	g_ui = ui_create(ops);
 

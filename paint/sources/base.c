@@ -7,8 +7,6 @@ rect_t        *base_drag_rect  = NULL;
 f32            base_drag_start = 0.0;
 f32            base_drop_x     = 0.0;
 f32            base_drop_y     = 0.0;
-gpu_texture_t *base_color_wheel;
-gpu_texture_t *base_color_wheel_gradient;
 i32            base_appx               = 0;
 i32            base_appy               = 0;
 i32            base_last_window_width  = 0;
@@ -515,9 +513,6 @@ void base_init() {
 
 	g_font = data_get_font("font.ttf");
 
-	base_color_wheel = data_get_texture("color_wheel.k");
-
-	base_color_wheel_gradient = data_get_texture("color_wheel_gradient.k");
 	config_load_theme(g_config->theme, false);
 	base_default_element_w = g_theme->ELEMENT_W;
 	base_default_element_h = g_theme->ELEMENT_H;
