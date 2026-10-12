@@ -2,13 +2,13 @@
 #include "../global.h"
 
 typedef enum {
-	MENUBAR_CATEGORY_FILE      = 0,
-	MENUBAR_CATEGORY_EDIT      = 1,
-	MENUBAR_CATEGORY_VIEWPORT  = 2,
-	MENUBAR_CATEGORY_MODE      = 3,
-	MENUBAR_CATEGORY_CAMERA    = 4,
-	MENUBAR_CATEGORY_WORKSPACE = 5,
-	MENUBAR_CATEGORY_HELP      = 6,
+	MENUBAR_CATEGORY_FILE     = 0,
+	MENUBAR_CATEGORY_EDIT     = 1,
+	MENUBAR_CATEGORY_VIEWPORT = 2,
+	MENUBAR_CATEGORY_MODE     = 3,
+	MENUBAR_CATEGORY_CAMERA   = 4,
+	MENUBAR_CATEGORY_WINDOW   = 5,
+	MENUBAR_CATEGORY_HELP     = 6,
 } menubar_category_t;
 
 typedef struct update_info {
@@ -409,17 +409,6 @@ void ui_menubar_draw_category_items() {
 		}
 	}
 	else if (ui_menubar_category == MENUBAR_CATEGORY_VIEWPORT) {
-		if (ui_menu_button(tr("Distract Free"), any_map_get(g_keymap, "view_distract_free"), ICON_NONE)) {
-			ui_base_toggle_distract_free();
-			g_ui->is_hovered = false;
-		}
-
-#if defined(IRON_WINDOWS) || defined(IRON_LINUX) || defined(IRON_MACOS) || defined(IRON_WASM)
-		if (ui_menu_button(tr("Toggle Fullscreen"), "alt+enter", ICON_FULLSCREEN)) {
-			base_toggle_fullscreen();
-		}
-#endif
-
 		g_ui->changed = false;
 
 		world_data_t *p = scene_world;
@@ -454,11 +443,6 @@ void ui_menubar_draw_category_items() {
 		ui_check(&g_context->split_view, string_tmp(" %s", tr("Split View")), "");
 		if (ui_item_changed()) {
 			base_resize();
-		}
-
-		ui_check(&g_context->cull_backfaces, string_tmp(" %s", tr("Cull Backfaces")), "");
-		if (ui_item_changed()) {
-			make_material_parse_mesh_material();
 		}
 
 		ui_check(&g_context->draw_wireframe, string_tmp(" %s", tr("Wireframe")), "");
@@ -768,7 +752,21 @@ void ui_menubar_draw_category_items() {
 			ui_box_show_custom(&ui_menubar_draw_category_items_about_box, 400, 320, NULL, true, tr("About"));
 		}
 	}
-	else if (ui_menubar_category == MENUBAR_CATEGORY_WORKSPACE) {
+	else if (ui_menubar_category == MENUBAR_CATEGORY_WINDOW) {
+#if defined(IRON_WINDOWS) || defined(IRON_LINUX) || defined(IRON_MACOS) || defined(IRON_WASM)
+		if (ui_menu_button(tr("Toggle Fullscreen"), "alt+enter", ICON_FULLSCREEN)) {
+			base_toggle_fullscreen();
+		}
+#endif
+
+		if (ui_menu_button(tr("Distract Free"), any_map_get(g_keymap, "view_distract_free"), ICON_NONE)) {
+			ui_base_toggle_distract_free();
+			g_ui->is_hovered = false;
+		}
+
+		ui_menu_separator();
+		ui_menu_align();
+		ui_menu_label(tr("Workspace"), NULL);
 		bool            workspace_changed = false;
 		string_array_t *modes             = any_array_create_from_raw(
             (void *[]){
@@ -797,18 +795,22 @@ void ui_menubar_draw_category_items() {
 
 		ui_menu_separator();
 		ui_menu_align();
-		ui_menu_label(tr("Workflow"), NULL);
-		ui_menu_align();
-		string_array_t *workflow_items = any_array_create_from_raw(
-		    (void *[]){
-		        tr("PBR"),
-		        tr("Base"),
-		        tr("Sculpt"),
-		    },
-		    3);
+		ui_menu_label(tr("Tools"), NULL);
+		bool            workflow_changed = false;
+		string_array_t *workflow_items   = any_array_create_from_raw(
+            (void *[]){
+                tr("PBR"),
+                tr("Base"),
+                tr("Sculpt"),
+            },
+            3);
 
-		ui_inline_radio((int *)&g_config->workflow, workflow_items, UI_ALIGN_LEFT);
-		if (ui_item_changed()) {
+		for (i32 i = 0; i < workflow_items->length; ++i) {
+			ui_radio((int *)&g_config->workflow, i, workflow_items->buffer[i], "");
+			workflow_changed |= ui_item_changed();
+		}
+
+		if (workflow_changed) {
 			config_save();
 			base_update_workflow();
 		}
@@ -828,7 +830,7 @@ void ui_menubar_show_menu(i32 category) {
 	i32 panel_x = ui_menu_panel_x();
 	i32 panel_y = ui_menu_panel_y();
 	ui_menu_x   = math_floor(g_ui->_x - g_ui->_w) + panel_x;
-	ui_menu_y   = math_floor(ui_MENUBAR_H(g_ui)) + panel_y + 2;
+	ui_menu_y   = math_floor(ui_MENUBAR_H(g_ui)) + panel_y;
 	if (g_config->touch_ui) {
 		i32 menu_w = math_floor(base_default_element_w * UI_SCALE() * 2.0);
 		ui_menu_x -= math_floor((menu_w - g_ui->_w) / 2.0) + math_floor(ui_header_h / 2.0);
@@ -893,7 +895,7 @@ void ui_menubar_render_ui() {
 				ui_menubar_show_menu(MENUBAR_CATEGORY_CAMERA);
 			}
 			if (ui_menubar_icon_button(ICON_WORKSPACE)) {
-				ui_menubar_show_menu(MENUBAR_CATEGORY_WORKSPACE);
+				ui_menubar_show_menu(MENUBAR_CATEGORY_WINDOW);
 			}
 			if (ui_menu_show && ui_menubar_category == MENUBAR_CATEGORY_HELP) {
 				ui_fill(0, -6, size, size - 4, g_theme->HIGHLIGHT_COL);
@@ -928,7 +930,7 @@ void ui_menubar_render_ui() {
 			        tr("Viewport"),
 			        tr("Mode"),
 			        tr("Camera"),
-			        tr("Workspace"),
+			        tr("Window"),
 			        tr("Help"),
 			    },
 			    7);

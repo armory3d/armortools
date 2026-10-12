@@ -452,6 +452,7 @@ void                      ui_menu_label(char *text, char *shortcut);
 void                      ui_menu_align();
 void                      ui_menu_begin();
 void                      ui_menu_end();
+i32                       ui_menu_padding();
 void                      ui_menu_sub_begin(i32 items);
 void                      ui_menu_sub_end();
 void                      render_path_base_init();
