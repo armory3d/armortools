@@ -475,7 +475,7 @@ void ui_header_draw_tool_properties() {
 					ui_text(string_tmp("%s%s%s", x, y, z), UI_ALIGN_LEFT, 0x00000000);
 				}
 				else {
-					g_ui->_w = math_floor(56 * sc);
+					g_ui->_w = math_floor(60 * sc);
 					ui_text(tr("Symmetry"), UI_ALIGN_LEFT, 0x00000000);
 					g_ui->_w = math_floor(25 * sc);
 					ui_check(&g_context->sym_x, tr("X"), "");
