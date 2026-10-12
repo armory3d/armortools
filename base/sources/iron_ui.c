@@ -33,6 +33,8 @@ bool  ui_is_copy                               = false;
 bool  ui_is_paste                              = false;
 void (*ui_on_border_hover)(ui_window_t *, int) = NULL; // Mouse over window border, use for resizing
 void (*ui_on_tab_drop)(int *, int, int *, int) = NULL; // Tab reorder via drag and drop
+void (*ui_on_tab_context_menu)(int *, int)     = NULL; // Tab name was right clicked
+bool (*ui_on_tab_dock)(int *)                  = NULL; // Tab group takes part in drag and drop, all groups do when not set
 #ifdef WITH_EVAL
 #include "libs/minic.h"
 #endif
@@ -1649,7 +1651,8 @@ void ui_draw_tabs() {
 	if (current->current_window == NULL) {
 		return;
 	}
-	float tab_x                 = 0.0;
+	float tab_x                 = current->tab_offset_x;
+	current->tab_offset_x       = 0.0;
 	float tab_y                 = 0.0;
 	float tab_h_min             = UI_BUTTON_H() * 1.1;
 	float header_h              = current->current_window->drag_enabled ? UI_HEADER_DRAG_H() : 0;
@@ -1684,6 +1687,15 @@ void ui_draw_tabs() {
 	float base_y   = current->tab_vertical ? current->_y + 10 : current->_y + 2;
 	bool  _enabled = current->enabled;
 
+	// Faded and disabled tabs are buttons, tabs can not be dropped in between them
+	int   dock_count = 0;
+	float dock_end_x = 0.0;
+	float drop_x     = -1.0;
+	bool  dock       = ui_on_tab_drop != NULL && (ui_on_tab_dock == NULL || ui_on_tab_dock(current->tab_handle));
+	bool  dragging   = dock && current->drag_tab_handle != NULL && !current->tab_vertical;
+	bool  dropped    = false;
+	bool  hover_dock = false;
+
 	for (int i = 0; i < current->tab_count; ++i) {
 		current->enabled = current->tab_enabled[i];
 		current->_x      = current->tab_vertical ? tab_x + UI_ELEMENT_W() * 0.1 : tab_x;
@@ -1700,15 +1712,33 @@ void ui_draw_tabs() {
 		bool started  = ui_get_started(tab_h);
 		bool pushed   = ui_get_pushed(tab_h);
 		bool hover    = ui_get_hover(tab_h);
-		if (ui_on_tab_drop != NULL) {
+		bool dockable = current->tab_colors[i] != -2 && current->tab_enabled[i];
+		if (dockable) {
+			dock_count = i + 1;
+			dock_end_x = current->_x + current->_w + 1;
+		}
+		if (dock && dockable) {
 			if (started) {
 				current->drag_tab_handle   = current->tab_handle;
 				current->drag_tab_position = i;
 			}
-			if (current->drag_tab_handle != NULL && hover && current->input_released) {
-				ui_on_tab_drop(current->tab_handle, i, current->drag_tab_handle, current->drag_tab_position);
-				ui_select_tab(i);
+			if (current->drag_tab_handle != NULL && hover) {
+				hover_dock = true;
+				bool same  = current->drag_tab_handle == current->tab_handle;
+				if (!same || current->drag_tab_position != i) {
+					// Tab lands after the hovered one when moving to the right
+					bool after = same && current->drag_tab_position < i;
+					drop_x     = after ? current->_x + current->_w : current->_x;
+				}
+				if (current->input_released) {
+					ui_on_tab_drop(current->tab_handle, i, current->drag_tab_handle, current->drag_tab_position);
+					ui_select_tab(i);
+					dropped = true;
+				}
 			}
+		}
+		if (ui_on_tab_context_menu != NULL && dock && dockable && hover && current->input_released_r) {
+			ui_on_tab_context_menu(current->tab_handle, i);
 		}
 		if (released) {
 			ui_select_tab(i);
@@ -1768,6 +1798,26 @@ void ui_draw_tabs() {
 				draw_filled_rect(current->_x + current->button_offset_y, current->_y + current->button_offset_y + tab_h, current->_w, 1);
 			}
 		}
+	}
+
+	// Dock at the end when dropping the tab next to the tab names
+	if (dragging && !dropped && !hover_dock &&
+	    ui_input_in_rect(current->_window_x, current->_window_y + header_h, current->_window_w, current->button_offset_y + tab_h + 2)) {
+		bool same = current->drag_tab_handle == current->tab_handle;
+		int  to   = same ? dock_count - 1 : dock_count;
+		if (!same || current->drag_tab_position != to) {
+			drop_x = dock_end_x;
+			if (current->input_released) {
+				ui_on_tab_drop(current->tab_handle, to, current->drag_tab_handle, current->drag_tab_position);
+				ui_select_tab(to);
+			}
+		}
+	}
+	if (dragging && drop_x >= 0 && !current->input_released) {
+		// Drop marker
+		draw_set_color(theme->HIGHLIGHT_COL);
+		draw_filled_rect(current->button_offset_y + drop_x - 1, base_y + current->button_offset_y, 2 * UI_SCALE(), tab_h);
+		current->current_window->redraws = 2; // Clear the marker once the mouse leaves
 	}
 
 	current->enabled = _enabled;

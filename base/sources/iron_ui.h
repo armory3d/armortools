@@ -63,9 +63,9 @@ typedef struct ui_theme {
 } ui_theme_t;
 
 typedef struct ui_options {
-	draw_font_t   *font;
-	ui_theme_t    *theme;
-	float          scale_factor;
+	draw_font_t *font;
+	ui_theme_t  *theme;
+	float        scale_factor;
 } ui_options_t;
 
 typedef struct ui_tab_state {
@@ -290,6 +290,7 @@ typedef struct ui {
 	float           tab_scroll;
 	bool            tab_vertical;
 	bool            tab_align_right;
+	float           tab_offset_x; // Space to keep before the first tab
 	bool            sticky;
 	bool            scissor;
 
@@ -420,6 +421,8 @@ extern char  ui_text_to_paste[UI_TEXT_MAX];
 extern char  ui_text_to_copy[UI_TEXT_MAX];
 extern void (*ui_on_border_hover)(ui_window_t *, int);
 extern void (*ui_on_tab_drop)(int *, int, int *, int);
+extern void (*ui_on_tab_context_menu)(int *, int);
+extern bool (*ui_on_tab_dock)(int *);
 extern bool (*ui_picker_button)(void);
 extern const char *ui_theme_keys[];
 extern int         ui_theme_keys_count;
