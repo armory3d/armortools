@@ -564,8 +564,8 @@ void base_init() {
 
 	args_run();
 
-	if (g_config->workflow != WORKFLOW_PBR) {
-		base_update_workflow();
+	if (g_config->tools != TOOLS_PAINT || g_config->materials != MATERIALS_PBR) {
+		base_update_tools();
 	}
 
 	g_context->camera_pivot    = g_config->camera_pivot;
@@ -984,33 +984,38 @@ void base_apply_workspace() {
 	ui_dock_save();
 }
 
-void base_update_workflow_create_sculpt_layer(void *_) {
+void base_update_tools_create_sculpt_layer(void *_) {
 	if (history_undo_layers != NULL) {
 		sculpt_layers_create_sculpt_layer();
-		sys_remove_update(base_update_workflow_create_sculpt_layer);
+		sys_remove_update(base_update_tools_create_sculpt_layer);
 	}
 }
 
-void base_update_workflow_nodes() {
+void base_update_tools_nodes() {
 	// Update Material Output nodes
+	bool pbr = g_config->materials == MATERIALS_PBR && g_config->tools != TOOLS_SCULPT;
 	for (i32 i = 0; i < g_project->_->materials->length; ++i) {
 		ui_node_array_t *nodes = g_project->_->materials->buffer[i]->canvas->nodes;
 		for (i32 j = 0; j < nodes->length; ++j) {
 			if (string_equals(nodes->buffer[j]->type, "OUTPUT_MATERIAL_PBR")) {
-				nodes->buffer[j]->inputs->length          = g_config->workflow == WORKFLOW_PBR ? 9 : 2;
-				nodes->buffer[j]->inputs->buffer[0]->name = g_config->workflow == WORKFLOW_SCULPT ? tr("Displacement") : tr("Base Color");
+				nodes->buffer[j]->inputs->length          = pbr ? 9 : 2;
+				nodes->buffer[j]->inputs->buffer[0]->name = g_config->tools == TOOLS_SCULPT ? tr("Displacement") : tr("Base Color");
 			}
 		}
 	}
 }
 
-void base_update_workflow() {
-	base_update_workflow_nodes();
+void base_update_tools() {
+	base_update_tools_nodes();
 	if (ui_toolbar_handle != NULL) {
 		ui_toolbar_handle->redraws = 2;
 	}
 
-	if (g_config->workflow == WORKFLOW_SCULPT) {
+	if (g_config->tools == TOOLS_OBJECT) {
+		context_select_tool(TOOL_TYPE_CURSOR);
+	}
+
+	if (g_config->tools == TOOLS_SCULPT) {
 		if (g_context->tool != TOOL_TYPE_BRUSH && !ui_toolbar_tool_visible(g_context->tool)) {
 			context_select_tool(TOOL_TYPE_BRUSH);
 		}
@@ -1022,8 +1027,8 @@ void base_update_workflow() {
 			}
 		}
 		if (first_sculpt == NULL) {
-			sys_remove_update(base_update_workflow_create_sculpt_layer);
-			sys_notify_on_update(base_update_workflow_create_sculpt_layer, NULL);
+			sys_remove_update(base_update_tools_create_sculpt_layer);
+			sys_notify_on_update(base_update_tools_create_sculpt_layer, NULL);
 		}
 		else {
 			context_set_layer(first_sculpt);

@@ -231,7 +231,7 @@ static void import_arm_run_mesh_append_from_project(project_t *project, i32_arra
 	make_material_parse_paint_material(true);
 	make_material_parse_mesh_material();
 	tab_meshes_reset_preview_map();
-	base_update_workflow();
+	base_update_tools();
 
 	util_uv_uvmap_cached                              = false;
 	util_uv_trianglemap_cached                        = false;
@@ -1271,7 +1271,7 @@ void import_arm_run_project(char *path) {
 	import_arm_progress(1.0);
 	sys_notify_on_next_frame(&import_arm_run_project_on_next_frame, NULL);
 
-	base_update_workflow();
+	base_update_tools();
 	ui_dock_redraw(TAB_AREA_SIDEBAR0);
 	ui_dock_redraw(TAB_AREA_SIDEBAR1);
 	g_context->ddirty                                 = 4;

@@ -270,7 +270,7 @@ void project_new(bool reset_layers) {
 
 	tab_stages_init();
 	tab_meshes_reset_preview_map();
-	base_update_workflow();
+	base_update_tools();
 	project_set_default_envmap();
 	context_select_tool(TOOL_TYPE_BRUSH);
 	viewport_reset();

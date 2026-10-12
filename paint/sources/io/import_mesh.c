@@ -167,7 +167,7 @@ void import_mesh_finish_import(void *_) {
 	render_path_raytrace_ready = false;
 	g_context->paint_body      = NULL;
 	tab_meshes_reset_preview_map();
-	base_update_workflow();
+	base_update_tools();
 
 	if (import_mesh_needs_unwrap) {
 		import_mesh_needs_unwrap = false;

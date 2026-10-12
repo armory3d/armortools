@@ -166,10 +166,11 @@ typedef struct config {
 	i32                  neural_res;
 	i32                  console_model;
 	render_mode_t        render_mode;
-	workflow_t           workflow;
+	tools_t              tools;
 	bool                 view2d_grid_show;
 	i32                  view2d_grid_cell;
 	bool                 view2d_grid_snap;
+	materials_t          materials;
 } config_t;
 
 typedef struct slot_material {

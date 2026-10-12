@@ -72,7 +72,7 @@ ui_node_t *util_clone_canvas_node(ui_node_t *n) {
 
 	u32 _length = 0;
 	if (n->inputs != NULL && n->inputs->length < 9 && string_equals(n->type, "OUTPUT_MATERIAL_PBR")) {
-		// Base workflow
+		// Base color materials
 		_length           = n->inputs->length;
 		n->inputs->length = 9;
 	}

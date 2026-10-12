@@ -148,9 +148,11 @@ buffer_t *export_arm_encode_project(char *path) {
 	tab_timeline_prepare_save();
 	tab_scripts_strip_trailing_whitespace();
 
-	workflow_t _workflow = g_config->workflow;
-	g_config->workflow   = WORKFLOW_PBR;
-	base_update_workflow_nodes();
+	tools_t     _tools     = g_config->tools;
+	materials_t _materials = g_config->materials;
+	g_config->tools        = TOOLS_PAINT;
+	g_config->materials    = MATERIALS_PBR;
+	base_update_tools_nodes();
 
 	ui_node_canvas_t_array_t *mnodes = any_array_create_from_raw((void *[]){}, 0);
 	for (i32 i = 0; i < g_project->_->materials->length; ++i) {
@@ -163,8 +165,9 @@ buffer_t *export_arm_encode_project(char *path) {
 		any_array_push(mnodes, c);
 	}
 
-	g_config->workflow = _workflow;
-	base_update_workflow_nodes();
+	g_config->tools     = _tools;
+	g_config->materials = _materials;
+	base_update_tools_nodes();
 
 	ui_node_canvas_t_array_t *bnodes = any_array_create_from_raw((void *[]){}, 0);
 	for (i32 i = 0; i < g_project->_->brushes->length; ++i) {

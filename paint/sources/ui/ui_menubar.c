@@ -503,7 +503,7 @@ void ui_menubar_draw_category_items() {
 		string_array_t *modes        = base_get_viewport_modes();
 		string_array_t *shortcuts    = base_get_viewport_mode_shortcuts();
 
-		if (g_config->workflow == WORKFLOW_BASE) {
+		if (g_config->materials == MATERIALS_BASE_COLOR && g_config->tools != TOOLS_SCULPT) {
 			array_splice(modes, 9, 1);
 			array_splice(modes, 8, 1);
 			array_splice(modes, 7, 1);
@@ -783,27 +783,40 @@ void ui_menubar_draw_category_items() {
 			}
 			ui_menu_sub_end();
 		}
+		if (ui_menu_sub_button(tr("Materials"))) {
+			ui_menu_sub_begin(2);
+			bool materials_changed = false;
+			ui_radio((int *)&g_config->materials, MATERIALS_PBR, tr("PBR"), "");
+			materials_changed |= ui_item_changed();
+			ui_radio((int *)&g_config->materials, MATERIALS_BASE_COLOR, tr("Base Color"), "");
+			materials_changed |= ui_item_changed();
+			if (materials_changed) {
+				config_save();
+				base_update_tools();
+			}
+			ui_menu_sub_end();
+		}
 
 		ui_menu_separator();
 		ui_menu_align();
 		ui_menu_label(tr("Tools"), NULL);
-		bool            workflow_changed = false;
-		string_array_t *workflow_items   = any_array_create_from_raw(
+		bool            tools_changed = false;
+		string_array_t *tools_items   = any_array_create_from_raw(
             (void *[]){
-                tr("PBR"),
-                tr("Base"),
+                tr("Paint"),
                 tr("Sculpt"),
+                tr("Object"),
             },
             3);
 
-		for (i32 i = 0; i < workflow_items->length; ++i) {
-			ui_radio((int *)&g_config->workflow, i, workflow_items->buffer[i], "");
-			workflow_changed |= ui_item_changed();
+		for (i32 i = 0; i < tools_items->length; ++i) {
+			ui_radio((int *)&g_config->tools, i, tools_items->buffer[i], "");
+			tools_changed |= ui_item_changed();
 		}
 
-		if (workflow_changed) {
+		if (tools_changed) {
 			config_save();
-			base_update_workflow();
+			base_update_tools();
 		}
 	}
 }

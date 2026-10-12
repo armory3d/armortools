@@ -863,7 +863,8 @@ void minic_register_builtins() {
 	MINIC_I(brush_live);
 	MINIC_I(node_previews);
 	MINIC_I(material_live);
-	MINIC_I(workflow);
+	MINIC_I(tools);
+	MINIC_I(materials);
 	MINIC_END();
 
 	MINIC_STRUCT(context_t);

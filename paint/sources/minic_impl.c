@@ -641,7 +641,7 @@ slot_layer_t *script_layer_new_fill(void) {
 	if (l != NULL) {
 		history_new_layer();
 		l->uv_type = UV_TYPE_UVMAP;
-		if (g_config->workflow == WORKFLOW_SCULPT) {
+		if (g_config->tools == TOOLS_SCULPT) {
 			sculpt_init();
 			sculpt_init_sculpt_texture(l);
 		}
@@ -1471,7 +1471,7 @@ void script_material_update(void) {
 	if (context_is_decal()) {
 		util_render_make_decal_preview();
 	}
-	base_update_workflow_nodes();
+	base_update_tools_nodes();
 
 	script_gpu_end(current, in_use);
 

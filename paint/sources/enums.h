@@ -85,10 +85,15 @@ typedef enum {
 } workspace_preset_t;
 
 typedef enum {
-	WORKFLOW_PBR    = 0,
-	WORKFLOW_BASE   = 1,
-	WORKFLOW_SCULPT = 2,
-} workflow_t;
+	TOOLS_PAINT  = 0,
+	TOOLS_SCULPT = 1,
+	TOOLS_OBJECT = 2,
+} tools_t;
+
+typedef enum {
+	MATERIALS_PBR        = 0,
+	MATERIALS_BASE_COLOR = 1,
+} materials_t;
 
 typedef enum {
 	RENDER_MODE_DEFERRED   = 0,

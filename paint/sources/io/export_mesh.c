@@ -10,7 +10,7 @@ void export_mesh_run(char *path, mesh_object_t_array_t *paint_objects) {
 		paint_objects = g_project->_->paint_objects;
 	}
 	if (g_context->export_mesh_format == MESH_FORMAT_OBJ) {
-		if (g_config->workflow == WORKFLOW_SCULPT) {
+		if (g_config->tools == TOOLS_SCULPT) {
 			export_obj_run_sculpt(path, paint_objects);
 		}
 		else {

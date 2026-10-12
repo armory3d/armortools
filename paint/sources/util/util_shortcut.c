@@ -194,7 +194,10 @@ void util_shortcut_viewport() {
 	if (context_in_paint_area() && !is_typing) {
 
 		if (!mouse_down("right")) { // Fly mode off
-			if (keymap_shortcut(any_map_get(g_keymap, "tool_brush"), SHORTCUT_TYPE_STARTED)) {
+			if (g_config->tools == TOOLS_OBJECT) {
+				// Cursor tool only
+			}
+			else if (keymap_shortcut(any_map_get(g_keymap, "tool_brush"), SHORTCUT_TYPE_STARTED)) {
 				context_select_tool(TOOL_TYPE_BRUSH);
 			}
 			else if (keymap_shortcut(any_map_get(g_keymap, "tool_eraser"), SHORTCUT_TYPE_STARTED)) {

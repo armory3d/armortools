@@ -81,7 +81,7 @@ f32 uniforms_ext_f32_link(object_t *object, shader_data_t *mat, char *link) {
 			val *= pen_pressure * g_config->pressure_sensitivity;
 		}
 		val *= val;
-		if (g_config->workflow == WORKFLOW_SCULPT) {
+		if (g_config->tools == TOOLS_SCULPT) {
 			val *= 0.8;
 		}
 		return val;

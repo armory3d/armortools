@@ -89,7 +89,7 @@ void import_json_material_run(char *path) {
 	g_context->material = slot_material_create(m0, canvas);
 	any_array_push(g_project->_->materials, g_context->material);
 
-	base_update_workflow_nodes();
+	base_update_tools_nodes();
 	history_new_material();
 
 	slot_material_t_array_t *imported = any_array_create_from_raw((void *[]){}, 0);

@@ -721,7 +721,7 @@ void ui_view2d_update(void *_) {
 					    },
 					    7);
 
-					if (g_config->workflow == WORKFLOW_BASE) {
+					if (g_config->materials == MATERIALS_BASE_COLOR && g_config->tools != TOOLS_SCULPT) {
 						array_splice(tex_type_combo, 6, 1);
 						array_splice(tex_type_combo, 5, 1);
 						array_splice(tex_type_combo, 4, 1);

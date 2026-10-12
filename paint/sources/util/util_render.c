@@ -214,7 +214,7 @@ void util_render_make_brush_preview() {
 		return;
 	}
 
-	if (g_config->workflow == WORKFLOW_SCULPT) {
+	if (g_config->tools == TOOLS_SCULPT) {
 		return;
 	}
 

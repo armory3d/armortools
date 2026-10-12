@@ -9,9 +9,12 @@ i32 _ui_toolbar_bottom = 0;
 void ui_toolbar_init() {}
 
 bool ui_toolbar_tool_visible(i32 tool) {
-	if (g_config->workflow == WORKFLOW_SCULPT) {
+	if (g_config->tools == TOOLS_SCULPT) {
 		// Brush is replaced by the sculpt mode icons
 		return tool != TOOL_TYPE_BRUSH && tool != TOOL_TYPE_PARTICLE && tool != TOOL_TYPE_COLORID && tool != TOOL_TYPE_PICKER && tool != TOOL_TYPE_MATERIAL;
+	}
+	if (g_config->tools == TOOLS_OBJECT) {
+		return tool == TOOL_TYPE_CURSOR;
 	}
 	return true;
 }
@@ -23,7 +26,7 @@ static i32 ui_toolbar_item_count() {
 			count++;
 		}
 	}
-	if (g_config->workflow == WORKFLOW_SCULPT) {
+	if (g_config->tools == TOOLS_SCULPT) {
 		count += SCULPT_TYPE_PLATEAU + 1;
 	}
 	return count;
@@ -278,7 +281,7 @@ static void ui_toolbar_draw_window(ui_window_t *handle, i32 x, i32 y, i32 h) {
 		}
 		g_ui->_y -= 4 * UI_SCALE();
 
-		if (g_config->workflow == WORKFLOW_SCULPT) {
+		if (g_config->tools == TOOLS_SCULPT) {
 			for (i32 i = 0; i <= SCULPT_TYPE_PLATEAU; ++i) {
 				ui_toolbar_draw_sculpt_tool(i, img, icon_accent);
 			}

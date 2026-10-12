@@ -211,7 +211,7 @@ void ui_header_draw_tool_properties() {
 			ui_tooltip(tr("Add picked color to swatches"));
 		}
 
-		if (g_config->workflow == WORKFLOW_PBR) {
+		if (g_config->materials == MATERIALS_PBR && g_config->tools != TOOLS_SCULPT) {
 
 			i32 _w = g_ui->_w;
 			g_ui->_w /= 2;
@@ -332,7 +332,7 @@ void ui_header_draw_tool_properties() {
 			ui_slider(&g_context->brush_hardness, tr("Hardness"), 0.0, 1.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
 		}
 
-		if (g_context->tool != TOOL_TYPE_ERASER && g_config->workflow != WORKFLOW_SCULPT) {
+		if (g_context->tool != TOOL_TYPE_ERASER && g_config->tools != TOOLS_SCULPT) {
 			string_array_t *brush_blending_combo = any_array_create_from_raw_tmp(
 			    (void *[]){
 			        tr("Mix"),
@@ -361,7 +361,7 @@ void ui_header_draw_tool_properties() {
 			}
 		}
 
-		if ((g_context->tool == TOOL_TYPE_BRUSH || g_context->tool == TOOL_TYPE_FILL) && g_config->workflow != WORKFLOW_SCULPT) {
+		if ((g_context->tool == TOOL_TYPE_BRUSH || g_context->tool == TOOL_TYPE_FILL) && g_config->tools != TOOLS_SCULPT) {
 			string_array_t *texcoord_combo = any_array_create_from_raw_tmp(
 			    (void *[]){
 			        tr("UV Map"),
@@ -407,7 +407,7 @@ void ui_header_draw_tool_properties() {
 			}
 		}
 
-		if (g_context->tool == TOOL_TYPE_BLUR && g_config->workflow != WORKFLOW_SCULPT) {
+		if (g_context->tool == TOOL_TYPE_BLUR && g_config->tools != TOOLS_SCULPT) {
 			string_array_t *blur_type_combo = any_array_create_from_raw_tmp(
 			    (void *[]){
 			        tr("Blur"),

@@ -917,7 +917,7 @@ void tab_layers_draw_layer_context_menu_draw() {
 		bool channels_changed = tab_layers_channel_check(&l->paint_base, tr("Base Color"));
 		channels_changed |= tab_layers_channel_check(&l->paint_opac, tr("Opacity"));
 
-		if (g_config->workflow == WORKFLOW_PBR) {
+		if (g_config->materials == MATERIALS_PBR && g_config->tools != TOOLS_SCULPT) {
 			ui_row2();
 			channels_changed |= tab_layers_channel_check(&l->paint_nor, tr("Normal"));
 			channels_changed |= tab_layers_channel_check(&l->paint_nor_blend, tr("Normal Blend"));
@@ -958,10 +958,10 @@ static bool tab_layers_slot_hidden(slot_layer_t *l) {
 	}
 
 	bool is_sculpt_layer = l->texpaint_sculpt != NULL;
-	if (g_config->workflow == WORKFLOW_SCULPT && !is_sculpt_layer && !slot_layer_is_group(l) && !slot_layer_is_mask(l)) {
+	if (g_config->tools == TOOLS_SCULPT && !is_sculpt_layer && !slot_layer_is_group(l) && !slot_layer_is_mask(l)) {
 		return true;
 	}
-	if (g_config->workflow != WORKFLOW_SCULPT && is_sculpt_layer) {
+	if (g_config->tools != TOOLS_SCULPT && is_sculpt_layer) {
 		return true;
 	}
 
@@ -1077,7 +1077,7 @@ void tab_layers_button_new_sculpt_layer(void *_) {
 
 void tab_layers_button_new_menu() {
 	slot_layer_t *l = g_context->layer;
-	if (g_config->workflow == WORKFLOW_SCULPT) {
+	if (g_config->tools == TOOLS_SCULPT) {
 		if (ui_menu_button(tr("Sculpt Layer"), "", ICON_PAINT)) {
 			sys_notify_on_next_frame(&tab_layers_button_new_sculpt_layer, NULL);
 		}

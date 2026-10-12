@@ -128,10 +128,11 @@ void config_save() {
 	json_encode_i32("neural_res", g_config->neural_res);
 	json_encode_i32("console_model", g_config->console_model);
 	json_encode_i32("render_mode", g_config->render_mode);
-	json_encode_i32("workflow", g_config->workflow);
+	json_encode_i32("tools", g_config->tools);
 	json_encode_bool("view2d_grid_show", g_config->view2d_grid_show);
 	json_encode_i32("view2d_grid_cell", g_config->view2d_grid_cell);
 	json_encode_bool("view2d_grid_snap", g_config->view2d_grid_snap);
+	json_encode_i32("materials", g_config->materials);
 	char *config_json = json_encode_end();
 
 	buffer_t *buffer = sys_string_to_buffer(config_json);
@@ -265,7 +266,8 @@ void config_init() {
 		g_config->neural_res          = 512;
 		g_config->console_model       = CONSOLE_MODEL_QWEN;
 		g_config->render_mode         = RENDER_MODE_DEFERRED;
-		g_config->workflow            = WORKFLOW_PBR;
+		g_config->tools               = TOOLS_PAINT;
+		g_config->materials           = MATERIALS_PBR;
 	}
 	else {
 		// Discard old config
