@@ -25,7 +25,8 @@ void browser_menu_open_git(git_file_t *f);
 // Runs the command and returns its output
 static char *git_exec(char *cmd, i32 *length) {
 #ifdef IRON_WINDOWS
-	FILE *p = _popen(string("%s 2>nul", cmd), "r");
+	HANDLE process = NULL;
+	FILE  *p       = pad_popen(string("%s 2>nul", cmd), &process);
 #else
 	FILE *p = popen(string("%s 2>/dev/null", cmd), "r");
 #endif
@@ -46,7 +47,7 @@ static char *git_exec(char *cmd, i32 *length) {
 			len += n;
 		}
 #ifdef IRON_WINDOWS
-		_pclose(p);
+		pad_pclose(p, process);
 #else
 		pclose(p);
 #endif

@@ -41,6 +41,61 @@ char *pad_parent_dir(char *dir) {
 void pad_save_config();
 void pad_saved(char *path);
 
+#ifdef IRON_WINDOWS
+#include <fcntl.h>
+#include <io.h>
+#include <sys/stat.h>
+
+FILE *pad_popen(char *cmd, HANDLE *process) {
+	SECURITY_ATTRIBUTES sa = {sizeof(sa), NULL, TRUE};
+	HANDLE              read_pipe;
+	HANDLE              write_pipe;
+	if (!CreatePipe(&read_pipe, &write_pipe, &sa, 0)) {
+		return NULL;
+	}
+	SetHandleInformation(read_pipe, HANDLE_FLAG_INHERIT, 0);
+	HANDLE nul = CreateFileW(L"NUL", GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, &sa, OPEN_EXISTING, 0, NULL);
+
+	wchar_t comspec[MAX_PATH];
+	GetEnvironmentVariableW(L"ComSpec", comspec, MAX_PATH);
+	i32      wlen = MultiByteToWideChar(CP_UTF8, 0, cmd, -1, NULL, 0);
+	wchar_t *wcmd = malloc(sizeof(wchar_t) * wlen);
+	MultiByteToWideChar(CP_UTF8, 0, cmd, -1, wcmd, wlen);
+	i32      cmdline_len = wlen + MAX_PATH + 16;
+	wchar_t *cmdline     = malloc(sizeof(wchar_t) * cmdline_len);
+	swprintf(cmdline, cmdline_len, L"\"%s\" /s /c \"%s\"", comspec, wcmd);
+
+	STARTUPINFOW        si = {0};
+	PROCESS_INFORMATION pi = {0};
+	si.cb                  = sizeof(si);
+	si.dwFlags             = STARTF_USESTDHANDLES;
+	si.hStdInput           = nul;
+	si.hStdOutput          = write_pipe;
+	si.hStdError           = write_pipe;
+	BOOL success           = CreateProcessW(NULL, cmdline, NULL, NULL, TRUE, CREATE_NO_WINDOW, NULL, NULL, &si, &pi);
+	free(wcmd);
+	free(cmdline);
+	CloseHandle(write_pipe);
+	CloseHandle(nul);
+	if (!success) {
+		CloseHandle(read_pipe);
+		return NULL;
+	}
+	CloseHandle(pi.hThread);
+	*process = pi.hProcess;
+	return _fdopen(_open_osfhandle((intptr_t)read_pipe, _O_RDONLY | _O_TEXT), "r");
+}
+
+i32 pad_pclose(FILE *p, HANDLE process) {
+	fclose(p);
+	WaitForSingleObject(process, INFINITE);
+	DWORD exit_code = 0;
+	GetExitCodeProcess(process, &exit_code);
+	CloseHandle(process);
+	return (i32)exit_code;
+}
+#endif
+
 // Side panels use dimmer text than the editor
 static i32 pad_text_col;
 static i32 pad_label_col;

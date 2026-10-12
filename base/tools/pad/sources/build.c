@@ -44,7 +44,8 @@ static void build_log_append(char *s) {
 
 static void build_thread_func(void *param) {
 #ifdef IRON_WINDOWS
-	FILE *p = _popen(build_cmd, "r");
+	HANDLE process = NULL;
+	FILE  *p       = pad_popen(build_cmd, &process);
 #else
 	FILE *p = popen(build_cmd, "r");
 #endif
@@ -70,7 +71,7 @@ static void build_thread_func(void *param) {
 			build_log_append(line);
 		}
 #ifdef IRON_WINDOWS
-		build_exit_code = _pclose(p);
+		build_exit_code = pad_pclose(p, process);
 #else
 		i32 status      = pclose(p);
 		build_exit_code = WIFEXITED(status) ? WEXITSTATUS(status) : -1;
