@@ -315,6 +315,12 @@ project_t *import_arm_from_map_to_arm(any_map_t *old) {
 	return project;
 }
 
+project_t *import_arm_from_version_17(any_map_t *old) {
+	any_map_set(old, "mesh_nodes", NULL);
+	any_map_set(old, "mesh_nodes_objects", NULL);
+	return import_arm_from_map_to_arm(old);
+}
+
 project_t *import_arm_from_version_16(any_map_t *old) {
 	any_array_t *tls = any_map_get(old, "timeline_layers");
 	if (tls != NULL) {
@@ -322,8 +328,6 @@ project_t *import_arm_from_version_16(any_map_t *old) {
 			any_map_set(tls->buffer[i], "texpaint_sculpt", NULL);
 		}
 	}
-	any_map_set(old, "mesh_nodes", NULL);
-	any_map_set(old, "mesh_nodes_objects", NULL);
 	return import_arm_from_map_to_arm(old);
 }
 
@@ -499,7 +503,7 @@ project_t *import_arm_from_old(buffer_t *b) {
 	    import_arm_from_version_0,  import_arm_from_version_1,  import_arm_from_version_2,  import_arm_from_version_3,  import_arm_from_version_4,
 	    import_arm_from_version_5,  import_arm_from_version_6,  import_arm_from_version_7,  import_arm_from_version_8,  import_arm_from_version_9,
 	    import_arm_from_version_10, import_arm_from_version_11, import_arm_from_version_12, import_arm_from_version_13, import_arm_from_version_14,
-	    import_arm_from_version_15, import_arm_from_version_16,
+	    import_arm_from_version_15, import_arm_from_version_16, import_arm_from_version_17,
 	};
 	for (i32 v = sizeof(fns) / sizeof(fns[0]) - 1; v >= 0; --v) {
 		if (import_arm_is_version(b, i32_to_string(v))) {
