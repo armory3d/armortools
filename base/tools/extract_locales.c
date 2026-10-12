@@ -93,12 +93,13 @@ int count_lines(char *data) {
 int main() {
 	char *dir            = "./paint/assets/locale";
 	char *source_paths[] = {
-	    "paint/sources",        "paint/sources/nodes_material", "paint/sources/nodes_brush", "paint/sources/nodes_neural", "paint/sources/io",
-	    "paint/sources/render", "paint/sources/slots",          "paint/sources/traits",      "paint/sources/ui",           "paint/sources/util"};
+	    "paint/sources",    "paint/sources/nodes_material", "paint/sources/nodes_brush", "paint/sources/nodes_neural", "paint/sources/nodes_mesh",
+	    "paint/sources/io", "paint/sources/render",         "paint/sources/slots",       "paint/sources/traits",       "paint/sources/ui",
+	    "paint/sources/util"};
 
 	// Collect the source strings
 	map_t *found = map_create();
-	for (int i = 0; i < 10; ++i) {
+	for (int i = 0; i < 11; ++i) {
 		char *path = source_paths[i];
 		if (!fs_exists(path)) {
 			continue;
