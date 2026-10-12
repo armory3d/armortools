@@ -301,6 +301,7 @@ typedef struct ui {
 	gpu_texture_t radio_select_image;
 	gpu_texture_t round_corner_image;
 	gpu_texture_t filled_round_corner_image;
+	gpu_texture_t shadow_image;
 } ui_t;
 
 void  ui_init(ui_t *ui, ui_options_t *ops);

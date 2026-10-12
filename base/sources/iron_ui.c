@@ -215,18 +215,111 @@ void ui_rect(float x, float y, float w, float h, uint32_t color, float strength)
 	draw_set_color(0xffffffff);
 }
 
-static void ui_draw_round_corner(float cx, float cy, float ro, float ri, float a0) {
-	int segments = 6;
-	for (int i = 0; i < segments; ++i) {
-		float a  = a0 + (IRON_PI / 2.0) * i / segments;
-		float b  = a0 + (IRON_PI / 2.0) * (i + 1) / segments;
-		float ca = cosf(a);
-		float sa = sinf(a);
-		float cb = cosf(b);
-		float sb = sinf(b);
-		draw_filled_triangle(cx + ca * ro, cy + sa * ro, cx + cb * ro, cy + sb * ro, cx + ca * ri, cy + sa * ri);
-		draw_filled_triangle(cx + ca * ri, cy + sa * ri, cx + cb * ro, cy + sb * ro, cx + cb * ri, cy + sb * ri);
+static void ui_bake_round_corner(gpu_texture_t *tex, int size, float ro, float ri) {
+	uint8_t *pixels = (uint8_t *)malloc(size * size * 4);
+	for (int y = 0; y < size; ++y) {
+		for (int x = 0; x < size; ++x) {
+			float dx = size - (x + 0.5);
+			float dy = size - (y + 0.5);
+			float d  = sqrtf(dx * dx + dy * dy);
+			float a  = fmin(fmax(ro - d + 0.5, 0.0), 1.0);
+			if (ri >= 0.0) {
+				a -= fmin(fmax(ri - d + 0.5, 0.0), 1.0);
+			}
+			uint8_t *p = pixels + (y * size + x) * 4;
+			p[0] = p[1] = p[2] = 255;
+			p[3]               = (uint8_t)(a * 255.0 + 0.5);
+		}
 	}
+	gpu_texture_init_from_bytes(tex, pixels, size, size, GPU_TEXTURE_FORMAT_RGBA32, false);
+	free(pixels);
+}
+
+static void ui_bake_circle(gpu_texture_t *tex, int size, float ro, float ri) {
+	uint8_t *pixels = (uint8_t *)malloc(size * size * 4);
+	for (int y = 0; y < size; ++y) {
+		for (int x = 0; x < size; ++x) {
+			float    dx = size / 2.0 - (x + 0.5);
+			float    dy = size / 2.0 - (y + 0.5);
+			float    d  = sqrtf(dx * dx + dy * dy);
+			float    a  = fmin(fmax(ro - d + 0.5, 0.0), 1.0);
+			float    in = fmin(fmax(ri - d + 0.5, 0.0), 1.0);
+			uint8_t *p  = pixels + (y * size + x) * 4;
+			p[0] = p[1] = p[2] = (uint8_t)(255.0 - 85.0 * in + 0.5);
+			p[3]               = (uint8_t)(a * 255.0 + 0.5);
+		}
+	}
+	gpu_texture_init_from_bytes(tex, pixels, size, size, GPU_TEXTURE_FORMAT_RGBA32, false);
+	free(pixels);
+}
+
+static float ui_segment_dist(float px, float py, float x0, float y0, float x1, float y1) {
+	float vx = x1 - x0;
+	float vy = y1 - y0;
+	float t  = ((px - x0) * vx + (py - y0) * vy) / (vx * vx + vy * vy);
+	t        = fmin(fmax(t, 0.0), 1.0);
+	float dx = px - (x0 + vx * t);
+	float dy = py - (y0 + vy * t);
+	return sqrtf(dx * dx + dy * dy);
+}
+
+static void ui_bake_check(gpu_texture_t *tex, int size, float x0, float y0, float x1, float y1, float x2, float y2, float hs) {
+	uint8_t *pixels = (uint8_t *)malloc(size * size * 4);
+	for (int y = 0; y < size; ++y) {
+		for (int x = 0; x < size; ++x) {
+			float    d = fmin(ui_segment_dist(x + 0.5, y + 0.5, x0, y0, x1, y1), ui_segment_dist(x + 0.5, y + 0.5, x1, y1, x2, y2));
+			float    a = fmin(fmax(hs - d + 0.5, 0.0), 1.0);
+			uint8_t *p = pixels + (y * size + x) * 4;
+			p[0] = p[1] = p[2] = 255;
+			p[3]               = (uint8_t)(a * 255.0 + 0.5);
+		}
+	}
+	gpu_texture_init_from_bytes(tex, pixels, size, size, GPU_TEXTURE_FORMAT_RGBA32, false);
+	free(pixels);
+}
+
+static void ui_bake_shadow(gpu_texture_t *tex, int size, float rc) {
+	uint8_t *pixels = (uint8_t *)malloc(size * size * 4);
+	for (int y = 0; y < size; ++y) {
+		for (int x = 0; x < size; ++x) {
+			float    d = sqrtf((x + 0.5) * (x + 0.5) + (y + 0.5) * (y + 0.5));
+			float    t = fmin(fmax((d - rc) / (size - rc), 0.0), 1.0);
+			uint8_t *p = pixels + (y * size + x) * 4;
+			p[0] = p[1] = p[2] = 0;
+			p[3]               = (uint8_t)((1.0 - t) * (1.0 - t) * 255.0 + 0.5);
+		}
+	}
+	gpu_texture_init_from_bytes(tex, pixels, size, size, GPU_TEXTURE_FORMAT_RGBA32, false);
+	free(pixels);
+}
+
+#define UI_ROUND_CACHE_SIZE 8
+
+typedef struct ui_round_cache {
+	int           r;
+	int           s;
+	gpu_texture_t image;
+} ui_round_cache_t;
+
+static ui_round_cache_t ui_round_cache[UI_ROUND_CACHE_SIZE];
+static int              ui_round_cache_next = 0;
+
+static gpu_texture_t *ui_get_round_corner(int r, int s) {
+	for (int i = 0; i < UI_ROUND_CACHE_SIZE; ++i) {
+		if (ui_round_cache[i].r == r && ui_round_cache[i].s == s) {
+			return &ui_round_cache[i].image;
+		}
+	}
+	draw_flush();
+	ui_round_cache_t *c = &ui_round_cache[ui_round_cache_next];
+	ui_round_cache_next = (ui_round_cache_next + 1) % UI_ROUND_CACHE_SIZE;
+	if (c->image.width != 0) {
+		gpu_texture_destroy(&c->image);
+	}
+	c->r = r;
+	c->s = s;
+	ui_bake_round_corner(&c->image, r, r, r - s);
+	return &c->image;
 }
 
 void ui_rect_round(float x, float y, float w, float h, uint32_t color, float strength) {
@@ -234,37 +327,65 @@ void ui_rect_round(float x, float y, float w, float h, uint32_t color, float str
 	if (!current->enabled) {
 		ui_fade_color(0.25);
 	}
-	float s  = strength;
-	float rx = current->_x + x * UI_SCALE() - s / 2.0;
-	float ry = current->_y + y * UI_SCALE() - s / 2.0;
-	float rw = w * UI_SCALE() + s;
-	float rh = h * UI_SCALE() + s;
-	float r  = 4.0 * UI_SCALE() + s / 2.0;
-	if (r > rw / 2.0) {
-		r = rw / 2.0;
+	int s  = (int)(strength + 0.5);
+	int rx = (int)(current->_x + x * UI_SCALE() - strength / 2.0);
+	int ry = (int)(current->_y + y * UI_SCALE() - strength / 2.0);
+	int rw = (int)(w * UI_SCALE() + strength);
+	int rh = (int)(h * UI_SCALE() + strength);
+	int r  = (int)(4.0 * UI_SCALE() + strength / 2.0 + 0.5);
+	if (s < 1) {
+		s = 1;
 	}
-	if (r > rh / 2.0) {
-		r = rh / 2.0;
+	if (r > rw / 2) {
+		r = rw / 2;
 	}
-	float ri = r - s > 0.0 ? r - s : 0.0;
-	draw_filled_rect(rx + r, ry, rw - r * 2.0, s);
-	draw_filled_rect(rx + r, ry + rh - s, rw - r * 2.0, s);
-	draw_filled_rect(rx, ry + r, s, rh - r * 2.0);
-	draw_filled_rect(rx + rw - s, ry + r, s, rh - r * 2.0);
-	ui_draw_round_corner(rx + r, ry + r, r, ri, IRON_PI);
-	ui_draw_round_corner(rx + rw - r, ry + r, r, ri, IRON_PI * 1.5);
-	ui_draw_round_corner(rx + rw - r, ry + rh - r, r, ri, 0.0);
-	ui_draw_round_corner(rx + r, ry + rh - r, r, ri, IRON_PI * 0.5);
+	if (r > rh / 2) {
+		r = rh / 2;
+	}
+	if (r > 0) {
+		gpu_texture_t *corner = ui_get_round_corner(r, s);
+		draw_scaled_image(corner, rx, ry, r, r);
+		draw_scaled_image(corner, rx, ry + rh, r, -r);
+		draw_scaled_image(corner, rx + rw, ry, -r, r);
+		draw_scaled_image(corner, rx + rw, ry + rh, -r, -r);
+	}
+	draw_filled_rect(rx + r, ry, rw - r * 2, s);
+	draw_filled_rect(rx + r, ry + rh - s, rw - r * 2, s);
+	draw_filled_rect(rx, ry + r, s, rh - r * 2);
+	draw_filled_rect(rx + rw - s, ry + r, s, rh - r * 2);
 	draw_set_color(0xffffffff);
 }
 
 void ui_draw_shadow(float x, float y, float w, float h) {
-	float max_offset = 16.0 * UI_SCALE();
-	for (int i = 0; i < 6; i++) {
-		float offset = (max_offset / 6) * (i + 1);
-		float a      = 0.04 - (0.04 / 6) * i;
-		draw_set_color(((uint8_t)(a * 255) << 24) | (0 << 16) | (0 << 8) | 0);
-		ui_draw_rect(true, false, x - offset, y, w + offset * 2, h + offset);
+	gpu_texture_t *img = &current->shadow_image;
+	int            t   = img->width;
+	if (t == 0) {
+		return;
+	}
+	int r  = current->filled_round_corner_image.width;
+	int xl = (int)x + r;
+	int xr = (int)(x + w) - r;
+	int yb = (int)(y + h) - r;
+	int yt = (int)y + t / 2;
+	if (yt > yb) {
+		yt = yb;
+	}
+	if (xl > xr) {
+		xl = xr = (int)(x + w / 2.0);
+	}
+	int   ht = yt - (int)y;
+	float e  = t - 1.0;
+	draw_set_color(0x24000000);
+	draw_scaled_sub_image(img, 0.5, 0.5, e, e, xr, yb, t, t);
+	draw_scaled_sub_image(img, 0.5, 0.5, e, e, xl, yb, -t, t);
+	draw_scaled_sub_image(img, 0.5, 0.5, 0, e, xl, yb, xr - xl, t);
+	draw_scaled_sub_image(img, 0.5, 0.5, e, 0, xr, yt, t, yb - yt);
+	draw_scaled_sub_image(img, 0.5, 0.5, e, 0, xl, yt, -t, yb - yt);
+	draw_scaled_sub_image(img, 0.5, 0.5, 0, 0, xl, yt, xr - xl, yb - yt);
+	if (ht > 0) {
+		draw_scaled_sub_image(img, 0.5, 0.5, e, e, xr, yt, t, -ht);
+		draw_scaled_sub_image(img, 0.5, 0.5, e, e, xl, yt, -t, -ht);
+		draw_scaled_sub_image(img, 0.5, 0.5, 0, e, xl, yt, xr - xl, -ht);
 	}
 }
 
@@ -1064,56 +1185,37 @@ void ui_bake_elements() {
 	if (current->check_select_image.width != 0) {
 		gpu_texture_destroy(&current->check_select_image);
 	}
-	float r = UI_CHECK_SELECT_SIZE();
-	gpu_render_target_init(&current->check_select_image, r, r, GPU_TEXTURE_FORMAT_RGBA32);
-	draw_begin(&current->check_select_image, true, 0x00000000);
-	draw_set_color(0xffffffff);
-	draw_line(0, r / 2.0, r / 2.0 - 2.0 * UI_SCALE(), r - 2.0 * UI_SCALE(), 2.0 * UI_SCALE());
-	draw_line(r / 2.0 - 3.0 * UI_SCALE(), r - 3.0 * UI_SCALE(), r / 2.0 + 5.0 * UI_SCALE(), r - 11.0 * UI_SCALE(), 2.0 * UI_SCALE());
-	draw_end();
+	float sc = UI_SCALE();
+	int   r  = (int)UI_CHECK_SELECT_SIZE();
+	ui_bake_check(&current->check_select_image, r, 0.7 * sc, r / 2.0 + 0.7 * sc, r / 2.0 - 2.3 * sc, r - 2.3 * sc, r / 2.0 + 5.0 * sc, r - 9.6 * sc, sc);
 
 	if (current->radio_image.width != 0) {
 		gpu_texture_destroy(&current->radio_image);
 	}
-	r = UI_CHECK_SIZE();
-	gpu_render_target_init(&current->radio_image, r, r, GPU_TEXTURE_FORMAT_RGBA32);
-	draw_begin(&current->radio_image, true, 0x00000000);
-	draw_set_color(0xffaaaaaa);
-	draw_filled_circle(r / 2.0, r / 2.0, r / 2.0, 0);
-	draw_set_color(0xffffffff);
-	draw_circle(r / 2.0, r / 2.0, r / 2.0, 0, 1.0 * UI_SCALE());
-	draw_end();
+	r = (int)UI_CHECK_SIZE();
+	ui_bake_circle(&current->radio_image, r, r / 2.0, r / 2.0 - sc);
 
 	if (current->radio_select_image.width != 0) {
 		gpu_texture_destroy(&current->radio_select_image);
 	}
-	r = UI_CHECK_SELECT_SIZE();
-	gpu_render_target_init(&current->radio_select_image, r, r, GPU_TEXTURE_FORMAT_RGBA32);
-	draw_begin(&current->radio_select_image, true, 0x00000000);
-	draw_set_color(0xffaaaaaa);
-	draw_filled_circle(r / 2.0, r / 2.0, 4.5 * UI_SCALE(), 0);
-	draw_set_color(0xffffffff);
-	draw_filled_circle(r / 2.0, r / 2.0, 4.0 * UI_SCALE(), 0);
-	draw_end();
+	r = (int)UI_CHECK_SELECT_SIZE();
+	ui_bake_circle(&current->radio_select_image, r, 4.5 * sc, 4.0 * sc);
 
 	if (current->filled_round_corner_image.width != 0) {
 		gpu_texture_destroy(&current->filled_round_corner_image);
 	}
-	r = 4.0 * UI_SCALE();
-	gpu_render_target_init(&current->filled_round_corner_image, r, r, GPU_TEXTURE_FORMAT_RGBA32);
-	draw_begin(&current->filled_round_corner_image, true, 0x00000000);
-	draw_set_color(0xffffffff);
-	draw_filled_circle(r, r, r, 0);
-	draw_end();
+	r = (int)(4.0 * sc);
+	ui_bake_round_corner(&current->filled_round_corner_image, r, r, -1.0);
 
 	if (current->round_corner_image.width != 0) {
 		gpu_texture_destroy(&current->round_corner_image);
 	}
-	gpu_render_target_init(&current->round_corner_image, r, r, GPU_TEXTURE_FORMAT_RGBA32);
-	draw_begin(&current->round_corner_image, true, 0x00000000);
-	draw_set_color(0xffffffff);
-	draw_circle(r, r, r, 0, 1);
-	draw_end();
+	ui_bake_round_corner(&current->round_corner_image, r, r, r - 1.0);
+
+	if (current->shadow_image.width != 0) {
+		gpu_texture_destroy(&current->shadow_image);
+	}
+	ui_bake_shadow(&current->shadow_image, (int)(16.0 * UI_SCALE()) + r, r);
 
 	current->elements_baked = true;
 }
