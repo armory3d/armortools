@@ -9,6 +9,10 @@ project_t *main() {
 	add_cfiles(project, "io_gltf/**");
 	add_cfiles(project, "io_fbx/**");
 	add_cfiles(project, "io_tiff/**");
+	
+	add_define(project, "UFBX_MINIMAL");
+	add_define(project, "UFBX_ENABLE_TRIANGULATION");
+	add_define(project, "UFBX_ENABLE_SCENE_EVALUATION");
 
 	if (fs_exists("external")) {
 		add_cfiles(project, "external/**");
