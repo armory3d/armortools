@@ -183,7 +183,69 @@ bool _ui_picker_button() {
 	return ui_button("P", UI_ALIGN_CENTER, "");
 }
 
-int ui_color_wheel(uint32_t *value, ui_color_state_t *state, bool alpha, float w, float h, bool color_preview, void (*picker)(void *), void *data) {
+static gpu_texture_t *ui_color_wheel_texture = NULL;
+
+static gpu_texture_t *ui_color_wheel_get_texture() {
+	if (ui_color_wheel_texture != NULL) {
+		return ui_color_wheel_texture;
+	}
+	int      w      = 360;
+	int      h      = 270;
+	float    radius = 127.0;
+	uint8_t *pixels = (uint8_t *)malloc(w * h * 4);
+	for (int y = 0; y < h; ++y) {
+		for (int x = 0; x < w; ++x) {
+			float dx   = x + 0.5 - w / 2.0;
+			float dy   = y + 0.5 - h / 2.0;
+			float dist = sqrtf(dx * dx + dy * dy);
+			float hue  = atan2f(-dx, dy) / (IRON_PI * 2.0); // Red at the bottom, matches mouse picking
+			if (hue < 0) {
+				hue += 1.0;
+			}
+			float rgb[3];
+			ui_hsv_to_rgb(hue, ui_clamp(dist / radius, 0.0, 1.0), 1.0, rgb);
+			uint8_t *p = pixels + (y * w + x) * 4;
+			p[0]       = round(rgb[0] * 255.0);
+			p[1]       = round(rgb[1] * 255.0);
+			p[2]       = round(rgb[2] * 255.0);
+			p[3]       = round(ui_clamp(radius - dist + 0.5, 0.0, 1.0) * 255.0);
+		}
+	}
+	ui_color_wheel_texture = (gpu_texture_t *)malloc(sizeof(gpu_texture_t));
+	gpu_texture_init_from_bytes(ui_color_wheel_texture, pixels, w, h, GPU_TEXTURE_FORMAT_RGBA32, false);
+	free(pixels);
+	return ui_color_wheel_texture;
+}
+
+static gpu_texture_t *ui_color_wheel_gradient_texture = NULL;
+
+static gpu_texture_t *ui_color_wheel_gradient_get_texture() {
+	if (ui_color_wheel_gradient_texture != NULL) {
+		return ui_color_wheel_gradient_texture;
+	}
+	int      w      = 360;
+	int      h      = 270;
+	int      x0     = 323;
+	int      x1     = 350;
+	int      y0     = 8;
+	int      y1     = 261;
+	uint8_t *pixels = (uint8_t *)calloc(w * h * 4, 1);
+	for (int y = y0; y <= y1; ++y) {
+		for (int x = x0; x <= x1; ++x) {
+			bool     border = x == x0 || x == x1 || y == y0 || y == y1;
+			float    val    = 1.0 - (y - (y0 + 1)) / (float)(y1 - y0 - 2);
+			uint8_t *p      = pixels + (y * w + x) * 4;
+			p[0] = p[1] = p[2] = border ? 0 : round(val * 255.0);
+			p[3]               = 255;
+		}
+	}
+	ui_color_wheel_gradient_texture = (gpu_texture_t *)malloc(sizeof(gpu_texture_t));
+	gpu_texture_init_from_bytes(ui_color_wheel_gradient_texture, pixels, w, h, GPU_TEXTURE_FORMAT_RGBA32, false);
+	free(pixels);
+	return ui_color_wheel_gradient_texture;
+}
+
+int ui_color_wheel(uint32_t *value,ui_color_state_t *state, bool alpha, float w, float h, bool color_preview, void (*picker)(void *), void *data) {
 	ui_t   *current  = ui_get_current();
 	ui_id_t id       = ui_widget_id(value, UI_ID_COLOR);
 	current->next_id = 0;
@@ -237,10 +299,11 @@ int ui_color_wheel(uint32_t *value, ui_color_state_t *state, bool alpha, float w
 	current->_y = _y;
 	current->_w = _w;
 
-	ui_theme_t *theme   = current->ops->theme;
-	uint32_t    col     = ui_color(round(state->val * 255.0f), round(state->val * 255.0f), round(state->val * 255.0f), 255);
-	float       wheel_h = current->ops->color_wheel->height * (w / current->ops->color_wheel->width);
-	ui_image(current->ops->color_wheel, col, wheel_h - 2);
+	ui_theme_t    *theme   = current->ops->theme;
+	uint32_t       col     = ui_color(round(state->val * 255.0f), round(state->val * 255.0f), round(state->val * 255.0f), 255);
+	gpu_texture_t *wheel   = ui_color_wheel_get_texture();
+	float          wheel_h = wheel->height * (w / wheel->width);
+	ui_image(wheel, col, wheel_h - 2);
 
 	// Picker
 	float ph      = current->_y - py;
@@ -263,7 +326,7 @@ int ui_color_wheel(uint32_t *value, ui_color_state_t *state, bool alpha, float w
 
 	current->_x = px - (scroll ? 0 : UI_SCROLL_W() / 2.0);
 	current->_y = py;
-	ui_image(current->ops->black_white_gradient, 0xffffffff, wheel_h);
+	ui_image(ui_color_wheel_gradient_get_texture(), 0xffffffff, wheel_h);
 
 	draw_set_color(0xff000000);
 	draw_filled_rect(cx - 3.0 * UI_SCALE(), cy - 3.0 * UI_SCALE(), 6.0 * UI_SCALE(), 6.0 * UI_SCALE());

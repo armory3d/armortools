@@ -66,8 +66,6 @@ typedef struct ui_options {
 	draw_font_t   *font;
 	ui_theme_t    *theme;
 	float          scale_factor;
-	gpu_texture_t *color_wheel;
-	gpu_texture_t *black_white_gradient;
 } ui_options_t;
 
 typedef struct ui_tab_state {
