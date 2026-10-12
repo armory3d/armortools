@@ -664,6 +664,11 @@ void box_preferences_viewport_tab() {
 	if (clip_changed) {
 		camera_object_build_proj(cam, -1.0);
 	}
+
+	ui_check(&g_context->cull_backfaces, tr("Cull Backfaces"), "");
+	if (ui_item_changed()) {
+		make_material_parse_mesh_material();
+	}
 }
 
 // ██╗  ██╗███████╗██╗   ██╗███╗   ███╗ █████╗ ██████╗
