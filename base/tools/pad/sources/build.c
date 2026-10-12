@@ -138,7 +138,7 @@ static void build_clean() {
 	browser_refresh();
 }
 
-// Debug builds compile faster and are the default, clean deletes the build folder first
+// Debug builds compile faster and are the default, release builds embed the data, clean deletes the build folder first
 void build_run(bool run, bool clean) {
 	if (build_running) {
 		return;
@@ -155,7 +155,7 @@ void build_run(bool run, bool clean) {
 	editor_save_all();
 	clean            = clean || build_clean_next;
 	build_clean_next = false;
-	char *debug      = build_config == 0 ? " --debug" : "";
+	char *debug      = build_config == 0 ? " --debug" : " --embed";
 #ifdef IRON_WINDOWS
 	build_exec(string("cd /d \"%s\" && %s\"%s\" %s%s 2>&1", dir, clean ? "(if exist build rmdir /s /q build) && " : "", make, run ? "--run" : "--compile",
 	                  debug),
