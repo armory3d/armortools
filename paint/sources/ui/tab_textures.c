@@ -72,7 +72,7 @@ void tab_textures_update_texture_pointers(ui_node_t_array_t *nodes, i32 index) {
 void tab_textures_delete_texture_on_next_frame(void *_) {
 	make_material_parse_paint_material(true);
 	util_render_make_material_preview();
-	ui_base_hwnds->buffer[TAB_AREA_SIDEBAR1]->redraws = 2;
+	ui_dock_redraw(TAB_AREA_SIDEBAR1);
 }
 
 void tab_textures_delete_texture(asset_t *asset) {
@@ -80,7 +80,7 @@ void tab_textures_delete_texture(asset_t *asset) {
 	if (g_project->_->assets->length > 1) {
 		g_context->texture = g_project->_->assets->buffer[index == g_project->_->assets->length - 1 ? index - 1 : index + 1];
 	}
-	ui_base_hwnds->buffer[TAB_AREA_STATUS]->redraws = 2;
+	ui_dock_redraw(TAB_AREA_STATUS);
 
 	if (g_context->tool == TOOL_TYPE_COLORID && index == g_context->colorid) {
 		ui_header_handle->redraws  = 2;
@@ -265,7 +265,7 @@ static void tab_textures_sort_by_name() {
 
 	array_delete(new_indices);
 	array_delete(old_order);
-	ui_base_hwnds->buffer[TAB_AREA_STATUS]->redraws = 2;
+	ui_dock_redraw(TAB_AREA_STATUS);
 }
 
 void tab_textures_draw_edit() {
@@ -279,7 +279,7 @@ void tab_textures_draw_edit() {
 
 void tab_textures_draw_import(char *path) {
 	import_asset_run(path, -1.0, -1.0, true, false, NULL);
-	ui_base_hwnds->buffer[TAB_AREA_STATUS]->redraws = 2;
+	ui_dock_redraw(TAB_AREA_STATUS);
 }
 
 char *tab_textures_search = "";

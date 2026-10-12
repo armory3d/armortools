@@ -503,7 +503,7 @@ static void agent_scripts_sync(void) {
 		}
 	}
 	tab_scripts_minimap_dirty                         = true;
-	ui_base_hwnds->buffer[TAB_AREA_SIDEBAR0]->redraws = 2;
+	ui_dock_redraw(TAB_AREA_SIDEBAR0);
 }
 
 static void agent_finish(char *s) {

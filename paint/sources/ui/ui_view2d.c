@@ -252,49 +252,20 @@ void ui_view2d_render_color_pick(void *_) {
 	}
 }
 
+// Height of the tab names and the header drawn on top of the image, the image is centered in the area below
+i32 ui_view2d_top() {
+	return ui_base_show ? ui_header_h * 2 : 0;
+}
+
 void ui_view2d_update(void *_) {
 	f32 headerh = UI_ELEMENT_H() * 1.4;
 
 	g_context->paint2d = false;
 
-	ui_view2d_ww = g_config->layout->buffer[LAYOUT_SIZE_NODES_W];
-	ui_view2d_wx = math_floor(sys_w()) + ui_toolbar_w(true);
-	ui_view2d_wy = 0;
-
-	if (!ui_base_show) {
-		ui_view2d_ww += g_config->layout->buffer[LAYOUT_SIZE_SIDEBAR_W] + ui_toolbar_w(true);
-		ui_view2d_wx -= ui_toolbar_w(true);
-	}
-	if (!base_view3d_show) {
-		ui_view2d_ww += base_view3d_w();
-	}
-
-	ui_view2d_wh = iron_window_height() - g_config->layout->buffer[LAYOUT_SIZE_STATUS_H];
-
-	if (ui_nodes_show) {
-		ui_view2d_wh -= g_config->layout->buffer[LAYOUT_SIZE_NODES_H];
-		if (g_config->touch_ui) {
-			ui_view2d_wh += ui_header_h;
-		}
-	}
-
-	if (!base_view3d_show && ui_nodes_show) {
-		ui_view2d_wx = 0;
-		ui_view2d_ww = base_view3d_w();
-		ui_view2d_wh = iron_window_height() - g_config->layout->buffer[LAYOUT_SIZE_STATUS_H];
-	}
-
-	// Distract free, no header or status bar
+	// 2D view takes the tab it is docked in
+	ui_dock_layout();
 	if (!ui_base_show) {
 		headerh = 0;
-		if (!base_view3d_show && !ui_nodes_show) {
-			ui_view2d_wx = 0;
-			ui_view2d_ww = iron_window_width();
-		}
-		ui_view2d_wh = iron_window_height();
-		if (ui_nodes_show && base_view3d_show) {
-			ui_view2d_wh -= g_config->layout->buffer[LAYOUT_SIZE_NODES_H];
-		}
 	}
 
 	ui_nodes_wrap_mouse(ui_view2d_controls_down, ui_view2d_wx, ui_view2d_wy, ui_view2d_ww, ui_view2d_wh);
@@ -358,8 +329,7 @@ void ui_view2d_update(void *_) {
 				f32            tw      = wm * 0.9 * ui_view2d_pan_scale;
 				f32            th      = tw * ratio;
 				f32            tx      = ui_view2d_ww / 2.0 - tw / 2.0 + ui_view2d_pan_x;
-				i32            headerh = g_config->layout->buffer[LAYOUT_SIZE_HEADER] == 1 ? ui_header_h * 2 : ui_header_h;
-				i32            apph    = iron_window_height() - g_config->layout->buffer[LAYOUT_SIZE_STATUS_H] + headerh;
+				i32            apph    = ui_view2d_wh + ui_view2d_top();
 				f32            ty      = apph / 2.0 - th / 2.0 + ui_view2d_pan_y;
 				f32            mx      = mouse_x - ui_view2d_wx;
 				f32            my      = mouse_y - ui_view2d_wy;
@@ -458,23 +428,12 @@ void ui_view2d_update(void *_) {
 
 	ui_begin(g_ui);
 
-	headerh  = g_config->layout->buffer[LAYOUT_SIZE_HEADER] == 1 ? ui_header_h * 2 : ui_header_h;
-	i32 apph = iron_window_height() - g_config->layout->buffer[LAYOUT_SIZE_STATUS_H] + headerh;
-	if (!base_view3d_show) {
-		apph = base_h();
-	}
-	if (!ui_base_show) {
-		apph = ui_view2d_wh;
-	}
+	i32 apph = ui_view2d_wh + ui_view2d_top();
 
 	if (ui_window(ui_view2d_hwnd, ui_view2d_wx, ui_view2d_wy, ui_view2d_ww, ui_view2d_wh, false)) {
 
 		if (!g_config->touch_ui && ui_base_show) {
-			bool expand = !base_view3d_show && !ui_nodes_show && g_config->layout->buffer[LAYOUT_SIZE_SIDEBAR_W] == 0;
-			ui_tab(&ui_view2d_tab, expand ? string_tmp("%s          ", tr("2D View")) : tr("2D View"), false, -1, !base_view3d_show);
-			if (ui_tab(&ui_view2d_tab, tr("+"), false, -1, false)) {
-				ui_view2d_tab = 0;
-			}
+			ui_dock_view_tabs(TAB_VIEW2D);
 		}
 
 		// Grid
@@ -646,9 +605,7 @@ void ui_view2d_update(void *_) {
 				g_ui->_w = math_floor(ew * 0.7 + 3);
 				if (ui_icon_button(tr("Back"), ICON_ARROW_LEFT, UI_ALIGN_CENTER)) {
 					g_ui->input_released = false;
-					g_config->workspace  = WORKSPACE_VIEW_3D;
-					config_save();
-					base_update_workspace();
+					base_set_workspace(WORKSPACE_PRESET_VIEW_3D);
 				}
 				g_ui->_x += ew * 0.7 + 3;
 				g_ui->_y = 2 + start_y;
@@ -732,7 +689,7 @@ void ui_view2d_update(void *_) {
 				}
 
 				if (name_changed) {
-					ui_base_hwnds->buffer[0]->redraws = 2;
+					ui_dock_redraw(0);
 				}
 				g_ui->_x += g_ui->_w + 3;
 				g_ui->_y = 2 + start_y;

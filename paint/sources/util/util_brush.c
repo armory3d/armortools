@@ -38,13 +38,16 @@ void util_brush_update() {
 		i32 mx = mouse_view_x();
 		i32 my = mouse_view_y();
 		i32 ww = sys_w();
+		i32 wh = sys_h();
 
 		if (g_context->paint2d) {
-			mx -= sys_w();
+			mx = mouse_x - ui_view2d_wx;
+			my = mouse_y - ui_view2d_wy - ui_view2d_top();
 			ww = ui_view2d_ww;
+			wh = ui_view2d_wh - ui_view2d_top();
 		}
 
-		if (mx < ww && mx > sys_x() && my < sys_h() && my > sys_y()) {
+		if (mx < ww && mx > 0 && my < wh && my > 0) {
 
 			if (set_clone_source) {
 				g_context->clone_start_x     = mx;
@@ -52,7 +55,7 @@ void util_brush_update() {
 				util_brush_clone_source_down = true;
 			}
 			else {
-				if (g_context->brush_time == 0 && !base_is_dragging && !base_is_resizing && g_ui->combo_selected_id == 0) { // Paint started
+				if (g_context->brush_time == 0 && !base_is_dragging && !base_is_resizing && !ui_dock_is_dragging() && g_ui->combo_selected_id == 0) { // Paint started
 
 					// Draw line
 					if (keymap_shortcut(string_tmp("%s+%s", any_map_get(g_keymap, "brush_ruler"), any_map_get(g_keymap, "action_paint")), SHORTCUT_TYPE_DOWN)) {

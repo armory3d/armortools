@@ -100,7 +100,7 @@ void brush_output_node_run() {
 
 	if (g_context->paint2d) {
 		left  = 1.0;
-		right = (g_context->split_view ? 2.0 : 1.0) + ui_view2d_ww / (float)base_w();
+		right = 1.0 + ui_view2d_ww / (float)base_w();
 	}
 
 	// Do not paint over floating toolbar
@@ -148,7 +148,7 @@ void brush_output_node_run() {
 		return;
 	}
 
-	if (g_ui->is_hovered || base_is_dragging || base_is_resizing || g_ui->is_scrolling || g_ui->combo_selected_id != 0) {
+	if (g_ui->is_hovered || base_is_dragging || base_is_resizing || ui_dock_is_dragging() || g_ui->is_scrolling || g_ui->combo_selected_id != 0) {
 		return;
 	}
 

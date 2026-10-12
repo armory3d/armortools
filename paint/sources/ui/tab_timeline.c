@@ -101,7 +101,7 @@ static bool tab_timeline_camera_editor_enabled = false;
 static bool tab_timeline_camera_player_enabled = true;
 
 static bool *tab_timeline_camera_enabled_handle() {
-	return g_config->workspace == WORKSPACE_PLAYER ? &tab_timeline_camera_player_enabled : &tab_timeline_camera_editor_enabled;
+	return base_player ? &tab_timeline_camera_player_enabled : &tab_timeline_camera_editor_enabled;
 }
 
 static bool tab_timeline_camera_enabled() {
@@ -994,7 +994,7 @@ static void tab_timeline_apply_stage_on_next_frame(void *stage) {
 		return;
 	tab_stages_selected = array_index_of(g_project->stages, stage);
 	tab_stages_apply(stage);
-	ui_base_hwnds->buffer[TAB_AREA_SIDEBAR0]->redraws = 2;
+	ui_dock_redraw(TAB_AREA_SIDEBAR0);
 }
 
 static void tab_timeline_open_mesh_on_next_frame(void *mesh_ptr) {
@@ -1020,12 +1020,11 @@ static void tab_timeline_open_mesh_on_next_frame(void *mesh_ptr) {
 
 void tab_timeline_edit_mesh(mesh_object_t *mesh) {
 	sys_notify_on_next_frame(&tab_timeline_open_mesh_on_next_frame, mesh);
-	ui_base_tabs->buffer[TAB_AREA_STATUS]          = 5; // Timeline
-	g_config->layout_tabs->buffer[TAB_AREA_STATUS] = 5;
-	if (g_config->layout->buffer[LAYOUT_SIZE_STATUS_H] <= ui_statusbar_default_h * g_config->window_scale) {
+	ui_base_show_tab(TAB_TIMELINE);
+	if (ui_dock_status_minimized()) {
 		ui_base_toggle_browser();
 	}
-	ui_base_hwnds->buffer[TAB_AREA_STATUS]->redraws = 2;
+	ui_dock_redraw(TAB_AREA_STATUS);
 }
 
 static i32    _tab_timeline_frame = 0;
@@ -1280,9 +1279,7 @@ static bool tab_timeline_has_script(i32 row, i32 frame) {
 
 void tab_timeline_edit_script(i32 row, i32 frame) {
 	tab_scripts_create(tab_timeline_script_name(row, frame));
-	ui_base_tabs->buffer[TAB_AREA_SIDEBAR0]           = 2; // Scripts tab
-	ui_base_hwnds->buffer[TAB_AREA_SIDEBAR0]->redraws = 2;
-	g_config->layout_tabs->buffer[TAB_AREA_SIDEBAR0]  = 2;
+	ui_base_show_tab(TAB_SCRIPTS);
 }
 
 static void tab_timeline_delete_script(i32 row, i32 frame) {
@@ -1451,8 +1448,8 @@ typedef struct {
 } tab_timeline_script_key_t;
 
 static void tab_timeline_redraw_status() {
-	if (g_config->workspace != WORKSPACE_PLAYER) {
-		ui_base_hwnds->buffer[TAB_AREA_STATUS]->redraws = 2;
+	if (!base_player) {
+		ui_dock_redraw(TAB_AREA_STATUS);
 	}
 }
 
@@ -1554,7 +1551,7 @@ void tab_timeline_update() {
 	}
 	iron_delay_idle_sleep();
 
-	i32 loop_frames = g_config->workspace == WORKSPACE_PLAYER && tab_timeline_loop_frames > 0 ? tab_timeline_loop_frames : tab_timeline_max_frames;
+	i32 loop_frames = base_player && tab_timeline_loop_frames > 0 ? tab_timeline_loop_frames : tab_timeline_max_frames;
 
 	// Keep nested clips continuous when the main timeline wraps
 	f64   playback_frame = (sys_time() - tab_timeline_play_time) * tab_timeline_frame_rate;
@@ -1570,8 +1567,8 @@ void tab_timeline_update() {
 
 	if (frame_i != tab_timeline_last_frame) {
 		tab_timeline_last_frame = frame_i;
-		if (g_config->workspace != WORKSPACE_PLAYER) {
-			ui_base_hwnds->buffer[TAB_AREA_STATUS]->redraws = 1;
+		if (!base_player) {
+			ui_dock_redraw(TAB_AREA_STATUS);
 		}
 		tab_timeline_load_from_keyframes(frame_i);
 		tab_timeline_run_frame_scripts(frame_i);
@@ -1720,7 +1717,7 @@ void tab_timeline_stage_edit_box_draw() {
 			tab_stages_set_hidden(s, o->base->name, false);
 			util_mesh_visibility_changed();
 			util_physics_apply_stage(s);
-			ui_base_hwnds->buffer[TAB_AREA_SIDEBAR0]->redraws = 2;
+			ui_dock_redraw(TAB_AREA_SIDEBAR0);
 		}
 	}
 	array_delete(objects);
@@ -1744,7 +1741,7 @@ void tab_timeline_stage_edit_box_draw() {
 			else {
 				array_splice(s->layers, idx, 1);
 			}
-			ui_base_hwnds->buffer[TAB_AREA_SIDEBAR0]->redraws = 2;
+			ui_dock_redraw(TAB_AREA_SIDEBAR0);
 		}
 	}
 	array_delete(layers);

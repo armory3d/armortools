@@ -141,7 +141,7 @@ static void tab_meshes_set_selected(mesh_object_t_array_t *objects) {
 			}
 		}
 		ui_header_handle->redraws                         = 2;
-		ui_base_hwnds->buffer[TAB_AREA_SIDEBAR0]->redraws = 2;
+		ui_dock_redraw(TAB_AREA_SIDEBAR0);
 	}
 	array_delete(objects);
 }
@@ -206,7 +206,7 @@ void tab_meshes_toggle_visible(mesh_object_t *o) {
 	if (merge && tab_meshes_get_linked_override(o) >= 0) {
 		util_mesh_visibility_changed();
 	}
-	ui_base_hwnds->buffer[TAB_AREA_SIDEBAR0]->redraws = 2;
+	ui_dock_redraw(TAB_AREA_SIDEBAR0);
 }
 
 i32 tab_meshes_depth(mesh_object_t *o) {
@@ -312,7 +312,7 @@ void tab_meshes_sort_by_name() {
 	tab_meshes_sort_hierarchy_from(old_order);
 	free(old_order);
 	tab_timeline_sync();
-	ui_base_hwnds->buffer[TAB_AREA_SIDEBAR0]->redraws = 2;
+	ui_dock_redraw(TAB_AREA_SIDEBAR0);
 }
 
 void tab_meshes_set_drag_mesh(mesh_object_t *o, f32 off_x, f32 off_y) {
@@ -580,7 +580,7 @@ void tab_meshes_draw_context_menu_delete_next_frame(mesh_object_t *o) {
 	g_context->paint_object = tab_meshes_select_after_delete();
 	util_mesh_merge(NULL);
 	g_context->ddirty                                 = 2;
-	ui_base_hwnds->buffer[TAB_AREA_SIDEBAR0]->redraws = 2;
+	ui_dock_redraw(TAB_AREA_SIDEBAR0);
 }
 
 static void tab_meshes_reparent_keep_world(object_t *child, object_t *parent) {
@@ -617,7 +617,7 @@ void tab_meshes_draw_context_menu_delete(mesh_object_t *o) {
 		util_mesh_visibility_changed();
 		util_physics_apply_stage(stage);
 		ui_header_handle->redraws                         = 2;
-		ui_base_hwnds->buffer[TAB_AREA_SIDEBAR0]->redraws = 2;
+		ui_dock_redraw(TAB_AREA_SIDEBAR0);
 		return;
 	}
 
@@ -1064,7 +1064,7 @@ void tab_meshes_draw_edit() {
 
 	if (ui_menu_button(tr("Select All"), "", ICON_NONE)) {
 		tab_meshes_select_range(0, g_project->_->paint_objects->length - 1);
-		ui_base_hwnds->buffer[TAB_AREA_SIDEBAR0]->redraws = 2;
+		ui_dock_redraw(TAB_AREA_SIDEBAR0);
 	}
 
 	if (ui_menu_button(tr("Select Visible"), "", ICON_NONE)) {
@@ -1493,7 +1493,7 @@ void tab_meshes_draw_mesh_slot(mesh_object_t *o, i32 i) {
 
 void tab_meshes_highlight_odd_lines() {
 	i32 step   = g_theme->ELEMENT_H * 2;
-	i32 full_h = g_ui->_window_h - ui_base_hwnds->buffer[0]->scroll_offset;
+	i32 full_h = g_ui->_window_h - g_ui->current_window->scroll_offset;
 	for (i32 i = 0; i < math_floor(full_h / (float)step); ++i) {
 		if (i % 2 == 0) {
 			ui_fill(0, i * step, (g_ui->_w / (float)UI_SCALE() - 2), step, base_darker(g_theme->WINDOW_BG_COL, 0x00040404));
@@ -1530,7 +1530,7 @@ void tab_meshes_reveal_slot(mesh_object_t *o) {
 		p = p->parent;
 	}
 	tab_meshes_reveal_pending                         = o;
-	ui_base_hwnds->buffer[TAB_AREA_SIDEBAR0]->redraws = 2;
+	ui_dock_redraw(TAB_AREA_SIDEBAR0);
 }
 
 void tab_meshes_draw(i32 *htab) {
@@ -1596,7 +1596,7 @@ void tab_meshes_draw(i32 *htab) {
 		if (in_window && !g_ui->is_typing && g_ui->is_ctrl_down && g_ui->is_key_pressed && g_ui->key_code == KEY_CODE_A) {
 			g_ui->is_key_pressed = false;
 			tab_meshes_select_range(0, g_project->_->paint_objects->length - 1);
-			ui_base_hwnds->buffer[TAB_AREA_SIDEBAR0]->redraws = 2;
+			ui_dock_redraw(TAB_AREA_SIDEBAR0);
 		}
 
 		for (i32 i = 0; i < g_project->_->paint_objects->length; ++i) {
@@ -1611,7 +1611,7 @@ void tab_meshes_draw(i32 *htab) {
 			i32 i = array_index_of(g_project->_->paint_objects, tab_meshes_reveal_pending);
 			if (i >= 0 && !tab_meshes_slot_hidden(tab_meshes_reveal_pending)) {
 				tab_meshes_scroll_to_slot(i);
-				ui_base_hwnds->buffer[TAB_AREA_SIDEBAR0]->redraws = 2;
+				ui_dock_redraw(TAB_AREA_SIDEBAR0);
 			}
 			tab_meshes_reveal_pending = NULL;
 		}
@@ -1626,7 +1626,7 @@ void tab_meshes_draw(i32 *htab) {
 				}
 				g_context->paint_object                           = candidate;
 				ui_header_handle->redraws                         = 2;
-				ui_base_hwnds->buffer[TAB_AREA_SIDEBAR0]->redraws = 2;
+				ui_dock_redraw(TAB_AREA_SIDEBAR0);
 				tab_meshes_scroll_to_slot(i);
 				break;
 			}

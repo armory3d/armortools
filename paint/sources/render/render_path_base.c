@@ -33,15 +33,15 @@ f32 render_path_base_get_super_sampling() {
 
 void render_path_base_begin() {
 	// Begin split
-	if (g_context->split_view && !g_context->paint2d_view) {
-		if (g_context->view_index_last == -1 && g_context->view_index == -1) {
-			// Begin split, draw right viewport first
-			g_context->view_index = 1;
+	if (base_is_split() && !g_context->paint2d_view) {
+		// Set current viewport, keep it while dragging or when the mouse is outside of the views
+		i32  view     = base_view_at_mouse();
+		bool dragging = (mouse_down("left") && !mouse_started("left")) || (mouse_down("right") && !mouse_started("right")) ||
+		                (mouse_down("middle") && !mouse_started("middle")) || (pen_down("tip") && !pen_started("tip"));
+		if (view == -1 || dragging) {
+			view = g_context->view_index_last > 0 ? 1 : 0;
 		}
-		else {
-			// Set current viewport
-			g_context->view_index = mouse_view_x() > base_w() / 2.0 ? 1 : 0;
-		}
+		g_context->view_index = view;
 
 		camera_object_t *cam = scene_camera;
 		if (g_context->view_index_last > -1) {
@@ -95,7 +95,7 @@ bool render_path_base_ssaa4() {
 }
 
 void render_path_base_draw_split(void (*draw_commands)(void)) {
-	if (g_context->split_view && !g_context->paint2d_view) {
+	if (base_is_split() && !g_context->paint2d_view) {
 		g_context->ddirty    = 2;
 		camera_object_t *cam = scene_camera;
 
@@ -428,7 +428,7 @@ static gpu_pipeline_t *render_path_base_outline_mask_pipe(mesh_data_t *data) {
 }
 
 void render_path_base_draw_outline() {
-	if (g_context->tool != TOOL_TYPE_CURSOR || g_config->workspace == WORKSPACE_PLAYER || g_context->capturing_screenshot || g_context->paint2d) {
+	if (g_context->tool != TOOL_TYPE_CURSOR || base_player || g_context->capturing_screenshot || g_context->paint2d) {
 		return;
 	}
 

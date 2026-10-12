@@ -681,7 +681,7 @@ void nodes_mesh_update(mesh_object_t *o, bool force) {
 	util_uv_dilatemap_cached                          = false;
 	render_path_raytrace_ready                        = false;
 	g_context->ddirty                                 = 2;
-	ui_base_hwnds->buffer[TAB_AREA_SIDEBAR0]->redraws = 2;
+	ui_dock_redraw(TAB_AREA_SIDEBAR0);
 }
 
 // Drops the nodes of an object, the output mesh stays with the object
@@ -713,7 +713,7 @@ bool nodes_mesh_has_nodes(mesh_object_t *o) {
 void nodes_mesh_apply(mesh_object_t *o) {
 	nodes_mesh_remove(o);
 	ui_nodes_hwnd->redraws                            = 2;
-	ui_base_hwnds->buffer[TAB_AREA_SIDEBAR0]->redraws = 2;
+	ui_dock_redraw(TAB_AREA_SIDEBAR0);
 }
 
 // Rebuilds meshes with scene mesh nodes after other meshes changed or moved
@@ -722,7 +722,7 @@ void nodes_mesh_request_refresh() {
 }
 
 void nodes_mesh_refresh() {
-	if (!nodes_mesh_refresh_pending || nodes_mesh_slots == NULL || mouse_down("left") || g_config->workspace == WORKSPACE_PLAYER) {
+	if (!nodes_mesh_refresh_pending || nodes_mesh_slots == NULL || mouse_down("left") || base_player) {
 		return;
 	}
 	nodes_mesh_refresh_pending = false;

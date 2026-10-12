@@ -7,8 +7,6 @@ rect_t        *base_drag_rect  = NULL;
 f32            base_drag_start = 0.0;
 f32            base_drop_x     = 0.0;
 f32            base_drop_y     = 0.0;
-i32            base_appx               = 0;
-i32            base_appy               = 0;
 i32            base_last_window_width  = 0;
 i32            base_last_window_height = 0;
 bool           base_start_arm_found    = false;
@@ -398,12 +396,16 @@ void base_update(void *_) {
 		tab_timeline_update();
 	}
 
+	if (base_workspace_pending) {
+		base_apply_workspace();
+	}
+	ui_dock_update();
 	ui_view2d_update(NULL);
 	ui_nodes_update(NULL);
 	ui_base_update(NULL);
 	camera_update(NULL);
 
-	if (g_config->workspace == WORKSPACE_PLAYER) {
+	if (base_player) {
 		player_running             = true;
 		render_path_raytrace_ready = false;
 		trait_update();
@@ -423,7 +425,7 @@ void base_update(void *_) {
 
 	if (g_context->frame == 2) {
 		util_render_make_material_preview();
-		ui_base_hwnds->buffer[TAB_AREA_SIDEBAR1]->redraws = 2;
+		ui_dock_redraw(TAB_AREA_SIDEBAR1);
 		base_init_undo_layers();
 
 		make_material_parse_mesh_material();
@@ -460,6 +462,8 @@ void base_update(void *_) {
 		draw_set_color(0xffffffff);
 		draw_end();
 	}
+
+	ui_dock_render_drag();
 
 	// Select tool rectangle mask
 	if (g_context->select_active || g_context->select_dragging) {
@@ -555,19 +559,11 @@ void base_init() {
 
 	sys_notify_on_update(base_update, NULL);
 
-	base_appx = ui_toolbar_w(true);
-	base_appy = 0;
-	if (g_config->layout->buffer[LAYOUT_SIZE_HEADER] == 1) {
-		base_appy = ui_header_h * 2;
-	}
 	scene_camera->data->fov = math_floor(scene_camera->data->fov * 100) / 100.0;
 	camera_object_build_proj(scene_camera, -1.0);
 
 	args_run();
 
-	if (g_config->workspace != WORKSPACE_VIEW_3D) {
-		base_update_workspace();
-	}
 	if (g_config->workflow != WORKFLOW_PBR) {
 		base_update_workflow();
 	}
@@ -594,9 +590,11 @@ void base_init() {
 	}
 
 	if (args_player) {
-		base_player_lock    = true;
-		g_config->workspace = WORKSPACE_PLAYER;
-		base_update_workspace();
+		base_player_lock = true;
+		base_player      = true;
+		ui_base_show     = false;
+		render_path_resize();
+		base_resize();
 		make_material_parse_paint_material(true);
 		sys_notify_on_next_frame(&base_init_on_start_arm, NULL);
 	}
@@ -622,32 +620,63 @@ i32 base_w() {
 		return 1;
 	}
 
-	i32 res = base_view3d_w();
+	i32 res = base_view_w();
 	return res > 0 ? res : 1; // App was minimized, force render path resize
 }
 
+// Width of the 3D view tab next to the toolbar
 i32 base_view3d_w() {
-	i32 res = 0;
-	if (g_config->layout == NULL) {
-		i32 sidebarw = ui_sidebar_default_w;
-		res          = iron_window_width() - sidebarw - ui_toolbar_default_w;
+	if (g_context->paint2d_view) {
+		return ui_view2d_ww;
 	}
-	else if (ui_nodes_show || ui_view2d_show) {
-		res = iron_window_width() - g_config->layout->buffer[LAYOUT_SIZE_SIDEBAR_W] - g_config->layout->buffer[LAYOUT_SIZE_NODES_W] - ui_toolbar_w(true);
-	}
-	else if (ui_base_show) {
-		res = iron_window_width() - g_config->layout->buffer[LAYOUT_SIZE_SIDEBAR_W] - ui_toolbar_w(true);
-	}
-	else { // Distract free
-		res = iron_window_width();
+	return ui_dock_view3d_w();
+}
+
+// Split view draws two 3D views next to each other, each one with its own toolbar and header
+bool base_is_split() {
+	return g_context->split_view && base_view3d_show;
+}
+
+// View being rendered, the view under the mouse cursor otherwise
+i32 base_view_index() {
+	if (!base_is_split()) {
+		return 0;
 	}
 	if (g_context->view_index > -1) {
-		res = math_ceil(res / 2.0);
+		return g_context->view_index;
 	}
-	if (g_context->paint2d_view) {
-		res = ui_view2d_ww;
+	return g_context->view_index_last > 0 ? 1 : 0;
+}
+
+// Toolbar docked next to each 3D view
+static i32 base_view_toolbar_w() {
+	return ui_base_show ? ui_toolbar_w(true) : 0;
+}
+
+i32 base_view_w() {
+	i32 res = base_view3d_w();
+	if (base_is_split()) {
+		res = math_floor((res - base_view_toolbar_w()) / 2.0);
 	}
 	return res;
+}
+
+i32 base_view_x(i32 view_index) {
+	return view_index == 1 ? base_appx + base_view3d_w() - base_view_w() : base_appx;
+}
+
+i32 base_view_at_mouse() {
+	if (!base_is_split()) {
+		return -1;
+	}
+	if (mouse_y >= base_appy && mouse_y < base_appy + base_h()) {
+		for (i32 i = 0; i < 2; ++i) {
+			if (mouse_x >= base_view_x(i) && mouse_x < base_view_x(i) + base_view_w()) {
+				return i;
+			}
+		}
+	}
+	return -1;
 }
 
 i32 base_h() {
@@ -661,31 +690,62 @@ i32 base_h() {
 		return util_render_decal_preview_size;
 	}
 
-	i32 res = iron_window_height();
-
-	if (g_config->layout == NULL) {
-		res -= ui_header_default_h * 2 + ui_statusbar_default_h;
-#if defined(IRON_ANDROID) || defined(IRON_IOS)
-		res += ui_header_h;
-#endif
-	}
-	else if (ui_base_show && res > 0) {
-		i32 statush = g_config->layout->buffer[LAYOUT_SIZE_STATUS_H];
-		res -= math_floor(ui_header_default_h * 2 * g_config->window_scale) + statush;
-
-		if (g_config->layout->buffer[LAYOUT_SIZE_HEADER] == 0) {
-			res += ui_header_h * 2;
-		}
-		if (!base_view3d_show) {
-			res += ui_header_h * 4;
-		}
+	// 2D view paints into the area below its header
+	i32 res = ui_dock_view3d_h();
+	if (g_context->paint2d_view || (!base_view3d_show && ui_view2d_show)) {
+		res = ui_view2d_wh - ui_view2d_top();
 	}
 
 	return res > 0 ? res : 1; // App was minimized, force render path resize
 }
 
+// The cursor hovering the 2D view is mapped the same way as while painting in it,
+// the stroke begins at the last hovered position
+static bool base_paint_in_2d() {
+	// The brush inputs are read before the 2D view updates paint2d for the frame,
+	// keep the view the stroke was started in
+	static bool started_in_2d = false;
+	bool        in_2d         = context_in_2d_view(VIEW_2D_TYPE_LAYER);
+	if (mouse_started("left") || pen_started("tip")) {
+		started_in_2d = in_2d;
+	}
+	if (mouse_down("left") || pen_down("tip")) {
+		return g_context->paint2d || started_in_2d;
+	}
+	return in_2d;
+}
+
+// 2D view paints in 3D viewport coordinates, placed right next to the viewport
+f32 base_paint_x(f32 screen_x) {
+	if (base_paint_in_2d()) {
+		return 1.0 + (screen_x - ui_view2d_wx) / (f32)base_w();
+	}
+	return (screen_x - base_x()) / (f32)base_w();
+}
+
+f32 base_paint_y(f32 screen_y) {
+	if (base_paint_in_2d()) {
+		return (screen_y - ui_view2d_wy - ui_view2d_top()) / (f32)(ui_view2d_wh - ui_view2d_top());
+	}
+	return (screen_y - base_y()) / (f32)base_h();
+}
+
+f32 base_paint_screen_x(f32 paint_x) {
+	if (base_paint_in_2d()) {
+		return ui_view2d_wx + (paint_x - 1.0) * base_w();
+	}
+	return base_x() + paint_x * base_w();
+}
+
+f32 base_paint_screen_y(f32 paint_y) {
+	if (base_paint_in_2d()) {
+		return ui_view2d_wy + ui_view2d_top() + paint_y * (ui_view2d_wh - ui_view2d_top());
+	}
+	return base_y() + paint_y * base_h();
+}
+
 i32 base_x() {
-	return g_context->view_index == 1 ? base_appx + base_w() : base_appx;
+	return base_view_x(base_view_index());
 }
 
 i32 base_y() {
@@ -697,14 +757,10 @@ void base_on_resize() {
 		return;
 	}
 
-	f32 ratio_w             = iron_window_width() / (float)base_last_window_width;
-	base_last_window_width  = iron_window_width();
-	f32 ratio_h             = iron_window_height() / (float)base_last_window_height;
-	base_last_window_height = iron_window_height();
-
-	g_config->layout->buffer[LAYOUT_SIZE_NODES_W]    = math_floor(g_config->layout->buffer[LAYOUT_SIZE_NODES_W] * ratio_w);
-	g_config->layout->buffer[LAYOUT_SIZE_SIDEBAR_H0] = math_floor(g_config->layout->buffer[LAYOUT_SIZE_SIDEBAR_H0] * ratio_h);
-	g_config->layout->buffer[LAYOUT_SIZE_SIDEBAR_H1] = iron_window_height() - g_config->layout->buffer[LAYOUT_SIZE_SIDEBAR_H0];
+	// Keep the nodes and 2D view in ratio
+	f32 ratio_w            = iron_window_width() / (float)base_last_window_width;
+	base_last_window_width = iron_window_width();
+	ui_dock_set_size(DOCK_ROLE_VIEWS, math_floor(ui_dock_get_size(DOCK_ROLE_VIEWS) * ratio_w));
 
 	base_resize();
 	base_save_window_rect();
@@ -714,6 +770,8 @@ void base_resize() {
 	if (iron_window_width() == 0 || iron_window_height() == 0) {
 		return;
 	}
+
+	ui_dock_layout();
 
 	camera_object_t *cam = scene_camera;
 	if (cam->data->ortho != NULL) {
@@ -728,18 +786,6 @@ void base_resize() {
 	}
 
 	g_context->ddirty = 2;
-
-	if (ui_base_show && base_view3d_show) {
-		base_appx = ui_toolbar_w(true);
-		base_appy = 0;
-		if (g_config->layout->buffer[LAYOUT_SIZE_HEADER] == 1) {
-			base_appy = ui_header_h * 2;
-		}
-	}
-	else {
-		base_appx = -1;
-		base_appy = 0;
-	}
 
 	ui_nodes_grid_redraw  = true;
 	ui_view2d_grid_redraw = true;
@@ -860,96 +906,82 @@ bool base_is_decal_layer() {
 }
 
 void base_redraw_status() {
-	if (ui_base_hwnds == NULL) {
-		return;
-	}
-	ui_base_hwnds->buffer[TAB_AREA_STATUS]->redraws = 2;
+	ui_dock_redraw(TAB_AREA_STATUS);
 }
 
 void base_redraw_console() {
-	if (ui_base_hwnds == NULL) {
-		return;
-	}
-	ui_base_hwnds->buffer[TAB_AREA_STATUS]->redraws = 2;
+	ui_dock_redraw(TAB_AREA_STATUS);
 }
 
 void base_redraw_ui() {
-	ui_header_handle->redraws                       = 2;
-	ui_base_hwnds->buffer[TAB_AREA_STATUS]->redraws = 2;
-	ui_menubar_menu_handle->redraws                 = 2;
-	ui_menubar_hwnd->redraws                        = 2;
-	ui_nodes_hwnd->redraws                          = 2;
-	ui_box_hwnd->redraws                            = 2;
-	ui_view2d_hwnd->redraws                         = 2;
+	ui_header_handle->redraws       = 2;
+	ui_menubar_menu_handle->redraws = 2;
+	ui_menubar_hwnd->redraws        = 2;
+	ui_nodes_hwnd->redraws          = 2;
+	ui_box_hwnd->redraws            = 2;
+	ui_view2d_hwnd->redraws         = 2;
+	ui_toolbar_handle->redraws      = 2;
+	ui_dock_redraw(-1);
 	// Redraw viewport
 	if (g_context->ddirty < 0) {
 		g_context->ddirty = 0;
 	}
-	ui_base_hwnds->buffer[TAB_AREA_SIDEBAR0]->redraws = 2;
-	ui_base_hwnds->buffer[TAB_AREA_SIDEBAR1]->redraws = 2;
-	ui_toolbar_handle->redraws                        = 2;
 	if (g_context->split_view) {
 		g_context->ddirty = 1;
 	}
 }
 
-void base_update_workspace() {
-	config_init_layout();
+// Tabs are docked anew once the windows of the frame are done
+void base_set_workspace(workspace_preset_t preset) {
+	base_workspace_preset  = preset;
+	base_workspace_pending = true;
+}
 
-	if (g_config->workspace == WORKSPACE_VIEW_3D) {
-		base_view3d_show = true;
-		ui_menubar_tab   = 0;
-		ui_view2d_show   = false;
-		ui_nodes_show    = false;
-	}
-	else if (g_config->workspace == WORKSPACE_VIEW_2D) {
-		base_view3d_show = false;
-		ui_menubar_tab   = -1;
-		ui_view2d_show   = true;
-		ui_nodes_show    = false;
-	}
-	else if (g_config->workspace == WORKSPACE_NODES) {
-		base_view3d_show = false;
-		ui_menubar_tab   = -1;
-		ui_view2d_show   = false;
-		ui_nodes_show    = true;
+void base_apply_workspace() {
+	base_workspace_pending    = false;
+	workspace_preset_t preset = base_workspace_preset;
 
+	if (preset == WORKSPACE_PRESET_NONE) {
+		ui_dock_load();
+		base_resize();
+		return;
+	}
+
+	// Reset the layout to the preset
+	ui_dock_set_preset(true);
+	ui_dock_reset();
+
+	if (preset == WORKSPACE_PRESET_VIEW_2D) {
+		ui_dock_show_view(TAB_VIEW3D, false);
+		ui_dock_show_view(TAB_VIEW2D, true);
+	}
+	else if (preset == WORKSPACE_PRESET_NODES) {
+		ui_dock_show_view(TAB_VIEW3D, false);
+		ui_dock_show_view(TAB_NODES, true);
 		ui_sidebar_show(false);
 	}
-	else if (g_config->workspace == WORKSPACE_SCRIPT) {
-		base_view3d_show = true;
-		ui_menubar_tab   = 0;
-		ui_view2d_show   = false;
-		ui_nodes_show    = false;
+	else if (preset == WORKSPACE_PRESET_SCRIPT) {
+		ui_base_show_tab(TAB_CONSOLE);
+		ui_base_show_tab(TAB_SCRIPTS);
 
-		ui_base_tabs->buffer[TAB_AREA_STATUS]            = 6; // Console
-		g_config->layout_tabs->buffer[TAB_AREA_STATUS]   = 6;
-		ui_base_tabs->buffer[TAB_AREA_SIDEBAR0]          = 2; // Script
-		g_config->layout_tabs->buffer[TAB_AREA_SIDEBAR0] = 2;
-
-		g_config->layout->buffer[LAYOUT_SIZE_STATUS_H]  = iron_window_height() * 0.2;
-		g_config->layout->buffer[LAYOUT_SIZE_SIDEBAR_W] = iron_window_width() * 0.52;
-		float h                                         = UI_ELEMENT_H() + UI_ELEMENT_OFFSET() + 2;
+		ui_dock_set_size(DOCK_ROLE_STATUS, math_floor(iron_window_height() * 0.2));
+		ui_dock_set_size(DOCK_ROLE_SIDEBAR, math_floor(iron_window_width() * 0.52));
+		float h = UI_ELEMENT_H() + UI_ELEMENT_OFFSET() + 2;
 		h += UI_ELEMENT_H() * 3.5; // Small material panel
-		g_config->layout->buffer[LAYOUT_SIZE_SIDEBAR_H0] = iron_window_height() - h;
-		g_config->layout->buffer[LAYOUT_SIZE_SIDEBAR_H1] = h;
-		render_path_resize();
-	}
-	else if (g_config->workspace == WORKSPACE_PLAYER) {
-		ui_base_show = false;
+		ui_dock_set_size(DOCK_ROLE_SIDEBAR_INNER, 1.0 - h / (f32)iron_window_height());
 		render_path_resize();
 	}
 
+	g_config->header_pinned = !g_config->touch_ui;
 	if (g_config->touch_ui) {
-		g_config->layout->buffer[LAYOUT_SIZE_HEADER] = 0;
-		if (g_config->workspace == WORKSPACE_VIEW_2D || g_config->workspace == WORKSPACE_VIEW_3D) {
-			ui_sidebar_show(true);
-			g_config->layout->buffer[LAYOUT_SIZE_SIDEBAR_W] = ui_sidebar_default_w_mini;
-			g_config->layout->buffer[LAYOUT_SIZE_SIDEBAR_W] = math_floor(g_config->layout->buffer[LAYOUT_SIZE_SIDEBAR_W] * UI_SCALE());
+		if (preset == WORKSPACE_PRESET_VIEW_2D || preset == WORKSPACE_PRESET_VIEW_3D) {
+			ui_dock_set_size(DOCK_ROLE_SIDEBAR, math_floor(ui_sidebar_default_w_mini * UI_SCALE()));
 		}
 	}
+	ui_dock_set_preset(false);
 
 	base_resize();
+	ui_dock_save();
 }
 
 void base_update_workflow_create_sculpt_layer(void *_) {

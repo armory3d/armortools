@@ -32,7 +32,7 @@ void tab_brushes_delete_brush(slot_brush_t *b) {
 	history_delete_brush();
 	context_select_brush(i == g_project->_->brushes->length - 1 ? i - 1 : i + 1);
 	array_splice(g_project->_->brushes, i, 1);
-	ui_base_hwnds->buffer[1]->redraws = 2;
+	ui_dock_redraw(1);
 }
 
 void tab_brushes_draw_context_menu() {

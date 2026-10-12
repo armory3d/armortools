@@ -163,7 +163,6 @@ void context_init() {
 	g_context->fill_type                    = FILL_TYPE_OBJECT;
 	g_context->blur_type                    = BLUR_TYPE_BLUR;
 	g_context->paint2d                      = false;
-	g_context->maximized_sidebar_width      = 0;
 	g_context->drag_dest                    = 0;
 	g_context->tool                         = TOOL_TYPE_BRUSH;
 	g_context->color_picker_previous_tool   = TOOL_TYPE_BRUSH;
@@ -194,7 +193,7 @@ void context_set_material(slot_material_t *m) {
 	}
 	g_context->material = m;
 	make_material_parse_paint_material(true);
-	ui_base_hwnds->buffer[TAB_AREA_SIDEBAR1]->redraws = 2;
+	ui_dock_redraw(TAB_AREA_SIDEBAR1);
 	ui_header_handle->redraws                         = 2;
 	ui_nodes_hwnd->redraws                            = 2;
 	ui_nodes_group_stack                              = any_array_create_from_raw((void *[]){}, 0);
@@ -220,7 +219,7 @@ void context_set_brush(slot_brush_t *b) {
 	make_material_parse_brush();
 	brush_output_node_parse_inputs();
 	make_material_parse_paint_material(false);
-	ui_base_hwnds->buffer[TAB_AREA_SIDEBAR1]->redraws = 2;
+	ui_dock_redraw(TAB_AREA_SIDEBAR1);
 	ui_nodes_hwnd->redraws                            = 2;
 }
 
@@ -231,7 +230,7 @@ void context_set_font(slot_font_t *f) {
 	g_context->font = f;
 	util_render_make_text_preview();
 	util_render_make_decal_preview();
-	ui_base_hwnds->buffer[TAB_AREA_STATUS]->redraws = 2;
+	ui_dock_redraw(TAB_AREA_STATUS);
 	ui_view2d_hwnd->redraws                         = 2;
 }
 
@@ -247,7 +246,7 @@ void context_set_sound(slot_sound_t *s) {
 		return;
 	}
 	g_context->sound                                = s;
-	ui_base_hwnds->buffer[TAB_AREA_STATUS]->redraws = 2;
+	ui_dock_redraw(TAB_AREA_STATUS);
 	ui_view2d_hwnd->redraws                         = 2;
 }
 
@@ -284,7 +283,7 @@ void context_set_layer(slot_layer_t *l) {
 	if (in_use)
 		draw_begin(current, false, 0);
 
-	ui_base_hwnds->buffer[TAB_AREA_SIDEBAR0]->redraws = 2;
+	ui_dock_redraw(TAB_AREA_SIDEBAR0);
 	ui_view2d_hwnd->redraws                           = 2;
 }
 
@@ -441,7 +440,7 @@ bool context_is_decal_mask_paint_pass() {
 
 bool context_is_floating_toolbar() {
 	// Header is off -> floating toolbar
-	return g_config->layout->buffer[LAYOUT_SIZE_HEADER] == 0 || (!base_view3d_show && ui_view2d_show);
+	return !g_config->header_pinned || (!base_view3d_show && ui_view2d_show);
 }
 
 void context_set_viewport_mode(viewport_mode_t mode) {

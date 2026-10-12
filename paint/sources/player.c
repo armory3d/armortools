@@ -97,24 +97,24 @@ static void player_remove_new_objects() {
 }
 
 static bool player_workspace_on   = false;
-static i32  player_workspace_last = 0;
+static bool player_workspace_last = false;
 static bool player_ui_show_last   = true;
 static bool player_lock_last      = false;
 
 void player_set_workspace(bool on) {
 	if (on) {
-		player_workspace_last = g_config->workspace;
+		player_workspace_last = base_player;
 		player_ui_show_last   = ui_base_show;
 		player_lock_last      = base_player_lock;
-		g_config->workspace   = WORKSPACE_PLAYER;
+		base_player           = true;
 		ui_base_show          = false;
 		ui_menu_show          = false;
 		base_player_lock      = true;
 	}
 	else {
-		g_config->workspace = player_workspace_last;
-		ui_base_show        = player_ui_show_last;
-		base_player_lock    = player_lock_last;
+		base_player      = player_workspace_last;
+		ui_base_show     = player_ui_show_last;
+		base_player_lock = player_lock_last;
 	}
 	player_workspace_on = on;
 	render_path_resize();

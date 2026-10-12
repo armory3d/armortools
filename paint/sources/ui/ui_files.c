@@ -90,7 +90,7 @@ void ui_files_file_browser_on_cache_cloud_done_on_next_frame(draw_cloud_icon_dat
 	draw_set_pipeline(NULL);
 	draw_end();
 	any_map_set(ui_files_icon_map, string("%s%s%s", *_ui_files_file_browser_path, PATH_SEP, data->f), icon);
-	ui_base_hwnds->buffer[TAB_AREA_STATUS]->redraws = 3;
+	ui_dock_redraw(TAB_AREA_STATUS);
 }
 
 void ui_files_file_browser_on_cache_cloud_done(char *abs) {
@@ -114,7 +114,7 @@ void ui_files_file_browser_on_cache_cloud_done(char *abs) {
 }
 
 void ui_files_file_browser_on_init_cloud_done() {
-	ui_base_hwnds->buffer[TAB_AREA_STATUS]->redraws = 3;
+	ui_dock_redraw(TAB_AREA_STATUS);
 	tab_browser_refresh                             = true;
 }
 
@@ -166,7 +166,7 @@ void ui_files_make_icon(ui_files_make_icon_t *args) {
 	draw_set_pipeline(NULL);
 	draw_end();
 	any_map_set(ui_files_icon_map, args->shandle, icon);
-	ui_base_hwnds->buffer[TAB_AREA_STATUS]->redraws = 3;
+	ui_dock_redraw(TAB_AREA_STATUS);
 
 	bool found = false;
 	for (i32 i = 0; i < g_project->_->assets->length; ++i) {

@@ -237,7 +237,7 @@ static void import_arm_run_mesh_append_from_project(project_t *project, i32_arra
 	util_uv_trianglemap_cached                        = false;
 	util_uv_dilatemap_cached                          = false;
 	g_context->ddirty                                 = 4;
-	ui_base_hwnds->buffer[TAB_AREA_SIDEBAR0]->redraws = 2;
+	ui_dock_redraw(TAB_AREA_SIDEBAR0);
 }
 
 void import_arm_run_mesh_append(char *path) {
@@ -606,7 +606,7 @@ static void import_arm_import_materials(project_t *project, char *path, i32_arra
 
 	sys_notify_on_next_frame(&import_arm_run_material_from_project_on_next_frame, imported);
 	ui_nodes_group_stack                              = any_array_create_from_raw((void *[]){}, 0);
-	ui_base_hwnds->buffer[TAB_AREA_SIDEBAR1]->redraws = 2;
+	ui_dock_redraw(TAB_AREA_SIDEBAR1);
 	if (delete_blob) {
 		data_delete_blob(path);
 	}
@@ -668,7 +668,7 @@ void import_arm_run_swatches_from_project(project_t *project, char *path, bool r
 			any_array_push(g_project->swatches, s);
 		}
 	}
-	ui_base_hwnds->buffer[TAB_AREA_STATUS]->redraws = 2;
+	ui_dock_redraw(TAB_AREA_STATUS);
 	data_delete_blob(path);
 }
 
@@ -1160,7 +1160,7 @@ void import_arm_run_project(char *path) {
 		}
 	}
 
-	bool make_previews = g_config->workspace != WORKSPACE_PLAYER;
+	bool make_previews = !base_player;
 
 	for (i32 i = 0; i < g_project->_->materials->length; ++i) {
 		g_context->material = g_project->_->materials->buffer[i];
@@ -1272,8 +1272,8 @@ void import_arm_run_project(char *path) {
 	sys_notify_on_next_frame(&import_arm_run_project_on_next_frame, NULL);
 
 	base_update_workflow();
-	ui_base_hwnds->buffer[TAB_AREA_SIDEBAR0]->redraws = 2;
-	ui_base_hwnds->buffer[TAB_AREA_SIDEBAR1]->redraws = 2;
+	ui_dock_redraw(TAB_AREA_SIDEBAR0);
+	ui_dock_redraw(TAB_AREA_SIDEBAR1);
 	g_context->ddirty                                 = 4;
 	data_delete_blob(path);
 }
@@ -1339,7 +1339,7 @@ void import_arm_run_brush_from_project(project_t *project, char *path) {
 		util_render_make_brush_preview();
 	}
 
-	ui_base_hwnds->buffer[TAB_AREA_SIDEBAR1]->redraws = 2;
+	ui_dock_redraw(TAB_AREA_SIDEBAR1);
 	data_delete_blob(path);
 }
 

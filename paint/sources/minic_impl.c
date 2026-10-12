@@ -780,9 +780,7 @@ void script_layer_set_name(slot_layer_t *l, char *name) {
 	char *old_name = l->name;
 	l->name        = string_copy(slot_layer_unique_name(l, name));
 	tab_stages_rename_layer(old_name, l->name);
-	if (ui_base_hwnds != NULL) {
-		ui_base_hwnds->buffer[TAB_AREA_SIDEBAR0]->redraws = 2;
-	}
+	ui_dock_redraw(TAB_AREA_SIDEBAR0);
 }
 
 void script_layer_update(slot_layer_t *l) {
@@ -1122,9 +1120,7 @@ slot_material_t *script_material_create(char *name) {
 	script_gpu_end(current, in_use);
 
 	history_new_material();
-	if (ui_base_hwnds != NULL && ui_base_hwnds->length > 1) {
-		ui_base_hwnds->buffer[1]->redraws = 2;
-	}
+	ui_dock_redraw(1);
 	return m;
 }
 
@@ -1485,9 +1481,7 @@ void script_material_update(void) {
 	if (ui_header_handle != NULL) {
 		ui_header_handle->redraws = 2;
 	}
-	if (ui_base_hwnds != NULL && ui_base_hwnds->length > 1) {
-		ui_base_hwnds->buffer[1]->redraws = 2;
-	}
+	ui_dock_redraw(1);
 	g_context->ddirty  = 2;
 	g_context->rtdirty = 1;
 }
@@ -1517,9 +1511,7 @@ object_t *script_shape_add(char *name) {
 
 	tab_meshes_reset_preview_map();
 	g_context->ddirty = 2;
-	if (ui_base_hwnds != NULL && ui_base_hwnds->length > TAB_AREA_SIDEBAR0) {
-		ui_base_hwnds->buffer[TAB_AREA_SIDEBAR0]->redraws = 2;
-	}
+	ui_dock_redraw(TAB_AREA_SIDEBAR0);
 	return mo->base;
 }
 
@@ -1535,7 +1527,7 @@ object_t *script_object_duplicate(object_t *o) {
 	script_gpu_end(current, in_use);
 
 	g_context->ddirty                                 = 2;
-	ui_base_hwnds->buffer[TAB_AREA_SIDEBAR0]->redraws = 2;
+	ui_dock_redraw(TAB_AREA_SIDEBAR0);
 	return dup->base;
 }
 
@@ -1559,9 +1551,7 @@ void script_object_remove(object_t *o) {
 
 	tab_meshes_reset_preview_map();
 	g_context->ddirty = 2;
-	if (ui_base_hwnds != NULL && ui_base_hwnds->length > TAB_AREA_SIDEBAR0) {
-		ui_base_hwnds->buffer[TAB_AREA_SIDEBAR0]->redraws = 2;
-	}
+	ui_dock_redraw(TAB_AREA_SIDEBAR0);
 }
 
 void script_object_origin_to_geometry(object_t *o) {
@@ -1595,9 +1585,7 @@ void script_object_set_name(object_t *o, char *name) {
 		o->name = new_name;
 	}
 
-	if (ui_base_hwnds != NULL && ui_base_hwnds->length > TAB_AREA_SIDEBAR0) {
-		ui_base_hwnds->buffer[TAB_AREA_SIDEBAR0]->redraws = 2;
-	}
+	ui_dock_redraw(TAB_AREA_SIDEBAR0);
 }
 
 static physics_body_t *script_physics_body(object_t *o) {

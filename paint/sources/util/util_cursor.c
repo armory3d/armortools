@@ -13,10 +13,8 @@ void util_cursor_render(void *_) {
 	draw_begin(NULL, false, 0);
 	draw_set_color(0xffffffff);
 
-	g_context->view_index = g_context->view_index_last;
-	i32 mx                = base_x() + g_context->paint_vec.x * base_w();
-	i32 my                = base_y() + g_context->paint_vec.y * base_h();
-	g_context->view_index = -1;
+	i32 mx = base_paint_screen_x(g_context->paint_vec.x);
+	i32 my = base_paint_screen_y(g_context->paint_vec.y);
 
 	if (g_context->brush_stencil_image != NULL && g_context->tool != TOOL_TYPE_PICKER && g_context->tool != TOOL_TYPE_COLORID) {
 		rect_t *r = ui_base_get_brush_stencil_rect();
@@ -92,10 +90,8 @@ void util_cursor_render(void *_) {
 				                        ui_view2d_pan_scale);
 				i32 psizey = math_floor(182 * 0.5 * 0.92 * UI_SCALE() * (g_context->brush_radius * g_context->brush_nodes_radius) * ui_view2d_pan_scale);
 
-				g_context->view_index = g_context->view_index_last;
-				f32 decalx            = base_x() + g_context->decal_x * base_w() - psizex / 2.0;
-				f32 decaly            = base_y() + g_context->decal_y * base_h() - psizey / 2.0;
-				g_context->view_index = -1;
+				f32 decalx = base_paint_screen_x(g_context->decal_x) - psizex / 2.0;
+				f32 decaly = base_paint_screen_y(g_context->decal_y) - psizey / 2.0;
 
 				draw_set_color(color_from_floats(1, 1, 1, decal_alpha));
 				f32 angle = (g_context->brush_angle + g_context->brush_nodes_angle) * (math_pi() / 180.0);
@@ -121,8 +117,8 @@ void util_cursor_render(void *_) {
 	    (g_context->tool == TOOL_TYPE_BRUSH || g_context->tool == TOOL_TYPE_ERASER || g_context->tool == TOOL_TYPE_DECAL || g_context->tool == TOOL_TYPE_TEXT ||
 	     g_context->tool == TOOL_TYPE_CLONE || g_context->tool == TOOL_TYPE_BLUR || g_context->tool == TOOL_TYPE_PARTICLE)) {
 		draw_filled_rect(mx - 1, my - 1, 2, 2);
-		mx         = g_context->brush_lazy_x * base_w() + base_x();
-		my         = g_context->brush_lazy_y * base_h() + base_y();
+		mx         = base_paint_screen_x(g_context->brush_lazy_x);
+		my         = base_paint_screen_y(g_context->brush_lazy_y);
 		f32 radius = g_context->brush_lazy_radius * util_layer_brush_screen_radius() * 3.0 * 2.0 * sys_h();
 		draw_set_color(0xff666666);
 		draw_scaled_image(cursor_img, mx - radius / 2.0, my - radius / 2.0, radius, radius);

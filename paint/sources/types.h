@@ -139,8 +139,8 @@ typedef struct config {
 	bool                 show_asset_names;
 	bool                 touch_ui;
 	bool                 splash_screen;
-	struct i32_array    *layout;          // Sizes
-	struct i32_array    *layout_tabs;     // Active tabs
+	bool                 header_pinned;   // Tool properties in the header, floating toolbar otherwise
+	struct i32_array    *layout_tabs;     // Docked tabs
 	i32                  camera_pivot;    // Cursor, camera center
 	i32                  camera_controls; // Orbit, rotate, fly
 	char                *server;
@@ -166,7 +166,6 @@ typedef struct config {
 	i32                  neural_res;
 	i32                  console_model;
 	render_mode_t        render_mode;
-	workspace_t          workspace;
 	workflow_t           workflow;
 	bool                 view2d_grid_show;
 	i32                  view2d_grid_cell;
@@ -195,9 +194,36 @@ typedef struct slot_material {
 
 typedef struct tab_draw {
 	void (*f)(i32 *);
+	i32   id;             // tab_id_t
+	char *name;           // Untranslated
+	i32   area;           // tab_area_t redrawn with, -1 for views
+	bool  closed;
+	bool  closed_default;
 } tab_draw_t;
 
-typedef struct tab_draw_t_array *tab_draw_array_t;
+typedef struct dock_node {
+	struct dock_node *parent;
+	// Split
+	struct dock_node *a;         // Left or top
+	struct dock_node *b;         // Right or bottom
+	bool              vertical;  // Children are stacked
+	i32               fixed;     // 0 - ratio, 1 - a keeps the size, 2 - b keeps the size
+	f32               size;      // Ratio of a, size in pixels of the fixed child otherwise
+	bool              collapsed; // Fixed child is hidden
+	i32               role;      // dock_role_t
+	// Leaf
+	i32          tabs[32]; // tab_id_t, closed tabs included
+	i32          tab_count;
+	i32          active; // Position in between the open tabs
+	i32          last_active;
+	ui_window_t *hwnd;
+	// Layout
+	bool visible;
+	i32  x;
+	i32  y;
+	i32  w;
+	i32  h;
+} dock_node_t;
 
 typedef struct context {
 	struct asset        *texture;
@@ -400,7 +426,6 @@ typedef struct context {
 	i32                         fill_type;
 	i32                         blur_type;
 	bool                        paint2d;
-	i32                         maximized_sidebar_width;
 	i32                         drag_dest;
 	vec4_t                      coords;
 	f32                         start_x;
@@ -881,18 +906,6 @@ typedef struct history_step_t_array {
 	int              length;
 	int              capacity;
 } history_step_t_array_t;
-
-typedef struct tab_draw_array_t_array {
-	tab_draw_array_t **buffer;
-	int                length;
-	int                capacity;
-} tab_draw_array_t_array_t;
-
-typedef struct tab_draw_t_array {
-	tab_draw_t **buffer;
-	int          length;
-	int          capacity;
-} tab_draw_t_array_t;
 
 typedef struct object_t_array {
 	object_t **buffer;

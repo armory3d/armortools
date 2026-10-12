@@ -5,7 +5,8 @@ ui_color_state_t ui_header_color_state;
 i32              ui_header_cursor_mode = 0;
 
 void ui_header_init() {
-	ui_header_handle->layout = UI_LAYOUT_HORIZONTAL;
+	ui_header_handle->layout       = UI_LAYOUT_HORIZONTAL;
+	ui_header_split_handle->layout = UI_LAYOUT_HORIZONTAL;
 }
 
 void ui_header_render_ui() {
@@ -17,7 +18,7 @@ void ui_header_render_ui() {
 	}
 	ui_header_h = math_floor(ui_header_h * UI_SCALE());
 
-	if (g_config->layout->buffer[LAYOUT_SIZE_HEADER] == 0) {
+	if (!g_config->header_pinned) {
 		return;
 	}
 
@@ -25,16 +26,18 @@ void ui_header_render_ui() {
 		return;
 	}
 
-	i32 nodesw = (ui_nodes_show || ui_view2d_show) ? g_config->layout->buffer[LAYOUT_SIZE_NODES_W] : 0;
-	i32 ww     = iron_window_width() - ui_toolbar_w(true) - g_config->layout->buffer[LAYOUT_SIZE_SIDEBAR_W] - nodesw;
-
 	if (g_ui->is_typing) {
 		ui_header_handle->redraws = 2;
 	}
 
-	if (ui_window(ui_header_handle, base_x(), ui_header_h, ww, ui_header_h, false)) {
-		g_ui->_y += 2;
-		ui_header_draw_tool_properties();
+	// One header per 3D view
+	i32 views = base_is_split() ? 2 : 1;
+	ui_window_sync_redraws(ui_header_handle, ui_header_split_handle, views == 2);
+	for (i32 i = 0; i < views; ++i) {
+		if (ui_window(i == 0 ? ui_header_handle : ui_header_split_handle, base_view_x(i), base_y() - ui_header_h, base_view_w(), ui_header_h, false)) {
+			g_ui->_y += 2;
+			ui_header_draw_tool_properties();
+		}
 	}
 }
 
@@ -129,7 +132,7 @@ void ui_header_draw_tool_properties_import(char *path) {
 	g_context->ddirty                 = 2;
 	g_context->colorid_picked         = false;
 	ui_toolbar_handle->redraws        = 1;
-	ui_base_hwnds->buffer[2]->redraws = 2;
+	ui_dock_redraw(2);
 }
 
 void ui_header_draw_tool_properties() {
@@ -202,7 +205,7 @@ void ui_header_draw_tool_properties() {
 			g_context->swatch          = new_swatch;
 			any_array_push(g_project->swatches, new_swatch);
 			history_new_swatch();
-			ui_base_hwnds->buffer[2]->redraws = 1;
+			ui_dock_redraw(2);
 		}
 		if (g_ui->is_hovered) {
 			ui_tooltip(tr("Add picked color to swatches"));
@@ -443,7 +446,7 @@ void ui_header_draw_tool_properties() {
 		else {
 			i32  _w           = g_ui->_w;
 			f32  sc           = UI_SCALE();
-			bool touch_header = (g_config->touch_ui && g_config->layout->buffer[LAYOUT_SIZE_HEADER] == 1);
+			bool touch_header = (g_config->touch_ui && g_config->header_pinned);
 			if (touch_header) {
 				g_ui->_x -= 4 * sc;
 			}
@@ -456,7 +459,7 @@ void ui_header_draw_tool_properties() {
 
 			bool sym_changed = false;
 
-			if (g_config->layout->buffer[LAYOUT_SIZE_HEADER] == 1) {
+			if (g_config->header_pinned) {
 				if (g_config->touch_ui) {
 					g_ui->_w = math_floor(19 * sc);
 					ui_check(&g_context->sym_x, "", "");

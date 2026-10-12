@@ -272,10 +272,14 @@ void ui_menu_sub_begin(i32 items) {
 	i32 offset    = g_ui->_w + padding * 2 + 2;
 	g_ui->_x += ui_menu_sub_left() ? -offset : offset;
 	g_ui->_y -= UI_ELEMENT_H();
+	f32 h = UI_ELEMENT_H() * items + padding * 2;
+	// Keep long sub menus in the window
+	if (g_ui->_y - padding + h > iron_window_height()) {
+		g_ui->_y = math_max(padding, iron_window_height() - h + padding);
+	}
 	f32 x = g_ui->_x - padding;
 	f32 y = g_ui->_y - padding;
 	f32 w = g_ui->_w + padding * 2;
-	f32 h = UI_ELEMENT_H() * items + padding * 2;
 	ui_draw_shadow(x, y, w, h);
 	draw_set_color(g_theme->SEPARATOR_COL);
 	ui_draw_rect(true, true, x, y, w, h);

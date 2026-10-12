@@ -580,7 +580,7 @@ void util_mesh_transform_changed() {
 }
 
 void util_mesh_visibility_changed() {
-	if (g_config->workspace == WORKSPACE_PLAYER) {
+	if (base_player) {
 		util_mesh_merged_stale     = true;
 		render_path_raytrace_ready = false;
 		g_context->ddirty          = 2;
@@ -660,7 +660,7 @@ static void util_mesh_geometry_joined() {
 	util_uv_trianglemap_cached                        = false;
 	util_uv_dilatemap_cached                          = false;
 	g_context->ddirty                                 = 2;
-	ui_base_hwnds->buffer[TAB_AREA_SIDEBAR0]->redraws = 2;
+	ui_dock_redraw(TAB_AREA_SIDEBAR0);
 }
 
 void util_mesh_merge_geometry() {
@@ -2713,7 +2713,7 @@ void util_mesh_duplicate() {
 	if (dup != NULL) {
 		g_context->paint_object                           = dup;
 		ui_header_handle->redraws                         = 2;
-		ui_base_hwnds->buffer[TAB_AREA_SIDEBAR0]->redraws = 2;
+		ui_dock_redraw(TAB_AREA_SIDEBAR0);
 	}
 	util_mesh_merge(NULL);
 	g_context->ddirty = 2;

@@ -3,6 +3,8 @@
 
 i32 ui_toolbar_last_tool = 0;
 i32 _ui_toolbar_i;
+i32 _ui_toolbar_y      = 0; // Top of the view the toolbar is drawn in
+i32 _ui_toolbar_bottom = 0;
 
 void ui_toolbar_init() {}
 
@@ -43,15 +45,12 @@ void ui_toolbar_tool_properties_menu_draw() {
 		ui_menu_keep_open = true;
 	}
 	if (base_view3d_show && ui_button(tr("Pin to Header"), UI_ALIGN_LEFT, "")) {
-		g_config->layout->buffer[LAYOUT_SIZE_HEADER] = 1;
-	}
-	if (base_view3d_show && ui_button(tr("Hide 3D View"), UI_ALIGN_LEFT, "")) {
-		ui_base_show_3d_view();
+		g_config->header_pinned = true;
 	}
 }
 
 void ui_toolbar_tool_properties_menu() {
-	i32 y = g_ui->_y - 2 * UI_SCALE();
+	i32 y = _ui_toolbar_y + g_ui->_y - 2 * UI_SCALE();
 	if (!base_view3d_show) {
 		y += ui_toolbar_w(false);
 	}
@@ -62,7 +61,8 @@ void ui_toolbar_tool_properties_menu() {
 	}
 #endif
 
-	ui_menu_draw(&ui_toolbar_tool_properties_menu_draw, g_ui->_x + g_ui->_w + 6 * UI_SCALE(), y);
+	i32 x = g_ui->_window_x - ui_toolbar_x();
+	ui_menu_draw(&ui_toolbar_tool_properties_menu_draw, x + g_ui->_x + g_ui->_w + 6 * UI_SCALE(), y);
 }
 
 void ui_toolbar_draw_highlight(u32 col) {
@@ -73,9 +73,7 @@ void ui_toolbar_draw_highlight(u32 col) {
 
 static bool ui_toolbar_input_visible() {
 	if (context_is_floating_toolbar()) {
-		i32 statush = g_config->layout->buffer[LAYOUT_SIZE_STATUS_H];
-		i32 statusy = iron_window_height() - statush;
-		return g_ui->input_y < statusy;
+		return g_ui->input_y < _ui_toolbar_bottom;
 	}
 	return true;
 }
@@ -235,42 +233,8 @@ void ui_toolbar_draw_show_3d_view() {
 	}
 }
 
-void ui_toolbar_render_ui() {
-	i32 x              = 0;
-	i32 y              = ui_header_h;
-	i32 h              = iron_window_height() - ui_header_h - g_config->layout->buffer[LAYOUT_SIZE_STATUS_H];
-	i32 _WINDOW_BG_COL = g_theme->WINDOW_BG_COL;
-
-	if (!base_view3d_show && !ui_view2d_show && !ui_nodes_show) {
-		ui_toolbar_draw_show_3d_view();
-		return;
-	}
-
-	if (!base_view3d_show && ui_view2d_show && ui_view2d_type != VIEW_2D_TYPE_LAYER) {
-		return;
-	}
-
-	if (!base_view3d_show && ui_nodes_show && !ui_view2d_show) {
-		return;
-	}
-
-	if (context_is_floating_toolbar()) {
-		x += ui_toolbar_x();
-		y += ui_toolbar_x() + 3 * UI_SCALE();
-		h                      = (ui_toolbar_item_count() + 1) * (ui_toolbar_w(false) + 2);
-		g_theme->WINDOW_BG_COL = g_theme->SEPARATOR_COL;
-		if (!base_view3d_show && ui_view2d_show && !g_config->touch_ui) {
-			y += ui_toolbar_w(false);
-		}
-
-#ifdef IRON_IOS
-		if (config_is_iphone()) {
-			y += ui_toolbar_w(false);
-		}
-#endif
-	}
-
-	if (ui_window(ui_toolbar_handle, x, y, ui_toolbar_w(false), h, false)) {
+static void ui_toolbar_draw_window(ui_window_t *handle, i32 x, i32 y, i32 h) {
+	if (ui_window(handle, x, y, ui_toolbar_w(false), h, false)) {
 		g_ui->_y -= 4 * UI_SCALE();
 		g_ui->image_scroll_align   = false;
 		gpu_texture_t *img         = resource_get("icons.k");
@@ -282,7 +246,7 @@ void ui_toolbar_render_ui() {
 		if (!context_is_floating_toolbar()) {
 			rect_t *rect = resource_tile50(img, ICON_PROPERTIES);
 			if (ui_sub_image(img, light ? 0xff666666 : g_theme->BUTTON_COL, -1.0, rect->x, rect->y, rect->w, rect->h) == UI_STATE_RELEASED) {
-				g_config->layout->buffer[LAYOUT_SIZE_HEADER] = 0;
+				g_config->header_pinned = false;
 			}
 		}
 		// Draw ">" button if header is hidden
@@ -328,15 +292,70 @@ void ui_toolbar_render_ui() {
 		g_ui->image_scroll_align = true;
 	}
 
-	if (context_is_floating_toolbar()) {
-		g_theme->WINDOW_BG_COL = _WINDOW_BG_COL;
-	}
-
 	if (g_config->touch_ui) {
 		// Hide scrollbar
 		i32 _SCROLL_W     = g_theme->SCROLL_W;
 		g_theme->SCROLL_W = 0;
 		ui_end_window();
 		g_theme->SCROLL_W = _SCROLL_W;
+	}
+}
+
+void ui_toolbar_render_ui() {
+	i32 _WINDOW_BG_COL = g_theme->WINDOW_BG_COL;
+
+	if (!base_view3d_show && !ui_view2d_show && !ui_nodes_show) {
+		ui_toolbar_draw_show_3d_view();
+		return;
+	}
+
+	if (!base_view3d_show && ui_view2d_show && ui_view2d_type != VIEW_2D_TYPE_LAYER) {
+		return;
+	}
+
+	if (!base_view3d_show && ui_nodes_show && !ui_view2d_show) {
+		return;
+	}
+
+	// Toolbar is docked on the side of the 3D view, it floats in the view when the header is hidden
+	i32 x              = base_view_x(0) - ui_toolbar_w(false);
+	i32 y              = base_y() - ui_header_h;
+	i32 h              = base_h() + ui_header_h;
+	_ui_toolbar_y      = base_y();
+	_ui_toolbar_bottom = base_y() + base_h();
+
+	if (context_is_floating_toolbar()) {
+		// 2D view takes the toolbar when there is no 3D view
+		if (!base_view3d_show) {
+			x                  = ui_view2d_wx + ui_toolbar_x();
+			_ui_toolbar_y      = ui_view2d_wy;
+			_ui_toolbar_bottom = ui_view2d_wy + ui_view2d_wh;
+		}
+		else {
+			x = base_view_x(0) + ui_toolbar_x();
+		}
+		y                      = _ui_toolbar_y + ui_header_h + ui_toolbar_x() + 3 * UI_SCALE();
+		h                      = (ui_toolbar_item_count() + 1) * (ui_toolbar_w(false) + 2);
+		g_theme->WINDOW_BG_COL = g_theme->SEPARATOR_COL;
+		if (!base_view3d_show && ui_view2d_show && !g_config->touch_ui) {
+			y += ui_toolbar_w(false);
+		}
+
+#ifdef IRON_IOS
+		if (config_is_iphone()) {
+			y += ui_toolbar_w(false);
+		}
+#endif
+	}
+
+	// One toolbar per 3D view
+	i32 views = base_is_split() ? 2 : 1;
+	ui_window_sync_redraws(ui_toolbar_handle, ui_toolbar_split_handle, views == 2);
+	for (i32 i = 0; i < views; ++i) {
+		ui_toolbar_draw_window(i == 0 ? ui_toolbar_handle : ui_toolbar_split_handle, x + base_view_x(i) - base_view_x(0), y, h);
+	}
+
+	if (context_is_floating_toolbar()) {
+		g_theme->WINDOW_BG_COL = _WINDOW_BG_COL;
 	}
 }

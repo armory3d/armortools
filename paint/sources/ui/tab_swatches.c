@@ -25,7 +25,7 @@ void tab_swatches_delete_swatch(swatch_color_t *swatch) {
 	history_delete_swatch(swatch);
 	g_context->swatch = g_project->swatches->buffer[i == g_project->swatches->length - 1 ? i - 1 : i + 1];
 	array_splice(g_project->swatches, i, 1);
-	ui_base_hwnds->buffer[TAB_AREA_STATUS]->redraws = 2;
+	ui_dock_redraw(TAB_AREA_STATUS);
 }
 
 void tab_swatches_draw_menu() {

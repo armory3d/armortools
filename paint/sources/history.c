@@ -180,7 +180,7 @@ void history_new_brush_slot(history_step_t *step) {
 	context_set_brush(b);
 	ui_nodes_canvas_changed();
 	ui_nodes_hwnd->redraws                            = 2;
-	ui_base_hwnds->buffer[TAB_AREA_SIDEBAR1]->redraws = 2;
+	ui_dock_redraw(TAB_AREA_SIDEBAR1);
 	util_render_make_brush_preview();
 }
 
@@ -192,13 +192,13 @@ void history_delete_brush_slot(history_step_t *step) {
 	array_splice(g_project->_->brushes, step->brush, 1);
 	ui_nodes_canvas_changed();
 	ui_nodes_hwnd->redraws                            = 2;
-	ui_base_hwnds->buffer[TAB_AREA_SIDEBAR1]->redraws = 2;
+	ui_dock_redraw(TAB_AREA_SIDEBAR1);
 }
 
 void history_new_swatch_slot(history_step_t *step) {
 	array_insert(g_project->swatches, step->swatch, step->swatch_color);
 	g_context->swatch                               = step->swatch_color;
-	ui_base_hwnds->buffer[TAB_AREA_STATUS]->redraws = 2;
+	ui_dock_redraw(TAB_AREA_STATUS);
 }
 
 void history_delete_swatch_slot(history_step_t *step) {
@@ -207,7 +207,7 @@ void history_delete_swatch_slot(history_step_t *step) {
 		g_context->swatch = g_project->swatches->buffer[step->swatch == g_project->swatches->length - 1 ? step->swatch - 1 : step->swatch + 1];
 	}
 	array_splice(g_project->swatches, step->swatch, 1);
-	ui_base_hwnds->buffer[TAB_AREA_STATUS]->redraws = 2;
+	ui_dock_redraw(TAB_AREA_STATUS);
 }
 
 void history_swap_swatches(history_step_t *step) {
@@ -217,7 +217,7 @@ void history_swap_swatches(history_step_t *step) {
 	if (g_project->swatches->length > 0) {
 		g_context->swatch = g_project->swatches->buffer[0];
 	}
-	ui_base_hwnds->buffer[TAB_AREA_STATUS]->redraws = 2;
+	ui_dock_redraw(TAB_AREA_STATUS);
 }
 
 void history_swap_swatch(history_step_t *step) {
@@ -227,7 +227,7 @@ void history_swap_swatch(history_step_t *step) {
 	*step->swatch_color                             = t;
 	g_context->swatch                               = s;
 	g_context->picked_color                         = util_clone_swatch_color(s);
-	ui_base_hwnds->buffer[TAB_AREA_STATUS]->redraws = 2;
+	ui_dock_redraw(TAB_AREA_STATUS);
 	ui_header_handle->redraws                       = 2;
 }
 
@@ -541,8 +541,8 @@ void history_undo() {
 		g_context->rtdirty = 1;
 		g_context->ddirty  = 2;
 
-		ui_base_hwnds->buffer[TAB_AREA_SIDEBAR0]->redraws = 2;
-		ui_base_hwnds->buffer[TAB_AREA_SIDEBAR1]->redraws = 2;
+		ui_dock_redraw(TAB_AREA_SIDEBAR0);
+		ui_dock_redraw(TAB_AREA_SIDEBAR1);
 		if (ui_view2d_show) {
 			ui_view2d_hwnd->redraws = 2;
 		}
@@ -857,8 +857,8 @@ void history_redo() {
 		g_context->rtdirty = 1;
 		g_context->ddirty  = 2;
 
-		ui_base_hwnds->buffer[TAB_AREA_SIDEBAR0]->redraws = 2;
-		ui_base_hwnds->buffer[TAB_AREA_SIDEBAR1]->redraws = 2;
+		ui_dock_redraw(TAB_AREA_SIDEBAR0);
+		ui_dock_redraw(TAB_AREA_SIDEBAR1);
 		if (ui_view2d_show) {
 			ui_view2d_hwnd->redraws = 2;
 		}

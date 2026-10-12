@@ -316,7 +316,7 @@ void render_path_paint_commands_paint(bool dilation) {
 				}
 			}
 			ui_header_handle->redraws         = 2;
-			ui_base_hwnds->buffer[2]->redraws = 2;
+			ui_dock_redraw(2);
 
 			render_target_t *texpaint_picker    = any_map_get(render_path_render_targets, "texpaint_picker");
 			render_target_t *texpaint_uv_picker = any_map_get(render_path_render_targets, "texpaint_uv_picker");
@@ -392,7 +392,7 @@ void render_path_paint_commands_paint(bool dilation) {
 					g_context->material = m;
 					layers_update_fill_layers();
 					util_render_make_material_preview();
-					ui_base_hwnds->buffer[TAB_AREA_SIDEBAR1]->redraws = 2;
+					ui_dock_redraw(TAB_AREA_SIDEBAR1);
 				}
 			}
 			g_context->material = _material;

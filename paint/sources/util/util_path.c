@@ -741,7 +741,7 @@ static void path_point_move(slot_layer_t *l, i32 idx, f32 new_x, f32 new_y) {
 
 void util_layer_check_path_grab() {
 	// Check if mouse ray hits any point sphere
-	if (g_config->workspace == WORKSPACE_PLAYER || g_context->paint2d) {
+	if (base_player || g_context->paint2d) {
 		return;
 	}
 
@@ -784,7 +784,7 @@ void util_layer_check_path_grab() {
 }
 
 void util_layer_update_path() {
-	if (g_config->workspace == WORKSPACE_PLAYER || g_context->paint2d) {
+	if (base_player || g_context->paint2d) {
 		return;
 	}
 

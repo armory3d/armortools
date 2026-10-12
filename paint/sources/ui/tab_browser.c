@@ -9,8 +9,7 @@ char *_tab_browser_draw_b;
 void tab_browser_show_directory(char *directory) {
 	tab_browser_path                               = string_copy(directory);
 	tab_browser_search                             = "";
-	ui_base_tabs->buffer[TAB_AREA_STATUS]          = 0;
-	g_config->layout_tabs->buffer[TAB_AREA_STATUS] = 0;
+	ui_base_show_tab(TAB_BROWSER);
 }
 
 void tab_browser_draw_bookmark_menu() {

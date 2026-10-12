@@ -75,13 +75,14 @@ typedef enum {
 	VIEWPORT_MODE_PATH_TRACE    = 15,
 } viewport_mode_t;
 
+// Layouts to reset the docked tabs to
 typedef enum {
-	WORKSPACE_VIEW_3D = 0,
-	WORKSPACE_VIEW_2D = 1,
-	WORKSPACE_NODES   = 2,
-	WORKSPACE_SCRIPT  = 3,
-	WORKSPACE_PLAYER  = 4,
-} workspace_t;
+	WORKSPACE_PRESET_NONE    = -1, // Saved layout
+	WORKSPACE_PRESET_VIEW_3D = 0,
+	WORKSPACE_PRESET_VIEW_2D = 1,
+	WORKSPACE_PRESET_NODES   = 2,
+	WORKSPACE_PRESET_SCRIPT  = 3,
+} workspace_preset_t;
 
 typedef enum {
 	WORKFLOW_PBR    = 0,
@@ -274,6 +275,46 @@ typedef enum {
 	TAB_AREA_STATUS   = 2,
 } tab_area_t;
 
+// Stored in config, append only
+typedef enum {
+	TAB_LAYERS    = 0,
+	TAB_MESHES    = 1,
+	TAB_SCRIPTS   = 2,
+	TAB_MATERIALS = 3,
+	TAB_BRUSHES   = 4,
+	TAB_PLUGINS   = 5,
+	TAB_BROWSER   = 6,
+	TAB_TEXTURES  = 7,
+	TAB_FONTS     = 8,
+	TAB_SOUNDS    = 9,
+	TAB_SWATCHES  = 10,
+	TAB_TIMELINE  = 11,
+	TAB_CONSOLE   = 12,
+	TAB_DEBUG     = 13,
+	TAB_VIEW3D    = 14,
+	TAB_VIEW2D    = 15,
+	TAB_NODES     = 16,
+	TAB_COUNT     = 17,
+} tab_id_t;
+
+typedef enum {
+	DOCK_ZONE_CENTER = 0,
+	DOCK_ZONE_LEFT   = 1,
+	DOCK_ZONE_RIGHT  = 2,
+	DOCK_ZONE_TOP    = 3,
+	DOCK_ZONE_BOTTOM = 4,
+} dock_zone_t;
+
+// Splits of the default layout, stored in config
+typedef enum {
+	DOCK_ROLE_NONE          = 0,
+	DOCK_ROLE_SIDEBAR       = 1,
+	DOCK_ROLE_SIDEBAR_INNER = 2,
+	DOCK_ROLE_STATUS        = 3,
+	DOCK_ROLE_VIEWS         = 4,
+	DOCK_ROLE_VIEWS_INNER   = 5,
+} dock_role_t;
+
 typedef enum {
 	TEXTURE_RES_RES2048  = 0,
 	TEXTURE_RES_RES4096  = 1,
@@ -288,16 +329,6 @@ typedef enum {
 	CONSOLE_MODEL_GROK   = 2,
 	CONSOLE_MODEL_CODEX  = 3,
 } console_model_t;
-
-typedef enum {
-	LAYOUT_SIZE_SIDEBAR_W  = 0,
-	LAYOUT_SIZE_SIDEBAR_H0 = 1,
-	LAYOUT_SIZE_SIDEBAR_H1 = 2,
-	LAYOUT_SIZE_NODES_W    = 3,
-	LAYOUT_SIZE_NODES_H    = 4,
-	LAYOUT_SIZE_STATUS_H   = 5,
-	LAYOUT_SIZE_HEADER     = 6, // 0 - hidden, 1 - visible
-} layout_size_t;
 
 typedef enum {
 	PREFERENCES_TAB_INTERFACE = 0,

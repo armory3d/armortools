@@ -227,7 +227,7 @@ void main() {\n\
 	ui_check(&tab_scripts_search_show, tr("Search"), "");
 	if (g_ui->changed) {
 		ui_menu_keep_open                                 = true;
-		ui_base_hwnds->buffer[TAB_AREA_SIDEBAR0]->redraws = 2;
+		ui_dock_redraw(TAB_AREA_SIDEBAR0);
 	}
 }
 

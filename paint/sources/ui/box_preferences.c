@@ -19,11 +19,11 @@ void box_preferences_set_scale() {
 	f32 scale = g_config->window_scale;
 	ui_set_scale(scale);
 	ui_header_h                                    = math_floor(ui_header_default_h * scale);
-	g_config->layout->buffer[LAYOUT_SIZE_STATUS_H] = math_floor(ui_statusbar_default_h * scale);
-	ui_menubar_w                                   = math_floor(ui_menubar_default_w * scale);
+	ui_dock_set_size(DOCK_ROLE_STATUS, math_floor(ui_statusbar_default_h * scale));
+	ui_menubar_w = math_floor(ui_menubar_default_w * scale);
 	ui_base_set_icon_scale();
+	ui_dock_set_size(DOCK_ROLE_SIDEBAR, math_floor(ui_sidebar_default_w * scale));
 	base_resize();
-	g_config->layout->buffer[LAYOUT_SIZE_SIDEBAR_W] = math_floor(ui_sidebar_default_w * scale);
 }
 
 // ██╗███╗   ██╗████████╗███████╗██████╗ ███████╗ █████╗  ██████╗███████╗
@@ -35,8 +35,7 @@ void box_preferences_set_scale() {
 
 void box_preferences_interface_tab_reset_layout_menu() {
 	if (ui_menu_button(tr("Confirm"), "", ICON_CHECK)) {
-		config_init_layout();
-		config_save();
+		base_set_workspace(WORKSPACE_PRESET_VIEW_3D);
 	}
 }
 
@@ -928,9 +927,7 @@ void box_preferences_plugins_tab_plugin_menu() {
 		tab_scripts_set(sys_buffer_to_string(blob));
 		data_delete_blob(string("plugins/%s", _box_preferences_f));
 		console_info(tr("Script opened"));
-		ui_base_tabs->buffer[TAB_AREA_SIDEBAR0]           = 2; // Scripts tab
-		ui_base_hwnds->buffer[TAB_AREA_SIDEBAR0]->redraws = 2;
-		g_config->layout_tabs->buffer[TAB_AREA_SIDEBAR0]  = 2;
+		ui_base_show_tab(TAB_SCRIPTS);
 	}
 	if (ui_menu_button(tr("Export"), "", ICON_EXPORT)) {
 		ui_files_show("c", true, false, &box_preferences_plugins_tab_plugin_menu_export);

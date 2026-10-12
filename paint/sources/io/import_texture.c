@@ -63,7 +63,7 @@ void import_texture_run(char *path, bool hdr_as_envmap) {
 		g_context->texture = asset;
 	}
 	asset->image                                    = image;
-	ui_base_hwnds->buffer[TAB_AREA_STATUS]->redraws = 2;
+	ui_dock_redraw(TAB_AREA_STATUS);
 	console_info(string("%s %s", tr("Texture imported:"), name));
 
 	// Set as envmap

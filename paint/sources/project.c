@@ -247,8 +247,8 @@ void project_new(bool reset_layers) {
 	g_project->_->next_asset_id                       = 0;
 	g_project->packed_assets                          = any_array_create_from_raw((void *[]){}, 0);
 	g_context->ddirty                                 = 4;
-	ui_base_hwnds->buffer[TAB_AREA_SIDEBAR0]->redraws = 2;
-	ui_base_hwnds->buffer[TAB_AREA_SIDEBAR1]->redraws = 2;
+	ui_dock_redraw(TAB_AREA_SIDEBAR0);
+	ui_dock_redraw(TAB_AREA_SIDEBAR1);
 
 	if (reset_layers) {
 		bool res_changed = g_project->_->layers->buffer[0]->texpaint->width != config_get_texture_res_x() ||
@@ -422,7 +422,7 @@ bool project_reskin_mesh(int frame) {
 		return false;
 	}
 
-	if (g_context->merged_object != NULL && g_config->workspace == WORKSPACE_PLAYER) {
+	if (g_context->merged_object != NULL && base_player) {
 		util_mesh_merged_stale = true;
 	}
 	else if (g_context->merged_object != NULL) {
@@ -492,7 +492,7 @@ void project_reimport_textures() {
 void project_reimport_texture_load_on_next_frame(void *_) {
 	make_material_parse_paint_material(true);
 	util_render_make_material_preview();
-	ui_base_hwnds->buffer[TAB_AREA_SIDEBAR1]->redraws = 2;
+	ui_dock_redraw(TAB_AREA_SIDEBAR1);
 }
 
 void project_reimport_texture_load(char *path, asset_t *asset) {

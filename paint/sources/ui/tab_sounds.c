@@ -16,7 +16,7 @@ void tab_sounds_delete_sound_on_next_frame(slot_sound_t *sound) {
 
 void tab_sounds_delete_sound(slot_sound_t *sound) {
 	sys_notify_on_next_frame(&tab_sounds_delete_sound_on_next_frame, sound);
-	ui_base_hwnds->buffer[2]->redraws = 2;
+	ui_dock_redraw(2);
 }
 
 slot_sound_t *_tab_sounds_export_sound;

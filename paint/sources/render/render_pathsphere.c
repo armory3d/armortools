@@ -113,7 +113,7 @@ static void create_pathsphere_object() {
 }
 
 void render_pathsphere() {
-	if (g_config->workspace == WORKSPACE_PLAYER || g_context->capturing_screenshot || g_context->paint2d) {
+	if (base_player || g_context->capturing_screenshot || g_context->paint2d) {
 		return;
 	}
 

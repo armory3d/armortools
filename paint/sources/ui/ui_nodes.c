@@ -20,7 +20,6 @@ bool                     ui_nodes_release_link          = false;
 bool                     ui_nodes_is_node_menu_op       = false;
 gpu_texture_t           *ui_nodes_grid                  = NULL;
 bool                     ui_nodes_controls_down         = false;
-slot_material_t_array_t *ui_nodes_tabs                  = NULL;
 static char             *ui_nodes_canvas_name_prev      = NULL;
 ui_node_link_t          *_ui_nodes_on_link_drag_link_drag;
 ui_node_t               *_ui_nodes_on_link_drag_node;
@@ -404,7 +403,7 @@ void ui_viewnodes_on_canvas_context_menu() {
 			g_context->swatch          = new_swatch;
 			any_array_push(g_project->swatches, new_swatch);
 			history_new_swatch();
-			ui_base_hwnds->buffer[TAB_AREA_STATUS]->redraws = 1;
+			ui_dock_redraw(TAB_AREA_STATUS);
 		}
 	}
 	if (ui_nodes_canvas_type != CANVAS_TYPE_MESH && ui_menu_button(tr("Capture Output"), "", ICON_PHOTO)) {
@@ -572,14 +571,8 @@ ui_canvas_control_t *ui_nodes_get_canvas_control(bool controls_down, bool is_nod
 }
 
 gpu_texture_t *ui_nodes_draw_grid(f32 zoom) {
-	i32 ww = g_config->layout->buffer[LAYOUT_SIZE_NODES_W];
-	if (!ui_base_show) {
-		ww += g_config->layout->buffer[LAYOUT_SIZE_SIDEBAR_W] + ui_toolbar_w(true);
-	}
-	if (!base_view3d_show) {
-		ww += base_view3d_w();
-	}
-	i32 wh   = sys_h();
+	i32 ww   = ui_nodes_show ? ui_nodes_ww : ui_view2d_ww;
+	i32 wh   = ui_nodes_show ? ui_nodes_wh : ui_view2d_wh;
 	f32 step = ui_nodes_grid_cell_w * zoom;
 	i32 mult = 5 * UI_SCALE();
 	i32 w    = math_floor(ww + step * mult);
@@ -641,7 +634,7 @@ static void ui_nodes_rename_mesh(ui_node_canvas_t *c, char *name) {
 	mesh_object_t *o = g_context->paint_object;
 	util_mesh_rename(o, name);
 	c->name                                           = o->base->name;
-	ui_base_hwnds->buffer[TAB_AREA_SIDEBAR0]->redraws = 2;
+	ui_dock_redraw(TAB_AREA_SIDEBAR0);
 }
 
 void ui_nodes_draw_menubar() {
@@ -661,9 +654,7 @@ void ui_nodes_draw_menubar() {
 		g_ui->_w = math_floor(ew + 3);
 		if (ui_icon_button("Back", ICON_ARROW_LEFT, UI_ALIGN_CENTER)) {
 			g_ui->input_released = false;
-			g_config->workspace  = WORKSPACE_VIEW_3D;
-			config_save();
-			base_update_workspace();
+			base_set_workspace(WORKSPACE_PRESET_VIEW_3D);
 		}
 		g_ui->_x += ew + 3;
 		g_ui->_y = 2 + start_y;
@@ -822,64 +813,9 @@ void ui_nodes_draw_menubar() {
 	}
 }
 
+// Nodes take the tab they are docked in
 void ui_nodes_update_rect() {
-	ui_nodes_ww = g_config->layout->buffer[LAYOUT_SIZE_NODES_W];
-	ui_nodes_wx = math_floor(sys_w()) + ui_toolbar_w(true);
-	ui_nodes_wy = 0;
-
-	if (!ui_base_show) {
-		ui_nodes_ww += g_config->layout->buffer[LAYOUT_SIZE_SIDEBAR_W] + ui_toolbar_w(true);
-		ui_nodes_wx -= ui_toolbar_w(true);
-	}
-	if (!base_view3d_show) {
-		ui_nodes_ww += base_view3d_w();
-	}
-
-	ui_nodes_wh = sys_h();
-	if (g_config->layout->buffer[LAYOUT_SIZE_HEADER] == 1) {
-		ui_nodes_wh += ui_header_h * 2;
-	}
-
-	if (ui_view2d_show) {
-		ui_nodes_wh = g_config->layout->buffer[LAYOUT_SIZE_NODES_H];
-		ui_nodes_wy = sys_h() - g_config->layout->buffer[LAYOUT_SIZE_NODES_H] + ui_header_h;
-		if (g_config->layout->buffer[LAYOUT_SIZE_HEADER] == 1) {
-			ui_nodes_wy += ui_header_h;
-		}
-		else {
-			ui_nodes_wy -= ui_header_h;
-		}
-	}
-
-	if (!base_view3d_show && ui_view2d_show) {
-		ui_nodes_wx = base_view3d_w();
-		ui_nodes_wy = 0;
-		ui_nodes_ww = g_config->layout->buffer[LAYOUT_SIZE_NODES_W];
-		ui_nodes_wh = sys_h();
-		if (g_config->layout->buffer[LAYOUT_SIZE_HEADER] == 1) {
-			ui_nodes_wh += ui_header_h * 2;
-		}
-	}
-
-	if (!base_view3d_show) {
-		ui_nodes_wh -= ui_header_h * 4;
-	}
-
-	// Distract free, no header or status bar
-	if (!ui_base_show) {
-		if (ui_view2d_show && base_view3d_show) {
-			ui_nodes_wh = g_config->layout->buffer[LAYOUT_SIZE_NODES_H];
-			ui_nodes_wy = iron_window_height() - ui_nodes_wh;
-		}
-		else {
-			if (!base_view3d_show && !ui_view2d_show) {
-				ui_nodes_wx = 0;
-			}
-			ui_nodes_ww = iron_window_width() - ui_nodes_wx;
-			ui_nodes_wy = 0;
-			ui_nodes_wh = iron_window_height();
-		}
-	}
+	ui_dock_layout();
 }
 
 void ui_nodes_update(void *_) {
@@ -891,7 +827,7 @@ void ui_nodes_update(void *_) {
 		i32  my      = mouse_y;
 		bool enabled = true;
 		i32  tabs_h  = ui_base_show ? ui_header_h * 2 : 0;
-		if (mx < ui_nodes_wx || mx > ui_nodes_wx + ui_nodes_ww || my < ui_nodes_wy + tabs_h) {
+		if (mx < ui_nodes_wx || mx > ui_nodes_wx + ui_nodes_ww || my < ui_nodes_wy + tabs_h || my > ui_nodes_wy + ui_nodes_wh) {
 			enabled = false;
 		}
 		if (g_ui->is_typing || !g_ui->input_enabled) {
@@ -1045,27 +981,7 @@ void ui_nodes_update(void *_) {
 	if (ui_window(ui_nodes_hwnd, ui_nodes_wx, ui_nodes_wy, ui_nodes_ww, ui_nodes_wh, false)) {
 
 		if (!g_config->touch_ui && ui_base_show) {
-			bool expand = !base_view3d_show && g_config->layout->buffer[LAYOUT_SIZE_SIDEBAR_W] == 0;
-			ui_tab(&ui_nodes_tab, expand ? string_tmp("%s          ", tr("Nodes")) : tr("Nodes"), false, -1, !base_view3d_show);
-
-			// Additional tabs
-			if (ui_nodes_canvas_type == CANVAS_TYPE_MATERIAL) {
-				if (ui_nodes_tabs == NULL) {
-					ui_nodes_tabs = any_array_create_from_raw((void *[]){}, 0);
-				}
-
-				for (i32 i = 0; i < ui_nodes_tabs->length; ++i) {
-					ui_tab(&ui_nodes_tab, ui_nodes_tabs->buffer[i]->canvas->name, false, -1, false);
-					if (ui_tab(&ui_nodes_tab, tr("x"), false, -1, false)) {
-						array_splice(ui_nodes_tabs, i, 1);
-						ui_nodes_tab = 0;
-					}
-				}
-
-				if (ui_tab(&ui_nodes_tab, tr("+"), false, -1, false)) {
-					any_array_push(ui_nodes_tabs, g_context->material);
-				}
-			}
+			ui_dock_view_tabs(TAB_NODES);
 		}
 
 		// Grid
@@ -1086,9 +1002,9 @@ void ui_nodes_update(void *_) {
 		i32  header_h              = ui_base_show ? UI_ELEMENT_H() * 2 + UI_ELEMENT_OFFSET() * 2 : 0;
 		bool header_hover          = g_ui->input_y < g_ui->_window_y + header_h;
 		g_ui->input_enabled        = _input_enabled && !ui_nodes_show_menu && !header_hover;
-		g_ui->window_border_right  = ui_base_show ? g_config->layout->buffer[LAYOUT_SIZE_SIDEBAR_W] : 0;
-		g_ui->window_border_top    = ui_base_show ? ui_header_h * 2 : 0;
-		g_ui->window_border_bottom = ui_base_show ? g_config->layout->buffer[LAYOUT_SIZE_STATUS_H] : 0;
+		g_ui->window_border_right  = iron_window_width() - ui_nodes_wx - ui_nodes_ww;
+		g_ui->window_border_top    = ui_nodes_wy + (ui_base_show ? ui_header_h * 2 : 0);
+		g_ui->window_border_bottom = iron_window_height() - ui_nodes_wy - ui_nodes_wh;
 
 		ui_node_canvas(ui_nodes, c);
 		g_ui->input_enabled = _input_enabled;

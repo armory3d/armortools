@@ -19,11 +19,7 @@ static bool _is_selected(i32 idx) {
 }
 
 static void _get_tex_transform(f32 *out_tx, f32 *out_ty, f32 *out_tw, f32 *out_th) {
-	i32 headerh = g_config->layout->buffer[LAYOUT_SIZE_HEADER] == 1 ? ui_header_h * 2 : ui_header_h;
-	i32 apph    = iron_window_height() - g_config->layout->buffer[LAYOUT_SIZE_STATUS_H] + headerh;
-	if (!base_view3d_show) {
-		apph = base_h();
-	}
+	i32 apph = ui_view2d_wh + ui_view2d_top();
 	f32 wm = fmin(ui_view2d_ww, ui_view2d_wh);
 	f32 tw = wm * 0.9f * ui_view2d_pan_scale;
 	f32 th = tw;

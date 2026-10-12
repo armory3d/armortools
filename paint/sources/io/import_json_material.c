@@ -95,5 +95,5 @@ void import_json_material_run(char *path) {
 	slot_material_t_array_t *imported = any_array_create_from_raw((void *[]){}, 0);
 	any_array_push(imported, g_context->material);
 	sys_notify_on_next_frame(&import_arm_run_material_from_project_on_next_frame, imported);
-	ui_base_hwnds->buffer[TAB_AREA_SIDEBAR1]->redraws = 2;
+	ui_dock_redraw(TAB_AREA_SIDEBAR1);
 }

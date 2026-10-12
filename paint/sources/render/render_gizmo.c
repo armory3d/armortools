@@ -44,7 +44,7 @@ void render_gizmo_update() {
 
 	object_t *gizmo = g_context->gizmo;
 	bool      hide  = keymap_shortcut(any_map_get(g_keymap, "stencil_hide"), SHORTCUT_TYPE_DOWN);
-	gizmo->visible  = (is_object || is_decal) && !hide && g_config->workspace != WORKSPACE_PLAYER;
+	gizmo->visible  = (is_object || is_decal) && !hide && !base_player;
 	if (!gizmo->visible) {
 		return;
 	}

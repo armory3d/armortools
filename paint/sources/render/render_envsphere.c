@@ -120,7 +120,7 @@ static void render_envsphere_init() {
 }
 
 void render_envsphere() {
-	if (!g_context->show_envmap_spheres || g_config->workspace == WORKSPACE_PLAYER || g_context->capturing_screenshot) {
+	if (!g_context->show_envmap_spheres || base_player || g_context->capturing_screenshot) {
 		return;
 	}
 	if (render_envsphere_metallic == NULL) {
