@@ -54,7 +54,7 @@ static bool tab_meshes_slot_hidden(mesh_object_t *o) {
 	return string_index_of(to_lower_case(o->base->name), to_lower_case(tab_meshes_search)) < 0;
 }
 
-static bool tab_meshes_is_selected(mesh_object_t *o) {
+bool tab_meshes_is_selected(mesh_object_t *o) {
 	return tab_meshes_selected != NULL && i32_array_index_of(tab_meshes_selected, o->base->uid) >= 0;
 }
 

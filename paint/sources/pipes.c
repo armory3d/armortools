@@ -238,6 +238,25 @@ void pipes_init() {
 		pipes_cursor_decal_texdecal     = 1;
 		pipes_cursor_decal_gbuffer0     = 2;
 	}
+
+	{
+
+		pipes_outline                  = gpu_create_pipeline();
+		pipes_outline->vertex_shader   = sys_get_shader("outline.vert");
+		pipes_outline->fragment_shader = sys_get_shader("outline.frag");
+		gpu_vertex_structure_t *vs     = ALLOC_INIT(gpu_vertex_structure_t, {0});
+		gpu_vertex_structure_add(vs, "pos", GPU_VERTEX_DATA_F32_2X);
+		pipes_outline->input_layout            = vs;
+		pipes_outline->blend_source            = GPU_BLEND_SOURCE_ALPHA;
+		pipes_outline->blend_destination       = GPU_BLEND_INV_SOURCE_ALPHA;
+		pipes_outline->alpha_blend_source      = GPU_BLEND_ZERO;
+		pipes_outline->alpha_blend_destination = GPU_BLEND_ONE;
+		gpu_pipeline_compile(pipes_outline);
+		pipes_offset           = 0;
+		pipes_outline_color    = pipes_get_constant_location("float4");
+		pipes_outline_tex_step = pipes_get_constant_location("float2");
+		pipes_outline_tex      = 0;
+	}
 }
 
 i32 pipes_get_constant_location(char *type) {
