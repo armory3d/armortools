@@ -902,7 +902,7 @@ static void editor_draw_minimap(char *text, bool diff, f32 mm_x, f32 mm_y, f32 m
 	else if (box_y > mm_y + mm_h - box_h) {
 		box_y = mm_y + mm_h - box_h;
 	}
-	draw_set_color(0x11ffffff);
+	draw_set_color(0x1cffffff);
 	draw_filled_rect(mm_x, box_y, mm_w, box_h);
 
 	// Drag the minimap to scroll the text area
