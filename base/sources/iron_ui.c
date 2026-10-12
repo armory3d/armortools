@@ -3056,7 +3056,7 @@ void ui_theme_default(ui_theme_t *t) {
 	t->BUTTON_COL        = 0xff323232;
 	t->PRESSED_COL       = 0xff212121;
 	t->TEXT_COL          = 0xfff7f7f7;
-	t->LABEL_COL         = 0xffcfcfcf;
+	t->LABEL_COL         = 0xffc4c4c4;
 	t->SEPARATOR_COL     = 0xff202020;
 	t->HIGHLIGHT_COL     = 0xff205d9c;
 	t->FONT_SIZE         = 13;
