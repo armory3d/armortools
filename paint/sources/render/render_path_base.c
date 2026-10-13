@@ -330,9 +330,7 @@ void render_path_base_swap_buf(char *bufa) {
 }
 
 void render_path_base_make_gbuffer_copy_textures() {
-	render_target_t *copy = any_map_get(render_path_render_targets, "gbuffer0_copy");
-	render_target_t *g0   = any_map_get(render_path_render_targets, "gbuffer0");
-	if (copy == NULL || copy->_image->width != g0->_image->width || copy->_image->height != g0->_image->height) {
+	if (any_map_get(render_path_render_targets, "gbuffer0_copy") == NULL) {
 		{
 			render_target_t *t = render_target_create();
 			t->name            = "gbuffer0_copy";

@@ -1335,6 +1335,8 @@ void tab_meshes_make_preview(mesh_object_t *o) {
 		transform_build_matrix(o->base->transform);
 	}
 
+	i32 _last_w         = _render_path_last_w;
+	i32 _last_h         = _render_path_last_h;
 	_render_path_last_w = util_render_material_preview_size;
 	_render_path_last_h = util_render_material_preview_size;
 	camera_object_build_proj(scene_camera, -1.0);
@@ -1347,8 +1349,8 @@ void tab_meshes_make_preview(mesh_object_t *o) {
 	render_path_commands = _commands;
 
 	g_context->material_preview = false;
-	_render_path_last_w         = sys_w();
-	_render_path_last_h         = sys_h();
+	_render_path_last_w         = _last_w; // Keep a pending viewport resize
+	_render_path_last_h         = _last_h;
 
 	// Restore
 	o->base->transform->scale = saved_scale;
