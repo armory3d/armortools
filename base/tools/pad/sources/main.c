@@ -392,6 +392,12 @@ static void pad_update_input() {
 		g_ui->is_key_pressed = false;
 		g_ui->key_code       = 0;
 	}
+	else if (g_ui->is_ctrl_down && g_ui->key_code == KEY_CODE_TAB) {
+		editor_switch_last();
+		g_ui->is_key_pressed = false; // Consume so the editor does not indent
+		g_ui->key_code       = 0;
+		g_ui->is_tab_down    = false;
+	}
 	else if (g_ui->is_ctrl_down && g_ui->key_code == KEY_CODE_M) {
 		editor_minimap_show  = !editor_minimap_show;
 		g_ui->is_key_pressed = false;

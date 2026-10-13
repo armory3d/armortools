@@ -4,6 +4,8 @@ ui_window_t        *editor_hwnd        = NULL;
 any_map_t          *editor_buffers     = NULL; // Opened files by path
 any_array_t        *editor_buffer_list = NULL;
 editor_buffer_t    *editor_current     = NULL;
+editor_buffer_t    *editor_last        = NULL; // Previously opened file, ctrl+tab switches to it
+char               *editor_closed      = NULL; // Path of the file closed last, ctrl+tab reopens it
 ui_text_coloring_t *editor_coloring    = NULL;
 
 gpu_texture_t *editor_minimap_tex       = NULL;
@@ -23,6 +25,8 @@ i32   editor_mark_pos = -1;   // Text offset of the selection
 extern char   *search_query;
 extern ui_id_t search_input_id;
 
+static bool editor_is_word_char(char c);
+
 ui_text_coloring_t *editor_get_coloring() {
 	if (editor_coloring == NULL) {
 		buffer_t *blob = data_get_blob("text_coloring.json");
@@ -32,6 +36,55 @@ ui_text_coloring_t *editor_get_coloring() {
 		editor_coloring = json_parse(sys_buffer_to_string(blob));
 	}
 	return editor_coloring;
+}
+
+// Words ending with _t are colored as types, words touching ( as function calls
+// Strings, comments and keywords are blanked in rest already
+static void editor_draw_coloring(char *text, char *rest, f32 x, f32 y) {
+	static char types[1024];
+	static char calls[1024];
+	i32         len       = string_length(rest);
+	bool        has_types = false;
+	bool        has_calls = false;
+	memset(types, ' ', len);
+	memset(calls, ' ', len);
+	types[len] = '\0';
+	calls[len] = '\0';
+	for (i32 i = 0; i < len; ++i) {
+		if (!editor_is_word_char(text[i])) {
+			continue;
+		}
+		i32 start = i;
+		while (i < len && editor_is_word_char(text[i])) {
+			i++;
+		}
+		bool is_type = i - start > 2 && text[i - 2] == '_' && text[i - 1] == 't';
+		bool is_call = text[i] == '(';
+		if ((!is_type && !is_call) || (text[start] >= '0' && text[start] <= '9')) {
+			continue;
+		}
+		char *dst = is_type ? types : calls;
+		for (i32 j = start; j < i; ++j) {
+			if (rest[j] != ' ') {
+				dst[j]  = rest[j];
+				rest[j] = ' ';
+				if (is_type) {
+					has_types = true;
+				}
+				else {
+					has_calls = true;
+				}
+			}
+		}
+	}
+	if (has_types) {
+		draw_set_color(0xffc695c6);
+		draw_string(types, x, y);
+	}
+	if (has_calls) {
+		draw_set_color(0xff6699cc);
+		draw_string(calls, x, y);
+	}
 }
 
 bool editor_is_modified(editor_buffer_t *b) {
@@ -129,6 +182,9 @@ static void editor_free_tab_lines(any_map_t *m) {
 
 // The buffer has to be out of the opened files and not the current one
 void editor_free_buffer(editor_buffer_t *b) {
+	if (b == editor_last) {
+		editor_last = NULL;
+	}
 	if (b->image != NULL) {
 		gpu_delete_texture(b->image);
 	}
@@ -157,6 +213,9 @@ static void editor_set_current(editor_buffer_t *b) {
 	ui_text_area_clear_selection();
 	if (b != NULL && b != editor_current) { // Not for a deleted or reverted file
 		editor_autosave();
+	}
+	if (b != NULL && prev != NULL && prev != b && array_index_of(editor_buffer_list, prev) >= 0) {
+		editor_last = prev;
 	}
 	editor_current             = b;
 	editor_hwnd->scroll_offset = b != NULL ? b->scroll : 0;
@@ -565,6 +624,42 @@ static bool editor_is_word_char(char c) {
 	return c == '_' || (c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z');
 }
 
+// Comments the line being edited after its indentation, or removes the comment
+// The text area picks the changed line up
+static void editor_toggle_comment() {
+	char *line   = g_ui->text_selected;
+	i32   len    = string_length(line);
+	i32   indent = 0;
+	while (line[indent] == ' ' || line[indent] == '\t') {
+		indent++;
+	}
+	if (indent == len) { // Blank line
+		return;
+	}
+	i32 delta;
+	if (line[indent] == '/' && line[indent + 1] == '/') {
+		delta = line[indent + 2] == ' ' ? -3 : -2;
+		memmove(line + indent, line + indent - delta, len - indent + delta + 1);
+	}
+	else {
+		delta = 3;
+		if (len + delta > UI_TEXT_MAX - 1) {
+			return;
+		}
+		memmove(line + indent + delta, line + indent, len - indent + 1);
+		memcpy(line + indent, "// ", 3);
+	}
+	// Cursor and selection stay on the same characters
+	if (g_ui->cursor_x > indent) {
+		g_ui->cursor_x = g_ui->cursor_x + delta > indent ? g_ui->cursor_x + delta : indent;
+	}
+	if (g_ui->highlight_anchor > indent) {
+		g_ui->highlight_anchor = g_ui->highlight_anchor + delta > indent ? g_ui->highlight_anchor + delta : indent;
+	}
+	g_ui->cursor_sticky_x = g_ui->cursor_x;
+	editor_hwnd->redraws  = 2;
+}
+
 // Selects a part of the line in the text area, runs while drawing the editor window
 static void editor_select(i32 line, i32 col, i32 len) {
 	ui_id_t id = ui_widget_id(&editor_current->text, UI_ID_TEXT);
@@ -922,6 +1017,18 @@ static void editor_draw_minimap(char *text, bool diff, f32 mm_x, f32 mm_y, f32 m
 	}
 }
 
+// Switches between the current and the previously opened file, a file which was just closed is opened again
+void editor_switch_last() {
+	if (editor_current == NULL && editor_closed != NULL) {
+		char *path    = editor_closed;
+		editor_closed = NULL;
+		editor_open(path);
+	}
+	else if (editor_last != NULL && editor_last != editor_current) {
+		editor_set_current(editor_last);
+	}
+}
+
 // Closes the current file
 void editor_close() {
 	editor_buffer_t *b = editor_current;
@@ -934,12 +1041,14 @@ void editor_close() {
 	if (i >= 0) {
 		array_splice(editor_buffer_list, i, 1);
 		map_delete(editor_buffers, b->path);
+		editor_closed = b->path; // Not freed with the buffer
 		editor_free_buffer(b);
 	}
 	pad_save_config();
 }
 
 void editor_close_all() {
+	editor_closed = NULL;
 	editor_autosave();
 	editor_set_current(NULL);
 	for (i32 i = 0; i < (i32)editor_buffer_list->length; ++i) {
@@ -967,9 +1076,11 @@ void editor_render(i32 x, i32 y, i32 w, i32 h) {
 	if (editor_current == NULL) {
 		// Faded shortcuts in the middle of the panel, the names end and the keys start at its center
 		static char       *names[]   = {"Go to File",
+		                                "Previous File",
 		                                "Save",
 		                                "Search",
 		                                "Select Word",
+		                                "Toggle Comment",
 		                                "Undo",
 		                                "Redo",
 		                                "Search in Files",
@@ -983,7 +1094,7 @@ void editor_render(i32 x, i32 y, i32 w, i32 h) {
 		                                "Build and Run",
 		                                "Clean Build and Run",
 		                                "Toggle Fullscreen"};
-		static char       *keys[]    = {"Ctrl+P", "Ctrl+S", "Ctrl+F", "Ctrl+D", "Ctrl+Z", "Ctrl+Shift+Z", "Ctrl+Shift+F", "Ctrl+E", "Ctrl+G",
+		static char       *keys[]    = {"Ctrl+P", "Ctrl+Tab", "Ctrl+S", "Ctrl+F", "Ctrl+D", "Ctrl+/", "Ctrl+Z", "Ctrl+Shift+Z", "Ctrl+Shift+F", "Ctrl+E", "Ctrl+G",
 		                                "Ctrl+J", "Ctrl+M", "Ctrl+K", "Ctrl+W", "Ctrl+B", "F5",           "Shift+F5",     "F11"};
 		static f32         ratio[2]  = {0.5, 0.5};
 		static f32_array_t ratios    = {.buffer = ratio, .length = 2};
@@ -1056,6 +1167,7 @@ void editor_render(i32 x, i32 y, i32 w, i32 h) {
 	ui_text_area_line_numbers    = true;
 	ui_text_area_scroll_past_end = true;
 	ui_text_area_coloring        = editor_get_coloring();
+	ui_text_coloring_draw        = editor_draw_coloring;
 
 	// Open the search box on ctrl+f
 	editor_text_id        = ui_widget_id(&editor_current->text, UI_ID_TEXT);
@@ -1111,6 +1223,13 @@ void editor_render(i32 x, i32 y, i32 w, i32 h) {
 		g_ui->key_code       = 0;
 	}
 
+	// ctrl+/ to comment the line at the cursor, or to uncomment it
+	if (is_text_selected && !editor_current->diff && g_ui->is_ctrl_down && g_ui->is_key_pressed && g_ui->key_code == KEY_CODE_SLASH) {
+		editor_toggle_comment();
+		g_ui->is_key_pressed = false; // Consume so the editor ignores ctrl+/
+		g_ui->key_code       = 0;
+	}
+
 	// ctrl+z to undo, ctrl+shift+z to redo
 	if (g_ui->input_enabled && !editor_current->diff && (is_text_selected || g_ui->text_selected_id == 0) && g_ui->is_ctrl_down && g_ui->is_key_pressed &&
 	    g_ui->key_code == KEY_CODE_Z) {
@@ -1138,10 +1257,12 @@ void editor_render(i32 x, i32 y, i32 w, i32 h) {
 		g_ui->key_code       = 0;
 	}
 
-	// Occurrences of the selected text are highlighted in the text and on the minimap
+	// Occurrences of the selected text are highlighted in the text and on the minimap, not for a multi-line selection
 	static char mark[UI_TEXT_MAX];
-	editor_mark = NULL;
-	if (g_ui->text_selected_id == ui_widget_id(&editor_current->text, UI_ID_TEXT) && g_ui->cursor_x != g_ui->highlight_anchor) {
+	editor_mark     = NULL;
+	i32  sel_line   = ui_text_area_selection_line();
+	bool multi_line = sel_line != -1 && sel_line != editor_current->line;
+	if (g_ui->text_selected_id == ui_widget_id(&editor_current->text, UI_ID_TEXT) && g_ui->cursor_x != g_ui->highlight_anchor && !multi_line) {
 		i32 a      = g_ui->cursor_x < g_ui->highlight_anchor ? g_ui->cursor_x : g_ui->highlight_anchor;
 		i32 b      = g_ui->cursor_x < g_ui->highlight_anchor ? g_ui->highlight_anchor : g_ui->cursor_x;
 		i32 len    = string_length(g_ui->text_selected);
@@ -1226,6 +1347,7 @@ void editor_render(i32 x, i32 y, i32 w, i32 h) {
 	ui_text_area_line_numbers    = false;
 	ui_text_area_scroll_past_end = false;
 	ui_text_area_coloring        = NULL;
+	ui_text_coloring_draw        = NULL;
 	ui_set_font(g_ui, _font);
 	g_ui->font_size = _font_size;
 

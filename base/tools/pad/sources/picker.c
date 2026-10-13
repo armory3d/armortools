@@ -126,6 +126,7 @@ void picker_open() {
 	picker_selected = 0;
 	picker_show     = true;
 	picker_focus    = true;
+	picker_update_matches();
 }
 
 void picker_close() {
