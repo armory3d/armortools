@@ -316,6 +316,7 @@ buffer_t *export_arm_encode_project(char *path) {
 		any_array_push(mesh_transforms, ar);
 	}
 	g_project->mesh_transforms = mesh_transforms;
+	util_path_tool_export();
 
 	// Source mesh bytes
 	// Meshes with no skin data store an empty buffer

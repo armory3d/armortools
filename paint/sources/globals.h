@@ -7,7 +7,7 @@
 
 char *manifest_title           = "ArmorPaint";
 char *manifest_version         = "1.1alpha";
-char *manifest_version_project = "18";
+char *manifest_version_project = "19";
 char *manifest_version_config  = "1";
 char *manifest_url             = "https://armorpaint.org";
 char *manifest_url_android     = "https://play.google.com/store/apps/details?id=org.armorpaint";
@@ -148,40 +148,44 @@ mesh_object_t   *base_drag_mesh     = NULL;
 bool             base_player        = false;
 bool             base_player_lock   = false;
 
-bool                      ui_base_show = true;
-i32                       ui_base_viewport_col;
-i32                       ui_toolbar_default_w = 36;
-ui_window_t              *ui_toolbar_handle;
-ui_window_t              *ui_toolbar_split_handle;
-string_array_t           *ui_toolbar_tool_names;
-string_array_t           *ui_toolbar_tooltip_extras;
-mat4_t                    uniforms_ext_ortho_p;
-i32                       box_projects_tab_index;
-char                     *box_projects_search = "";
-history_step_t_array_t   *history_steps;
-i32                       history_undo_i      = 0;     // Undo layer
-i32                       history_undos       = 0;     // Undos available
-i32                       history_redos       = 0;     // Redos available
-bool                      history_push_undo   = false; // Store undo on next paint
-slot_layer_t_array_t     *history_undo_layers = NULL;
-char                     *tab_scripts_text    = "";
-i32                       tab_scripts_line; // Active line of the script text area
-bool                      tab_scripts_minimap_dirty = true;
-extern int                tab_stages_selected;
-extern bool               tab_timeline_playing;
-any_map_t                *import_mesh_importers;
-i32                       ui_menubar_default_w = 390;
-ui_window_t              *ui_menubar_hwnd;
-ui_window_t              *ui_menubar_split_hwnd;
-ui_window_t              *ui_menubar_menu_handle;
-i32                       ui_menubar_w;
-any_map_t                *translator_translations;
-bool                      ui_menu_show                       = false;
-bool                      ui_menu_nested                     = false;
-i32                       ui_menu_x                          = 0;
-i32                       ui_menu_y                          = 0;
-i32                       ui_menu_h                          = 0;
-bool                      ui_menu_keep_open                  = false;
+bool                    ui_base_show = true;
+i32                     ui_base_viewport_col;
+i32                     ui_toolbar_default_w = 36;
+ui_window_t            *ui_toolbar_handle;
+ui_window_t            *ui_toolbar_split_handle;
+string_array_t         *ui_toolbar_tool_names;
+f32                     util_path_tool_radius      = 0.03;
+f32                     util_text_tool_size        = 0.5;
+f32                     util_text_tool_depth       = 0.1;
+f32                     util_shape_tool_segments[] = {0, 1, 0, 128, 64, 64, 32, 64}; // From TOOL_TYPE_EMPTY to TOOL_TYPE_TORUS
+string_array_t         *ui_toolbar_tooltip_extras;
+mat4_t                  uniforms_ext_ortho_p;
+i32                     box_projects_tab_index;
+char                   *box_projects_search = "";
+history_step_t_array_t *history_steps;
+i32                     history_undo_i      = 0;     // Undo layer
+i32                     history_undos       = 0;     // Undos available
+i32                     history_redos       = 0;     // Redos available
+bool                    history_push_undo   = false; // Store undo on next paint
+slot_layer_t_array_t   *history_undo_layers = NULL;
+char                   *tab_scripts_text    = "";
+i32                     tab_scripts_line; // Active line of the script text area
+bool                    tab_scripts_minimap_dirty = true;
+extern int              tab_stages_selected;
+extern bool             tab_timeline_playing;
+any_map_t              *import_mesh_importers;
+i32                     ui_menubar_default_w = 390;
+ui_window_t            *ui_menubar_hwnd;
+ui_window_t            *ui_menubar_split_hwnd;
+ui_window_t            *ui_menubar_menu_handle;
+i32                     ui_menubar_w;
+any_map_t              *translator_translations;
+bool                    ui_menu_show                         = false;
+bool                    ui_menu_nested                       = false;
+i32                     ui_menu_x                            = 0;
+i32                     ui_menu_y                            = 0;
+i32                     ui_menu_h                            = 0;
+bool                    ui_menu_keep_open                    = false;
 void (*ui_menu_commands)(void)                               = NULL;
 bool                      ui_menu_show_first                 = true;
 i32                       render_path_base_bloom_current_mip = 0;
@@ -197,11 +201,11 @@ i32                       ui_view2d_wy;
 i32                       ui_view2d_ww;
 i32                       ui_view2d_wh;
 ui_window_t              *ui_view2d_hwnd;
-f32                       ui_view2d_pan_x       = 0.0;
-f32                       ui_view2d_pan_y       = 0.0;
-f32                       ui_view2d_pan_scale   = 1.0;
-bool                      ui_view2d_tiled_show  = false;
-bool                      ui_view2d_grid_redraw = true;
+f32                       ui_view2d_pan_x            = 0.0;
+f32                       ui_view2d_pan_y            = 0.0;
+f32                       ui_view2d_pan_scale        = 1.0;
+bool                      ui_view2d_tiled_show       = false;
+bool                      ui_view2d_grid_redraw      = true;
 sound_t                  *ui_view2d_sound_playing    = NULL;
 bool                      player_running             = false;
 bool                      player_in_editor           = false;
@@ -295,17 +299,18 @@ ui_node_t_array_t        *nodes_material_color;
 ui_node_t_array_t        *nodes_material_utilities;
 ui_node_t_array_t        *nodes_material_neural;
 ui_node_t_array_t        *nodes_material_group;
-node_list_t_array_t      *nodes_material_list        = NULL;
-string_array_t           *nodes_mesh_categories      = NULL;
+node_list_t_array_t      *nodes_material_list   = NULL;
+string_array_t           *nodes_mesh_categories = NULL;
 ui_node_t_array_t        *nodes_mesh_input;
 ui_node_t_array_t        *nodes_mesh_modifier;
 ui_node_t_array_t        *nodes_mesh_combine;
 ui_node_t_array_t        *nodes_mesh_utilities;
-node_list_t_array_t      *nodes_mesh_list            = NULL;
+node_list_t_array_t      *nodes_mesh_list = NULL;
 ui_node_t                *nodes_mesh_input_def;
 ui_node_t                *nodes_mesh_output_def;
 any_map_t                *nodes_mesh_node_evals;
 any_map_t                *nodes_mesh_node_vectors;
+i32                       context_deselected_uid = -1; // Paint object with no outline and gizmo in the viewport
 ui_node_canvas_t         *nodes_mesh_eval_canvas;
 mesh_nodes_t             *nodes_mesh_eval_slot;
 mesh_object_t            *nodes_mesh_eval_object;

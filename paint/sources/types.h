@@ -195,9 +195,9 @@ typedef struct slot_material {
 
 typedef struct tab_draw {
 	void (*f)(i32 *);
-	i32   id;             // tab_id_t
-	char *name;           // Untranslated
-	i32   area;           // tab_area_t redrawn with, -1 for views
+	i32   id;   // tab_id_t
+	char *name; // Untranslated
+	i32   area; // tab_area_t redrawn with, -1 for views
 	bool  closed;
 	bool  closed_default;
 } tab_draw_t;
@@ -643,6 +643,7 @@ typedef struct project {
 	struct stage_t_array                        *stages;
 	struct ui_node_canvas_t_array               *mesh_nodes;
 	struct i32_array                            *mesh_nodes_objects; // Object index for each mesh_nodes canvas
+	struct f32_array_t_array                    *mesh_paths;         // Path and curve tool points
 	project_runtime_t                           *_;
 } project_t;
 

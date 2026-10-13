@@ -73,21 +73,12 @@ void import_mesh_run(char *path, bool _clear_layers, bool replace_existing, bool
 }
 
 static mesh_object_t *import_mesh_make_root() {
-	// Mesh with no geometry
-	char       *name = string_copy(_import_mesh_unique_name("Root"));
-	raw_mesh_t *mesh = ALLOC_INIT(raw_mesh_t, {.name      = name,
-	                                           .posa      = i16_array_create(0),
-	                                           .nora      = i16_array_create(0),
-	                                           .texa      = i16_array_create(0),
-	                                           .inda      = u32_array_create(0),
-	                                           .scale_pos = 1.0,
-	                                           .scale_tex = 1.0});
-
-	mesh_data_t *md    = mesh_data_create(import_mesh_raw_mesh(mesh));
-	md->_->owns_arrays = true;
-	mesh_object_t *mo  = scene_add_mesh_object(md, g_context->paint_object->material, NULL);
-	mo->base->name     = name;
-	mo->skip_context   = "paint";
+	char          *name = string_copy(_import_mesh_unique_name("Root"));
+	mesh_data_t   *md   = util_shape_make_data("empty");
+	md->name            = name;
+	mesh_object_t *mo   = scene_add_mesh_object(md, g_context->paint_object->material, NULL);
+	mo->base->name      = name;
+	mo->skip_context    = "paint";
 	tab_stages_add_object(name);
 	return mo;
 }

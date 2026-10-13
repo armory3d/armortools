@@ -595,8 +595,8 @@ void util_mesh_visibility_changed() {
 	g_context->ddirty          = 2;
 }
 
-static void util_mesh_bake_transform(mesh_object_t *o, mat4_t inv_world) {
-	mat4_t       m         = mat4_mult_mat(o->base->transform->world_unpack, inv_world);
+// Positions are transformed from their packed values
+static void util_mesh_bake_matrix(mesh_object_t *o, mat4_t m) {
 	mat4_t       nm        = mat4_transpose3(mat4_inv(m));
 	i16_array_t *va0       = o->data->vertex_arrays->buffer[0]->values;
 	i16_array_t *va1       = o->data->vertex_arrays->buffer[1]->values;
@@ -630,6 +630,78 @@ static void util_mesh_bake_transform(mesh_object_t *o, mat4_t inv_world) {
 		va0->buffer[i * 4 + 2] = math_floor(pos->buffer[i * 3 + 2] / max_scale * 32767);
 	}
 	o->data->scale_pos = max_scale;
+}
+
+static void util_mesh_bake_transform(mesh_object_t *o, mat4_t inv_world) {
+	util_mesh_bake_matrix(o, mat4_mult_mat(o->base->transform->world_unpack, inv_world));
+}
+
+// Moves a rotation and scale matrix into the mesh, the object is left with its location only
+static void util_mesh_apply_matrix(mesh_object_t *o, mat4_t m) {
+	util_mesh_unshare_data(o);
+	mesh_data_t *g        = o->data;
+	mat4_t       m_unpack = m;
+	m_unpack.m00 *= g->scale_pos;
+	m_unpack.m01 *= g->scale_pos;
+	m_unpack.m02 *= g->scale_pos;
+	m_unpack.m10 *= g->scale_pos;
+	m_unpack.m11 *= g->scale_pos;
+	m_unpack.m12 *= g->scale_pos;
+	m_unpack.m20 *= g->scale_pos;
+	m_unpack.m21 *= g->scale_pos;
+	m_unpack.m22 *= g->scale_pos;
+	util_mesh_bake_matrix(o, m_unpack);
+	if (mat4_determinant(m) < 0.0) {
+		// Mirrored by a negative scale
+		u32_array_t *inda = g->index_array;
+		for (i32 i = 0; i + 2 < inda->length; i += 3) {
+			u32 tmp             = inda->buffer[i + 1];
+			inda->buffer[i + 1] = inda->buffer[i + 2];
+			inda->buffer[i + 2] = tmp;
+		}
+	}
+	mesh_data_build_vertices(g->_->vertex_buffer, g->vertex_arrays);
+	mesh_data_build_indices(g->_->index_buffer, g->index_array);
+
+	// Children stay in place
+	for (i32 i = 0; i < o->base->children->length; ++i) {
+		object_t    *c     = o->base->children->buffer[i];
+		transform_t *ct    = c->transform;
+		mat4_t       local = mat4_mult_mat(ct->local, m);
+		ct->local          = local;
+		transform_decompose(ct);
+		mat4_t composed = mat4_compose(ct->loc, ct->rot, ct->scale);
+		f32    diff     = 0.0;
+		f32    size     = 0.0;
+		for (i32 j = 0; j < 12; ++j) {
+			diff = math_max(diff, math_abs(composed.m[j] - local.m[j]));
+			size = math_max(size, math_abs(local.m[j]));
+		}
+		mesh_object_t *co = c->ext_type != NULL && string_equals(c->ext_type, "mesh_object_t") ? c->ext : NULL;
+		if (co != NULL && diff > size * 0.0001) {
+			// Skewed by a non-uniform scale, applied to the mesh of the child too
+			local.m30 = 0.0;
+			local.m31 = 0.0;
+			local.m32 = 0.0;
+			util_mesh_apply_matrix(co, local);
+		}
+	}
+
+	transform_t *t = o->base->transform;
+	t->rot         = (quat_t){0.0, 0.0, 0.0, 1.0};
+	t->scale       = (vec4_t){1.0, 1.0, 1.0, 1.0};
+	t->scale_world = g->scale_pos;
+}
+
+// Rotation and scale are moved into the mesh, the object and its children stay in place
+void util_mesh_apply_transform(mesh_object_t *o) {
+	transform_t *t = o->base->transform;
+	util_mesh_apply_matrix(o, mat4_compose((vec4_t){0.0, 0.0, 0.0, 1.0}, t->rot, t->scale));
+	transform_build_matrix(t);
+
+	util_mesh_merge(NULL);
+	nodes_mesh_request_refresh();
+	render_path_raytrace_ready = false;
 }
 
 static void util_mesh_join_geometry(mesh_object_t_array_t *objects) {
@@ -2702,6 +2774,8 @@ mesh_object_t *util_mesh_duplicate_object(mesh_object_t *so) {
 		util_physics_set(dup->base, shape, util_physics_get_mass(so->base));
 	}
 
+	util_path_tool_copy(so, dup);
+
 	tab_meshes_sort_hierarchy();
 	tab_timeline_sync();
 
@@ -2893,7 +2967,7 @@ void util_mesh_delete() {
 	if (g_project->_->paint_objects->length < 2) {
 		return;
 	}
-	tab_meshes_draw_context_menu_delete(g_context->paint_object);
+	tab_meshes_delete_selected_next_frame(NULL);
 }
 
 static bool util_mesh_is_unique_name(mesh_object_t *self, char *name) {

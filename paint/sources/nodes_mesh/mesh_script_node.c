@@ -7,6 +7,7 @@ static mesh_geo_t  *nodes_mesh_script_out   = NULL;
 static mesh_geo_t **nodes_mesh_script_geos  = NULL;
 static i32          nodes_mesh_script_count = 0;
 static i32          nodes_mesh_script_cap   = 0;
+static mesh_geo_t **nodes_mesh_script_inputs = NULL; // Meshes linked to the added mesh inputs, by socket
 
 static ui_node_t        *nodes_mesh_script_node  = NULL;
 static ui_node_button_t *nodes_mesh_script_dirty = NULL;
@@ -59,14 +60,15 @@ static void nodes_mesh_script_button(i32 node_id) {
 	but->height = ui_line_count(text) * UI_TEXT_AREA_LINE_H() / UI_LINE_H() + 2;
 }
 
-// Inputs added to a script node are read by name with mesh_geo_input_value() and mesh_geo_input_vector()
+// Inputs added to a script node are read by name with mesh_geo_input_value(), mesh_geo_input_vector() and mesh_geo_input_mesh()
 ui_node_socket_t *nodes_mesh_script_add_socket(ui_node_canvas_t *canvas, ui_node_t *node, char *type, char *name) {
-	if (!string_equals(type, "RGBA") && !string_equals(type, "VECTOR")) {
+	bool is_mesh = string_equals(type, "MESH") && string_equals(node->type, "MESH_SCRIPT");
+	if (!string_equals(type, "RGBA") && !string_equals(type, "VECTOR") && !is_mesh) {
 		type = "VALUE";
 	}
 	if (name == NULL || string_equals(name, "")) {
 		// First free name, sockets are looked up by it
-		char *base = nodes_material_get_socket_name(type);
+		char *base = is_mesh ? _tr("Mesh") : nodes_material_get_socket_name(type);
 		name       = base;
 		for (i32 i = 2; i < 999; ++i) {
 			bool found = false;
@@ -84,15 +86,18 @@ ui_node_socket_t *nodes_mesh_script_add_socket(ui_node_canvas_t *canvas, ui_node
 	}
 	ui_node_socket_t *soc = nodes_material_create_socket(NULL, node, string_copy(name), type, canvas, 0.0, 1.0, NULL);
 	soc->display          = string_equals(type, "VECTOR") ? 1 : 0;
+	if (is_mesh) {
+		soc->color = node->inputs->buffer[0]->color;
+	}
 	any_array_push(node->inputs, soc);
 	return soc;
 }
 
 static void nodes_mesh_script_add_menu_draw() {
 	ui_node_t *node    = nodes_mesh_socket_node;
-	char      *names[] = {tr("RGBA"), tr("Vector"), tr("Value")};
-	char      *types[] = {"RGBA", "VECTOR", "VALUE"};
-	for (i32 i = 0; i < 3; ++i) {
+	char      *names[] = {tr("RGBA"), tr("Vector"), tr("Value"), tr("Mesh")};
+	char      *types[] = {"RGBA", "VECTOR", "VALUE", "MESH"};
+	for (i32 i = 0; i < 4; ++i) {
 		if (ui_menu_button(names[i], "", ICON_NONE)) {
 			ui_nodes_push_undo(NULL);
 			nodes_mesh_script_add_socket(ui_nodes_get_canvas(true), node, types[i], NULL);
@@ -257,11 +262,33 @@ f32 mesh_geo_input_vector(char *name, i32 i) {
 	return f;
 }
 
+// Mesh linked to a mesh input added to the script node, empty when there is none
+mesh_geo_t *mesh_geo_input_mesh(char *name) {
+	ui_node_t *node = nodes_mesh_script_node;
+	if (node != NULL && name != NULL) {
+		for (i32 j = 1; j < node->inputs->length; ++j) {
+			ui_node_socket_t *s = node->inputs->buffer[j];
+			if (string_equals(s->name, name) && string_equals(s->type, "MESH")) {
+				return nodes_mesh_script_inputs[j];
+			}
+		}
+	}
+	return nodes_mesh_script_track(util_geo_create(0, 0));
+}
+
 mesh_geo_t *mesh_script_node_eval(ui_node_t *node) {
 	mesh_geo_t *g    = nodes_mesh_eval_input(node, 0);
 	char       *text = nodes_mesh_script_text(node);
 	if (!project_scripts_trusted || string_equals(text, "")) {
 		return g;
+	}
+
+	// Linked nodes are evaluated before the script starts, they may be script nodes too
+	mesh_geo_t **inputs = calloc(node->inputs->length, sizeof(mesh_geo_t *));
+	for (i32 i = 1; i < node->inputs->length; ++i) {
+		if (string_equals(node->inputs->buffer[i]->type, "MESH")) {
+			inputs[i] = nodes_mesh_eval_input(node, i);
+		}
 	}
 
 	// The script works on a copy, the input passes through when it fails
@@ -270,6 +297,14 @@ mesh_geo_t *mesh_script_node_eval(ui_node_t *node) {
 	nodes_mesh_script_in      = nodes_mesh_script_track(nodes_mesh_script_arg(g));
 	nodes_mesh_script_out     = nodes_mesh_script_in;
 	nodes_mesh_script_node    = node;
+	nodes_mesh_script_inputs  = inputs;
+	for (i32 i = 1; i < node->inputs->length; ++i) {
+		if (inputs[i] != NULL) {
+			mesh_geo_t *raw = inputs[i];
+			inputs[i]       = nodes_mesh_script_track(nodes_mesh_script_arg(raw));
+			util_geo_free(raw);
+		}
+	}
 
 	i32 errors = minic_error_count;
 	minic_ctx_free(minic_eval_named(text, "mesh script"));
@@ -285,7 +320,9 @@ mesh_geo_t *mesh_script_node_eval(ui_node_t *node) {
 	nodes_mesh_script_in      = NULL;
 	nodes_mesh_script_out     = NULL;
 	nodes_mesh_script_node    = NULL;
+	nodes_mesh_script_inputs  = NULL;
 	nodes_mesh_script_running = false;
+	free(inputs);
 	return g;
 }
 

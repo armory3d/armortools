@@ -337,6 +337,11 @@ void context_select_paint_object(mesh_object_t *o) {
 	util_uv_dilatemap_cached   = false;
 }
 
+// Cursor tool clicked on empty space, the paint object stays selected in the meshes tab
+bool context_object_deselected() {
+	return g_context->paint_object != NULL && context_deselected_uid == g_context->paint_object->base->uid;
+}
+
 mesh_object_t *context_main_object() {
 	for (i32 i = 0; i < g_project->_->paint_objects->length; ++i) {
 		mesh_object_t *po = g_project->_->paint_objects->buffer[i];

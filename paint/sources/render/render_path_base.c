@@ -428,7 +428,7 @@ static gpu_pipeline_t *render_path_base_outline_mask_pipe(mesh_data_t *data) {
 }
 
 void render_path_base_draw_outline() {
-	if (g_context->tool != TOOL_TYPE_CURSOR || base_player || g_context->capturing_screenshot || g_context->paint2d) {
+	if (g_context->tool != TOOL_TYPE_CURSOR || base_player || g_context->capturing_screenshot || g_context->paint2d || context_object_deselected()) {
 		return;
 	}
 

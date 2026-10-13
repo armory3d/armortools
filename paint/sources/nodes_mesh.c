@@ -169,7 +169,7 @@ static i16 nodes_mesh_pack(f32 f) {
 	return (i16)math_round(f * 32767.0);
 }
 
-static mesh_data_t *nodes_mesh_geo_to_data(mesh_geo_t *g, char *name) {
+mesh_data_t *nodes_mesh_geo_to_data(mesh_geo_t *g, char *name) {
 	f32 scale_pos = 0.0;
 	for (i32 i = 0; i < g->vertex_count * 3; ++i) {
 		scale_pos = math_max(scale_pos, math_abs(g->pos[i]));
@@ -633,6 +633,34 @@ bool nodes_mesh_holds(mesh_data_t *data) {
 	return false;
 }
 
+// Replaces the mesh of an object, the previous one is left to the caller
+static void nodes_mesh_set_data(mesh_object_t *o, mesh_data_t *data, bool unwrap) {
+	mesh_object_set_data(o, data);
+	transform_build_matrix(o->base->transform);
+	nodes_mesh_refresh_pending = true; // Meshes using this one
+
+	if (unwrap) {
+		util_mesh_uv_unwrap(any_array_create_from_raw_tmp((void *[]){o}, 1));
+	}
+	else if (g_context->merged_object != NULL || g_project->_->paint_objects->length > 1) {
+		util_mesh_merge(NULL);
+	}
+
+	char          *uid_key = i32_to_string(o->base->uid);
+	gpu_texture_t *preview = tab_meshes_preview_map != NULL ? any_map_get(tab_meshes_preview_map, uid_key) : NULL;
+	if (preview != NULL) {
+		gpu_delete_texture(preview);
+		map_delete(tab_meshes_preview_map, uid_key);
+	}
+
+	util_uv_uvmap_cached                              = false;
+	util_uv_trianglemap_cached                        = false;
+	util_uv_dilatemap_cached                          = false;
+	render_path_raytrace_ready                        = false;
+	g_context->ddirty                                 = 2;
+	ui_dock_redraw(TAB_AREA_SIDEBAR0);
+}
+
 void nodes_mesh_update(mesh_object_t *o, bool force) {
 	mesh_nodes_t *slot = nodes_mesh_get(o, false);
 	if (slot == NULL || nodes_mesh_script_running) {
@@ -653,35 +681,11 @@ void nodes_mesh_update(mesh_object_t *o, bool force) {
 		return;
 	}
 
-	bool shared = util_mesh_data_is_shared(old);
-	mesh_object_set_data(o, out);
-	slot->output = out;
-	transform_build_matrix(o->base->transform);
-	nodes_mesh_refresh_pending = true; // Meshes using this one
-	if (old != slot->input && !shared) {
+	if (old != slot->input && !util_mesh_data_is_shared(old)) {
 		sys_notify_on_next_frame(&util_mesh_delete_data_uncache, old);
 	}
-
-	if (nodes_mesh_eval_unwrap && out != slot->input) {
-		util_mesh_uv_unwrap(any_array_create_from_raw_tmp((void *[]){o}, 1));
-	}
-	else if (g_context->merged_object != NULL || g_project->_->paint_objects->length > 1) {
-		util_mesh_merge(NULL);
-	}
-
-	char          *uid_key = i32_to_string(o->base->uid);
-	gpu_texture_t *preview = tab_meshes_preview_map != NULL ? any_map_get(tab_meshes_preview_map, uid_key) : NULL;
-	if (preview != NULL) {
-		gpu_delete_texture(preview);
-		map_delete(tab_meshes_preview_map, uid_key);
-	}
-
-	util_uv_uvmap_cached                              = false;
-	util_uv_trianglemap_cached                        = false;
-	util_uv_dilatemap_cached                          = false;
-	render_path_raytrace_ready                        = false;
-	g_context->ddirty                                 = 2;
-	ui_dock_redraw(TAB_AREA_SIDEBAR0);
+	slot->output = out;
+	nodes_mesh_set_data(o, out, nodes_mesh_eval_unwrap && out != slot->input);
 }
 
 // Drops the nodes of an object, the output mesh stays with the object
@@ -714,6 +718,49 @@ void nodes_mesh_apply(mesh_object_t *o) {
 	nodes_mesh_remove(o);
 	ui_nodes_hwnd->redraws                            = 2;
 	ui_dock_redraw(TAB_AREA_SIDEBAR0);
+}
+
+// Modifiers of the mesh tab, a single node run on the mesh of an object with the result kept as its mesh
+
+static ui_node_canvas_t *nodes_mesh_modifier_canvas = NULL;
+
+// Node with its default values on a canvas of its own, linked in between a mesh input and output
+ui_node_t *nodes_mesh_modifier_node(ui_node_t *def) {
+	ui_node_canvas_t *c    = nodes_mesh_default_canvas(NULL);
+	ui_node_t        *in   = c->nodes->buffer[0];
+	ui_node_t        *out  = c->nodes->buffer[1];
+	ui_node_t        *node = ui_nodes_make_node(def, NULL, c);
+	any_array_push(c->nodes, node);
+	c->links->buffer[0]->to_id = node->id;
+	ui_node_link_t *l          = ALLOC_INIT(ui_node_link_t, {.id = 1, .from_id = node->id, .from_socket = 0, .to_id = out->id, .to_socket = 0});
+	any_array_push(c->links, l);
+	ui_nodes_node_changed      = NULL;
+	nodes_mesh_modifier_canvas = c;
+	return node;
+}
+
+void nodes_mesh_apply_modifier(mesh_object_t *o) {
+	if (nodes_mesh_modifier_canvas == NULL || o->data->index_array->length == 0) {
+		return;
+	}
+	mesh_data_t *old  = o->data;
+	mesh_nodes_t temp = {.uid = o->base->uid, .canvas = nodes_mesh_modifier_canvas, .input = old, .output = old};
+	mesh_data_t *out  = nodes_mesh_eval(&temp, o);
+	if (out == NULL) {
+		return;
+	}
+	if (!util_mesh_data_is_shared(old)) {
+		sys_notify_on_next_frame(&util_mesh_delete_data_uncache, old);
+	}
+	// Nodes of the object are kept, they run again on their next change
+	mesh_nodes_t *slot = nodes_mesh_find(o->base->uid);
+	if (slot != NULL) {
+		if (slot->output == slot->input) {
+			slot->input = out;
+		}
+		slot->output = out;
+	}
+	nodes_mesh_set_data(o, out, nodes_mesh_eval_unwrap);
 }
 
 // Rebuilds meshes with scene mesh nodes after other meshes changed or moved
@@ -874,10 +921,12 @@ char *nodes_mesh_reference() {
 	       "//     mesh_geo_shape: 0 Box, 1 Sphere, 2 Cylinder, 3 Cone, 4 Torus, 5 Plane. mesh_geo_mirror axis: 0 X, 1 Y, 2 Z.\n"
 	       "//     mesh_geo_boolean op: MESH_BOOLEAN_UNION, MESH_BOOLEAN_DIFFERENCE, MESH_BOOLEAN_INTERSECT. Rotations are in degrees.\n"
 	       "//     Call mesh_geo_normals(g, smooth) after moving vertices. The input passes through when the script has an error.\n"
-	       "//     Inputs: script_mesh_add_input(o, sc, \"VALUE\", \"Height\") adds a VALUE, VECTOR or RGBA socket after the mesh input\n"
+	       "//     Inputs: script_mesh_add_input(o, sc, \"VALUE\", \"Height\") adds a VALUE, VECTOR, RGBA or MESH socket after the mesh input\n"
 	       "//     (socket 1, 2, ..), the Add button of the node does the same. The script reads them by name with\n"
 	       "//     mesh_geo_input_value(\"Height\") and mesh_geo_input_vector(\"Offset\", i), i is 0 - 2 for x y z, 0 - 3 for r g b a.\n"
 	       "//     Value, Math and Vector nodes can be linked into them.\n"
+	       "//     A \"MESH\" input takes a second mesh, such as a MESH_OBJECT node (button 0 is the scene mesh index), read with\n"
+	       "//     mesh_geo_t *path = mesh_geo_input_mesh(\"Path\"); it is in the space of the edited object, empty when not linked.\n"
 	       "//     Example:\n"
 	       "//     mesh_object_t *o = script_get_context()->paint_object;\n"
 	       "//     ui_node_t *sc = script_mesh_create_node_at(o, \"MESH_SCRIPT\", 300.0, 100.0);\n"

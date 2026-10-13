@@ -8,15 +8,20 @@ i32 _ui_toolbar_bottom = 0;
 
 void ui_toolbar_init() {}
 
+// From TOOL_TYPE_EMPTY to TOOL_TYPE_CURVE
+static i32 ui_toolbar_object_tool_icons[] = {ICON_EMPTY,   ICON_PLANE, ICON_CUBE,   ICON_UVSPHERE, ICON_CONE, ICON_CYLINDER,
+                                             ICON_CAPSULE, ICON_TORUS, ICON_TEXT3D, ICON_PATH,     ICON_CURVE};
+
 bool ui_toolbar_tool_visible(i32 tool) {
 	if (g_config->tools == TOOLS_SCULPT) {
 		// Brush is replaced by the sculpt mode icons
-		return tool != TOOL_TYPE_BRUSH && tool != TOOL_TYPE_PARTICLE && tool != TOOL_TYPE_COLORID && tool != TOOL_TYPE_PICKER && tool != TOOL_TYPE_MATERIAL;
+		return tool != TOOL_TYPE_BRUSH && tool != TOOL_TYPE_PARTICLE && tool != TOOL_TYPE_COLORID && tool != TOOL_TYPE_PICKER && tool != TOOL_TYPE_MATERIAL &&
+		       !util_tool_is_object_tool(tool);
 	}
 	if (g_config->tools == TOOLS_OBJECT) {
-		return tool == TOOL_TYPE_CURSOR;
+		return tool == TOOL_TYPE_CURSOR || util_tool_is_object_tool(tool);
 	}
-	return true;
+	return !util_tool_is_object_tool(tool);
 }
 
 static i32 ui_toolbar_item_count() {
@@ -149,8 +154,9 @@ void ui_toolbar_draw_tool(i32 tool, gpu_texture_t *img, i32 icon_accent) {
 	i32  tile_y  = math_floor(tool / 12.0);
 	i32  tile_x  = tile_y % 2 == 0 ? tool % 12 : (11 - (tool % 12));
 	i32  _y      = g_ui->_y;
+	i32  tile_i  = util_tool_is_object_tool(tool) ? ui_toolbar_object_tool_icons[tool - TOOL_TYPE_EMPTY] : tile_y * 12 + tile_x;
 
-	ui_state_t image_state = ui_toolbar_draw_icon(g_context->tool == tool, visible, tile_y * 12 + tile_x, img, icon_accent);
+	ui_state_t image_state = ui_toolbar_draw_icon(g_context->tool == tool, visible, tile_i, img, icon_accent);
 
 	if (image_state == UI_STATE_STARTED && visible) {
 		_ui_toolbar_i = tool;
@@ -170,7 +176,8 @@ void ui_toolbar_draw_tool(i32 tool, gpu_texture_t *img, i32 icon_accent) {
 			*c = tolower(*c);
 		}
 		char *key = any_map_get(g_keymap, key_name);
-		if (!string_equals(key, "")) {
+		// Object tools have no shortcuts, the text one shares its name with the paint tool
+		if (key != NULL && !string_equals(key, "") && !util_tool_is_object_tool(tool)) {
 			tooltip = string_tmp("%s (%s)", tooltip, key);
 		}
 		char *extra = ui_toolbar_tooltip_extras->buffer[tool];
@@ -286,13 +293,20 @@ static void ui_toolbar_draw_window(ui_window_t *handle, i32 x, i32 y, i32 h) {
 				ui_toolbar_draw_sculpt_tool(i, img, icon_accent);
 			}
 		}
+		// The cursor leads the object tools, it is the last one of the paint and sculpt tools
+		bool cursor_last = g_config->tools != TOOLS_OBJECT;
 		for (i32 i = 0; i < ui_toolbar_tool_names->length; ++i) {
-			if (ui_toolbar_tool_visible(i)) {
+			if (ui_toolbar_tool_visible(i) && !(cursor_last && i == TOOL_TYPE_CURSOR)) {
 				ui_toolbar_draw_tool(i, img, icon_accent);
 			}
 		}
+		if (cursor_last) {
+			ui_toolbar_draw_tool(TOOL_TYPE_CURSOR, img, icon_accent);
+		}
 
 		g_ui->image_scroll_align = true;
+		// The window is not redrawn once the mouse leaves, the hover of the last tool would stay set
+		g_ui->is_hovered = false;
 	}
 
 	if (g_config->touch_ui) {

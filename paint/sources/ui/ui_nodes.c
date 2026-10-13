@@ -245,6 +245,18 @@ void ui_viewnodes_on_link_drag(i32 link_drag_id, bool is_new_link) {
 void ui_viewnodes_on_socket_released_group_edit_box() {
 	ui_node_socket_t *socket     = _ui_nodes_on_socket_released_socket;
 	ui_node_t        *node       = _ui_nodes_on_socket_released_node;
+	if (string_equals(socket->type, "MESH")) {
+		// Mesh input of a script node, only the name can be edited
+		char *name = ui_text_input(&_ui_nodes_name, tr("Name"), UI_ALIGN_LEFT, true, false);
+		if (ui_icon_button(tr("OK"), ICON_CHECK, UI_ALIGN_CENTER)) {
+			ui_nodes_push_undo(NULL);
+			socket->name = string_copy(name);
+			ui_box_hide();
+			ui_nodes_canvas_changed();
+			ui_nodes_hwnd->redraws = 2;
+		}
+		return;
+	}
 	string_array_t   *type_combo = any_array_create_from_raw_tmp(
         (void *[]){
             tr("Color"),

@@ -212,14 +212,17 @@
 #include "util/util_nodes.c"
 #include "util/util_particle.c"
 #include "util/util_path.c"
+#include "util/util_path_tool.c"
 #include "util/util_physics.c"
 #include "util/util_raycast.c"
 #include "util/util_render.c"
 #include "util/util_select.c"
+#include "util/util_shape_tool.c"
 #include "util/util_shortcut.c"
 #include "util/util_skin.c"
 #include "util/util_stage.c"
 #include "util/util_stencil.c"
+#include "util/util_text_tool.c"
 #include "util/util_texture.c"
 #include "util/util_touch.c"
 #include "util/util_ui.c"
@@ -287,22 +290,12 @@ void _kickstart() {
 
 	ui_toolbar_tool_names = any_array_create_from_raw(
 	    (void *[]){
-	        _tr("Brush"),
-	        _tr("Eraser"),
-	        _tr("Fill"),
-	        _tr("Decal"),
-	        _tr("Text"),
-	        _tr("Clone"),
-	        _tr("Blur"),
-	        _tr("Particle"),
-	        _tr("ColorID"),
-	        _tr("Picker"),
-	        _tr("Material"),
-	        _tr("Cursor"),
-	        _tr("Select"),
+	        _tr("Brush"),   _tr("Eraser"), _tr("Fill"),     _tr("Decal"),   _tr("Text"),   _tr("Clone"), _tr("Blur"),  _tr("Particle"),
+	        _tr("ColorID"), _tr("Picker"), _tr("Material"), _tr("Cursor"),  _tr("Select"), _tr("Empty"), _tr("Plane"), _tr("Cube"),
+	        _tr("Sphere"),  _tr("Cone"),   _tr("Cylinder"), _tr("Capsule"), _tr("Torus"),  _tr("Text"),  _tr("Path"),  _tr("Curve"),
 	        _tr("Bake"), // Hidden, used by Bake Texture node
 	    },
-	    14);
+	    25);
 	ui_toolbar_tool_names->length--; // Hide Bake tool
 
 	ui_toolbar_tooltip_extras = any_array_create_from_raw(
@@ -320,8 +313,19 @@ void _kickstart() {
 	        "",
 	        "",
 	        "",
+	        "",
+	        "",
+	        "",
+	        "",
+	        "",
+	        "",
+	        "",
+	        "",
+	        "",
+	        "",
+	        "",
 	    },
-	    13);
+	    24);
 
 	uniforms_ext_ortho_p    = mat4_ortho(-0.5, 0.5, -0.5, 0.5, -0.5, 0.5);
 	import_mesh_importers   = any_map_create();

@@ -253,20 +253,31 @@ typedef enum {
 } layer_slot_type_t;
 
 typedef enum {
-	TOOL_TYPE_BRUSH    = 0,
-	TOOL_TYPE_ERASER   = 1,
-	TOOL_TYPE_FILL     = 2,
-	TOOL_TYPE_DECAL    = 3,
-	TOOL_TYPE_TEXT     = 4,
-	TOOL_TYPE_CLONE    = 5,
-	TOOL_TYPE_BLUR     = 6,
-	TOOL_TYPE_PARTICLE = 7,
-	TOOL_TYPE_COLORID  = 8,
-	TOOL_TYPE_PICKER   = 9,
-	TOOL_TYPE_MATERIAL = 10,
-	TOOL_TYPE_CURSOR   = 11,
-	TOOL_TYPE_SELECT   = 12,
-	TOOL_TYPE_BAKE     = 13, // Hidden, used by Bake Texture node
+	TOOL_TYPE_BRUSH     = 0,
+	TOOL_TYPE_ERASER    = 1,
+	TOOL_TYPE_FILL      = 2,
+	TOOL_TYPE_DECAL     = 3,
+	TOOL_TYPE_TEXT      = 4,
+	TOOL_TYPE_CLONE     = 5,
+	TOOL_TYPE_BLUR      = 6,
+	TOOL_TYPE_PARTICLE  = 7,
+	TOOL_TYPE_COLORID   = 8,
+	TOOL_TYPE_PICKER    = 9,
+	TOOL_TYPE_MATERIAL  = 10,
+	TOOL_TYPE_CURSOR    = 11,
+	TOOL_TYPE_SELECT    = 12,
+	TOOL_TYPE_EMPTY     = 13, // Object tools only, see util_tool_is_object_tool
+	TOOL_TYPE_PLANE     = 14,
+	TOOL_TYPE_CUBE      = 15,
+	TOOL_TYPE_SPHERE    = 16,
+	TOOL_TYPE_CONE      = 17,
+	TOOL_TYPE_CYLINDER  = 18,
+	TOOL_TYPE_CAPSULE   = 19,
+	TOOL_TYPE_TORUS     = 20,
+	TOOL_TYPE_TEXT_MESH = 21,
+	TOOL_TYPE_PATH      = 22,
+	TOOL_TYPE_CURVE     = 23,
+	TOOL_TYPE_BAKE      = 24, // Hidden, used by Bake Texture node
 } tool_type_t;
 
 typedef enum {
@@ -487,9 +498,9 @@ typedef enum {
 	ICON_TERMINAL         = 129,
 	ICON_TRANSLATE        = 130,
 	ICON_UPLOAD           = 131,
-	ICON_RESERVED0        = 132,
-	ICON_RESERVED1        = 133,
-	ICON_RESERVED2        = 134,
+	ICON_EMPTY            = 132,
+	ICON_CAPSULE          = 133,
+	ICON_TEXT3D           = 134,
 	ICON_RESERVED3        = 135,
 	ICON_RESERVED4        = 136,
 	ICON_WORKSPACE        = 137,

@@ -431,6 +431,7 @@ void render_path_paint_commands_paint(bool dilation) {
 
 			render_target_t *rt    = any_map_get(render_path_render_targets, "texpaint_picker");
 			buffer_t        *pixel = gpu_get_texture_pixels(rt->_image);
+			bool             hit   = false;
 			if (buffer_get_u8(pixel, 3) > 0) {
 #ifdef IRON_BGRA
 				i32 r_byte = buffer_get_u8(pixel, 2);
@@ -439,7 +440,11 @@ void render_path_paint_commands_paint(bool dilation) {
 #endif
 				i32 index = r_byte - 1;
 				if (index >= 0 && index < g_project->_->paint_objects->length) {
+					hit                       = true;
+					context_deselected_uid    = -1;
 					g_context->paint_object   = g_project->_->paint_objects->buffer[index];
+					// Only the clicked mesh stays selected
+					tab_meshes_select_objects(any_array_create_from_raw((void *[]){g_context->paint_object}, 1));
 					ui_header_handle->redraws = 2;
 					tab_meshes_reveal_slot(g_context->paint_object);
 
@@ -450,6 +455,11 @@ void render_path_paint_commands_paint(bool dilation) {
 
 					base_redraw_status();
 				}
+			}
+			if (!hit) {
+				// Nothing to outline, the mesh stays selected in the meshes tab
+				context_deselected_uid = g_context->paint_object->base->uid;
+				g_context->ddirty      = 2;
 			}
 
 			g_context->pick_object_id = false;

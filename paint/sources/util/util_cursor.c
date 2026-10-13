@@ -124,5 +124,9 @@ void util_cursor_render(void *_) {
 		draw_scaled_image(cursor_img, mx - radius / 2.0, my - radius / 2.0, radius, radius);
 		draw_set_color(0xffffffff);
 	}
+	render_gizmo_render_rect();
+	util_shape_tool_render();
+	util_text_tool_render();
+	util_path_tool_render();
 	draw_end();
 }

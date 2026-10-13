@@ -117,6 +117,7 @@ static void tab_meshes_select_range(i32 from, i32 to) {
 		tab_meshes_selected = i32_array_create(0);
 	}
 	tab_meshes_selected->length = 0;
+	context_deselected_uid      = -1;
 	for (i32 i = from < to ? from : to; i <= (from < to ? to : from); ++i) {
 		mesh_object_t *o = g_project->_->paint_objects->buffer[i];
 		if (!tab_meshes_slot_hidden(o) || o == g_context->paint_object) {
@@ -128,6 +129,7 @@ static void tab_meshes_select_range(i32 from, i32 to) {
 static void tab_meshes_set_selected(mesh_object_t_array_t *objects) {
 	if (objects->length > 0) {
 		tab_meshes_clear_selected();
+		context_deselected_uid = -1;
 		if (array_index_of(objects, g_context->paint_object) < 0) {
 			g_context->paint_object = objects->buffer[0];
 		}
@@ -144,6 +146,17 @@ static void tab_meshes_set_selected(mesh_object_t_array_t *objects) {
 		ui_dock_redraw(TAB_AREA_SIDEBAR0);
 	}
 	array_delete(objects);
+}
+
+// Selection made in the viewport, nothing is outlined when it is empty
+void tab_meshes_select_objects(mesh_object_t_array_t *objects) {
+	if (objects->length == 0) {
+		tab_meshes_clear_selected();
+		context_deselected_uid    = g_context->paint_object->base->uid;
+		ui_header_handle->redraws = 2;
+		ui_dock_redraw(TAB_AREA_SIDEBAR0);
+	}
+	tab_meshes_set_selected(objects);
 }
 
 static void tab_meshes_select_visible(bool visible) {
@@ -811,6 +824,96 @@ static bool tab_meshes_menu_origin(mesh_object_t *o) {
 	return false;
 }
 
+static mesh_object_t *tab_meshes_modifier_object = NULL;
+static ui_node_t     *tab_meshes_modifier_node   = NULL;
+
+static void tab_meshes_draw_modifier_menu() {
+	// Values of a mesh node, applied to the mesh and its children
+	ui_node_t *node = tab_meshes_modifier_node;
+	ui_menu_label(tr(node->name), NULL);
+
+	for (i32 i = 0; i < node->buttons->length; ++i) {
+		ui_node_button_t *but = node->buttons->buffer[i];
+		f32              *v   = but->default_value->buffer;
+		if (string_equals(but->type, "BOOL")) {
+			bool b = v[0] > 0;
+			ui_check(&b, tr(but->name), "");
+			v[0] = b ? 1 : 0;
+		}
+		else if (string_equals(but->type, "ENUM") && but->data != NULL) {
+			string_array_t *texts = string_split((char *)but->data->buffer, "\n");
+			i32             value = (i32)v[0];
+			ui_set_next_id((ui_id_t)but);
+			ui_combo(&value, texts, tr(but->name), true, UI_ALIGN_LEFT, false);
+			v[0] = value;
+			string_split_free(texts);
+		}
+	}
+
+	for (i32 i = 0; i < node->inputs->length; ++i) {
+		ui_node_socket_t *soc = node->inputs->buffer[i];
+		f32              *v   = soc->default_value->buffer;
+		if (string_equals(soc->type, "VECTOR")) {
+			ui_row4();
+			ui_text(tr(soc->name), UI_ALIGN_LEFT, 0x00000000);
+			tab_meshes_float_input(&v[0], &v[0], "X");
+			tab_meshes_float_input(&v[1], &v[1], "Y");
+			tab_meshes_float_input(&v[2], &v[2], "Z");
+		}
+		else if (string_equals(soc->type, "VALUE")) {
+			ui_slider(&v[0], tr(soc->name), soc->min, soc->max, true, soc->precision, true, UI_ALIGN_LEFT, true);
+		}
+	}
+
+	bool changed = g_ui->changed || g_ui->is_typing;
+
+	if (ui_menu_button(tr("Apply"), "", ICON_CHECK)) {
+		mesh_object_t *o = tab_meshes_modifier_object;
+		if (array_index_of(g_project->_->paint_objects, o) >= 0) {
+			mesh_object_t_array_t *objects = util_mesh_get_hierarchy(o);
+			for (i32 i = 0; i < objects->length; ++i) {
+				nodes_mesh_apply_modifier(objects->buffer[i]);
+			}
+			array_delete(objects);
+		}
+		return;
+	}
+
+	// Stays open while the values are edited
+	i32 padding = ui_menu_padding();
+	if (changed || (g_ui->input_x >= ui_menu_x && g_ui->input_x < ui_menu_x + g_ui->_w + padding * 2 && g_ui->input_y >= ui_menu_y &&
+	                g_ui->input_y < ui_menu_y + ui_menu_h + padding * 2 && !g_ui->is_escape_down)) {
+		ui_menu_keep_open = true;
+	}
+}
+
+static void tab_meshes_menu_modifiers(mesh_object_t *o) {
+	if (!ui_menu_sub_button(tr("Modifiers"))) {
+		return;
+	}
+	// The modifiers of the mesh nodes
+	nodes_mesh_init();
+	i32 count = 0;
+	for (i32 i = 0; i < nodes_mesh_modifier->length; ++i) {
+		if (!string_equals(nodes_mesh_modifier->buffer[i]->type, "MESH_SCRIPT")) {
+			count++;
+		}
+	}
+	ui_menu_sub_begin(count);
+	for (i32 i = 0; i < nodes_mesh_modifier->length; ++i) {
+		ui_node_t *def = nodes_mesh_modifier->buffer[i];
+		if (string_equals(def->type, "MESH_SCRIPT")) {
+			continue;
+		}
+		if (ui_menu_button(tr(def->name), "", ICON_NONE)) {
+			tab_meshes_modifier_object = o;
+			tab_meshes_modifier_node   = nodes_mesh_modifier_node(def);
+			ui_menu_draw(&tab_meshes_draw_modifier_menu, -1, -1);
+		}
+	}
+	ui_menu_sub_end();
+}
+
 void tab_meshes_draw_context_menu_selected() {
 	if (tab_meshes_menu_delete()) {
 		return;
@@ -898,10 +1001,23 @@ void tab_meshes_draw_context_menu() {
 		ui_menu_sub_end();
 	}
 
+	tab_meshes_menu_modifiers(o);
+
 	if (ui_menu_button(tr("Apply Displacement"), "", ICON_NONE)) {
 		mesh_object_t_array_t *objects = util_mesh_get_hierarchy(o);
 		util_mesh_apply_displacement(objects, g_project->_->layers->buffer[0]->texpaint_pack, 0.1, 1.0);
 		util_mesh_calc_normals(objects, false);
+		g_context->ddirty = 2;
+		return;
+	}
+
+	if (ui_menu_button(tr("Apply Transform"), "", ICON_NONE)) {
+		mesh_object_t_array_t *objects = util_mesh_get_hierarchy(o);
+		util_mesh_apply_transform(o);
+		for (i32 j = 0; j < objects->length; ++j) {
+			tab_meshes_delete_preview(objects->buffer[j]);
+		}
+		array_delete(objects);
 		g_context->ddirty = 2;
 		return;
 	}
@@ -1081,31 +1197,16 @@ void tab_meshes_draw_edit() {
 }
 
 mesh_object_t *tab_meshes_append_shape(char *mesh_name) {
-	scene_t     *scene_raw = NULL;
-	mesh_data_t *raw       = NULL;
-	if (string_equals(mesh_name, "sphere")) {
-		raw_mesh_t *mesh = geom_make_uv_sphere(1, 128, 64, true, 1.0);
-		raw              = import_mesh_raw_mesh(mesh);
+	mesh_data_t *md = util_shape_make_data(mesh_name);
+	if (md != NULL) {
+		return tab_meshes_append_data(md, NULL);
 	}
-	else if (string_equals(mesh_name, "sphere_2048")) {
-		raw_mesh_t *mesh = geom_make_uv_sphere(1, 4096, 2048, true, 1.0);
-		raw              = import_mesh_raw_mesh(mesh);
-	}
-	else if (string_equals(mesh_name, "plane")) {
-		raw_mesh_t *mesh = geom_make_plane(1, 1, 2, 2, 1.0);
-		raw              = import_mesh_raw_mesh(mesh);
-	}
-	else if (string_equals(mesh_name, "plane_2048")) {
-		raw_mesh_t *mesh = geom_make_plane(1, 1, 2048, 2048, 1.0);
-		raw              = import_mesh_raw_mesh(mesh);
-	}
-	else {
-		buffer_t *b = iron_load_blob(string("%smeshes/%s.arm", data_path(), mesh_name));
-		scene_raw   = armpack_decode(b);
-		raw         = scene_raw->mesh_datas->buffer[0];
-	}
+	buffer_t *b         = iron_load_blob(string("%smeshes/%s.arm", data_path(), mesh_name));
+	scene_t  *scene_raw = armpack_decode(b);
+	return tab_meshes_append_data(mesh_data_create(scene_raw->mesh_datas->buffer[0]), scene_raw);
+}
 
-	mesh_data_t   *md = mesh_data_create(raw);
+mesh_object_t *tab_meshes_append_data(mesh_data_t *md, void *gc) {
 	mesh_object_t *mo = scene_add_mesh_object(md, g_project->_->paint_objects->buffer[0]->material, NULL);
 
 	// The shape stays at the scene root
@@ -1115,7 +1216,7 @@ mesh_object_t *tab_meshes_append_shape(char *mesh_name) {
 	mo->base->name = string_copy(_import_mesh_unique_name(md->name));
 
 	obj_t *o      = ALLOC_INIT(obj_t, {0});
-	o->_          = ALLOC_INIT(obj_runtime_t, {._gc = scene_raw});
+	o->_          = ALLOC_INIT(obj_runtime_t, {._gc = gc});
 	mo->base->raw = o;
 	any_array_push(g_project->_->paint_objects, mo);
 	tab_stages_add_object(mo->base->name);
@@ -1137,8 +1238,10 @@ static icon_t tab_meshes_mesh_name_to_icon(char *s) {
 		return ICON_PLANE;
 	if (starts_with(s, "sphere"))
 		return ICON_UVSPHERE;
+	if (starts_with(s, "capsule"))
+		return ICON_CAPSULE;
 	if (starts_with(s, "empty"))
-		return ICON_GIZMO;
+		return ICON_EMPTY;
 	return ICON_NONE;
 }
 
@@ -1413,6 +1516,9 @@ void tab_meshes_draw_mesh_slot(mesh_object_t *o, i32 i) {
 		               g_ui->input_y > g_ui->_window_y + g_ui->window_header_h;
 		if (hovered) {
 			ui_tooltip(tab_meshes_mesh_info(o, i));
+			if (g_ui->input_started || g_ui->input_released_r) {
+				context_deselected_uid = -1;
+			}
 			if (g_ui->input_started && g_ui->is_ctrl_down) {
 				tab_meshes_select_toggle(o);
 				ui_header_handle->redraws = 2;

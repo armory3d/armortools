@@ -98,8 +98,8 @@ static mesh_geo_t *nodes_mesh_shape_cap(i32 segments, f32 z) {
 		g->pos[i * 3 + 1] = math_sin(theta) * r;
 		g->pos[i * 3 + 2] = z;
 		g->nor[i * 3 + 2] = z > 0.0 ? 1.0 : -1.0;
-		g->tex[i * 2]     = g->pos[i * 3] + 0.5;
-		g->tex[i * 2 + 1] = 0.5 - g->pos[i * 3 + 1];
+		g->tex[i * 2]     = (z > 0.0 ? 0.25 : 0.75) + g->pos[i * 3] * 0.5;
+		g->tex[i * 2 + 1] = 0.25 - g->pos[i * 3 + 1] * 0.5;
 	}
 	for (i32 i = 0; i < segments; ++i) {
 		g->ind[i * 3]     = segments + 1;
@@ -125,8 +125,9 @@ static mesh_geo_t *nodes_mesh_shape_box() {
 			g->pos[vi * 3 + u]    = cu[corner];
 			g->pos[vi * 3 + v]    = cv[corner];
 			g->nor[vi * 3 + axis] = sign;
-			g->tex[vi * 2]        = cu[corner] + 0.5;
-			g->tex[vi * 2 + 1]    = 0.5 - cv[corner];
+			// Faces are laid out in a 3x2 grid
+			g->tex[vi * 2]     = (face % 3 + cu[corner] + 0.5) / 3.0;
+			g->tex[vi * 2 + 1] = (face / 3 + 0.5 - cv[corner]) / 3.0;
 		}
 		u32 quad[6] = {0, 1, 2, 0, 2, 3};
 		for (i32 i = 0; i < 6; ++i) {
@@ -134,6 +135,13 @@ static mesh_geo_t *nodes_mesh_shape_box() {
 		}
 	}
 	return g;
+}
+
+// Moves the side of a capped shape into the lower half of the texture
+static void nodes_mesh_shape_side_uvs(mesh_geo_t *g) {
+	for (i32 i = 0; i < g->vertex_count; ++i) {
+		g->tex[i * 2 + 1] = 0.5 + g->tex[i * 2 + 1] * 0.5;
+	}
 }
 
 mesh_geo_t *nodes_mesh_shape(i32 shape, f32 *size, i32 segments) {
@@ -144,11 +152,13 @@ mesh_geo_t *nodes_mesh_shape(i32 shape, f32 *size, i32 segments) {
 	}
 	else if (shape == 2) {
 		g = nodes_mesh_shape_grid(segments, 1, nodes_mesh_shape_cylinder);
+		nodes_mesh_shape_side_uvs(g);
 		g = nodes_mesh_geo_join(g, nodes_mesh_shape_cap(segments, 0.5));
 		g = nodes_mesh_geo_join(g, nodes_mesh_shape_cap(segments, -0.5));
 	}
 	else if (shape == 3) {
 		g = nodes_mesh_shape_grid(segments, 1, nodes_mesh_shape_cone);
+		nodes_mesh_shape_side_uvs(g);
 		g = nodes_mesh_geo_join(g, nodes_mesh_shape_cap(segments, -0.5));
 	}
 	else if (shape == 4) {

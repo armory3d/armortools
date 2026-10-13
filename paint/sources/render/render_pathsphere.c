@@ -112,7 +112,36 @@ static void create_pathsphere_object() {
 	render_pathsphere_obj->frustum_culling = false;
 }
 
+// Points of the path and curve object tools
+void render_pathsphere_tool() {
+	if (base_player || g_context->capturing_screenshot || g_context->paint2d) {
+		return;
+	}
+	i32     count;
+	i32     active;
+	vec4_t *points = util_path_tool_get_points(&count, &active);
+	if (count == 0) {
+		return;
+	}
+	if (render_pathsphere_obj == NULL) {
+		create_pathsphere_object();
+	}
+	render_pathsphere_obj->base->visible = true;
+	for (i32 i = 0; i < count; i++) {
+		f32 dist  = vec4_dist(scene_camera->base->transform->loc, points[i]);
+		f32 scale = dist / 8.0f * scene_camera->data->fov * 0.1f * (i == active ? 1.5f : 1.0f);
+
+		render_pathsphere_obj->base->transform->loc   = points[i];
+		render_pathsphere_obj->base->transform->scale = (vec4_t){scale, scale, scale, 1.0};
+		transform_build_matrix(render_pathsphere_obj->base->transform);
+		mesh_object_render(render_pathsphere_obj, "overlay", NULL);
+	}
+	render_pathsphere_obj->base->visible = false;
+}
+
 void render_pathsphere() {
+	render_pathsphere_tool();
+
 	if (base_player || g_context->capturing_screenshot || g_context->paint2d) {
 		return;
 	}

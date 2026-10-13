@@ -164,6 +164,9 @@ void ui_base_update(void *_) {
 		util_touch_update();
 		util_stencil_transform();
 		util_select_update();
+		util_shape_tool_update();
+		util_text_tool_update();
+		util_path_tool_update();
 		util_layer_check_path_grab();
 		util_brush_update();
 		util_layer_update_preview();

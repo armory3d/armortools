@@ -91,6 +91,7 @@ void project_save_as(bool save_and_quit) {
 void project_cleanup() {
 	util_mesh_remove_merged();
 	nodes_mesh_reset();
+	util_path_tool_reset();
 
 	if (g_project->_->paint_objects != NULL) {
 		for (i32 i = 0; i < g_project->_->paint_objects->length; ++i) {
@@ -149,39 +150,18 @@ void project_new(bool reset_layers) {
 	g_context->texture             = NULL;
 	g_project->mesh_assets         = any_array_create_from_raw((void *[]){}, 0);
 
-	mesh_data_t *raw        = NULL;
 	bool         no_default = project_default_mesh_list == NULL || g_context->project_type == -1;
 	char        *mesh_name  = no_default ? "cube_bevel" : project_default_mesh_list->buffer[g_context->project_type];
 
-	if (string_equals(mesh_name, "sphere")) {
-		raw_mesh_t *mesh = geom_make_uv_sphere(1, 128, 64, true, 1.0);
-		mesh->name       = "Tessellated";
-		raw              = import_mesh_raw_mesh(mesh);
-	}
-	else if (string_equals(mesh_name, "sphere_2048")) {
-		raw_mesh_t *mesh = geom_make_uv_sphere(1, 4096, 2048, true, 1.0);
-		mesh->name       = "Tessellated";
-		raw              = import_mesh_raw_mesh(mesh);
-	}
-	else if (string_equals(mesh_name, "plane")) {
-		raw_mesh_t *mesh = geom_make_plane(1, 1, 2, 2, 1.0);
-		mesh->name       = "Tessellated";
-		raw              = import_mesh_raw_mesh(mesh);
-		// viewport_set_view(0, 0, 0.75, 0, 0, 0); // Top
-	}
-	else if (string_equals(mesh_name, "plane_2048")) {
-		raw_mesh_t *mesh = geom_make_plane(1, 1, 2048, 2048, 1.0);
-		mesh->name       = "Tessellated";
-		raw              = import_mesh_raw_mesh(mesh);
-		// viewport_set_view(0, 0, 0.75, 0, 0, 0); // Top
+	mesh_data_t *md = util_shape_make_data(mesh_name);
+	if (md != NULL) {
+		md->name = "Tessellated";
 	}
 	else {
 		buffer_t *b            = data_get_blob(string("meshes/%s.arm", mesh_name));
 		_project_scene_mesh_gc = armpack_decode(b);
-		raw                    = _project_scene_mesh_gc->mesh_datas->buffer[0];
+		md                     = mesh_data_create(_project_scene_mesh_gc->mesh_datas->buffer[0]);
 	}
-
-	mesh_data_t *md = mesh_data_create(raw);
 
 	gpu_texture_t *current = _draw_current;
 	bool           in_use  = gpu_in_use;

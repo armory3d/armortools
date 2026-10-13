@@ -358,7 +358,7 @@ void base_update(void *_) {
 
 	base_handle_drop_paths();
 
-	if (g_context->tool == TOOL_TYPE_CURSOR && context_in_3d_view()) {
+	if (g_context->tool == TOOL_TYPE_CURSOR && context_in_3d_view() && !context_object_deselected()) {
 		if (keyboard_down("control") && keyboard_started("d")) {
 			util_mesh_duplicate();
 		}
@@ -1013,6 +1013,9 @@ void base_update_tools() {
 
 	if (g_config->tools == TOOLS_OBJECT) {
 		context_select_tool(TOOL_TYPE_CURSOR);
+	}
+	else if (util_tool_is_object_tool(g_context->tool)) {
+		context_select_tool(TOOL_TYPE_BRUSH);
 	}
 
 	if (g_config->tools == TOOLS_SCULPT) {

@@ -515,6 +515,30 @@ void ui_header_draw_tool_properties() {
 		g_ui->enabled = true;
 	}
 
+	if (util_shape_tool_has_segments(g_context->tool)) {
+		f32 *segments = &util_shape_tool_segments[g_context->tool - TOOL_TYPE_EMPTY];
+		ui_slider(segments, tr("Segments"), g_context->tool == TOOL_TYPE_PLANE ? 1.0 : 3.0, 256.0, true, 1.0, true, UI_ALIGN_RIGHT, true);
+	}
+
+	if (g_context->tool == TOOL_TYPE_TEXT_MESH) {
+		if (g_context->text_tool_text == NULL) {
+			g_context->text_tool_text = "";
+		}
+		ui_id_t text_id = ui_widget_id(&g_context->text_tool_text, UI_ID_TEXT);
+		i32     w       = g_ui->_w;
+		if (g_ui->text_selected_id == text_id || g_ui->submit_text_id == text_id) {
+			g_ui->_w *= 3;
+		}
+		ui_text_input(&g_context->text_tool_text, "", UI_ALIGN_LEFT, true, true);
+		g_ui->_w = w;
+		ui_slider(&util_text_tool_size, tr("Size"), 0.05, 2.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
+		ui_slider(&util_text_tool_depth, tr("Depth"), 0.01, 1.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
+	}
+
+	if (g_context->tool == TOOL_TYPE_PATH || g_context->tool == TOOL_TYPE_CURVE) {
+		ui_slider(&util_path_tool_radius, tr("Radius"), 0.01, 0.5, true, 100.0, true, UI_ALIGN_RIGHT, true);
+	}
+
 	if (g_context->tool == TOOL_TYPE_CURSOR) {
 		string_array_t *cursor_mode_combo = any_array_create_from_raw_tmp(
 		    (void *[]){

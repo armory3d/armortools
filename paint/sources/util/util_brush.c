@@ -30,7 +30,7 @@ void util_brush_update() {
 		down = false;
 	}
 
-	if (g_context->tool == TOOL_TYPE_SELECT) {
+	if (g_context->tool == TOOL_TYPE_SELECT || util_tool_is_object_tool(g_context->tool)) {
 		down = false;
 	}
 
