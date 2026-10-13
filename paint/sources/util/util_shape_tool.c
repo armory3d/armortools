@@ -378,18 +378,18 @@ void util_tool_draw_line(vec4_t a, vec4_t b) {
 		// Keep both ends in front of the perspective camera
 		vec4_t eye  = mat4_get_loc(cam->base->transform->world);
 		vec4_t look = camera_object_look_world(cam);
-		f32    near = cam->data->near_plane;
+		f32    zn   = cam->data->near_plane;
 		f32    za   = vec4_dot(vec4_sub(a, eye), look);
 		f32    zb   = vec4_dot(vec4_sub(b, eye), look);
-		if (za < near && zb < near) {
+		if (za < zn && zb < zn) {
 			return;
 		}
 		vec4_t dir = vec4_sub(b, a);
-		if (za < near) {
-			a = vec4_add(a, vec4_mult(dir, (near - za) / (zb - za)));
+		if (za < zn) {
+			a = vec4_add(a, vec4_mult(dir, (zn - za) / (zb - za)));
 		}
-		else if (zb < near) {
-			b = vec4_add(a, vec4_mult(dir, (near - za) / (zb - za)));
+		else if (zb < zn) {
+			b = vec4_add(a, vec4_mult(dir, (zn - za) / (zb - za)));
 		}
 	}
 	a.w = 1.0;
