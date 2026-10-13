@@ -468,8 +468,10 @@ void ui_draw_round_bottom(float x, float y, float w) {
 }
 
 bool ui_is_char(int code) {
-	return (code >= 65 && code <= 90) || (code >= 97 && code <= 122);
+	return (code >= 65 && code <= 90) || (code >= 97 && code <= 122) || code == '_';
 }
+
+void (*ui_text_coloring_draw)(char *text, char *rest, float x, float y) = NULL;
 
 int ui_check_start(int i, char *text, char **start, int start_count) {
 	for (int x = 0; x < start_count; ++x) {
@@ -601,6 +603,9 @@ void ui_draw_string(char *text, float x_offset, float y_offset, int align, bool 
 				draw_string(result.colored, current->_x + x_offset, current->_y + current->font_offset_y + y_offset);
 			}
 			strcpy(temp, result.uncolored);
+		}
+		if (ui_text_coloring_draw != NULL) {
+			ui_text_coloring_draw(text, temp, current->_x + x_offset, current->_y + current->font_offset_y + y_offset);
 		}
 		draw_set_color(current->text_coloring->default_color);
 		draw_string(temp, current->_x + x_offset, current->_y + current->font_offset_y + y_offset);

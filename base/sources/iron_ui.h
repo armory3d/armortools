@@ -449,6 +449,7 @@ extern bool                ui_text_area_line_numbers;
 extern bool                ui_text_area_scroll_past_end;
 extern ui_text_coloring_t *ui_text_area_coloring;
 extern char               *ui_text_area_search;
+extern void (*ui_text_coloring_draw)(char *text, char *rest, float x, float y);
 
 typedef struct ui_canvas_control {
 	float pan_x;
