@@ -2575,6 +2575,10 @@ render_target_t *render_path_create_render_target(render_target_t *t) {
 		render_path_render_targets = any_map_create();
 	}
 	t->_image = render_path_create_image(t);
+	if (t->width == 0 && _render_path_last_w == 0) {
+		_render_path_last_w = sys_w();
+		_render_path_last_h = sys_h();
+	}
 	any_map_set(render_path_render_targets, t->name, t);
 	return t;
 }
