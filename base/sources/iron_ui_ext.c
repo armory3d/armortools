@@ -245,7 +245,7 @@ static gpu_texture_t *ui_color_wheel_gradient_get_texture() {
 	return ui_color_wheel_gradient_texture;
 }
 
-int ui_color_wheel(uint32_t *value,ui_color_state_t *state, bool alpha, float w, float h, bool color_preview, void (*picker)(void *), void *data) {
+int ui_color_wheel(uint32_t *value, ui_color_state_t *state, bool alpha, float w, float h, bool color_preview, void (*picker)(void *), void *data) {
 	ui_t   *current  = ui_get_current();
 	ui_id_t id       = ui_widget_id(value, UI_ID_COLOR);
 	current->next_id = 0;
@@ -536,6 +536,11 @@ void ui_text_area_clear_selection() {
 	text_area_selection_start = -1;
 }
 
+// Line where the multi-line selection started, -1 when there is none
+int ui_text_area_selection_line() {
+	return text_area_selection_start;
+}
+
 static void handle_line_select(ui_t *current, int *line_index) {
 	if (current->is_shift_down) {
 		if (text_area_selection_start == -1) {
@@ -698,7 +703,7 @@ void ui_text_area_draw_line_numbers(int line_count) {
 	current->_y     = _y;
 
 	sprintf(s, "%d", line_count);
-	float numbers_w = (strlen(s) * 16 + 4) * UI_SCALE();
+	float numbers_w = draw_string_width(current->ops->font, current->font_size, s) + 24 * UI_SCALE();
 	current->_x += numbers_w;
 	current->_w -= numbers_w - UI_SCROLL_W();
 }
@@ -788,8 +793,9 @@ char *ui_text_area(char **value, int *line_index, int align, bool editable, char
 	if (ui_text_area_line_numbers) {
 		ui_text_area_draw_line_numbers(line_count);
 	}
-	int cursor_start_x  = current->cursor_x;
-	int active_line_len = selected ? (int)strlen(ui_extract_line(lines, (*line_index))) : 0;
+	int  cursor_start_x  = current->cursor_x;
+	bool has_selection   = current->cursor_x != current->highlight_anchor; // Backspace and delete remove the selection only, the new line stays
+	int  active_line_len = selected ? (int)strlen(ui_extract_line(lines, (*line_index))) : 0;
 
 	ui_theme_t *theme = current->ops->theme;
 	draw_set_color(theme->SEPARATOR_COL); // Background
@@ -1125,14 +1131,15 @@ char *ui_text_area(char **value, int *line_index, int align, bool editable, char
 			scroll_align(current, line_index);
 		}
 		// Delete line
-		if (editable && current->key_code == KEY_CODE_BACKSPACE && cursor_start_x == 0 && (*line_index) > 0 && text_area_selection_start == -1) {
+		if (editable && current->key_code == KEY_CODE_BACKSPACE && cursor_start_x == 0 && !has_selection && (*line_index) > 0 &&
+		    text_area_selection_start == -1) {
 			(*line_index)--;
 			current->cursor_x = current->highlight_anchor = strlen(ui_extract_line(lines, (*line_index)));
 			ui_remove_chars_at(lines, ui_line_pos(lines, (*line_index) + 1) - 1, 1); // Remove '\n' of the previous line
 			scroll_align(current, line_index);
 		}
 		// Delete line
-		if (editable && current->key_code == KEY_CODE_DELETE && (*line_index) < line_count - 1 && cursor_start_x == active_line_len &&
+		if (editable && current->key_code == KEY_CODE_DELETE && (*line_index) < line_count - 1 && cursor_start_x == active_line_len && !has_selection &&
 		    text_area_selection_start == -1) {
 			current->highlight_anchor = current->cursor_x;
 			ui_remove_chars_at(lines, ui_line_pos(lines, (*line_index) + 1) - 1, 1); // Remove '\n' at end of current line
