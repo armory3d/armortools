@@ -655,7 +655,10 @@ static int stbtt_BakeFontBitmapArr(unsigned char *data, int offset,       // Fon
 	return bottom_y;
 }
 
+int draw_font_get_char_index_internal(int char_code);
+
 bool draw_font_load(draw_font_t *font, int size) {
+	draw_font_init(font); // Drop images baked before the glyph set changed
 	if (!draw_prepare_font_load_internal(font, size)) {
 		return true;
 	}
@@ -687,6 +690,13 @@ bool draw_font_load(draw_font_t *font, int size) {
 	int            ascent, descent, line_gap;
 	stbtt_InitFont(&info, font->blob, font->offset);
 	stbtt_GetFontVMetrics(&info, &ascent, &descent, &line_gap);
+	// Glyphs not present in the font draw as '?'
+	stbtt_bakedchar missing = baked[draw_font_get_char_index_internal('?')];
+	for (int i = 0; i < draw_font_glyphs->length; ++i) {
+		if (draw_font_glyphs->buffer[i] > 126 && stbtt_FindGlyphIndex(&info, draw_font_glyphs->buffer[i]) == 0) {
+			baked[i] = missing;
+		}
+	}
 	float scale         = stbtt_ScaleForPixelHeight(&info, (float)size);
 	img->m_size         = (float)size;
 	img->baseline       = (float)((int)((float)ascent * scale + 0.5f));
@@ -703,31 +713,27 @@ bool draw_font_load(draw_font_t *font, int size) {
 }
 
 gpu_texture_t *draw_font_get_texture(draw_font_t *font, int size) {
+	draw_font_load(font, size);
 	draw_font_image_t *img = draw_font_get_image_internal(font, size);
 	return img->tex;
 }
 
-int draw_font_get_char_index_internal(int char_index) {
-	if (draw_font_glyphs->length <= 0) {
-		return 0;
-	}
-	int offset = draw_font_glyph_blocks->buffer[0];
-	if (char_index < offset) {
-		return 0;
-	}
-
-	for (int i = 1; i < draw_font_glyph_blocks->length / 2; ++i) {
-		int prev_end = draw_font_glyph_blocks->buffer[i * 2 - 1];
-		int start    = draw_font_glyph_blocks->buffer[i * 2];
-		if (char_index > start - 1) {
-			offset += start - 1 - prev_end;
+int draw_font_get_char_index_internal(int char_code) {
+	int offset = 0;
+	for (int i = 0; i < draw_font_glyph_blocks->length / 2; ++i) {
+		int start = draw_font_glyph_blocks->buffer[i * 2];
+		int end   = draw_font_glyph_blocks->buffer[i * 2 + 1];
+		if (char_code < start) {
+			break;
 		}
+		if (char_code <= end) {
+			return offset + char_code - start;
+		}
+		offset += end - start + 1;
 	}
-
-	if (char_index - offset >= draw_font_glyphs->length) {
-		return 0;
-	}
-	return char_index - offset;
+	// Control characters draw as space, missing glyphs as '?'
+	int fallback = char_code < ' ' ? ' ' : '?';
+	return char_code == fallback ? 0 : draw_font_get_char_index_internal(fallback);
 }
 
 bool draw_font_get_baked_quad(draw_font_t *font, int size, draw_font_aligned_quad_t *q, int char_code, float xpos, float ypos) {
@@ -758,6 +764,7 @@ bool draw_font_get_baked_quad(draw_font_t *font, int size, draw_font_aligned_qua
 }
 
 void draw_string(const char *text, float x, float y) {
+	draw_font_load(draw_font, draw_font_size);
 	draw_font_image_t       *img  = draw_font_get_image_internal(draw_font, draw_font_size);
 	float                    xpos = x;
 	float                    ypos = y + img->baseline;
