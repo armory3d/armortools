@@ -445,6 +445,7 @@ mesh_data_t           *import_mesh_raw_mesh(raw_mesh_t *mesh);
 void                   ui_menubar_init();
 i32                    ui_menu_top_y();
 void                   ui_menubar_render_ui();
+void                   ui_menubar_update_w();
 bool                   ui_menubar_icon_button(i32 i);
 char                  *_tr(char *s);
 char                  *vtr(char *id, any_map_t *vars);

@@ -213,6 +213,7 @@ void ui_base_update(void *_) {
 	}
 
 	ui_begin(g_ui);
+	ui_menubar_update_w();
 	ui_dock_render_ui();
 	ui_toolbar_render_ui();
 	ui_menubar_render_ui();

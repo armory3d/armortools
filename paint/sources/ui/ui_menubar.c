@@ -849,6 +849,35 @@ void ui_menubar_show_menu(i32 category) {
 	}
 }
 
+static string_array_t *ui_menubar_categories() {
+	return any_array_create_from_raw_tmp(
+	    (void *[]){
+	        tr("File"),
+	        tr("Edit"),
+	        tr("Viewport"),
+	        tr("Mode"),
+	        tr("Camera"),
+	        tr("Window"),
+	        tr("Help"),
+	    },
+	    7);
+}
+
+void ui_menubar_update_w() {
+	if (g_config->touch_ui) {
+		return;
+	}
+	string_array_t *categories = ui_menubar_categories();
+	f32             x          = base_view3d_show ? 0 : 1;
+	for (i32 i = 0; i < categories->length; ++i) {
+		x += draw_string_width(g_ui->ops->font, g_ui->font_size, categories->buffer[i]) + 25.0 * UI_SCALE();
+	}
+	i32 w = math_min(math_floor(x + 10), ui_dock_menubar_max_w());
+	if (ui_menubar_w < w) {
+		ui_menubar_w = w;
+	}
+}
+
 void ui_menubar_render_ui() {
 	if (g_config->touch_ui && !base_view3d_show) {
 		return;
@@ -937,18 +966,7 @@ void ui_menubar_render_ui() {
 			g_ui->enabled = true;
 		}
 		else {
-			string_array_t *categories = any_array_create_from_raw(
-			    (void *[]){
-			        tr("File"),
-			        tr("Edit"),
-			        tr("Viewport"),
-			        tr("Mode"),
-			        tr("Camera"),
-			        tr("Window"),
-			        tr("Help"),
-			    },
-			    7);
-
+			string_array_t *categories = ui_menubar_categories();
 			for (i32 i = 0; i < categories->length; ++i) {
 				if (ui_menubar_button(categories->buffer[i]) || (ui_menu_show && ui_menu_commands == ui_menubar_draw_category_items && g_ui->is_hovered)) {
 					ui_menubar_show_menu(i);

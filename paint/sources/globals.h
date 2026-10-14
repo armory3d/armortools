@@ -174,7 +174,7 @@ bool                    tab_scripts_minimap_dirty = true;
 extern int              tab_stages_selected;
 extern bool             tab_timeline_playing;
 any_map_t              *import_mesh_importers;
-i32                     ui_menubar_default_w = 390;
+i32                     ui_menubar_default_w = 395;
 ui_window_t            *ui_menubar_hwnd;
 ui_window_t            *ui_menubar_split_hwnd;
 ui_window_t            *ui_menubar_menu_handle;
