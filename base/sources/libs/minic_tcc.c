@@ -361,13 +361,13 @@ static char *minic_tcc_header(const char *text) {
 		string_buffer_append(&sb, string("#define %s %d\n", minic_enum_const_name_at(i), minic_enum_const_value_at(i)));
 	}
 
+	for (int i = 0; i < minic_global_count_get(); ++i) {
+		minic_type_t t = minic_global_type_at(i);
+		string_buffer_append(&sb, string("extern %s%s %s;\n", minic_tcc_scalar_name(t), t == MINIC_T_PTR ? " *" : "", minic_global_name_at(i)));
+	}
 	for (int i = 0; i < minic_tcc_count; ++i) {
-		minic_tcc_fn_t *f = &minic_tcc_fns[i];
-		if (strchr(f->sig, '(') == NULL) {
-			string_buffer_append(&sb, string("extern %s %s;\n", minic_tcc_sig_type(f->sig[0]), f->name)); // Global variable
-		}
-		else if (!minic_tcc_script_defines(text, f->name)) {
-			minic_tcc_sig_proto(&sb, f->name, f->sig);
+		if (!minic_tcc_script_defines(text, minic_tcc_fns[i].name)) {
+			minic_tcc_sig_proto(&sb, minic_tcc_fns[i].name, minic_tcc_fns[i].sig);
 		}
 	}
 
@@ -391,6 +391,9 @@ void minic_tcc_eval(char *text, char *name) {
 		if (!minic_tcc_script_defines(text, minic_tcc_fns[i].name)) {
 			tcc_add_symbol(s, minic_tcc_fns[i].name, minic_tcc_fns[i].fn);
 		}
+	}
+	for (int i = 0; i < minic_global_count_get(); ++i) {
+		tcc_add_symbol(s, minic_global_name_at(i), minic_global_ptr_at(i));
 	}
 	void (*fn)(void) = NULL;
 	if (tcc_compile_string(s, code) == 0 && tcc_relocate(s) == 0) {
