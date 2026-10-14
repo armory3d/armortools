@@ -165,21 +165,25 @@ mesh_geo_t *nodes_mesh_geo_from_data(mesh_data_t *md) {
 }
 
 static i16 nodes_mesh_pack(f32 f) {
-	f = f < -1.0 ? -1.0 : (f > 1.0 ? 1.0 : f);
-	return (i16)math_round(f * 32767.0);
+	f     = f < -1.0f ? -1.0f : (f > 1.0f ? 1.0f : f);
+	f32 x = f * 32767.0;
+	i32 t = (i32)x;
+	f32 r = x - (f32)t;
+	return (i16)(t + (r >= 0.5f) - (r <= -0.5f));
 }
 
 mesh_data_t *nodes_mesh_geo_to_data(mesh_geo_t *g, char *name) {
 	f32 scale_pos = 0.0;
-	for (i32 i = 0; i < g->vertex_count * 3; ++i) {
-		scale_pos = math_max(scale_pos, math_abs(g->pos[i]));
+	f32 scale_tex = 1.0;
+	for (i32 i = 0; i < g->vertex_count; ++i) {
+		scale_pos = math_max(scale_pos, math_abs(g->pos[i * 3]));
+		scale_pos = math_max(scale_pos, math_abs(g->pos[i * 3 + 1]));
+		scale_pos = math_max(scale_pos, math_abs(g->pos[i * 3 + 2]));
+		scale_tex = math_max(scale_tex, math_abs(g->tex[i * 2]));
+		scale_tex = math_max(scale_tex, math_abs(g->tex[i * 2 + 1]));
 	}
 	if (scale_pos <= 0.0) {
 		scale_pos = 1.0;
-	}
-	f32 scale_tex = 1.0;
-	for (i32 i = 0; i < g->vertex_count * 2; ++i) {
-		scale_tex = math_max(scale_tex, math_abs(g->tex[i]));
 	}
 
 	i16_array_t *va0  = i16_array_create(g->vertex_count * 4);
@@ -919,6 +923,8 @@ char *nodes_mesh_reference() {
 	       "//     Arrays are not bounds checked. Counts can be lowered, to grow a mesh fill a new mesh_geo_create(vertex_count, index_count).\n"
 	       "//     Triangles are counter clockwise, a mesh fits the default view at a size of about 1.\n"
 	       "//     mesh_geo_* functions return a new mesh and leave their arguments unchanged, meshes are freed when the script ends.\n"
+	       "//     Except mesh_geo_append(dst, src, m), which adds src to dst in place (dst counts grow, false when its capacity is\n"
+	       "//     full), transformed by float m[12]: the x, y, z axes then the translation. Use it to place many copies of a mesh.\n"
 	       "//     mesh_geo_shape: 0 Box, 1 Sphere, 2 Cylinder, 3 Cone, 4 Torus, 5 Plane. mesh_geo_mirror axis: 0 X, 1 Y, 2 Z.\n"
 	       "//     mesh_geo_boolean op: MESH_BOOLEAN_UNION, MESH_BOOLEAN_DIFFERENCE, MESH_BOOLEAN_INTERSECT. Rotations are in degrees.\n"
 	       "//     Call mesh_geo_normals(g, smooth) after moving vertices. The input passes through when the script has an error.\n"

@@ -599,6 +599,7 @@ X10(mesh_geo_transform, "p:mesh_geo_t(p:mesh_geo_t g,f loc_x,f loc_y,f loc_z,f r
 X6(mesh_geo_array, "p:mesh_geo_t(p:mesh_geo_t g,i count,f offset_x,f offset_y,f offset_z,b relative)", p, p, i, f, f, f, b)
 X2(mesh_geo_mirror, "p:mesh_geo_t(p:mesh_geo_t g,i axis)", p, p, i)
 X2(mesh_geo_join, "p:mesh_geo_t(p:mesh_geo_t a,p:mesh_geo_t b)", p, p, p)
+X3(mesh_geo_append, "b(p:mesh_geo_t dst,p:mesh_geo_t src,p:float m)", b, p, p, p)
 X3(mesh_geo_boolean, "p:mesh_geo_t(p:mesh_geo_t a,p:mesh_geo_t b,i op)", p, p, p, i)
 X2(mesh_geo_subdivide, "p:mesh_geo_t(p:mesh_geo_t g,i levels)", p, p, i)
 X2(mesh_geo_smooth, "p:mesh_geo_t(p:mesh_geo_t g,i iterations)", p, p, i)

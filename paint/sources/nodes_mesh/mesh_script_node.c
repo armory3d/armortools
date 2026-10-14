@@ -125,14 +125,14 @@ static mesh_geo_t *nodes_mesh_script_track(mesh_geo_t *g) {
 	return g;
 }
 
-// Copy of a mesh handed over by a script, with out of range counts, indices and values dropped
-static mesh_geo_t *nodes_mesh_script_arg(mesh_geo_t *g) {
+// Mesh handed over by a script with out of range counts, indices and values dropped, copied or fixed in place
+static mesh_geo_t *nodes_mesh_script_clean(mesh_geo_t *g, bool in_place) {
 	if (g == NULL || g->pos == NULL || g->nor == NULL || g->tex == NULL || g->ind == NULL) {
 		return util_geo_create(0, 0);
 	}
 	i32         vertex_count = g->vertex_count < 0 ? 0 : (g->vertex_count > g->vertex_capacity ? g->vertex_capacity : g->vertex_count);
 	i32         index_count  = g->index_count < 0 ? 0 : (g->index_count > g->index_capacity ? g->index_capacity : g->index_count);
-	mesh_geo_t *c            = util_geo_create(vertex_count, index_count - index_count % 3);
+	mesh_geo_t *c            = in_place ? g : util_geo_create(vertex_count, index_count - index_count % 3);
 	for (i32 i = 0; i < vertex_count * 3; ++i) {
 		c->pos[i] = isfinite(g->pos[i]) ? g->pos[i] : 0.0;
 		c->nor[i] = isfinite(g->nor[i]) ? g->nor[i] : 0.0;
@@ -140,7 +140,7 @@ static mesh_geo_t *nodes_mesh_script_arg(mesh_geo_t *g) {
 	for (i32 i = 0; i < vertex_count * 2; ++i) {
 		c->tex[i] = isfinite(g->tex[i]) ? g->tex[i] : 0.0;
 	}
-	i32 count = 0;
+	i32 count = 0; // Stays at or behind i, so packing in place is safe
 	for (i32 i = 0; i + 2 < index_count; i += 3) {
 		if (g->ind[i] < (u32)vertex_count && g->ind[i + 1] < (u32)vertex_count && g->ind[i + 2] < (u32)vertex_count) {
 			c->ind[count++] = g->ind[i];
@@ -148,8 +148,13 @@ static mesh_geo_t *nodes_mesh_script_arg(mesh_geo_t *g) {
 			c->ind[count++] = g->ind[i + 2];
 		}
 	}
-	c->index_count = count;
+	c->vertex_count = vertex_count;
+	c->index_count  = count;
 	return c;
+}
+
+static mesh_geo_t *nodes_mesh_script_arg(mesh_geo_t *g) {
+	return nodes_mesh_script_clean(g, false);
 }
 
 // Mesh the script node received, edited in place or replaced with mesh_geo_output()
@@ -196,6 +201,54 @@ mesh_geo_t *mesh_geo_mirror(mesh_geo_t *g, i32 axis) {
 mesh_geo_t *mesh_geo_join(mesh_geo_t *a, mesh_geo_t *b) {
 	mesh_geo_t *ca = nodes_mesh_script_arg(a);
 	return nodes_mesh_script_track(nodes_mesh_geo_join(ca, nodes_mesh_script_arg(b)));
+}
+
+// Appends src to dst in place, transformed by m: the x, y, z axes then the translation (12 floats).
+// False when dst has no room left.
+bool mesh_geo_append(mesh_geo_t *dst, mesh_geo_t *src, f32 *m) {
+	if (dst == NULL || src == NULL || m == NULL || src->pos == NULL || src->nor == NULL || src->tex == NULL || src->ind == NULL) {
+		return false;
+	}
+	i32 base  = dst->vertex_count < 0 ? 0 : dst->vertex_count;
+	i32 first = dst->index_count < 0 ? 0 : dst->index_count;
+	i32 vc    = src->vertex_count < 0 ? 0 : (src->vertex_count > src->vertex_capacity ? src->vertex_capacity : src->vertex_count);
+	i32 ic    = src->index_count < 0 ? 0 : (src->index_count > src->index_capacity ? src->index_capacity : src->index_count);
+	if (dst->pos == NULL || dst->nor == NULL || dst->tex == NULL || dst->ind == NULL || vc > dst->vertex_capacity - base || ic > dst->index_capacity - first) {
+		return false;
+	}
+	// Normals by the cofactor matrix, which keeps them perpendicular under non-uniform scale
+	f32  c[9]   = {m[4] * m[8] - m[5] * m[7], m[5] * m[6] - m[3] * m[8], m[3] * m[7] - m[4] * m[6], m[7] * m[2] - m[8] * m[1], m[8] * m[0] - m[6] * m[2],
+	               m[6] * m[1] - m[7] * m[0], m[1] * m[5] - m[2] * m[4], m[2] * m[3] - m[0] * m[5], m[0] * m[4] - m[1] * m[3]};
+	bool mirror = m[0] * c[0] + m[1] * c[1] + m[2] * c[2] < 0.0;
+	for (i32 i = 0; i < vc; ++i) {
+		f32 *p = src->pos + i * 3;
+		f32 *n = src->nor + i * 3;
+		f32 *q = dst->pos + (base + i) * 3;
+		f32 *r = dst->nor + (base + i) * 3;
+		for (i32 k = 0; k < 3; ++k) {
+			q[k] = m[9 + k] + m[k] * p[0] + m[3 + k] * p[1] + m[6 + k] * p[2];
+			r[k] = c[k] * n[0] + c[3 + k] * n[1] + c[6 + k] * n[2];
+		}
+		f32 l = sqrtf(r[0] * r[0] + r[1] * r[1] + r[2] * r[2]);
+		l     = l > 0.0 ? (mirror ? -1.0 : 1.0) / l : 0.0;
+		r[0] *= l;
+		r[1] *= l;
+		r[2] *= l;
+		dst->tex[(base + i) * 2]     = src->tex[i * 2];
+		dst->tex[(base + i) * 2 + 1] = src->tex[i * 2 + 1];
+	}
+	i32 count = first;
+	for (i32 i = 0; i + 2 < ic; i += 3) {
+		u32 *t = src->ind + i;
+		if (t[0] < (u32)vc && t[1] < (u32)vc && t[2] < (u32)vc) {
+			dst->ind[count++] = base + t[0];
+			dst->ind[count++] = base + t[mirror ? 2 : 1]; // Mirroring flips the winding, keep it counter clockwise
+			dst->ind[count++] = base + t[mirror ? 1 : 2];
+		}
+	}
+	dst->vertex_count = base + vc;
+	dst->index_count  = count;
+	return true;
 }
 
 mesh_geo_t *mesh_geo_boolean(mesh_geo_t *a, mesh_geo_t *b, i32 op) {
@@ -309,7 +362,21 @@ mesh_geo_t *mesh_script_node_eval(ui_node_t *node) {
 	minic_ctx_free(minic_eval_named(text, "mesh script"));
 	if (minic_error_count == errors) {
 		util_geo_free(g);
-		g = nodes_mesh_script_arg(nodes_mesh_script_out);
+		g = NULL;
+		for (i32 i = 0; i < nodes_mesh_script_count; ++i) {
+			if (nodes_mesh_script_geos[i] == nodes_mesh_script_out) {
+				// Created by this script, taken over instead of copied
+				nodes_mesh_script_geos[i] = nodes_mesh_script_geos[--nodes_mesh_script_count];
+				g                         = nodes_mesh_script_clean(nodes_mesh_script_out, true);
+				if (g != nodes_mesh_script_out) {
+					util_geo_free(nodes_mesh_script_out);
+				}
+				break;
+			}
+		}
+		if (g == NULL) {
+			g = nodes_mesh_script_arg(nodes_mesh_script_out);
+		}
 	}
 
 	for (i32 i = 0; i < nodes_mesh_script_count; ++i) {

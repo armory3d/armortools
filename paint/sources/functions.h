@@ -942,6 +942,7 @@ mesh_geo_t          *mesh_geo_transform(mesh_geo_t *g, f32 loc_x, f32 loc_y, f32
 mesh_geo_t          *mesh_geo_array(mesh_geo_t *g, i32 count, f32 offset_x, f32 offset_y, f32 offset_z, bool relative);
 mesh_geo_t          *mesh_geo_mirror(mesh_geo_t *g, i32 axis);
 mesh_geo_t          *mesh_geo_join(mesh_geo_t *a, mesh_geo_t *b);
+bool                 mesh_geo_append(mesh_geo_t *dst, mesh_geo_t *src, f32 *m);
 mesh_geo_t          *mesh_geo_boolean(mesh_geo_t *a, mesh_geo_t *b, i32 op);
 mesh_geo_t          *mesh_geo_subdivide(mesh_geo_t *g, i32 levels);
 mesh_geo_t          *mesh_geo_smooth(mesh_geo_t *g, i32 iterations);
