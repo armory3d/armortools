@@ -359,7 +359,11 @@ mesh_geo_t *mesh_script_node_eval(ui_node_t *node) {
 	}
 
 	i32 errors = minic_error_count;
+#ifdef WITH_TCC
+	minic_tcc_eval(text, "mesh script");
+#else
 	minic_ctx_free(minic_eval_named(text, "mesh script"));
+#endif
 	if (minic_error_count == errors) {
 		util_geo_free(g);
 		g = NULL;

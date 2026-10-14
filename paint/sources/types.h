@@ -4,6 +4,7 @@
 
 #include "enums.h"
 #include "minic.h"
+#include "minic_tcc.h"
 
 typedef struct slot_brush {
 	struct ui_nodes       *nodes;
