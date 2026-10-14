@@ -564,10 +564,11 @@ void ui_draw_string(char *text, float x_offset, float y_offset, int align, bool 
 	}
 
 	if (ui_dynamic_glyph_load) {
-		int len = strlen(text);
-		for (int i = 0; i < len; ++i) {
-			if (text[i] > 126 && !draw_font_has_glyph((int)text[i])) {
-				int glyph = text[i];
+		for (int i = 0; text[i] != '\0';) {
+			int l     = 0;
+			int glyph = string_utf8_decode(&text[i], &l);
+			i += l > 0 ? l : 1;
+			if (glyph > 126 && !draw_font_has_glyph(glyph)) {
 				draw_font_add_glyph(glyph);
 			}
 		}
