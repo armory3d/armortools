@@ -204,7 +204,6 @@ mesh_geo_t *mesh_geo_boolean(mesh_geo_t *a, mesh_geo_t *b, i32 op) {
 }
 
 static mesh_geo_t *nodes_mesh_script_modify(mesh_geo_t *g, char *type, f32 value) {
-	nodes_mesh_eval_unwrap = nodes_mesh_eval_unwrap || !string_equals(type, "MESH_NORMALS");
 	return nodes_mesh_script_track(nodes_mesh_geo_modify(nodes_mesh_script_arg(g), type, value));
 }
 

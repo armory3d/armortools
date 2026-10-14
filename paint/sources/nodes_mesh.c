@@ -411,11 +411,13 @@ mesh_geo_t *nodes_mesh_geo_modify(mesh_geo_t *g, char *type, f32 value) {
 	else if (string_equals(type, "MESH_DECIMATE")) {
 		if (value < 1.0) {
 			_util_mesh_decimate(&temp, math_max(value, 0.01));
+			nodes_mesh_eval_unwrap = true;
 		}
 	}
 	else if (string_equals(type, "MESH_BEVEL")) {
 		if (value > 0.0) {
 			_util_mesh_bevel(&temp, value);
+			nodes_mesh_eval_unwrap = true;
 		}
 	}
 	else {
@@ -432,8 +434,7 @@ mesh_geo_t *nodes_mesh_geo_modify(mesh_geo_t *g, char *type, f32 value) {
 mesh_geo_t *nodes_mesh_eval_modifier(ui_node_t *node) {
 	mesh_geo_t *g = nodes_mesh_eval_input(node, 0);
 	if (g->index_count > 0) {
-		g                      = nodes_mesh_geo_modify(g, node->type, nodes_mesh_value(node, 1));
-		nodes_mesh_eval_unwrap = true;
+		g = nodes_mesh_geo_modify(g, node->type, nodes_mesh_value(node, 1));
 	}
 	return g;
 }
@@ -653,11 +654,11 @@ static void nodes_mesh_set_data(mesh_object_t *o, mesh_data_t *data, bool unwrap
 		map_delete(tab_meshes_preview_map, uid_key);
 	}
 
-	util_uv_uvmap_cached                              = false;
-	util_uv_trianglemap_cached                        = false;
-	util_uv_dilatemap_cached                          = false;
-	render_path_raytrace_ready                        = false;
-	g_context->ddirty                                 = 2;
+	util_uv_uvmap_cached       = false;
+	util_uv_trianglemap_cached = false;
+	util_uv_dilatemap_cached   = false;
+	render_path_raytrace_ready = false;
+	g_context->ddirty          = 2;
 	ui_dock_redraw(TAB_AREA_SIDEBAR0);
 }
 
@@ -716,7 +717,7 @@ bool nodes_mesh_has_nodes(mesh_object_t *o) {
 // The output mesh becomes the original mesh, the next edit starts from a default canvas
 void nodes_mesh_apply(mesh_object_t *o) {
 	nodes_mesh_remove(o);
-	ui_nodes_hwnd->redraws                            = 2;
+	ui_nodes_hwnd->redraws = 2;
 	ui_dock_redraw(TAB_AREA_SIDEBAR0);
 }
 

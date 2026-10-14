@@ -728,10 +728,10 @@ static void util_mesh_join_geometry(mesh_object_t_array_t *objects) {
 
 static void util_mesh_geometry_joined() {
 	util_mesh_merge(NULL);
-	util_uv_uvmap_cached                              = false;
-	util_uv_trianglemap_cached                        = false;
-	util_uv_dilatemap_cached                          = false;
-	g_context->ddirty                                 = 2;
+	util_uv_uvmap_cached       = false;
+	util_uv_trianglemap_cached = false;
+	util_uv_dilatemap_cached   = false;
+	g_context->ddirty          = 2;
 	ui_dock_redraw(TAB_AREA_SIDEBAR0);
 }
 
@@ -2668,7 +2668,7 @@ static void _util_mesh_subdivide(mesh_object_t *o) {
                                                     3),
 	                                                     .index_array = new_inda,
 	                                                     .scale_pos   = o->data->scale_pos,
-	                                                     .scale_tex   = 1.0});
+	                                                     .scale_tex   = o->data->scale_tex});
 	mesh_data_t *new_data2    = mesh_data_create(raw);
 	new_data2->_->owns_arrays = true;
 	if (!util_mesh_data_is_shared(o->data)) {
@@ -2690,9 +2690,16 @@ static mesh_object_t_array_t *_util_mesh_modifier_begin(mesh_object_t_array_t *o
 	return ar;
 }
 
-static void _util_mesh_modifier_end(mesh_object_t_array_t *objects) {
+static void _util_mesh_modifier_end(mesh_object_t_array_t *objects, bool unwrap) {
 	util_mesh_calc_normals(objects, true);
-	util_mesh_uv_unwrap(objects);
+	if (unwrap) {
+		util_mesh_uv_unwrap(objects);
+	}
+	else {
+		util_uv_uvmap_cached       = false;
+		util_uv_trianglemap_cached = false;
+		util_uv_dilatemap_cached   = false;
+	}
 }
 
 void util_mesh_decimate(mesh_object_t_array_t *objects, f32 ratio) {
@@ -2700,7 +2707,7 @@ void util_mesh_decimate(mesh_object_t_array_t *objects, f32 ratio) {
 	for (i32 i = 0; i < objects->length; ++i) {
 		_util_mesh_decimate(objects->buffer[i], ratio);
 	}
-	_util_mesh_modifier_end(objects);
+	_util_mesh_modifier_end(objects, true);
 }
 
 void util_mesh_smooth(mesh_object_t_array_t *objects) {
@@ -2708,7 +2715,7 @@ void util_mesh_smooth(mesh_object_t_array_t *objects) {
 	for (i32 i = 0; i < objects->length; ++i) {
 		_util_mesh_smooth(objects->buffer[i]);
 	}
-	_util_mesh_modifier_end(objects);
+	_util_mesh_modifier_end(objects, false);
 }
 
 void util_mesh_bevel(mesh_object_t_array_t *objects, f32 amount) {
@@ -2716,7 +2723,7 @@ void util_mesh_bevel(mesh_object_t_array_t *objects, f32 amount) {
 	for (i32 i = 0; i < objects->length; ++i) {
 		_util_mesh_bevel(objects->buffer[i], amount);
 	}
-	_util_mesh_modifier_end(objects);
+	_util_mesh_modifier_end(objects, true);
 }
 
 void util_mesh_subdivide(mesh_object_t_array_t *objects) {
@@ -2724,7 +2731,7 @@ void util_mesh_subdivide(mesh_object_t_array_t *objects) {
 	for (i32 i = 0; i < objects->length; ++i) {
 		_util_mesh_subdivide(objects->buffer[i]);
 	}
-	_util_mesh_modifier_end(objects);
+	_util_mesh_modifier_end(objects, false);
 }
 
 static void _util_mesh_shift_object_masks(i32 from) {
@@ -2785,8 +2792,8 @@ mesh_object_t *util_mesh_duplicate_object(mesh_object_t *so) {
 void util_mesh_duplicate() {
 	mesh_object_t *dup = util_mesh_duplicate_object(g_context->paint_object);
 	if (dup != NULL) {
-		g_context->paint_object                           = dup;
-		ui_header_handle->redraws                         = 2;
+		g_context->paint_object   = dup;
+		ui_header_handle->redraws = 2;
 		ui_dock_redraw(TAB_AREA_SIDEBAR0);
 	}
 	util_mesh_merge(NULL);
