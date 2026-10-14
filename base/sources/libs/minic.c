@@ -3712,6 +3712,10 @@ minic_type_t minic_global_type_at(int i) {
 	return minic_globals[i].type;
 }
 
+void *minic_global_ptr_at(int i) {
+	return (void *)minic_globals[i].ptr;
+}
+
 int minic_enum_const_count_get(void) {
 	return minic_enum_const_count;
 }
