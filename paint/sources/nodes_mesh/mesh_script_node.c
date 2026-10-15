@@ -328,6 +328,42 @@ mesh_geo_t *mesh_geo_input_mesh(char *name) {
 	return nodes_mesh_script_track(util_geo_create(0, 0));
 }
 
+// Pixels of the image or layer mask node linked to an input added to the script node, read during the script.
+// An input without one gives a 1x1 image of its value. NULL when there is no input of that name.
+mesh_geo_image_t *mesh_geo_input_image(char *name) {
+	ui_node_t *node = nodes_mesh_script_node;
+	if (node == NULL || name == NULL) {
+		return NULL;
+	}
+	for (i32 j = 1; j < node->inputs->length; ++j) {
+		ui_node_socket_t *s = node->inputs->buffer[j];
+		if (!string_equals(s->name, name) || string_equals(s->type, "MESH")) {
+			continue;
+		}
+		ui_node_link_t *link = nodes_mesh_link(nodes_mesh_eval_canvas, node, j);
+		ui_node_t      *from = link != NULL ? ui_get_node(nodes_mesh_eval_canvas->nodes, link->from_id) : NULL;
+		if (from != NULL && (string_equals(from->type, "TEX_IMAGE") || string_equals(from->type, "LAYER_MASK"))) {
+			mesh_geo_image_t *img = mesh_image_node_get(from, link->from_socket);
+			if (img != NULL) {
+				return img;
+			}
+		}
+		mesh_geo_image_t *img = mesh_image_create(1, 1);
+		for (i32 i = 0; i < 4; ++i) {
+			nodes_mesh_script_socket(name, i, &img->pixels[i]);
+		}
+		mesh_image_node_track(img);
+		return img;
+	}
+	return NULL;
+}
+
+// Channel 0 - 3 (r g b a) at a mesh uv, nearest pixel and repeating
+f32 mesh_geo_image_sample(mesh_geo_image_t *img, f32 u, f32 v, i32 channel) {
+	vec4_t c = mesh_image_sample(img, u, v);
+	return channel == 0 ? c.x : channel == 1 ? c.y : channel == 2 ? c.z : channel == 3 ? c.w : 0.0;
+}
+
 mesh_geo_t *mesh_script_node_eval(ui_node_t *node) {
 	mesh_geo_t *g    = nodes_mesh_eval_input(node, 0);
 	char       *text = nodes_mesh_script_text(node);

@@ -36,6 +36,12 @@ typedef struct mesh_geo {
 	i32  index_capacity;
 } mesh_geo_t;
 
+typedef struct mesh_geo_image {
+	i32  width;
+	i32  height;
+	f32 *pixels; // Float rgba, rows from v 0
+} mesh_geo_image_t;
+
 typedef struct slot_layer {
 	i32                   id;
 	char                 *name;

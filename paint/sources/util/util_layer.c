@@ -455,6 +455,7 @@ void layers_update_fill_layer(bool parse_paint) {
 }
 
 void layers_update_linked_layers() {
+	nodes_mesh_layer_changed(g_context->layer);
 	slot_material_t *_material  = g_context->material;
 	bool             any_linked = false;
 	for (i32 i = 0; i < g_project->_->materials->length; ++i) {
@@ -1321,6 +1322,18 @@ void tab_layers_remap_layer_pointers(ui_node_t_array_t *nodes, i32_imap_t *point
 				n->buttons->buffer[0]->default_value->buffer[0] = i32_imap_get(pointer_map, i);
 			}
 		}
+	}
+}
+
+// Material and mesh nodes, after layers were added, removed or moved
+void tab_layers_remap_all_layer_pointers(slot_layer_t_array_t *old_layers) {
+	for (i32 i = 0; i < g_project->_->materials->length; ++i) {
+		slot_material_t *m = g_project->_->materials->buffer[i];
+		tab_layers_remap_layer_pointers(m->canvas->nodes, tab_layers_fill_layer_map(old_layers));
+	}
+	ui_node_canvas_t_array_t *mesh_canvases = nodes_mesh_canvases();
+	for (i32 i = 0; i < mesh_canvases->length; ++i) {
+		tab_layers_remap_layer_pointers(mesh_canvases->buffer[i]->nodes, tab_layers_fill_layer_map(old_layers));
 	}
 }
 

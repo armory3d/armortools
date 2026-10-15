@@ -315,6 +315,7 @@ ui_node_canvas_t         *nodes_mesh_eval_canvas;
 mesh_nodes_t             *nodes_mesh_eval_slot;
 mesh_object_t            *nodes_mesh_eval_object;
 bool                      nodes_mesh_eval_unwrap;
+i32                       nodes_mesh_vector_socket; // Output socket of the node evaluated by nodes_mesh_vector
 bool                      nodes_mesh_script_running  = false;
 i32                       make_mesh_layer_pass_count = 1;
 

@@ -20,7 +20,8 @@ char *parser_material_texture_store(ui_node_t *node, bind_tex_t *tex, char *tex_
 	node_shader_context_add_elem(parser_material_kong->context, "tex", "short2norm");
 	node_shader_add_texture(parser_material_kong, tex_name, NULL);
 	char *uv_name = "";
-	if (string_equals(node->type, "TEX_IMAGE") && parser_material_get_input_link(node->inputs->buffer[0]) != NULL) {
+	// Image nodes pasted from a mesh canvas have no vector input
+	if (string_equals(node->type, "TEX_IMAGE") && node->inputs->length > 0 && parser_material_get_input_link(node->inputs->buffer[0]) != NULL) {
 		uv_name = string_copy(parser_material_parse_vector_input(node->inputs->buffer[0]));
 	}
 	else {

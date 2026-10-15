@@ -706,10 +706,7 @@ slot_layer_t *script_layer_new_mask(slot_layer_t *l, i32 type) {
 	slot_layer_t_array_t *pointers = tab_layers_init_layer_map();
 	slot_layer_t         *m        = layers_new_mask(false, l, -1);
 	if (m != NULL) {
-		for (i32 i = 0; i < g_project->_->materials->length; ++i) {
-			slot_material_t *mat = g_project->_->materials->buffer[i];
-			tab_layers_remap_layer_pointers(mat->canvas->nodes, tab_layers_fill_layer_map(pointers));
-		}
+		tab_layers_remap_all_layer_pointers(pointers);
 		if (type == 0) {
 			history_new_black_mask();
 			slot_layer_clear(m, 0x00000000, NULL, 1.0, layers_default_rough, 0.0);
@@ -753,10 +750,7 @@ slot_layer_t *script_layer_new_group(slot_layer_t *l) {
 		array_remove(g_project->_->layers, group);
 		array_insert(g_project->_->layers, array_index_of(g_project->_->layers, l) + 1, group);
 		l->parent = group;
-		for (i32 i = 0; i < g_project->_->materials->length; ++i) {
-			slot_material_t *m = g_project->_->materials->buffer[i];
-			tab_layers_remap_layer_pointers(m->canvas->nodes, tab_layers_fill_layer_map(pointers));
-		}
+		tab_layers_remap_all_layer_pointers(pointers);
 		context_set_layer(group);
 		history_new_group();
 	}

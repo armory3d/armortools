@@ -681,6 +681,7 @@ void util_layer_add_path_point(slot_layer_t *l, f32 screen_x, f32 screen_y) {
 	path_layer_last_active = new_index;
 
 	path_repaint(l);
+	nodes_mesh_layer_changed(l);
 
 	for (i32 j = 0; j < path_point_sphere_count; j++) {
 		path_point_spheres[j]->visible = true;
@@ -700,6 +701,7 @@ void util_layer_repaint_path(slot_layer_t *l) {
 	for (i32 j = 0; j < path_point_sphere_count; j++) {
 		path_point_spheres[j]->visible = true;
 	}
+	nodes_mesh_layer_changed(l); // Mesh layer mask nodes, rebuilt once the drag ends
 }
 
 static void path_point_move(slot_layer_t *l, i32 idx, f32 new_x, f32 new_y) {

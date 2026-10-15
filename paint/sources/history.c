@@ -552,6 +552,7 @@ void history_undo() {
 			ui_menubar_menu_handle->redraws = 2;
 		}
 	}
+	nodes_mesh_request_refresh(); // Layer masks used by mesh nodes
 	base_redraw_status();
 }
 
@@ -868,6 +869,7 @@ void history_redo() {
 			ui_menubar_menu_handle->redraws = 2;
 		}
 	}
+	nodes_mesh_request_refresh(); // Layer masks used by mesh nodes
 	base_redraw_status();
 }
 

@@ -77,6 +77,8 @@ void nodes_mesh_init() {
 	mesh_input_node_init();
 	mesh_shape_node_init();
 	mesh_object_node_init();
+	mesh_image_node_init();
+	mesh_layer_mask_node_init();
 
 	nodes_mesh_modifier = any_array_create(0);
 	mesh_transform_node_init();
@@ -254,14 +256,19 @@ void nodes_mesh_geo_transform(mesh_geo_t *g, mat4_t m) {
 
 // Evaluation
 
-ui_node_t *nodes_mesh_linked_node(ui_node_canvas_t *c, ui_node_t *node, i32 socket) {
+ui_node_link_t *nodes_mesh_link(ui_node_canvas_t *c, ui_node_t *node, i32 socket) {
 	for (i32 i = 0; i < c->links->length; ++i) {
 		ui_node_link_t *l = c->links->buffer[i];
 		if (l->to_id == node->id && l->to_socket == socket) {
-			return ui_get_node(c->nodes, l->from_id);
+			return l;
 		}
 	}
 	return NULL;
+}
+
+ui_node_t *nodes_mesh_linked_node(ui_node_canvas_t *c, ui_node_t *node, i32 socket) {
+	ui_node_link_t *l = nodes_mesh_link(c, node, socket);
+	return l != NULL ? ui_get_node(c->nodes, l->from_id) : NULL;
 }
 
 // Socket value, taken from the linked value, math or vector node when there is one
@@ -269,12 +276,14 @@ vec4_t nodes_mesh_vector(ui_node_t *node, i32 socket) {
 	ui_node_socket_t *s      = node->inputs->buffer[socket];
 	f32              *v      = s->default_value->buffer;
 	vec4_t            result = s->default_value->length > 2 ? (vec4_t){v[0], v[1], v[2], 1.0} : (vec4_t){v[0], v[0], v[0], 1.0};
-	ui_node_t        *from   = nodes_mesh_linked_node(nodes_mesh_eval_canvas, node, socket);
+	ui_node_link_t   *link   = nodes_mesh_link(nodes_mesh_eval_canvas, node, socket);
+	ui_node_t        *from   = link != NULL ? ui_get_node(nodes_mesh_eval_canvas->nodes, link->from_id) : NULL;
 	if (from == NULL || nodes_mesh_eval_depth >= NODES_MESH_MAX_DEPTH) {
 		return result;
 	}
 	vec4_t (*node_vector)(ui_node_t *) = any_map_get(nodes_mesh_node_vectors, from->type);
 	if (node_vector != NULL) {
+		nodes_mesh_vector_socket = link->from_socket;
 		nodes_mesh_eval_depth++;
 		result = node_vector(from);
 		nodes_mesh_eval_depth--;
@@ -292,9 +301,9 @@ i32 nodes_mesh_button(ui_node_t *node, i32 button) {
 
 static mesh_object_t *nodes_mesh_object(i32 uid);
 
-static bool nodes_mesh_has_object_nodes(ui_node_canvas_t *c) {
+static bool nodes_mesh_has_node(ui_node_canvas_t *c, char *type) {
 	for (i32 i = 0; i < c->nodes->length; ++i) {
-		if (string_equals(c->nodes->buffer[i]->type, "MESH_OBJECT")) {
+		if (string_equals(c->nodes->buffer[i]->type, type)) {
 			return true;
 		}
 	}
@@ -480,6 +489,7 @@ static mesh_data_t *nodes_mesh_eval(mesh_nodes_t *slot, mesh_object_t *o) {
 	nodes_mesh_eval_depth  = 0;
 	mesh_geo_t *g          = nodes_mesh_eval_node(from);
 	nodes_mesh_eval_object = NULL;
+	mesh_image_node_clear();
 
 	if (g->index_count == 0) {
 		// Keep the vertex buffers valid
@@ -523,6 +533,10 @@ static u32 nodes_mesh_hash(ui_node_canvas_t *c, mesh_object_t *o) {
 			}
 			hash = nodes_mesh_hash_bytes(hash, &ref, sizeof(ref));
 			continue;
+		}
+		if (string_equals(n->type, "TEX_IMAGE") || string_equals(n->type, "LAYER_MASK")) {
+			gpu_texture_t *texture = mesh_image_node_texture(n); // Reimported, replaced or swapped by undo
+			hash                   = nodes_mesh_hash_bytes(hash, &texture, sizeof(texture));
 		}
 		for (i32 j = 0; j < n->inputs->length; ++j) {
 			f32_array_t *v = n->inputs->buffer[j]->default_value;
@@ -715,6 +729,16 @@ void nodes_mesh_remove(mesh_object_t *o) {
 	}
 }
 
+// Canvases of all objects with nodes, for asset index updates
+ui_node_canvas_t_array_t *nodes_mesh_canvases() {
+	ui_node_canvas_t_array_t *canvases = any_array_create(0);
+	for (i32 i = 0; nodes_mesh_slots != NULL && i < nodes_mesh_slots->length; ++i) {
+		mesh_nodes_t *slot = nodes_mesh_slots->buffer[i];
+		any_array_push(canvases, slot->canvas);
+	}
+	return canvases;
+}
+
 bool nodes_mesh_has_nodes(mesh_object_t *o) {
 	mesh_nodes_t *slot = nodes_mesh_get(o, false);
 	return slot != NULL && !nodes_mesh_is_default(slot->canvas);
@@ -786,6 +810,22 @@ bool nodes_mesh_set_input(mesh_object_t *o, mesh_data_t *data) {
 	return true;
 }
 
+// Rebuilds meshes with layer mask nodes of a painted layer once the mouse is up
+void nodes_mesh_layer_changed(slot_layer_t *l) {
+	i32 index = g_project->_->layers != NULL ? array_index_of(g_project->_->layers, l) : -1;
+	for (i32 i = 0; index >= 0 && nodes_mesh_slots != NULL && i < nodes_mesh_slots->length; ++i) {
+		mesh_nodes_t *slot = nodes_mesh_slots->buffer[i];
+		for (i32 j = 0; j < slot->canvas->nodes->length; ++j) {
+			ui_node_t *n = slot->canvas->nodes->buffer[j];
+			if (string_equals(n->type, "LAYER_MASK") && nodes_mesh_button(n, 0) == index) {
+				slot->dirty                = true;
+				nodes_mesh_refresh_pending = true;
+				break;
+			}
+		}
+	}
+}
+
 // Rebuilds meshes with scene mesh nodes after other meshes changed or moved
 void nodes_mesh_request_refresh() {
 	nodes_mesh_refresh_pending = true;
@@ -799,7 +839,8 @@ void nodes_mesh_refresh() {
 	for (i32 i = 0; i < nodes_mesh_slots->length; ++i) {
 		mesh_nodes_t  *slot = nodes_mesh_slots->buffer[i];
 		mesh_object_t *o    = nodes_mesh_object(slot->uid);
-		if (o != NULL && (slot->dirty || nodes_mesh_has_object_nodes(slot->canvas))) {
+		// Undo swaps the textures of layers, which changes the hash of layer mask nodes
+		if (o != NULL && (slot->dirty || nodes_mesh_has_node(slot->canvas, "MESH_OBJECT") || nodes_mesh_has_node(slot->canvas, "LAYER_MASK"))) {
 			nodes_mesh_update(o, false);
 		}
 	}
@@ -835,7 +876,12 @@ void nodes_mesh_export_begin() {
 			g_project->mesh_nodes         = any_array_create(0);
 			g_project->mesh_nodes_objects = i32_array_create(0);
 		}
-		any_array_push(g_project->mesh_nodes, slot->canvas);
+		// Images are stored by name like in material nodes
+		ui_node_canvas_t *c = util_clone_canvas(slot->canvas);
+		for (i32 j = 0; j < c->nodes->length; ++j) {
+			export_arm_export_node(c->nodes->buffer[j], NULL);
+		}
+		any_array_push(g_project->mesh_nodes, c);
 		i32_array_push(g_project->mesh_nodes_objects, i);
 		if (slot->output != slot->input) {
 			slot->output = o->data;
@@ -869,6 +915,7 @@ void nodes_mesh_import() {
 		mesh_object_t *o    = g_project->_->paint_objects->buffer[index];
 		mesh_nodes_t  *slot = nodes_mesh_get(o, true);
 		slot->canvas        = util_clone_canvas(g_project->mesh_nodes->buffer[i]); // Project data is temporary
+		import_arm_init_nodes(slot->canvas->nodes);
 		for (i32 j = 0; j < slot->canvas->nodes->length; ++j) {
 			ui_node_t *n = slot->canvas->nodes->buffer[j];
 			if (string_equals(n->type, "MESH_OBJECT") && n->buttons->buffer[0]->default_value->length > 2) {
@@ -952,6 +999,13 @@ char *nodes_mesh_reference() {
 	       "//     Value, Math and Vector nodes can be linked into them.\n"
 	       "//     A \"MESH\" input takes a second mesh, such as a MESH_OBJECT node (button 0 is the scene mesh index), read with\n"
 	       "//     mesh_geo_t *path = mesh_geo_input_mesh(\"Path\"); it is in the space of the edited object, empty when not linked.\n"
+	       "//     TEX_IMAGE (Image Texture) node: button 0 is the index of a project texture (Textures tab), outputs Color (0) and\n"
+	       "//     Alpha (1). Link one into an RGBA or VALUE input and read its pixels with mesh_geo_image_t *img =\n"
+	       "//     mesh_geo_input_image(\"Mask\"); img->width, img->height, float img->pixels[width * height * 4] (rgba, 0 - 1, rows\n"
+	       "//     from v 0, at most 2048 pixels per side), mesh_geo_image_sample(img, u, v, channel) samples the nearest pixel at a mesh uv.\n"
+	       "//     The Alpha output gives alpha in all channels. An input without an image gives a 1x1 image of its value.\n"
+	       "//     LAYER_MASK (Layer Mask) node: button 0 is the index of a project layer, reads like an image with the red channel\n"
+	       "//     in all four, mesh_geo_input_image() of a VALUE input linked to it.\n"
 	       "//     Example:\n"
 	       "//     mesh_object_t *o = script_get_context()->paint_object;\n"
 	       "//     ui_node_t *sc = script_mesh_create_node_at(o, \"MESH_SCRIPT\", 300.0, 100.0);\n"

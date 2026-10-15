@@ -1210,12 +1210,14 @@ void ui_nodes_update(void *_) {
 }
 
 void ui_nodes_accept_asset_drop(i32 index) {
-	if (ui_nodes_canvas_type == CANVAS_TYPE_MESH) {
+	if (ui_nodes_canvas_type == CANVAS_TYPE_MESH && g_context->paint_object == NULL) {
 		return;
 	}
 	ui_nodes_push_undo(NULL);
 	node_group_t *g = ui_nodes_group_stack->length > 0 ? ui_nodes_group_stack->buffer[ui_nodes_group_stack->length - 1] : NULL;
-	ui_node_t    *n = ui_nodes_canvas_type == CANVAS_TYPE_MATERIAL ? nodes_material_create_node("TEX_IMAGE", g) : nodes_brush_create_node("TEX_IMAGE");
+	ui_node_t    *n = ui_nodes_canvas_type == CANVAS_TYPE_MESH       ? nodes_mesh_create_node(g_context->paint_object, "TEX_IMAGE")
+	                  : ui_nodes_canvas_type == CANVAS_TYPE_MATERIAL ? nodes_material_create_node("TEX_IMAGE", g)
+	                                                                 : nodes_brush_create_node("TEX_IMAGE");
 	n->buttons->buffer[0]->default_value->buffer[0] = index;
 	ui_nodes_get_nodes()->nodes_selected_id         = i32_array_create_from_raw(
         (i32[]){
@@ -1225,15 +1227,16 @@ void ui_nodes_accept_asset_drop(i32 index) {
 }
 
 void ui_nodes_accept_layer_drop(i32 index) {
-	if (ui_nodes_canvas_type == CANVAS_TYPE_MESH) {
+	if (ui_nodes_canvas_type == CANVAS_TYPE_MESH && g_context->paint_object == NULL) {
 		return;
 	}
 	ui_nodes_push_undo(NULL);
 	if (slot_layer_is_group(g_project->_->layers->buffer[index])) {
 		return;
 	}
-	node_group_t *g                                 = ui_nodes_group_stack->length > 0 ? ui_nodes_group_stack->buffer[ui_nodes_group_stack->length - 1] : NULL;
-	ui_node_t    *n                                 = nodes_material_create_node(slot_layer_is_mask(g_context->layer) ? "LAYER_MASK" : "LAYER", g);
+	node_group_t *g = ui_nodes_group_stack->length > 0 ? ui_nodes_group_stack->buffer[ui_nodes_group_stack->length - 1] : NULL;
+	ui_node_t    *n = ui_nodes_canvas_type == CANVAS_TYPE_MESH ? nodes_mesh_create_node(g_context->paint_object, "LAYER_MASK") // Mesh nodes read masks only
+	                                                           : nodes_material_create_node(slot_layer_is_mask(g_context->layer) ? "LAYER_MASK" : "LAYER", g);
 	n->buttons->buffer[0]->default_value->buffer[0] = index;
 	ui_nodes_get_nodes()->nodes_selected_id         = i32_array_create_from_raw(
         (i32[]){

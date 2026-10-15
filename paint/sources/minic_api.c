@@ -722,6 +722,12 @@ void minic_register_builtins() {
 	MINIC_I(vertex_count);
 	MINIC_I(index_count);
 	MINIC_END();
+
+	MINIC_STRUCT(mesh_geo_image_t);
+	MINIC_I(width);
+	MINIC_I(height);
+	MINIC_FIELD(pixels, MINIC_T_PTR, MINIC_T_FLOAT, NULL);
+	MINIC_END();
 	MINIC_ENUM("mesh_boolean_t", "MESH_BOOLEAN_UNION", "MESH_BOOLEAN_DIFFERENCE", "MESH_BOOLEAN_INTERSECT");
 
 	MINIC_STRUCT(camera_data_t);

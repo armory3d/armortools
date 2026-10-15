@@ -963,8 +963,5 @@ void slot_layer_move(slot_layer_t *raw, i32 to) {
 		}
 	}
 
-	for (i32 i = 0; i < g_project->_->materials->length; ++i) {
-		slot_material_t *m = g_project->_->materials->buffer[i];
-		tab_layers_remap_layer_pointers(m->canvas->nodes, tab_layers_fill_layer_map(pointers));
-	}
+	tab_layers_remap_all_layer_pointers(pointers);
 }
