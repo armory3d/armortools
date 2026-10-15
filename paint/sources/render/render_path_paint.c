@@ -263,7 +263,7 @@ void render_path_paint_commands_paint(bool dilation) {
 			render_path_set_target("texpaint_posnortex_picker0", additional, NULL, GPU_CLEAR_NONE, 0, 0.0);
 			render_path_bind_target("gbuffer2", "gbuffer2");
 			render_path_bind_target("main", "gbufferD");
-			render_path_draw_meshes("paint");
+			render_path_paint_draw_fullscreen_triangle("paint");
 			render_target_t *picker0                    = any_map_get(render_path_render_targets, "texpaint_posnortex_picker0");
 			render_target_t *picker1                    = any_map_get(render_path_render_targets, "texpaint_posnortex_picker1");
 			gpu_texture_t   *texpaint_posnortex_picker0 = picker0->_image;
@@ -315,7 +315,7 @@ void render_path_paint_commands_paint(bool dilation) {
 					render_path_paint_use_live_layer(false);
 				}
 			}
-			ui_header_handle->redraws         = 2;
+			ui_header_handle->redraws = 2;
 			ui_dock_redraw(2);
 
 			render_target_t *texpaint_picker    = any_map_get(render_path_render_targets, "texpaint_picker");
@@ -440,9 +440,9 @@ void render_path_paint_commands_paint(bool dilation) {
 #endif
 				i32 index = r_byte - 1;
 				if (index >= 0 && index < g_project->_->paint_objects->length) {
-					hit                       = true;
-					context_deselected_uid    = -1;
-					g_context->paint_object   = g_project->_->paint_objects->buffer[index];
+					hit                     = true;
+					context_deselected_uid  = -1;
+					g_context->paint_object = g_project->_->paint_objects->buffer[index];
 					// Only the clicked mesh stays selected
 					tab_meshes_select_objects(any_array_create_from_raw((void *[]){g_context->paint_object}, 1));
 					ui_header_handle->redraws = 2;

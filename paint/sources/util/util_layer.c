@@ -642,6 +642,7 @@ static slot_layer_t *_layers_path_sculpt_layer = NULL;
 void layers_new_path_layer_sculpt_init(void *_) {
 	sculpt_init();
 	sculpt_init_sculpt_texture(_layers_path_sculpt_layer);
+	make_material_parse_mesh_material();
 }
 
 slot_layer_t *layers_new_path_layer(bool curved) {
