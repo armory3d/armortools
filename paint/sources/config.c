@@ -124,6 +124,7 @@ void config_save() {
 	json_encode_i32("dilate_radius", g_config->dilate_radius);
 	json_encode_string("blender", g_config->blender);
 	json_encode_bool("grid_snap", g_config->grid_snap);
+	json_encode_bool("auto_run_scripts", g_config->auto_run_scripts);
 	json_encode_bool("experimental", g_config->experimental);
 	json_encode_i32("neural_res", g_config->neural_res);
 	json_encode_i32("console_model", g_config->console_model);
@@ -262,6 +263,11 @@ void config_init() {
 		g_config->view2d_grid_show    = false;
 		g_config->view2d_grid_cell    = 64;
 		g_config->view2d_grid_snap    = false;
+#ifdef NDEBUG
+		g_config->auto_run_scripts = false;
+#else
+		g_config->auto_run_scripts = true;
+#endif
 		g_config->experimental        = false;
 		g_config->neural_res          = 512;
 		g_config->console_model       = CONSOLE_MODEL_QWEN;

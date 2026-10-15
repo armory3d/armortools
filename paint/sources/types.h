@@ -170,6 +170,7 @@ typedef struct config {
 	i32                  dilate_radius;
 	char                *blender;
 	bool                 grid_snap;
+	bool                 auto_run_scripts;
 	bool                 experimental;
 	i32                  neural_res;
 	i32                  console_model;

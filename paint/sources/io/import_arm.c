@@ -532,6 +532,10 @@ static void import_arm_check_scripts(project_t *project, bool meshes) {
 	if (args_player) {
 		return;
 	}
+	if (g_config->auto_run_scripts) {
+		project_scripts_trusted = true;
+		return;
+	}
 	if (!import_arm_canvases_have_script(project->material_nodes) && !import_arm_canvases_have_script(project->material_groups) &&
 	    !(meshes && nodes_mesh_canvases_have_script(project->mesh_nodes))) {
 		return;

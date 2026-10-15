@@ -161,6 +161,11 @@ void box_preferences_interface_tab() {
 	ui_check(&g_config->grid_snap, tr("Grid Snap"), "");
 	ui_nodes_grid_snap = g_config->grid_snap;
 
+	ui_check(&g_config->auto_run_scripts, tr("Auto Run Scripts"), "");
+	if (g_ui->is_hovered) {
+		ui_tooltip(tr("Run script nodes when opening a project without asking"));
+	}
+
 	ui_check(&g_config->experimental, tr("Experimental Features"), "");
 
 	ui_end_element();
