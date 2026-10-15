@@ -14,6 +14,7 @@ f32                  _ui_view2d_render_th;
 gpu_texture_t       *ui_view2d_grid            = NULL;
 bool                 ui_view2d_layer_touched   = false;
 gpu_texture_t       *ui_view2d_tex             = NULL;
+i32                  ui_view2d_tex_channel     = 0;
 char                *ui_view2d_layer_name_prev = NULL;
 
 void ui_view2d_init() {
@@ -36,7 +37,20 @@ void ui_view2d_init() {
 }
 
 void ui_view2d_capture_output(void *_) {
-	util_texture_capture_output(ui_view2d_tex, "tex_capture", false);
+	if (ui_view2d_tex == NULL || ui_view2d_tex_channel == 0) {
+		util_texture_capture_output(ui_view2d_tex, "tex_capture", false);
+		return;
+	}
+	// Single channel views carry no usable alpha, bake the displayed channel into an opaque image
+	gpu_texture_t *rt = gpu_create_render_target(ui_view2d_tex->width, ui_view2d_tex->height, GPU_TEXTURE_FORMAT_RGBA32);
+	draw_begin(rt, true, 0xff000000);
+	draw_set_pipeline(ui_view2d_pipe);
+	gpu_set_int(ui_view2d_channel_loc, ui_view2d_tex_channel);
+	draw_scaled_image(ui_view2d_tex, 0, 0, rt->width, rt->height);
+	draw_end();
+	draw_set_pipeline(NULL);
+	util_texture_capture_output(rt, "tex_capture", false);
+	gpu_delete_texture(rt);
 }
 
 ui_node_t *ui_view2d_get_selected_node() {
@@ -322,17 +336,17 @@ void ui_view2d_update(void *_) {
 
 			if (g_config->touch_ui) {
 				// Paint only when clicking on the layer rect
-				slot_layer_t  *layer   = g_context->layer;
-				gpu_texture_t *tex     = layer->texpaint;
-				f32            ratio   = tex->height / (float)tex->width;
-				f32            wm      = fmin(ui_view2d_ww, ui_view2d_wh);
-				f32            tw      = wm * 0.9 * ui_view2d_pan_scale;
-				f32            th      = tw * ratio;
-				f32            tx      = ui_view2d_ww / 2.0 - tw / 2.0 + ui_view2d_pan_x;
-				i32            apph    = ui_view2d_wh + ui_view2d_top();
-				f32            ty      = apph / 2.0 - th / 2.0 + ui_view2d_pan_y;
-				f32            mx      = mouse_x - ui_view2d_wx;
-				f32            my      = mouse_y - ui_view2d_wy;
+				slot_layer_t  *layer = g_context->layer;
+				gpu_texture_t *tex   = layer->texpaint;
+				f32            ratio = tex->height / (float)tex->width;
+				f32            wm    = fmin(ui_view2d_ww, ui_view2d_wh);
+				f32            tw    = wm * 0.9 * ui_view2d_pan_scale;
+				f32            th    = tw * ratio;
+				f32            tx    = ui_view2d_ww / 2.0 - tw / 2.0 + ui_view2d_pan_x;
+				i32            apph  = ui_view2d_wh + ui_view2d_top();
+				f32            ty    = apph / 2.0 - th / 2.0 + ui_view2d_pan_y;
+				f32            mx    = mouse_x - ui_view2d_wx;
+				f32            my    = mouse_y - ui_view2d_wy;
 				if (mx > tx && mx < tx + tw && my > ty && my < ty + th) {
 					ui_view2d_layer_touched = true;
 				}
@@ -770,7 +784,8 @@ void ui_view2d_update(void *_) {
 
 			g_ui->_w = math_floor(ew * 0.7 + 3);
 			if (ui_icon_button("Edit", ICON_EDIT, UI_ALIGN_CENTER)) {
-				ui_view2d_tex = tex;
+				ui_view2d_tex         = tex;
+				ui_view2d_tex_channel = ui_view2d_type == VIEW_2D_TYPE_LAYER ? channel : 0;
 				ui_menu_draw(&ui_view2d_draw_edit, -1, -1);
 			}
 			g_ui->_x += ew * 0.7 + 3;
