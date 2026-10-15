@@ -186,7 +186,7 @@ void shader_node_init() {
 	                                                                                          .type          = "CUSTOM",
 	                                                                                          .output        = -1,
 	                                                                                          .default_value = f32_array_create_x(0),
-	                                                                                          .data          = NULL,
+	                                                                                          .data          = u8_array_create_from_string("return float3(0.0, 0.0, 0.0);"),
 	                                                                                          .min           = 0.0,
 	                                                                                          .max           = 1.0,
 	                                                                                          .precision     = 100,
