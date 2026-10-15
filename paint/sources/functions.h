@@ -672,6 +672,7 @@ void                   project_import_asset(char *filters, bool hdr_as_envmap);
 void                   project_import_swatches(bool replace_existing);
 void                   project_reimport_textures();
 void                   project_reimport_texture(asset_t *asset);
+void                   project_reimport_texture_load(char *path, asset_t *asset);
 gpu_texture_t         *project_get_image(asset_t *asset);
 asset_t_array_t       *project_get_assets();
 string_array_t        *project_get_used_atlases();

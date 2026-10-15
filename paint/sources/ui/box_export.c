@@ -148,6 +148,10 @@ void box_export_tab_export_textures(char *title, bool bake_material) {
 
 		ui_check(&g_context->export_padding, tr("Padding"), "");
 
+		if (bake_material) {
+			ui_check(&g_context->bake_create_material, tr("Create Baked Material"), "");
+		}
+
 		ui_row2();
 		if (ui_icon_button(tr("Cancel"), ICON_CLOSE, UI_ALIGN_CENTER)) {
 			ui_box_hide();
