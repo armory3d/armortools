@@ -1707,6 +1707,17 @@ void tab_meshes_draw(i32 *htab) {
 			ui_dock_redraw(TAB_AREA_SIDEBAR0);
 		}
 
+		// F2 to rename the selected mesh
+		mesh_object_t *sel = g_context->paint_object;
+		if (in_window && !g_ui->is_typing && g_ui->is_key_pressed && g_ui->key_code == KEY_CODE_F2 && sel != NULL && !tab_meshes_slot_hidden(sel)) {
+			g_ui->is_key_pressed      = false;
+			tab_meshes_mesh_name_edit = sel->base->uid;
+			tab_meshes_mesh_name      = string_copy(sel->base->name);
+			tab_meshes_mesh_name_prev = tab_meshes_mesh_name;
+			ui_start_text_edit(&tab_meshes_mesh_name, UI_ALIGN_LEFT);
+			tab_meshes_scroll_to_slot(array_index_of(g_project->_->paint_objects, sel));
+		}
+
 		for (i32 i = 0; i < g_project->_->paint_objects->length; ++i) {
 			mesh_object_t *o = g_project->_->paint_objects->buffer[i];
 			if (tab_meshes_slot_hidden(o)) {

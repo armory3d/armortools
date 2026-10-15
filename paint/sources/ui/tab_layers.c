@@ -1290,6 +1290,17 @@ void tab_layers_draw_full(i32 *htab) {
 		ui_end_sticky();
 		g_ui->_y += 2;
 
+		// F2 to rename the selected layer
+		slot_layer_t *sel = g_context->layer;
+		if (in_window && !g_ui->is_typing && g_ui->is_key_pressed && g_ui->key_code == KEY_CODE_F2 && sel != NULL && !tab_layers_slot_hidden(sel)) {
+			g_ui->is_key_pressed       = false;
+			tab_layers_layer_name_edit = sel->id;
+			tab_layers_layer_name_prev = string_copy(sel->name);
+			tab_layers_layer_name      = string_copy(sel->name);
+			ui_start_text_edit(&tab_layers_layer_name, UI_ALIGN_LEFT);
+			tab_layers_scroll_to_layer(sel);
+		}
+
 		tab_layers_highlight_odd_lines();
 		tab_layers_draw_slots(false);
 
