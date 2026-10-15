@@ -128,8 +128,7 @@ void render_pathsphere_tool() {
 	}
 	render_pathsphere_obj->base->visible = true;
 	for (i32 i = 0; i < count; i++) {
-		f32 dist  = vec4_dist(scene_camera->base->transform->loc, points[i]);
-		f32 scale = dist / 8.0f * scene_camera->data->fov * 0.1f * (i == active ? 1.5f : 1.0f);
+		f32 scale = util_path_tool_point_scale(points[i]) * (i == active ? 1.5f : 1.0f);
 
 		render_pathsphere_obj->base->transform->loc   = points[i];
 		render_pathsphere_obj->base->transform->scale = (vec4_t){scale, scale, scale, 1.0};

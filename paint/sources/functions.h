@@ -757,6 +757,7 @@ void                      util_path_tool_copy(mesh_object_t *from, mesh_object_t
 void                      util_path_tool_export();
 void                      util_path_tool_import();
 vec4_t                   *util_path_tool_get_points(i32 *count, i32 *active);
+f32                       util_path_tool_point_scale(vec4_t p);
 vec4_t                    raycast_aabb_mouse(object_t *object);
 bool                      point_in_aabb(object_t *object, vec4_t point);
 void                      util_select_update();
@@ -926,6 +927,7 @@ ui_node_t                *nodes_mesh_modifier_node(ui_node_t *def);
 void                      nodes_mesh_apply_modifier(mesh_object_t *o);
 void                      nodes_mesh_request_refresh();
 void                      nodes_mesh_refresh();
+bool                      nodes_mesh_set_input(mesh_object_t *o, mesh_data_t *data);
 void                      nodes_mesh_reset();
 void                      nodes_mesh_export_begin();
 void                      nodes_mesh_export_end();

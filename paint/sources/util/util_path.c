@@ -808,7 +808,8 @@ void util_layer_update_path() {
 		return;
 	}
 
-	if (keyboard_started("delete") && !g_ui->is_typing && context_in_3d_view()) {
+	bool object_tool = g_context->tool == TOOL_TYPE_PATH || g_context->tool == TOOL_TYPE_CURVE; // Removes its own points
+	if (keyboard_started("delete") && !g_ui->is_typing && context_in_3d_view() && !object_tool) {
 		util_layer_remove_path_point(l);
 	}
 

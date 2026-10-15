@@ -22,6 +22,7 @@ typedef struct mesh_nodes {
 	struct mesh_data      *input;  // Original mesh
 	struct mesh_data      *output; // Mesh assigned to the object, equals input unless the nodes change it
 	u32                    hash;
+	bool                   dirty; // Input replaced, rebuilt once the mouse is up
 } mesh_nodes_t;
 
 typedef struct mesh_geo {

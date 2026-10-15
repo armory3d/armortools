@@ -8,12 +8,15 @@
 #define PATH_TOOL_SMOOTH_DOT  0.8 // Joints of a curve bending less than this are shaded smooth
 
 static vec4_t        *_path_tool_points   = NULL; // World space, placed on the ground plane
+static i32           *_path_tool_parents  = NULL; // Point the segment or curve ending at each point starts from, -1 for none
 static i32            _path_tool_count    = 0;
 static i32            _path_tool_capacity = 0;
-static vec4_t        *_path_tool_samples  = NULL;  // Curve tool - points along the beziers
-static i32            _path_tool_tool     = -1;    // Tool the points were placed with
-static mesh_object_t *_path_tool_object   = NULL;  // Created with the first segment, or the selected mesh being edited
-static bool           _path_tool_open     = false; // Clicks add points
+static vec4_t        *_path_tool_samples  = NULL; // Points along the chains, curves sampled
+static i32           *_path_tool_chains   = NULL; // End of each chain in the samples
+static i32            _path_tool_tool     = -1;   // Tool the points were placed with
+static mesh_object_t *_path_tool_object   = NULL; // Created with the first segment, or the selected mesh being edited
+static mesh_object_t *_path_tool_synced   = NULL; // Paint object the points were last picked up from
+static i32            _path_tool_active   = -1;   // Selected point, new points connect to it
 static i32            _path_tool_dragging = -1;
 static any_imap_t    *_path_tool_datas    = NULL; // Object uid -> f32_array_t, curve flag, radius and the points in the object space
 static f32            _path_tool_radius;          // Radius the mesh was built with
@@ -76,9 +79,28 @@ static bool _path_tool_curved() {
 	return _path_tool_tool == TOOL_TYPE_CURVE;
 }
 
-// Curves start at an anchor and take a control point and an anchor each
+// Curves keep anchors at even indices, each anchor with a parent is reached through the control point before it
+static bool _path_tool_is_node(i32 i) {
+	return !_path_tool_curved() || i % 2 == 0;
+}
+
+static i32 _path_tool_parent(i32 i) {
+	i32 p = _path_tool_parents[i];
+	return p >= 0 && p < i && _path_tool_is_node(p) ? p : -1; // Points connect to earlier ones
+}
+
 static bool _path_tool_has_mesh() {
-	return _path_tool_curved() ? _path_tool_count > 2 : _path_tool_count > 1;
+	for (i32 i = 0; i < _path_tool_count; ++i) {
+		if (_path_tool_is_node(i) && _path_tool_parent(i) >= 0) {
+			return true;
+		}
+	}
+	return false;
+}
+
+// Nodes without a parent start the path not drawn yet
+static bool _path_tool_pending() {
+	return _path_tool_object == NULL && _path_tool_count > 0;
 }
 
 static vec4_t _path_tool_bezier(vec4_t p0, vec4_t pc, vec4_t p1, f32 t) {
@@ -86,30 +108,73 @@ static vec4_t _path_tool_bezier(vec4_t p0, vec4_t pc, vec4_t p1, f32 t) {
 	return vec4_add(vec4_add(vec4_mult(p0, u * u), vec4_mult(pc, 2.0 * u * t)), vec4_mult(p1, t * t));
 }
 
-// Fills _path_tool_samples, a trailing control point has no curve yet
-static i32 _path_tool_sample_curves() {
-	i32 curves                  = (_path_tool_count - 1) / 2;
-	_path_tool_samples          = realloc(_path_tool_samples, (curves * PATH_TOOL_CURVE_STEPS + 1) * sizeof(vec4_t));
-	i32 count                   = 0;
-	_path_tool_samples[count++] = _path_tool_points[0];
-	for (i32 j = 2; j < _path_tool_count; j += 2) {
-		for (i32 k = 1; k <= PATH_TOOL_CURVE_STEPS; ++k) {
-			vec4_t p = _path_tool_bezier(_path_tool_points[j - 2], _path_tool_points[j - 1], _path_tool_points[j], k / (f32)PATH_TOOL_CURVE_STEPS);
-			if (vec4_dist(p, _path_tool_samples[count - 1]) >= PATH_TOOL_MIN_DIST) {
-				_path_tool_samples[count++] = p;
+static void _path_tool_sample(i32 *count, vec4_t p) {
+	if (vec4_dist(p, _path_tool_samples[*count - 1]) >= PATH_TOOL_MIN_DIST) {
+		_path_tool_samples[(*count)++] = p;
+	}
+}
+
+// Appends the chain from node `from` through `next`, following the first child of each node
+static void _path_tool_chain(i32 *count, i32 *chains, i32 *first_child, i32 from, i32 next) {
+	i32 start                    = *count;
+	_path_tool_samples[(*count)++] = _path_tool_points[from];
+	for (i32 j = next; j >= 0; j = first_child[j]) {
+		i32 p = _path_tool_parent(j);
+		if (_path_tool_curved()) {
+			for (i32 k = 1; k <= PATH_TOOL_CURVE_STEPS; ++k) {
+				_path_tool_sample(count, _path_tool_bezier(_path_tool_points[p], _path_tool_points[j - 1], _path_tool_points[j], k / (f32)PATH_TOOL_CURVE_STEPS));
 			}
 		}
+		else {
+			_path_tool_sample(count, _path_tool_points[j]);
+		}
 	}
-	return count;
+	if (*count - start < 2) {
+		*count = start;
+		return;
+	}
+	_path_tool_chains[(*chains)++] = *count;
+}
+
+// Splits the point tree into chains of samples, a branch starts a new chain at its parent
+static i32 _path_tool_sample_chains() {
+	i32  n             = _path_tool_count;
+	_path_tool_samples = realloc(_path_tool_samples, (n * (PATH_TOOL_CURVE_STEPS + 1) + 1) * sizeof(vec4_t));
+	_path_tool_chains  = realloc(_path_tool_chains, (n + 1) * sizeof(i32));
+	i32 *first_child   = malloc((n + 1) * sizeof(i32));
+	for (i32 i = 0; i < n; ++i) {
+		first_child[i] = -1;
+	}
+	for (i32 i = n - 1; i >= 0; --i) {
+		i32 p = _path_tool_is_node(i) ? _path_tool_parent(i) : -1;
+		if (p >= 0) {
+			first_child[p] = i;
+		}
+	}
+	i32 count  = 0;
+	i32 chains = 0;
+	for (i32 i = 0; i < n; ++i) {
+		if (!_path_tool_is_node(i)) {
+			continue;
+		}
+		i32 p = _path_tool_parent(i);
+		if (p < 0) {
+			_path_tool_chain(&count, &chains, first_child, i, first_child[i]);
+		}
+		else if (first_child[p] != i) {
+			_path_tool_chain(&count, &chains, first_child, p, i);
+		}
+	}
+	free(first_child);
+	return chains;
 }
 
 // Round tube with mitered joints and capped ends
-static mesh_geo_t *_path_tool_make_geo(vec4_t *points, i32 count, f32 radius, bool smooth) {
-	i32         sides    = PATH_TOOL_SIDES;
-	i32         segments = count - 1;
-	mesh_geo_t *g        = util_geo_create(segments * (sides + 1) * 4, segments * sides * 12);
-	i32         vi       = 0;
-	i32         ii       = 0;
+static void _path_tool_tube(mesh_geo_t *g, i32 *_vi, i32 *_ii, vec4_t *points, i32 count, f32 radius, bool smooth) {
+	i32 sides    = PATH_TOOL_SIDES;
+	i32 segments = count - 1;
+	i32 vi       = *_vi;
+	i32 ii       = *_ii;
 
 	f32 total = 0.0;
 	for (i32 s = 0; s < segments; ++s) {
@@ -180,6 +245,22 @@ static mesh_geo_t *_path_tool_make_geo(vec4_t *points, i32 count, f32 radius, bo
 		dist += len;
 		prev_dir = dir;
 	}
+	*_vi = vi;
+	*_ii = ii;
+}
+
+// Tubes of all the chains in _path_tool_samples
+static mesh_geo_t *_path_tool_make_geo(vec4_t *points, i32 chains, f32 radius, bool smooth) {
+	i32 segments = 0;
+	for (i32 c = 0, start = 0; c < chains; start = _path_tool_chains[c++]) {
+		segments += _path_tool_chains[c] - start - 1;
+	}
+	mesh_geo_t *g  = util_geo_create(segments * (PATH_TOOL_SIDES + 1) * 4, segments * PATH_TOOL_SIDES * 12);
+	i32         vi = 0;
+	i32         ii = 0;
+	for (i32 c = 0, start = 0; c < chains; start = _path_tool_chains[c++]) {
+		_path_tool_tube(g, &vi, &ii, points + start, _path_tool_chains[c] - start, radius, smooth);
+	}
 	g->vertex_count = vi;
 	g->index_count  = ii;
 	return g;
@@ -200,26 +281,33 @@ static void _path_tool_reserve(i32 count) {
 	if (count > _path_tool_capacity) {
 		_path_tool_capacity = math_max(count, math_max(_path_tool_capacity * 2, 16));
 		_path_tool_points   = realloc(_path_tool_points, _path_tool_capacity * sizeof(vec4_t));
+		_path_tool_parents  = realloc(_path_tool_parents, _path_tool_capacity * sizeof(i32));
 	}
 }
 
-// Keeps the points with the mesh
+// Data flags, points stored before the parents were have none and form a single chain
+#define PATH_TOOL_DATA_CURVE   1
+#define PATH_TOOL_DATA_PARENTS 2
+
+// Keeps the points with the mesh, [flags, radius, points xyz, parents]
 static void _path_tool_store() {
+	i32          n    = _path_tool_count;
 	f32_array_t *data = _path_tool_data(_path_tool_object);
-	if (data == NULL || data->length != 2 + _path_tool_count * 3) {
-		data = f32_array_create(2 + _path_tool_count * 3);
+	if (data == NULL || data->length != 2 + n * 4) {
+		data = f32_array_create(2 + n * 4);
 		_path_tool_set_data(_path_tool_object, data);
 	}
 	mat4_t inv      = mat4_inv(_path_tool_object->base->transform->world);
-	data->buffer[0] = _path_tool_curved() ? 1.0 : 0.0;
+	data->buffer[0] = PATH_TOOL_DATA_PARENTS | (_path_tool_curved() ? PATH_TOOL_DATA_CURVE : 0);
 	data->buffer[1] = _path_tool_radius;
-	for (i32 i = 0; i < _path_tool_count; ++i) {
-		vec4_t p                = _path_tool_points[i];
-		p.w                     = 1.0;
-		p                       = vec4_apply_mat4(p, inv);
-		data->buffer[2 + i * 3] = p.x;
-		data->buffer[3 + i * 3] = p.y;
-		data->buffer[4 + i * 3] = p.z;
+	for (i32 i = 0; i < n; ++i) {
+		vec4_t p                    = _path_tool_points[i];
+		p.w                         = 1.0;
+		p                           = vec4_apply_mat4(p, inv);
+		data->buffer[2 + i * 3]     = p.x;
+		data->buffer[3 + i * 3]     = p.y;
+		data->buffer[4 + i * 3]     = p.z;
+		data->buffer[2 + n * 3 + i] = _path_tool_parents[i];
 	}
 }
 
@@ -238,8 +326,9 @@ static void _path_tool_rebuild() {
 	_path_tool_radius = util_path_tool_radius;
 	f32     radius    = math_max(_path_tool_radius, PATH_TOOL_MIN_RADIUS); // Typed values are not clamped
 	bool    curved    = _path_tool_curved();
-	i32     count     = curved ? _path_tool_sample_curves() : _path_tool_count; // Reallocates the samples
-	vec4_t *world     = curved ? _path_tool_samples : _path_tool_points;
+	i32     chains    = _path_tool_sample_chains(); // Reallocates the samples
+	i32     count     = chains > 0 ? _path_tool_chains[chains - 1] : 0;
+	vec4_t *world     = _path_tool_samples;
 	// The mesh is built in the object space, a new object sits at the first point
 	vec4_t *local = malloc(count * sizeof(vec4_t));
 	mat4_t  inv   = _path_tool_object != NULL ? mat4_inv(_path_tool_object->base->transform->world) : mat4_identity();
@@ -248,7 +337,7 @@ static void _path_tool_rebuild() {
 		p.w      = 1.0;
 		local[i] = _path_tool_object != NULL ? vec4_apply_mat4(p, inv) : vec4_sub(p, _path_tool_points[0]);
 	}
-	mesh_geo_t  *g  = _path_tool_make_geo(local, count, radius, curved);
+	mesh_geo_t  *g  = _path_tool_make_geo(local, chains, radius, curved);
 	mesh_data_t *md = nodes_mesh_geo_to_data(g, curved ? "Curve" : "Path");
 	util_geo_free(g);
 	free(local);
@@ -258,6 +347,9 @@ static void _path_tool_rebuild() {
 		_path_tool_object->base->transform->loc = _path_tool_points[0];
 		transform_build_matrix(_path_tool_object->base->transform);
 		util_mesh_transform_changed();
+	}
+	else if (nodes_mesh_set_input(_path_tool_object, md)) {
+		// The mesh nodes of the object build on the path
 	}
 	else {
 		mesh_data_t *old = _path_tool_object->data;
@@ -286,55 +378,76 @@ static void _path_tool_rebuild() {
 static void _path_tool_end() {
 	_path_tool_count    = 0;
 	_path_tool_object   = NULL;
-	_path_tool_open     = false;
+	_path_tool_synced   = NULL;
+	_path_tool_active   = -1;
 	_path_tool_dragging = -1;
 }
 
-static f32 _path_tool_sphere_scale(vec4_t p) {
+// Size of the point spheres, the selected one is drawn 1.5x bigger
+f32 util_path_tool_point_scale(vec4_t p) {
 	f32 dist = vec4_dist(scene_camera->base->transform->loc, p);
-	return dist / 8.0 * scene_camera->data->fov * 0.1;
+	return dist / 8.0 * scene_camera->data->fov * 0.2;
 }
 
 // Points of the path being drawn or edited, drawn as spheres by render_pathsphere_tool
 vec4_t *util_path_tool_get_points(i32 *count, i32 *active) {
 	bool tool = (g_context->tool == TOOL_TYPE_PATH || g_context->tool == TOOL_TYPE_CURVE) && !base_player;
 	*count    = tool && g_context->tool == _path_tool_tool ? _path_tool_count : 0;
-	*active   = _path_tool_dragging;
+	*active   = _path_tool_active;
 	return _path_tool_points;
 }
 
-// Picks up the points of the selected mesh when no path is being drawn
+// Picks up the points of the selected mesh when no new path is being started
 static void _path_tool_sync() {
 	mesh_object_t *po = g_context->paint_object;
-	if (_path_tool_open) {
-		if (_path_tool_object == NULL || _path_tool_object == po) {
+	if (_path_tool_pending()) {
+		if (po == _path_tool_synced) {
 			return;
 		}
 		// Another mesh was selected
-		_path_tool_end();
+		_path_tool_count = 0;
 	}
 	if (_path_tool_dragging >= 0) {
 		return;
 	}
 	bool         selected = po != NULL && !context_object_deselected() && array_index_of(g_project->_->paint_objects, po) >= 0;
 	f32_array_t *data     = selected ? _path_tool_data(po) : NULL;
-	if (data == NULL || (data->buffer[0] != 0.0) != _path_tool_curved()) {
+	i32          flags    = data != NULL ? (i32)data->buffer[0] : 0;
+	if (data == NULL || ((flags & PATH_TOOL_DATA_CURVE) != 0) != _path_tool_curved()) {
 		_path_tool_count  = 0;
 		_path_tool_object = NULL;
+		_path_tool_synced = po;
+		_path_tool_active = -1;
 		return;
 	}
-	if (_path_tool_object != po) {
-		_path_tool_radius         = data->buffer[1];
-		util_path_tool_radius     = _path_tool_radius;
-		ui_header_handle->redraws = 2;
-	}
-	_path_tool_object = po;
-	_path_tool_count  = (data->length - 2) / 3;
+	bool parents     = (flags & PATH_TOOL_DATA_PARENTS) != 0;
+	_path_tool_count = (data->length - 2) / (parents ? 4 : 3);
 	_path_tool_reserve(_path_tool_count);
 	for (i32 i = 0; i < _path_tool_count; ++i) {
 		vec4_t p             = (vec4_t){data->buffer[2 + i * 3], data->buffer[3 + i * 3], data->buffer[4 + i * 3], 1.0};
 		_path_tool_points[i] = vec4_apply_mat4(p, po->base->transform->world);
+		if (parents) {
+			_path_tool_parents[i] = (i32)data->buffer[2 + _path_tool_count * 3 + i];
+		}
+		else {
+			// A single chain, controls point back to the anchor before them
+			_path_tool_parents[i] = _path_tool_curved() && i % 2 == 0 ? i - 2 : i - 1;
+		}
 	}
+	if (po != _path_tool_synced) {
+		// A mesh selected elsewhere shows its points with none selected, a path just drawn keeps its point
+		if (po != _path_tool_object) {
+			_path_tool_active = -1;
+		}
+		_path_tool_radius         = data->buffer[1];
+		util_path_tool_radius     = _path_tool_radius;
+		ui_header_handle->redraws = 2;
+	}
+	if (_path_tool_active >= _path_tool_count) {
+		_path_tool_active = _path_tool_count - 1;
+	}
+	_path_tool_object = po;
+	_path_tool_synced = po;
 }
 
 // Point under the mouse
@@ -348,7 +461,7 @@ static i32 _path_tool_pick() {
 	for (i32 i = 0; i < _path_tool_count; ++i) {
 		vec4_t p      = _path_tool_points[i];
 		f32    dist   = vec4_dist(scene_camera->base->transform->loc, p);
-		f32    radius = _path_tool_sphere_scale(p) * 2.5;
+		f32    radius = util_path_tool_point_scale(p) * 1.5;
 		if (ray_intersects_sphere(ray, p, radius) && (closest < 0 || dist < min_dist)) {
 			min_dist = dist;
 			closest  = i;
@@ -382,17 +495,119 @@ static void _path_tool_drag() {
 	g_context->ddirty = 2;
 }
 
+// Parent of a new point, curves grow from anchors
+static i32 _path_tool_next_parent() {
+	i32 p = _path_tool_active;
+	if (_path_tool_curved() && p >= 0 && p % 2 == 1) {
+		p = _path_tool_parents[p];
+	}
+	return p;
+}
+
+static void _path_tool_add(vec4_t p) {
+	if (_path_tool_active >= 0 && vec4_dist(p, _path_tool_points[_path_tool_active]) < PATH_TOOL_MIN_DIST) {
+		return;
+	}
+	i32 i = _path_tool_count;
+	_path_tool_reserve(i + 1);
+	_path_tool_points[i]  = p;
+	_path_tool_parents[i] = _path_tool_next_parent();
+	_path_tool_active     = i;
+	_path_tool_count++;
+	// A control point adds no curve until its anchor is placed
+	if (_path_tool_is_node(i) && _path_tool_parent(i) >= 0) {
+		_path_tool_rebuild();
+	}
+	else if (_path_tool_object != NULL) {
+		// The points are picked up from the mesh again on the next frame
+		_path_tool_store();
+	}
+}
+
+// Removes the selected point and connects its children to its parent, curves remove the anchor with its control point
+static void _path_tool_remove() {
+	i32 n   = _path_tool_count;
+	i32 idx = _path_tool_active;
+	if (idx < 0 || idx >= n) {
+		return;
+	}
+	i32 start = idx;
+	i32 count = 1;
+	if (_path_tool_curved()) {
+		if (idx % 2 == 1) {
+			count = idx + 1 < n ? 2 : 1;
+		}
+		else if (idx > 0) {
+			start = idx - 1;
+			count = 2;
+		}
+		else {
+			count = n > 1 ? 2 : 1;
+		}
+	}
+	i32 last       = start + count - 1;
+	i32 new_parent = _path_tool_parents[last];
+	if (new_parent >= start && new_parent <= last) {
+		new_parent = -1;
+	}
+	else if (new_parent > last) {
+		new_parent -= count;
+	}
+	for (i32 i = 0; i < n; ++i) {
+		i32 p = _path_tool_parents[i];
+		if (p >= start && p <= last) {
+			p = new_parent;
+		}
+		else if (p > last) {
+			p -= count;
+		}
+		_path_tool_parents[i] = p;
+	}
+	memmove(&_path_tool_points[start], &_path_tool_points[start + count], (n - start - count) * sizeof(vec4_t));
+	memmove(&_path_tool_parents[start], &_path_tool_parents[start + count], (n - start - count) * sizeof(i32));
+	_path_tool_count    = n - count;
+	_path_tool_active   = _path_tool_count > 0 ? (new_parent >= 0 ? new_parent : _path_tool_count - 1) : -1;
+	_path_tool_dragging = -1;
+
+	if (_path_tool_has_mesh()) {
+		if (_path_tool_object != NULL) {
+			_path_tool_rebuild();
+		}
+	}
+	else if (_path_tool_object != NULL) {
+		// Nothing left to build, the path goes with its mesh
+		if (_path_tool_object == g_context->paint_object && g_project->_->paint_objects->length > 1) {
+			imap_delete(_path_tool_datas, _path_tool_object->base->uid);
+			util_mesh_delete();
+			_path_tool_count  = 0;
+			_path_tool_object = NULL;
+			_path_tool_active = -1;
+		}
+		// Otherwise the stored points are picked up again
+	}
+	g_context->ddirty = 2;
+}
+
+static void _path_tool_deselect() {
+	_path_tool_active = -1;
+	if (_path_tool_pending()) {
+		_path_tool_count = 0;
+	}
+	g_context->ddirty = 2;
+}
+
 static void _path_tool_input() {
-	// Right click ends the path, right drag rotates the camera
+	// Right click deselects the point so the next click starts a new path, right drag rotates the camera
 	if (mouse_started("right")) {
 		_path_tool_right_x = mouse_view_x();
 		_path_tool_right_y = mouse_view_y();
 	}
 	if (mouse_released("right") && math_abs(mouse_view_x() - _path_tool_right_x) < 4 && math_abs(mouse_view_y() - _path_tool_right_y) < 4) {
-		_path_tool_open = false;
-		if (!_path_tool_has_mesh()) {
-			_path_tool_end();
-		}
+		_path_tool_deselect();
+		return;
+	}
+	if (keyboard_started("escape")) {
+		_path_tool_deselect();
 		return;
 	}
 
@@ -403,6 +618,11 @@ static void _path_tool_input() {
 		return;
 	}
 
+	if (keyboard_started("delete") && !g_ui->is_typing && context_in_3d_view()) {
+		_path_tool_remove();
+		return;
+	}
+
 	if (_path_tool_has_mesh() && _path_tool_object != NULL && _path_tool_radius != util_path_tool_radius && !mouse_down("left")) {
 		_path_tool_rebuild();
 	}
@@ -410,33 +630,28 @@ static void _path_tool_input() {
 	if (!util_tool_input_enabled() || !mouse_started("left")) {
 		return;
 	}
-	_path_tool_dragging = _path_tool_pick();
-	if (_path_tool_dragging >= 0) {
+	i32 picked = _path_tool_pick();
+	if (picked >= 0) {
+		_path_tool_dragging = picked;
+		_path_tool_active   = picked;
+		g_context->ddirty   = 2;
 		return;
 	}
 	vec4_t p;
 	if (!util_tool_plane_point(&p)) {
 		return;
 	}
-	if (!_path_tool_open) {
+	if (_path_tool_active < 0) {
 		// Start a new path, the edited one is done
-		_path_tool_end();
-		_path_tool_open = true;
+		_path_tool_count  = 0;
+		_path_tool_object = NULL;
 	}
-	if (_path_tool_count > 0 && vec4_dist(p, _path_tool_points[_path_tool_count - 1]) < PATH_TOOL_MIN_DIST) {
-		return;
-	}
-	_path_tool_reserve(_path_tool_count + 1);
-	_path_tool_points[_path_tool_count++] = p;
-	// A control point adds no curve until its anchor is placed
-	if (_path_tool_has_mesh() && !(_path_tool_curved() && _path_tool_count % 2 == 0)) {
-		_path_tool_rebuild();
-	}
+	_path_tool_add(p);
 }
 
 void util_path_tool_update() {
 	bool active = (g_context->tool == TOOL_TYPE_PATH || g_context->tool == TOOL_TYPE_CURVE) && !base_player;
-	if (!active || g_context->tool != _path_tool_tool || keyboard_started("escape")) {
+	if (!active || g_context->tool != _path_tool_tool) {
 		_path_tool_end();
 		_path_tool_tool = g_context->tool;
 		if (!active) {
@@ -493,38 +708,42 @@ void util_path_tool_render() {
 
 	draw_scissor(base_x(), base_y(), base_w(), base_h());
 	draw_set_color(0xffffffff);
-	bool   curved  = _path_tool_curved();
-	vec4_t last    = _path_tool_points[_path_tool_count - 1];
-	bool   control = curved && _path_tool_count % 2 == 0; // The next point is an anchor ending a curve
+	bool curved = _path_tool_curved();
+	i32  next   = _path_tool_count; // Index of the next point, an even one is an anchor ending a curve
+	i32  parent = _path_tool_next_parent();
 	vec4_t p;
-	if (_path_tool_open && _path_tool_dragging < 0 && util_tool_input_enabled() && util_tool_plane_point(&p)) {
-		if (control) {
-			vec4_t prev = _path_tool_points[_path_tool_count - 2];
-			vec4_t a    = prev;
+	if (_path_tool_active >= 0 && _path_tool_dragging < 0 && util_tool_input_enabled() && util_tool_plane_point(&p)) {
+		if (curved && next % 2 == 0 && parent >= 0) {
+			vec4_t from = _path_tool_points[parent];
+			vec4_t a    = from;
 			for (i32 k = 1; k <= PATH_TOOL_CURVE_STEPS; ++k) {
-				vec4_t b = _path_tool_bezier(prev, last, p, k / (f32)PATH_TOOL_CURVE_STEPS);
+				vec4_t b = _path_tool_bezier(from, _path_tool_points[next - 1], p, k / (f32)PATH_TOOL_CURVE_STEPS);
 				util_tool_draw_line(a, b);
 				a = b;
 			}
 		}
-		else {
-			util_tool_draw_line(last, p);
+		else if (parent >= 0) {
+			util_tool_draw_line(_path_tool_points[parent], p);
 		}
 	}
 	// The path stays visible no matter how thin the tube is
-	if (curved) {
-		i32 count = _path_tool_sample_curves();
-		for (i32 i = 1; i < count; ++i) {
+	i32 chains = _path_tool_sample_chains();
+	for (i32 c = 0, start = 0; c < chains; start = _path_tool_chains[c++]) {
+		for (i32 i = start + 1; i < _path_tool_chains[c]; ++i) {
 			util_tool_draw_line(_path_tool_samples[i - 1], _path_tool_samples[i]);
 		}
-		// Control points are off the curve
-		for (i32 i = 1; i < _path_tool_count; ++i) {
-			util_tool_draw_line(_path_tool_points[i - 1], _path_tool_points[i]);
-		}
 	}
-	else {
-		for (i32 i = 1; i < _path_tool_count; ++i) {
-			util_tool_draw_line(_path_tool_points[i - 1], _path_tool_points[i]);
+	if (curved) {
+		// Control points are off the curve
+		for (i32 i = 1; i < _path_tool_count; i += 2) {
+			i32 anchor = i + 1 < _path_tool_count ? _path_tool_parent(i + 1) : -1;
+			i32 from   = anchor >= 0 ? anchor : _path_tool_parent(i);
+			if (from >= 0) {
+				util_tool_draw_line(_path_tool_points[from], _path_tool_points[i]);
+			}
+			if (anchor >= 0) {
+				util_tool_draw_line(_path_tool_points[i], _path_tool_points[i + 1]);
+			}
 		}
 	}
 	draw_flush();

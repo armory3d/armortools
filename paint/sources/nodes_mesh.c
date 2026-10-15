@@ -671,7 +671,9 @@ void nodes_mesh_update(mesh_object_t *o, bool force) {
 	if (slot == NULL || nodes_mesh_script_running) {
 		return;
 	}
-	u32 hash = nodes_mesh_hash(slot->canvas, o);
+	force       = force || slot->dirty;
+	slot->dirty = false;
+	u32 hash    = nodes_mesh_hash(slot->canvas, o);
 	if (!force && hash == slot->hash) {
 		return;
 	}
@@ -768,6 +770,22 @@ void nodes_mesh_apply_modifier(mesh_object_t *o) {
 	nodes_mesh_set_data(o, out, nodes_mesh_eval_unwrap);
 }
 
+// Replaces the original mesh of an object whose nodes change it, the nodes run again once the mouse is up
+bool nodes_mesh_set_input(mesh_object_t *o, mesh_data_t *data) {
+	mesh_nodes_t *slot = nodes_mesh_find(o->base->uid);
+	if (slot == NULL || slot->output == slot->input) {
+		return false;
+	}
+	mesh_data_t *old = slot->input;
+	slot->input      = data;
+	if (old != data && util_mesh_data_owner(old) == -1 && !nodes_mesh_holds(old)) {
+		sys_notify_on_next_frame(&util_mesh_delete_data_uncache, old);
+	}
+	slot->dirty                = true;
+	nodes_mesh_refresh_pending = true;
+	return true;
+}
+
 // Rebuilds meshes with scene mesh nodes after other meshes changed or moved
 void nodes_mesh_request_refresh() {
 	nodes_mesh_refresh_pending = true;
@@ -781,7 +799,7 @@ void nodes_mesh_refresh() {
 	for (i32 i = 0; i < nodes_mesh_slots->length; ++i) {
 		mesh_nodes_t  *slot = nodes_mesh_slots->buffer[i];
 		mesh_object_t *o    = nodes_mesh_object(slot->uid);
-		if (o != NULL && nodes_mesh_has_object_nodes(slot->canvas)) {
+		if (o != NULL && (slot->dirty || nodes_mesh_has_object_nodes(slot->canvas))) {
 			nodes_mesh_update(o, false);
 		}
 	}
