@@ -180,9 +180,15 @@ void make_material_parse_mesh_preview_material() {
 	any_array_push(m->contexts, scon);
 }
 
+static bool make_material_bake_linked = false;
+
+char *make_material_node_preview_id(ui_node_t *node, ui_node_t_array_t *parents) {
+	return string_tmp("m%d_%s", g_context->material->id, parser_material_node_name(node, parents));
+}
+
 void make_material_bake_node_preview(ui_node_t *node, ui_node_canvas_t *group, ui_node_t_array_t *parents) {
 	if (string_equals(node->type, "BLUR")) {
-		char          *id    = parser_material_node_name(node, parents);
+		char          *id    = make_material_node_preview_id(node, parents);
 		gpu_texture_t *image = any_map_get(g_context->node_previews, id);
 		any_array_push(g_context->node_previews_used, id);
 		i32 res_x = math_floor(config_get_texture_res_x() / 4.0);
@@ -200,7 +206,7 @@ void make_material_bake_node_preview(ui_node_t *node, ui_node_canvas_t *group, u
 		parser_material_blur_passthrough = false;
 	}
 	else if (string_equals(node->type, "DIRECT_WARP")) {
-		char          *id    = parser_material_node_name(node, parents);
+		char          *id    = make_material_node_preview_id(node, parents);
 		gpu_texture_t *image = any_map_get(g_context->node_previews, id);
 		any_array_push(g_context->node_previews_used, id);
 		i32 res_x = math_floor(config_get_texture_res_x());
@@ -221,7 +227,7 @@ void make_material_bake_node_preview(ui_node_t *node, ui_node_canvas_t *group, u
 		if (g_context->merged_object == NULL) {
 			layers_set_object_mask();
 		}
-		char          *id    = parser_material_node_name(node, parents);
+		char          *id    = make_material_node_preview_id(node, parents);
 		gpu_texture_t *image = any_map_get(g_context->node_previews, id);
 		any_array_push(g_context->node_previews_used, id);
 		i32 res_x = math_floor(config_get_texture_res_x());
@@ -232,6 +238,9 @@ void make_material_bake_node_preview(ui_node_t *node, ui_node_canvas_t *group, u
 			}
 			image = gpu_create_render_target(res_x, res_y, GPU_TEXTURE_FORMAT_R8);
 			any_map_set(g_context->node_previews, string_copy(id), image);
+		}
+		else if (make_material_bake_linked) {
+			return; // Curvature does not depend on painted layers, keep the existing bake
 		}
 
 		if (render_path_paint_live_layer == NULL) {
@@ -289,18 +298,16 @@ void make_material_traverse_nodes(ui_node_t_array_t *nodes, ui_node_canvas_t *gr
 	}
 }
 
-void make_material_bake_node_previews() {
-	g_context->node_previews_used = any_array_create_from_raw((void *[]){}, 0);
+// Deletes previews of material m, except the ones listed in keep
+void make_material_delete_node_previews(slot_material_t *m, string_array_t *keep) {
 	if (g_context->node_previews == NULL) {
-		g_context->node_previews = any_map_create();
+		return;
 	}
-	ui_node_t_array_t *empty = any_array_create_from_raw((void *[]){}, 0);
-	make_material_traverse_nodes(g_context->material->canvas->nodes, NULL, empty);
-
-	string_array_t *keys = map_keys(g_context->node_previews);
+	char           *prefix = string_tmp("m%d_", m->id);
+	string_array_t *keys   = map_keys(g_context->node_previews);
 	for (i32 i = 0; i < keys->length; ++i) {
 		char *key = keys->buffer[i];
-		if (string_array_index_of(g_context->node_previews_used, key) == -1) {
+		if (starts_with(key, prefix) && (keep == NULL || string_array_index_of(keep, key) == -1)) {
 			gpu_texture_t *image = any_map_get(g_context->node_previews, key);
 			gpu_delete_texture(image);
 			map_delete(g_context->node_previews, key);
@@ -309,11 +316,36 @@ void make_material_bake_node_previews() {
 	}
 	array_free(keys);
 	free(keys);
+}
+
+void make_material_bake_node_previews() {
+	g_context->node_previews_used = any_array_create_from_raw((void *[]){}, 0);
+	if (g_context->node_previews == NULL) {
+		g_context->node_previews = any_map_create();
+	}
+	ui_node_t_array_t *empty = any_array_create_from_raw((void *[]){}, 0);
+	make_material_traverse_nodes(g_context->material->canvas->nodes, NULL, empty);
+
+	make_material_delete_node_previews(g_context->material, g_context->node_previews_used);
 	array_free(empty);
 	free(empty);
 	array_free(g_context->node_previews_used);
 	free(g_context->node_previews_used);
 	g_context->node_previews_used = NULL;
+}
+
+// Refresh previews of a material that is not selected but fills linked layers,
+// blur and warp sample other layers so they go stale on every stroke
+void make_material_bake_node_previews_linked() {
+	gpu_texture_t *current = _draw_current;
+	bool           in_use  = gpu_in_use;
+	if (in_use)
+		draw_end();
+	make_material_bake_linked = true;
+	make_material_bake_node_previews();
+	make_material_bake_linked = false;
+	if (in_use)
+		draw_begin(current, false, 0);
 }
 
 void make_material_parse_paint_material(bool bake_previews) {

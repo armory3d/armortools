@@ -473,6 +473,7 @@ void layers_update_linked_layers() {
 		}
 		any_linked          = true;
 		g_context->material = m;
+		make_material_bake_node_previews_linked();
 		layers_update_fill_layers();
 	}
 	g_context->material = _material;
@@ -1151,7 +1152,7 @@ slot_layer_t *layers_flatten(bool height_to_normal, slot_layer_t_array_t *layers
 		if (!slot_layer_is_layer(l1)) {
 			continue;
 		}
-		if (slot_layer_get_filters(l1, false) != NULL) {
+		if (slot_layer_has_visible_filter(l1)) {
 			continue;
 		}
 

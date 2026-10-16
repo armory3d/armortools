@@ -525,7 +525,7 @@ void slot_layer_resize_and_set_bits(slot_layer_t *raw) {
 
 void slot_layer_to_fill_layer_on_next_frame(void *_) {
 	make_material_parse_paint_material(true);
-	g_context->layer_preview_dirty                    = true;
+	g_context->layer_preview_dirty = true;
 	ui_dock_redraw(TAB_AREA_SIDEBAR0);
 }
 
@@ -546,7 +546,7 @@ void slot_layer_to_paint_layer(slot_layer_t *raw) {
 		util_layer_update_path();
 	}
 	make_material_parse_paint_material(true);
-	g_context->layer_preview_dirty                    = true;
+	g_context->layer_preview_dirty = true;
 	ui_dock_redraw(TAB_AREA_SIDEBAR0);
 }
 
@@ -687,6 +687,19 @@ slot_layer_t_array_t *slot_layer_get_filters(slot_layer_t *raw, bool include_gro
 		}
 	}
 	return children;
+}
+
+bool slot_layer_has_visible_filter(slot_layer_t *raw) {
+	slot_layer_t_array_t *filters = slot_layer_get_filters(raw, false);
+	if (filters == NULL) {
+		return false;
+	}
+	for (i32 i = 0; i < filters->length; ++i) {
+		if (slot_layer_is_visible(filters->buffer[i])) {
+			return true;
+		}
+	}
+	return false;
 }
 
 f32 slot_layer_get_opacity(slot_layer_t *raw) {

@@ -270,7 +270,7 @@ node_shader_context_t *make_mesh_run(material_t *data, i32 layer_pass) {
 			if (!slot_layer_is_layer(l)) {
 				continue;
 			}
-			if (slot_layer_get_filters(l, false) != NULL) {
+			if (slot_layer_has_visible_filter(l)) {
 				continue;
 			}
 

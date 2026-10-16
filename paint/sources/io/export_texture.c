@@ -305,7 +305,7 @@ static void export_texture_run_layers(char *path, slot_layer_t_array_t *layers, 
 		if (!slot_layer_is_layer(l1)) {
 			continue;
 		}
-		if (slot_layer_get_filters(l1, false) != NULL) {
+		if (slot_layer_has_visible_filter(l1)) {
 			continue;
 		}
 
