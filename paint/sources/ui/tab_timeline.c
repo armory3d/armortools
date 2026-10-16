@@ -46,6 +46,7 @@ static i32          tab_timeline_last_frame = 0;
 static any_array_t *tab_timeline_mesh_keyframes  = NULL;
 static i32          tab_timeline_loop_frames     = 0;
 static i32          tab_timeline_last_skin_frame = -1;
+static bool         tab_timeline_capturing       = false;
 
 static i32 tab_timeline_pending_from           = -1;
 static i32 tab_timeline_pending_to             = -1;
@@ -1539,9 +1540,33 @@ void tab_timeline_set_frame(i32 frame) {
 	tab_timeline_last_frame = frame;
 }
 
+static void tab_timeline_capture_end() {
+	tab_timeline_capturing = false;
+	tab_timeline_playing   = false;
+	if (viewport_recording) {
+		viewport_capture_video_end();
+	}
+}
+
+static void tab_timeline_capture_on_next_frame(void *_) {
+	if (tab_timeline_playing || viewport_recording) {
+		return;
+	}
+	viewport_capture_video_begin();
+	if (!viewport_recording) {
+		return;
+	}
+	tab_timeline_set_frame(0);
+	tab_timeline_play_on_next_frame(NULL);
+	tab_timeline_capturing = true;
+}
+
 void tab_timeline_update() {
 	tab_timeline_init();
 	tab_timeline_sync();
+	if (tab_timeline_capturing && (!tab_timeline_playing || !viewport_recording)) {
+		tab_timeline_capture_end();
+	}
 	if (!tab_timeline_playing) {
 		if (tab_timeline_mesh_refresh_pending) {
 			tab_timeline_mesh_refresh_pending = false;
@@ -1556,6 +1581,11 @@ void tab_timeline_update() {
 
 	// Keep nested clips continuous when the main timeline wraps
 	f64   playback_frame = (sys_time() - tab_timeline_play_time) * tab_timeline_frame_rate;
+	if (tab_timeline_capturing && playback_frame >= loop_frames) {
+		// Played once, the last frame was already recorded
+		tab_timeline_capture_end();
+		return;
+	}
 	float frame_f        = (float)fmod(playback_frame, loop_frames);
 	i32   frame_i        = (i32)frame_f;
 	i32   skin_frame     = (i32)playback_frame;
@@ -1646,6 +1676,13 @@ void tab_timeline_draw_edit() {
 	ui_slider_int(&tab_timeline_max_frames, tr("Frame Count"), 1, 200, false, true, UI_ALIGN_RIGHT, true);
 	if (ui_item_changed()) {
 		ui_menu_keep_open = true;
+	}
+
+	if (!viewport_recording && ui_menu_button(tr("Capture Video"), "", ICON_MOVIE)) {
+		sys_notify_on_next_frame(&tab_timeline_capture_on_next_frame, NULL);
+	}
+	if (viewport_recording && ui_menu_button(tr("Stop Capture"), "", ICON_STOP)) {
+		viewport_capture_video_end();
 	}
 
 	if (ui_menu_button(tr("Clear"), "", ICON_ERASE)) {
