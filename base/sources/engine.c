@@ -1974,6 +1974,9 @@ buffer_t *data_get_blob(char *file) {
 		return cached;
 	}
 	buffer_t *b = iron_load_blob(data_resolve_path(file));
+	if (b == NULL) {
+		return NULL;
+	}
 	any_map_set(data_cached_blobs, string_copy(file), b);
 	data_assets_loaded++;
 	return b;

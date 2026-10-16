@@ -1221,6 +1221,9 @@ void sys_remove_update(void (*f)(void *data)) {
 }
 
 char *sys_buffer_to_string(buffer_t *b) {
+	if (b == NULL) {
+		return NULL;
+	}
 	char *str = string_alloc(b->length + 1);
 	memcpy(str, b->buffer, b->length);
 	return str;
