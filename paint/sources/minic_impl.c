@@ -1520,7 +1520,7 @@ object_t *script_object_duplicate(object_t *o) {
 	mesh_object_t *dup = util_mesh_duplicate_object(o->ext);
 	script_gpu_end(current, in_use);
 
-	g_context->ddirty                                 = 2;
+	g_context->ddirty = 2;
 	ui_dock_redraw(TAB_AREA_SIDEBAR0);
 	return dup->base;
 }
@@ -1947,6 +1947,13 @@ void script_timeline_resume(void) {
 
 void script_timeline_pause(void) {
 	tab_timeline_pause();
+}
+
+i32 script_timeline_get_frame(void) {
+	if (nodes_mesh_script_running) {
+		nodes_mesh_eval_reads_frame = true;
+	}
+	return tab_timeline_selected_frame;
 }
 
 void script_timeline_set_frame(i32 frame) {

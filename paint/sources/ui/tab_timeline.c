@@ -1547,6 +1547,7 @@ void tab_timeline_update() {
 			tab_timeline_mesh_refresh_pending = false;
 			util_mesh_transform_changed();
 		}
+		nodes_mesh_frame_changed();
 		return;
 	}
 	iron_delay_idle_sleep();
@@ -1586,6 +1587,7 @@ void tab_timeline_update() {
 	if (tab_timeline_keyframes != NULL) {
 		tab_timeline_tween_from_keyframes(frame_f);
 	}
+	nodes_mesh_frame_changed();
 }
 
 void tab_timeline_draw_frame_context_menu() {

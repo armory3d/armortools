@@ -8,6 +8,7 @@ char *shader_node_text(ui_node_t *node) {
 
 static char *shader_node_constants[][3] = {
     {"time", "float", "_time"},
+    {"frame", "float", "_timeline_frame"},
 };
 
 static i32 shader_node_constants_count = sizeof(shader_node_constants) / sizeof(shader_node_constants[0]);

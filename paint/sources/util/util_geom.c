@@ -1590,7 +1590,7 @@ void geom_export_add(geom_t *g, char *name, bool flat) {
 	b[2] += flat ? g->icount / 3 : g->vcount;
 }
 
-void geom_export_write(char *path) {
+void geom_export_write_obj(char *path) {
 	if (geom_out == NULL) {
 		return;
 	}

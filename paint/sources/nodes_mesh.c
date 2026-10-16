@@ -482,13 +482,15 @@ static mesh_data_t *nodes_mesh_eval(mesh_nodes_t *slot, mesh_object_t *o) {
 		return NULL;
 	}
 
-	nodes_mesh_eval_canvas = slot->canvas;
-	nodes_mesh_eval_slot   = slot;
-	nodes_mesh_eval_object = o;
-	nodes_mesh_eval_unwrap = false;
-	nodes_mesh_eval_depth  = 0;
-	mesh_geo_t *g          = nodes_mesh_eval_node(from);
-	nodes_mesh_eval_object = NULL;
+	nodes_mesh_eval_canvas      = slot->canvas;
+	nodes_mesh_eval_slot        = slot;
+	nodes_mesh_eval_object      = o;
+	nodes_mesh_eval_unwrap      = false;
+	nodes_mesh_eval_depth       = 0;
+	nodes_mesh_eval_reads_frame = false;
+	mesh_geo_t *g               = nodes_mesh_eval_node(from);
+	nodes_mesh_eval_object      = NULL;
+	slot->reads_frame           = nodes_mesh_eval_reads_frame;
 	mesh_image_node_clear();
 
 	if (g->index_count == 0) {
@@ -685,8 +687,9 @@ void nodes_mesh_update(mesh_object_t *o, bool force) {
 	if (slot == NULL || nodes_mesh_script_running) {
 		return;
 	}
-	force       = force || slot->dirty;
+	force       = force || slot->dirty || (slot->reads_frame && slot->frame != tab_timeline_selected_frame);
 	slot->dirty = false;
+	slot->frame = tab_timeline_selected_frame;
 	u32 hash    = nodes_mesh_hash(slot->canvas, o);
 	if (!force && hash == slot->hash) {
 		return;
@@ -695,7 +698,8 @@ void nodes_mesh_update(mesh_object_t *o, bool force) {
 
 	mesh_data_t *out = nodes_mesh_eval(slot, o);
 	if (out == NULL) {
-		out = slot->input;
+		out               = slot->input;
+		slot->reads_frame = false;
 	}
 	mesh_data_t *old = o->data;
 	if (out == old) {
@@ -842,6 +846,19 @@ void nodes_mesh_refresh() {
 		// Undo swaps the textures of layers, which changes the hash of layer mask nodes
 		if (o != NULL && (slot->dirty || nodes_mesh_has_node(slot->canvas, "MESH_OBJECT") || nodes_mesh_has_node(slot->canvas, "LAYER_MASK"))) {
 			nodes_mesh_update(o, false);
+		}
+	}
+}
+
+// Rebuilds meshes whose scripts read the timeline frame
+void nodes_mesh_frame_changed() {
+	for (i32 i = 0; nodes_mesh_slots != NULL && i < nodes_mesh_slots->length; ++i) {
+		mesh_nodes_t *slot = nodes_mesh_slots->buffer[i];
+		if (slot->reads_frame && slot->frame != tab_timeline_selected_frame) {
+			mesh_object_t *o = nodes_mesh_object(slot->uid);
+			if (o != NULL) {
+				nodes_mesh_update(o, false);
+			}
 		}
 	}
 }
@@ -997,6 +1014,7 @@ char *nodes_mesh_reference() {
 	       "//     (socket 1, 2, ..), the Add button of the node does the same. The script reads them by name with\n"
 	       "//     mesh_geo_input_value(\"Height\") and mesh_geo_input_vector(\"Offset\", i), i is 0 - 2 for x y z, 0 - 3 for r g b a.\n"
 	       "//     Value, Math and Vector nodes can be linked into them.\n"
+	       "//     script_timeline_get_frame() returns the timeline frame, a script that calls it is rerun when the frame changes.\n"
 	       "//     A \"MESH\" input takes a second mesh, such as a MESH_OBJECT node (button 0 is the scene mesh index), read with\n"
 	       "//     mesh_geo_t *path = mesh_geo_input_mesh(\"Path\"); it is in the space of the edited object, empty when not linked.\n"
 	       "//     TEX_IMAGE (Image Texture) node: button 0 is the index of a project texture (Textures tab), outputs Color (0) and\n"

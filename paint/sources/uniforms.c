@@ -155,6 +155,9 @@ f32 uniforms_ext_f32_link(object_t *object, shader_data_t *mat, char *link) {
 	else if (string_equals(link, "_ssao_frame")) {
 		return scene_camera->frame % 2 == 0 ? 0.0 : 0.5;
 	}
+	else if (string_equals(link, "_timeline_frame")) {
+		return (f32)tab_timeline_selected_frame;
+	}
 	if (parser_material_script_links != NULL && link[0] == '_') {
 		char *script = any_map_get(parser_material_script_links, link + 1);
 		if (script != NULL) {

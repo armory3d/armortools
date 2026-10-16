@@ -24,6 +24,10 @@ void script_node_draw_snippets() {
 		ui_node_t *node                = script_node_draw_snippets_node;
 		node->buttons->buffer[0]->data = u8_array_create_from_string("sys_time()");
 	}
+	if (ui_menu_button("script_timeline_get_frame()", "", ICON_DRAFT)) {
+		ui_node_t *node                = script_node_draw_snippets_node;
+		node->buttons->buffer[0]->data = u8_array_create_from_string("script_timeline_get_frame()");
+	}
 }
 
 ui_node_button_t *script_node_dirty = NULL;

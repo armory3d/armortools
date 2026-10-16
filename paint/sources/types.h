@@ -22,7 +22,9 @@ typedef struct mesh_nodes {
 	struct mesh_data      *input;  // Original mesh
 	struct mesh_data      *output; // Mesh assigned to the object, equals input unless the nodes change it
 	u32                    hash;
-	bool                   dirty; // Input replaced, rebuilt once the mouse is up
+	bool                   dirty;       // Input replaced, rebuilt once the mouse is up
+	bool                   reads_frame; // A script read the timeline frame, rebuilt when it changes
+	i32                    frame;       // Timeline frame of the last build
 } mesh_nodes_t;
 
 typedef struct mesh_geo {
