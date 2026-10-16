@@ -549,3 +549,27 @@ void render_path_raytrace_bake_lightmap(mesh_object_t *object, i32 res, i32 samp
 	lightmap_jobs                        = realloc(lightmap_jobs, sizeof(lightmap_job_t *) * (lightmap_jobs_count + 1));
 	lightmap_jobs[lightmap_jobs_count++] = job;
 }
+
+bool render_path_raytrace_bake_lightmap_busy(void) {
+	return lightmap_job != NULL || lightmap_jobs_count > 0;
+}
+
+void render_path_raytrace_bake_lightmap_cancel(void) {
+	if (!render_path_raytrace_bake_lightmap_busy()) {
+		return;
+	}
+	if (lightmap_job != NULL) {
+		lightmap_delete_textures();
+		free(lightmap_job->path);
+		free(lightmap_job);
+		lightmap_job               = NULL;
+		render_path_raytrace_ready = false;
+	}
+	for (i32 i = 0; i < lightmap_jobs_count; ++i) {
+		free(lightmap_jobs[i]->path);
+		free(lightmap_jobs[i]);
+	}
+	lightmap_jobs_count = 0;
+	sys_remove_update(lightmap_update);
+	g_context->viewport_mode = lightmap_viewport_mode;
+}

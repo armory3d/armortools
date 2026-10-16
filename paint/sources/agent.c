@@ -502,7 +502,7 @@ static void agent_scripts_sync(void) {
 			array_insert(g_project->script_datas, 0, data);
 		}
 	}
-	tab_scripts_minimap_dirty                         = true;
+	tab_scripts_minimap_dirty = true;
 	ui_dock_redraw(TAB_AREA_SIDEBAR0);
 }
 
@@ -535,12 +535,13 @@ static void agent_eval_finish(void *_) {
 static void agent_eval_wait(void *_) {
 	iron_delay_idle_sleep();
 	bool timed_out = sys_time() - agent_eval_start > agent_eval_timeout;
-	if (script_is_running() && !timed_out) {
+	if ((script_is_running() || render_path_raytrace_bake_lightmap_busy()) && !timed_out) {
 		return;
 	}
 	sys_remove_update(agent_eval_wait);
 	if (timed_out) {
 		script_stop();
+		render_path_raytrace_bake_lightmap_cancel();
 		console_log("Script timed out");
 	}
 	agent_eval_ok = !timed_out && minic_error_count == 0;

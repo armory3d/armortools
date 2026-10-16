@@ -1207,6 +1207,8 @@ void                   import_envmap_run(char *path, gpu_texture_t *image);
 void                   render_path_raytrace_set_env_pixels(char *file, buffer_t *pixels, i32 w, i32 h);
 gpu_texture_t         *render_path_raytrace_update_env_cdf();
 void              render_path_raytrace_bake_lightmap(mesh_object_t *object, i32 res, i32 samples, f32 range, char *path, void (*done)(void *), void *done_data);
+bool              render_path_raytrace_bake_lightmap_busy(void);
+void              render_path_raytrace_bake_lightmap_cancel(void);
 void              image_texture_node_init();
 char             *parser_material_texture_store(ui_node_t *node, bind_tex_t *tex, char *tex_name, i32 color_space);
 void              material_node_init();
