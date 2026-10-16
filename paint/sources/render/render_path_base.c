@@ -88,6 +88,10 @@ void render_path_base_end() {
 		g_context->foreground_event = false;
 		g_context->pdirty           = 0;
 	}
+
+	if (viewport_recording) {
+		viewport_capture_video_frame();
+	}
 }
 
 bool render_path_base_ssaa4() {
@@ -121,6 +125,10 @@ void render_path_base_draw_split(void (*draw_commands)(void)) {
 void render_path_base_commands(void (*draw_commands)(void)) {
 	if (iron_window_width() == 0 || iron_window_height() == 0) {
 		return;
+	}
+
+	if (viewport_recording) {
+		gpu_framebuffer_redirect = viewport_video_frame;
 	}
 
 	render_path_base_begin();

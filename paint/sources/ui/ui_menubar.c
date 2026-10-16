@@ -476,11 +476,11 @@ void ui_menubar_draw_category_items() {
 		// 	ui_check(&g_context->capture_background, tr("Capture Background"), "", NULL);
 		// }
 
-		if (g_config->experimental && !viewport_recording && ui_menu_button(tr("Capture Video"), "", ICON_MOVIE)) {
+		if (!viewport_recording && ui_menu_button(tr("Capture Video"), "", ICON_MOVIE)) {
 			viewport_capture_video_begin();
 			g_ui->changed = false; // Close menu
 		}
-		if (g_config->experimental && viewport_recording && ui_menu_button(tr("Stop Capture"), "", ICON_STOP)) {
+		if (viewport_recording && ui_menu_button(tr("Stop Capture"), "", ICON_STOP)) {
 			viewport_capture_video_end();
 			g_ui->changed = false; // Close menu
 		}

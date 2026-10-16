@@ -1,16 +1,16 @@
 
 #include "global.h"
 
-i32            base_drag_tint  = 0xffffffff;
-i32            base_drag_size  = -1;
-rect_t        *base_drag_rect  = NULL;
-f32            base_drag_start = 0.0;
-f32            base_drop_x     = 0.0;
-f32            base_drop_y     = 0.0;
-i32            base_last_window_width  = 0;
-i32            base_last_window_height = 0;
-bool           base_start_arm_found    = false;
-i32            _base_material_count;
+i32     base_drag_tint          = 0xffffffff;
+i32     base_drag_size          = -1;
+rect_t *base_drag_rect          = NULL;
+f32     base_drag_start         = 0.0;
+f32     base_drop_x             = 0.0;
+f32     base_drop_y             = 0.0;
+i32     base_last_window_width  = 0;
+i32     base_last_window_height = 0;
+bool    base_start_arm_found    = false;
+i32     _base_material_count;
 
 void base_on_shutdown() {
 #if defined(IRON_ANDROID) || defined(IRON_IOS)
@@ -46,6 +46,9 @@ void base_save_window_rect() {
 }
 
 void base_save_and_quit_callback(bool save) {
+	if (viewport_recording) {
+		viewport_capture_video_end();
+	}
 	base_save_window_rect();
 	if (save) {
 		project_save(true);
@@ -482,6 +485,9 @@ void base_update(void *_) {
 	bool using_menu = ui_menu_show && mouse_y > ui_header_h;
 	base_ui_enabled = !ui_box_show && !using_menu && g_ui->combo_selected_id == 0 && !agent_running;
 
+	if (viewport_recording) {
+		viewport_capture_video_draw();
+	}
 	if (!ui_base_show && !player_in_editor && !base_player_lock && gpu_framebuffer_redirect == NULL) {
 		base_draw_console_lines();
 	}
