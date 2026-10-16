@@ -261,8 +261,6 @@ project_t *main() {
 
 	if (flags->with_video_write) {
 		add_define(project, "WITH_VIDEO_WRITE");
-		add_cfiles(project, "sources/libs/minimp4.c");
-		add_cfiles(project, "sources/libs/minih264e.c");
 	}
 
 	project_flatten(project);
