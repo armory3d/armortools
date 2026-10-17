@@ -320,7 +320,7 @@ void iron_mp4_begin(char *path, i32 w, i32 h) {
 	fwrite(head, 1, 40, iron_mp4_fp);
 }
 
-void iron_mp4_encode(buffer_t *pixels) {
+void iron_mp4_encode(buffer_t *pixels, f64 time) {
 	if (iron_mp4_fp == NULL) {
 		return;
 	}
@@ -415,7 +415,7 @@ void iron_mp4_encode(buffer_t *pixels) {
 	iron_mp4_nal[3] = size;
 	fwrite(iron_mp4_nal, 1, size + 4, iron_mp4_fp);
 	iron_mp4_sizes[iron_mp4_count] = size + 4;
-	iron_mp4_times[iron_mp4_count] = iron_time();
+	iron_mp4_times[iron_mp4_count] = time;
 	iron_mp4_count++;
 	iron_mp4_mdat_size += size + 4;
 }
