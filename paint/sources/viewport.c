@@ -171,13 +171,22 @@ void viewport_capture_video_frame() {
 	draw_set_pipeline(NULL);
 	draw_end();
 
+	f64 time = iron_time();
+	if (viewport_video_stepped) {
+		if (viewport_video_time < 0.0) {
+			return;
+		}
+		time                = viewport_video_time;
+		viewport_video_time = -1.0;
+	}
+
 	// Crop the viewport rect in place
 	buffer_t *pixels = gpu_get_texture_pixels(frame);
 	for (i32 i = 0; i < h; ++i) {
 		memmove(pixels->buffer + i * w * 4, pixels->buffer + ((y + i) * frame->width + x) * 4, w * 4);
 	}
 #ifdef WITH_VIDEO_WRITE
-	iron_mp4_encode(pixels);
+	iron_mp4_encode(pixels, time);
 #endif
 }
 
@@ -246,8 +255,10 @@ void viewport_capture_video_end() {
 #endif
 	gpu_delete_texture(viewport_video_frame);
 	viewport_video_frame  = NULL;
-	viewport_recording    = false;
-	g_config->rp_vignette = viewport_video_vignette;
+	viewport_recording     = false;
+	viewport_video_stepped = false;
+	viewport_video_time    = -1.0;
+	g_config->rp_vignette  = viewport_video_vignette;
 	g_config->rp_grain    = viewport_video_grain;
 	g_context->ddirty     = 2;
 }

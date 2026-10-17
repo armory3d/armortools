@@ -47,6 +47,7 @@ static any_array_t *tab_timeline_mesh_keyframes  = NULL;
 static i32          tab_timeline_loop_frames     = 0;
 static i32          tab_timeline_last_skin_frame = -1;
 static bool         tab_timeline_capturing       = false;
+static i32          tab_timeline_capture_frame   = 0;
 
 static i32 tab_timeline_pending_from           = -1;
 static i32 tab_timeline_pending_to             = -1;
@@ -1558,7 +1559,10 @@ static void tab_timeline_capture_on_next_frame(void *_) {
 	}
 	tab_timeline_set_frame(0);
 	tab_timeline_play_on_next_frame(NULL);
-	tab_timeline_capturing = true;
+	tab_timeline_capturing     = true;
+	tab_timeline_capture_frame = 0;
+	viewport_video_stepped     = true;
+	viewport_video_time        = -1.0;
 }
 
 void tab_timeline_update() {
@@ -1580,11 +1584,22 @@ void tab_timeline_update() {
 	i32 loop_frames = base_player && tab_timeline_loop_frames > 0 ? tab_timeline_loop_frames : tab_timeline_max_frames;
 
 	// Keep nested clips continuous when the main timeline wraps
-	f64   playback_frame = (sys_time() - tab_timeline_play_time) * tab_timeline_frame_rate;
-	if (tab_timeline_capturing && playback_frame >= loop_frames) {
-		// Played once, the last frame was already recorded
-		tab_timeline_capture_end();
-		return;
+	f64 playback_frame = (sys_time() - tab_timeline_play_time) * tab_timeline_frame_rate;
+	if (tab_timeline_capturing) {
+		// Step one frame per recorded video frame, however long it takes to render
+		g_context->ddirty = 2;
+		if (viewport_video_time >= 0.0) {
+			// Previous frame was not recorded yet
+			return;
+		}
+		playback_frame = tab_timeline_capture_frame;
+		if (playback_frame >= loop_frames) {
+			// Played once, the last frame was already recorded
+			tab_timeline_capture_end();
+			return;
+		}
+		tab_timeline_capture_frame++;
+		viewport_video_time = playback_frame / tab_timeline_frame_rate;
 	}
 	float frame_f        = (float)fmod(playback_frame, loop_frames);
 	i32   frame_i        = (i32)frame_f;
