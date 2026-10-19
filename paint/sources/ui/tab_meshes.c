@@ -142,7 +142,7 @@ static void tab_meshes_set_selected(mesh_object_t_array_t *objects) {
 				i32_array_push(tab_meshes_selected, o->base->uid);
 			}
 		}
-		ui_header_handle->redraws                         = 2;
+		ui_header_handle->redraws = 2;
 		ui_dock_redraw(TAB_AREA_SIDEBAR0);
 	}
 	array_delete(objects);
@@ -157,6 +157,26 @@ void tab_meshes_select_objects(mesh_object_t_array_t *objects) {
 		ui_dock_redraw(TAB_AREA_SIDEBAR0);
 	}
 	tab_meshes_set_selected(objects);
+}
+
+// Shift + select in the viewport
+void tab_meshes_add_objects(mesh_object_t_array_t *objects) {
+	tab_meshes_validate_selected();
+	bool                   multi = tab_meshes_selected != NULL && tab_meshes_selected->length > 0;
+	mesh_object_t_array_t *ar    = any_array_create_from_raw((void *[]){}, 0);
+	for (i32 i = 0; i < g_project->_->paint_objects->length; ++i) {
+		mesh_object_t *o        = g_project->_->paint_objects->buffer[i];
+		bool           selected = multi ? tab_meshes_is_selected(o) : (o == g_context->paint_object && !context_object_deselected());
+		if (selected || array_index_of(objects, o) >= 0) {
+			any_array_push(ar, o);
+		}
+	}
+	array_delete(objects);
+	if (ar->length == 0) {
+		array_delete(ar);
+		return;
+	}
+	tab_meshes_set_selected(ar);
 }
 
 static void tab_meshes_select_visible(bool visible) {
@@ -592,7 +612,7 @@ void tab_meshes_draw_context_menu_delete_next_frame(mesh_object_t *o) {
 	tab_stages_prune();
 	g_context->paint_object = tab_meshes_select_after_delete();
 	util_mesh_merge(NULL);
-	g_context->ddirty                                 = 2;
+	g_context->ddirty = 2;
 	ui_dock_redraw(TAB_AREA_SIDEBAR0);
 }
 
@@ -629,7 +649,7 @@ void tab_meshes_draw_context_menu_delete(mesh_object_t *o) {
 		g_context->paint_object = tab_meshes_select_after_delete();
 		util_mesh_visibility_changed();
 		util_physics_apply_stage(stage);
-		ui_header_handle->redraws                         = 2;
+		ui_header_handle->redraws = 2;
 		ui_dock_redraw(TAB_AREA_SIDEBAR0);
 		return;
 	}
@@ -1637,7 +1657,7 @@ void tab_meshes_reveal_slot(mesh_object_t *o) {
 		}
 		p = p->parent;
 	}
-	tab_meshes_reveal_pending                         = o;
+	tab_meshes_reveal_pending = o;
 	ui_dock_redraw(TAB_AREA_SIDEBAR0);
 }
 
@@ -1743,8 +1763,8 @@ void tab_meshes_draw(i32 *htab) {
 				if (tab_meshes_slot_hidden(candidate)) {
 					continue;
 				}
-				g_context->paint_object                           = candidate;
-				ui_header_handle->redraws                         = 2;
+				g_context->paint_object   = candidate;
+				ui_header_handle->redraws = 2;
 				ui_dock_redraw(TAB_AREA_SIDEBAR0);
 				tab_meshes_scroll_to_slot(i);
 				break;

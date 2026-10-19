@@ -219,6 +219,7 @@ void                   base_redraw_status();
 bool                   context_object_deselected();
 void                   render_gizmo_render_rect();
 void                   tab_meshes_select_objects(mesh_object_t_array_t *objects);
+void                   tab_meshes_add_objects(mesh_object_t_array_t *objects);
 void                   base_redraw_console();
 uint32_t               base_darker(uint32_t x, uint32_t y);
 void                   base_redraw_ui();

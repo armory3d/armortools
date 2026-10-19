@@ -438,13 +438,22 @@ void render_path_paint_commands_paint(bool dilation) {
 #else
 				i32 r_byte = buffer_get_u8(pixel, 0);
 #endif
-				i32 index = r_byte - 1;
+				i32 g_byte = buffer_get_u8(pixel, 1);
+				i32 index  = r_byte + g_byte * 256 - 1;
 				if (index >= 0 && index < g_project->_->paint_objects->length) {
-					hit                     = true;
-					context_deselected_uid  = -1;
-					g_context->paint_object = g_project->_->paint_objects->buffer[index];
-					// Only the clicked mesh stays selected
-					tab_meshes_select_objects(any_array_create_from_raw((void *[]){g_context->paint_object}, 1));
+					hit              = true;
+					mesh_object_t *o = g_project->_->paint_objects->buffer[index];
+					if (keyboard_down("shift")) {
+						// Added to the selection, the clicked mesh becomes the active one
+						tab_meshes_add_objects(any_array_create_from_raw((void *[]){o}, 1));
+						g_context->paint_object = o;
+					}
+					else {
+						// Only the clicked mesh stays selected
+						g_context->paint_object = o;
+						tab_meshes_select_objects(any_array_create_from_raw((void *[]){o}, 1));
+					}
+					context_deselected_uid    = -1;
 					ui_header_handle->redraws = 2;
 					tab_meshes_reveal_slot(g_context->paint_object);
 
@@ -456,7 +465,7 @@ void render_path_paint_commands_paint(bool dilation) {
 					base_redraw_status();
 				}
 			}
-			if (!hit) {
+			if (!hit && !keyboard_down("shift")) {
 				// Nothing to outline, the mesh stays selected in the meshes tab
 				context_deselected_uid = g_context->paint_object->base->uid;
 				g_context->ddirty      = 2;

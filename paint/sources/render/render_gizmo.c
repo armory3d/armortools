@@ -205,7 +205,7 @@ static void gizmo_rect_update() {
 			any_array_push(objects, o);
 		}
 	}
-	tab_meshes_select_objects(objects);
+	keyboard_down("shift") ? tab_meshes_add_objects(objects) : tab_meshes_select_objects(objects);
 	g_context->ddirty = 2;
 }
 
