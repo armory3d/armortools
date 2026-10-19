@@ -1274,13 +1274,6 @@ void tab_meshes_draw_new() {
 	}
 }
 
-static vec4_t aabb_center(mesh_data_t *raw) {
-	vec4_t aabb_min;
-	vec4_t aabb_max;
-	mesh_data_calculate_aabb_min_max(raw, &aabb_min, &aabb_max);
-	return (vec4_t){(aabb_min.x + aabb_max.x) / 2.0f, (aabb_min.y + aabb_max.y) / 2.0f, (aabb_min.z + aabb_max.z) / 2.0f, 0.0f};
-}
-
 void tab_meshes_make_preview(mesh_object_t *o) {
 	if (array_index_of((any_array_t *)g_project->_->paint_objects, o) < 0) {
 		return;
@@ -1323,37 +1316,21 @@ void tab_meshes_make_preview(mesh_object_t *o) {
 	    (mat4_t){0.9146286343879498, 0.404295023959927,   0.000007410128652369705, 0, -0.0032648027153306235, 0.007367569133732468, 0.9999675337275382,   0,
 	             0.404281837254303,  -0.9145989516155143, 0.008058532943908717,    0, 0.4659988049397712,     -1.0687517188018691,  0.015935682577325486, 1};
 	transform_set_matrix(scene_camera->base->transform, m);
+	{
+		// Orbit up to look at the mesh from above
+		quat_t q                           = quat_from_axis_angle(camera_object_right(scene_camera), -0.45);
+		scene_camera->base->transform->loc = vec4_apply_quat(scene_camera->base->transform->loc, q);
+		scene_camera->base->transform->rot = quat_mult(q, scene_camera->base->transform->rot);
+		transform_build_matrix(scene_camera->base->transform);
+	}
 	f32 saved_fov           = scene_camera->data->fov;
 	scene_camera->data->fov = 0.4;
 	viewport_update_camera_type(CAMERA_TYPE_PERSPECTIVE);
 
-	world_data_t *probe           = scene_world;
-	f32           _probe_strength = probe->strength;
-	probe->strength               = 2;
-	f32 _envmap_angle             = g_context->envmap_angle;
-	g_context->envmap_angle       = 0.0;
-
 	gpu_texture_t *_envmap = scene_world->_->envmap;
 	scene_world->_->envmap = g_context->preview_envmap;
 
-	// Fit into camera
-	vec4_t saved_scale = o->base->transform->scale;
-	vec4_t saved_loc   = o->base->transform->loc;
-	quat_t saved_rot   = o->base->transform->rot;
-	{
-		vec4_t aabb = mesh_data_calculate_aabb(o->data);
-		f32    r    = math_max(aabb.x, math_max(aabb.y, aabb.z));
-		f32    s    = 0.5 / r;
-		if (o->base->parent == NULL || o->base->parent == _scene_root) {
-			s *= o->base->transform->scale.x;
-		}
-		s *= o->data->scale_pos;
-		vec4_t center             = aabb_center(o->data);
-		o->base->transform->scale = (vec4_t){s, s, s, 1.0};
-		o->base->transform->loc   = (vec4_t){-s * center.x, -s * center.y, -s * center.z, 1.0};
-		o->base->transform->rot   = (quat_t){0, 0, 0, 1};
-		transform_build_matrix(o->base->transform);
-	}
+	util_render_preview_lighting_begin(0.33, 0.43);
 
 	i32 _last_w         = _render_path_last_w;
 	i32 _last_h         = _render_path_last_h;
@@ -1361,6 +1338,49 @@ void tab_meshes_make_preview(mesh_object_t *o) {
 	_render_path_last_h = util_render_material_preview_size;
 	camera_object_build_proj(scene_camera, -1.0);
 	camera_object_build_mat(scene_camera);
+
+	// Fit into camera
+	vec4_t    saved_scale   = o->base->transform->scale;
+	vec4_t    saved_loc     = o->base->transform->loc;
+	quat_t    saved_rot     = o->base->transform->rot;
+	object_t *saved_parent  = o->base->parent;
+	bool      saved_visible = o->base->visible;
+	o->base->visible        = true; // Preview hidden meshes too
+	{
+		// Bounds of the mesh as placed in the scene, shared meshes get their shape from the object scale
+		mat4_t world = o->base->transform->world;
+		vec4_t lmin;
+		vec4_t lmax;
+		mesh_data_calculate_aabb_min_max(o->data, &lmin, &lmax);
+		vec4_t corners[8];
+		vec4_t wmin = (vec4_t){FLT_MAX, FLT_MAX, FLT_MAX, 0.0};
+		vec4_t wmax = (vec4_t){-FLT_MAX, -FLT_MAX, -FLT_MAX, 0.0};
+		for (i32 i = 0; i < 8; ++i) {
+			corners[i] = (vec4_t){(i & 1) ? lmax.x : lmin.x, (i & 2) ? lmax.y : lmin.y, (i & 4) ? lmax.z : lmin.z, 1.0};
+			vec4_t c   = vec4_apply_mat4(corners[i], world);
+			wmin       = (vec4_t){math_min(wmin.x, c.x), math_min(wmin.y, c.y), math_min(wmin.z, c.z), 0.0};
+			wmax       = (vec4_t){math_max(wmax.x, c.x), math_max(wmax.y, c.y), math_max(wmax.z, c.z), 0.0};
+		}
+		vec4_t center = (vec4_t){(wmin.x + wmax.x) / 2.0f, (wmin.y + wmax.y) / 2.0f, (wmin.z + wmax.z) / 2.0f, 0.0};
+		vec4_t loc    = mat4_get_loc(world);
+		f32    diag   = vec4_len((vec4_t){wmax.x - wmin.x, wmax.y - wmin.y, wmax.z - wmin.z, 0.0});
+		f32    s      = 0.4 / math_max(diag, 0.0001); // Bounding sphere fits the view
+		mat4_t m      = mat4_identity();
+		for (i32 iter = 0; iter < 4; ++iter) {
+			m       = mat4_mult(world, s);
+			m       = mat4_set_loc(m, (vec4_t){s * (loc.x - center.x), s * (loc.y - center.y), s * (loc.z - center.z), 1.0});
+			m.m[15] = 1.0;
+			// Scale until the projected bounds fill the view
+			f32 extent = 0.0;
+			for (i32 i = 0; i < 8; ++i) {
+				vec4_t c = vec4_apply_mat4(vec4_apply_mat4(corners[i], m), scene_camera->vp);
+				extent   = math_max(extent, math_max(math_abs(c.x / c.w), math_abs(c.y / c.w)));
+			}
+			s *= 0.85 / math_max(extent, 0.0001);
+		}
+		o->base->parent = NULL; // Parent transform is already in world
+		transform_set_matrix(o->base->transform, m);
+	}
 
 	make_material_parse_mesh_preview_material();
 	void (*_commands)(void) = render_path_commands;
@@ -1373,6 +1393,8 @@ void tab_meshes_make_preview(mesh_object_t *o) {
 	_render_path_last_h         = _last_h;
 
 	// Restore
+	o->base->parent           = saved_parent;
+	o->base->visible          = saved_visible;
 	o->base->transform->scale = saved_scale;
 	o->base->transform->loc   = saved_loc;
 	o->base->transform->rot   = saved_rot;
@@ -1389,9 +1411,8 @@ void tab_meshes_make_preview(mesh_object_t *o) {
 	camera_object_build_proj(scene_camera, -1.0);
 	camera_object_build_mat(scene_camera);
 
-	probe->strength         = _probe_strength;
-	g_context->envmap_angle = _envmap_angle;
-	scene_world->_->envmap  = _envmap;
+	scene_world->_->envmap = _envmap;
+	util_render_preview_lighting_end();
 
 	g_context->material = _material;
 	gpu_delete_texture(mat->image_icon);
