@@ -233,10 +233,10 @@ static void import_arm_run_mesh_append_from_project(project_t *project, i32_arra
 	tab_meshes_reset_preview_map();
 	base_update_tools();
 
-	util_uv_uvmap_cached                              = false;
-	util_uv_trianglemap_cached                        = false;
-	util_uv_dilatemap_cached                          = false;
-	g_context->ddirty                                 = 4;
+	util_uv_uvmap_cached       = false;
+	util_uv_trianglemap_cached = false;
+	util_uv_dilatemap_cached   = false;
+	g_context->ddirty          = 4;
 	ui_dock_redraw(TAB_AREA_SIDEBAR0);
 }
 
@@ -382,7 +382,7 @@ void import_arm_unpack_asset(project_t *project, char *abs, char *file, bool cop
 		return;
 	}
 	import_arm_progress_unpacked += ((buffer_t *)pa->bytes)->length;
-	gpu_texture_t *image = gpu_create_texture_from_encoded_bytes(pa->bytes, ends_with(pa->name, ".jpg") ? ".jpg" : ".png");
+	gpu_texture_t *image = gpu_create_texture_from_encoded_bytes(pa->bytes, pa->name);
 	any_map_set(data_cached_textures, abs, image);
 }
 
@@ -609,7 +609,7 @@ static void import_arm_import_materials(project_t *project, char *path, i32_arra
 	}
 
 	sys_notify_on_next_frame(&import_arm_run_material_from_project_on_next_frame, imported);
-	ui_nodes_group_stack                              = any_array_create_from_raw((void *[]){}, 0);
+	ui_nodes_group_stack = any_array_create_from_raw((void *[]){}, 0);
 	ui_dock_redraw(TAB_AREA_SIDEBAR1);
 	if (delete_blob) {
 		data_delete_blob(path);
@@ -855,7 +855,7 @@ void import_arm_run_project(char *path) {
 			packed_asset_t *pa = import_arm_take_packed_asset(g_project, abs, file, false);
 			if (pa != NULL) {
 				images[i].bytes  = pa->bytes;
-				images[i].format = ends_with(pa->name, ".jpg") ? ".jpg" : ".png";
+				images[i].format = pa->name;
 				images[i].packed = true;
 			}
 		}
@@ -1281,7 +1281,7 @@ void import_arm_run_project(char *path) {
 	base_update_tools();
 	ui_dock_redraw(TAB_AREA_SIDEBAR0);
 	ui_dock_redraw(TAB_AREA_SIDEBAR1);
-	g_context->ddirty                                 = 4;
+	g_context->ddirty = 4;
 	data_delete_blob(path);
 }
 
