@@ -195,9 +195,9 @@ void context_set_material(slot_material_t *m) {
 	g_context->material = m;
 	make_material_parse_paint_material(true);
 	ui_dock_redraw(TAB_AREA_SIDEBAR1);
-	ui_header_handle->redraws                         = 2;
-	ui_nodes_hwnd->redraws                            = 2;
-	ui_nodes_group_stack                              = any_array_create_from_raw((void *[]){}, 0);
+	ui_header_handle->redraws = 2;
+	ui_nodes_hwnd->redraws    = 2;
+	ui_nodes_group_stack      = any_array_create_from_raw((void *[]){}, 0);
 
 	bool decal = context_is_decal();
 	if (decal) {
@@ -221,7 +221,7 @@ void context_set_brush(slot_brush_t *b) {
 	brush_output_node_parse_inputs();
 	make_material_parse_paint_material(false);
 	ui_dock_redraw(TAB_AREA_SIDEBAR1);
-	ui_nodes_hwnd->redraws                            = 2;
+	ui_nodes_hwnd->redraws = 2;
 }
 
 void context_set_font(slot_font_t *f) {
@@ -232,7 +232,7 @@ void context_set_font(slot_font_t *f) {
 	util_render_make_text_preview();
 	util_render_make_decal_preview();
 	ui_dock_redraw(TAB_AREA_STATUS);
-	ui_view2d_hwnd->redraws                         = 2;
+	ui_view2d_hwnd->redraws = 2;
 }
 
 void context_select_font(i32 i) {
@@ -246,9 +246,9 @@ void context_set_sound(slot_sound_t *s) {
 	if (array_index_of(g_project->_->sounds, s) == -1) {
 		return;
 	}
-	g_context->sound                                = s;
+	g_context->sound = s;
 	ui_dock_redraw(TAB_AREA_STATUS);
-	ui_view2d_hwnd->redraws                         = 2;
+	ui_view2d_hwnd->redraws = 2;
 }
 
 void context_select_sound(i32 i) {
@@ -285,7 +285,7 @@ void context_set_layer(slot_layer_t *l) {
 		draw_begin(current, false, 0);
 
 	ui_dock_redraw(TAB_AREA_SIDEBAR0);
-	ui_view2d_hwnd->redraws                           = 2;
+	ui_view2d_hwnd->redraws = 2;
 }
 
 void context_select_tool(i32 i) {
@@ -466,7 +466,7 @@ void context_set_viewport_mode(viewport_mode_t mode) {
 	make_material_parse_mesh_material();
 
 	if (g_context->viewport_mode == VIEWPORT_MODE_PATH_TRACE) {
-		util_mesh_merge(NULL);
+		util_mesh_visibility_changed();
 	}
 
 	// Rotate mode is not supported for path tracing yet

@@ -559,7 +559,9 @@ void render_path_raytrace_raytrace_init(char *shader_name, bool build) {
 	}
 
 	if (build && g_context->merged_object == NULL) {
-		util_mesh_merge(NULL);
+		mesh_object_t_array_t *visibles = util_mesh_get_visible();
+		util_mesh_merge(visibles);
+		array_delete(visibles);
 	}
 
 	_gpu_raytrace_as_init();
