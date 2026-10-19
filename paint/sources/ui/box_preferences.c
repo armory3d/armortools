@@ -476,6 +476,18 @@ void box_preferences_camera_tab() {
 	ui_combo(&g_config->zoom_direction, zoom_direction_combo, tr("Direction to Zoom"), true, UI_ALIGN_LEFT, true);
 
 	ui_check(&g_config->camera_upside_down, tr("Allow Upside Down Camera"), "");
+
+	camera_object_t *cam     = scene_camera;
+	camera_data_t   *cam_raw = cam->data;
+
+	ui_row2();
+	ui_slider(&cam_raw->near_plane, tr("Clip Start"), 0.001, 1.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
+	bool clip_changed = ui_item_changed();
+	ui_slider(&cam_raw->far_plane, tr("Clip End"), 50.0, 100.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
+	clip_changed |= ui_item_changed();
+	if (clip_changed) {
+		camera_object_build_proj(cam, -1.0);
+	}
 }
 
 // ██████╗ ███████╗███╗   ██╗
@@ -576,6 +588,11 @@ void box_preferences_viewport_tab() {
 		gpu_use_linear_sampling(g_config->texture_filter);
 	}
 
+	ui_check(&g_context->cull_backfaces, tr("Cull Backfaces"), "");
+	if (ui_item_changed()) {
+		make_material_parse_mesh_material();
+	}
+
 	box_preferences_section(tr("Path Tracer"));
 
 	ui_row2();
@@ -653,25 +670,6 @@ void box_preferences_viewport_tab() {
 	}
 	if (ui_icon_button("", ICON_FOLDER_OPEN, UI_ALIGN_CENTER)) {
 		ui_files_show("cube", false, false, &box_preferences_lut_picked);
-	}
-
-	box_preferences_section(tr("Clipping"));
-
-	camera_object_t *cam     = scene_camera;
-	camera_data_t   *cam_raw = cam->data;
-
-	ui_row2();
-	ui_slider(&cam_raw->near_plane, tr("Clip Start"), 0.001, 1.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
-	bool clip_changed = ui_item_changed();
-	ui_slider(&cam_raw->far_plane, tr("Clip End"), 50.0, 100.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
-	clip_changed |= ui_item_changed();
-	if (clip_changed) {
-		camera_object_build_proj(cam, -1.0);
-	}
-
-	ui_check(&g_context->cull_backfaces, tr("Cull Backfaces"), "");
-	if (ui_item_changed()) {
-		make_material_parse_mesh_material();
 	}
 }
 
