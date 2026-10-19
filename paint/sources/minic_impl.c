@@ -339,6 +339,10 @@ project_t *script_get_project() {
 	return g_project;
 }
 
+world_data_t *script_get_world() {
+	return scene_world;
+}
+
 object_t *script_get_object(char *s) {
 	for (int i = 0; i < g_project->_->paint_objects->length; ++i) {
 		if (string_equals(g_project->_->paint_objects->buffer[i]->base->name, s)) {
@@ -973,6 +977,10 @@ void script_append_mesh_skinned(char *glb_path) {
 	plugins_skinning_frame = 0;
 	script_append_mesh(glb_path);
 	plugins_skinning_frame = -1;
+}
+
+buffer_t *script_load_blob(char *path) {
+	return iron_load_blob(path);
 }
 
 void script_append_mesh_obj(char *data) {

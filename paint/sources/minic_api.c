@@ -674,15 +674,16 @@ void minic_register_builtins() {
 	MINIC_STRUCT(slot_material_t);
 	MINIC_O(canvas, ui_node_canvas_t);
 	MINIC_I(id);
-	MINIC_I(paint_base);
-	MINIC_I(paint_opac);
-	MINIC_I(paint_occ);
-	MINIC_I(paint_rough);
-	MINIC_I(paint_met);
-	MINIC_I(paint_nor);
-	MINIC_I(paint_height);
-	MINIC_I(paint_emis);
-	MINIC_I(paint_subs);
+	MINIC_B(paint_base);
+	MINIC_B(paint_opac);
+	MINIC_I(paint_opac_mode);
+	MINIC_B(paint_occ);
+	MINIC_B(paint_rough);
+	MINIC_B(paint_met);
+	MINIC_B(paint_nor);
+	MINIC_B(paint_height);
+	MINIC_B(paint_emis);
+	MINIC_B(paint_subs);
 	MINIC_END();
 
 	// engine.h
@@ -894,6 +895,7 @@ void minic_register_builtins() {
 	MINIC_I(viewport_mode);
 	MINIC_I(xray);
 	MINIC_B(capturing_screenshot);
+	MINIC_F(envmap_angle);
 	MINIC_END();
 
 	MINIC_STRUCT(project_t);
@@ -901,8 +903,6 @@ void minic_register_builtins() {
 	MINIC_O(assets, string_array_t);
 	MINIC_I(is_bgra);
 	MINIC_S(envmap);
-	MINIC_F(envmap_strength);
-	MINIC_F(envmap_angle);
 	MINIC_F(camera_fov);
 	MINIC_F(camera_near);
 	MINIC_F(camera_far);
