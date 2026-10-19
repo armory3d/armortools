@@ -209,6 +209,14 @@ project_t *main() {
 		add_define(project, "WITH_GAMEPAD");
 	}
 
+	bool with_websocket = true;
+	if (with_websocket) {
+		add_define(project, "WITH_WEBSOCKET");
+		if (platform == PLATFORM_LINUX) {
+			add_cfiles(project, "sources/backends/posix_websocket.c");
+		}
+	}
+
 	if (flags->idle_sleep) {
 		add_define(project, "IDLE_SLEEP");
 	}
