@@ -233,17 +233,19 @@ void ui_viewnodes_on_node_changed(ui_node_t *n) {
 	ui_nodes_node_changed = n;
 }
 
+bool ui_nodes_node_preview_is_bgra(ui_node_t *n) {
+#ifdef IRON_BGRA
+	return n != NULL && (string_equals(n->type, "TEX_IMAGE") || starts_with(n->type, "NEURAL_"));
+#else
+	return false;
+#endif
+}
+
 void ui_nodes_capture_output() {
 	ui_nodes_t       *ui_nodes = ui_nodes_get_nodes();
 	ui_node_canvas_t *c        = ui_nodes_get_canvas(true);
 	ui_node_t        *sel      = ui_get_node(c->nodes, ui_nodes->nodes_selected_id->buffer[0]);
-
-	bool bgra = false;
-#ifdef IRON_BGRA
-	bgra = string_equals(sel->type, "TEX_IMAGE") || starts_with(sel->type, "NEURAL_");
-#endif
-
-	util_texture_capture_output(ui_nodes_get_node_preview_image(sel), "node_preview", bgra);
+	util_texture_capture_output(ui_nodes_get_node_preview_image(sel), "node_preview", ui_nodes_node_preview_is_bgra(sel));
 }
 
 void ui_viewnodes_on_canvas_capture_output(void *_) {
@@ -351,7 +353,7 @@ void ui_nodes_recompile() {
 		}
 
 		ui_dock_redraw(TAB_AREA_SIDEBAR0);
-		ui_nodes_recompile_mat_final                      = false;
+		ui_nodes_recompile_mat_final = false;
 	}
 }
 

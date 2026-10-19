@@ -904,6 +904,7 @@ void                      ui_nodes_update(void *_);
 void                      ui_nodes_canvas_changed();
 gpu_texture_t            *ui_nodes_draw_grid(f32 zoom);
 gpu_texture_t            *ui_nodes_get_node_preview_image(ui_node_t *n);
+bool                      ui_nodes_node_preview_is_bgra(ui_node_t *n);
 void                      ui_nodes_accept_asset_drop(i32 index);
 void                      ui_nodes_accept_layer_drop(i32 index);
 void                      ui_nodes_accept_material_drop(i32 index);
