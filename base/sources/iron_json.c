@@ -454,7 +454,7 @@ static void enc(char *s) {
 	string_buffer_append(&encoded, s);
 }
 
-static void json_escape_to(buffer_t *sb, char *s) {
+void json_escape_to(buffer_t *sb, char *s) {
 	char chunk[256];
 	int  n = 0;
 	for (; *s != '\0'; ++s) {
