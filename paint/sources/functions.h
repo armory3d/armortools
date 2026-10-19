@@ -218,6 +218,7 @@ bool                   base_is_decal_layer();
 void                   base_redraw_status();
 bool                   context_object_deselected();
 void                   render_gizmo_render_rect();
+void                   render_gizmo_render_bones();
 void                   tab_meshes_select_objects(mesh_object_t_array_t *objects);
 void                   tab_meshes_add_objects(mesh_object_t_array_t *objects);
 void                   base_redraw_console();
@@ -1089,7 +1090,9 @@ void                 env_add_disc(f32 dx, f32 dy, f32 dz, f32 deg, f32 irradianc
 void                 env_write(char *path);
 i32                  util_skin_frame_count(buffer_t *blob);
 bool                 util_skin_apply(buffer_t *blob, i32 frame, i16_array_t *posa, i16_array_t *nora, f32 *scale_pos);
-buffer_t   *util_skin_blob_create(char *name, i32 vc, f32 *pos, f32 *nor, f32 *tex, i32 ic, u32 *ind, u16 *joints, f32 *weights, i32 jc, i32 fc, f32 *mats);
+buffer_t   *util_skin_blob_create(char *name, i32 vc, f32 *pos, f32 *nor, f32 *tex, i32 ic, u32 *ind, u16 *joints, f32 *weights, i32 jc, i32 fc, f32 *mats,
+                                  i32 *parents, f32 *heads, f32 *tails);
+f32        *util_skin_bones(buffer_t *blob, i32 frame, i32 *count);
 raw_mesh_t *util_skin_raw_mesh(buffer_t *blob);
 void        util_skin_init();
 bool        script_packed_asset_save(char *suffix, char *path);

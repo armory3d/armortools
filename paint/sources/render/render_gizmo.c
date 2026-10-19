@@ -227,6 +227,77 @@ void render_gizmo_render_rect() {
 	gpu_disable_scissor();
 }
 
+void render_gizmo_render_bones() {
+	if (g_context->tool != TOOL_TYPE_CURSOR || base_player || g_context->paint2d || context_object_deselected() ||
+	    keymap_shortcut(any_map_get(g_keymap, "stencil_hide"), SHORTCUT_TYPE_DOWN)) {
+		return;
+	}
+	draw_scissor(base_x(), base_y(), base_w(), base_h());
+	for (i32 i = 0; i < g_project->_->paint_objects->length; ++i) {
+		mesh_object_t *o = g_project->_->paint_objects->buffer[i];
+		if (o->data->_->skin_blob == NULL || !o->base->visible || (o != g_context->paint_object && !tab_meshes_is_selected(o))) {
+			continue;
+		}
+		i32    count = 0;
+		f32   *bones = util_skin_bones(o->data->_->skin_blob, math_max(o->data->_->skin_frame, 0), &count);
+		mat4_t m     = mat4_mult_mat(o->base->transform->world_unpack, mat4_mult_mat(scene_camera->v, scene_camera->no_jitter_p));
+		for (i32 j = 0; j < count; ++j) {
+			f32 *bone = &bones[j * 7];
+			f32  s[4];
+			bool behind = false;
+			for (i32 k = 0; k < 2; ++k) {
+				vec4_t p = {bone[k * 3], bone[k * 3 + 1], bone[k * 3 + 2], 1.0};
+				if (p.x * m.m03 + p.y * m.m13 + p.z * m.m23 + m.m33 <= 0.0) {
+					behind = true;
+					break;
+				}
+				p            = vec4_apply_proj(p, m);
+				s[k * 2]     = base_x() + (p.x * 0.5 + 0.5) * base_w();
+				s[k * 2 + 1] = base_y() + (0.5 - p.y * 0.5) * base_h();
+			}
+			if (behind) {
+				continue;
+			}
+			f32 dx  = s[2] - s[0];
+			f32 dy  = s[3] - s[1];
+			f32 len = math_sqrt(dx * dx + dy * dy);
+			f32 r   = 3.0 * UI_SCALE();
+			if (bone[6] != 0.0) {
+				// Dashed relation line to a child not starting at the tail
+				f32 dash = 4.0 * UI_SCALE();
+				draw_set_color(0xaa1a1a1a);
+				for (f32 t = 0.0; t < len; t += dash * 2.0) {
+					f32 t1 = math_min(t + dash, len);
+					draw_line_aa(s[0] + dx * t / len, s[1] + dy * t / len, s[0] + dx * t1 / len, s[1] + dy * t1 / len, 1.0);
+				}
+				continue;
+			}
+			// Octahedral bone seen from the camera: a kite widest near the head
+			if (len > r) {
+				f32 w  = math_min(len * 0.1, 12.0 * UI_SCALE());
+				f32 nx = -dy / len * w;
+				f32 ny = dx / len * w;
+				f32 mx = s[0] + dx * 0.2;
+				f32 my = s[1] + dy * 0.2;
+				draw_set_color(0x40ffffff);
+				draw_filled_triangle(s[0], s[1], mx + nx, my + ny, s[2], s[3]);
+				draw_filled_triangle(s[0], s[1], s[2], s[3], mx - nx, my - ny);
+				draw_set_color(0xff1a1a1a);
+				draw_line_aa(s[0], s[1], mx + nx, my + ny, 1.0);
+				draw_line_aa(mx + nx, my + ny, s[2], s[3], 1.0);
+				draw_line_aa(s[2], s[3], mx - nx, my - ny, 1.0);
+				draw_line_aa(mx - nx, my - ny, s[0], s[1], 1.0);
+			}
+			draw_set_color(g_theme->HIGHLIGHT_COL);
+			draw_filled_circle(s[0], s[1], r, 0);
+		}
+		free(bones);
+	}
+	draw_set_color(0xffffffff);
+	draw_flush();
+	gpu_disable_scissor();
+}
+
 void render_gizmo_update() {
 	bool is_object = g_context->tool == TOOL_TYPE_CURSOR;
 	bool is_decal  = base_is_decal_layer();
@@ -489,9 +560,9 @@ void render_gizmo_update() {
 		g_context->rotate_x = g_context->rotate_y = g_context->rotate_z = false;
 
 		if (gizmo_undo_stored) {
-			gizmo_undo_stored = false;
-			transform_t *t    = paint_object->transform;
-			bool changed = gizmo_others_end();
+			gizmo_undo_stored    = false;
+			transform_t *t       = paint_object->transform;
+			bool         changed = gizmo_others_end();
 			if (!vec4_equals(t->loc, gizmo_undo_loc) || !gizmo_quat_equals(t->rot, gizmo_undo_rot) || !vec4_equals(t->scale, gizmo_undo_scale)) {
 				history_object_transform(g_context->paint_object, gizmo_undo_loc, gizmo_undo_rot, gizmo_undo_scale);
 				changed = true;
