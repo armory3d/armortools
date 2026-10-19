@@ -618,7 +618,9 @@ node_shader_context_t *make_mesh_run(material_t *data, i32 layer_pass) {
 		else if (g_context->viewport_mode == VIEWPORT_MODE_OBJECT_ID) {
 			node_shader_add_constant(kong, "float object_id", "_object_id");
 			if (g_context->pick_object_id) {
-				node_shader_write_frag(kong, "output[1] = float4((constants.object_id + 1.0) / 255.0, 0.0, 0.0, 1.0);");
+				// Low byte in r, high byte in g
+				node_shader_write_frag(kong, "float id1 = constants.object_id + 1.0;");
+				node_shader_write_frag(kong, "output[1] = float4((id1 % 256.0) / 255.0, floor(id1 / 256.0) / 255.0, 0.0, 1.0);");
 			}
 			else {
 				node_shader_write_frag(kong, "float obid = constants.object_id + 1.0 / 255.0;");
