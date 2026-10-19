@@ -506,26 +506,6 @@ f32 math_fmod(f32 x, f32 y) {
 	return fmod(x, y);
 }
 
-#ifdef _WIN32
-i32 parse_int(const char *s) {
-	return _strtoi64(s, NULL, 10);
-}
-i32 parse_int_hex(const char *s) {
-	return _strtoi64(s, NULL, 16);
-}
-#else
-i32 parse_int(const char *s) {
-	return strtol(s, NULL, 10);
-}
-i32 parse_int_hex(const char *s) {
-	return strtol(s, NULL, 16);
-}
-#endif
-
-f32 parse_float(const char *s) {
-	return strtof(s, NULL);
-}
-
 i32 color_from_floats(f32 r, f32 g, f32 b, f32 a) {
 	return ((int)(a * 255) << 24) | ((int)(r * 255) << 16) | ((int)(g * 255) << 8) | (int)(b * 255);
 }
