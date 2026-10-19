@@ -125,6 +125,8 @@ project_t *import_arm_from_map_to_arm(any_map_t *old) {
 	project->camera_world    = any_map_get(old, "camera_world");
 	project->camera_origin   = any_map_get(old, "camera_origin");
 	project->camera_fov      = armpack_map_get_f32(old, "camera_fov");
+	project->camera_near     = armpack_map_get_f32(old, "camera_near");
+	project->camera_far      = armpack_map_get_f32(old, "camera_far");
 
 	any_array_t *ss = any_map_get(old, "swatches");
 	if (ss != NULL) {
@@ -319,15 +321,22 @@ project_t *import_arm_from_map_to_arm(any_map_t *old) {
 	return project;
 }
 
+project_t *import_arm_from_version_19(any_map_t *old) {
+	project_t *project   = import_arm_from_map_to_arm(old);
+	project->camera_near = 0.01;
+	project->camera_far  = 100.0;
+	return project;
+}
+
 project_t *import_arm_from_version_18(any_map_t *old) {
 	any_map_set(old, "mesh_paths", NULL);
-	return import_arm_from_map_to_arm(old);
+	return import_arm_from_version_19(old);
 }
 
 project_t *import_arm_from_version_17(any_map_t *old) {
 	any_map_set(old, "mesh_nodes", NULL);
 	any_map_set(old, "mesh_nodes_objects", NULL);
-	return import_arm_from_map_to_arm(old);
+	return import_arm_from_version_18(old);
 }
 
 project_t *import_arm_from_version_16(any_map_t *old) {
@@ -337,7 +346,7 @@ project_t *import_arm_from_version_16(any_map_t *old) {
 			any_map_set(tls->buffer[i], "texpaint_sculpt", NULL);
 		}
 	}
-	return import_arm_from_map_to_arm(old);
+	return import_arm_from_version_17(old);
 }
 
 project_t *import_arm_from_version_15(any_map_t *old) {
@@ -513,6 +522,7 @@ project_t *import_arm_from_old(buffer_t *b) {
 	    import_arm_from_version_5,  import_arm_from_version_6,  import_arm_from_version_7,  import_arm_from_version_8,  import_arm_from_version_9,
 	    import_arm_from_version_10, import_arm_from_version_11, import_arm_from_version_12, import_arm_from_version_13, import_arm_from_version_14,
 	    import_arm_from_version_15, import_arm_from_version_16, import_arm_from_version_17, import_arm_from_version_18,
+	    import_arm_from_version_19,
 	};
 	for (i32 v = sizeof(fns) / sizeof(fns[0]) - 1; v >= 0; --v) {
 		if (import_arm_is_version(b, i32_to_string(v))) {

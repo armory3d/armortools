@@ -830,7 +830,9 @@ void import_arm_run_project(char *path) {
 	if (g_project->camera_world != NULL) {
 		scene_camera->base->transform->local = mat4_from_f32_array(g_project->camera_world, 0);
 		transform_decompose(scene_camera->base->transform);
-		scene_camera->data->fov = g_project->camera_fov;
+		scene_camera->data->fov        = g_project->camera_fov;
+		scene_camera->data->near_plane = g_project->camera_near;
+		scene_camera->data->far_plane  = g_project->camera_far;
 		camera_object_build_proj(scene_camera, -1.0);
 		f32_array_t *origin = g_project->camera_origin;
 		camera_origins[0]   = (vec4_t){origin->buffer[0], origin->buffer[1], origin->buffer[2], 1.0};

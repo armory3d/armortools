@@ -297,6 +297,8 @@ buffer_t *export_arm_encode_project(char *path) {
 	g_project->camera_world    = mat4_to_f32_array(scene_camera->base->transform->local);
 	g_project->camera_origin   = vec3_to_f32_array(camera_origins[0]);
 	g_project->camera_fov      = scene_camera->data->fov;
+	g_project->camera_near     = scene_camera->data->near_plane;
+	g_project->camera_far      = scene_camera->data->far_plane;
 
 	// g_project.mesh_datas = md; // TODO: fix GC ref
 	if (g_project->mesh_datas == NULL) {

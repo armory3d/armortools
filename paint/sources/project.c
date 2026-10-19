@@ -254,6 +254,8 @@ void project_new(bool reset_layers) {
 	base_update_tools();
 	project_set_default_envmap();
 	context_select_tool(TOOL_TYPE_BRUSH);
+	scene_camera->data->near_plane = 0.01;
+	scene_camera->data->far_plane  = 100.0;
 	viewport_reset();
 	viewport_scale_to_bounds(1.8);
 	render_path_raytrace_ready = false;

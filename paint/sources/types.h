@@ -625,6 +625,8 @@ typedef struct project {
 	struct f32_array                            *camera_world;
 	struct f32_array                            *camera_origin;
 	f32                                          camera_fov;
+	f32                                          camera_near;
+	f32                                          camera_far;
 	struct swatch_color_t_array                 *swatches;
 	struct ui_node_canvas_t_array               *brush_nodes;
 	struct buffer_t_array                       *brush_icons;

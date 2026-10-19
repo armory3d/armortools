@@ -904,6 +904,8 @@ void minic_register_builtins() {
 	MINIC_F(envmap_strength);
 	MINIC_F(envmap_angle);
 	MINIC_F(camera_fov);
+	MINIC_F(camera_near);
+	MINIC_F(camera_far);
 	MINIC_O(camera_world, f32_array_t);
 	MINIC_O(camera_origin, f32_array_t);
 	MINIC_P(swatches);
