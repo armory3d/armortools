@@ -182,10 +182,6 @@ void tab_materials_draw_slots_menu() {
 		tab_materials_delete_material(m);
 	}
 
-	if (g_project->_->materials->length > 1 && ui_menu_button(tr("Delete Unused"), "", ICON_DELETE)) {
-		tab_materials_delete_unused();
-	}
-
 	if (g_config->experimental && ui_menu_button(tr("Inspect as Script"), "", ICON_SEARCH)) {
 		node_shader_dump_to_script = true;
 		context_select_material(i);

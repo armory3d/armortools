@@ -215,6 +215,12 @@ char *ui_menubar_viewport_mode_to_string(viewport_mode_t m) {
 	return "Lit";
 }
 
+static void ui_menubar_delete_unused(void *_) {
+	tab_stages_delete_unused();
+	tab_materials_delete_unused();
+	tab_textures_delete_unused();
+}
+
 void ui_menubar_draw_category_items() {
 	if (ui_menubar_category == MENUBAR_CATEGORY_FILE) {
 		if (ui_menu_button(tr("New Project..."), any_map_get(g_keymap, "file_new"), ICON_FILE_NEW)) {
@@ -243,10 +249,17 @@ void ui_menubar_draw_category_items() {
 		}
 #endif
 
-		g_ui->changed = false;
-		ui_check(&g_context->pack_assets_on_save, tr("Pack Assets"), "");
-		if (g_ui->changed) {
-			ui_menu_keep_open = true;
+		if (ui_menu_sub_button(tr("Assets"))) {
+			ui_menu_sub_begin(2);
+			g_ui->changed = false;
+			ui_check(&g_context->pack_assets_on_save, tr("Pack Assets"), "");
+			if (g_ui->changed) {
+				ui_menu_keep_open = true;
+			}
+			if (ui_menu_button(tr("Delete Unused"), "", ICON_DELETE)) {
+				sys_notify_on_next_frame(&ui_menubar_delete_unused, NULL);
+			}
+			ui_menu_sub_end();
 		}
 
 		ui_menu_separator();

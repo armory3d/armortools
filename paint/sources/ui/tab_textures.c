@@ -288,9 +288,6 @@ void tab_textures_draw_edit() {
 	if (ui_menu_button(tr("Sort"), "", ICON_NONE)) {
 		tab_textures_sort_by_name();
 	}
-	if (ui_menu_button(tr("Delete Unused"), "", ICON_DELETE)) {
-		tab_textures_delete_unused();
-	}
 }
 
 void tab_textures_draw_import(char *path) {
