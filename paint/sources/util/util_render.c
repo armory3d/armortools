@@ -4,6 +4,212 @@
 gpu_buffer_t *util_render_screen_aligned_full_vb = NULL;
 gpu_buffer_t *util_render_screen_aligned_full_ib = NULL;
 
+typedef struct preview_env {
+	vec4_t         up;
+	vec4_t         d;
+	gpu_texture_t *radiance;
+	any_array_t   *mips; // gpu_texture_t[], 5 blurred levels
+} preview_env_t;
+
+typedef struct env_params {
+	f32 ground;
+	f32 sky;
+	f32 horizon[6];  // Gradient half width per blur level
+	f32 lobe_exp[6]; // Key light lobe per blur level
+	f32 lobe_peak[6];
+} env_params_t;
+
+// Dim key light
+static env_params_t util_render_preview_env_params = {
+    .ground    = 0.12,
+    .sky       = 0.47,
+    .horizon   = {0.5, 0.55, 0.6, 0.7, 0.8, 1.0},
+    .lobe_exp  = {600.0, 150.0, 40.0, 12.0, 5.0, 2.0},
+    .lobe_peak = {3.0, 2.0, 1.2, 0.8, 0.5, 0.35},
+};
+
+static f32_array_t   *util_render_preview_irradiance = NULL;
+static preview_env_t  util_render_preview_envs[4];
+static i32            util_render_preview_envs_count     = 0;
+static f32_array_t   *util_render_saved_irradiance       = NULL;
+static gpu_texture_t *util_render_saved_radiance         = NULL;
+static any_array_t   *util_render_saved_radiance_mipmaps = NULL;
+static f32            util_render_saved_envmap_angle     = 0.0;
+static f32            util_render_saved_strength         = 0.0;
+
+static f32 util_render_smoothstep(f32 e0, f32 e1, f32 x) {
+	f32 t = math_min(math_max((x - e0) / (e1 - e0), 0.0), 1.0);
+	return t * t * (3.0 - 2.0 * t);
+}
+
+static buffer_t *util_render_make_env_pixels(env_params_t *p, vec4_t up, vec4_t d, i32 level, i32 w) {
+	// Equirect RGBA16F sky over a dark ground with a key light lobe, prefiltered for the given blur level
+	// Inverse of envmap_equirect() in deferred_light with angle 0, n = (sin_phi * cos_theta, -sin_phi * sin_theta, cos_phi)
+	i32       h       = w / 2;
+	buffer_t *b       = buffer_create(w * h * 8);
+	u16      *px      = (u16 *)b->buffer;
+	f32      *col_up  = malloc(sizeof(f32) * w * 2);
+	f32      *col_d   = col_up + w;
+	f32       horizon = p->horizon[level];
+	f32       e       = p->lobe_exp[level];
+	f32       peak    = p->lobe_peak[level];
+	f32       cutoff  = math_pow(0.0005 / peak, 1.0 / e); // Lobe below half float precision
+	u16       one     = float_to_half_fast(1.0);
+	for (i32 x = 0; x < w; ++x) {
+		f32 theta = (x + 0.5) / w * 2.0 * math_pi() - math_pi();
+		f32 ct    = math_cos(theta);
+		f32 st    = math_sin(theta);
+		col_up[x] = ct * up.x - st * up.y;
+		col_d[x]  = ct * d.x - st * d.y;
+	}
+	for (i32 y = 0; y < h; ++y) {
+		f32 phi = (y + 0.5) / h * math_pi();
+		f32 sp  = math_sin(phi);
+		f32 cp  = math_cos(phi);
+		for (i32 x = 0; x < w; ++x) {
+			f32 dot_up = sp * col_up[x] + cp * up.z;
+			f32 dot_d  = sp * col_d[x] + cp * d.z;
+			f32 v      = p->ground + (p->sky - p->ground) * util_render_smoothstep(-horizon, horizon, dot_up);
+			if (dot_d > cutoff) {
+				v += peak * math_pow(dot_d, e);
+			}
+			u16 hv    = float_to_half_fast(v);
+			i32 i     = (y * w + x) * 4;
+			px[i]     = hv;
+			px[i + 1] = hv;
+			px[i + 2] = hv;
+			px[i + 3] = one;
+		}
+	}
+	free(col_up);
+	return b;
+}
+
+static void util_render_make_env(env_params_t *p, vec4_t up, vec4_t d, i32 w, gpu_texture_t **radiance, any_array_t **mips, buffer_t **radiance_pixels) {
+	*mips = any_array_create_from_raw((void *[]){}, 0);
+	for (i32 level = 0; level < 6; ++level) {
+		buffer_t      *b   = util_render_make_env_pixels(p, up, d, level, w);
+		gpu_texture_t *tex = gpu_create_texture_from_bytes(b, w, w / 2, GPU_TEXTURE_FORMAT_RGBA64);
+		if (level == 0) {
+			*radiance = tex;
+		}
+		else {
+			any_array_push(*mips, tex);
+		}
+		if (level == 0 && radiance_pixels != NULL) {
+			*radiance_pixels = b;
+		}
+		else {
+			array_free(b);
+			free(b);
+		}
+		w /= 2;
+	}
+}
+
+// Energy conserving sun
+static env_params_t util_render_world_env_params = {
+    .ground    = 0.15,
+    .sky       = 0.5,
+    .horizon   = {0.1, 0.15, 0.25, 0.4, 0.6, 0.9},
+    .lobe_exp  = {600.0, 150.0, 40.0, 12.0, 5.0, 2.0},
+    .lobe_peak = {191.0, 48.0, 13.0, 4.1, 1.9, 0.95}, // sun_energy * (exp + 1) / 2pi
+};
+
+static gpu_texture_t *util_render_default_radiance        = NULL;
+static buffer_t      *util_render_default_radiance_pixels = NULL;
+
+void util_render_make_default_world() {
+	vec4_t       up = (vec4_t){0.0, 0.0, 1.0, 0.0};
+	vec4_t       d  = vec4_norm((vec4_t){-0.43, -0.52, 1.0, 0.0});
+	any_array_t *mips;
+	util_render_make_env(&util_render_world_env_params, up, d, util_render_default_envmap_w, &util_render_default_radiance, &mips,
+	                     &util_render_default_radiance_pixels);
+	// Prefiltering conserves the sun energy, a blurred level projects to sh without aliasing
+	buffer_t *b                      = util_render_make_env_pixels(&util_render_world_env_params, up, d, 3, 64);
+	scene_world->_->irradiance       = import_envmap_get_spherical_harmonics(b, 64, 32);
+	scene_world->_->radiance         = util_render_default_radiance;
+	scene_world->_->radiance_mipmaps = mips;
+	scene_world->envmap              = util_render_default_envmap_name;
+	array_free(b);
+	free(b);
+}
+
+bool util_render_is_default_envmap(char *file) {
+	return file != NULL && string_equals(file, util_render_default_envmap_name);
+}
+
+gpu_texture_t *util_render_default_envmap() {
+	return util_render_default_radiance;
+}
+
+buffer_t *util_render_default_envmap_pixels() {
+	return util_render_default_radiance_pixels;
+}
+
+void util_render_preview_lighting_begin(f32 ambient, f32 key) {
+	// Neutral lighting independent of the scene envmap, with a key light from the top left of the camera
+	if (util_render_preview_irradiance == NULL) {
+		util_render_preview_irradiance = f32_array_create(27);
+	}
+	f32_array_t *irr = util_render_preview_irradiance;
+	memset(irr->buffer, 0, 27 * sizeof(f32));
+	vec4_t right = camera_object_right(scene_camera);
+	vec4_t up    = camera_object_up(scene_camera);
+	vec4_t back  = vec4_mult(camera_object_look(scene_camera), -1.0);
+	vec4_t d     = vec4_norm((vec4_t){-0.6 * right.x + 0.3 * back.x + up.x, -0.6 * right.y + 0.3 * back.y + up.y, -0.6 * right.z + 0.3 * back.z + up.z, 0.0});
+	for (i32 c = 0; c < 3; ++c) {
+		irr->buffer[0 + c] = ambient;   // l00
+		irr->buffer[3 + c] = key * d.y; // l1-1
+		irr->buffer[6 + c] = key * d.z; // l10
+		irr->buffer[9 + c] = key * d.x; // l11
+	}
+
+	// One radiance per preview camera
+	preview_env_t *env = NULL;
+	for (i32 i = 0; i < util_render_preview_envs_count; ++i) {
+		preview_env_t *e = &util_render_preview_envs[i];
+		if (vec4_dot(e->up, up) > 0.999 && vec4_dot(e->d, d) > 0.999) {
+			env = e;
+			break;
+		}
+	}
+	if (env == NULL) {
+		if (util_render_preview_envs_count < 4) {
+			env = &util_render_preview_envs[util_render_preview_envs_count++];
+		}
+		else {
+			env = &util_render_preview_envs[0];
+			gpu_delete_texture(env->radiance);
+			for (i32 i = 0; i < env->mips->length; ++i) {
+				gpu_delete_texture(env->mips->buffer[i]);
+			}
+		}
+		env->up = up;
+		env->d  = d;
+		util_render_make_env(&util_render_preview_env_params, up, d, 256, &env->radiance, &env->mips, NULL);
+	}
+
+	util_render_saved_irradiance       = scene_world->_->irradiance;
+	util_render_saved_radiance         = scene_world->_->radiance;
+	util_render_saved_radiance_mipmaps = scene_world->_->radiance_mipmaps;
+	util_render_saved_envmap_angle     = g_context->envmap_angle;
+	scene_world->_->irradiance         = irr;
+	scene_world->_->radiance           = env->radiance;
+	scene_world->_->radiance_mipmaps   = env->mips;
+	g_context->envmap_angle            = 0.0;
+	util_render_saved_strength         = scene_world->strength;
+	scene_world->strength              = 2.0;
+}
+
+void util_render_preview_lighting_end() {
+	scene_world->_->irradiance       = util_render_saved_irradiance;
+	scene_world->_->radiance         = util_render_saved_radiance;
+	scene_world->_->radiance_mipmaps = util_render_saved_radiance_mipmaps;
+	g_context->envmap_angle          = util_render_saved_envmap_angle;
+	scene_world->strength            = util_render_saved_strength;
+}
+
 void util_render_make_material_preview() {
 	g_context->material_preview = true;
 
@@ -31,18 +237,14 @@ void util_render_make_material_preview() {
 	scene_camera->data->fov = 0.92;
 	viewport_update_camera_type(CAMERA_TYPE_PERSPECTIVE);
 
-	world_data_t *probe           = scene_world;
-	f32           _probe_strength = probe->strength;
-	probe->strength               = 2;
-	f32 _envmap_angle             = g_context->envmap_angle;
-	g_context->envmap_angle       = 0.0;
-	f32 _brush_scale              = g_context->brush_scale;
-	g_context->brush_scale        = 1.5;
-	f32 _brush_nodes_scale        = g_context->brush_nodes_scale;
-	g_context->brush_nodes_scale  = 1.0;
+	f32 _brush_scale             = g_context->brush_scale;
+	g_context->brush_scale       = 1.5;
+	f32 _brush_nodes_scale       = g_context->brush_nodes_scale;
+	g_context->brush_nodes_scale = 1.0;
 
 	gpu_texture_t *_envmap = scene_world->_->envmap;
 	scene_world->_->envmap = g_context->preview_envmap;
+	util_render_preview_lighting_begin(0.5, 0.65);
 	// No resize
 	i32 _last_w         = _render_path_last_w;
 	i32 _last_h         = _render_path_last_h;
@@ -74,11 +276,10 @@ void util_render_make_material_preview() {
 	camera_object_build_proj(scene_camera, -1.0);
 	camera_object_build_mat(scene_camera);
 
-	probe->strength              = _probe_strength;
-	g_context->envmap_angle      = _envmap_angle;
 	g_context->brush_scale       = _brush_scale;
 	g_context->brush_nodes_scale = _brush_nodes_scale;
 	scene_world->_->envmap       = _envmap;
+	util_render_preview_lighting_end();
 
 	make_material_parse_mesh_material();
 	g_context->ddirty = 0;
@@ -113,6 +314,7 @@ void util_render_make_decal_preview() {
 	viewport_update_camera_type(CAMERA_TYPE_PERSPECTIVE);
 	gpu_texture_t *_envmap = scene_world->_->envmap;
 	scene_world->_->envmap = g_context->preview_envmap;
+	util_render_preview_lighting_begin(0.7, 0.65);
 
 	// No resize
 	i32 _last_w         = _render_path_last_w;
@@ -146,6 +348,7 @@ void util_render_make_decal_preview() {
 	camera_object_build_mat(scene_camera);
 
 	scene_world->_->envmap = _envmap;
+	util_render_preview_lighting_end();
 
 	make_material_parse_mesh_material();
 	g_context->ddirty = 1; // Refresh depth for decal paint

@@ -114,6 +114,15 @@ static bool render_path_raytrace_env_luma(char *file, float *out) {
 		memcpy(out, render_path_raytrace_env_imported_weight, sizeof(float) * ENV_CDF_N);
 		return true;
 	}
+	if (util_render_is_default_envmap(file)) {
+		buffer_t *pixels = util_render_default_envmap_pixels();
+		if (pixels == NULL) {
+			return false;
+		}
+		i32 w = util_render_default_envmap_w;
+		render_path_raytrace_env_luma_pixels(pixels->buffer, w, w / 2, true, out);
+		return true;
+	}
 	buffer_t *blob = iron_load_blob(data_resolve_path(file));
 	if (blob == NULL) {
 		return false;

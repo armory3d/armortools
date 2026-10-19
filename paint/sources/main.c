@@ -429,6 +429,7 @@ void _kickstart() {
 	data_cached_scene_raws = any_map_create();
 	any_map_set(data_cached_scene_raws, "Scene", startup_get_scene());
 	scene_set_active("Scene");
+	util_render_make_default_world();
 
 	uniforms_ext_init();
 	render_path_base_init();

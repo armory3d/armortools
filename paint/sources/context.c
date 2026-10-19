@@ -503,12 +503,13 @@ void context_set_camera_controls(int i) {
 }
 
 void context_load_envmap() {
-	if (!g_context->envmap_loaded) {
-		// TODO: Unable to share texture for both radiance and envmap - reload image
-		g_context->envmap_loaded = true;
-		map_delete(data_cached_textures, "World_radiance.k");
+	g_context->envmap_loaded = true;
+	if (util_render_is_default_envmap(scene_world->envmap)) {
+		scene_world->_->envmap = util_render_default_envmap();
 	}
-	world_data_load_envmap(scene_world);
+	else {
+		world_data_load_envmap(scene_world);
+	}
 	if (g_context->saved_envmap == NULL) {
 		g_context->saved_envmap = scene_world->_->envmap;
 	}

@@ -268,7 +268,7 @@ void project_set_default_envmap() {
 	g_context->saved_envmap          = NULL;
 	g_context->envmap_loaded         = false;
 	scene_world->_->envmap           = g_context->empty_envmap;
-	scene_world->envmap              = "World_radiance.k";
+	scene_world->envmap              = util_render_default_envmap_name;
 	g_context->show_envmap           = false;
 	scene_world->_->radiance         = g_context->default_radiance;
 	scene_world->_->radiance_mipmaps = g_context->default_radiance_mipmaps;

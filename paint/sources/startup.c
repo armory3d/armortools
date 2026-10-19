@@ -743,10 +743,10 @@ scene_t *startup_get_scene(void) {
 		wd->name                      = "World";
 		wd->color                     = -15987700;
 		wd->strength                  = 1.0f;
-		wd->irradiance                = "World_irradiance";
-		wd->radiance                  = "World_radiance.k";
-		wd->radiance_mipmaps          = 5;
-		wd->envmap                    = "World_radiance.k";
+		wd->irradiance                = NULL; // Generated in util_render_make_default_world()
+		wd->radiance                  = NULL;
+		wd->radiance_mipmaps          = 0;
+		wd->envmap                    = NULL;
 		scene->world_datas->buffer[0] = wd;
 	}
 
