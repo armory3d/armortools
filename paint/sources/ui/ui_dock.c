@@ -18,6 +18,10 @@ static i32  ui_dock_drop_from_position = 0;
 static i32  ui_dock_context_tab        = -1;
 static bool ui_dock_preset             = false; // Workspace is being set up, not a change made by the user
 static f32  ui_dock_resizing_size      = 0;
+// Tab resize waiting for the next frame
+static i32 ui_dock_resize_tab = -1;
+static i32 ui_dock_resize_w   = 0;
+static i32 ui_dock_resize_h   = 0;
 
 static bool dock_is_leaf(dock_node_t *n) {
 	return n->a == NULL;
@@ -786,9 +790,69 @@ void ui_dock_on_tab_drop(int *to, i32 to_position, int *from, i32 from_position)
 	ui_dock_drop_from_position = from_position;
 }
 
+static f32 ui_dock_resize_box_w = 0;
+static f32 ui_dock_resize_box_h = 0;
+
+static void ui_dock_resize_box_draw() {
+	ui_slider(&ui_dock_resize_box_w, tr("Width"), 1, 3840, false, 1, true, UI_ALIGN_RIGHT, true);
+	ui_slider(&ui_dock_resize_box_h, tr("Height"), 1, 2160, false, 1, true, UI_ALIGN_RIGHT, true);
+	ui_end_element();
+	ui_row2();
+	if (ui_icon_button(tr("Cancel"), ICON_CLOSE, UI_ALIGN_CENTER)) {
+		ui_box_hide();
+	}
+	if (ui_icon_button(tr("OK"), ICON_CHECK, UI_ALIGN_CENTER) || g_ui->is_return_down) {
+		ui_dock_resize_tab = ui_dock_context_tab;
+		ui_dock_resize_w   = math_floor(ui_dock_resize_box_w);
+		ui_dock_resize_h   = math_floor(ui_dock_resize_box_h);
+		ui_box_hide();
+	}
+}
+
 static void ui_dock_tab_context_menu_draw() {
 	if (ui_menu_button(tr("Close"), "", ICON_CLOSE)) {
 		ui_base_close_tab(ui_dock_context_tab);
+	}
+	if (ui_menu_button(tr("Resize..."), "", ICON_NONE)) {
+		dock_node_t *l       = dock_find_leaf(ui_dock_root, ui_dock_context_tab);
+		bool         view3d  = ui_dock_context_tab == TAB_VIEW3D;
+		ui_dock_resize_box_w = view3d ? dock_view3d_w : l->w;
+		ui_dock_resize_box_h = view3d ? dock_view3d_h : l->h;
+		ui_box_show_custom(&ui_dock_resize_box_draw, 400, 200, NULL, true, tr("Resize"));
+	}
+}
+
+static i32 dock_split_resize_child(dock_node_t *s, dock_node_t *n, i32 delta) {
+	i32 total = s->vertical ? s->h : s->w;
+	i32 a     = s->vertical ? s->a->h : s->a->w;
+	i32 to    = s->a == n ? a + delta : a - delta;
+	i32 min   = dock_split_min_size(s);
+	if (to > total - min) {
+		to = total - min;
+	}
+	if (to < DOCK_MIN_SIZE) {
+		to = DOCK_MIN_SIZE;
+	}
+	s->size = s->fixed == 1 ? to : s->fixed == 2 ? total - to : to / (f32)total;
+	return s->a == n ? to - a : a - to;
+}
+
+static void dock_resize_leaf(dock_node_t *l, i32 id, i32 w, i32 h) {
+	bool view3d = id == TAB_VIEW3D;
+	i32  dw     = w - (view3d ? dock_view3d_w : l->w);
+	i32  dh     = h - (view3d ? dock_view3d_h : l->h);
+	for (dock_node_t *n = l; n->parent != NULL; n = n->parent) {
+		dock_node_t *s = n->parent;
+		if (!s->a->visible || !s->b->visible) {
+			continue;
+		}
+		if (s->vertical && dh != 0) {
+			dh -= dock_split_resize_child(s, n, dh);
+		}
+		else if (!s->vertical && dw != 0) {
+			dw -= dock_split_resize_child(s, n, dw);
+		}
+		dock_layout(ui_dock_root, ui_dock_root->x, ui_dock_root->y, ui_dock_root->w, ui_dock_root->h);
 	}
 }
 
@@ -1205,6 +1269,19 @@ void ui_dock_update() {
 		i32          id = dock_leaf_open_tab(from, g_ui->drag_tab_position);
 		if (to != NULL && id != -1 && !(to == from && zone == DOCK_ZONE_CENTER)) {
 			dock_move_tab(id, to, zone, -1);
+			base_resize();
+			ui_dock_save();
+		}
+	}
+
+	// Tab resized from the context menu
+	if (ui_dock_resize_tab != -1) {
+		dock_node_t *l     = dock_find_leaf(ui_dock_root, ui_dock_resize_tab);
+		i32          id    = ui_dock_resize_tab;
+		ui_dock_resize_tab = -1;
+		if (l != NULL && l->visible) {
+			ui_dock_layout();
+			dock_resize_leaf(l, id, ui_dock_resize_w, ui_dock_resize_h);
 			base_resize();
 			ui_dock_save();
 		}
