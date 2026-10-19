@@ -209,7 +209,7 @@ project_t *main() {
 		add_define(project, "WITH_GAMEPAD");
 	}
 
-	bool with_websocket = true;
+	bool with_websocket = platform == PLATFORM_LINUX;
 	if (with_websocket) {
 		add_define(project, "WITH_WEBSOCKET");
 		if (platform == PLATFORM_LINUX) {
