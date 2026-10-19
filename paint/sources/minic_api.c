@@ -16,6 +16,7 @@
 #include "iron_string.h"
 #include "iron_system.h"
 #include "iron_ui.h"
+#include "iron_websocket.h"
 #include "minic.h"
 #include <limits.h>
 #include <math.h>

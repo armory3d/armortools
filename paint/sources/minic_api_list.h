@@ -307,6 +307,16 @@ X1(to_lower_case, "p:char(p:char s)", p, p)
 X1(to_upper_case, "p:char(p:char s)", p, p)
 X1(trim_end, "p:char(p:char str)", p, p)
 X2(string_utf8_decode, "i(p:char str,p:int i)", i, p, p)
+X1(parse_int, "i(p:char s)", i, p)
+X1(parse_float, "f(p:char s)", f, p)
+
+#ifdef WITH_WEBSOCKET
+X1(iron_websocket_open, "i(p:char url)", i, p)
+X2(iron_websocket_send, "v(i ws,p:char text)", v, i, p)
+X1(iron_websocket_receive, "p:char(i ws)", p, i)
+X1(iron_websocket_state, "i(i ws)", i, i)
+X1(iron_websocket_close, "v(i ws)", v, i)
+#endif
 
 // iron_file
 X3(iron_file_reader_open, "b(p:iron_file_reader_t reader,p:char filepath,i type)", b, p, p, i)
