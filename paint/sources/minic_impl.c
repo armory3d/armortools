@@ -1968,6 +1968,18 @@ void script_timeline_set_frame(i32 frame) {
 	tab_timeline_set_frame(frame);
 }
 
+void script_clip_play(object_t *o, i32 start, i32 end) {
+	if (o != NULL && o->ext_type != NULL && string_equals(o->ext_type, "mesh_object_t")) {
+		tab_timeline_clip_play(o->ext, start, end);
+	}
+}
+
+void script_clip_set_frame(object_t *o, i32 frame) {
+	if (o != NULL && o->ext_type != NULL && string_equals(o->ext_type, "mesh_object_t")) {
+		tab_timeline_clip_set_frame(o->ext, frame);
+	}
+}
+
 void script_timeline_add_keyframe(char *name, i32 frame) {
 	tab_timeline_add_named_keyframe(name, frame);
 }

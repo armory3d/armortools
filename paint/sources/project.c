@@ -151,8 +151,8 @@ void project_new(bool reset_layers) {
 	g_context->texture             = NULL;
 	g_project->mesh_assets         = any_array_create_from_raw((void *[]){}, 0);
 
-	bool         no_default = project_default_mesh_list == NULL || g_context->project_type == -1;
-	char        *mesh_name  = no_default ? "cube_bevel" : project_default_mesh_list->buffer[g_context->project_type];
+	bool  no_default = project_default_mesh_list == NULL || g_context->project_type == -1;
+	char *mesh_name  = no_default ? "cube_bevel" : project_default_mesh_list->buffer[g_context->project_type];
 
 	mesh_data_t *md = util_shape_make_data(mesh_name);
 	if (md != NULL) {
@@ -224,10 +224,10 @@ void project_new(bool reset_layers) {
 	make_material_parse_paint_material(true);
 	make_material_parse_brush();
 
-	g_project->_->assets                              = any_array_create_from_raw((void *[]){}, 0);
-	g_project->_->next_asset_id                       = 0;
-	g_project->packed_assets                          = any_array_create_from_raw((void *[]){}, 0);
-	g_context->ddirty                                 = 4;
+	g_project->_->assets        = any_array_create_from_raw((void *[]){}, 0);
+	g_project->_->next_asset_id = 0;
+	g_project->packed_assets    = any_array_create_from_raw((void *[]){}, 0);
+	g_context->ddirty           = 4;
 	ui_dock_redraw(TAB_AREA_SIDEBAR0);
 	ui_dock_redraw(TAB_AREA_SIDEBAR1);
 
@@ -364,47 +364,47 @@ void project_reimport_mesh() {
 	}
 }
 
-i32 project_skin_frames() {
-	i32 frames = 0;
-	for (i32 i = 0; i < g_project->_->paint_objects->length; ++i) {
-		mesh_data_t *md = ((mesh_object_t *)g_project->_->paint_objects->buffer[i])->data;
-		frames          = math_max(frames, util_skin_frame_count(md->_->skin_blob));
+bool project_reskin_object(mesh_object_t *o, i32 frame) {
+	mesh_data_t *md = o->data;
+	if (md->_->skin_blob == NULL) {
+		return false;
 	}
-	return frames;
+
+	// Each mesh loops over its own animation length
+	i32 frames     = util_skin_frame_count(md->_->skin_blob);
+	i32 mesh_frame = frames > 0 ? frame % frames : frame;
+	if (mesh_frame == md->_->skin_frame) {
+		return false;
+	}
+
+	vertex_array_t *pos = mesh_data_get_vertex_array(md, "pos");
+	vertex_array_t *nor = mesh_data_get_vertex_array(md, "nor");
+	if (!util_skin_apply(md->_->skin_blob, mesh_frame, pos->values, nor->values, &md->scale_pos)) {
+		return false;
+	}
+
+	md->_->skin_frame = mesh_frame;
+	mesh_data_build_vertices(md->_->vertex_buffer, md->vertex_arrays);
+	return true;
 }
 
 // Poses the skinned meshes at a frame
 bool project_reskin_mesh(int frame) {
 	bool any = false;
 	for (i32 i = 0; i < g_project->_->paint_objects->length; ++i) {
-		mesh_object_t *o  = g_project->_->paint_objects->buffer[i];
-		mesh_data_t   *md = o->data;
-		if (md->_->skin_blob == NULL || !o->base->visible) {
-			continue;
+		mesh_object_t *o = g_project->_->paint_objects->buffer[i];
+		if (o->base->visible && project_reskin_object(o, frame)) {
+			any = true;
 		}
-
-		// Each mesh loops over its own animation length
-		i32 frames     = util_skin_frame_count(md->_->skin_blob);
-		i32 mesh_frame = frames > 0 ? frame % frames : frame;
-		if (mesh_frame == md->_->skin_frame) {
-			continue;
-		}
-
-		vertex_array_t *pos = mesh_data_get_vertex_array(md, "pos");
-		vertex_array_t *nor = mesh_data_get_vertex_array(md, "nor");
-		if (!util_skin_apply(md->_->skin_blob, mesh_frame, pos->values, nor->values, &md->scale_pos)) {
-			continue;
-		}
-
-		md->_->skin_frame = mesh_frame;
-		mesh_data_build_vertices(md->_->vertex_buffer, md->vertex_arrays);
-		any = true;
 	}
-
 	if (!any) {
 		return false;
 	}
+	project_reskin_finish();
+	return true;
+}
 
+void project_reskin_finish() {
 	if (g_context->merged_object != NULL && base_player) {
 		util_mesh_merged_stale = true;
 	}
@@ -418,7 +418,6 @@ bool project_reskin_mesh(int frame) {
 	}
 	g_context->ddirty          = 4;
 	render_path_raytrace_ready = false;
-	return true;
 }
 
 void project_unwrap_mesh_box_draw() {

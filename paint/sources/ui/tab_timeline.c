@@ -43,11 +43,9 @@ static i32          tab_timeline_frame_rate = 24;
 static any_array_t *tab_timeline_keyframes  = NULL;
 static i32          tab_timeline_last_frame = 0;
 
-static any_array_t *tab_timeline_mesh_keyframes  = NULL;
-static i32          tab_timeline_loop_frames     = 0;
-static i32          tab_timeline_last_skin_frame = -1;
-static bool         tab_timeline_capturing       = false;
-static i32          tab_timeline_capture_frame   = 0;
+static any_array_t *tab_timeline_mesh_keyframes = NULL;
+static bool         tab_timeline_capturing      = false;
+static i32          tab_timeline_capture_frame  = 0;
 
 static i32 tab_timeline_pending_from           = -1;
 static i32 tab_timeline_pending_to             = -1;
@@ -134,6 +132,79 @@ static bool tab_timeline_is_clip_instance(i32 mi) {
 	return false;
 }
 
+typedef struct {
+	mesh_object_t *mesh;
+	mat4_t         delta;      // Clip animation applied on top of base
+	mat4_t         base;       // Transform without delta
+	mat4_t         applied;    // Local transform last written, base is recomputed once it changes
+	bool           clip_range; // Plays clip_start..clip_end from clip_offset (script_clip_play), else the whole clip in sync
+	i32            clip_start;
+	i32            clip_end;
+	f64            clip_offset; // Nested frame the range started at
+	bool           clip_held;   // Stays at clip_hold (script_clip_set_frame)
+	i32            clip_hold;
+} tab_timeline_instance_t;
+
+static any_array_t *tab_timeline_instances = NULL;
+
+static tab_timeline_instance_t *tab_timeline_instance_of(mesh_object_t *mesh) {
+	if (tab_timeline_instances == NULL)
+		tab_timeline_instances = any_array_create_from_raw((void *[]){}, 0);
+	for (i32 i = 0; i < tab_timeline_instances->length; ++i) {
+		tab_timeline_instance_t *instance = tab_timeline_instances->buffer[i];
+		if (instance->mesh == mesh)
+			return instance;
+	}
+	tab_timeline_instance_t *instance = ALLOC_INIT(tab_timeline_instance_t, {0});
+	instance->mesh                    = mesh;
+	instance->delta                   = mat4_identity();
+	any_array_push(tab_timeline_instances, instance);
+	return instance;
+}
+
+static tab_timeline_instance_t *tab_timeline_instance(i32 mi) {
+	return tab_timeline_instance_of(g_project->_->paint_objects->buffer[mi]);
+}
+
+static stage_t *tab_timeline_clip_of(mesh_object_t *mesh) {
+	if (g_project->stages == NULL)
+		return NULL;
+	for (i32 si = 0; si < g_project->stages->length; ++si) {
+		if (tab_timeline_clip_matches(g_project->stages->buffer[si], mesh))
+			return g_project->stages->buffer[si];
+	}
+	return NULL;
+}
+
+// A mesh clip spans its keys and its skin animation
+static i32 tab_timeline_clip_length(mesh_object_t *mesh, stage_t *stage) {
+	i32 length = util_skin_frame_count(mesh->data->_->skin_blob);
+	if (stage != NULL && tab_timeline_mesh_keyframes != NULL) {
+		for (i32 i = 0; i < tab_timeline_mesh_keyframes->length; ++i) {
+			tab_timeline_mesh_keyframe_t *kf = tab_timeline_mesh_keyframes->buffer[i];
+			if (kf->stage == stage && kf->frame + 1 > length)
+				length = kf->frame + 1;
+		}
+	}
+	return length;
+}
+
+// Each object plays its mesh clip on its own clock, by default the whole clip in sync with the timeline
+static f64 tab_timeline_clip_frame(mesh_object_t *mesh, i32 length) {
+	if (tab_timeline_edit_stage != NULL || length <= 0)
+		return tab_timeline_nested_frame; // The timeline shows the edited clip
+	tab_timeline_instance_t *instance = tab_timeline_instance_of(mesh);
+	if (instance->clip_held)
+		return instance->clip_hold;
+	if (!instance->clip_range)
+		return fmod(tab_timeline_nested_frame, (f64)length);
+	i32 start = instance->clip_start < length ? instance->clip_start : length - 1;
+	i32 end   = instance->clip_end > start && instance->clip_end <= length ? instance->clip_end : length;
+	if (tab_timeline_nested_frame < instance->clip_offset) // Playback restarted
+		instance->clip_offset = tab_timeline_nested_frame;
+	return start + fmod(tab_timeline_nested_frame - instance->clip_offset, (f64)(end - start));
+}
+
 static mat4_t tab_timeline_nested_transform(i32 mi) {
 	mat4_t result = mat4_identity();
 	if (!tab_timeline_nested_enabled || tab_timeline_edit_stage != NULL || mi < 0 || g_project->stages == NULL) {
@@ -145,13 +216,7 @@ static mat4_t tab_timeline_nested_transform(i32 mi) {
 		if (!tab_timeline_clip_matches(stage, mesh)) {
 			continue;
 		}
-		i32 end = 0;
-		for (i32 i = 0; i < tab_timeline_mesh_keyframes->length; ++i) {
-			tab_timeline_mesh_keyframe_t *kf = tab_timeline_mesh_keyframes->buffer[i];
-			if (kf->stage == stage && kf->frame > end)
-				end = kf->frame;
-		}
-		f32                           frame = (f32)fmod(tab_timeline_nested_frame, (f64)(end + 1));
+		f32                           frame = (f32)tab_timeline_clip_frame(mesh, tab_timeline_clip_length(mesh, stage));
 		tab_timeline_mesh_keyframe_t *prev  = NULL;
 		tab_timeline_mesh_keyframe_t *next  = NULL;
 		for (i32 i = 0; i < tab_timeline_mesh_keyframes->length; ++i) {
@@ -172,31 +237,6 @@ static mat4_t tab_timeline_nested_transform(i32 mi) {
 		break;
 	}
 	return result;
-}
-
-typedef struct {
-	mesh_object_t *mesh;
-	mat4_t         delta;   // Clip animation applied on top of base
-	mat4_t         base;    // Transform without delta
-	mat4_t         applied; // Local transform last written, base is recomputed once it changes
-} tab_timeline_instance_t;
-
-static any_array_t *tab_timeline_instances = NULL;
-
-static tab_timeline_instance_t *tab_timeline_instance(i32 mi) {
-	if (tab_timeline_instances == NULL)
-		tab_timeline_instances = any_array_create_from_raw((void *[]){}, 0);
-	mesh_object_t *mesh = g_project->_->paint_objects->buffer[mi];
-	for (i32 i = 0; i < tab_timeline_instances->length; ++i) {
-		tab_timeline_instance_t *instance = tab_timeline_instances->buffer[i];
-		if (instance->mesh == mesh)
-			return instance;
-	}
-	tab_timeline_instance_t *instance = ALLOC_INIT(tab_timeline_instance_t, {0});
-	instance->mesh                    = mesh;
-	instance->delta                   = mat4_identity();
-	any_array_push(tab_timeline_instances, instance);
-	return instance;
 }
 
 static mat4_t tab_timeline_capture_mesh(i32 mi) {
@@ -657,6 +697,39 @@ static void tab_timeline_load_mesh_from_keyframes(float frame_f) {
 	tab_timeline_load_mesh_keyframes(frame_f, false, frame_f);
 }
 
+// Poses each skinned mesh at the frame of its own clip
+static void tab_timeline_reskin(f64 nested_frame) {
+	tab_timeline_nested_frame = nested_frame;
+	bool any                  = false;
+	for (i32 i = 0; i < g_project->_->paint_objects->length; ++i) {
+		mesh_object_t *mesh = g_project->_->paint_objects->buffer[i];
+		if (mesh->data->_->skin_blob == NULL || !mesh->base->visible)
+			continue;
+		i32 frame = (i32)tab_timeline_clip_frame(mesh, tab_timeline_clip_length(mesh, tab_timeline_clip_of(mesh)));
+		if (project_reskin_object(mesh, frame))
+			any = true;
+	}
+	if (any)
+		project_reskin_finish();
+}
+
+void tab_timeline_clip_play(mesh_object_t *mesh, i32 start, i32 end) {
+	tab_timeline_instance_t *instance = tab_timeline_instance_of(mesh);
+	instance->clip_range              = true;
+	instance->clip_held               = false;
+	instance->clip_start              = start > 0 ? start : 0;
+	instance->clip_end                = end;
+	instance->clip_offset             = tab_timeline_nested_frame;
+}
+
+void tab_timeline_clip_set_frame(mesh_object_t *mesh, i32 frame) {
+	tab_timeline_instance_t *instance = tab_timeline_instance_of(mesh);
+	instance->clip_held               = true;
+	instance->clip_hold               = frame > 0 ? frame : 0;
+	if (project_reskin_object(mesh, instance->clip_hold))
+		project_reskin_finish();
+}
+
 static void tab_timeline_save_current(i32 frame) {
 	if (tab_timeline_edit_stage == NULL) {
 		tab_timeline_save_to_keyframes(frame);
@@ -681,7 +754,7 @@ static void tab_timeline_frame_change_on_next_frame(void *_) {
 		tab_timeline_load_mesh_from_keyframes((float)to);
 	}
 
-	project_reskin_mesh(to);
+	tab_timeline_reskin(to);
 }
 
 static void tab_timeline_play_on_next_frame(void *_) {
@@ -689,10 +762,8 @@ static void tab_timeline_play_on_next_frame(void *_) {
 		return;
 	tab_timeline_frame_change_on_next_frame(NULL);
 	tab_timeline_save_current(tab_timeline_selected_frame);
-	tab_timeline_playing         = true;
-	tab_timeline_play_time       = sys_time() - (f64)tab_timeline_selected_frame / tab_timeline_frame_rate;
-	tab_timeline_loop_frames     = 0;
-	tab_timeline_last_skin_frame = -1;
+	tab_timeline_playing   = true;
+	tab_timeline_play_time = sys_time() - (f64)tab_timeline_selected_frame / tab_timeline_frame_rate;
 }
 
 // Show the current frame again after keys changed, edits on keyed frames are kept
@@ -931,13 +1002,11 @@ void tab_timeline_reset() {
 	tab_timeline_nested_frame          = 0.0f;
 	tab_timeline_nested_enabled        = true;
 
-	tab_timeline_selected_frame  = 0;
-	tab_timeline_selected_row    = 0;
-	tab_timeline_last_frame      = 0;
-	tab_timeline_playing         = false;
-	tab_timeline_scroll          = 0;
-	tab_timeline_loop_frames     = 0;
-	tab_timeline_last_skin_frame = -1;
+	tab_timeline_selected_frame = 0;
+	tab_timeline_selected_row   = 0;
+	tab_timeline_last_frame     = 0;
+	tab_timeline_playing        = false;
+	tab_timeline_scroll         = 0;
 }
 
 static void tab_timeline_load_camera(i32 frame) {
@@ -1508,11 +1577,9 @@ void tab_timeline_add_named_keyframe(char *name, i32 frame) {
 
 void tab_timeline_play() {
 	tab_timeline_init();
-	tab_timeline_playing         = true;
-	tab_timeline_play_time       = sys_time();
-	tab_timeline_last_frame      = -1; // Ensure frame 0 scripts run
-	tab_timeline_loop_frames     = 0;
-	tab_timeline_last_skin_frame = -1;
+	tab_timeline_playing    = true;
+	tab_timeline_play_time  = sys_time();
+	tab_timeline_last_frame = -1; // Ensure frame 0 scripts run
 }
 
 void tab_timeline_resume() {
@@ -1581,8 +1648,6 @@ void tab_timeline_update() {
 	}
 	iron_delay_idle_sleep();
 
-	i32 loop_frames = base_player && tab_timeline_loop_frames > 0 ? tab_timeline_loop_frames : tab_timeline_max_frames;
-
 	// Keep nested clips continuous when the main timeline wraps
 	f64 playback_frame = (sys_time() - tab_timeline_play_time) * tab_timeline_frame_rate;
 	if (tab_timeline_capturing) {
@@ -1593,7 +1658,7 @@ void tab_timeline_update() {
 			return;
 		}
 		playback_frame = tab_timeline_capture_frame;
-		if (playback_frame >= loop_frames) {
+		if (playback_frame >= tab_timeline_max_frames) {
 			// Played once, the last frame was already recorded
 			tab_timeline_capture_end();
 			return;
@@ -1601,9 +1666,8 @@ void tab_timeline_update() {
 		tab_timeline_capture_frame++;
 		viewport_video_time = playback_frame / tab_timeline_frame_rate;
 	}
-	float frame_f        = (float)fmod(playback_frame, loop_frames);
-	i32   frame_i        = (i32)frame_f;
-	i32   skin_frame     = (i32)playback_frame;
+	float frame_f = (float)fmod(playback_frame, tab_timeline_max_frames);
+	i32   frame_i = (i32)frame_f;
 
 	tab_timeline_selected_frame = frame_i;
 
@@ -1620,14 +1684,7 @@ void tab_timeline_update() {
 		tab_timeline_run_frame_scripts(frame_i);
 	}
 
-	project_reskin_mesh(skin_frame);
-	if (skin_frame != tab_timeline_last_skin_frame) {
-		tab_timeline_last_skin_frame = skin_frame;
-		if (tab_timeline_loop_frames <= 0) {
-			i32 frames               = project_skin_frames();
-			tab_timeline_loop_frames = frames > 0 && frames < tab_timeline_max_frames ? frames : tab_timeline_max_frames;
-		}
-	}
+	tab_timeline_reskin(playback_frame);
 
 	if (tab_timeline_keyframes != NULL) {
 		tab_timeline_tween_from_keyframes(frame_f);
