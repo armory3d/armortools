@@ -209,10 +209,13 @@ project_t *main() {
 		add_define(project, "WITH_GAMEPAD");
 	}
 
-	bool with_websocket = platform == PLATFORM_LINUX;
+	bool with_websocket = platform == PLATFORM_LINUX || platform == PLATFORM_WINDOWS;
 	if (with_websocket) {
 		add_define(project, "WITH_WEBSOCKET");
-		if (platform == PLATFORM_LINUX) {
+		if (platform == PLATFORM_WINDOWS) {
+			add_cfiles(project, "sources/backends/windows_websocket.c");
+		}
+		else if (platform == PLATFORM_LINUX) {
 			add_cfiles(project, "sources/backends/posix_websocket.c");
 		}
 	}
