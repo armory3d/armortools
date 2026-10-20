@@ -31,6 +31,10 @@ f32 render_path_base_get_super_sampling() {
 	return render_path_base_super_sample;
 }
 
+static bool render_path_base_path_trace() {
+	return g_context->viewport_mode == VIEWPORT_MODE_PATH_TRACE && g_context->tool != TOOL_TYPE_COLORID && !render_path_raytrace_bake_lightmap_busy();
+}
+
 void render_path_base_begin() {
 	// Begin split
 	if (base_is_split() && !g_context->paint2d_view) {
@@ -62,8 +66,7 @@ void render_path_base_begin() {
 	}
 
 	// Match projection matrix jitter
-	bool skip_taa = g_context->split_view || (g_context->viewport_mode == VIEWPORT_MODE_PATH_TRACE && g_context->tool != TOOL_TYPE_COLORID) ||
-	                g_context->camera_type == CAMERA_TYPE_ORTHOGRAPHIC ||
+	bool skip_taa = g_context->split_view || render_path_base_path_trace() || g_context->camera_type == CAMERA_TYPE_ORTHOGRAPHIC ||
 	                ((g_context->tool == TOOL_TYPE_CLONE || g_context->tool == TOOL_TYPE_BLUR) && g_context->pdirty > 0);
 
 	if (skip_taa || g_config->brush_live) {
@@ -111,7 +114,7 @@ void render_path_base_draw_split(void (*draw_commands)(void)) {
 		render_path_base_draw_gbuffer();
 
 		bool use_live_layer = g_context->tool == TOOL_TYPE_MATERIAL;
-		bool path_trace     = g_context->viewport_mode == VIEWPORT_MODE_PATH_TRACE && g_context->tool != TOOL_TYPE_COLORID;
+		bool path_trace     = render_path_base_path_trace();
         path_trace ? render_path_raytrace_draw(use_live_layer) : draw_commands();
 		render_path_base_draw_outline();
 
@@ -137,7 +140,7 @@ void render_path_base_commands(void (*draw_commands)(void)) {
 	render_path_base_draw_gbuffer();
 	render_path_paint_draw();
 
-	if (g_context->viewport_mode == VIEWPORT_MODE_PATH_TRACE && g_context->tool != TOOL_TYPE_COLORID) {
+	if (render_path_base_path_trace()) {
 		bool use_live_layer = g_context->tool == TOOL_TYPE_MATERIAL;
 		render_path_raytrace_draw(use_live_layer);
 		render_path_base_draw_outline();
