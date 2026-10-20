@@ -557,6 +557,12 @@ void tab_layers_apply_filter(i32 filter) {
 }
 
 void layers_new_layer_clear(slot_layer_t *l) {
+	if (array_index_of(g_project->_->layers, l) < 0) {
+		return;
+	}
+	if (slot_layer_is_path(l) && l->path_points->length > 0) {
+		return;
+	}
 	slot_layer_clear(l, 0x00000000, NULL, 1.0, layers_default_rough, 0.0);
 }
 
