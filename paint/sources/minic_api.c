@@ -928,6 +928,7 @@ void minic_register_builtins() {
 	// iron_input globals
 	minic_register_global("mouse_x", &mouse_x, MINIC_T_FLOAT);
 	minic_register_global("mouse_y", &mouse_y, MINIC_T_FLOAT);
+	minic_register_global("mouse_wheel_delta", &mouse_wheel_delta, MINIC_T_FLOAT);
 
 	// minic_api_list.h
 	for (int i = 0; i < (int)(sizeof(minic_api_entries) / sizeof(minic_api_entries[0])); ++i) {

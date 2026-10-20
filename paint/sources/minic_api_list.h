@@ -458,7 +458,7 @@ X1(string_array_create, "p:string_array_t(i length)", p, i)
 X1(float_to_half_fast, "i(f value)", i, f)
 X1(half_to_u8_fast, "i(i h)", i, i)
 
-// iron_input (mouse_x / mouse_y globals are registered in minic_register_builtins)
+// iron_input
 X1(mouse_down, "b(p:char button)", b, p)
 X0(mouse_down_any, "b()", b)
 X1(mouse_started, "b(p:char button)", b, p)
