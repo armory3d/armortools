@@ -1154,8 +1154,6 @@ i32                    box_preferences_get_theme_index();
 i32                    box_preferences_get_preset_index();
 void                   render_path_paint_init();
 void                   render_path_paint_commands_paint(bool dilation);
-gpu_texture_t         *render_path_paint_feedback_ref(gpu_texture_t *t);
-void                   render_path_paint_feedback_stroke_end();
 gpu_texture_t         *uniforms_ext_tex_link(object_t *object, shader_data_t *mat, char *link);
 void                   render_path_paint_use_live_layer(bool use);
 void                   render_path_paint_commands_cursor();

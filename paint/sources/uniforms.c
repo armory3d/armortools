@@ -387,6 +387,17 @@ static gpu_texture_t *_uniforms_ext_get_target(char *name) {
 	return rt->_image;
 }
 
+// A layer texture bound as a render target of the current pass reads as black
+static gpu_texture_t *uniforms_layer_tex(gpu_texture_t *t) {
+	for (i32 i = 0; gpu_in_use && i < current_render_targets_count; ++i) {
+		if (t == current_render_targets[i]) {
+			render_target_t *rt = any_map_get(render_path_render_targets, "empty_black");
+			return rt->_image;
+		}
+	}
+	return t;
+}
+
 gpu_texture_t *uniforms_ext_tex_link(object_t *object, shader_data_t *mat, char *link) {
 	if (string_equals(link, "_texpaint_undo")) {
 		i32 i = history_undo_i - 1 < 0 ? g_config->undo_steps - 1 : history_undo_i - 1;
@@ -481,25 +492,26 @@ gpu_texture_t *uniforms_ext_tex_link(object_t *object, shader_data_t *mat, char 
 		}
 		return NULL;
 	}
+	// Layer and Layer Mask nodes, the index follows the prefix
 	if (starts_with(link, "_texpaint_nor")) {
-		i32 tid = parse_int(link + string_length(link) - 1);
-		return tid < g_project->_->layers->length ? g_project->_->layers->buffer[tid]->texpaint_nor : NULL;
+		i32 tid = parse_int(link + string_length("_texpaint_nor"));
+		return tid < g_project->_->layers->length ? uniforms_layer_tex(g_project->_->layers->buffer[tid]->texpaint_nor) : NULL;
 	}
 	if (starts_with(link, "_texpaint_pack")) {
-		i32 tid = parse_int(link + string_length(link) - 1);
-		return tid < g_project->_->layers->length ? g_project->_->layers->buffer[tid]->texpaint_pack : NULL;
+		i32 tid = parse_int(link + string_length("_texpaint_pack"));
+		return tid < g_project->_->layers->length ? uniforms_layer_tex(g_project->_->layers->buffer[tid]->texpaint_pack) : NULL;
 	}
 	if (string_equals(link, "_texpaint_sculpt_base")) {
 		render_target_t *rt = any_map_get(render_path_render_targets, "texpaint_sculpt_base");
 		return rt != NULL ? rt->_image : NULL;
 	}
 	if (starts_with(link, "_texpaint_sculpt")) {
-		i32 tid = parse_int(link + string_length(link) - 1);
+		i32 tid = parse_int(link + string_length("_texpaint_sculpt"));
 		return tid < g_project->_->layers->length ? g_project->_->layers->buffer[tid]->texpaint_sculpt : NULL;
 	}
 	if (starts_with(link, "_texpaint")) {
-		i32 tid = parse_int(link + string_length(link) - 1);
-		return tid < g_project->_->layers->length ? g_project->_->layers->buffer[tid]->texpaint : NULL;
+		i32 tid = parse_int(link + string_length("_texpaint"));
+		return tid < g_project->_->layers->length ? uniforms_layer_tex(g_project->_->layers->buffer[tid]->texpaint) : NULL;
 	}
 	if (starts_with(link, "_texblur_")) {
 		char *id = link + 9;

@@ -519,7 +519,6 @@ void script_paint_end(void) {
 	g_context->layer_preview_dirty = true;
 	g_context->prev_paint_vec_x    = -1.0f;
 	g_context->prev_paint_vec_y    = -1.0f;
-	render_path_paint_feedback_stroke_end();
 
 	script_paint_active = false;
 	script_paint_first  = true;
