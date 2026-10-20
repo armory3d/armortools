@@ -1020,8 +1020,10 @@ void render_path_paint_draw() {
 					g_context->merged_object->base->visible = _visible;
 			}
 			else if (render_path_paint_is_rt_bake()) {
-				render_path_raytrace_bake_commands(make_material_parse_paint_material);
-				render_path_paint_dilate(true, false);
+				if (!render_path_raytrace_bake_lightmap_busy()) {
+					render_path_raytrace_bake_commands(make_material_parse_paint_material);
+					render_path_paint_dilate(true, false);
+				}
 			}
 			else {
 				render_path_paint_commands_paint(true);
