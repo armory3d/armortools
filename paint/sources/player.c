@@ -124,7 +124,7 @@ void player_set_workspace(bool on) {
 
 void player_runtime_reset() {
 	script_reset_runtime();
-	trait_reset();
+	iron_mouse_unlock();
 	if (player_workspace_on) {
 		player_set_workspace(false);
 	}

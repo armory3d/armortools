@@ -412,13 +412,11 @@ void base_update(void *_) {
 	if (base_player) {
 		player_running             = true;
 		render_path_raytrace_ready = false;
-		trait_update();
 		physics_world_update();
 		iron_delay_idle_sleep();
 	}
 	else if (player_running) {
 		player_running = false;
-		trait_stop();
 	}
 
 	if (player_running || tab_timeline_playing) {
