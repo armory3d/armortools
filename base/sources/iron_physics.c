@@ -1351,9 +1351,10 @@ physics_body_t *physics_body_create(object_t *obj, physics_shape_t shape, float 
 	obj->_->body         = body;
 
 	transform_compute_dim(obj->transform);
-	body->dimx = obj->transform->dim.x;
-	body->dimy = obj->transform->dim.y;
-	body->dimz = obj->transform->dim.z;
+	vec4_t dim = transform_dim(obj->transform);
+	body->dimx = dim.x;
+	body->dimy = dim.y;
+	body->dimz = dim.z;
 
 	if (shape == PHYSICS_SHAPE_BOX || shape == PHYSICS_SHAPE_SPHERE) {
 		vec4_t center, extent;

@@ -91,8 +91,10 @@ typedef struct mesh_data_runtime {
 	gpu_buffer_t          *vertex_buffer;
 	gpu_buffer_t          *index_buffer;
 	gpu_vertex_structure_t structure;
-	buffer_t              *skin_blob;  // Skinned animation
-	i32                    skin_frame; // Frame the vertices are posed at, -1 = unknown
+	buffer_t              *skin_blob;          // Skinned animation
+	i32                    skin_frame;         // Frame the vertices are posed at, -1 = unknown
+	i32                    skin_pending_frame; // Frame to pose at once back in view
+	bool                   skin_pending;
 	bool                   owns_arrays;
 } mesh_data_runtime_t;
 
@@ -258,8 +260,7 @@ typedef struct mesh_object {
 	shader_data_t *material;
 	f32            camera_dist;
 	bool           frustum_culling;
-	char          *skip_context;  // Do not draw this context
-	char          *force_context; // Draw only this context
+	bool           culled; // Outside the camera frustum when last drawn
 } mesh_object_t;
 
 typedef struct transform {
@@ -272,7 +273,7 @@ typedef struct transform {
 	mat4_t    world_unpack;
 	bool      dirty;
 	object_t *object;
-	vec4_t    dim;
+	vec4_t    extent;
 	float     radius;
 } transform_t;
 
@@ -292,7 +293,6 @@ typedef struct object {
 	object_t         *parent;
 	any_array_t      *children;
 	bool              visible;
-	bool              culled;
 	bool              is_empty;
 	bool              owns_raw;
 	void             *ext;
@@ -333,6 +333,7 @@ void         transform_rotate(transform_t *raw, vec4_t axis, float f);
 void         transform_move(transform_t *raw, vec4_t axis, float f);
 void         transform_compute_radius(transform_t *raw);
 void         transform_compute_dim(transform_t *raw);
+vec4_t       transform_dim(transform_t *raw);
 vec4_t       transform_look(transform_t *raw);
 vec4_t       transform_right(transform_t *raw);
 vec4_t       transform_up(transform_t *raw);
@@ -462,10 +463,9 @@ extern gpu_pipeline_t *_mesh_object_last_pipeline;
 mesh_object_t         *mesh_object_create(mesh_data_t *data, shader_data_t *material);
 void                   mesh_object_set_data(mesh_object_t *raw, mesh_data_t *data);
 void                   mesh_object_remove(mesh_object_t *raw);
-bool                   mesh_object_cull_material(mesh_object_t *raw, char *context);
-bool                   mesh_object_cull_mesh(mesh_object_t *raw, char *context, camera_object_t *camera);
-void                   mesh_object_render(mesh_object_t *raw, char *context, string_array_t *bind_params);
-bool                   mesh_object_valid_context(mesh_object_t *raw, shader_data_t *mat, char *context);
+bool                   mesh_object_cull(mesh_object_t *raw, camera_object_t *camera);
+void                   mesh_object_render(mesh_object_t *raw, shader_context_t *scontext, string_array_t *bind_params);
+void                   mesh_object_draw(mesh_object_t *raw, shader_context_t *scontext, string_array_t *bind_params);
 
 extern mat4_t _uniforms_mat;
 extern mat4_t _uniforms_mat2;
@@ -606,7 +606,6 @@ bool                 render_path_ready(void);
 void                 render_path_render_frame(void);
 void                 render_path_set_target(char *target, string_array_t *additional, char *depth_buffer, gpu_clear_t flags, i32 color, f32 depth);
 void                 render_path_end(void);
-void                 render_path_draw_meshes(char *context);
 void                 render_path_draw_skydome(char *handle);
 void                 render_path_bind_target(char *target, char *uniform);
 void                 render_path_draw_shader(char *handle);
