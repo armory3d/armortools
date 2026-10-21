@@ -1010,14 +1010,29 @@ typedef struct {
 
 void console_log(char *s);
 
-static int minic_line_at(const char *src, int pos) {
-	int line = 1;
+// "file:line" of pos, following #line N "file" directives
+static const char *minic_where(minic_ctx_t *ctx, int pos) {
+	static char where[256];
+	const char *src  = ctx->src_copy;
+	const char *file = ctx->filename;
+	int         len  = (int)strlen(file);
+	int         line = 1;
 	for (int i = 0; i < pos && src[i] != '\0'; i++) {
+		if ((i == 0 || src[i - 1] == '\n') && strncmp(src + i, "#line ", 6) == 0) {
+			line          = atoi(src + i + 6) - 1; // The directive's own newline counts it up to N
+			const char *q = strchr(src + i, '"');
+			const char *e = q != NULL ? strchr(q + 1, '"') : NULL;
+			if (e != NULL && memchr(src + i, '\n', q - (src + i)) == NULL) {
+				file = q + 1;
+				len  = (int)(e - file);
+			}
+		}
 		if (src[i] == '\n') {
 			line++;
 		}
 	}
-	return line;
+	snprintf(where, sizeof(where), "%.*s:%d", len, file, line);
+	return where;
 }
 
 static minic_token_t *minic_tok(minic_comp_t *c) {
@@ -1065,7 +1080,7 @@ static void minic_error(minic_comp_t *c, const char *fmt, ...) {
 	vsnprintf(msg, sizeof(msg), fmt, args);
 	va_end(args);
 	char log[512];
-	snprintf(log, sizeof(log), "%s:%d: error: %s (got %s)", c->ctx->filename, minic_line_at(c->ctx->src_copy, minic_tok(c)->pos), msg,
+	snprintf(log, sizeof(log), "%s: error: %s (got %s)", minic_where(c->ctx, minic_tok(c)->pos), msg,
 	         minic_tok_names[minic_cur(c)]);
 	console_log(log);
 	c->error = true;
@@ -3009,7 +3024,7 @@ static void minic_runtime_error(minic_ctx_t *ctx, int pc, const char *fmt, ...) 
 	vsnprintf(msg, sizeof(msg), fmt, args);
 	va_end(args);
 	char log[512];
-	snprintf(log, sizeof(log), "%s:%d: error: %s", ctx->filename, minic_line_at(ctx->src_copy, ctx->code_pos[pc]), msg);
+	snprintf(log, sizeof(log), "%s: error: %s", minic_where(ctx, ctx->code_pos[pc]), msg);
 	console_log(log);
 }
 
