@@ -171,10 +171,6 @@ void object_remove_super(object_t *raw) {
 }
 
 void object_free(object_t *raw) {
-	if (raw->owns_raw && raw->raw != NULL) {
-		array_delete(raw->raw->dimensions);
-		free(raw->raw);
-	}
 	free(raw->transform);
 	array_delete(raw->children);
 	free(raw->_);
@@ -219,6 +215,7 @@ transform_t *transform_create(object_t *object) {
 	transform_t *raw = calloc(1, sizeof(transform_t));
 	raw->scale_world = 1.0;
 	raw->object      = object;
+	raw->dim         = (vec4_t){2.0, 2.0, 2.0, 0.0};
 	transform_reset(raw);
 	return raw;
 }
@@ -302,23 +299,21 @@ void transform_move(transform_t *raw, vec4_t axis, float f) {
 }
 
 void transform_compute_radius(transform_t *raw) {
-	vec4_t d    = raw->object->owns_raw
-	                  ? (vec4_t){raw->extent.x * fabsf(raw->scale.x), raw->extent.y * fabsf(raw->scale.y), raw->extent.z * fabsf(raw->scale.z), 0.0}
-	                  : transform_dim(raw);
+	vec4_t d    = raw->measured ? (vec4_t){raw->extent.x * fabsf(raw->scale.x), raw->extent.y * fabsf(raw->scale.y), raw->extent.z * fabsf(raw->scale.z), 0.0}
+	                            : transform_dim(raw);
 	raw->radius = sqrtf(d.x * d.x + d.y * d.y + d.z * d.z);
 }
 
 void transform_compute_dim(transform_t *raw) {
-	if (raw->object->raw == NULL && string_equals(raw->object->ext_type, "mesh_object_t")) {
+	if (!raw->has_dim && string_equals(raw->object->ext_type, "mesh_object_t")) {
 		mesh_object_t *mo = (mesh_object_t *)raw->object->ext;
 		vec4_t         aabb_min;
 		vec4_t         aabb_max;
 		mesh_data_calculate_aabb_min_max(mo->data, &aabb_min, &aabb_max);
-		raw->extent           = (vec4_t){fmaxf(-aabb_min.x, aabb_max.x), fmaxf(-aabb_min.y, aabb_max.y), fmaxf(-aabb_min.z, aabb_max.z), 0.0};
-		obj_t *o_raw          = calloc(1, sizeof(obj_t));
-		o_raw->dimensions     = f32_array_create_xyz(aabb_max.x - aabb_min.x, aabb_max.y - aabb_min.y, aabb_max.z - aabb_min.z);
-		raw->object->raw      = o_raw;
-		raw->object->owns_raw = true;
+		raw->extent   = (vec4_t){fmaxf(-aabb_min.x, aabb_max.x), fmaxf(-aabb_min.y, aabb_max.y), fmaxf(-aabb_min.z, aabb_max.z), 0.0};
+		raw->dim      = (vec4_t){aabb_max.x - aabb_min.x, aabb_max.y - aabb_min.y, aabb_max.z - aabb_min.z, 0.0};
+		raw->has_dim  = true;
+		raw->measured = true;
 	}
 
 	transform_compute_radius(raw);
@@ -326,11 +321,7 @@ void transform_compute_dim(transform_t *raw) {
 
 // Bounds size in world units, 2 units per axis without dimensions
 vec4_t transform_dim(transform_t *raw) {
-	if (raw->object->raw == NULL || raw->object->raw->dimensions == NULL) {
-		return (vec4_t){2.0 * raw->scale.x, 2.0 * raw->scale.y, 2.0 * raw->scale.z, 0.0};
-	}
-	f32_array_t *d = raw->object->raw->dimensions;
-	return (vec4_t){d->buffer[0] * raw->scale.x, d->buffer[1] * raw->scale.y, d->buffer[2] * raw->scale.z, 0.0};
+	return (vec4_t){raw->dim.x * raw->scale.x, raw->dim.y * raw->scale.y, raw->dim.z * raw->scale.z, 0.0};
 }
 
 vec4_t transform_look(transform_t *raw) {
@@ -2217,7 +2208,7 @@ void scene_traverse_objects(scene_t *format, object_t *parent, any_array_t *obje
 		return;
 	}
 	for (i32 i = 0; i < objects->length; ++i) {
-		obj_t *o = (obj_t *)objects->buffer[i];
+		object_desc_t *o = (object_desc_t *)objects->buffer[i];
 		if (!o->spawn) {
 			continue; // Do not auto-create Scene object
 		}
@@ -2242,7 +2233,7 @@ i32 scene_get_objects_count(any_array_t *objects) {
 	}
 	i32 result = objects->length;
 	for (i32 i = 0; i < objects->length; ++i) {
-		obj_t *o = (obj_t *)objects->buffer[i];
+		object_desc_t *o = (object_desc_t *)objects->buffer[i];
 		if (!o->spawn) {
 			continue; // Do not count children of non-spawned objects
 		}
@@ -2253,12 +2244,12 @@ i32 scene_get_objects_count(any_array_t *objects) {
 	return result;
 }
 
-object_t *_scene_spawn_object_tree(obj_t *obj, object_t *parent, bool spawn_children) {
-	object_t      *object       = scene_create_object(obj, _scene_raw, parent);
-	obj_t_array_t *obj_children = obj->children;
+object_t *_scene_spawn_object_tree(object_desc_t *obj, object_t *parent, bool spawn_children) {
+	object_t              *object       = scene_create_object(obj, _scene_raw, parent);
+	object_desc_t_array_t *obj_children = obj->children;
 	if (spawn_children && obj_children != NULL) {
 		for (i32 i = 0; i < obj_children->length; ++i) {
-			obj_t *child = (obj_t *)obj_children->buffer[i];
+			object_desc_t *child = (object_desc_t *)obj_children->buffer[i];
 			_scene_spawn_object_tree(child, object, spawn_children);
 		}
 	}
@@ -2266,22 +2257,22 @@ object_t *_scene_spawn_object_tree(obj_t *obj, object_t *parent, bool spawn_chil
 }
 
 object_t *scene_spawn_object(char *name, object_t *parent, bool spawn_children) {
-	obj_t *obj = scene_get_raw_object_by_name(_scene_raw, name);
+	object_desc_t *obj = scene_get_raw_object_by_name(_scene_raw, name);
 	return _scene_spawn_object_tree(obj, parent, spawn_children);
 }
 
-obj_t *scene_get_raw_object_by_name(scene_t *format, char *name) {
+object_desc_t *scene_get_raw_object_by_name(scene_t *format, char *name) {
 	return scene_traverse_objs(format->objects, name);
 }
 
-obj_t *scene_traverse_objs(any_array_t *children, char *name) {
+object_desc_t *scene_traverse_objs(any_array_t *children, char *name) {
 	for (i32 i = 0; i < children->length; ++i) {
-		obj_t *o = (obj_t *)children->buffer[i];
+		object_desc_t *o = (object_desc_t *)children->buffer[i];
 		if (string_equals(o->name, name)) {
 			return o;
 		}
 		if (o->children != NULL) {
-			obj_t *res = scene_traverse_objs((any_array_t *)(void *)o->children, name);
+			object_desc_t *res = scene_traverse_objs((any_array_t *)(void *)o->children, name);
 			if (res != NULL) {
 				return res;
 			}
@@ -2290,7 +2281,7 @@ obj_t *scene_traverse_objs(any_array_t *children, char *name) {
 	return NULL;
 }
 
-object_t *scene_create_object(obj_t *o, scene_t *format, object_t *parent) {
+object_t *scene_create_object(object_desc_t *o, scene_t *format, object_t *parent) {
 	char *scene_name = format->name;
 
 	if (string_equals(o->type, "camera_object")) {
@@ -2314,7 +2305,7 @@ object_t *scene_create_object(obj_t *o, scene_t *format, object_t *parent) {
 	return NULL;
 }
 
-object_t *scene_create_mesh_object(obj_t *o, scene_t *format, object_t *parent, shader_data_t *material) {
+object_t *scene_create_mesh_object(object_desc_t *o, scene_t *format, object_t *parent, shader_data_t *material) {
 	// Mesh reference
 	any_array_t *ref         = string_split(o->data_ref, "/");
 	char        *object_file = "";
@@ -2331,28 +2322,27 @@ object_t *scene_create_mesh_object(obj_t *o, scene_t *format, object_t *parent, 
 	return scene_return_mesh_object(object_file, data_ref, material, parent, o);
 }
 
-object_t *scene_return_mesh_object(char *object_file, char *data_ref, shader_data_t *material, object_t *parent, obj_t *o) {
+object_t *scene_return_mesh_object(char *object_file, char *data_ref, shader_data_t *material, object_t *parent, object_desc_t *o) {
 	mesh_data_t   *mesh   = data_get_mesh(object_file, data_ref);
 	mesh_object_t *object = scene_add_mesh_object(mesh, material, parent);
 	return scene_return_object(object->base, o);
 }
 
-object_t *scene_return_object(object_t *object, obj_t *o) {
+object_t *scene_return_object(object_t *object, object_desc_t *o) {
 	if (object != NULL) {
-		if (object->owns_raw && object->raw != NULL) {
-			array_delete(object->raw->dimensions);
-			free(object->raw);
-			object->owns_raw = false;
-		}
-		object->raw     = o;
+		transform_t *t  = object->transform;
+		f32_array_t *d  = o->dimensions;
+		t->dim          = d != NULL ? (vec4_t){d->buffer[0], d->buffer[1], d->buffer[2], 0.0} : (vec4_t){2.0, 2.0, 2.0, 0.0};
+		t->has_dim      = true; // Never measured, the scene file is authoritative
+		t->measured     = false;
 		object->name    = o->name;
 		object->visible = o->visible;
-		scene_gen_transform(o, object->transform);
+		scene_gen_transform(o, t);
 	}
 	return object;
 }
 
-void scene_gen_transform(obj_t *object, transform_t *transform) {
+void scene_gen_transform(object_desc_t *object, transform_t *transform) {
 	transform->world       = object->transform != NULL ? mat4_from_f32_array(object->transform, 0) : mat4_identity();
 	mat4_decomposed_t *dec = mat4_decompose(transform->world);
 	transform->loc         = dec->loc;

@@ -36,9 +36,9 @@ void ready() {
 	    {.name    = "Scene",
 	     .objects = any_array_create_from_raw(
 	         (void *[]){
-	             ALLOC_INIT(obj_t,
+	             ALLOC_INIT(object_desc_t,
 	                        {.name = "Cube", .type = "mesh_object", .data_ref = "cube.arm/Cube", .material_ref = "MyShader", .visible = true, .spawn = true}),
-	             ALLOC_INIT(obj_t, {.name = "Camera", .type = "camera_object", .data_ref = "MyCamera", .visible = true, .spawn = true}),
+	             ALLOC_INIT(object_desc_t, {.name = "Camera", .type = "camera_object", .data_ref = "MyCamera", .visible = true, .spawn = true}),
 	         },
 	         2),
 	     .camera_datas = any_array_create_from_raw(
