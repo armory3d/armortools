@@ -84,6 +84,7 @@ void ui_base_init() {
 	ui_picker_button = ui_base_picker_button;
 
 	g_context->gizmo             = scene_get_child(".Gizmo");
+	array_remove(scene_meshes, g_context->gizmo->ext); // Drawn by render_gizmo_draw()
 	g_context->gizmo_translate_x = object_get_child(g_context->gizmo, ".TranslateX");
 	g_context->gizmo_translate_y = object_get_child(g_context->gizmo, ".TranslateY");
 	g_context->gizmo_translate_z = object_get_child(g_context->gizmo, ".TranslateZ");
@@ -242,8 +243,8 @@ void ui_base_init_tabs() {
 	_draw_callback_create(tab_swatches_draw, TAB_SWATCHES, "Swatches", TAB_AREA_STATUS);
 	_draw_callback_create(tab_timeline_draw, TAB_TIMELINE, "Timeline", TAB_AREA_STATUS);
 	_draw_callback_create(tab_console_draw, TAB_CONSOLE, "Console", TAB_AREA_STATUS);
-#ifdef is_debug
-	_draw_callback_create(tab_debug_draw, TAB_DEBUG, "Debug", TAB_AREA_SIDEBAR0);
+#ifndef NDEBUG
+	_draw_callback_create(tab_debug_draw, TAB_DEBUG, "Debug", TAB_AREA_SIDEBAR0)->closed_default = true;
 #endif
 	// Views draw their own windows
 	_draw_callback_create(tab_view3d_draw, TAB_VIEW3D, "3D View", -1);

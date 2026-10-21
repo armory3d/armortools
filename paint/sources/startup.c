@@ -751,7 +751,7 @@ scene_t *startup_get_scene(void) {
 	}
 
 	// shader_datas
-	scene->shader_datas = any_array_create(18);
+	scene->shader_datas = any_array_create(17);
 	{
 		shader_data_t *sd = (shader_data_t *)calloc(1, sizeof(shader_data_t));
 		sd->name          = "armdefault";
@@ -922,56 +922,6 @@ scene_t *startup_get_scene(void) {
 	}
 	{
 		shader_data_t *sd = (shader_data_t *)calloc(1, sizeof(shader_data_t));
-		sd->name          = "Material2";
-		sd->contexts      = any_array_create(1);
-		{
-			shader_context_t *sc             = (shader_context_t *)calloc(1, sizeof(shader_context_t));
-			sc->name                         = "mesh";
-			sc->depth_write                  = true;
-			sc->compare_mode                 = "less";
-			sc->cull_mode                    = "clockwise";
-			sc->vertex_shader                = "mesh_posnor.vert";
-			sc->fragment_shader              = "mesh_posnor.frag";
-			sc->shader_from_source           = false;
-			sc->color_attachments            = string_array_create(2);
-			sc->color_attachments->buffer[0] = "RGBA64";
-			sc->color_attachments->buffer[1] = "RGBA64";
-			sc->depth_attachment             = "D32";
-			sc->vertex_elements              = (vertex_element_t_array_t *)any_array_create(2);
-			{
-				vertex_element_t *ve           = (vertex_element_t *)calloc(1, sizeof(vertex_element_t));
-				ve->name                       = "pos";
-				ve->data                       = "short4norm";
-				sc->vertex_elements->buffer[0] = ve;
-			}
-			{
-				vertex_element_t *ve           = (vertex_element_t *)calloc(1, sizeof(vertex_element_t));
-				ve->name                       = "nor";
-				ve->data                       = "short2norm";
-				sc->vertex_elements->buffer[1] = ve;
-			}
-			sc->constants = (shader_const_t_array_t *)any_array_create(2);
-			{
-				shader_const_t *c        = (shader_const_t *)calloc(1, sizeof(shader_const_t));
-				c->name                  = "WVP";
-				c->type                  = "float4x4";
-				c->link                  = "_world_view_proj_matrix";
-				sc->constants->buffer[0] = c;
-			}
-			{
-				shader_const_t *c        = (shader_const_t *)calloc(1, sizeof(shader_const_t));
-				c->name                  = "N";
-				c->type                  = "float3x3";
-				c->link                  = "_normal_matrix";
-				sc->constants->buffer[1] = c;
-			}
-			sc->texture_units       = (tex_unit_t_array_t *)any_array_create(0);
-			sd->contexts->buffer[0] = sc;
-		}
-		scene->shader_datas->buffer[3] = sd;
-	}
-	{
-		shader_data_t *sd = (shader_data_t *)calloc(1, sizeof(shader_data_t));
 		sd->name          = "compositor_pass";
 		sd->contexts      = any_array_create(1);
 		{
@@ -1049,7 +999,7 @@ scene_t *startup_get_scene(void) {
 			}
 			sd->contexts->buffer[0] = sc;
 		}
-		scene->shader_datas->buffer[4] = sd;
+		scene->shader_datas->buffer[3] = sd;
 	}
 	{
 		shader_data_t *sd = (shader_data_t *)calloc(1, sizeof(shader_data_t));
@@ -1094,7 +1044,7 @@ scene_t *startup_get_scene(void) {
 			}
 			sd->contexts->buffer[0] = sc;
 		}
-		scene->shader_datas->buffer[5] = sd;
+		scene->shader_datas->buffer[4] = sd;
 	}
 	{
 		shader_data_t *sd = (shader_data_t *)calloc(1, sizeof(shader_data_t));
@@ -1233,7 +1183,7 @@ scene_t *startup_get_scene(void) {
 			}
 			sd->contexts->buffer[4] = sc;
 		}
-		scene->shader_datas->buffer[6] = sd;
+		scene->shader_datas->buffer[5] = sd;
 	}
 	{
 		shader_data_t *sd = (shader_data_t *)calloc(1, sizeof(shader_data_t));
@@ -1307,7 +1257,7 @@ scene_t *startup_get_scene(void) {
 			}
 			sd->contexts->buffer[1] = sc;
 		}
-		scene->shader_datas->buffer[7] = sd;
+		scene->shader_datas->buffer[6] = sd;
 	}
 	{
 		shader_data_t *sd = (shader_data_t *)calloc(1, sizeof(shader_data_t));
@@ -1345,7 +1295,7 @@ scene_t *startup_get_scene(void) {
 			}
 			sd->contexts->buffer[0] = sc;
 		}
-		scene->shader_datas->buffer[8] = sd;
+		scene->shader_datas->buffer[7] = sd;
 	}
 	{
 		shader_data_t *sd = (shader_data_t *)calloc(1, sizeof(shader_data_t));
@@ -1425,7 +1375,7 @@ scene_t *startup_get_scene(void) {
 			}
 			sd->contexts->buffer[0] = sc;
 		}
-		scene->shader_datas->buffer[9] = sd;
+		scene->shader_datas->buffer[8] = sd;
 	}
 	{
 		shader_data_t *sd = (shader_data_t *)calloc(1, sizeof(shader_data_t));
@@ -1509,7 +1459,7 @@ scene_t *startup_get_scene(void) {
 			}
 			sd->contexts->buffer[1] = sc;
 		}
-		scene->shader_datas->buffer[10] = sd;
+		scene->shader_datas->buffer[9] = sd;
 	}
 	{
 		shader_data_t *sd = (shader_data_t *)calloc(1, sizeof(shader_data_t));
@@ -1615,7 +1565,7 @@ scene_t *startup_get_scene(void) {
 			}
 			sd->contexts->buffer[1] = sc;
 		}
-		scene->shader_datas->buffer[11] = sd;
+		scene->shader_datas->buffer[10] = sd;
 	}
 	{
 		shader_data_t *sd = (shader_data_t *)calloc(1, sizeof(shader_data_t));
@@ -1738,7 +1688,7 @@ scene_t *startup_get_scene(void) {
 			}
 			sd->contexts->buffer[2] = sc;
 		}
-		scene->shader_datas->buffer[12] = sd;
+		scene->shader_datas->buffer[11] = sd;
 	}
 	{
 		shader_data_t *sd = (shader_data_t *)calloc(1, sizeof(shader_data_t));
@@ -1883,7 +1833,7 @@ scene_t *startup_get_scene(void) {
 			}
 			sd->contexts->buffer[2] = sc;
 		}
-		scene->shader_datas->buffer[13] = sd;
+		scene->shader_datas->buffer[12] = sd;
 	}
 	{
 		shader_data_t *sd = (shader_data_t *)calloc(1, sizeof(shader_data_t));
@@ -1916,7 +1866,7 @@ scene_t *startup_get_scene(void) {
 			}
 			sd->contexts->buffer[0] = sc;
 		}
-		scene->shader_datas->buffer[14] = sd;
+		scene->shader_datas->buffer[13] = sd;
 	}
 	{
 		shader_data_t *sd = (shader_data_t *)calloc(1, sizeof(shader_data_t));
@@ -2091,7 +2041,7 @@ scene_t *startup_get_scene(void) {
 			}
 			sd->contexts->buffer[0] = sc;
 		}
-		scene->shader_datas->buffer[15] = sd;
+		scene->shader_datas->buffer[14] = sd;
 	}
 	{
 		shader_data_t *sd = (shader_data_t *)calloc(1, sizeof(shader_data_t));
@@ -2146,7 +2096,7 @@ scene_t *startup_get_scene(void) {
 			}
 			sd->contexts->buffer[0] = sc;
 		}
-		scene->shader_datas->buffer[16] = sd;
+		scene->shader_datas->buffer[15] = sd;
 	}
 	{
 		shader_data_t *sd = (shader_data_t *)calloc(1, sizeof(shader_data_t));
@@ -2186,7 +2136,7 @@ scene_t *startup_get_scene(void) {
 			}
 			sd->contexts->buffer[0] = sc;
 		}
-		scene->shader_datas->buffer[17] = sd;
+		scene->shader_datas->buffer[16] = sd;
 	}
 
 	// objects

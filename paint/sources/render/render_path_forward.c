@@ -17,7 +17,7 @@ void render_path_forward_draw_forward() {
 	render_compass();
 	render_envsphere();
 	render_pathsphere_tool();
-	render_path_draw_meshes("overlay");
+	render_gizmo_draw();
 
 	render_path_base_draw_taa("buf", "gbuffer1");
 }

@@ -254,8 +254,9 @@ void project_new(bool reset_layers) {
 	base_update_tools();
 	project_set_default_envmap();
 	context_select_tool(TOOL_TYPE_BRUSH);
-	scene_camera->data->near_plane = 0.01;
-	scene_camera->data->far_plane  = 100.0;
+	scene_camera->data->near_plane      = 0.01;
+	scene_camera->data->far_plane       = 100.0;
+	scene_camera->data->frustum_culling = false;
 	viewport_reset();
 	viewport_scale_to_bounds(1.8);
 	render_path_raytrace_ready = false;
@@ -364,6 +365,11 @@ void project_reimport_mesh() {
 	}
 }
 
+// culled is from the last drawn frame, path tracing and split view see beyond it
+static bool project_skin_in_view(mesh_object_t *o) {
+	return !scene_camera->data->frustum_culling || !o->culled || g_context->viewport_mode == VIEWPORT_MODE_PATH_TRACE || base_is_split();
+}
+
 bool project_reskin_object(mesh_object_t *o, i32 frame) {
 	mesh_data_t *md = o->data;
 	if (md->_->skin_blob == NULL) {
@@ -374,8 +380,17 @@ bool project_reskin_object(mesh_object_t *o, i32 frame) {
 	i32 frames     = util_skin_frame_count(md->_->skin_blob);
 	i32 mesh_frame = frames > 0 ? frame % frames : frame;
 	if (mesh_frame == md->_->skin_frame) {
+		md->_->skin_pending = false;
 		return false;
 	}
+
+	// Skip skinning culled meshes, project_reskin_pending() poses them once back in view
+	if (!project_skin_in_view(o)) {
+		md->_->skin_pending       = true;
+		md->_->skin_pending_frame = mesh_frame;
+		return false;
+	}
+	md->_->skin_pending = false;
 
 	vertex_array_t *pos = mesh_data_get_vertex_array(md, "pos");
 	vertex_array_t *nor = mesh_data_get_vertex_array(md, "nor");
@@ -402,6 +417,20 @@ bool project_reskin_mesh(int frame) {
 	}
 	project_reskin_finish();
 	return true;
+}
+
+// Poses the meshes whose skinning was skipped while culled
+void project_reskin_pending() {
+	bool any = false;
+	for (i32 i = 0; i < g_project->_->paint_objects->length; ++i) {
+		mesh_object_t *o = g_project->_->paint_objects->buffer[i];
+		if (o->data->_->skin_pending && o->base->visible && project_reskin_object(o, o->data->_->skin_pending_frame)) {
+			any = true;
+		}
+	}
+	if (any) {
+		project_reskin_finish();
+	}
 }
 
 void project_reskin_finish() {

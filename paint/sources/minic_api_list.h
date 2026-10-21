@@ -72,7 +72,8 @@ X1(mesh_data_delete, "v(p:mesh_data_t raw)", v, p)
 // X2(mesh_object_create, "p:mesh_object_t(p:mesh_data_t data,p:shader_data_t material)", p, p, p)
 X2(mesh_object_set_data, "v(p:mesh_object_t raw,p:mesh_data_t data)", v, p, p)
 // X1(mesh_object_remove, "v(p:mesh_object_t raw)", v, p)
-X3(mesh_object_render, "v(p:mesh_object_t raw,p:char context,p:string_array_t bind_params)", v, p, p, p)
+X3(mesh_object_render, "v(p:mesh_object_t raw,p:shader_context_t scontext,p:string_array_t bind_params)", v, p, p, p)
+X3(mesh_object_draw, "v(p:mesh_object_t raw,p:shader_context_t scontext,p:string_array_t bind_params)", v, p, p, p)
 
 // data
 X2(data_get_mesh, "p:mesh_data_t(p:char file,p:char name)", p, p, p)
@@ -111,7 +112,6 @@ X2(scene_gen_transform, "v(p:obj_t object,p:transform_t transform)", v, p, p)
 // render_path
 X6(render_path_set_target, "v(p:char target,p:string_array_t additional,p:char depth_buffer,i flags,i color,f depth)", v, p, p, p, i, i, f)
 X0(render_path_end, "v()", v)
-X1(render_path_draw_meshes, "v(p:char context)", v, p)
 X1(render_path_draw_skydome, "v(p:char handle)", v, p)
 X2(render_path_bind_target, "v(p:char target,p:char uniform)", v, p, p)
 X1(render_path_draw_shader, "v(p:char handle)", v, p)

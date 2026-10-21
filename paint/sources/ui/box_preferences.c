@@ -588,9 +588,17 @@ void box_preferences_viewport_tab() {
 		gpu_use_linear_sampling(g_config->texture_filter);
 	}
 
+	ui_row2();
+
 	ui_check(&g_context->cull_backfaces, tr("Cull Backfaces"), "");
 	if (ui_item_changed()) {
 		make_material_parse_mesh_material();
+	}
+
+	// Saved in the project
+	ui_check(&scene_camera->data->frustum_culling, tr("Frustum Culling"), "");
+	if (ui_item_changed()) {
+		g_context->ddirty = 2;
 	}
 
 	box_preferences_section(tr("Path Tracer"));

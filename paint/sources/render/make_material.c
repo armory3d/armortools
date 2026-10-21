@@ -1,8 +1,13 @@
 
 #include "../global.h"
 
-shader_context_t        *make_material_default_scon = NULL;
+static shader_context_t *make_material_default_scon = NULL;
 static shader_context_t *make_material_saved_scon   = NULL;
+
+// Objects without an override material draw with the pass shaders
+bool make_material_is_default(shader_data_t *m) {
+	return m == g_project->_->materials->buffer[0]->data;
+}
 
 bool make_material_get_mout() {
 	for (i32 i = 0; i < g_context->material->canvas->nodes->length; ++i) {
@@ -90,45 +95,23 @@ void make_material_delete_context(shader_context_t *c) {
 	sys_notify_on_next_frame(&make_material_delete_context_on_next_frame, c);
 }
 
-static bool make_material_is_mesh_context(char *name) {
-	if (!starts_with(name, "mesh")) {
-		return false;
-	}
-	for (char *c = name + 4; *c != '\0'; ++c) {
-		if (*c < '0' || *c > '9') {
-			return false;
-		}
-	}
-	return true;
-}
-
 void make_material_parse_mesh_material() {
-	shader_data_t *m = g_project->_->materials->buffer[0]->data;
-
-	i32 i = 0;
-	while (i < m->contexts->length) {
-		shader_context_t *c = m->contexts->buffer[i];
-		if (make_material_is_mesh_context(c->name)) {
-			array_remove(m->contexts, c);
-			make_material_delete_context(c);
-			continue;
-		}
-		++i;
+	if (make_material_mesh_scons == NULL) {
+		make_material_mesh_scons = any_array_create(0);
 	}
+	for (i32 i = 0; i < make_material_mesh_scons->length; ++i) {
+		if (make_material_mesh_scons->buffer[i] != NULL) {
+			make_material_delete_context(make_material_mesh_scons->buffer[i]);
+		}
+	}
+	make_material_mesh_scons->length = 0;
 
-	material_t *mm = ALLOC_INIT(material_t, {.name = "Material", .canvas = NULL});
-
-	node_shader_context_t *con = make_mesh_run(mm, 0);
-	shader_context_load(con->data);
-	any_array_push(m->contexts, con->data);
-	node_shader_context_free(con);
-	free(mm);
-
-	for (i32 i = 1; i < make_mesh_layer_pass_count; ++i) {
+	// The first pass decides the layer pass count
+	for (i32 i = 0; i == 0 || i < make_mesh_layer_pass_count; ++i) {
 		material_t            *mm  = ALLOC_INIT(material_t, {.name = "Material", .canvas = NULL});
 		node_shader_context_t *con = make_mesh_run(mm, i);
 		shader_context_load(con->data);
-		any_array_push(m->contexts, con->data);
+		any_array_push(make_material_mesh_scons, con->data);
 		node_shader_context_free(con);
 		free(mm);
 	}
@@ -146,38 +129,22 @@ void make_material_parse_mesh_preview_material() {
 		return;
 	}
 
-	shader_data_t    *m    = g_project->_->materials->buffer[0]->data;
-	shader_context_t *scon = NULL;
-	for (i32 i = 0; i < m->contexts->length; ++i) {
-		shader_context_t *c = m->contexts->buffer[i];
-		if (string_equals(c->name, "mesh")) {
-			scon = c;
-			break;
-		}
-	}
-
-	array_remove(m->contexts, scon);
-
+	// Replaces the first mesh pass shader, make_material_parse_mesh_material() restores it
 	material_t            *sd  = ALLOC_INIT(material_t, {.name = "Material", .canvas = NULL});
 	node_shader_context_t *con = make_mesh_preview_run(sd, false);
-
-	if (scon != NULL) {
-		make_material_delete_context(scon);
-	}
-
-	bool compile_error = false;
 	shader_context_load(con->data);
-	if (con->data == NULL) {
-		compile_error = true;
+	if (make_material_mesh_scons == NULL) {
+		make_material_mesh_scons = any_array_create(0);
 	}
-	scon = con->data;
+	if (make_material_mesh_scons->length == 0) {
+		any_array_push(make_material_mesh_scons, NULL);
+	}
+	if (make_material_mesh_scons->buffer[0] != NULL) {
+		make_material_delete_context(make_material_mesh_scons->buffer[0]);
+	}
+	make_material_mesh_scons->buffer[0] = con->data;
 	node_shader_context_free(con);
 	free(sd);
-	if (compile_error) {
-		return;
-	}
-
-	any_array_push(m->contexts, scon);
 }
 
 static bool make_material_bake_linked = false;
@@ -348,6 +315,14 @@ void make_material_bake_node_previews_linked() {
 		draw_begin(current, false, 0);
 }
 
+static void make_material_set_paint_scon(shader_context_t *scon) {
+	shader_context_t *old = make_material_paint_scon;
+	if (old != NULL && old != scon && old != make_material_default_scon && old != make_material_saved_scon) {
+		make_material_delete_context(old);
+	}
+	make_material_paint_scon = scon;
+}
+
 void make_material_parse_paint_material(bool bake_previews) {
 	if (!make_material_get_mout()) {
 		return;
@@ -363,69 +338,29 @@ void make_material_parse_paint_material(bool bake_previews) {
 			draw_begin(current, false, 0);
 	}
 
-	shader_data_t *m = g_project->_->materials->buffer[0]->data;
-	for (i32 i = 0; i < m->contexts->length; ++i) {
-		shader_context_t *c = m->contexts->buffer[i];
-		if (string_equals(c->name, "paint")) {
-			array_remove(m->contexts, c);
-			if (c != make_material_default_scon && c != make_material_saved_scon) {
-				make_material_delete_context(c);
-			}
-			break;
-		}
-	}
-
 	material_t            *sdata = ALLOC_INIT(material_t, {.name = "Material", .canvas = g_context->material->canvas});
 	node_shader_context_t *con   = make_paint_run(sdata);
-
-	bool              compile_error = false;
-	shader_context_t *scon;
 	shader_context_load(con->data);
-	if (con->data == NULL) {
-		compile_error = true;
-	}
-	scon = con->data;
+	make_material_set_paint_scon(con->data);
 	node_shader_context_free(con);
 	free(sdata);
-	if (compile_error) {
-		return;
-	}
-
-	any_array_push(m->contexts, scon);
 
 	if (make_material_default_scon == NULL) {
-		make_material_default_scon = scon;
+		make_material_default_scon = make_material_paint_scon;
 	}
 }
 
 void make_material_save_paint_material() {
-	shader_data_t *m = g_project->_->materials->buffer[0]->data;
-	for (i32 i = 0; i < m->contexts->length; ++i) {
-		shader_context_t *c = m->contexts->buffer[i];
-		if (string_equals(c->name, "paint")) {
-			make_material_saved_scon = c;
-			break;
-		}
-	}
+	make_material_saved_scon = make_material_paint_scon;
 }
 
 void make_material_restore_paint_material() {
 	if (make_material_saved_scon == NULL) {
 		return;
 	}
-	shader_data_t *m = g_project->_->materials->buffer[0]->data;
-	for (i32 i = 0; i < m->contexts->length; ++i) {
-		shader_context_t *c = m->contexts->buffer[i];
-		if (string_equals(c->name, "paint")) {
-			array_remove(m->contexts, c);
-			if (c != make_material_default_scon && c != make_material_saved_scon) {
-				make_material_delete_context(c);
-			}
-			break;
-		}
-	}
-	any_array_push(m->contexts, make_material_saved_scon);
+	shader_context_t *saved  = make_material_saved_scon;
 	make_material_saved_scon = NULL;
+	make_material_set_paint_scon(saved);
 }
 
 shader_context_t *make_material_parse_node_preview_material(ui_node_t *node, ui_node_canvas_t *group, ui_node_t_array_t *parents) {
@@ -542,32 +477,13 @@ char *make_material_blend_mode(node_shader_t *kong, i32 blending, char *cola, ch
 }
 
 void make_material_parse_depth_material() {
-	shader_data_t *m = g_project->_->materials->buffer[0]->data;
-
-	for (i32 i = 0; i < m->contexts->length; ++i) {
-		shader_context_t *c = m->contexts->buffer[i];
-		if (string_equals(c->name, "depth")) {
-			array_remove(m->contexts, c);
-			make_material_delete_context(c);
-			break;
-		}
+	if (make_material_depth_scon != NULL) {
+		make_material_delete_context(make_material_depth_scon);
 	}
-
 	material_t            *sdata = ALLOC_INIT(material_t, {.name = "Material", .canvas = g_context->material->canvas});
 	node_shader_context_t *con   = make_depth_run(sdata);
-
-	bool              compile_error = false;
-	shader_context_t *scon;
 	shader_context_load(con->data);
-	if (con->data == NULL) {
-		compile_error = true;
-	}
-	scon = con->data;
+	make_material_depth_scon = con->data;
 	node_shader_context_free(con);
 	free(sdata);
-	if (compile_error) {
-		return;
-	}
-
-	any_array_push(m->contexts, scon);
 }

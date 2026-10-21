@@ -7,7 +7,7 @@
 
 char *manifest_title           = "ArmorPaint";
 char *manifest_version         = "1.1alpha";
-char *manifest_version_project = "20";
+char *manifest_version_project = "21";
 char *manifest_version_config  = "1";
 char *manifest_url             = "https://armorpaint.org";
 char *manifest_url_android     = "https://play.google.com/store/apps/details?id=org.armorpaint";
@@ -279,6 +279,9 @@ i32                       render_path_raytrace_bake_current_sample = 0;
 bool                      bake_texture_node_baking                 = false;
 gpu_texture_t            *bake_texture_node_texpaint               = NULL;
 bool                      make_material_transluc_used              = false;
+shader_context_t         *make_material_paint_scon                 = NULL; // Texture space paint pass
+shader_context_t         *make_material_depth_scon                 = NULL;
+any_array_t              *make_material_mesh_scons                 = NULL; // shader_context_t[], one per mesh layer pass
 bool                      make_material_height_used                = false;
 bool                      make_material_emis_used                  = false;
 bool                      make_material_subs_used                  = false;

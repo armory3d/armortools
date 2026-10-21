@@ -75,7 +75,7 @@ bool render_path_raytrace_bake_commands(void (*parse_paint_material)(bool)) {
 		    },
 		    1);
 		render_path_set_target("baketex0", additional, NULL, GPU_CLEAR_NONE, 0, 0.0);
-		render_path_draw_meshes("paint");
+		render_path_paint_draw_target();
 		g_context->bake_type = _bake_type;
 		sys_notify_on_next_frame(&render_path_raytrace_bake_commands_parse_paint_material, parse_paint_material);
 

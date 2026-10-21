@@ -284,21 +284,22 @@ buffer_t *export_arm_encode_project(char *path) {
 	bool same_drive = g_project->envmap != NULL ? char_at(relative_to, 0)[0] == char_at(g_project->envmap, 0)[0] : true;
 #endif
 
-	g_project->version         = string_copy(manifest_version_project);
-	g_project->material_groups = mgroups;
-	g_project->material_datas  = mdata2;
-	g_project->assets          = texture_files;
-	g_project->packed_assets   = packed_assets;
-	g_project->swatches        = g_project->swatches;
-	g_project->envmap          = g_project->envmap != NULL ? (same_drive ? path_to_relative(relative_to, g_project->envmap) : g_project->envmap) : NULL;
-	g_project->envmap_strength = scene_world->strength;
-	g_project->envmap_angle    = g_context->envmap_angle;
-	g_project->envmap_blur     = g_context->show_envmap_blur;
-	g_project->camera_world    = mat4_to_f32_array(scene_camera->base->transform->local);
-	g_project->camera_origin   = vec3_to_f32_array(camera_origins[0]);
-	g_project->camera_fov      = scene_camera->data->fov;
-	g_project->camera_near     = scene_camera->data->near_plane;
-	g_project->camera_far      = scene_camera->data->far_plane;
+	g_project->version                = string_copy(manifest_version_project);
+	g_project->material_groups        = mgroups;
+	g_project->material_datas         = mdata2;
+	g_project->assets                 = texture_files;
+	g_project->packed_assets          = packed_assets;
+	g_project->swatches               = g_project->swatches;
+	g_project->envmap                 = g_project->envmap != NULL ? (same_drive ? path_to_relative(relative_to, g_project->envmap) : g_project->envmap) : NULL;
+	g_project->envmap_strength        = scene_world->strength;
+	g_project->envmap_angle           = g_context->envmap_angle;
+	g_project->envmap_blur            = g_context->show_envmap_blur;
+	g_project->camera_world           = mat4_to_f32_array(scene_camera->base->transform->local);
+	g_project->camera_origin          = vec3_to_f32_array(camera_origins[0]);
+	g_project->camera_fov             = scene_camera->data->fov;
+	g_project->camera_near            = scene_camera->data->near_plane;
+	g_project->camera_far             = scene_camera->data->far_plane;
+	g_project->camera_frustum_culling = scene_camera->data->frustum_culling;
 
 	// g_project.mesh_datas = md; // TODO: fix GC ref
 	if (g_project->mesh_datas == NULL) {

@@ -15,9 +15,6 @@ void viewport_scale_to_bounds(f32 bounds) {
 	mesh_data_t *md            = g_context->merged_object == NULL ? po->data : g_context->merged_object->data;
 	vec4_t       aabb          = mesh_data_calculate_aabb(md);
 	f32          r             = math_sqrt(aabb.x * aabb.x + aabb.y * aabb.y + aabb.z * aabb.z);
-	po->base->transform->dim.x = aabb.x;
-	po->base->transform->dim.y = aabb.y;
-	po->base->transform->dim.z = aabb.z;
 	po->base->transform->scale = (vec4_t){bounds / (float)r, bounds / (float)r, bounds / (float)r, 1.0};
 	po->base->transform->loc   = (vec4_t){0, 0, 0, 1.0};
 	transform_build_matrix(po->base->transform);

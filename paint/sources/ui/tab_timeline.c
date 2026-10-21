@@ -1643,6 +1643,7 @@ void tab_timeline_update() {
 		tab_timeline_capture_end();
 	}
 	if (!tab_timeline_playing) {
+		project_reskin_pending();
 		if (tab_timeline_mesh_refresh_pending) {
 			tab_timeline_mesh_refresh_pending = false;
 			util_mesh_transform_changed();

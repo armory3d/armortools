@@ -120,24 +120,36 @@ void render_path_paint_init() {
 	render_path_load_shader("Scene/dilate_pass/dilateRGBA128_pass");
 }
 
-void render_path_paint_draw_fullscreen_triangle(char *ctx) {
+void render_path_paint_draw_fullscreen_triangle() {
 	// Vertices are mangled in vertex shader to form a fullscreen triangle,
 	// so plane transform does not matter
-	mesh_object_t *plane    = scene_get_child(".Plane")->ext;
-	bool           _visible = plane->base->visible;
-	plane->base->visible    = true;
-	mesh_object_render(plane, ctx, _render_path_bind_params);
-	plane->base->visible = _visible;
+	if (make_material_paint_scon != NULL) {
+		mesh_object_draw(scene_get_child(".Plane")->ext, make_material_paint_scon, _render_path_bind_params);
+	}
+	render_path_end();
+}
+
+// The merged mesh is painted unless an object mask selects a single object
+mesh_object_t *render_path_paint_target() {
+	mesh_object_t *merged = g_context->merged_object;
+	if (merged != NULL && merged->base->visible) {
+		return merged;
+	}
+	mesh_object_t *o = g_context->paint_object;
+	return o->base->visible && make_material_is_default(o->material) ? o : NULL;
+}
+
+// Texture space, the whole mesh is drawn wherever the camera looks
+void render_path_paint_draw_target() {
+	mesh_object_t *o = render_path_paint_target();
+	if (o != NULL && make_material_paint_scon != NULL) {
+		_mesh_object_last_pipeline = NULL;
+		mesh_object_draw(o, make_material_paint_scon, _render_path_bind_params);
+	}
 	render_path_end();
 }
 
 void render_path_paint_commands_particle(i32 tid, char *texpaint, bool is_mask) {
-	// Hide bullets to avoid self-painting
-	for (i32 _pi = 0; _pi < 32; ++_pi) {
-		if (g_context->particles[_pi].bullet != NULL) {
-			g_context->particles[_pi].bullet->visible = false;
-		}
-	}
 	// Paint pass per particle
 	for (i32 _pi = 0; _pi < 32; ++_pi) {
 		if (g_context->particles[_pi].timer == NULL || g_context->particles[_pi].hit_x == 0) {
@@ -171,12 +183,7 @@ void render_path_paint_commands_particle(i32 tid, char *texpaint, bool is_mask) 
 		if (g_context->colorid_picked) {
 			render_path_bind_target("texpaint_colorid", "texpaint_colorid");
 		}
-		render_path_draw_meshes("paint");
-	}
-	for (i32 _pi = 0; _pi < 32; ++_pi) {
-		if (g_context->particles[_pi].bullet != NULL) {
-			g_context->particles[_pi].bullet->visible = true;
-		}
+		render_path_paint_draw_target();
 	}
 }
 
@@ -240,7 +247,7 @@ void render_path_paint_commands_paint(bool dilation) {
 	if (g_context->tool == TOOL_TYPE_COLORID) {
 		render_path_set_target("texpaint_colorid", NULL, NULL, GPU_CLEAR_COLOR, 0xff000000, 0.0);
 		render_path_bind_target("gbuffer2", "gbuffer2");
-		render_path_paint_draw_fullscreen_triangle("paint");
+		render_path_paint_draw_fullscreen_triangle();
 		ui_header_handle->redraws = 2;
 	}
 	else if (g_context->tool == TOOL_TYPE_PICKER || g_context->tool == TOOL_TYPE_MATERIAL) {
@@ -253,7 +260,7 @@ void render_path_paint_commands_paint(bool dilation) {
 				    },
 				    2);
 				render_path_set_target("gbuffer0", additional, "main", GPU_CLEAR_NONE, 0, 0.0);
-				render_path_draw_meshes("mesh");
+				render_path_base_draw_meshes(render_path_base_mesh_scon(0), true);
 			}
 			string_array_t *additional = any_array_create_from_raw(
 			    (void *[]){
@@ -263,7 +270,7 @@ void render_path_paint_commands_paint(bool dilation) {
 			render_path_set_target("texpaint_posnortex_picker0", additional, NULL, GPU_CLEAR_NONE, 0, 0.0);
 			render_path_bind_target("gbuffer2", "gbuffer2");
 			render_path_bind_target("main", "gbufferD");
-			render_path_paint_draw_fullscreen_triangle("paint");
+			render_path_paint_draw_fullscreen_triangle();
 			render_target_t *picker0                    = any_map_get(render_path_render_targets, "texpaint_posnortex_picker0");
 			render_target_t *picker1                    = any_map_get(render_path_render_targets, "texpaint_posnortex_picker1");
 			gpu_texture_t   *texpaint_posnortex_picker0 = picker0->_image;
@@ -291,7 +298,7 @@ void render_path_paint_commands_paint(bool dilation) {
 				render_path_set_target("texpaint_picker", additional, NULL, GPU_CLEAR_NONE, 0, 0.0);
 				render_path_bind_target("gbuffer2", "gbuffer2");
 				render_path_bind_target(string_tmp("texpaint%d", tid), "texpaint");
-				render_path_paint_draw_fullscreen_triangle("paint");
+				render_path_paint_draw_fullscreen_triangle();
 			}
 			else {
 				string_array_t *additional = any_array_create_from_raw(
@@ -310,7 +317,7 @@ void render_path_paint_commands_paint(bool dilation) {
 				render_path_bind_target(string_tmp("texpaint%d", tid), "texpaint");
 				render_path_bind_target(string_tmp("texpaint_nor%d", tid), "texpaint_nor");
 				render_path_bind_target(string_tmp("texpaint_pack%d", tid), "texpaint_pack");
-				render_path_paint_draw_fullscreen_triangle("paint");
+				render_path_paint_draw_fullscreen_triangle();
 				if (use_live_layer) {
 					render_path_paint_use_live_layer(false);
 				}
@@ -427,7 +434,7 @@ void render_path_paint_commands_paint(bool dilation) {
 			render_path_set_target("texpaint_picker", NULL, NULL, GPU_CLEAR_NONE, 0, 0.0);
 			render_path_bind_target("gbuffer1", "gbuffer1");
 			render_path_bind_target("gbuffer2", "gbuffer2");
-			render_path_paint_draw_fullscreen_triangle("paint");
+			render_path_paint_draw_fullscreen_triangle();
 
 			render_target_t *rt    = any_map_get(render_path_render_targets, "texpaint_picker");
 			buffer_t        *pixel = gpu_get_texture_pixels(rt->_image);
@@ -538,15 +545,7 @@ void render_path_paint_commands_paint(bool dilation) {
 			if (sculpt_layer_count > 1) {
 				render_path_bind_target("texpaint_sculpt_base", "texpaint_sculpt_base");
 			}
-			object_t *bullet     = scene_get_child(".Bullet");
-			bool      bullet_vis = bullet != NULL && bullet->visible;
-			if (bullet != NULL) {
-				bullet->visible = false;
-			}
-			render_path_draw_meshes("paint");
-			if (bullet != NULL) {
-				bullet->visible = bullet_vis;
-			}
+			render_path_paint_draw_target();
 		}
 
 		if (g_context->tool == TOOL_TYPE_BAKE && g_context->bake_type == BAKE_TYPE_CURVATURE && g_context->bake_curv_smooth > 0) {

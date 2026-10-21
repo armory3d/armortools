@@ -207,7 +207,7 @@ buffer_t *util_encode_project(project_t *raw) {
 	buffer_t *encoded = buffer_create(size);
 
 	armpack_encode_start(encoded->buffer);
-	armpack_encode_map(44);
+	armpack_encode_map(45);
 
 	armpack_encode_string("version");
 	armpack_encode_string(raw->version);
@@ -247,6 +247,8 @@ buffer_t *util_encode_project(project_t *raw) {
 	armpack_encode_f32(raw->camera_near);
 	armpack_encode_string("camera_far");
 	armpack_encode_f32(raw->camera_far);
+	armpack_encode_string("camera_frustum_culling");
+	armpack_encode_bool(raw->camera_frustum_culling);
 	armpack_encode_string("swatches");
 	if (raw->swatches != NULL) {
 		armpack_encode_array(raw->swatches->length);

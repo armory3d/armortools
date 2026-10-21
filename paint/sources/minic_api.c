@@ -748,7 +748,7 @@ void minic_register_builtins() {
 	MINIC_F(far_plane);
 	MINIC_F(fov);
 	MINIC_F(aspect);
-	MINIC_I(frustum_culling);
+	MINIC_B(frustum_culling);
 	MINIC_O(ortho, f32_array_t);
 	MINIC_END();
 
@@ -834,7 +834,6 @@ void minic_register_builtins() {
 	MINIC_P(parent);
 	MINIC_O(children, any_array_t);
 	MINIC_B(visible);
-	MINIC_B(culled);
 	MINIC_B(is_empty);
 	MINIC_P(ext);
 	MINIC_S(ext_type);
@@ -845,9 +844,8 @@ void minic_register_builtins() {
 	MINIC_O(data, mesh_data_t);
 	MINIC_O(material, shader_data_t);
 	MINIC_F(camera_dist);
-	MINIC_I(frustum_culling);
-	MINIC_S(skip_context);
-	MINIC_S(force_context);
+	MINIC_B(frustum_culling);
+	MINIC_B(culled);
 	MINIC_END();
 
 	MINIC_STRUCT(transform_t);
@@ -916,6 +914,7 @@ void minic_register_builtins() {
 	MINIC_F(camera_fov);
 	MINIC_F(camera_near);
 	MINIC_F(camera_far);
+	MINIC_B(camera_frustum_culling);
 	MINIC_O(camera_world, f32_array_t);
 	MINIC_O(camera_origin, f32_array_t);
 	MINIC_P(swatches);

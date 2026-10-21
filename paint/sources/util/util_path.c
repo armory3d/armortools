@@ -83,7 +83,7 @@ f32 util_layer_brush_screen_radius() {
 	f32 brush_nodes_radius = g_context->brush_nodes_uses_random ? 1.0f : g_context->brush_nodes_radius;
 
 	f32  r_world = g_context->brush_radius * brush_nodes_radius / 15.0f * 2.0f;
-	bool on_mesh = math_abs(g_context->posx_picked) < 50.0f && math_abs(g_context->posy_picked) < 50.0f && math_abs(g_context->posz_picked) < 50.0f;
+	bool on_mesh = util_render_picked_on_mesh();
 	if (!on_mesh) {
 		return r_world;
 	}
@@ -832,7 +832,7 @@ static void path_point_move(slot_layer_t *l, i32 idx, f32 new_x, f32 new_y) {
 	g_context->paint_vec.x = saved_pvx;
 	g_context->paint_vec.y = saved_pvy;
 
-	if (math_abs(g_context->posx_picked) < 50.0f) {
+	if (util_render_picked_on_mesh()) {
 		points_world->buffer[idx * 3]     = g_context->posx_picked;
 		points_world->buffer[idx * 3 + 1] = g_context->posy_picked;
 		points_world->buffer[idx * 3 + 2] = g_context->posz_picked;

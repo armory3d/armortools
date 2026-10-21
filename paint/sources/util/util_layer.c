@@ -521,7 +521,6 @@ void layers_set_object_mask() {
 		}
 		context_select_paint_object(context_main_object());
 		if (g_context->merged_object != NULL) {
-			g_context->paint_object->skip_context   = "paint";
 			g_context->merged_object->base->visible = true;
 		}
 	}
@@ -1072,7 +1071,7 @@ void layers_draw_mesh_materials() {
 	render_path_set_target("expa", additional, NULL, GPU_CLEAR_NONE, 0, 0.0);
 	render_path_bind_target("main", "gbufferD");
 	render_path_bind_target("texpaint_blend1", "paintmask");
-	render_path_draw_meshes("atlas");
+	render_path_base_draw_overrides(NULL);
 }
 
 static gpu_texture_t *layers_udim_a    = NULL;

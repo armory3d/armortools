@@ -298,6 +298,16 @@ void render_gizmo_render_bones() {
 	gpu_disable_scissor();
 }
 
+// Drawn over the scene, the gizmo is not part of scene_meshes
+void render_gizmo_draw() {
+	if (g_context->gizmo->visible) {
+		mesh_object_t *gizmo       = g_context->gizmo->ext;
+		_mesh_object_last_pipeline = NULL;
+		mesh_object_render(gizmo, render_path_base_own_scon(gizmo), _render_path_bind_params);
+	}
+	render_path_end();
+}
+
 void render_gizmo_update() {
 	bool is_object = g_context->tool == TOOL_TYPE_CURSOR;
 	bool is_decal  = base_is_decal_layer();

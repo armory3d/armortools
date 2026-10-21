@@ -78,7 +78,6 @@ static mesh_object_t *import_mesh_make_root() {
 	md->name            = name;
 	mesh_object_t *mo   = scene_add_mesh_object(md, g_context->paint_object->material, NULL);
 	mo->base->name      = name;
-	mo->skip_context    = "paint";
 	tab_stages_add_object(name);
 	return mo;
 }
@@ -133,7 +132,6 @@ void import_mesh_finish_import(void *_) {
 			util_mesh_merge(NULL);
 		}
 		if (g_context->merged_object != NULL) {
-			g_context->paint_object->skip_context   = "paint";
 			g_context->merged_object->base->visible = true;
 		}
 	}
@@ -284,7 +282,6 @@ void import_mesh_add_mesh(raw_mesh_t *mesh) {
 	object_t      *parent = import_mesh_append ? NULL : g_context->paint_object->base;
 	mesh_object_t *object = scene_add_mesh_object(md, g_context->paint_object->material, parent);
 	object->base->name    = mesh->name;
-	object->skip_context  = "paint";
 
 	// Ensure unique names
 	char *uname = _import_mesh_unique_name(object->base->name);

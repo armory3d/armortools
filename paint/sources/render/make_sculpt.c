@@ -1549,8 +1549,7 @@ void render_path_sculpt_displace_pass(char *texpaint_sculpt) {
 	render_path_bind_target("texpaint_blend1", "paintmask");
 	render_path_bind_target("gbuffer0_undo", "gbuffer0_undo");
 
-	shader_data_t    *mat            = g_project->_->paint_objects->buffer[0]->material;
-	shader_context_t *shader_context = shader_data_get_context(mat, "paint");
+	shader_context_t *shader_context = make_material_paint_scon;
 
 	gpu_set_pipeline(shader_context->_->pipe);
 	uniforms_set_context_consts(shader_context, _render_path_bind_params);

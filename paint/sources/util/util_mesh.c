@@ -503,11 +503,10 @@ static void _util_mesh_merge(mesh_object_t_array_t *paint_objects, bool paintabl
 	mesh_data_t *md                           = mesh_data_create(raw);
 	md->_->owns_arrays                        = true;
 	shader_data_t *paint_material             = g_project->_->materials->buffer[0]->data;
-	g_context->merged_object                  = mesh_object_create(md, paint_material);
-	g_context->merged_object->base->name      = string("%s_merged", g_context->paint_object->base->name);
-	g_context->merged_object->force_context   = "paint";
-	g_context->merged_object->frustum_culling = false;
-	g_context->merged_object->base->visible   = merged_visible;
+	g_context->merged_object                = mesh_object_create(md, paint_material);
+	g_context->merged_object->base->name    = string("%s_merged", g_context->paint_object->base->name);
+	g_context->merged_object->base->visible = merged_visible; // Painted instead of the objects when visible
+	array_remove(scene_meshes, g_context->merged_object);     // Drawn by the paint passes only
 	object_set_parent(g_context->merged_object->base, parent);
 	transform_build_matrix(g_context->merged_object->base->transform);
 	render_path_raytrace_ready = false;
@@ -1009,6 +1008,21 @@ void util_mesh_calc_normals(mesh_object_t_array_t *objects, bool smooth) {
 	render_path_raytrace_ready = false;
 }
 
+// Drops the bounds cached by transform_compute_dim, so the next matrix build measures the moved vertices
+static void util_mesh_clear_dim(mesh_object_t *o) {
+	object_t *b = o->base;
+	if (b->owns_raw) {
+		array_delete(b->raw->dimensions);
+		free(b->raw);
+		b->raw      = NULL;
+		b->owns_raw = false;
+	}
+	else if (b->raw != NULL && b->raw->dimensions != NULL) {
+		vec4_t aabb        = mesh_data_calculate_aabb(o->data);
+		b->raw->dimensions = f32_array_create_xyz(aabb.x, aabb.y, aabb.z);
+	}
+}
+
 void util_mesh_to_origin(mesh_object_t_array_t *objects) {
 	f32 dx = 0.0;
 	f32 dy = 0.0;
@@ -1080,6 +1094,14 @@ void util_mesh_to_origin(mesh_object_t_array_t *objects) {
 		}
 
 		mesh_data_build_vertices(g->_->vertex_buffer, o->data->vertex_arrays);
+
+		for (i32 j = 0; j < g_project->_->paint_objects->length; ++j) {
+			mesh_object_t *p = g_project->_->paint_objects->buffer[j];
+			if (p->data == g) {
+				util_mesh_clear_dim(p);
+				transform_build_matrix(p->base->transform);
+			}
+		}
 	}
 
 	util_mesh_merge(NULL);
@@ -1126,6 +1148,7 @@ void util_mesh_origin_to_geometry(mesh_object_t_array_t *objects) {
 			if (p->data != g) {
 				continue;
 			}
+			util_mesh_clear_dim(p);
 			transform_t *t = p->base->transform;
 			vec4_t       d = vec4_apply_quat((vec4_t){c[0] * t->scale.x, c[1] * t->scale.y, c[2] * t->scale.z, 0.0}, t->rot);
 			t->loc         = (vec4_t){t->loc.x + d.x, t->loc.y + d.y, t->loc.z + d.z, t->loc.w};

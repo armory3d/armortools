@@ -311,27 +311,12 @@ void context_init_tool() {
 	}
 	else if (g_context->tool == TOOL_TYPE_MATERIAL) {
 		layers_update_fill_layers();
-		context_main_object()->skip_context = NULL;
 	}
 }
 
 void context_select_paint_object(mesh_object_t *o) {
-	ui_header_handle->redraws = 2;
-	for (i32 i = 0; i < g_project->_->paint_objects->length; ++i) {
-		mesh_object_t *p = g_project->_->paint_objects->buffer[i];
-		p->skip_context  = "paint";
-	}
-
-	g_context->paint_object = o;
-
-	i32 mask = slot_layer_get_object_mask(g_context->layer);
-	if (context_layer_filter_used()) {
-		mask = g_context->layer_filter;
-	}
-
-	if (g_context->merged_object == NULL || mask > 0) {
-		g_context->paint_object->skip_context = "";
-	}
+	ui_header_handle->redraws  = 2;
+	g_context->paint_object    = o;
 	util_uv_uvmap_cached       = false;
 	util_uv_trianglemap_cached = false;
 	util_uv_dilatemap_cached   = false;

@@ -1085,11 +1085,21 @@ void tab_meshes_draw_context_menu() {
 	ui_row4();
 	ui_text("Dim", UI_ALIGN_LEFT, 0x00000000);
 
-	bool changed = tab_meshes_float_input(&t->dim.x, &t->dim.x, "X");
-	changed |= tab_meshes_float_input(&t->dim.y, &t->dim.y, "Y");
-	changed |= tab_meshes_float_input(&t->dim.z, &t->dim.z, "Z");
+	// Edits the scale that gives the typed size
+	vec4_t dim  = transform_dim(t);
+	vec4_t prev = dim;
+	ui_push_id((ui_id_t)"dim");
+	bool changed = tab_meshes_float_input(&dim.x, &t->scale.x, "X");
+	changed |= tab_meshes_float_input(&dim.y, &t->scale.y, "Y");
+	changed |= tab_meshes_float_input(&dim.z, &t->scale.z, "Z");
+	ui_pop_id();
 
 	if (changed) {
+		vec4_t prev_scale = t->scale;
+		t->scale.x        = prev.x != 0.0 ? t->scale.x * dim.x / prev.x : t->scale.x;
+		t->scale.y        = prev.y != 0.0 ? t->scale.y * dim.y / prev.y : t->scale.y;
+		t->scale.z        = prev.z != 0.0 ? t->scale.z * dim.z / prev.z : t->scale.z;
+		history_object_transform(o, t->loc, t->rot, prev_scale);
 		transform_build_matrix(t);
 		transform_compute_dim(t);
 		util_mesh_transform_changed();

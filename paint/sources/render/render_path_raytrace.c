@@ -343,18 +343,6 @@ static gpu_texture_t *render_path_raytrace_override_texture(i32 slot, char chann
 }
 
 static void render_path_raytrace_draw_override(i32 slot) {
-	mesh_data_t           *data    = render_path_raytrace_override_data[slot];
-	mesh_object_t_array_t *objects = g_project->_->paint_objects;
-	u8_array_t            *visible = u8_array_create(objects->length);
-	u8_array_t            *culling = u8_array_create(objects->length);
-	for (i32 i = 0; i < objects->length; ++i) {
-		mesh_object_t *p   = objects->buffer[i];
-		visible->buffer[i] = p->base->visible;
-		culling->buffer[i] = p->frustum_culling;
-		p->base->visible   = p->data == data;
-		p->frustum_culling = false;
-	}
-
 	string_array_t *additional = any_array_create_from_raw(
 	    (void *[]){
 	        render_path_raytrace_override_target(slot, 'b'),
@@ -366,15 +354,8 @@ static void render_path_raytrace_draw_override(i32 slot) {
 	render_path_set_target(render_path_raytrace_override_target(slot, 'a'), additional, NULL, GPU_CLEAR_COLOR, 0x00000000, 0.0);
 	render_path_bind_target("main", "gbufferD");
 	render_path_bind_target("texpaint_blend1", "paintmask");
-	render_path_draw_meshes("atlas");
+	render_path_base_draw_overrides(render_path_raytrace_override_data[slot]);
 	render_path_raytrace_override_pass = false;
-
-	for (i32 i = 0; i < objects->length; ++i) {
-		objects->buffer[i]->base->visible   = visible->buffer[i];
-		objects->buffer[i]->frustum_culling = culling->buffer[i];
-	}
-	array_delete(visible);
-	array_delete(culling);
 	array_delete(additional);
 	render_path_raytrace_override_dirty[slot] = false;
 }
@@ -626,7 +607,7 @@ void render_path_raytrace_draw(bool use_live_layer) {
 
 	render_path_raytrace_commands(use_live_layer);
 	render_path_set_target("buf", NULL, NULL, GPU_CLEAR_NONE, 0, 0.0);
-	render_path_draw_meshes("overlay");
+	render_gizmo_draw();
 	render_path_set_target("buf", NULL, NULL, GPU_CLEAR_NONE, 0, 0.0);
 	render_compass();
 	render_path_set_target("last", NULL, NULL, GPU_CLEAR_NONE, 0, 0.0);

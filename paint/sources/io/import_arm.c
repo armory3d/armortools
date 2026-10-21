@@ -68,9 +68,8 @@ void import_arm_run_mesh(project_t *raw) {
 			object = g_context->paint_object;
 		}
 		else {
-			object               = scene_add_mesh_object(md, g_context->paint_object->material, g_context->paint_object->base);
-			object->base->name   = md->name;
-			object->skip_context = "paint";
+			object             = scene_add_mesh_object(md, g_context->paint_object->material, g_context->paint_object->base);
+			object->base->name = md->name;
 		}
 		object->base->transform->scale = (vec4_t){1, 1, 1, 1.0};
 		transform_build_matrix(object->base->transform);
@@ -181,7 +180,6 @@ static void import_arm_run_mesh_append_from_project(project_t *project, i32_arra
 		}
 		mesh_data_t   *md     = mesh_datas->buffer[i];
 		mesh_object_t *object = scene_add_mesh_object(md, g_context->paint_object->material, NULL);
-		object->skip_context  = "paint";
 		object->base->name    = mesh_names->buffer[i];
 
 		if (project->mesh_transforms != NULL && i < project->mesh_transforms->length) {
@@ -222,7 +220,6 @@ static void import_arm_run_mesh_append_from_project(project_t *project, i32_arra
 	if (g_project->_->paint_objects->length > 1) {
 		util_mesh_merge(NULL);
 		if (g_context->merged_object != NULL) {
-			context_main_object()->skip_context     = "paint";
 			g_context->merged_object->base->visible = true;
 		}
 	}
@@ -830,9 +827,10 @@ void import_arm_run_project(char *path) {
 	if (g_project->camera_world != NULL) {
 		scene_camera->base->transform->local = mat4_from_f32_array(g_project->camera_world, 0);
 		transform_decompose(scene_camera->base->transform);
-		scene_camera->data->fov        = g_project->camera_fov;
-		scene_camera->data->near_plane = g_project->camera_near;
-		scene_camera->data->far_plane  = g_project->camera_far;
+		scene_camera->data->fov             = g_project->camera_fov;
+		scene_camera->data->near_plane      = g_project->camera_near;
+		scene_camera->data->far_plane       = g_project->camera_far;
+		scene_camera->data->frustum_culling = g_project->camera_frustum_culling;
 		camera_object_build_proj(scene_camera, -1.0);
 		f32_array_t *origin = g_project->camera_origin;
 		camera_origins[0]   = (vec4_t){origin->buffer[0], origin->buffer[1], origin->buffer[2], 1.0};
@@ -954,7 +952,6 @@ void import_arm_run_project(char *path) {
 	for (i32 i = 1; i < mesh_datas->length; ++i) {
 		mesh_object_t *object = scene_add_mesh_object(mesh_datas->buffer[i], g_context->paint_object->material, g_context->paint_object->base);
 		object->base->name    = mesh_names->buffer[i];
-		object->skip_context  = "paint";
 		any_array_push(g_project->_->paint_objects, object);
 	}
 
@@ -975,7 +972,6 @@ void import_arm_run_project(char *path) {
 	}
 
 	context_select_paint_object(context_main_object());
-	g_context->paint_object->skip_context = "paint";
 
 	gpu_texture_t *tex = g_project->_->layers->buffer[0]->texpaint;
 	if (tex->width != config_get_texture_res_x() || tex->height != config_get_texture_res_y()) {
