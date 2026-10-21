@@ -1167,6 +1167,16 @@ void script_project_open(char *path) {
 	g_context->ddirty = 2;
 }
 
+i32 script_asset_index(char *search) {
+	for (i32 i = g_project->_->assets->length - 1; i >= 0; --i) {
+		asset_t *a = g_project->_->assets->buffer[i];
+		if (string_index_of(a->file, search) >= 0) {
+			return i;
+		}
+	}
+	return -1;
+}
+
 void script_import_asset(char *path, bool hdr_as_envmap) {
 	if (path == NULL || !iron_file_exists(path)) {
 		return;
