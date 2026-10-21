@@ -2768,6 +2768,11 @@ mesh_object_t *util_mesh_duplicate_object(mesh_object_t *so) {
 	dup->base->name = string_copy(_import_mesh_unique_name(so->base->name));
 	tab_stages_add_object(dup->base->name);
 
+	// Skinned meshes are posed in their vertices, make a copy so it can play a clip on its own
+	if (data->_->skin_blob != NULL) {
+		util_mesh_unshare_data(dup);
+	}
+
 	// Material override
 	i32 mat_index = tab_meshes_get_override(so);
 	if (mat_index >= 0) {
