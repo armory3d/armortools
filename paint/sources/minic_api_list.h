@@ -105,10 +105,10 @@ X3(scene_add_mesh_object, "p:mesh_object_t(p:mesh_data_t data,p:shader_data_t ma
 X2(scene_add_camera_object, "p:camera_object_t(p:camera_data_t data,p:object_t parent)", p, p, p)
 X1(scene_add_scene, "v(p:char scene_name)", v, p)
 X3(scene_spawn_object, "p:object_t(p:char name,p:object_t parent,i spawn_children)", p, p, p, i)
-X2(scene_get_raw_object_by_name, "p:obj_t(p:scene_t format,p:char name)", p, p, p)
-// X3(scene_create_object, "p:object_t(p:obj_t o,p:scene_t format,p:object_t parent)", p, p, p, p)
-// X4(scene_create_mesh_object, "p:object_t(p:obj_t o,p:scene_t format,p:object_t parent,p:shader_data_t material)", p, p, p, p, p)
-X2(scene_gen_transform, "v(p:obj_t object,p:transform_t transform)", v, p, p)
+X2(scene_get_raw_object_by_name, "p:object_desc_t(p:scene_t format,p:char name)", p, p, p)
+// X3(scene_create_object, "p:object_t(p:object_desc_t o,p:scene_t format,p:object_t parent)", p, p, p, p)
+// X4(scene_create_mesh_object, "p:object_t(p:object_desc_t o,p:scene_t format,p:object_t parent,p:shader_data_t material)", p, p, p, p, p)
+X2(scene_gen_transform, "v(p:object_desc_t object,p:transform_t transform)", v, p, p)
 
 // render_path
 X6(render_path_set_target, "v(p:char target,p:string_array_t additional,p:char depth_buffer,i flags,i color,f depth)", v, p, p, p, i, i, f)

@@ -1010,16 +1010,10 @@ void util_mesh_calc_normals(mesh_object_t_array_t *objects, bool smooth) {
 
 // Drops the bounds cached by transform_compute_dim, so the next matrix build measures the moved vertices
 static void util_mesh_clear_dim(mesh_object_t *o) {
-	object_t *b = o->base;
-	if (b->owns_raw) {
-		array_delete(b->raw->dimensions);
-		free(b->raw);
-		b->raw      = NULL;
-		b->owns_raw = false;
-	}
-	else if (b->raw != NULL && b->raw->dimensions != NULL) {
-		vec4_t aabb        = mesh_data_calculate_aabb(o->data);
-		b->raw->dimensions = f32_array_create_xyz(aabb.x, aabb.y, aabb.z);
+	transform_t *t = o->base->transform;
+	if (t->measured) {
+		t->has_dim  = false;
+		t->measured = false;
 	}
 }
 

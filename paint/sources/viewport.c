@@ -23,7 +23,7 @@ void viewport_scale_to_bounds(f32 bounds) {
 void viewport_reset() {
 	camera_object_t *cam = scene_camera;
 	for (i32 i = 0; i < _scene_raw->objects->length; ++i) {
-		obj_t *o = _scene_raw->objects->buffer[i];
+		object_desc_t *o = _scene_raw->objects->buffer[i];
 		if (string_equals(o->type, "camera_object")) {
 			cam->base->transform->local = mat4_from_f32_array(o->transform, 0);
 			transform_decompose(cam->base->transform);

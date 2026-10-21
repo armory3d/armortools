@@ -702,7 +702,7 @@ void minic_register_builtins() {
 	MINIC_END();
 
 	// engine.h
-	MINIC_STRUCT(obj_t);
+	MINIC_STRUCT(object_desc_t);
 	MINIC_S(name);
 	MINIC_S(type);
 	MINIC_S(data_ref);
@@ -712,8 +712,7 @@ void minic_register_builtins() {
 	MINIC_I(spawn);
 	MINIC_P(anim);
 	MINIC_S(material_ref);
-	MINIC_O(children, obj_t_array_t);
-	MINIC_P(_);
+	MINIC_O(children, object_desc_t_array_t);
 	MINIC_END();
 
 	MINIC_STRUCT(vertex_array_t);
@@ -833,7 +832,6 @@ void minic_register_builtins() {
 	MINIC_STRUCT(object_t);
 	MINIC_I(uid);
 	MINIC_F(urandom);
-	MINIC_O(raw, obj_t);
 	MINIC_S(name);
 	MINIC_O(transform, transform_t);
 	MINIC_P(parent);
@@ -860,6 +858,10 @@ void minic_register_builtins() {
 	MINIC_F(scale_world);
 	MINIC_I(dirty);
 	MINIC_O(object, object_t);
+	MINIC_E(dim, vec4_t);
+	MINIC_E(extent, vec4_t);
+	MINIC_B(has_dim);
+	MINIC_B(measured);
 	MINIC_F(radius);
 	MINIC_END();
 

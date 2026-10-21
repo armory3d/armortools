@@ -1229,14 +1229,14 @@ void tab_meshes_draw_edit() {
 mesh_object_t *tab_meshes_append_shape(char *mesh_name) {
 	mesh_data_t *md = util_shape_make_data(mesh_name);
 	if (md != NULL) {
-		return tab_meshes_append_data(md, NULL);
+		return tab_meshes_append_data(md);
 	}
 	buffer_t *b         = iron_load_blob(string("%smeshes/%s.arm", data_path(), mesh_name));
 	scene_t  *scene_raw = armpack_decode(b);
-	return tab_meshes_append_data(mesh_data_create(scene_raw->mesh_datas->buffer[0]), scene_raw);
+	return tab_meshes_append_data(mesh_data_create(scene_raw->mesh_datas->buffer[0]));
 }
 
-mesh_object_t *tab_meshes_append_data(mesh_data_t *md, void *gc) {
+mesh_object_t *tab_meshes_append_data(mesh_data_t *md) {
 	mesh_object_t *mo = scene_add_mesh_object(md, g_project->_->paint_objects->buffer[0]->material, NULL);
 
 	// The shape stays at the scene root
@@ -1245,9 +1245,7 @@ mesh_object_t *tab_meshes_append_data(mesh_data_t *md, void *gc) {
 	// Ensure unique name
 	mo->base->name = string_copy(_import_mesh_unique_name(md->name));
 
-	obj_t *o      = ALLOC_INIT(obj_t, {0});
-	o->_          = ALLOC_INIT(obj_runtime_t, {._gc = gc});
-	mo->base->raw = o;
+	mo->base->transform->has_dim = true; // Keeps the default 2 unit bounds, never measured
 	any_array_push(g_project->_->paint_objects, mo);
 	tab_stages_add_object(mo->base->name);
 	g_context->paint_object = mo;

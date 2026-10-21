@@ -283,13 +283,13 @@ static void _shape_tool_commit() {
 	mesh_object_t *mo;
 	if (tool == TOOL_TYPE_CAPSULE) {
 		// Built for the box, scaling would squash the caps
-		mo = tab_meshes_append_data(_shape_tool_geo_data(_shape_tool_make_capsule(size_x, size_y, size_z, _shape_tool_segments(tool)), "Capsule"), NULL);
+		mo = tab_meshes_append_data(_shape_tool_geo_data(_shape_tool_make_capsule(size_x, size_y, size_z, _shape_tool_segments(tool)), "Capsule"));
 	}
 	else if (tool == TOOL_TYPE_EMPTY) {
 		mo = tab_meshes_append_shape("empty");
 	}
 	else {
-		mo = tab_meshes_append_data(_shape_tool_make_data(tool, _shape_tool_segments(tool)), NULL);
+		mo = tab_meshes_append_data(_shape_tool_make_data(tool, _shape_tool_segments(tool)));
 	}
 	if (in_use) {
 		draw_begin(current, false, 0);

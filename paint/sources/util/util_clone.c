@@ -128,29 +128,6 @@ ui_node_canvas_t *util_clone_canvas(ui_node_canvas_t *c) {
 	return r;
 }
 
-obj_t *util_clone_obj(obj_t *o) {
-	if (o == NULL) {
-		return NULL;
-	}
-	obj_t *r        = ALLOC_INIT(obj_t, {0});
-	r->name         = string_copy(o->name);
-	r->type         = string_copy(o->type);
-	r->data_ref     = string_copy(o->data_ref);
-	r->transform    = util_clone_f32_array(o->transform);
-	r->dimensions   = util_clone_f32_array(o->dimensions);
-	r->visible      = o->visible;
-	r->spawn        = o->spawn;
-	r->material_ref = string_copy(o->material_ref);
-	if (o->children != NULL) {
-		r->children = any_array_create_from_raw((void *[]){}, 0);
-		for (i32 i = 0; i < o->children->length; ++i) {
-			obj_t *c = util_clone_obj(o->children->buffer[i]);
-			any_array_push(r->children, c);
-		}
-	}
-	return r;
-}
-
 swatch_color_t *util_clone_swatch_color(swatch_color_t *s) {
 	swatch_color_t *r = ALLOC_INIT(swatch_color_t, {0});
 	r->base           = s->base;

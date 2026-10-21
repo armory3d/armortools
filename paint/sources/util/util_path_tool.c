@@ -343,7 +343,7 @@ static void _path_tool_rebuild() {
 	free(local);
 
 	if (_path_tool_object == NULL) {
-		_path_tool_object                       = tab_meshes_append_data(md, NULL);
+		_path_tool_object                       = tab_meshes_append_data(md);
 		_path_tool_object->base->transform->loc = _path_tool_points[0];
 		transform_build_matrix(_path_tool_object->base->transform);
 		util_mesh_transform_changed();

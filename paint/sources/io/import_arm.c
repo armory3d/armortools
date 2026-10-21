@@ -1,7 +1,6 @@
 
 #include "../global.h"
 
-scene_t   *scene_raw_gc;
 static f64 import_arm_progress_last     = 0.0;
 static i32 import_arm_progress_unpacked = 0;
 
@@ -725,9 +724,9 @@ void import_arm_run_project(char *path) {
 #endif
 
 	if (!import_arm_has_version(b)) {
-		import_as_mesh = true;
-		scene_raw_gc   = armpack_decode(b);
-		project        = ALLOC_INIT(project_t, {.mesh_datas = scene_raw_gc->mesh_datas});
+		import_as_mesh     = true;
+		scene_t *scene_raw = armpack_decode(b);
+		project            = ALLOC_INIT(project_t, {.mesh_datas = scene_raw->mesh_datas});
 	}
 	else if (import_arm_is_old(b) && !is_cloud) {
 		project = import_arm_from_old(b);

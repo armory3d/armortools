@@ -518,7 +518,7 @@ static void _text_commit(vec4_t p) {
 	if (in_use) {
 		draw_end();
 	}
-	mesh_object_t *mo = tab_meshes_append_data(nodes_mesh_geo_to_data(g, "Text"), NULL);
+	mesh_object_t *mo = tab_meshes_append_data(nodes_mesh_geo_to_data(g, "Text"));
 	util_geo_free(g);
 	if (in_use) {
 		draw_begin(current, false, 0);

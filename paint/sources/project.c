@@ -7,7 +7,6 @@ void (*_project_import_mesh_done)(void);
 bool     _project_import_asset_hdr_as_envmap;
 bool     _project_import_swatches_replace_existing;
 asset_t *_project_reimport_texture_asset;
-scene_t *_project_scene_mesh_gc;
 
 void project_open_on_file_picked(char *path) {
 	if (!ends_with(path, ".arm")) {
@@ -159,9 +158,9 @@ void project_new(bool reset_layers) {
 		md->name = "Tessellated";
 	}
 	else {
-		buffer_t *b            = data_get_blob(string("meshes/%s.arm", mesh_name));
-		_project_scene_mesh_gc = armpack_decode(b);
-		md                     = mesh_data_create(_project_scene_mesh_gc->mesh_datas->buffer[0]);
+		buffer_t *b         = data_get_blob(string("meshes/%s.arm", mesh_name));
+		scene_t  *scene_raw = armpack_decode(b);
+		md                  = mesh_data_create(scene_raw->mesh_datas->buffer[0]);
 	}
 
 	gpu_texture_t *current = _draw_current;
