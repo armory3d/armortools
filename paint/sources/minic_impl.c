@@ -329,6 +329,9 @@ void project_filepath_set(char *s) {
 #endif
 	g_project->_->filepath = string_copy(s);
 }
+camera_object_t *script_get_camera() {
+	return scene_camera;
+}
 context_t *script_get_context() {
 	return g_context;
 }
@@ -1878,6 +1881,35 @@ void script_physics_sync_transform(object_t *o) {
 	}
 }
 
+physics_body_t *script_physics_get_body(object_t *o) {
+	return script_physics_body(o);
+}
+
+vec4_t script_physics_get_pos(object_t *o) {
+	vec4_t          pos  = {0.0, 0.0, 0.0, 1.0};
+	physics_body_t *body = script_physics_body(o);
+	if (body != NULL) {
+		physics_body_get_pos(body->_body, &pos);
+	}
+	return pos;
+}
+
+vec4_t script_physics_get_velocity(object_t *o) {
+	vec4_t          vel  = {0.0, 0.0, 0.0, 0.0};
+	physics_body_t *body = script_physics_body(o);
+	if (body != NULL) {
+		physics_body_get_velocity(body->_body, &vel);
+	}
+	return vel;
+}
+
+void script_physics_set_rotation(object_t *o, quat_t rot) {
+	physics_body_t *body = script_physics_body(o);
+	if (body != NULL) {
+		physics_body_set_rotation(body, rot);
+	}
+}
+
 static bool script_pick_hit(object_t *o, ray_t *ray, f32 margin, f32 *out_t) {
 	if (o->ext == NULL || !string_equals(o->ext_type, "mesh_object_t")) {
 		return false;
@@ -1964,6 +1996,28 @@ object_t *script_pick_object() {
 		}
 	}
 	return hit;
+}
+
+// Where the mouse ray hits the terrain body, nan on a miss
+vec4_t script_pick_terrain() {
+	vec4_t hit = vec4_nan();
+	ray_t *ray = raycast_get_ray(mouse_view_x(), mouse_view_y(), scene_camera);
+	if (ray == NULL || !physics_terrain_raycast(ray->origin, ray->dir, &hit)) {
+		return vec4_nan();
+	}
+	return hit;
+}
+
+// The paint objects as mesh_object_t, the scenes meshes
+any_array_t *script_get_mesh_objects() {
+	return (any_array_t *)g_project->_->paint_objects;
+}
+
+// Scripts have no indirect calls, a function stored in a variable is called through here
+void script_call(void *fn) {
+	if (fn != NULL) {
+		minic_call_fn(fn, NULL, 0);
+	}
 }
 
 extern string_array_t *_path_texture_formats;
@@ -2217,6 +2271,15 @@ void script_clip_play(object_t *o, i32 start, i32 end) {
 	if (o != NULL && o->ext_type != NULL && string_equals(o->ext_type, "mesh_object_t")) {
 		tab_timeline_clip_play(o->ext, start, end);
 	}
+}
+
+// Frames in the skinned mesh clip, 0 without one
+i32 script_clip_frame_count(object_t *o) {
+	if (o == NULL || o->ext_type == NULL || !string_equals(o->ext_type, "mesh_object_t")) {
+		return 0;
+	}
+	mesh_object_t *mo = o->ext;
+	return util_skin_frame_count(mo->data->_->skin_blob);
 }
 
 void script_clip_set_frame(object_t *o, i32 frame) {
