@@ -444,7 +444,8 @@ void args_run_script(void *_) {
 		data = tab_scripts_find(substring(args_script_path, 2, string_length(args_script_path)));
 	}
 	if (data != NULL) {
-		minic_eval(data);
+		char *name = substring(args_script_path, 2, string_length(args_script_path));
+		minic_eval_named(tab_scripts_expand(data, name), name);
 	}
 	else {
 		buffer_t *b = iron_load_blob(args_script_path);
@@ -452,7 +453,7 @@ void args_run_script(void *_) {
 			iron_log(tr("Invalid script path"));
 		}
 		else {
-			minic_eval(sys_buffer_to_string(b));
+			minic_eval_named(tab_scripts_expand(sys_buffer_to_string(b), args_script_path), args_script_path);
 			iron_delete_blob(b);
 		}
 	}

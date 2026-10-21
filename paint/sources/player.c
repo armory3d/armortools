@@ -8,7 +8,8 @@ void player_update() {
 void player_run_scripts() {
 	g_context->tool = TOOL_TYPE_CURSOR;
 	if (g_project->script_datas != NULL && g_project->script_datas->length > 0) {
-		minic_eval(g_project->script_datas->buffer[0]);
+		char *name = g_project->script_names->buffer[0];
+		minic_eval_named(tab_scripts_expand(g_project->script_datas->buffer[0], name), name);
 	}
 	tab_timeline_play();
 }

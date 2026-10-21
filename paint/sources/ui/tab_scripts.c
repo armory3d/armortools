@@ -43,6 +43,29 @@ char *tab_scripts_find(char *name) {
 	return i >= 0 ? g_project->script_datas->buffer[i] : NULL;
 }
 
+// Pastes in the project scripts of #include "name.c" lines, #line keeps error lines pointing at the files
+char *tab_scripts_expand(char *src, char *name) {
+	buffer_t sb;
+	string_buffer_init(&sb);
+	any_array_t *lines = string_split(src, "\n");
+	for (i32 i = 0; i < lines->length; ++i) {
+		char *line = lines->buffer[i];
+		char *data = NULL;
+		if (starts_with(line, "#include \"")) {
+			char *inc = substring(line, 10, string_last_index_of(line, "\""));
+			data      = tab_scripts_find(inc);
+			if (data != NULL) {
+				string_buffer_append(&sb, string("#line 1 \"%s\"\n%s\n#line %d \"%s\"\n", inc, data, i + 2, name));
+			}
+		}
+		if (data == NULL) {
+			string_buffer_append(&sb, line);
+			string_buffer_append(&sb, "\n");
+		}
+	}
+	return string_buffer_get(&sb);
+}
+
 void tab_scripts_set(char *s) {
 	tab_scripts_prepare();
 	g_project->script_datas->buffer[tab_scripts_selected] = string_copy(s);
@@ -498,7 +521,8 @@ void tab_scripts_draw(i32 *htab) {
 		ui_row(row);
 
 		if (ui_icon_button(tr("Run"), ICON_PLAY, UI_ALIGN_CENTER)) {
-			minic_ctx_t *ctx = minic_eval(tab_scripts_text);
+			char        *name = g_project->script_names->buffer[tab_scripts_selected];
+			minic_ctx_t *ctx  = minic_eval_named(tab_scripts_expand(tab_scripts_text, name), name);
 			// minic_ctx_free(ctx);
 		}
 
