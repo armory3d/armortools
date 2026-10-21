@@ -10,8 +10,8 @@
 
 #define GRAVITY         -9.81f
 #define MAX_BVH_DEPTH   20
-#define MAX_SPHERES     32
-#define MAX_BOXES       32
+#define MAX_SPHERES     256
+#define MAX_BOXES       256
 #define MAX_BODIES      (MAX_SPHERES + MAX_BOXES)
 #define MAX_TERRAIN_RES 1024
 
@@ -86,6 +86,8 @@ typedef struct {
 
 static sphere_t       spheres[MAX_SPHERES];
 static box_t          boxes[MAX_BOXES];
+static int            sphere_count;
+static int            box_count;
 static physics_pair_t pairs[MAX_BODIES];
 static float          pair_best[MAX_BODIES];
 static physics_pair_t null_pair;
@@ -871,11 +873,20 @@ static void mesh_clear() {
 	mesh.root = NULL;
 }
 
+static void pairs_clear() {
+	memset(pairs, 0, sizeof(physics_pair_t) * sphere_count);
+	memset(pair_best, 0, sizeof(float) * sphere_count);
+	memset(&pairs[box_pair(0)], 0, sizeof(physics_pair_t) * box_count);
+	memset(&pair_best[box_pair(0)], 0, sizeof(float) * box_count);
+}
+
 void physics_world_create() {
 	physics_world_destroy();
-	memset(spheres, 0, sizeof(spheres));
-	memset(boxes, 0, sizeof(boxes));
-	memset(pairs, 0, sizeof(pairs));
+	memset(spheres, 0, sizeof(sphere_t) * sphere_count);
+	memset(boxes, 0, sizeof(box_t) * box_count);
+	pairs_clear();
+	sphere_count = 0;
+	box_count    = 0;
 }
 
 void physics_world_destroy() {
@@ -887,12 +898,11 @@ void physics_world_update() {
 	const int sub_steps = 8;
 	float     dt        = sys_delta() / sub_steps;
 
-	memset(pairs, 0, sizeof(pairs));
-	memset(pair_best, 0, sizeof(pair_best));
+	pairs_clear();
 
 	for (int step = 0; step < sub_steps; step++) {
 		// Sphere-mesh collision
-		for (int i = 0; i < MAX_SPHERES; i++) {
+		for (int i = 0; i < sphere_count; i++) {
 			sphere_t *s = &spheres[i];
 			if (!s->active || s->mass == 0.0f) {
 				continue;
@@ -906,18 +916,18 @@ void physics_world_update() {
 		}
 
 		// Sphere-sphere collision
-		for (int i = 0; i < MAX_SPHERES; i++) {
+		for (int i = 0; i < sphere_count; i++) {
 			if (!spheres[i].active) {
 				continue;
 			}
-			for (int j = i + 1; j < MAX_SPHERES; j++) {
+			for (int j = i + 1; j < sphere_count; j++) {
 				if (spheres[j].active) {
 					collide_sphere_sphere(i, j);
 				}
 			}
 		}
 
-		for (int i = 0; i < MAX_BOXES; i++) {
+		for (int i = 0; i < box_count; i++) {
 			box_t *b = &boxes[i];
 			if (!b->active || b->mass == 0.0f) {
 				continue;
@@ -948,24 +958,25 @@ void physics_world_update() {
 			collide_box_terrain(i);
 		}
 
-		// Box-box collision
-		for (int i = 0; i < MAX_BOXES; i++) {
-			if (!boxes[i].active) {
+		// Box-box collision, static boxes only collide with moving ones
+		for (int i = 0; i < box_count; i++) {
+			if (!boxes[i].active || boxes[i].mass == 0.0f) {
 				continue;
 			}
-			for (int j = i + 1; j < MAX_BOXES; j++) {
-				if (boxes[j].active) {
-					collide_box_box(i, j);
+			for (int j = 0; j < box_count; j++) {
+				if (j == i || !boxes[j].active || (boxes[j].mass != 0.0f && j < i)) {
+					continue;
 				}
+				collide_box_box(i, j);
 			}
 		}
 
 		// Box-sphere collision
-		for (int i = 0; i < MAX_BOXES; i++) {
+		for (int i = 0; i < box_count; i++) {
 			if (!boxes[i].active) {
 				continue;
 			}
-			for (int j = 0; j < MAX_SPHERES; j++) {
+			for (int j = 0; j < sphere_count; j++) {
 				if (spheres[j].active) {
 					collide_box_sphere(i, j);
 				}
@@ -975,14 +986,14 @@ void physics_world_update() {
 
 	// Put bodies that have settled on something to sleep, so they stop entirely
 	float frame_dt = sys_delta();
-	for (int i = 0; i < MAX_SPHERES; i++) {
+	for (int i = 0; i < sphere_count; i++) {
 		sphere_t *s = &spheres[i];
 		if (s->active && s->mass != 0.0f && !s->sleeping) {
 			settling_t settling = {&s->position, NULL, &s->velocity, &rigid_zero, &s->sleep_pos, NULL, &s->sleep_timer, &s->sleeping};
 			sleep_update(settling, pair_best[i] > 0.0f, frame_dt);
 		}
 	}
-	for (int i = 0; i < MAX_BOXES; i++) {
+	for (int i = 0; i < box_count; i++) {
 		box_t *b = &boxes[i];
 		if (b->active && b->mass != 0.0f && !b->sleeping) {
 			settling_t settling = {&b->position, &b->rotation, &b->velocity, &b->angular, &b->sleep_pos, &b->sleep_rot, &b->sleep_timer, &b->sleeping};
@@ -1193,6 +1204,10 @@ static void *body_create(int shape, float mass, float dimx, float dimy, float di
 			return NULL;
 		}
 
+		if (slot >= box_count) {
+			box_count = slot + 1;
+		}
+
 		vec4_t half = {dimx / 2.0f, dimy / 2.0f, dimz / 2.0f};
 
 		boxes[slot] = (box_t){
@@ -1208,6 +1223,9 @@ static void *body_create(int shape, float mass, float dimx, float dimy, float di
 		}
 		if (slot == MAX_SPHERES) {
 			return NULL;
+		}
+		if (slot >= sphere_count) {
+			sphere_count = slot + 1;
 		}
 
 		spheres[slot] = (sphere_t){.position = {x, y, z}, .radius = dimx / 2.0f, .mass = mass, .active = 1};
@@ -1274,10 +1292,10 @@ static void body_wake(void *body) {
 }
 
 static void wake_all() {
-	for (int i = 0; i < MAX_SPHERES; i++) {
+	for (int i = 0; i < sphere_count; i++) {
 		sphere_wake(&spheres[i]);
 	}
-	for (int i = 0; i < MAX_BOXES; i++) {
+	for (int i = 0; i < box_count; i++) {
 		boxes[i].sleeping    = 0;
 		boxes[i].sleep_timer = 0.0f;
 	}
@@ -1505,6 +1523,12 @@ void physics_body_remove(physics_body_t *body) {
 		return;
 	}
 	*body_ref(body->_body).active = 0;
+	while (sphere_count > 0 && !spheres[sphere_count - 1].active) {
+		sphere_count--;
+	}
+	while (box_count > 0 && !boxes[box_count - 1].active) {
+		box_count--;
+	}
 }
 
 float physics_body_get_speed(physics_body_t *body) {
