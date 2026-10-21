@@ -2008,6 +2008,38 @@ vec4_t script_pick_terrain() {
 	return hit;
 }
 
+typedef struct script_click {
+	i32 x;
+	i32 y;
+	i32 button;
+} script_click_t;
+
+static void script_mouse_click_up(void *data) {
+	script_click_t *c = data;
+	iron_internal_mouse_trigger_release(c->button, c->x, c->y);
+	free(c);
+}
+
+static void script_mouse_click_down(void *data) {
+	script_click_t *c = data;
+	iron_internal_mouse_trigger_move(c->x, c->y);
+	ui_mouse_move(g_ui, c->x, c->y, 0, 0);
+	iron_internal_mouse_trigger_press(c->button, c->x, c->y);
+	sys_notify_on_next_frame(script_mouse_click_up, c);
+}
+
+// Press at window pixel x, y next frame and release the frame after, button 0 left, 1 right, 2 middle
+void script_mouse_click(i32 x, i32 y, i32 button) {
+	if (button < 0 || button > 4) {
+		return;
+	}
+	script_click_t *c = malloc(sizeof(script_click_t));
+	c->x              = x;
+	c->y              = y;
+	c->button         = button;
+	sys_notify_on_next_frame(script_mouse_click_down, c);
+}
+
 // The paint objects as mesh_object_t, the scenes meshes
 any_array_t *script_get_mesh_objects() {
 	return (any_array_t *)g_project->_->paint_objects;
