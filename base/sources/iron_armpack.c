@@ -922,3 +922,10 @@ void armpack_map_set_i32(any_map_t *map, char *key, int value) {
 	s.type = 1;
 	any_map_set(map, key, s.p);
 }
+
+void armpack_map_set_f32(any_map_t *map, char *key, float value) {
+	ptr_storage_t s;
+	s.f    = value;
+	s.type = 0;
+	any_map_set(map, key, s.p);
+}
