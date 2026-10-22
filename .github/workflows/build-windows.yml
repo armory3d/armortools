@@ -1,0 +1,67 @@
+# Save this file as .github/workflows/build-windows.yml in your fork
+# of armory3d/armorpaint, then run it from the Actions tab.
+#
+# The compile step mirrors the upstream CI workflow used by the ArmorPaint
+# project itself (windows_direct3d12.yml), so runner compatibility is proven:
+# https://github.com/armory3d/armorpaint/tree/main/.github/workflows
+
+name: Build ArmorPaint (Windows x64)
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Compile (Direct3D12)
+        shell: pwsh
+        run: |
+          Set-Location paint
+          ..\base\make.bat --compile
+
+      - name: Stage portable build
+        shell: pwsh
+        run: |
+          # Find every ArmorPaint.exe produced by the build
+          $exes = Get-ChildItem -Recurse -Filter ArmorPaint.exe -File
+          if (-not $exes) { throw 'ArmorPaint.exe not found - did the compile step fail?' }
+
+          # Prefer a folder that already contains exe + data/ (fully assembled)
+          $stage = ($exes | Where-Object { Test-Path (Join-Path $_.DirectoryName 'data') } |
+                    Select-Object -First 1).DirectoryName
+
+          # Otherwise fall back to the runtime dir under build\ (holds the data/ assets)
+          if (-not $stage) {
+            $dataDir = Get-ChildItem -Path paint\build -Recurse -Directory -Filter data -ErrorAction SilentlyContinue |
+                       Select-Object -First 1
+            if ($dataDir) {
+              $stage = $dataDir.Parent.FullName
+              Copy-Item $exes[0].FullName -Destination $stage -Force
+            } else {
+              # Last resort: ship whatever folder holds the exe
+              $stage = $exes[0].DirectoryName
+            }
+          }
+
+          Write-Host "Staging portable build from: $stage"
+          Compress-Archive -Path "$stage\*" -DestinationPath ArmorPaint-windows-x64.zip -Force
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ArmorPaint-windows-x64
+          path: ArmorPaint-windows-x64.zip
+          retention-days: 14
+          if-no-files-found: error
