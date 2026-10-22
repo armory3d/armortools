@@ -1563,7 +1563,9 @@ void geom_export_add(geom_t *g, char *name, bool flat) {
 	}
 	if (g->uv != NULL) {
 		for (i32 i = 0; i < g->icount; ++i) {
-			geom_write("vt %.6f %.6f\n", g->uv[i * 2], g->uv[i * 2 + 1], 0);
+			f32 u, v;
+			geom_tex(g, i, &u, &v);
+			geom_write("vt %.6f %.6f\n", u, 1.0f - v, 0);
 		}
 	}
 	f32 *n = geom_normals(g);
