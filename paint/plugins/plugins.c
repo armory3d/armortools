@@ -111,10 +111,6 @@ static void *import_fbx(char *path) {
 	return res;
 }
 
-#ifdef WITH_EXTERNAL
-void external_init();
-#endif
-
 void plugins_init() {
 	path_texture_formats(); // Init array
 	any_map_set(import_texture_importers, "exr", import_exr);
@@ -135,10 +131,6 @@ void plugins_init() {
 	any_array_push(_path_mesh_formats, "glb");
 	any_map_set(import_mesh_importers, "fbx", import_fbx);
 	any_array_push(_path_mesh_formats, "fbx");
-
-#ifdef WITH_EXTERNAL
-	external_init();
-#endif
 }
 
 #endif
