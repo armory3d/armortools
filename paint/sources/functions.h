@@ -369,6 +369,7 @@ bool                   ui_toolbar_tool_visible(i32 tool);
 i32                    ui_toolbar_w(bool screen_size_request);
 i32                    ui_toolbar_x();
 void                   ui_toolbar_render_ui();
+void                   ui_toolbar_update();
 void                   export_arm_run_mesh(char *path, mesh_object_t_array_t *paint_objects);
 buffer_t              *export_arm_encode_project(char *path);
 void                   export_arm_run_project(char *path);

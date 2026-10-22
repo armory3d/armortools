@@ -73,6 +73,24 @@ void ui_toolbar_tool_properties_menu() {
 	ui_menu_draw(&ui_toolbar_tool_properties_menu_draw, x + g_ui->_x + g_ui->_w + 6 * UI_SCALE(), y);
 }
 
+static bool _ui_toolbar_right_click = false;
+
+void ui_toolbar_update() {
+	if (mouse_started("right")) {
+		_ui_toolbar_right_click = context_is_floating_toolbar() && context_in_paint_area() && !g_config->touch_ui && !base_player && !ui_menu_show &&
+		                          !ui_box_show && !g_ui->is_typing && g_context->tool != TOOL_TYPE_PATH && g_context->tool != TOOL_TYPE_CURVE;
+	}
+	else if (mouse_down("right") && mouse_moved) {
+		_ui_toolbar_right_click = false;
+	}
+	else if (mouse_released("right")) {
+		if (_ui_toolbar_right_click && !mouse_moved && context_in_paint_area()) {
+			ui_menu_draw(&ui_toolbar_tool_properties_menu_draw, -1, -1);
+		}
+		_ui_toolbar_right_click = false;
+	}
+}
+
 void ui_toolbar_draw_highlight(u32 col) {
 	i32 size = ui_toolbar_w(false) - 4;
 	draw_set_color(col);
@@ -96,9 +114,20 @@ static ui_state_t ui_toolbar_draw_icon(bool selected, bool visible, i32 tile_i, 
 	}
 
 	rect_t *rect = resource_tile50(img, tile_i);
+	i32     _y   = g_ui->_y;
 	g_ui->_x -= 2;
 	ui_state_t image_state = ui_sub_image(img, icon_accent, -1.0, rect->x, rect->y, rect->w, rect->h);
 	g_ui->_x += 2;
+
+	// Clicking the selected tool again opens its properties
+	if (selected && context_is_floating_toolbar()) {
+		float aw = 4 * UI_SCALE();
+		float ah = 8 * UI_SCALE();
+		float ax = g_ui->_x + size - aw;
+		float ay = _y + 4 + size - 2 * UI_SCALE() - ah;
+		draw_set_color(g_theme->LABEL_COL);
+		draw_filled_triangle(ax, ay, ax, ay + ah, ax + aw, ay + ah / 2.0);
+	}
 	return image_state;
 }
 
@@ -245,7 +274,6 @@ void ui_toolbar_draw_show_3d_view() {
 
 static void ui_toolbar_draw_window(ui_window_t *handle, i32 x, i32 y, i32 h) {
 	if (ui_window(handle, x, y, ui_toolbar_w(false), h, false)) {
-		g_ui->_y -= 4 * UI_SCALE();
 		g_ui->image_scroll_align   = false;
 		gpu_texture_t *img         = resource_get("icons.k");
 		u32            col         = g_theme->WINDOW_BG_COL;
@@ -254,39 +282,16 @@ static void ui_toolbar_draw_window(ui_window_t *handle, i32 x, i32 y, i32 h) {
 
 		// Properties icon
 		if (!context_is_floating_toolbar()) {
+			g_ui->_y -= 4 * UI_SCALE();
 			rect_t *rect = resource_tile50(img, ICON_PROPERTIES);
 			if (ui_sub_image(img, light ? 0xff666666 : g_theme->BUTTON_COL, -1.0, rect->x, rect->y, rect->w, rect->h) == UI_STATE_RELEASED) {
 				g_config->header_pinned = false;
 			}
-		}
-		// Draw ">" button if header is hidden
-		else {
-			i32 _ELEMENT_H      = g_theme->ELEMENT_H;
-			i32 _BUTTON_H       = g_theme->BUTTON_H;
-			i32 _BUTTON_COL     = g_theme->BUTTON_COL;
-			i32 _fontOffsetY    = g_ui->font_offset_y;
-			g_theme->ELEMENT_H  = math_floor(g_theme->ELEMENT_H * 1.5);
-			g_theme->BUTTON_H   = g_theme->ELEMENT_H;
-			g_theme->BUTTON_COL = g_theme->WINDOW_BG_COL;
-			i32 font_height     = draw_font_height(g_font, g_ui->font_size);
-			g_ui->font_offset_y = (UI_ELEMENT_H() - font_height) / 2.0;
-			i32 _w              = g_ui->_w;
-			g_ui->_w            = ui_toolbar_w(false);
-
-			if (ui_button(">", UI_ALIGN_CENTER, "")) {
-				ui_toolbar_tool_properties_menu();
+			if (g_ui->is_hovered) {
+				ui_tooltip(tr("Toggle header"));
 			}
-
-			g_ui->_w            = _w;
-			g_theme->ELEMENT_H  = _ELEMENT_H;
-			g_theme->BUTTON_H   = _BUTTON_H;
-			g_theme->BUTTON_COL = _BUTTON_COL;
-			g_ui->font_offset_y = _fontOffsetY;
+			g_ui->_y -= 4 * UI_SCALE();
 		}
-		if (g_ui->is_hovered) {
-			ui_tooltip(tr("Toggle header"));
-		}
-		g_ui->_y -= 4 * UI_SCALE();
 
 		if (g_config->tools == TOOLS_SCULPT) {
 			for (i32 i = 0; i <= SCULPT_TYPE_PLATEAU; ++i) {
@@ -352,7 +357,7 @@ void ui_toolbar_render_ui() {
 			x = base_view_x(0) + ui_toolbar_x();
 		}
 		y                      = _ui_toolbar_y + ui_header_h + ui_toolbar_x() + 3 * UI_SCALE();
-		h                      = (ui_toolbar_item_count() + 1) * (ui_toolbar_w(false) + 2);
+		h                      = ui_toolbar_item_count() * (ui_toolbar_w(false) + 2);
 		g_theme->WINDOW_BG_COL = g_theme->SEPARATOR_COL;
 		if (!base_view3d_show && ui_view2d_show && !g_config->touch_ui) {
 			y += ui_toolbar_w(false);

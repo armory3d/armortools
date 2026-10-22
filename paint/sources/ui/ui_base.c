@@ -174,6 +174,7 @@ void ui_base_update(void *_) {
 		util_shortcut_global();
 		util_shortcut_brush();
 		util_shortcut_viewport();
+		ui_toolbar_update();
 		util_particle_update();
 	}
 
