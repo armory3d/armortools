@@ -58,6 +58,11 @@ void base_save_and_quit_callback(bool save) {
 	}
 }
 
+void base_material_dropped_export(char *path) {
+	export_arm_run_material(path);
+	tab_browser_refresh = true;
+}
+
 void base_material_dropped() {
 	// Material drag and dropped onto viewport or layers tab
 	if (context_in_3d_view()) {
@@ -78,6 +83,15 @@ void base_material_dropped() {
 	}
 	else if (context_in_meshes()) {
 		tab_meshes_accept_material_drop(base_drag_material);
+	}
+	else if (context_in_browser() && iron_is_directory(tab_browser_path)) {
+		// Export material into the browser directory
+		char *name = base_drag_material->canvas->name;
+		char *path = string("%s%s%s.arm", tab_browser_path, PATH_SEP, name);
+		for (i32 i = 1; iron_file_exists(path); ++i) {
+			path = string("%s%s%s.%03d.arm", tab_browser_path, PATH_SEP, name, i);
+		}
+		sys_notify_on_next_frame(&base_material_dropped_export, path);
 	}
 	base_drag_material = NULL;
 }
