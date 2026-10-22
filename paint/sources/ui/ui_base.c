@@ -61,11 +61,10 @@ void ui_base_init() {
 
 	string_array_t *resources = any_array_create_from_raw(
 	    (void *[]){
-	        "cursor.k",
 	        "icons.k",
 	        "icons05x.k",
 	    },
-	    3);
+	    2);
 	resource_load(resources);
 
 	f32           scale = g_config->window_scale;

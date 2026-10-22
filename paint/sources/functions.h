@@ -248,6 +248,7 @@ rect_t                *ui_base_get_brush_stencil_rect();
 bool                   ui_base_hit_rect(f32 mx, f32 my, i32 x, i32 y, i32 w, i32 h);
 void                   ui_base_update_ui();
 void                   ui_base_update(void *_);
+void                   util_cursor_draw_2d(f32 cx, f32 cy, f32 radius, i32 color);
 void                   util_cursor_render(void *_);
 tab_draw_t            *_draw_callback_create(void (*f)(i32 *), i32 id, char *name, i32 area);
 tab_draw_t            *ui_base_get_tab(i32 id);

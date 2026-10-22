@@ -802,10 +802,7 @@ void ui_view2d_update(void *_) {
 
 		// Picked position
 		if (g_context->tool == TOOL_TYPE_PICKER && (ui_view2d_type == VIEW_2D_TYPE_LAYER || ui_view2d_type == VIEW_2D_TYPE_ASSET)) {
-			gpu_texture_t *cursor_img = resource_get("cursor.k");
-			f32            hsize      = 16 * UI_SCALE();
-			f32            size       = hsize * 2;
-			draw_scaled_image(cursor_img, tx + tw * g_context->uvx_picked - hsize, ty + th * g_context->uvy_picked - hsize, size, size);
+			util_cursor_draw_2d(tx + tw * g_context->uvx_picked, ty + th * g_context->uvy_picked, 15 * UI_SCALE(), 0x99ffffff);
 		}
 	}
 	ui_end();
