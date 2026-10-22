@@ -706,7 +706,7 @@ i32 base_h() {
 
 // The cursor hovering the 2D view is mapped the same way as while painting in it,
 // the stroke begins at the last hovered position
-static bool base_paint_in_2d() {
+bool base_paint_in_2d() {
 	// The brush inputs are read before the 2D view updates paint2d for the frame,
 	// keep the view the stroke was started in
 	static bool started_in_2d = false;
@@ -720,40 +720,50 @@ static bool base_paint_in_2d() {
 	return in_2d;
 }
 
-// 2D view paints in 3D viewport coordinates, placed right next to the viewport
+// Paint coordinates are relative to the view being painted, the 2D view is a 3D view of the layer plane
+i32 base_paint_view_x() {
+	return base_paint_in_2d() ? ui_view2d_wx : base_x();
+}
+
+i32 base_paint_view_y() {
+	return base_paint_in_2d() ? ui_view2d_wy + ui_view2d_top() : base_y();
+}
+
+i32 base_paint_view_w() {
+	return base_paint_in_2d() ? ui_view2d_ww : base_w();
+}
+
+i32 base_paint_view_h() {
+	return base_paint_in_2d() ? ui_view2d_wh - ui_view2d_top() : base_h();
+}
+
 f32 base_paint_x(f32 screen_x) {
-	if (base_paint_in_2d()) {
-		return 1.0 + (screen_x - ui_view2d_wx) / (f32)base_w();
-	}
-	return (screen_x - base_x()) / (f32)base_w();
+	return (screen_x - base_paint_view_x()) / (f32)base_paint_view_w();
 }
 
 f32 base_paint_y(f32 screen_y) {
-	if (base_paint_in_2d()) {
-		return (screen_y - ui_view2d_wy - ui_view2d_top()) / (f32)(ui_view2d_wh - ui_view2d_top());
-	}
-	return (screen_y - base_y()) / (f32)base_h();
+	return (screen_y - base_paint_view_y()) / (f32)base_paint_view_h();
 }
 
 f32 base_paint_screen_x(f32 paint_x) {
-	if (base_paint_in_2d()) {
-		return ui_view2d_wx + (paint_x - 1.0) * base_w();
-	}
-	return base_x() + paint_x * base_w();
+	return base_paint_view_x() + paint_x * base_paint_view_w();
 }
 
 f32 base_paint_screen_y(f32 paint_y) {
-	if (base_paint_in_2d()) {
-		return ui_view2d_wy + ui_view2d_top() + paint_y * (ui_view2d_wh - ui_view2d_top());
-	}
-	return base_y() + paint_y * base_h();
+	return base_paint_view_y() + paint_y * base_paint_view_h();
 }
 
 i32 base_x() {
+	if (g_context->paint2d_view) {
+		return ui_view2d_wx;
+	}
 	return base_view_x(base_view_index());
 }
 
 i32 base_y() {
+	if (g_context->paint2d_view) {
+		return ui_view2d_wy + ui_view2d_top();
+	}
 	return base_appy;
 }
 

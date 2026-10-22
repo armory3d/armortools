@@ -39,16 +39,9 @@ static void input_node_grid_snap() {
 	f32 tw;
 	f32 th;
 	if (in_2d) {
-		i32 apph = ui_view2d_wh + ui_view2d_top();
-		i32 wm   = fmin(ui_view2d_ww, ui_view2d_wh);
-		i32 itw = wm * 0.9 * ui_view2d_pan_scale;
-		i32 ith = itw * (tex->height / (float)tex->width);
-		i32 itx = ui_view2d_ww / 2.0 - itw / 2.0 + ui_view2d_pan_x;
-		i32 ity = apph / 2.0 - ith / 2.0 + ui_view2d_pan_y;
-		tw      = itw;
-		th      = ith;
-		tx      = ui_view2d_wx + itx;
-		ty      = ui_view2d_wy + ity;
+		ui_view2d_tex_rect(tex->height / (float)tex->width, &tx, &ty, &tw, &th);
+		tx += ui_view2d_wx;
+		ty += ui_view2d_wy;
 	}
 	else {
 		f32 wm = fmin(base_w(), base_h());
@@ -58,10 +51,8 @@ static void input_node_grid_snap() {
 		ty     = base_y() + base_h() / 2.0 - th / 2.0;
 	}
 
-	// 2D view coords begin past the 3D viewport
-	i32 view2d_h = ui_view2d_wh - ui_view2d_top();
-	f32 sx       = in_2d ? ui_view2d_wx + (input_node_coords.x - 1.0) * base_w() : input_node_coords.x * base_w() + base_x();
-	f32 sy       = in_2d ? ui_view2d_wy + ui_view2d_top() + input_node_coords.y * view2d_h : input_node_coords.y * base_h() + base_y();
+	f32 sx = base_paint_screen_x(input_node_coords.x);
+	f32 sy = base_paint_screen_y(input_node_coords.y);
 
 	// Snap to nearest cell center
 	f32 u    = (sx - tx) / tw;
@@ -72,8 +63,8 @@ static void input_node_grid_snap() {
 	sx       = tx + (px / tex->width) * tw;
 	sy       = ty + (py / tex->height) * th;
 
-	input_node_coords.x = in_2d ? 1.0 + (sx - ui_view2d_wx) / base_w() : (sx - base_x()) / base_w();
-	input_node_coords.y = in_2d ? (sy - ui_view2d_wy - ui_view2d_top()) / view2d_h : (sy - base_y()) / base_h();
+	input_node_coords.x = base_paint_x(sx);
+	input_node_coords.y = base_paint_y(sy);
 }
 
 void input_node_update(float_node_t *self) {

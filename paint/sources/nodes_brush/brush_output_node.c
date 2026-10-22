@@ -98,20 +98,15 @@ void brush_output_node_run() {
 	f32 top    = 0.0;
 	f32 bottom = 1.0;
 
-	if (g_context->paint2d) {
-		left  = 1.0;
-		right = 1.0 + ui_view2d_ww / (float)base_w();
-	}
-
-	// Do not paint over floating toolbar
-	if (context_is_floating_toolbar()) {
+	// Do not paint over floating toolbar, it floats in the 2D view when there is no 3D view
+	if (context_is_floating_toolbar() && base_paint_in_2d() == !base_view3d_show) {
 		i32 w = ui_toolbar_x() + ui_toolbar_w(false);
-		left += w / (float)sys_w();
-		top += w / (float)sys_h();
+		left += w / (float)base_paint_view_w();
+		top += w / (float)base_paint_view_h();
 
 #ifdef IRON_IOS
 		if (config_is_iphone()) {
-			top += w / (float)sys_h();
+			top += w / (float)base_paint_view_h();
 		}
 #endif
 	}

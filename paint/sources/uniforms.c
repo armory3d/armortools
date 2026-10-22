@@ -16,7 +16,6 @@ f32 uniforms_ext_f32_link(object_t *object, shader_data_t *mat, char *link) {
 		bool decal                   = context_is_decal();
 		bool decal_mask              = context_is_decal_mask_paint_pass();
 		f32  brush_decal_mask_radius = g_context->brush_decal_mask_radius;
-		bool paint2d                 = g_context->paint2d || g_context->paint2d_view;
 		brush_decal_mask_radius *= 2.0;
 		f32 radius = decal_mask ? brush_decal_mask_radius : g_context->brush_radius;
 		f32 val    = (radius * g_context->brush_nodes_radius) / 15.0;
@@ -25,13 +24,13 @@ f32 uniforms_ext_f32_link(object_t *object, shader_data_t *mat, char *link) {
 		}
 		f32 scale2d = (900 / (float)base_h()) * g_config->window_scale;
 		if (!decal) {
-			val *= paint2d ? 0.5 * 0.5 * scale2d * ui_view2d_pan_scale : 2;
+			val *= 2;
 		}
 		else if (decal_mask) {
-			val *= paint2d ? 0.5 * 0.5 * scale2d * ui_view2d_pan_scale : scale2d;
+			val *= scale2d;
 		}
 		else {
-			val *= paint2d ? 0.5 * 0.5 * scale2d * ui_view2d_pan_scale : scale2d * 2.0;
+			val *= scale2d * 2.0;
 		}
 		return val;
 	}
@@ -199,14 +198,6 @@ vec2_t uniforms_ext_vec2_link(object_t *object, shader_data_t *mat, char *link) 
 	return vec2_nan();
 }
 
-f32 uniforms_ext_vec2d(f32 x) {
-	// Transform from 3d viewport coord to 2d view coord
-	g_context->paint2d_view = false;
-	f32 res                 = (x * base_w() - base_w()) / (float)ui_view2d_ww;
-	g_context->paint2d_view = true;
-	return res;
-}
-
 vec4_t uniforms_ext_vec3_link(object_t *object, shader_data_t *mat, char *link) {
 	vec4_t v = vec4_nan();
 	if (string_equals(link, "_brush_direction")) {
@@ -217,10 +208,6 @@ vec4_t uniforms_ext_vec3_link(object_t *object, shader_data_t *mat, char *link) 
 		f32 y     = g_context->paint_vec.y;
 		f32 lastx = g_context->prev_paint_vec_x;
 		f32 lasty = g_context->prev_paint_vec_y;
-		if (g_context->paint2d) {
-			x     = uniforms_ext_vec2d(x);
-			lastx = uniforms_ext_vec2d(lastx);
-		}
 		f32 angle                   = math_atan2(-y + lasty, x - lastx) - math_pi() / 2.0;
 		v                           = (vec4_t){math_cos(angle), math_sin(angle), allow_paint ? 1 : 0, 1.0};
 		g_context->prev_paint_vec_x = g_context->last_paint_vec_x;
@@ -279,20 +266,12 @@ vec4_t uniforms_ext_vec3_link(object_t *object, shader_data_t *mat, char *link) 
 vec4_t uniforms_ext_vec4_link(object_t *object, shader_data_t *mat, char *link) {
 	if (string_equals(link, "_input_brush")) {
 		bool   down = mouse_down("left") || pen_down("tip");
-		vec4_t v    = (vec4_t){g_context->paint_vec.x, g_context->paint_vec.y, down ? 1.0 : 0.0, g_context->paint2d ? 1.0 : 0.0};
-		if (g_context->paint2d) {
-			v.x = uniforms_ext_vec2d(v.x);
-		}
-
+		vec4_t v    = (vec4_t){g_context->paint_vec.x, g_context->paint_vec.y, down ? 1.0 : 0.0, 0.0};
 		return v;
 	}
 	else if (string_equals(link, "_input_brush_last")) {
 		bool   down = mouse_down("left") || pen_down("tip");
-		vec4_t v    = (vec4_t){g_context->last_paint_vec_x, g_context->last_paint_vec_y, down ? 1.0 : 0.0, g_context->paint2d ? 1.0 : 0.0};
-		if (g_context->paint2d) {
-			v.x = uniforms_ext_vec2d(v.x);
-		}
-
+		vec4_t v    = (vec4_t){g_context->last_paint_vec_x, g_context->last_paint_vec_y, down ? 1.0 : 0.0, 0.0};
 		return v;
 	}
 	else if (string_equals(link, "_envmap_data")) {
@@ -304,21 +283,14 @@ vec4_t uniforms_ext_vec4_link(object_t *object, shader_data_t *mat, char *link) 
 	}
 	else if (string_equals(link, "_stencil_transform")) {
 		vec4_t v = (vec4_t){g_context->brush_stencil_x, g_context->brush_stencil_y, g_context->brush_stencil_scale, g_context->brush_stencil_angle};
-		if (g_context->paint2d) {
-			v.x = uniforms_ext_vec2d(v.x);
-		}
-
 		return v;
 	}
 	else if (string_equals(link, "_decal_mask")) {
 		bool decal_mask = context_is_decal_mask_paint_pass();
 		f32  val        = (g_context->brush_radius * g_context->brush_nodes_radius) / 15.0;
 		f32  scale2d    = (900 / (float)base_h()) * g_config->window_scale;
-		val *= g_context->paint2d ? 0.5 * 0.5 * scale2d * ui_view2d_pan_scale : scale2d * 2.0;
+		val *= scale2d * 2.0;
 		vec4_t v = (vec4_t){g_context->decal_x, g_context->decal_y, decal_mask ? 1 : 0, val};
-		if (g_context->paint2d) {
-			v.x = uniforms_ext_vec2d(v.x);
-		}
 		return v;
 	}
 	else if (string_equals(link, "_select_mask")) {

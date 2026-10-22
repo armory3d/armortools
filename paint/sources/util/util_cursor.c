@@ -65,17 +65,22 @@ void util_cursor_render(void *_) {
 	gpu_texture_t *cursor_img = resource_get("cursor.k");
 	i32            psize      = math_floor(182 * (g_context->brush_radius * 0.5 * g_context->brush_nodes_radius) * UI_SCALE());
 
+	// The 2D view sees the layer plane, brush radius is in world units as in the 3D view
+	bool in_2d   = context_in_2d_view(VIEW_2D_TYPE_LAYER);
+	f32  scale2d = (900 / (f32)base_paint_view_h()) * g_config->window_scale;
+	f32  world2d = ui_view2d_world_scale();
+
 	// Clone source cursor
 	if (g_context->tool == TOOL_TYPE_CLONE && !keyboard_down("alt") && (mouse_down("left") || pen_down("tip"))) {
 		draw_set_color(0x66ffffff);
-		draw_scaled_image(cursor_img, mx + g_context->clone_delta_x * sys_w() - psize / 2.0, my + g_context->clone_delta_y * sys_h() - psize / 2.0, psize,
-		                  psize);
+		draw_scaled_image(cursor_img, mx + g_context->clone_delta_x * base_paint_view_w() - psize / 2.0,
+		                  my + g_context->clone_delta_y * base_paint_view_h() - psize / 2.0, psize, psize);
 		draw_set_color(0xffffffff);
 	}
 
 	bool decal = context_is_decal();
 
-	if (context_in_2d_view(VIEW_2D_TYPE_LAYER) || decal) {
+	if (in_2d || decal) {
 		bool decal_mask = context_is_decal_mask();
 		if (decal && !context_in_nodes()) {
 			f32 decal_alpha = 0.5;
@@ -85,10 +90,11 @@ void util_cursor_render(void *_) {
 				decal_alpha        = g_context->brush_opacity;
 			}
 
-			if (!g_config->brush_live && (!context_is_decal() || context_in_2d_view(VIEW_2D_TYPE_LAYER))) {
-				i32 psizex = math_floor(182 * 0.5 * 0.92 * UI_SCALE() * (g_context->brush_radius * g_context->brush_nodes_radius * g_context->brush_scale_x) *
-				                        ui_view2d_pan_scale);
-				i32 psizey = math_floor(182 * 0.5 * 0.92 * UI_SCALE() * (g_context->brush_radius * g_context->brush_nodes_radius) * ui_view2d_pan_scale);
+			if (!g_config->brush_live && (!context_is_decal() || in_2d)) {
+				// Decal image spans twice the radius
+				f32 radius = g_context->brush_radius * g_context->brush_nodes_radius / 15.0 * scale2d * 2.0;
+				i32 psizey = math_floor(radius * 2.0 * world2d);
+				i32 psizex = math_floor(psizey * g_context->brush_scale_x);
 
 				f32 decalx = base_paint_screen_x(g_context->decal_x) - psizex / 2.0;
 				f32 decaly = base_paint_screen_y(g_context->decal_y) - psizey / 2.0;
@@ -102,13 +108,10 @@ void util_cursor_render(void *_) {
 			}
 		}
 		if (g_context->tool == TOOL_TYPE_BRUSH || g_context->tool == TOOL_TYPE_ERASER || g_context->tool == TOOL_TYPE_CLONE ||
-		    g_context->tool == TOOL_TYPE_BLUR || g_context->tool == TOOL_TYPE_PARTICLE || (decal_mask && context_in_2d_view(VIEW_2D_TYPE_LAYER))) {
-			if (decal_mask) {
-				psize = math_floor(cursor_img->width * (g_context->brush_decal_mask_radius * g_context->brush_nodes_radius) * UI_SCALE());
-			}
-			if (context_in_2d_view(VIEW_2D_TYPE_LAYER)) {
-				psize = math_floor(psize * ui_view2d_pan_scale);
-			}
+		    g_context->tool == TOOL_TYPE_BLUR || g_context->tool == TOOL_TYPE_PARTICLE || (decal_mask && in_2d)) {
+			// The 3D view draws its own cursor, the circle covers 92% of the cursor image
+			f32 radius = decal_mask ? g_context->brush_decal_mask_radius * 2.0 / 15.0 * scale2d : g_context->brush_radius / 15.0 * 2.0;
+			psize      = math_floor(radius * g_context->brush_nodes_radius * 2.0 * world2d / 0.92);
 			draw_scaled_image(cursor_img, mx - psize / 2.0, my - psize / 2.0, psize, psize);
 		}
 	}

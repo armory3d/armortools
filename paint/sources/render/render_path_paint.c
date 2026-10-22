@@ -28,7 +28,7 @@ mesh_object_t   *render_path_paint_painto                = NULL;
 mesh_object_t   *render_path_paint_planeo                = NULL;
 u8_array_t      *render_path_paint_visibles              = NULL;
 bool             render_path_paint_merged_object_visible = false;
-f32              render_path_paint_saved_fov             = 0.0;
+f32_array_t     *render_path_paint_saved_ortho           = NULL;
 render_target_t *_render_path_paint_texpaint;
 render_target_t *_render_path_paint_texpaint_nor;
 render_target_t *_render_path_paint_texpaint_pack;
@@ -808,6 +808,11 @@ void render_path_paint_commands_cursor() {
 		return;
 	}
 
+	// Paint coordinates point into the 2D view, it draws its own cursor
+	if (base_paint_in_2d()) {
+		return;
+	}
+
 	f32 mx = g_context->paint_vec.x;
 	f32 my = 1.0 - g_context->paint_vec.y;
 
@@ -817,7 +822,7 @@ void render_path_paint_commands_cursor() {
 		brush_nodes_radius = 1.0;
 	}
 
-	if (context_is_decal() && !g_context->paint2d) {
+	if (context_is_decal()) {
 		f32            scale2d = (900 / (f32)base_h()) * g_config->window_scale;
 		f32            radius  = brush_nodes_radius * g_context->brush_radius / 15.0 * scale2d * 2.0;
 		f32            cmx     = decal_mask ? g_context->decal_x : mx;
@@ -1059,25 +1064,28 @@ void render_path_paint_set_plane_mesh() {
 		g_context->merged_object->base->visible = false;
 	}
 
-	camera_object_t *cam        = scene_camera;
-	g_context->saved_camera     = cam->base->transform->local;
-	render_path_paint_saved_fov = cam->data->fov;
-	viewport_update_camera_type(CAMERA_TYPE_PERSPECTIVE);
-	mat4_t m = mat4_identity();
-	m        = mat4_translate(m, 0, 0, 0.5);
-	transform_set_matrix(cam->base->transform, m);
-	cam->data->fov = 0.69;
+	// Camera looks down at the layer plane, the ortho bounds place the plane where the 2D view shows the texture
+	camera_object_t *cam          = scene_camera;
+	g_context->saved_camera       = cam->base->transform->local;
+	render_path_paint_saved_ortho = cam->data->ortho;
+	transform_set_matrix(cam->base->transform, mat4_translate(mat4_identity(), 0, 0, 1));
+	f32 ratio = config_get_texture_res_y() / (float)config_get_texture_res_x();
+	f32 tx, ty, tw, th;
+	ui_view2d_tex_rect(ratio, &tx, &ty, &tw, &th);
+	f32                 s     = ui_view2d_world_scale();
+	f32                 cx    = tx + tw / 2.0;
+	f32                 cy    = ty + th / 2.0 - ui_view2d_top();
+	static f32_array_t *ortho = NULL;
+	if (ortho == NULL) {
+		ortho = f32_array_create(4);
+	}
+	ortho->buffer[0] = -cx / s;
+	ortho->buffer[1] = (base_w() - cx) / s;
+	ortho->buffer[2] = -(base_h() - cy) / s;
+	ortho->buffer[3] = cy / s;
+	cam->data->ortho = ortho;
 	camera_object_build_proj(cam, -1.0);
 	camera_object_build_mat(cam);
-	f32 tw    = 0.9 * ui_view2d_pan_scale * (fmin(ui_view2d_ww, ui_view2d_wh) / ui_view2d_ww);
-	f32 tx    = ui_view2d_pan_x / (float)ui_view2d_ww;
-	f32 ty    = ui_view2d_pan_y / (float)sys_h();
-	m         = mat4_identity();
-	m         = mat4_scale(m, (vec4_t){tw, tw, 1, 1.0});
-	m         = mat4_set_loc(m, (vec4_t){tx, ty, 0, 1.0});
-	mat4_t m2 = mat4_identity();
-	m2        = mat4_inv(scene_camera->vp);
-	m         = mat4_mult_mat(m, m2);
 
 	bool tiled = ui_view2d_tiled_show;
 	if (tiled && scene_get_child(".PlaneTiled") == NULL) {
@@ -1140,22 +1148,17 @@ void render_path_paint_set_plane_mesh() {
 
 	render_path_paint_planeo = scene_get_child(tiled ? ".PlaneTiled" : ".Plane")->ext;
 
-	render_path_paint_planeo->base->visible = true;
-	g_context->paint_object                 = render_path_paint_planeo;
-
-	vec4_t v                                         = (vec4_t){m.m00, m.m01, m.m02, 1.0};
-	f32    sx                                        = vec4_len(v);
+	render_path_paint_planeo->base->visible          = true;
+	g_context->paint_object                          = render_path_paint_planeo;
+	render_path_paint_planeo->base->transform->loc   = (vec4_t){0.0, 0.0, 0.0, 1.0};
 	render_path_paint_planeo->base->transform->rot   = quat_from_euler(-math_pi() / 2.0, 0, 0);
-	render_path_paint_planeo->base->transform->scale = (vec4_t){sx, 1.0, sx, 1.0};
-	render_path_paint_planeo->base->transform->scale.z *= config_get_texture_res_y() / (float)config_get_texture_res_x();
-	render_path_paint_planeo->base->transform->loc = (vec4_t){m.m30, -m.m31, 0.0, 1.0};
+	render_path_paint_planeo->base->transform->scale = (vec4_t){2.0, 1.0, 2.0 * ratio, 1.0};
 	transform_build_matrix(render_path_paint_planeo->base->transform);
 }
 
 void render_path_paint_restore_plane_mesh() {
-	g_context->paint2d_view                        = false;
-	render_path_paint_planeo->base->visible        = false;
-	render_path_paint_planeo->base->transform->loc = (vec4_t){0.0, 0.0, 0.0, 1.0};
+	g_context->paint2d_view                 = false;
+	render_path_paint_planeo->base->visible = false;
 	for (i32 i = 0; i < g_project->_->paint_objects->length; ++i) {
 		g_project->_->paint_objects->buffer[i]->base->visible = render_path_paint_visibles->buffer[i];
 	}
@@ -1164,10 +1167,10 @@ void render_path_paint_restore_plane_mesh() {
 	}
 	g_context->paint_object = render_path_paint_painto;
 	transform_set_matrix(scene_camera->base->transform, g_context->saved_camera);
-	scene_camera->data->fov = render_path_paint_saved_fov;
-	viewport_update_camera_type(g_context->camera_type);
+	scene_camera->data->ortho = render_path_paint_saved_ortho;
 	camera_object_build_proj(scene_camera, -1.0);
 	camera_object_build_mat(scene_camera);
+	g_context->ddirty = 2;
 
 	render_path_base_draw_gbuffer();
 }

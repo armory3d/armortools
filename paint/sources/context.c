@@ -346,7 +346,7 @@ bool context_object_mask_used() {
 }
 
 bool context_in_3d_view() {
-	return g_context->paint_vec.x < 1 && g_context->paint_vec.x > 0 && g_context->paint_vec.y < 1 && g_context->paint_vec.y > 0;
+	return !base_paint_in_2d() && g_context->paint_vec.x < 1 && g_context->paint_vec.x > 0 && g_context->paint_vec.y < 1 && g_context->paint_vec.y > 0;
 }
 
 bool context_in_paint_area() {

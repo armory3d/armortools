@@ -740,8 +740,6 @@ void util_layer_add_path_point(slot_layer_t *l, f32 screen_x, f32 screen_y) {
 
 	bool _paint2d = g_context->paint2d;
 	if (_paint2d) {
-		// Convert 2D view x-coordinate [1, 1+ww/base_w] to 3D range [0, 1]
-		screen_x = (screen_x * base_w() - base_w()) / (float)ui_view2d_ww;
 		render_path_paint_set_plane_mesh();
 		g_context->paint2d = false;
 	}

@@ -272,6 +272,20 @@ i32 ui_view2d_top() {
 	return ui_base_show ? ui_header_h * 2 : 0;
 }
 
+// Rect of the shown image relative to the window, the layer plane fills it when painting
+void ui_view2d_tex_rect(f32 aspect, f32 *x, f32 *y, f32 *w, f32 *h) {
+	f32 wm = fmin(ui_view2d_ww, ui_view2d_wh);
+	*w     = wm * 0.9 * ui_view2d_pan_scale;
+	*h     = *w * aspect;
+	*x     = ui_view2d_ww / 2.0 - *w / 2.0 + ui_view2d_pan_x;
+	*y     = (ui_view2d_wh + ui_view2d_top()) / 2.0 - *h / 2.0 + ui_view2d_pan_y;
+}
+
+// Pixels per world unit, the layer plane is 2 units wide like the default 3D mesh to share the brush radius
+f32 ui_view2d_world_scale() {
+	return fmin(ui_view2d_ww, ui_view2d_wh) * 0.9 * ui_view2d_pan_scale / 2.0;
+}
+
 void ui_view2d_update(void *_) {
 	f32 headerh = UI_ELEMENT_H() * 1.4;
 
@@ -337,17 +351,11 @@ void ui_view2d_update(void *_) {
 
 			if (g_config->touch_ui) {
 				// Paint only when clicking on the layer rect
-				slot_layer_t  *layer = g_context->layer;
-				gpu_texture_t *tex   = layer->texpaint;
-				f32            ratio = tex->height / (float)tex->width;
-				f32            wm    = fmin(ui_view2d_ww, ui_view2d_wh);
-				f32            tw    = wm * 0.9 * ui_view2d_pan_scale;
-				f32            th    = tw * ratio;
-				f32            tx    = ui_view2d_ww / 2.0 - tw / 2.0 + ui_view2d_pan_x;
-				i32            apph  = ui_view2d_wh + ui_view2d_top();
-				f32            ty    = apph / 2.0 - th / 2.0 + ui_view2d_pan_y;
-				f32            mx    = mouse_x - ui_view2d_wx;
-				f32            my    = mouse_y - ui_view2d_wy;
+				gpu_texture_t *tex = g_context->layer->texpaint;
+				f32            tx, ty, tw, th;
+				ui_view2d_tex_rect(tex->height / (float)tex->width, &tx, &ty, &tw, &th);
+				f32 mx = mouse_x - ui_view2d_wx;
+				f32 my = mouse_y - ui_view2d_wy;
 				if (mx > tx && mx < tx + tw && my > ty && my < ty + th) {
 					ui_view2d_layer_touched = true;
 				}
@@ -443,8 +451,6 @@ void ui_view2d_update(void *_) {
 
 	ui_begin(g_ui);
 
-	i32 apph = ui_view2d_wh + ui_view2d_top();
-
 	if (ui_window(ui_view2d_hwnd, ui_view2d_wx, ui_view2d_wy, ui_view2d_ww, ui_view2d_wh, false)) {
 
 		if (!g_config->touch_ui && ui_base_show) {
@@ -465,11 +471,6 @@ void ui_view2d_update(void *_) {
 		gpu_texture_t *tex     = NULL;
 		slot_layer_t  *l       = g_context->layer;
 		i32            channel = 0;
-
-		i32 wm = fmin(ui_view2d_ww, ui_view2d_wh);
-		i32 tw = wm * 0.9 * ui_view2d_pan_scale;
-		i32 tx = ui_view2d_ww / 2.0 - tw / 2.0 + ui_view2d_pan_x;
-		i32 ty = apph / 2.0 - tw / 2.0 + ui_view2d_pan_y;
 
 		if (ui_view2d_type == VIEW_2D_TYPE_ASSET) {
 			tex = project_get_image(g_context->texture);
@@ -535,16 +536,16 @@ void ui_view2d_update(void *_) {
 		}
 #ifdef IRON_AUDIO
 		else if (ui_view2d_type == VIEW_2D_TYPE_SOUND && g_context->sound != NULL) {
-			i32 sw = ui_view2d_ww * 0.9 * ui_view2d_pan_scale;
-			i32 sh = wm * 0.5;
+			i32 apph = ui_view2d_wh + ui_view2d_top();
+			i32 sw   = ui_view2d_ww * 0.9 * ui_view2d_pan_scale;
+			i32 sh   = fmin(ui_view2d_ww, ui_view2d_wh) * 0.5;
 			ui_view2d_draw_waveform(g_context->sound->sound, ui_view2d_ww / 2.0 - sw / 2.0 + ui_view2d_pan_x, apph / 2.0 - sh / 2.0 + ui_view2d_pan_y, sw, sh);
 		}
 #endif
 
-		i32 th = tw;
+		f32 tx, ty, tw, th;
+		ui_view2d_tex_rect(tex != NULL ? tex->height / (float)tex->width : 1.0, &tx, &ty, &tw, &th);
 		if (tex != NULL) {
-			th = tw * (tex->height / (float)tex->width);
-			ty = apph / 2.0 - th / 2.0 + ui_view2d_pan_y;
 			if (ui_view2d_type == VIEW_2D_TYPE_LAYER) {
 				draw_set_pipeline(ui_view2d_pipe);
 			}
@@ -776,7 +777,7 @@ void ui_view2d_update(void *_) {
 				ui_set_next_id((ui_id_t)&ui_view2d_pan_scale);
 				ui_slider(&zoom, string_tmp("%%", scale_percent), 1, 100, true, 1, true, UI_ALIGN_RIGHT, true);
 				if (ui_item_changed()) {
-					ui_view2d_pan_scale     = zoom / 100.0 * tex->width / (wm * 0.9);
+					ui_view2d_pan_scale     = zoom / 100.0 * tex->width / (fmin(ui_view2d_ww, ui_view2d_wh) * 0.9);
 					ui_view2d_hwnd->redraws = 2;
 				}
 				g_ui->_x += ew + 3;

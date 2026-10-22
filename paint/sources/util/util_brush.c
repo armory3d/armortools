@@ -35,17 +35,10 @@ void util_brush_update() {
 	}
 
 	if (down) {
-		i32 mx = mouse_view_x();
-		i32 my = mouse_view_y();
-		i32 ww = sys_w();
-		i32 wh = sys_h();
-
-		if (g_context->paint2d) {
-			mx = mouse_x - ui_view2d_wx;
-			my = mouse_y - ui_view2d_wy - ui_view2d_top();
-			ww = ui_view2d_ww;
-			wh = ui_view2d_wh - ui_view2d_top();
-		}
+		i32 mx = mouse_x - base_paint_view_x();
+		i32 my = mouse_y - base_paint_view_y();
+		i32 ww = base_paint_view_w();
+		i32 wh = base_paint_view_h();
 
 		if (mx < ww && mx > 0 && my < wh && my > 0) {
 
@@ -67,7 +60,7 @@ void util_brush_update() {
 
 					if (g_context->tool == TOOL_TYPE_CLONE && g_context->clone_start_x >= 0.0) { // Clone delta
 						g_context->clone_delta_x = (g_context->clone_start_x - mx) / (float)ww;
-						g_context->clone_delta_y = (g_context->clone_start_y - my) / (float)sys_h();
+						g_context->clone_delta_y = (g_context->clone_start_y - my) / (float)wh;
 						g_context->clone_start_x = -1;
 					}
 					else if (g_context->tool == TOOL_TYPE_FILL && g_context->fill_type == FILL_TYPE_UV_ISLAND) {
