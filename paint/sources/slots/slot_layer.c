@@ -432,6 +432,15 @@ slot_layer_t *slot_layer_duplicate(slot_layer_t *raw) {
 	return l;
 }
 
+static void slot_layer_draw_resized(gpu_texture_t *src, i32 res_x, i32 res_y) {
+	if (layers_crop) {
+		draw_scaled_sub_image(src, layers_crop_x, layers_crop_y, res_x, res_y, 0, 0, res_x, res_y);
+	}
+	else {
+		draw_scaled_image(src, 0, 0, res_x, res_y);
+	}
+}
+
 void slot_layer_resize_and_set_bits(slot_layer_t *raw) {
 	i32        res_x = config_get_texture_res_x();
 	i32        res_y = config_get_texture_res_y();
@@ -448,7 +457,7 @@ void slot_layer_resize_and_set_bits(slot_layer_t *raw) {
 		raw->texpaint            = gpu_create_render_target(res_x, res_y, format);
 		draw_begin(raw->texpaint, false, 0);
 		draw_set_pipeline(pipe);
-		draw_scaled_image(_texpaint, 0, 0, res_x, res_y);
+		slot_layer_draw_resized(_texpaint, res_x, res_y);
 		draw_set_pipeline(NULL);
 		draw_end();
 
@@ -457,7 +466,7 @@ void slot_layer_resize_and_set_bits(slot_layer_t *raw) {
 			raw->texpaint_nor = gpu_create_render_target(res_x, res_y, format);
 			draw_begin(raw->texpaint_nor, false, 0);
 			draw_set_pipeline(pipe);
-			draw_scaled_image(_texpaint_nor, 0, 0, res_x, res_y);
+			slot_layer_draw_resized(_texpaint_nor, res_x, res_y);
 			draw_set_pipeline(NULL);
 			draw_end();
 		}
@@ -467,7 +476,7 @@ void slot_layer_resize_and_set_bits(slot_layer_t *raw) {
 			raw->texpaint_pack = gpu_create_render_target(res_x, res_y, format);
 			draw_begin(raw->texpaint_pack, false, 0);
 			draw_set_pipeline(pipe);
-			draw_scaled_image(_texpaint_pack, 0, 0, res_x, res_y);
+			slot_layer_draw_resized(_texpaint_pack, res_x, res_y);
 			draw_set_pipeline(NULL);
 			draw_end();
 		}
@@ -499,7 +508,7 @@ void slot_layer_resize_and_set_bits(slot_layer_t *raw) {
 
 		draw_begin(raw->texpaint, false, 0);
 		draw_set_pipeline(pipes_copy8);
-		draw_scaled_image(_texpaint, 0, 0, res_x, res_y);
+		slot_layer_draw_resized(_texpaint, res_x, res_y);
 		draw_set_pipeline(NULL);
 		draw_end();
 

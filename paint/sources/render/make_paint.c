@@ -214,6 +214,11 @@ node_shader_context_t *make_paint_run_context(material_t *data, char *context_id
 
 	node_shader_write_vert(kong, "output.pos = float4(tpos, 0.0, 1.0);");
 
+	if (g_context->select_active && g_context->select_2d) {
+		node_shader_add_out(kong, "float2 select_uv");
+		node_shader_write_vert(kong, string_tmp("output.select_uv = %s;", tuv));
+	}
+
 	bool decal_layer = g_context->layer->fill_material != NULL && g_context->layer->uv_type == UV_TYPE_PROJECT;
 	if (decal_layer) {
 		node_shader_add_constant(kong, "float4x4 WVP", "_decal_layer_matrix");
@@ -244,7 +249,12 @@ node_shader_context_t *make_paint_run_context(material_t *data, char *context_id
 	node_shader_write_frag(kong, "bsp = bsp * 0.5 + 0.5;");
 
 	// Select tool mask
-	if (g_context->select_active) {
+	if (g_context->select_active && g_context->select_2d) {
+		node_shader_add_constant(kong, "float4 select_mask", "_select_mask");
+		node_shader_write_frag(kong, "if (input.select_uv.x < constants.select_mask.x || input.select_uv.x > constants.select_mask.z || input.select_uv.y < "
+		                             "constants.select_mask.y || input.select_uv.y > constants.select_mask.w) { discard; }");
+	}
+	else if (g_context->select_active) {
 		node_shader_add_constant(kong, "float4 select_mask", "_select_mask");
 		node_shader_write_frag(kong, "if (sp.x < constants.select_mask.x || sp.x > constants.select_mask.z || sp.y < constants.select_mask.y || sp.y > "
 		                             "constants.select_mask.w) { discard; }");

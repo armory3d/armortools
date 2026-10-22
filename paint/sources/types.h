@@ -356,6 +356,7 @@ typedef struct context {
 	bool                        brush_camera_align;
 	bool                        select_active; // Select tool
 	bool                        select_dragging;
+	bool                        select_2d;
 	f32                         select_start_x;
 	f32                         select_start_y;
 	f32                         select_x1;

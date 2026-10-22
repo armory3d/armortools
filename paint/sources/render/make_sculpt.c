@@ -865,7 +865,7 @@ node_shader_context_t *sculpt_make_sculpt_run(material_t *data) {
 		}
 	}
 
-	if (g_context->select_active && has_wposition) {
+	if (g_context->select_active && !g_context->select_2d && has_wposition) {
 		node_shader_add_constant(kong, "float4x4 VP", "_view_proj_matrix");
 		node_shader_add_constant(kong, "float4 select_mask", "_select_mask");
 		node_shader_write_frag(kong, "float4 select_sp4 = constants.VP * float4(wposition.xyz, 1.0);");

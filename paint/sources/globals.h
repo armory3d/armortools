@@ -30,6 +30,9 @@ gpu_texture_t   *layers_expa           = NULL;
 gpu_texture_t   *layers_expb           = NULL;
 gpu_texture_t   *layers_expc           = NULL;
 f32              layers_default_base   = 0.5;
+bool             layers_crop           = false;
+i32              layers_crop_x         = 0;
+i32              layers_crop_y         = 0;
 f32              layers_default_rough  = 0.4;
 ui_align_t       config_button_align   = UI_ALIGN_LEFT;
 char            *config_button_spacing = "       ";
@@ -335,7 +338,7 @@ mesh_nodes_t             *nodes_mesh_eval_slot;
 mesh_object_t            *nodes_mesh_eval_object;
 bool                      nodes_mesh_eval_unwrap;
 i32                       nodes_mesh_vector_socket; // Output socket of the node evaluated by nodes_mesh_vector
-bool                      nodes_mesh_script_running  = false;
+bool                      nodes_mesh_script_running = false;
 bool                      nodes_mesh_eval_reads_frame;
 i32                       make_mesh_layer_pass_count = 1;
 

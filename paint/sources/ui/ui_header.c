@@ -2,7 +2,6 @@
 #include "../global.h"
 
 ui_color_state_t ui_header_color_state;
-i32              ui_header_cursor_mode = 0;
 
 void ui_header_init() {
 	ui_header_handle->layout       = UI_LAYOUT_HORIZONTAL;
@@ -129,10 +128,31 @@ void ui_header_draw_tool_properties_import(char *path) {
 			g_context->colorid = array_index_of(g_project->_->assets, a);
 		}
 	}
-	g_context->ddirty                 = 2;
-	g_context->colorid_picked         = false;
-	ui_toolbar_handle->redraws        = 1;
+	g_context->ddirty          = 2;
+	g_context->colorid_picked  = false;
+	ui_toolbar_handle->redraws = 1;
 	ui_dock_redraw(2);
+}
+
+static void ui_header_crop_layers() {
+	i32 res_x = config_get_texture_res_x();
+	i32 res_y = config_get_texture_res_y();
+	i32 x1    = math_round(g_context->select_x1 * res_x);
+	i32 y1    = math_round(g_context->select_y1 * res_y);
+	i32 x2    = math_round(g_context->select_x2 * res_x);
+	i32 y2    = math_round(g_context->select_y2 * res_y);
+	if (x2 - x1 < 1 || y2 - y1 < 1) {
+		return;
+	}
+	layers_crop              = true;
+	layers_crop_x            = x1;
+	layers_crop_y            = y1;
+	base_res                 = TEXTURE_RES_CUSTOM;
+	base_res_x               = x2 - x1;
+	base_res_y               = y2 - y1;
+	g_context->select_active = false;
+	layers_on_resized();
+	ui_view2d_hwnd->redraws = 2;
 }
 
 void ui_header_draw_tool_properties() {
@@ -511,6 +531,11 @@ void ui_header_draw_tool_properties() {
 		if (ui_icon_button(tr("Clear"), ICON_ERASE, UI_ALIGN_CENTER)) {
 			g_context->select_active = false;
 			make_material_parse_paint_material(false);
+			ui_view2d_hwnd->redraws = 2;
+		}
+		g_ui->enabled = g_context->select_active && g_context->select_2d;
+		if (ui_icon_button(tr("Crop"), ICON_CROP, UI_ALIGN_CENTER)) {
+			ui_header_crop_layers();
 		}
 		g_ui->enabled = true;
 	}
@@ -540,13 +565,6 @@ void ui_header_draw_tool_properties() {
 	}
 
 	if (g_context->tool == TOOL_TYPE_CURSOR) {
-		string_array_t *cursor_mode_combo = any_array_create_from_raw_tmp(
-		    (void *[]){
-		        tr("Object"),
-		    },
-		    1);
-		ui_combo(&ui_header_cursor_mode, cursor_mode_combo, tr("Mode"), false, UI_ALIGN_LEFT, true);
-
 		mesh_object_t *o = g_context->paint_object != NULL ? g_context->paint_object : context_main_object();
 		if (o != NULL && o->base != NULL && o->base->transform != NULL) {
 			i32 _w = g_ui->_w;

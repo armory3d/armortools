@@ -134,6 +134,7 @@ void layers_resize() {
 
 	render_path_raytrace_ready = false; // Rebuild baketex
 	g_context->ddirty          = 2;
+	layers_crop                = false;
 }
 
 void layers_set_bits() {
@@ -1131,6 +1132,41 @@ i32 layers_udim_tile_slot(slot_layer_t *l) {
 	return tile < 0 ? -1 : util_mesh_udim_slot(tile);
 }
 
+static gpu_texture_t *layers_move_a    = NULL;
+static gpu_texture_t *layers_move_b    = NULL;
+static gpu_texture_t *layers_move_c    = NULL;
+static gpu_texture_t *layers_move_mask = NULL;
+
+static gpu_texture_t *_layers_move_copy(gpu_texture_t **target, gpu_texture_t *src, gpu_pipeline_t *pipe, i32 dx, i32 dy) {
+	gpu_texture_t *dst = _layers_udim_target(target, src);
+	draw_begin(dst, true, 0x00000000);
+	draw_set_pipeline(pipe);
+	draw_image(src, dx, dy);
+	draw_set_pipeline(NULL);
+	draw_end();
+	return dst;
+}
+
+// Layer with the pending 2D view move applied, the layer itself when it is not being moved
+static slot_layer_t *layers_move_preview(slot_layer_t *l) {
+	i32 dx, dy;
+	if (ui_view2d_move_layer(&dx, &dy) != l) {
+		return l;
+	}
+	static slot_layer_t moved;
+	moved = *l;
+	if (slot_layer_is_mask(l)) {
+		moved.texpaint = _layers_move_copy(&layers_move_mask, l->texpaint, pipes_copy8, dx, dy);
+	}
+	else {
+		gpu_pipeline_t *pipe = base_bits == TEXTURE_BITS_BITS8 ? pipes_copy : base_bits == TEXTURE_BITS_BITS16 ? pipes_copy64 : pipes_copy128;
+		moved.texpaint       = _layers_move_copy(&layers_move_a, l->texpaint, pipe, dx, dy);
+		moved.texpaint_nor   = _layers_move_copy(&layers_move_b, l->texpaint_nor, pipe, dx, dy);
+		moved.texpaint_pack  = _layers_move_copy(&layers_move_c, l->texpaint_pack, pipe, dx, dy);
+	}
+	return &moved;
+}
+
 slot_layer_t *layers_flatten(bool height_to_normal, slot_layer_t_array_t *layers) {
 	if (layers == NULL) {
 		layers = g_project->_->layers;
@@ -1169,10 +1205,12 @@ slot_layer_t *layers_flatten(bool height_to_normal, slot_layer_t_array_t *layers
 			draw_end();
 			slot_layer_t *l1 = ALLOC_INIT(slot_layer_t, {.texpaint = pipes_temp_mask_image});
 			for (i32 i = 0; i < l1masks->length; ++i) {
-				layers_merge_layer(l1, l1masks->buffer[i], false);
+				layers_merge_layer(l1, layers_move_preview(l1masks->buffer[i]), false);
 			}
 			mask = pipes_temp_mask_image;
 		}
+
+		l1 = layers_move_preview(l1);
 
 		// Flattened layers are in shared atlas space
 		i32 tile_slot = layers_udim_tile_slot(l1);

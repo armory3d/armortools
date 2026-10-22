@@ -226,6 +226,20 @@ static void base_draw_console_lines() {
 	draw_end();
 }
 
+void base_draw_dashed_rect(f32 x, f32 y, f32 w, f32 h) {
+	f32 dash = 4.0 * UI_SCALE();
+	for (f32 t = 0.0; t < w; t += dash * 2.0) {
+		f32 l = math_min(dash, w - t);
+		draw_filled_rect(x + t, y, l, 1.0);
+		draw_filled_rect(x + t, y + h, l, 1.0);
+	}
+	for (f32 t = 0.0; t < h; t += dash * 2.0) {
+		f32 l = math_min(dash, h - t);
+		draw_filled_rect(x, y + t, 1.0, l);
+		draw_filled_rect(x + w, y + t, 1.0, l);
+	}
+}
+
 void base_update(void *_) {
 	if (mouse_movement_x != 0 || mouse_movement_y != 0) {
 		iron_mouse_set_cursor(IRON_CURSOR_ARROW);
@@ -482,14 +496,14 @@ void base_update(void *_) {
 	ui_dock_render_drag();
 
 	// Select tool rectangle mask
-	if (g_context->select_active || g_context->select_dragging) {
+	if ((g_context->select_active || g_context->select_dragging) && !g_context->select_2d) {
 		f32 x1 = g_context->select_x1 * sys_w() + sys_x();
 		f32 y1 = g_context->select_y1 * sys_h() + sys_y();
 		f32 x2 = g_context->select_x2 * sys_w() + sys_x();
 		f32 y2 = g_context->select_y2 * sys_h() + sys_y();
 		draw_begin(NULL, false, 0);
 		draw_set_color(g_context->select_dragging ? 0xffffffff : 0xaaffffff);
-		draw_rect(x1, y1, x2 - x1, y2 - y1, 1.0);
+		base_draw_dashed_rect(math_min(x1, x2), math_min(y1, y2), math_abs(x2 - x1), math_abs(y2 - y1));
 		draw_set_color(0xffffffff);
 		draw_end();
 	}
