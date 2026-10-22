@@ -170,7 +170,7 @@ void project_new(bool reset_layers) {
 
 	shader_data_t *m = data_get_shader("Scene", "Material");
 	if (g_context->paint_object == NULL) {
-		g_context->paint_object             = mesh_object_create(md, m);
+		g_context->paint_object             = scene_add_mesh_object(md, m, NULL);
 		g_context->paint_object->base->name = "paint_object";
 	}
 	else {
