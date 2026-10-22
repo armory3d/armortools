@@ -211,7 +211,7 @@ void tab_materials_draw_slots_menu() {
 	ui_check(&m->paint_opac, tr("Opacity"), "");
 	channels_changed |= ui_item_changed();
 
-	if (g_config->materials == MATERIALS_PBR && g_config->tools != TOOLS_SCULPT) {
+	if (g_config->tools != TOOLS_SCULPT) {
 		ui_row2();
 		ui_check(&m->paint_nor, tr("Normal"), "");
 		channels_changed |= ui_item_changed();
@@ -425,6 +425,73 @@ void tab_materials_button_new_on_next_frame(void *_) {
 	any_array_push(g_project->_->materials, g_context->material);
 	tab_materials_update_material();
 	history_new_material();
+}
+
+// Swatches mode paints through a "Swatch" material driven by the Picker node
+static void tab_materials_setup_swatches_on_next_frame(void *_) {
+	if (g_config->materials != MATERIALS_SWATCHES || args_player) {
+		return;
+	}
+	for (i32 i = 0; i < g_project->_->materials->length; ++i) {
+		slot_material_t *m = g_project->_->materials->buffer[i];
+		if (string_equals(m->canvas->name, "Swatch")) {
+			context_set_material(m);
+			return;
+		}
+	}
+
+	slot_material_t  *m      = slot_material_create(g_project->_->materials->buffer[0]->data, NULL);
+	ui_node_canvas_t *canvas = m->canvas;
+	m->canvas->name          = string_copy(slot_material_unique_name(canvas, "Swatch"));
+
+	ui_node_t *output = NULL;
+	f32        x      = 0.0;
+	f32        y      = 0.0;
+	for (i32 i = canvas->nodes->length - 1; i >= 0; --i) {
+		ui_node_t *n = canvas->nodes->buffer[i];
+		if (string_equals(n->type, "OUTPUT_MATERIAL_PBR")) {
+			output = n;
+		}
+		else if (string_equals(n->type, "RGB")) {
+			x = n->x;
+			y = n->y;
+			for (i32 j = canvas->links->length - 1; j >= 0; --j) {
+				ui_node_link_t *l = canvas->links->buffer[j];
+				if (l->from_id == n->id || l->to_id == n->id) {
+					array_remove(canvas->links, l);
+				}
+			}
+			array_remove(canvas->nodes, n);
+		}
+	}
+
+	nodes_material_init();
+	ui_node_t *picker = ui_nodes_make_node(nodes_material_get_node_t("PICKER"), m->nodes, canvas);
+	picker->x         = x;
+	picker->y         = y;
+	any_array_push(canvas->nodes, picker);
+
+	if (output != NULL) {
+		// Picker outputs match the Material Output inputs one to one
+		for (i32 i = 0; i < picker->outputs->length && i < output->inputs->length; ++i) {
+			any_array_push(canvas->links, project_create_node_link(canvas->links, picker->id, i, output->id, i));
+		}
+		output->inputs->buffer[3]->default_value->buffer[0] = 0.8; // Roughness
+	}
+
+	any_array_push(g_project->_->materials, m);
+	g_context->material = m;
+	tab_materials_update_material();
+	history_new_material();
+}
+
+void tab_materials_setup_swatches() {
+	if (g_config->materials != MATERIALS_SWATCHES || args_player) {
+		return;
+	}
+	ui_base_close_tab(TAB_MATERIALS);
+	ui_base_show_tab(TAB_SWATCHES);
+	sys_notify_on_next_frame(&tab_materials_setup_swatches_on_next_frame, NULL);
 }
 
 void tab_materials_button_new(char *text) {

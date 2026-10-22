@@ -521,24 +521,6 @@ void ui_menubar_draw_category_items() {
 		string_array_t *modes        = base_get_viewport_modes();
 		string_array_t *shortcuts    = base_get_viewport_mode_shortcuts();
 
-		if (g_config->materials == MATERIALS_BASE_COLOR && g_config->tools != TOOLS_SCULPT) {
-			array_splice(modes, 9, 1);
-			array_splice(modes, 8, 1);
-			array_splice(modes, 7, 1);
-			array_splice(modes, 5, 1);
-			array_splice(modes, 4, 1);
-			array_splice(modes, 3, 1);
-			array_splice(modes, 2, 1);
-			array_splice(shortcuts, 9, 1);
-			array_splice(shortcuts, 8, 1);
-			array_splice(shortcuts, 7, 1);
-			array_splice(shortcuts, 5, 1);
-			array_splice(shortcuts, 4, 1);
-			array_splice(shortcuts, 3, 1);
-			array_splice(shortcuts, 2, 1);
-			mode = string_array_index_of(modes, ui_menubar_viewport_mode_to_string(mode));
-		}
-
 		for (i32 i = 0; i < modes->length; ++i) {
 			char *shortcut = g_config->touch_ui ? "" : string_tmp("%s, %s", any_map_get(g_keymap, "viewport_mode"), shortcuts->buffer[i]);
 			ui_radio(&mode, i, modes->buffer[i], shortcut);
@@ -804,11 +786,17 @@ void ui_menubar_draw_category_items() {
 		if (ui_menu_sub_button(tr("Materials"))) {
 			ui_menu_sub_begin(2);
 			bool materials_changed = false;
-			ui_radio((int *)&g_config->materials, MATERIALS_PBR, tr("PBR"), "");
+			ui_radio((int *)&g_config->materials, MATERIALS_NODES, tr("Nodes"), "");
 			materials_changed |= ui_item_changed();
-			ui_radio((int *)&g_config->materials, MATERIALS_BASE_COLOR, tr("Base Color"), "");
+			ui_radio((int *)&g_config->materials, MATERIALS_SWATCHES, tr("Swatches"), "");
 			materials_changed |= ui_item_changed();
 			if (materials_changed) {
+				if (g_config->materials == MATERIALS_SWATCHES) {
+					tab_materials_setup_swatches();
+				}
+				else {
+					ui_base_show_tab(TAB_MATERIALS);
+				}
 				config_save();
 				base_update_tools();
 			}

@@ -737,14 +737,6 @@ void ui_view2d_update(void *_) {
 					    },
 					    7);
 
-					if (g_config->materials == MATERIALS_BASE_COLOR && g_config->tools != TOOLS_SCULPT) {
-						array_splice(tex_type_combo, 6, 1);
-						array_splice(tex_type_combo, 5, 1);
-						array_splice(tex_type_combo, 4, 1);
-						array_splice(tex_type_combo, 3, 1);
-						array_splice(tex_type_combo, 2, 1);
-					}
-
 					ui_combo((int *)&ui_view2d_tex_type, tex_type_combo, tr("Texture"), false, UI_ALIGN_LEFT, true);
 					g_ui->_x += ew + 3;
 					g_ui->_y = 2 + start_y;

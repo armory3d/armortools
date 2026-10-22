@@ -148,10 +148,8 @@ buffer_t *export_arm_encode_project(char *path) {
 	tab_timeline_prepare_save();
 	tab_scripts_strip_trailing_whitespace();
 
-	tools_t     _tools     = g_config->tools;
-	materials_t _materials = g_config->materials;
-	g_config->tools        = TOOLS_PAINT;
-	g_config->materials    = MATERIALS_PBR;
+	tools_t _tools  = g_config->tools;
+	g_config->tools = TOOLS_PAINT;
 	base_update_tools_nodes();
 
 	ui_node_canvas_t_array_t *mnodes = any_array_create_from_raw((void *[]){}, 0);
@@ -165,8 +163,7 @@ buffer_t *export_arm_encode_project(char *path) {
 		any_array_push(mnodes, c);
 	}
 
-	g_config->tools     = _tools;
-	g_config->materials = _materials;
+	g_config->tools = _tools;
 	base_update_tools_nodes();
 
 	ui_node_canvas_t_array_t *bnodes = any_array_create_from_raw((void *[]){}, 0);

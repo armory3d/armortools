@@ -211,7 +211,7 @@ void ui_header_draw_tool_properties() {
 			ui_tooltip(tr("Add picked color to swatches"));
 		}
 
-		if (g_config->materials == MATERIALS_PBR && g_config->tools != TOOLS_SCULPT) {
+		if (g_config->tools != TOOLS_SCULPT) {
 
 			i32 _w = g_ui->_w;
 			g_ui->_w /= 2;

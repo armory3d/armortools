@@ -822,6 +822,7 @@ void                      util_shortcut_viewport();
 void                      util_stencil_transform();
 void                      util_touch_update();
 void                      tab_materials_draw(i32 *htab);
+void                      tab_materials_setup_swatches();
 void                      tab_materials_accept_swatch_drop(swatch_color_t *swatch);
 void                      tab_materials_accept_material_drop(slot_material_t *material);
 void                      tab_materials_delete_material(slot_material_t *m);

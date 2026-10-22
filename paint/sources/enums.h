@@ -91,8 +91,8 @@ typedef enum {
 } tools_t;
 
 typedef enum {
-	MATERIALS_PBR        = 0,
-	MATERIALS_BASE_COLOR = 1,
+	MATERIALS_NODES    = 0,
+	MATERIALS_SWATCHES = 1,
 } materials_t;
 
 typedef enum {

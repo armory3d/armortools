@@ -251,6 +251,7 @@ void project_new(bool reset_layers) {
 	tab_stages_init();
 	tab_meshes_reset_preview_map();
 	base_update_tools();
+	tab_materials_setup_swatches();
 	project_set_default_envmap();
 	context_select_tool(TOOL_TYPE_BRUSH);
 	scene_camera->data->near_plane      = 0.01;
@@ -620,7 +621,7 @@ swatch_color_t *project_make_swatch(i32 base) {
 	swatch_color_t *s = ALLOC_INIT(swatch_color_t, {.base       = base,
 	                                                .opacity    = 1.0,
 	                                                .occlusion  = 1.0,
-	                                                .roughness  = 0.0,
+	                                                .roughness  = 0.8,
 	                                                .metallic   = 0.0,
 	                                                .normal     = 0xff8080ff,
 	                                                .emission   = 0.0,

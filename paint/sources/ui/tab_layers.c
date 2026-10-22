@@ -914,7 +914,7 @@ void tab_layers_draw_layer_context_menu_draw() {
 		bool channels_changed = tab_layers_channel_check(&l->paint_base, tr("Base Color"));
 		channels_changed |= tab_layers_channel_check(&l->paint_opac, tr("Opacity"));
 
-		if (g_config->materials == MATERIALS_PBR && g_config->tools != TOOLS_SCULPT) {
+		if (g_config->tools != TOOLS_SCULPT) {
 			ui_row2();
 			channels_changed |= tab_layers_channel_check(&l->paint_nor, tr("Normal"));
 			channels_changed |= tab_layers_channel_check(&l->paint_nor_blend, tr("Normal Blend"));

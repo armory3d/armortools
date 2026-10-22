@@ -583,7 +583,7 @@ void base_init() {
 
 	args_run();
 
-	if (g_config->tools != TOOLS_PAINT || g_config->materials != MATERIALS_PBR) {
+	if (g_config->tools != TOOLS_PAINT || g_config->materials != MATERIALS_NODES) {
 		base_update_tools();
 	}
 
@@ -1022,7 +1022,7 @@ void base_update_tools_create_sculpt_layer(void *_) {
 
 void base_update_tools_nodes() {
 	// Update Material Output nodes
-	bool pbr = g_config->materials == MATERIALS_PBR && g_config->tools != TOOLS_SCULPT;
+	bool pbr = g_config->tools != TOOLS_SCULPT;
 	for (i32 i = 0; i < g_project->_->materials->length; ++i) {
 		ui_node_array_t *nodes = g_project->_->materials->buffer[i]->canvas->nodes;
 		for (i32 j = 0; j < nodes->length; ++j) {

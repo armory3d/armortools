@@ -273,7 +273,7 @@ void config_init() {
 		g_config->console_model       = CONSOLE_MODEL_QWEN;
 		g_config->render_mode         = RENDER_MODE_DEFERRED;
 		g_config->tools               = TOOLS_PAINT;
-		g_config->materials           = MATERIALS_PBR;
+		g_config->materials           = MATERIALS_NODES;
 	}
 	else {
 		// Discard old config
