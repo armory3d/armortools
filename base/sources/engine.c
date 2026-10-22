@@ -135,6 +135,9 @@ object_t *object_create(bool is_empty) {
 }
 
 void object_set_parent(object_t *raw, object_t *parent_object) {
+	if (parent_object == NULL) {
+		parent_object = _scene_root;
+	}
 	if (parent_object == raw || parent_object == raw->parent) {
 		return;
 	}
@@ -145,9 +148,6 @@ void object_set_parent(object_t *raw, object_t *parent_object) {
 		transform_build_matrix(raw->transform);
 	}
 
-	if (parent_object == NULL) {
-		parent_object = _scene_root;
-	}
 	raw->parent = parent_object;
 	any_array_push(raw->parent->children, raw);
 }
