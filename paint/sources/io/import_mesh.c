@@ -185,10 +185,40 @@ char *_import_mesh_unique_name(char *name) {
 	char *base;
 	i32   i   = strings_split_number_ext(name, &base);
 	char *res = i == 0 ? base : string_tmp("%s%s", base, strings_number_ext(i));
-	while (!_import_mesh_is_unique_name(res)) {
-		res = string_tmp("%s%s", base, strings_number_ext(++i));
+	if (_import_mesh_is_unique_name(res)) {
+		return res;
 	}
-	return res;
+
+	// Mark the numbers after i taken by base.00X names in one pass, instead of a pass per number tried,
+	// one of the next length + 1 numbers is free
+	mesh_object_t_array_t *objects  = g_project->_->paint_objects;
+	i32                    count    = objects->length + 1;
+	bool                  *taken    = calloc(count, sizeof(bool));
+	i32                    base_len = string_length(base);
+	for (i32 j = 0; j < objects->length; ++j) {
+		char *s = objects->buffer[j]->base->name;
+		if (strncmp(s, base, base_len) != 0 || s[base_len] != '.') {
+			continue;
+		}
+		char *digits = s + base_len + 1;
+		i32   len    = 0;
+		while (digits[len] >= '0' && digits[len] <= '9') {
+			++len;
+		}
+		if (len < 3 || len > 9 || digits[len] != '\0') {
+			continue;
+		}
+		i32 k = parse_int(digits) - i - 1;
+		if (k >= 0 && k < count) {
+			taken[k] = true;
+		}
+	}
+	i32 k = 0;
+	while (taken[k]) {
+		++k;
+	}
+	free(taken);
+	return string_tmp("%s%s", base, strings_number_ext(i + 1 + k));
 }
 
 void import_mesh_make_mesh(raw_mesh_t *mesh) {

@@ -260,7 +260,9 @@ static void tab_meshes_collect_children(mesh_object_t_array_t *objects, mesh_obj
 			continue;
 		}
 		out[(*count)++] = o;
-		tab_meshes_collect_children(objects, out, count, o->base);
+		if (o->base->children->length > 0) {
+			tab_meshes_collect_children(objects, out, count, o->base);
+		}
 	}
 }
 
@@ -1088,7 +1090,7 @@ void tab_meshes_draw_context_menu() {
 	// Edits the scale that gives the typed size
 	vec4_t dim  = transform_dim(t);
 	vec4_t prev = dim;
-	ui_push_id((ui_id_t)"dim");
+	ui_push_id((ui_id_t) "dim");
 	bool changed = tab_meshes_float_input(&dim.x, &t->scale.x, "X");
 	changed |= tab_meshes_float_input(&dim.y, &t->scale.y, "Y");
 	changed |= tab_meshes_float_input(&dim.z, &t->scale.z, "Z");
