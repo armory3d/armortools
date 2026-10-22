@@ -545,6 +545,9 @@ void args_run_on_next_frame(void *_) {
 	else if (args_script) {
 		sys_notify_on_next_frame(&args_run_script, NULL);
 	}
+	else if (args_background && args_export_textures) {
+		sys_notify_on_next_frame(&args_run_script_quit, NULL); // Runs after the export queue
+	}
 	else if (args_background) {
 		iron_stop();
 	}
