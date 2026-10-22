@@ -523,7 +523,7 @@ u8 color_get_bb(i32 c) {
 }
 
 u8 color_get_ab(i32 c) {
-	return c & 0x000000ff;
+	return (c & 0xff000000) >> 24;
 }
 
 i32 color_set_rb(i32 c, u8 i) {
