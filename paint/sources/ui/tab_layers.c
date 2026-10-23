@@ -770,46 +770,6 @@ void tab_layers_draw_layer_context_menu_draw() {
 
 	if (!slot_layer_is_group(l)) {
 		ui_menu_align();
-		string_array_t *ar = any_array_create_from_raw(
-		    (void *[]){
-		        "2048",
-		        "4096",
-		        "8192",
-		        "16384",
-		        tr("Custom"),
-		    },
-		    5);
-		ui_combo(&base_res, ar, tr("Resolution"), true, UI_ALIGN_LEFT, true);
-		if (ui_item_changed()) {
-			ui_menu_show_first = true;
-			config_set_texture_res(base_res);
-			layers_on_resized();
-		}
-
-		if (base_res == TEXTURE_RES_CUSTOM) {
-			static bool res_was_changed = false;
-
-			ui_menu_align();
-			ui_slider(&base_res_x, tr("Width"), 1, 16384, false, 1, true, UI_ALIGN_RIGHT, true);
-			bool res_changed = ui_item_changed();
-			ui_menu_align();
-			ui_slider(&base_res_y, tr("Height"), 1, 16384, false, 1, true, UI_ALIGN_RIGHT, true);
-			res_changed |= ui_item_changed();
-
-			if (res_changed) {
-				ui_menu_keep_open = true;
-			}
-			if (res_was_changed && !g_ui->input_down) {
-				res_was_changed = false;
-				layers_on_resized();
-			}
-
-			if (res_changed) {
-				res_was_changed = true;
-			}
-		}
-
-		ui_menu_align();
 		string_array_t *aruv = any_array_create_from_raw(
 		    (void *[]){
 		        "uv0",
@@ -824,29 +784,6 @@ void tab_layers_draw_layer_context_menu_draw() {
 			make_material_parse_mesh_material();
 			ui_menu_keep_open = true;
 		}
-
-#if defined(IRON_ANDROID) || defined(IRON_IOS)
-// let bits_items: string[] = ["8"];
-// ui_inline_radio(base_bits_handle, bits_items, ui_align_t.LEFT);
-#else
-		ui_menu_separator();
-		ui_menu_align();
-		ui_menu_label(tr("Bits"), NULL);
-		ui_menu_align();
-		string_array_t *bits_items = any_array_create_from_raw(
-		    (void *[]){
-		        "8",
-		        "16",
-		        "32",
-		    },
-		    3);
-		ui_inline_radio(&base_bits, bits_items, UI_ALIGN_LEFT);
-		if (ui_item_changed()) {
-			sys_notify_on_next_frame(&tab_layers_draw_layer_context_menu_set_bits, NULL);
-			make_material_parse_paint_material(true);
-			ui_menu_keep_open = true;
-		}
-#endif
 	}
 	if (l->fill_material != NULL) {
 		ui_menu_align();
@@ -1232,6 +1169,79 @@ static void tab_layers_scroll_to_layer(slot_layer_t *l) {
 	}
 }
 
+void tab_layers_draw_edit() {
+	ui_menu_align();
+	string_array_t *ar = any_array_create_from_raw(
+	    (void *[]){
+	        "2048",
+	        "4096",
+	        "8192",
+	        "16384",
+	        tr("Custom"),
+	    },
+	    5);
+	ui_combo(&base_res, ar, tr("Resolution"), true, UI_ALIGN_LEFT, true);
+	if (ui_item_changed()) {
+		ui_menu_show_first = true;
+		config_set_texture_res(base_res);
+		layers_on_resized();
+	}
+
+	if (base_res == TEXTURE_RES_CUSTOM) {
+		static bool res_was_changed = false;
+
+		ui_menu_align();
+		ui_slider(&base_res_x, tr("Width"), 1, 16384, false, 1, true, UI_ALIGN_RIGHT, true);
+		bool res_changed = ui_item_changed();
+		ui_menu_align();
+		ui_slider(&base_res_y, tr("Height"), 1, 16384, false, 1, true, UI_ALIGN_RIGHT, true);
+		res_changed |= ui_item_changed();
+
+		if (res_changed) {
+			ui_menu_keep_open = true;
+		}
+		if (res_was_changed && !g_ui->input_down) {
+			res_was_changed = false;
+			layers_on_resized();
+		}
+
+		if (res_changed) {
+			res_was_changed = true;
+		}
+	}
+
+#if defined(IRON_ANDROID) || defined(IRON_IOS)
+// let bits_items: string[] = ["8"];
+// ui_inline_radio(base_bits_handle, bits_items, ui_align_t.LEFT);
+#else
+	ui_menu_separator();
+	ui_menu_align();
+	ui_menu_label(tr("Bits"), NULL);
+	ui_menu_align();
+	string_array_t *bits_items = any_array_create_from_raw(
+	    (void *[]){
+	        "8",
+	        "16",
+	        "32",
+	    },
+	    3);
+	ui_inline_radio(&base_bits, bits_items, UI_ALIGN_LEFT);
+	if (ui_item_changed()) {
+		sys_notify_on_next_frame(&tab_layers_draw_layer_context_menu_set_bits, NULL);
+		make_material_parse_paint_material(true);
+		ui_menu_keep_open = true;
+	}
+#endif
+
+	ui_menu_separator();
+	g_ui->changed = false;
+	ui_check(&tab_layers_search_show, tr("Search"), "");
+	if (g_ui->changed) {
+		ui_menu_keep_open = true;
+		ui_dock_redraw(TAB_AREA_SIDEBAR0);
+	}
+}
+
 void tab_layers_draw_full(i32 *htab) {
 	if (ui_tab(htab, tr("Layers"), false, -1, false)) {
 		bool in_window = ui_input_in_rect(g_ui->_window_x, g_ui->_window_y, g_ui->_window_w, g_ui->_window_h);
@@ -1246,15 +1256,19 @@ void tab_layers_draw_full(i32 *htab) {
 		ui_begin_sticky();
 		f32_array_t *row = f32_array_create_from_raw_tmp(
 		    (f32[]){
-		        -70,
-		        -70,
-		        -140,
+		        -64,
+		        -64,
+		        -64,
+		        -88,
 		    },
-		    3);
+		    4);
 		ui_row(row);
 
 		tab_layers_button_new(tr("New"));
 		tab_layers_button_2d_view();
+		if (ui_icon_button(tr("Edit"), ICON_EDIT, UI_ALIGN_CENTER)) {
+			ui_menu_draw(&tab_layers_draw_edit, -1, -1);
+		}
 		tab_layers_combo_filter();
 
 		if (tab_layers_search_show) {
@@ -1319,7 +1333,7 @@ void tab_layers_draw_full(i32 *htab) {
 			slot_layer_t *l            = g_context->layer;
 			bool          has_children = tab_layers_has_children(l);
 			if (has_children && g_ui->is_key_pressed && g_ui->key_code == KEY_CODE_RETURN) {
-				l->show_panel                                     = !l->show_panel;
+				l->show_panel = !l->show_panel;
 				ui_dock_redraw(TAB_AREA_SIDEBAR0);
 			}
 		}
