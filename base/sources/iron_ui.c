@@ -788,6 +788,7 @@ void ui_end_input() {
 	}
 
 	current->is_key_pressed    = false;
+	current->key_char          = 0;
 	current->input_started     = false;
 	current->input_started_r   = false;
 	current->input_released    = false;
@@ -1390,6 +1391,12 @@ static int ui_tab_indent_count(char *str, int cursor_x, int len) {
 	return n;
 }
 
+#ifdef IRON_MACOS
+#define UI_ALT_TYPES true // Option+key types characters
+#else
+#define UI_ALT_TYPES false
+#endif
+
 static void ui_update_text_edit(int align, bool editable) {
 	char text[UI_TEXT_MAX];
 	strcpy(text, current->text_selected);
@@ -1528,7 +1535,8 @@ static void ui_update_text_edit(int align, bool editable) {
 		         current->key_code != KEY_CODE_SHIFT && current->key_code != KEY_CODE_CAPS_LOCK && current->key_code != KEY_CODE_CONTROL &&
 		         current->key_code != KEY_CODE_META && current->key_code != KEY_CODE_ALT && current->key_code != KEY_CODE_UP &&
 		         current->key_code != KEY_CODE_DOWN && current->key_char >= 32 && (!current->is_ctrl_down || current->is_alt_down) && // AltGr = ctrl+alt
-		         !(current->key_code >= KEY_CODE_F1 && current->key_code <= KEY_CODE_F24)) {
+		         !(current->key_code >= KEY_CODE_F1 && current->key_code <= KEY_CODE_F24) &&
+		         (!current->is_alt_down || current->is_ctrl_down || UI_ALT_TYPES)) { // Alt shortcuts are not typed
 			ui_remove_chars_at(text, current->highlight_anchor, current->cursor_x - current->highlight_anchor);
 			ui_insert_char_at(text, current->highlight_anchor, current->key_char);
 
@@ -1537,7 +1545,7 @@ static void ui_update_text_edit(int align, bool editable) {
 		bool selecting =
 		    current->is_shift_down && (current->key_code == KEY_CODE_LEFT || current->key_code == KEY_CODE_RIGHT || current->key_code == KEY_CODE_SHIFT ||
 		                               current->key_code == KEY_CODE_HOME || current->key_code == KEY_CODE_END);
-		// isCtrlDown && isAltDown is the condition for AltGr was pressed
+		// is_ctrl_down && is_alt_down is the condition for AltGr was pressed
 		// AltGr is part of the German keyboard layout and part of key combinations like AltGr + e -> €
 		bool ctrl_nav = current->is_ctrl_down && !current->is_shift_down &&
 		                (current->key_code == KEY_CODE_LEFT || current->key_code == KEY_CODE_RIGHT || current->key_code == KEY_CODE_HOME ||
