@@ -149,6 +149,21 @@ void render_path_paint_draw_target() {
 	render_path_end();
 }
 
+static mesh_object_t *render_path_paint_fill_object = NULL; // Picked on mesh fill stroke start
+
+// Mesh fill, only the clicked paint object is drawn
+static void render_path_paint_draw_fill_object() {
+	mesh_object_t *o       = render_path_paint_fill_object;
+	mesh_object_t *target  = render_path_paint_target();
+	bool           merged  = target != NULL && target == g_context->merged_object;
+	bool           painted = o != NULL && (merged || o == target) && array_index_of(g_project->_->paint_objects, o) >= 0;
+	if (painted && o->base->visible && make_material_is_default(o->material) && make_material_paint_scon != NULL) {
+		_mesh_object_last_pipeline = NULL;
+		mesh_object_draw(o, make_material_paint_scon, _render_path_bind_params);
+	}
+	render_path_end();
+}
+
 void render_path_paint_commands_particle(i32 tid, char *texpaint, bool is_mask) {
 	// Paint pass per particle
 	for (i32 _pi = 0; _pi < 32; ++_pi) {
@@ -249,6 +264,55 @@ static void render_path_paint_clone_snapshot() {
 	render_path_bind_target("expc", "tex2");
 	char *pipe = string_equals(format, "RGBA32") ? "copy_mrt3_pass" : string_equals(format, "RGBA64") ? "copy_mrt3RGBA64_pass" : "copy_mrt3RGBA128_pass";
 	render_path_draw_shader(string_tmp("Scene/copy_mrt3_pass/%s", pipe));
+}
+
+// Renders object ids and returns the paint object under the cursor, NULL on a miss.
+// Expects the cursor tool with pick_object_id set, the paint material is parsed for it here.
+static mesh_object_t *render_path_paint_pick_object() {
+	viewport_mode_t _viewport_mode = g_context->viewport_mode;
+	g_context->viewport_mode       = VIEWPORT_MODE_OBJECT_ID;
+	make_material_parse_mesh_material();
+
+	// Objects with assigned material do not write object id
+	shader_data_t *base_material     = g_project->_->materials->buffer[0]->data;
+	any_array_t   *_object_materials = any_array_create(g_project->_->paint_objects->length);
+	for (i32 i = 0; i < g_project->_->paint_objects->length; ++i) {
+		mesh_object_t *o             = g_project->_->paint_objects->buffer[i];
+		_object_materials->buffer[i] = o->material;
+		o->material                  = base_material;
+	}
+
+	render_path_base_draw_gbuffer();
+
+	for (i32 i = 0; i < g_project->_->paint_objects->length; ++i) {
+		g_project->_->paint_objects->buffer[i]->material = _object_materials->buffer[i];
+	}
+
+	g_context->viewport_mode = _viewport_mode;
+	make_material_parse_mesh_material();
+
+	g_context->pdirty = 1;
+	make_material_parse_paint_material(false);
+	render_path_set_target("texpaint_picker", NULL, NULL, GPU_CLEAR_NONE, 0, 0.0);
+	render_path_bind_target("gbuffer1", "gbuffer1");
+	render_path_bind_target("gbuffer2", "gbuffer2");
+	render_path_paint_draw_fullscreen_triangle();
+
+	render_target_t *rt    = any_map_get(render_path_render_targets, "texpaint_picker");
+	buffer_t        *pixel = gpu_get_texture_pixels(rt->_image);
+	if (buffer_get_u8(pixel, 3) > 0) {
+#ifdef IRON_BGRA
+		i32 r_byte = buffer_get_u8(pixel, 2);
+#else
+		i32 r_byte = buffer_get_u8(pixel, 0);
+#endif
+		i32 g_byte = buffer_get_u8(pixel, 1);
+		i32 index  = r_byte + g_byte * 256 - 1;
+		if (index >= 0 && index < g_project->_->paint_objects->length) {
+			return g_project->_->paint_objects->buffer[index];
+		}
+	}
+	return NULL;
 }
 
 void render_path_paint_commands_paint(bool dilation) {
@@ -428,70 +492,29 @@ void render_path_paint_commands_paint(bool dilation) {
 	}
 	else if (g_context->tool == TOOL_TYPE_CURSOR) {
 		if (g_context->pick_object_id) {
-			viewport_mode_t _viewport_mode = g_context->viewport_mode;
-			g_context->viewport_mode       = VIEWPORT_MODE_OBJECT_ID;
-			make_material_parse_mesh_material();
-
-			// Objects with assigned material do not write object id
-			shader_data_t *base_material     = g_project->_->materials->buffer[0]->data;
-			any_array_t   *_object_materials = any_array_create(g_project->_->paint_objects->length);
-			for (i32 i = 0; i < g_project->_->paint_objects->length; ++i) {
-				mesh_object_t *o             = g_project->_->paint_objects->buffer[i];
-				_object_materials->buffer[i] = o->material;
-				o->material                  = base_material;
-			}
-
-			render_path_base_draw_gbuffer();
-
-			for (i32 i = 0; i < g_project->_->paint_objects->length; ++i) {
-				g_project->_->paint_objects->buffer[i]->material = _object_materials->buffer[i];
-			}
-
-			g_context->viewport_mode = _viewport_mode;
-			make_material_parse_mesh_material();
-
-			g_context->pdirty = 1;
-			make_material_parse_paint_material(false);
-			render_path_set_target("texpaint_picker", NULL, NULL, GPU_CLEAR_NONE, 0, 0.0);
-			render_path_bind_target("gbuffer1", "gbuffer1");
-			render_path_bind_target("gbuffer2", "gbuffer2");
-			render_path_paint_draw_fullscreen_triangle();
-
-			render_target_t *rt    = any_map_get(render_path_render_targets, "texpaint_picker");
-			buffer_t        *pixel = gpu_get_texture_pixels(rt->_image);
-			bool             hit   = false;
-			if (buffer_get_u8(pixel, 3) > 0) {
-#ifdef IRON_BGRA
-				i32 r_byte = buffer_get_u8(pixel, 2);
-#else
-				i32 r_byte = buffer_get_u8(pixel, 0);
-#endif
-				i32 g_byte = buffer_get_u8(pixel, 1);
-				i32 index  = r_byte + g_byte * 256 - 1;
-				if (index >= 0 && index < g_project->_->paint_objects->length) {
-					hit              = true;
-					mesh_object_t *o = g_project->_->paint_objects->buffer[index];
-					if (keyboard_down("shift")) {
-						// Added to the selection, the clicked mesh becomes the active one
-						tab_meshes_add_objects(any_array_create_from_raw((void *[]){o}, 1));
-						g_context->paint_object = o;
-					}
-					else {
-						// Only the clicked mesh stays selected
-						g_context->paint_object = o;
-						tab_meshes_select_objects(any_array_create_from_raw((void *[]){o}, 1));
-					}
-					context_deselected_uid    = -1;
-					ui_header_handle->redraws = 2;
-					tab_meshes_reveal_slot(g_context->paint_object);
-
-					// g_context->layer->object_mask = index + 1;
-					// context_set_layer(g_context->layer);
-					// make_material_parse_mesh_material();
-					// layers_set_object_mask();
-
-					base_redraw_status();
+			mesh_object_t *o   = render_path_paint_pick_object();
+			bool           hit = o != NULL;
+			if (hit) {
+				if (keyboard_down("shift")) {
+					// Added to the selection, the clicked mesh becomes the active one
+					tab_meshes_add_objects(any_array_create_from_raw((void *[]){o}, 1));
+					g_context->paint_object = o;
 				}
+				else {
+					// Only the clicked mesh stays selected
+					g_context->paint_object = o;
+					tab_meshes_select_objects(any_array_create_from_raw((void *[]){o}, 1));
+				}
+				context_deselected_uid    = -1;
+				ui_header_handle->redraws = 2;
+				tab_meshes_reveal_slot(g_context->paint_object);
+
+				// g_context->layer->object_mask = index + 1;
+				// context_set_layer(g_context->layer);
+				// make_material_parse_mesh_material();
+				// layers_set_object_mask();
+
+				base_redraw_status();
 			}
 			if (!hit && !keyboard_down("shift")) {
 				// Nothing to outline, the mesh stays selected in the meshes tab
@@ -505,6 +528,21 @@ void render_path_paint_commands_paint(bool dilation) {
 		}
 	}
 	else {
+		bool mesh_fill = g_context->tool == TOOL_TYPE_FILL && g_context->fill_type == FILL_TYPE_MESH;
+		if (mesh_fill && render_path_paint_fill_pick) {
+			// Pick the clicked mesh once per stroke
+			render_path_paint_fill_pick   = false;
+			i32 _pdirty                   = g_context->pdirty;
+			g_context->tool               = TOOL_TYPE_CURSOR;
+			g_context->pick_object_id     = true;
+			render_path_paint_fill_object = render_path_paint_pick_object();
+			g_context->pick_object_id     = false;
+			g_context->tool               = TOOL_TYPE_FILL;
+			g_context->pdirty             = _pdirty;
+			make_material_parse_paint_material(false);
+			render_path_base_draw_gbuffer();
+		}
+
 		char *texpaint = string_tmp("texpaint%d", tid);
 		if (g_context->tool == TOOL_TYPE_BAKE && g_context->brush_time == sys_delta()) {
 			// Clear to black on bake start
@@ -566,7 +604,12 @@ void render_path_paint_commands_paint(bool dilation) {
 			if (sculpt_layer_count > 1) {
 				render_path_bind_target("texpaint_sculpt_base", "texpaint_sculpt_base");
 			}
-			render_path_paint_draw_target();
+			if (mesh_fill) {
+				render_path_paint_draw_fill_object();
+			}
+			else {
+				render_path_paint_draw_target();
+			}
 		}
 
 		if (g_context->tool == TOOL_TYPE_BAKE && g_context->bake_type == BAKE_TYPE_CURVATURE && g_context->bake_curv_smooth > 0) {

@@ -457,8 +457,9 @@ void ui_header_draw_tool_properties() {
 			        tr("Face"),
 			        tr("Angle"),
 			        tr("UV Island"),
+			        tr("Mesh"),
 			    },
-			    4);
+			    5);
 			ui_combo(&g_context->fill_type, fill_mode_combo, tr("Fill Mode"), false, UI_ALIGN_LEFT, true);
 			if (ui_item_changed()) {
 				if (g_context->fill_type == FILL_TYPE_FACE) {
