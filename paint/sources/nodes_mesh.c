@@ -676,6 +676,7 @@ static void nodes_mesh_set_data(mesh_object_t *o, mesh_data_t *data, bool unwrap
 
 	util_uv_uvmap_cached       = false;
 	util_uv_trianglemap_cached = false;
+	util_uv_seammap_cached     = false;
 	util_uv_dilatemap_cached   = false;
 	render_path_raytrace_ready = false;
 	g_context->ddirty          = 2;

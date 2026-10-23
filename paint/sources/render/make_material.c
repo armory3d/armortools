@@ -153,24 +153,38 @@ char *make_material_node_preview_id(ui_node_t *node, ui_node_t_array_t *parents)
 	return string_tmp("m%d_%s", g_context->material->id, parser_material_node_name(node, parents));
 }
 
+static gpu_texture_t *make_material_node_preview_target(char *id, i32 res_x, i32 res_y, gpu_texture_format_t format) {
+	gpu_texture_t *image = any_map_get(g_context->node_previews, id);
+	any_array_push(g_context->node_previews_used, id);
+	if (image == NULL || image->width != res_x || image->height != res_y || image->format != format) {
+		if (image != NULL) {
+			gpu_delete_texture(image);
+		}
+		image = gpu_create_render_target(res_x, res_y, format);
+		any_map_set(g_context->node_previews, string_copy(id), image);
+	}
+	return image;
+}
+
 void make_material_bake_node_preview(ui_node_t *node, ui_node_canvas_t *group, ui_node_t_array_t *parents) {
 	if (string_equals(node->type, "BLUR")) {
-		char          *id    = make_material_node_preview_id(node, parents);
-		gpu_texture_t *image = any_map_get(g_context->node_previews, id);
-		any_array_push(g_context->node_previews_used, id);
-		i32 res_x = math_floor(config_get_texture_res_x() / 4.0);
-		i32 res_y = math_floor(config_get_texture_res_y() / 4.0);
-		if (image == NULL || image->width != res_x || image->height != res_y) {
-			if (image != NULL) {
-				gpu_delete_texture(image);
-			}
-			image = gpu_create_render_target(res_x, res_y, GPU_TEXTURE_FORMAT_RGBA32);
-			any_map_set(g_context->node_previews, string_copy(id), image);
-		}
+		char *id     = make_material_node_preview_id(node, parents);
+		i32   passes = blur_node_seamless_passes(node);
+		i32   res_x  = math_floor(config_get_texture_res_x() / 4.0);
+		i32   res_y  = math_floor(config_get_texture_res_y() / 4.0);
+		// Seamless blur renders the input to _src, then diffuses it into the sampled texture
+		gpu_texture_t *image = make_material_node_preview_target(passes > 0 ? string_tmp("%s_src", id) : id, res_x, res_y, GPU_TEXTURE_FORMAT_RGBA32);
 
 		parser_material_blur_passthrough = true;
 		util_render_make_node_preview(g_context->material->canvas, node, image, group, parents);
 		parser_material_blur_passthrough = false;
+
+		if (passes > 0) {
+			util_uv_cache_seam_map(res_x, res_y);
+			gpu_texture_t *dst = make_material_node_preview_target(id, res_x, res_y, GPU_TEXTURE_FORMAT_RGBA64);
+			gpu_texture_t *tmp = make_material_node_preview_target(string_tmp("%s_tmp", id), res_x, res_y, GPU_TEXTURE_FORMAT_RGBA64);
+			util_uv_blur_seamless(dst, tmp, image, passes);
+		}
 	}
 	else if (string_equals(node->type, "DIRECT_WARP")) {
 		char          *id    = make_material_node_preview_id(node, parents);

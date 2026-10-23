@@ -231,6 +231,7 @@ static void import_arm_run_mesh_append_from_project(project_t *project, i32_arra
 
 	util_uv_uvmap_cached       = false;
 	util_uv_trianglemap_cached = false;
+	util_uv_seammap_cached     = false;
 	util_uv_dilatemap_cached   = false;
 	g_context->ddirty          = 4;
 	ui_dock_redraw(TAB_AREA_SIDEBAR0);
