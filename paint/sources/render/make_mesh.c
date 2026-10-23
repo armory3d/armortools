@@ -661,7 +661,9 @@ node_shader_context_t *make_mesh_run(material_t *data, i32 layer_pass) {
 		node_shader_write_frag(kong, "output[0] = float4(n.xy, roughness, pack_f32_i16(metallic, uint(float(int(matid * 255.0)) % float(3))));");
 	}
 
-	node_shader_write_frag(kong, string_tmp("output[2] = float4(0.0, 0.0, %s.xy);", tex_coord_layer));
+	// Half floats, split the texcoord into a coarse part and a residual
+	node_shader_write_frag(kong, string_tmp("float2 tex_coord_hi = floor(%s.xy * 256.0) / 256.0;", tex_coord_layer));
+	node_shader_write_frag(kong, string_tmp("output[2] = float4(%s.xy - tex_coord_hi, tex_coord_hi);", tex_coord_layer));
 
 	parser_material_finalize(con_mesh);
 

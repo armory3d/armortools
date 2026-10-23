@@ -63,7 +63,7 @@ void make_blur_run(node_shader_t *kong) {
 		node_shader_write_frag(kong, "smudge_sp = float2(clamp(smudge_sp.x, 0.0, 0.9999), clamp(smudge_sp.y, 0.0, 0.9999));");
 		node_shader_write_frag(kong, "float4 tex_coord_inp24 = gbuffer2[uint2(uint(smudge_sp.x * constants.gbuffer_size.x), uint(smudge_sp.y * "
 		                             "constants.gbuffer_size.y))];");
-		node_shader_write_frag(kong, "float2 tex_coord_inp2 = tex_coord_inp24.ba;");
+		node_shader_write_frag(kong, "float2 tex_coord_inp2 = tex_coord_inp24.ba + tex_coord_inp24.rg;");
 		node_shader_write_frag(kong, "float4 texpaint_sample = sample(texpaint_ref, sampler_linear, tex_coord_inp2);");
 		node_shader_write_frag(kong, "float blur_weight_i = get_smudge_tool_weight(i);");
 		if (is_mask) {
@@ -83,7 +83,7 @@ void make_blur_run(node_shader_t *kong) {
 	}
 	else {
 		node_shader_write_frag(kong, "float4 tex_coord_inp4 = gbuffer2[uint2(uint(sp.x * constants.gbuffer_size.x), uint(sp.y * constants.gbuffer_size.y))];");
-		node_shader_write_frag(kong, "float2 tex_coord_inp = tex_coord_inp4.ba;");
+		node_shader_write_frag(kong, "float2 tex_coord_inp = tex_coord_inp4.ba + tex_coord_inp4.rg;");
 		node_shader_add_constant(kong, "float2 texpaint_size", "_texpaint_size");
 		node_shader_write_frag(kong, "float blur_step = 1.0 / constants.texpaint_size.x;");
 		node_shader_add_function(kong, str_get_blur_tool_weight);
