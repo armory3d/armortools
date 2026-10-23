@@ -98,9 +98,20 @@ void layers_resize() {
 		slot_layer_t *l = g_project->_->layers->buffer[i];
 		slot_layer_resize_and_set_bits(l);
 	}
-	for (i32 i = 0; i < history_undo_layers->length; ++i) {
-		slot_layer_t *l = history_undo_layers->buffer[i];
-		slot_layer_resize_and_set_bits(l);
+	layers_resize_targets();
+
+	render_path_raytrace_ready = false; // Rebuild baketex
+	g_context->ddirty          = 2;
+	layers_crop                = false;
+}
+
+// Undo layers, live layer and paint targets that follow the texture resolution
+void layers_resize_targets() {
+	if (history_undo_layers != NULL) {
+		for (i32 i = 0; i < history_undo_layers->length; ++i) {
+			slot_layer_t *l = history_undo_layers->buffer[i];
+			slot_layer_resize_and_set_bits(l);
+		}
 	}
 
 	any_map_t *rts = render_path_render_targets;
@@ -150,10 +161,6 @@ void layers_resize() {
 		sculpt_base->height = config_get_texture_res_y();
 		sculpt_base->_image = gpu_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), GPU_TEXTURE_FORMAT_RGBA128);
 	}
-
-	render_path_raytrace_ready = false; // Rebuild baketex
-	g_context->ddirty          = 2;
-	layers_crop                = false;
 }
 
 void layers_set_bits() {

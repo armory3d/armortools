@@ -60,6 +60,7 @@ bool                  slot_layer_can_move(slot_layer_t *raw, i32 to);
 void                  slot_layer_move(slot_layer_t *raw, i32 to);
 void                  layers_init();
 void                  layers_resize();
+void                  layers_resize_targets();
 void                  layers_set_bits();
 void                  layers_make_temp_img();
 void                  layers_make_temp_mask_img();

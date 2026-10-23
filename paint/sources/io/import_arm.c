@@ -969,28 +969,7 @@ void import_arm_run_project(char *path) {
 
 	gpu_texture_t *tex = g_project->_->layers->buffer[0]->texpaint;
 	if (tex->width != config_get_texture_res_x() || tex->height != config_get_texture_res_y()) {
-		if (history_undo_layers != NULL) {
-			for (i32 i = 0; i < history_undo_layers->length; ++i) {
-				slot_layer_t *l = history_undo_layers->buffer[i];
-				slot_layer_resize_and_set_bits(l);
-			}
-		}
-		any_map_t       *rts              = render_path_render_targets;
-		render_target_t *blend0           = any_map_get(rts, "texpaint_blend0");
-		gpu_texture_t   *_texpaint_blend0 = blend0->_image;
-		gpu_delete_texture(_texpaint_blend0);
-		blend0->width  = config_get_texture_res_x();
-		blend0->height = config_get_texture_res_y();
-		blend0->_image = gpu_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), GPU_TEXTURE_FORMAT_R8);
-
-		render_target_t *blend1           = any_map_get(rts, "texpaint_blend1");
-		gpu_texture_t   *_texpaint_blend1 = blend1->_image;
-		gpu_delete_texture(_texpaint_blend1);
-		blend1->width  = config_get_texture_res_x();
-		blend1->height = config_get_texture_res_y();
-		blend1->_image = gpu_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), GPU_TEXTURE_FORMAT_R8);
-
-		g_context->brush_blend_dirty = true;
+		layers_resize_targets();
 	}
 
 	for (i32 i = 0; i < g_project->_->layers->length; ++i) {
