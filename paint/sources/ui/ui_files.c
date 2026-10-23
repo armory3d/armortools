@@ -380,13 +380,7 @@ char *ui_files_file_browser(char **path, bool drag_files, char *search, bool ref
 					project_t *raw     = NULL;
 					bool       is_blob = false;
 
-#ifdef IRON_WINDOWS
-					bool is_cloud_cache = string_index_of(*path, "\\cloud\\") >= 0;
-#else
-					bool is_cloud_cache = string_index_of(*path, "/cloud/") >= 0;
-#endif
-
-					if (import_arm_is_old(buffer) && !is_cloud_cache) {
+					if (import_arm_is_old(buffer)) {
 						raw = import_arm_from_old(buffer);
 					}
 					else if (import_arm_has_version(buffer)) {

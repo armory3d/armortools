@@ -717,18 +717,12 @@ void import_arm_run_project(char *path) {
 	}
 	project_t *project;
 	bool       import_as_mesh = false;
-#ifdef IRON_WINDOWS
-	bool is_cloud = string_index_of(path, "\\cloud\\") >= 0;
-#else
-	bool is_cloud = string_index_of(path, "/cloud/") >= 0;
-#endif
-
 	if (!import_arm_has_version(b)) {
 		import_as_mesh     = true;
 		scene_t *scene_raw = armpack_decode(b);
 		project            = ALLOC_INIT(project_t, {.mesh_datas = scene_raw->mesh_datas});
 	}
-	else if (import_arm_is_old(b) && !is_cloud) {
+	else if (import_arm_is_old(b)) {
 		project = import_arm_from_old(b);
 	}
 	else {
