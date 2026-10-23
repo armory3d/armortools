@@ -159,6 +159,17 @@ void update(){frame++;
 }
 void main(){script_set_tools(0);script_notify_on_update(update);}
 `);
+await run('sculpt-mode-preserves-materials',common+`
+void update(){frame++;
+ if(frame==2)script_import_mesh(${q(fixture)},0,-1,-1);
+ if(frame==10){report();script_set_tools(1);}
+ if(frame==16){report();script_set_tools(0);}
+ if(frame==22){report();setup();}
+ if(frame==28)mark();
+ if(frame==34){counts(2);if(painted[0]!=0||painted[1]<100||painted[2]!=0)printf("FAIL: material paint after sculpt %d %d %d",painted[0],painted[1],painted[2]);printf("PASS: sculpt mode preserves materials, LOD visibility, UVs and paint isolation");script_quit();}
+}
+void main(){script_set_tools(0);script_notify_on_update(update);}
+`);
 await run('manual-axes-y-symmetry',common+`
 void update(){frame++;
  if(frame==2)script_import_mesh(${q(fixture)},0,2,0);

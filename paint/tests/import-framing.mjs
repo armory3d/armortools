@@ -1,5 +1,6 @@
 // node paint/tests/import-framing.mjs [optional FBX fixture] [optional executable]
 // Check world-space framing as well as raw import data. Fixtures stay in build output.
+// IMPORT_TEST_SCULPT=1 also exercises the deferred sculpt initialization after import.
 import { spawn } from 'node:child_process';
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
@@ -37,7 +38,7 @@ for(let up=0;up<6;up++) for(let forward=0;forward<6;forward++) {
 }
 if(process.argv[2]) {
   cases.push({name:'user-fbx-auto',file:path.resolve(process.argv[2]),up:-1,forward:-1,screenshot:true});
-  cases.push({name:'user-fbx-manual',file:path.resolve(process.argv[2]),up:4,forward:3,screenshot:true});
+  for(const forward of [0,1,2,3]) cases.push({name:`user-fbx-z-up-${forward}`,file:path.resolve(process.argv[2]),up:4,forward,screenshot:true});
 }
 const actions = cases.map((c,i) => `
  if(frames==${i*10+2}) script_import_mesh(${quote(c.file)},0,${c.up},${c.forward});
@@ -79,7 +80,7 @@ void report(char *name) {
  printf("FRAME %s %d %f %f %f %f %f %f",name,count,lx,ly,lz,hx,hy,hz);
 }
 void update() { frames++; ${actions} if(frames>${cases.length*10+4})script_quit(); }
-void main(){script_set_tools(0);script_notify_on_update(update);}
+void main(){script_set_tools(${process.env.IMPORT_TEST_SCULPT ? 1 : 0});script_notify_on_update(update);}
 `);
 const result = await new Promise((resolve,reject) => {
   const child=spawn(exe,['--background','--script',script],{cwd:path.dirname(exe),windowsHide:true});

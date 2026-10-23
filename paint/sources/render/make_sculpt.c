@@ -1398,62 +1398,33 @@ void sculpt_init_meshes() {
 		}
 	}
 
-	// Keep the mesh indexed, only bring all objects to a shared position scale
+	// A shared sculpt texture needs a shared packing scale, while the unpacked
+	// positions and object transforms must stay unchanged after import.
 	for (i32 o = 0; o < objects->length; ++o) {
 		mesh_object_t *object = objects->buffer[o];
 		mesh_data_t   *md     = object->data;
-		f32            ratio  = objects->length > 1 ? md->scale_pos / max_scale : 1.0;
-		i16_array_t   *pos    = md->vertex_arrays->buffer[0]->values;
-		i32            n      = pos->length / 4;
-
-		i16_array_t *posa = i16_array_create(n * 4);
-		i16_array_t *nora = i16_array_create(n * 2);
-		i16_array_t *texa = i16_array_create(n * 2);
-		for (i32 i = 0; i < n; ++i) {
-			posa->buffer[i * 4]     = math_floor(pos->buffer[i * 4] * ratio);
-			posa->buffer[i * 4 + 1] = math_floor(pos->buffer[i * 4 + 1] * ratio);
-			posa->buffer[i * 4 + 2] = math_floor(pos->buffer[i * 4 + 2] * ratio);
-			posa->buffer[i * 4 + 3] = pos->buffer[i * 4 + 3];
-			nora->buffer[i * 2]     = md->vertex_arrays->buffer[1]->values->buffer[i * 2];
-			nora->buffer[i * 2 + 1] = md->vertex_arrays->buffer[1]->values->buffer[i * 2 + 1];
-			texa->buffer[i * 2]     = md->vertex_arrays->buffer[2]->values->buffer[i * 2];
-			texa->buffer[i * 2 + 1] = md->vertex_arrays->buffer[2]->values->buffer[i * 2 + 1];
+		if (md->scale_pos == max_scale || md->index_array->length == 0) {
+			continue;
 		}
-		u32_array_t *inda = u32_array_create(md->index_array->length);
-		for (i32 i = 0; i < inda->length; ++i) {
-			inda->buffer[i] = md->index_array->buffer[i];
+		mesh_data_t *copy  = util_mesh_data_duplicate(md);
+		i16_array_t *pos   = mesh_data_get_vertex_array(copy, "pos")->values;
+		f32          ratio = md->scale_pos / max_scale;
+		for (i32 i = 0; i < pos->length / 4; ++i) {
+			for (i32 c = 0; c < 3; ++c) {
+				pos->buffer[i * 4 + c] = math_round(pos->buffer[i * 4 + c] * ratio);
+			}
 		}
-		mesh_data_t *raw = ALLOC_INIT(mesh_data_t, {.name          = md->name,
-		                                            .vertex_arrays = any_array_create_from_raw(
-		                                                (void *[]){
-		                                                    ALLOC_INIT(vertex_array_t, {.values = posa, .attrib = "pos", .data = "short4norm"}),
-		                                                    ALLOC_INIT(vertex_array_t, {.values = nora, .attrib = "nor", .data = "short2norm"}),
-		                                                    ALLOC_INIT(vertex_array_t, {.values = texa, .attrib = "tex", .data = "short2norm"}),
-		                                                },
-		                                                3),
-		                                            .index_array = inda,
-		                                            .scale_pos   = 1.0,
-		                                            .scale_tex   = 1.0});
-		mesh_object_set_data(object, mesh_data_create(raw));
+		copy->scale_pos = max_scale;
+		mesh_data_build_vertices(copy->_->vertex_buffer, copy->vertex_arrays);
+		mesh_object_set_data(object, copy);
+		transform_build_matrix(object->base->transform);
+		if (util_mesh_data_owner(md) < 0 && !nodes_mesh_holds(md)) {
+			sys_notify_on_next_frame(util_mesh_delete_data_uncache, md);
+		}
 	}
 
 	sculpt_build_weld();
 	sculpt_ensure_texture_res();
-
-	if (objects->length > 1) {
-		f32 ex = 0.0, ey = 0.0, ez = 0.0;
-		for (i32 o = 0; o < objects->length; ++o) {
-			vec4_t aabb = mesh_data_calculate_aabb(objects->buffer[o]->data);
-			ex          = fmaxf(ex, aabb.x);
-			ey          = fmaxf(ey, aabb.y);
-			ez          = fmaxf(ez, aabb.z);
-		}
-		f32            r                    = math_sqrt(ex * ex + ey * ey + ez * ez);
-		mesh_object_t *main_object          = context_main_object();
-		main_object->base->transform->loc   = (vec4_t){0, 0, 0, 1.0};
-		main_object->base->transform->scale = (vec4_t){2.0 / r, 2.0 / r, 2.0 / r, 1.0};
-		transform_build_matrix(main_object->base->transform);
-	}
 }
 
 void sculpt_init() {
