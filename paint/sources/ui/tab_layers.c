@@ -1214,7 +1214,6 @@ void tab_layers_draw_edit() {
 // let bits_items: string[] = ["8"];
 // ui_inline_radio(base_bits_handle, bits_items, ui_align_t.LEFT);
 #else
-	ui_menu_separator();
 	ui_menu_align();
 	ui_menu_label(tr("Bits"), NULL);
 	ui_menu_align();
@@ -1234,6 +1233,24 @@ void tab_layers_draw_edit() {
 #endif
 
 	ui_menu_separator();
+	ui_menu_align();
+	string_array_t *preview_items = any_array_create_from_raw_tmp(
+	    (void *[]){
+	        tr("Base Color"),
+	        tr("Opacity"),
+	        tr("Normal Map"),
+	        tr("Occlusion"),
+	        tr("Roughness"),
+	        tr("Metallic"),
+	        tr("Height"),
+	    },
+	    7);
+	ui_combo((int *)&tab_layers_preview_tex, preview_items, tr("Preview"), true, UI_ALIGN_LEFT, true);
+	if (ui_item_changed()) {
+		g_context->layers_preview_dirty = true;
+		ui_menu_keep_open               = true;
+	}
+
 	g_ui->changed = false;
 	ui_check(&tab_layers_search_show, tr("Search"), "");
 	if (g_ui->changed) {
