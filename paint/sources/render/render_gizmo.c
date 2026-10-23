@@ -38,6 +38,17 @@ static void gizmo_scale_world(object_t *o, vec4_t axis, f32 delta) {
 	o->transform->scale.z += delta * a.z * a.z;
 }
 
+// Scale the decal along a world axis, mapped onto its rotated local axes
+static void gizmo_scale_decal(vec4_t axis, f32 delta) {
+	mat4_decomposed_t *dec = mat4_decompose(g_context->layer->decal_mat);
+	vec4_t             a   = vec4_apply_quat(axis, quat_inv(dec->rot));
+	vec4_t             scl = dec->scl;
+	scl.x += delta * a.x * a.x;
+	scl.y += delta * a.y * a.y;
+	scl.z += delta * a.z * a.z;
+	g_context->layer->decal_mat = mat4_compose(dec->loc, dec->rot, scl);
+}
+
 // Other selected meshes follow the gizmo of the paint object
 static mesh_object_t_array_t *gizmo_others       = NULL;
 static vec4_t                *gizmo_others_loc   = NULL;
@@ -433,28 +444,13 @@ void render_gizmo_update() {
 				g_context->layer->decal_mat.m32 = g_context->gizmo_drag;
 			}
 			else if (g_context->scale_x) {
-				mat4_decomposed_t *dec = mat4_decompose(g_context->layer->decal_mat);
-				gizmo_v                = dec->loc;
-				gizmo_q                = dec->rot;
-				gizmo_v0               = dec->scl;
-				gizmo_v0.x += g_context->gizmo_drag - g_context->gizmo_drag_last;
-				g_context->layer->decal_mat = mat4_compose(gizmo_v, gizmo_q, gizmo_v0);
+				gizmo_scale_decal(vec4_x_axis(), g_context->gizmo_drag - g_context->gizmo_drag_last);
 			}
 			else if (g_context->scale_y) {
-				mat4_decomposed_t *dec = mat4_decompose(g_context->layer->decal_mat);
-				gizmo_v                = dec->loc;
-				gizmo_q                = dec->rot;
-				gizmo_v0               = dec->scl;
-				gizmo_v0.y += g_context->gizmo_drag - g_context->gizmo_drag_last;
-				g_context->layer->decal_mat = mat4_compose(gizmo_v, gizmo_q, gizmo_v0);
+				gizmo_scale_decal(vec4_y_axis(), g_context->gizmo_drag - g_context->gizmo_drag_last);
 			}
 			else if (g_context->scale_z) {
-				mat4_decomposed_t *dec = mat4_decompose(g_context->layer->decal_mat);
-				gizmo_v                = dec->loc;
-				gizmo_q                = dec->rot;
-				gizmo_v0               = dec->scl;
-				gizmo_v0.z += g_context->gizmo_drag - g_context->gizmo_drag_last;
-				g_context->layer->decal_mat = mat4_compose(gizmo_v, gizmo_q, gizmo_v0);
+				gizmo_scale_decal(vec4_z_axis(), g_context->gizmo_drag - g_context->gizmo_drag_last);
 			}
 			else if (g_context->rotate_x) {
 				mat4_decomposed_t *dec      = mat4_decompose(g_context->layer->decal_mat);
