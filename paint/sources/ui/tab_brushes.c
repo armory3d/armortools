@@ -53,14 +53,20 @@ void tab_brushes_draw_context_menu() {
 	}
 }
 
+void tab_brushes_draw_edit() {
+	if (ui_menu_button(tr("Import"), "", ICON_IMPORT)) {
+		project_import_brush();
+	}
+}
+
 void tab_brushes_draw(i32 *htab) {
 	if (ui_tab(htab, tr("Brushes"), false, -1, false)) {
 		ui_begin_sticky();
 		f32_array_t *row = f32_array_create_from_raw_tmp(
 		    (f32[]){
-		        -70,
-		        -70,
-		        -70,
+		        -64,
+		        -64,
+		        -64,
 		    },
 		    3);
 		ui_row(row);
@@ -71,11 +77,11 @@ void tab_brushes_draw(i32 *htab) {
 			history_new_brush();
 			ui_nodes_hwnd->redraws = 2;
 		}
-		if (ui_icon_button(tr("Import"), ICON_IMPORT, UI_ALIGN_CENTER)) {
-			project_import_brush();
-		}
 		if (ui_button(tr("Nodes"), UI_ALIGN_CENTER, "")) {
 			ui_base_show_brush_nodes();
+		}
+		if (ui_icon_button(tr("Edit"), ICON_EDIT, UI_ALIGN_CENTER)) {
+			ui_menu_draw(&tab_brushes_draw_edit, -1, -1);
 		}
 		ui_end_sticky();
 		ui_separator(3, false);

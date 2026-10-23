@@ -1916,7 +1916,7 @@ void tab_timeline_draw(i32 *htab) {
 		tab_timeline_init();
 
 		ui_begin_sticky();
-		f32_array_t *row = f32_array_create_from_raw_tmp((f32[]){-70, -110, -100, -100, -40, -40, -40, -40, -60}, 9);
+		f32_array_t *row = f32_array_create_from_raw_tmp((f32[]){-64, -110, -100, -100, -40, -40, -40, -40, -60}, 9);
 		ui_row(row);
 
 		// Stage

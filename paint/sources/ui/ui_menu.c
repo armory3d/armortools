@@ -158,7 +158,7 @@ bool ui_icon_button(char *text, icon_t icon, ui_align_t align) {
 	i32 _y_top  = g_ui->_y;
 	i32 _w      = g_ui->_w;
 	if (!string_equals(text, "")) {
-		text = align == UI_ALIGN_LEFT ? string_tmp("       %s", text) : string_tmp("     %s", text);
+		text = align == UI_ALIGN_LEFT ? string_tmp("       %s", text) : string_tmp("    %s", text);
 	}
 
 	char *tooltip = "";

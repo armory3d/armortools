@@ -1706,9 +1706,9 @@ void tab_meshes_draw(i32 *htab) {
 		ui_begin_sticky();
 		f32_array_t *row = f32_array_create_from_raw_tmp(
 		    (f32[]){
-		        -70,
-		        -70,
-		        -70,
+		        -64,
+		        -64,
+		        -64,
 		    },
 		    3);
 		ui_row(row);

@@ -514,23 +514,29 @@ void tab_materials_draw_mini(i32 *htab) {
 	tab_materials_draw_slots(true);
 }
 
+void tab_materials_draw_edit() {
+	if (ui_menu_button(tr("Import"), "", ICON_IMPORT)) {
+		project_import_material();
+	}
+}
+
 void tab_materials_draw_full(i32 *htab) {
 	if (ui_tab(htab, tr("Materials"), false, -1, false)) {
 		ui_begin_sticky();
 		f32_array_t *row = f32_array_create_from_raw_tmp(
 		    (f32[]){
-		        -70,
-		        -70,
-		        -70,
+		        -64,
+		        -64,
+		        -64,
 		    },
 		    3);
 		ui_row(row);
 
 		tab_materials_button_new(tr("New"));
-		if (ui_icon_button(tr("Import"), ICON_IMPORT, UI_ALIGN_CENTER)) {
-			project_import_material();
-		}
 		tab_materials_button_nodes();
+		if (ui_icon_button(tr("Edit"), ICON_EDIT, UI_ALIGN_CENTER)) {
+			ui_menu_draw(&tab_materials_draw_edit, -1, -1);
+		}
 
 		ui_end_sticky();
 		ui_separator(3, false);

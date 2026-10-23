@@ -249,7 +249,7 @@ void main() {\n\
 	g_ui->changed = false;
 	ui_check(&tab_scripts_search_show, tr("Search"), "");
 	if (g_ui->changed) {
-		ui_menu_keep_open                                 = true;
+		ui_menu_keep_open = true;
 		ui_dock_redraw(TAB_AREA_SIDEBAR0);
 	}
 }
@@ -512,9 +512,9 @@ void tab_scripts_draw(i32 *htab) {
 		ui_begin_sticky();
 		f32_array_t *row = f32_array_create_from_raw_tmp(
 		    (f32[]){
-		        -70,
-		        -70,
-		        -140,
+		        -64,
+		        -64,
+		        -152,
 		    },
 		    3);
 

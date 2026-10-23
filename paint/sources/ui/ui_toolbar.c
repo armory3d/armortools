@@ -272,6 +272,12 @@ void ui_toolbar_draw_show_3d_view() {
 	}
 }
 
+void ui_toolbar_header_menu_draw() {
+	if (ui_menu_button(tr("Toggle Header"), "", ICON_PROPERTIES)) {
+		g_config->header_pinned = false;
+	}
+}
+
 static void ui_toolbar_draw_window(ui_window_t *handle, i32 x, i32 y, i32 h) {
 	if (ui_window(handle, x, y, ui_toolbar_w(false), h, false)) {
 		g_ui->image_scroll_align   = false;
@@ -285,10 +291,7 @@ static void ui_toolbar_draw_window(ui_window_t *handle, i32 x, i32 y, i32 h) {
 			g_ui->_y -= 4 * UI_SCALE();
 			rect_t *rect = resource_tile50(img, ICON_PROPERTIES);
 			if (ui_sub_image(img, light ? 0xff666666 : g_theme->BUTTON_COL, -1.0, rect->x, rect->y, rect->w, rect->h) == UI_STATE_RELEASED) {
-				g_config->header_pinned = false;
-			}
-			if (g_ui->is_hovered) {
-				ui_tooltip(tr("Toggle header"));
+				ui_menu_draw(&ui_toolbar_header_menu_draw, -1, -1);
 			}
 			g_ui->_y -= 4 * UI_SCALE();
 		}
