@@ -84,7 +84,8 @@ void util_cursor_render(void *_) {
 
 	// Clone source cursor
 	if (g_context->tool == TOOL_TYPE_CLONE && !keyboard_down("alt") && (mouse_down("left") || pen_down("tip"))) {
-		f32 radius = 42 * g_context->brush_radius * g_context->brush_nodes_radius * UI_SCALE();
+		f32 radius =
+		    in_2d ? g_context->brush_radius / 15.0 * 2.0 * g_context->brush_nodes_radius * world2d : util_layer_brush_screen_radius() * base_paint_view_h();
 		util_cursor_draw_2d(mx + g_context->clone_delta_x * base_paint_view_w(), my + g_context->clone_delta_y * base_paint_view_h(), radius, 0x66ffffff);
 	}
 
