@@ -2611,6 +2611,10 @@ int ui_combo(int *value, string_array_t *texts, char *label, bool show_label, in
 			if (current->combo_selected_w > current->_w) {
 				current->combo_selected_w += UI_TEXT_OFFSET();
 			}
+			if (current->combo_selected_x + current->combo_selected_w > iron_window_width() - current->window_border_right) {
+				float x                   = current->_x + current->_window_x + current->_w - current->combo_selected_w;
+				current->combo_selected_x = x > 0 ? x : 0;
+			}
 			current->combo_to_submit     = (*value);
 			current->combo_initial_value = (*value);
 		}
