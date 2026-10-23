@@ -21,6 +21,7 @@ i32             ui_files_num_cols        = 1;
 char           *ui_files_select_pending  = NULL;
 bool            ui_files_show_extensions = false;
 bool            ui_files_offline         = false;
+bool            ui_files_scroll_pending  = false;
 char          **_ui_files_file_browser_path;
 
 void ui_files_release_keys() {
@@ -265,6 +266,9 @@ char *ui_files_file_browser(char **path, bool drag_files, char *search, bool ref
 	}
 	ui_files_num_cols = num;
 
+	i32 selected_row = ui_files_selected >= 0 ? ui_files_selected / num : -1;
+	f32 selected_top = 0.0;
+
 	g_ui->_y += 4; // Don't cut off the border around selected materials
 	// Directory contents
 	for (i32 row = 0; row < math_floor(math_ceil(ui_files_files->length / (float)num)); ++row) {
@@ -275,6 +279,9 @@ char *ui_files_file_browser(char **path, bool drag_files, char *search, bool ref
 		ui_row(ar);
 		if (row > 0) {
 			g_ui->_y += UI_ELEMENT_OFFSET() * 14.0;
+		}
+		if (row == selected_row) {
+			selected_top = g_ui->_y;
 		}
 
 		for (i32 j = 0; j < num; ++j) {
@@ -549,6 +556,26 @@ char *ui_files_file_browser(char **path, bool drag_files, char *search, bool ref
 		}
 	}
 	g_ui->_y += slotw * 0.8;
+
+	// Scroll the keyboard selection into view
+	if (ui_files_scroll_pending && selected_row >= 0) {
+		// Icon plus two label lines, the gap to the next row is left out
+		f32 selected_bot = selected_top + slotw * 0.75 + UI_ELEMENT_H() + UI_ELEMENT_OFFSET() + draw_font_height(g_font, g_ui->font_size);
+		ui_window_t *handle = g_ui->current_window;
+		if (selected_row == 0) {
+			handle->scroll_offset = 0;
+			handle->redraws       = 2;
+		}
+		else if (selected_top < g_ui->window_header_h) {
+			handle->scroll_offset += g_ui->window_header_h - selected_top;
+			handle->redraws = 2;
+		}
+		else if (selected_bot > g_ui->_window_h) {
+			handle->scroll_offset -= selected_bot - g_ui->_window_h;
+			handle->redraws = 2;
+		}
+	}
+	ui_files_scroll_pending = false;
 	return *path;
 }
 
@@ -568,6 +595,7 @@ void ui_files_navigate(i32 dx, i32 dy) {
 	if (ui_files_files == NULL || ui_files_files->length == 0) {
 		return;
 	}
+	ui_files_scroll_pending = true;
 	if (ui_files_selected < 0) {
 		ui_files_selected = 0;
 		return;
@@ -575,6 +603,20 @@ void ui_files_navigate(i32 dx, i32 dy) {
 	i32 next = ui_files_selected + dx + dy * ui_files_num_cols;
 	if (next >= 0 && next < ui_files_files->length) {
 		ui_files_selected = next;
+	}
+}
+
+void ui_files_select_letter(char c) {
+	if (ui_files_files == NULL) {
+		return;
+	}
+	for (i32 i = 0; i < ui_files_files->length; ++i) {
+		char *f = ui_files_files->buffer[i];
+		if (tolower(f[0]) == tolower(c)) {
+			ui_files_selected       = i;
+			ui_files_scroll_pending = true;
+			return;
+		}
 	}
 }
 

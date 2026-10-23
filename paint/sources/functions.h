@@ -188,6 +188,7 @@ void                   ui_files_show(char *filters, bool is_save, bool open_mult
 char                  *ui_files_file_browser(char **path, bool drag_files, char *search, bool refresh, void (*context_menu)(char *));
 void                   ui_files_go_up(char **path);
 void                   ui_files_navigate(i32 dx, i32 dy);
+void                   ui_files_select_letter(char c);
 void                   ui_files_enter_selected(char **path);
 void                   base_init();
 i32                    base_w();
