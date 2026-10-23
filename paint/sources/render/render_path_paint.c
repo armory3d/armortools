@@ -149,17 +149,47 @@ void render_path_paint_draw_target() {
 	render_path_end();
 }
 
-static mesh_object_t *render_path_paint_fill_object = NULL; // Picked on mesh fill stroke start
+static mesh_object_t *render_path_paint_fill_object  = NULL; // Picked on mesh fill stroke start
+static gpu_buffer_t  *render_path_paint_fill_indices = NULL; // Submesh fill, triangles connected to the clicked one
 
-// Mesh fill, only the clicked paint object is drawn
+static void render_path_paint_pick_fill_submesh() {
+	if (render_path_paint_fill_indices != NULL) {
+		gpu_delete_buffer(render_path_paint_fill_indices);
+		render_path_paint_fill_indices = NULL;
+	}
+	mesh_object_t *o = render_path_paint_fill_object;
+	if (o == NULL) {
+		return;
+	}
+	ray_t *ray = raycast_get_ray(mouse_view_x(), mouse_view_y(), scene_camera);
+	i32    tri = util_mesh_raycast_triangle(o, ray);
+	if (tri < 0) {
+		return;
+	}
+	u32_array_t *indices           = util_mesh_connected_indices(o->data, tri);
+	render_path_paint_fill_indices = gpu_create_index_buffer(indices->length);
+	mesh_data_build_indices(render_path_paint_fill_indices, indices);
+	array_delete(indices);
+}
+
+// Mesh fill, only the clicked paint object is drawn, submesh fill only its clicked connected part
 static void render_path_paint_draw_fill_object() {
 	mesh_object_t *o       = render_path_paint_fill_object;
 	mesh_object_t *target  = render_path_paint_target();
 	bool           merged  = target != NULL && target == g_context->merged_object;
 	bool           painted = o != NULL && (merged || o == target) && array_index_of(g_project->_->paint_objects, o) >= 0;
+	bool           submesh = g_context->fill_type == FILL_TYPE_SUBMESH;
+	if (submesh && render_path_paint_fill_indices == NULL) {
+		painted = false;
+	}
 	if (painted && o->base->visible && make_material_is_default(o->material) && make_material_paint_scon != NULL) {
 		_mesh_object_last_pipeline = NULL;
+		gpu_buffer_t *indices      = o->data->_->index_buffer;
+		if (submesh) {
+			o->data->_->index_buffer = render_path_paint_fill_indices;
+		}
 		mesh_object_draw(o, make_material_paint_scon, _render_path_bind_params);
+		o->data->_->index_buffer = indices;
 	}
 	render_path_end();
 }
@@ -528,7 +558,7 @@ void render_path_paint_commands_paint(bool dilation) {
 		}
 	}
 	else {
-		bool mesh_fill = g_context->tool == TOOL_TYPE_FILL && g_context->fill_type == FILL_TYPE_MESH;
+		bool mesh_fill = g_context->tool == TOOL_TYPE_FILL && (g_context->fill_type == FILL_TYPE_MESH || g_context->fill_type == FILL_TYPE_SUBMESH);
 		if (mesh_fill && render_path_paint_fill_pick) {
 			// Pick the clicked mesh once per stroke
 			render_path_paint_fill_pick   = false;
@@ -536,9 +566,12 @@ void render_path_paint_commands_paint(bool dilation) {
 			g_context->tool               = TOOL_TYPE_CURSOR;
 			g_context->pick_object_id     = true;
 			render_path_paint_fill_object = render_path_paint_pick_object();
-			g_context->pick_object_id     = false;
-			g_context->tool               = TOOL_TYPE_FILL;
-			g_context->pdirty             = _pdirty;
+			if (g_context->fill_type == FILL_TYPE_SUBMESH) {
+				render_path_paint_pick_fill_submesh();
+			}
+			g_context->pick_object_id = false;
+			g_context->tool           = TOOL_TYPE_FILL;
+			g_context->pdirty         = _pdirty;
 			make_material_parse_paint_material(false);
 			render_path_base_draw_gbuffer();
 		}

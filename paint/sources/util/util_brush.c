@@ -66,7 +66,7 @@ void util_brush_update() {
 					else if (g_context->tool == TOOL_TYPE_FILL && g_context->fill_type == FILL_TYPE_UV_ISLAND) {
 						util_uv_uvislandmap_cached = false;
 					}
-					else if (g_context->tool == TOOL_TYPE_FILL && g_context->fill_type == FILL_TYPE_MESH) {
+					else if (g_context->tool == TOOL_TYPE_FILL && (g_context->fill_type == FILL_TYPE_MESH || g_context->fill_type == FILL_TYPE_SUBMESH)) {
 						render_path_paint_fill_pick = true;
 					}
 				}

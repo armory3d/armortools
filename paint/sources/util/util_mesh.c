@@ -2825,19 +2825,12 @@ void util_mesh_duplicate() {
 	g_context->ddirty = 2;
 }
 
-void util_mesh_split(mesh_object_t *o) {
-	// Separate the connected surfaces of a mesh into objects of their own
-	mesh_object_t_array_t  *objects   = g_project->_->paint_objects;
-	i32                     index     = array_index_of(objects, o);
-	mesh_data_t            *g         = o->data;
-	vertex_array_t_array_t *vas       = g->vertex_arrays;
-	i16_array_t            *va0       = vas->buffer[0]->values;
-	u32_array_t            *inda      = g->index_array;
-	i32                     num_verts = math_floor(va0->length / 4.0);
-	i32                     num_inds  = math_floor(inda->length / 3.0) * 3;
-	if (index < 0 || num_inds < 6) {
-		return;
-	}
+// Union-find over the vertices of g, joined by triangles and by equal positions
+static i32 *_util_mesh_connected(mesh_data_t *g) {
+	i16_array_t *va0       = g->vertex_arrays->buffer[0]->values;
+	u32_array_t *inda      = g->index_array;
+	i32          num_verts = math_floor(va0->length / 4.0);
+	i32          num_inds  = math_floor(inda->length / 3.0) * 3;
 
 	// Position-weld, vertices split by uv seams stay connected
 	i32_array_t *weld_sort = i32_array_create(num_verts);
@@ -2862,6 +2855,71 @@ void util_mesh_split(mesh_object_t *o) {
 		_util_mesh_bevel_union(uf, inda->buffer[i], inda->buffer[i + 1]);
 		_util_mesh_bevel_union(uf, inda->buffer[i], inda->buffer[i + 2]);
 	}
+	return uf;
+}
+
+// Triangles connected to triangle tri, the same surface util_mesh_split separates
+u32_array_t *util_mesh_connected_indices(mesh_data_t *g, i32 tri) {
+	u32_array_t *inda     = g->index_array;
+	i32          num_inds = math_floor(inda->length / 3.0) * 3;
+	if (tri < 0 || tri * 3 >= num_inds) {
+		return NULL;
+	}
+	i32         *uf   = _util_mesh_connected(g);
+	i32          root = _util_mesh_bevel_find(uf, inda->buffer[tri * 3]);
+	u32_array_t *out  = u32_array_create(0);
+	for (i32 i = 0; i < num_inds; i += 3) {
+		if (_util_mesh_bevel_find(uf, inda->buffer[i]) == root) {
+			u32_array_push(out, inda->buffer[i]);
+			u32_array_push(out, inda->buffer[i + 1]);
+			u32_array_push(out, inda->buffer[i + 2]);
+		}
+	}
+	free(uf);
+	return out;
+}
+
+// Triangle of o hit by the ray, closest to its origin, -1 on a miss
+i32 util_mesh_raycast_triangle(mesh_object_t *o, struct ray *ray) {
+	i16_array_t *va0     = o->data->vertex_arrays->buffer[0]->values;
+	u32_array_t *inda    = o->data->index_array;
+	mat4_t       m       = o->base->transform->world_unpack;
+	i32          closest = -1;
+	f32          min_d   = 0.0;
+	for (i32 i = 0; i + 2 < inda->length; i += 3) {
+		vec4_t p[3];
+		for (i32 k = 0; k < 3; ++k) {
+			i32 v = inda->buffer[i + k] * 4;
+			p[k]  = vec4_apply_mat4((vec4_t){va0->buffer[v] / 32767.0, va0->buffer[v + 1] / 32767.0, va0->buffer[v + 2] / 32767.0, 1.0}, m);
+		}
+		vec4_t hit = ray_intersect_triangle(ray, p[0], p[1], p[2], false);
+		if (isnan(hit.x)) {
+			continue;
+		}
+		f32 d = vec4_dist(hit, ray->origin);
+		if (closest < 0 || d < min_d) {
+			closest = i / 3;
+			min_d   = d;
+		}
+	}
+	return closest;
+}
+
+void util_mesh_split(mesh_object_t *o) {
+	// Separate the connected surfaces of a mesh into objects of their own
+	mesh_object_t_array_t  *objects   = g_project->_->paint_objects;
+	i32                     index     = array_index_of(objects, o);
+	mesh_data_t            *g         = o->data;
+	vertex_array_t_array_t *vas       = g->vertex_arrays;
+	i16_array_t            *va0       = vas->buffer[0]->values;
+	u32_array_t            *inda      = g->index_array;
+	i32                     num_verts = math_floor(va0->length / 4.0);
+	i32                     num_inds  = math_floor(inda->length / 3.0) * 3;
+	if (index < 0 || num_inds < 6) {
+		return;
+	}
+
+	i32 *uf = _util_mesh_connected(g);
 
 	// Islands in triangle order
 	i32 *island = malloc(num_verts * sizeof(i32)); // Island of a root vertex

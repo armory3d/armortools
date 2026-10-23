@@ -124,6 +124,7 @@ typedef enum {
 	FILL_TYPE_ANGLE     = 2,
 	FILL_TYPE_UV_ISLAND = 3,
 	FILL_TYPE_MESH      = 4,
+	FILL_TYPE_SUBMESH   = 5,
 } fill_type_t;
 
 typedef enum {

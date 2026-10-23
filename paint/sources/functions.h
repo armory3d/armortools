@@ -863,6 +863,8 @@ void                      util_mesh_visibility_changed();
 void                      util_mesh_merge_geometry();
 void                      util_mesh_merge_geometry_objects(mesh_object_t_array_t *merged);
 void                      util_mesh_split(mesh_object_t *o);
+u32_array_t              *util_mesh_connected_indices(mesh_data_t *g, i32 tri);
+i32                       util_mesh_raycast_triangle(mesh_object_t *o, struct ray *ray);
 void                      util_mesh_swap_axis(mesh_object_t_array_t *objects, i32 a, i32 b);
 void                      util_mesh_flip_normals(mesh_object_t_array_t *objects);
 void                      util_mesh_calc_normals(mesh_object_t_array_t *objects, bool smooth);
