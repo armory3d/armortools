@@ -214,6 +214,11 @@ node_shader_context_t *make_paint_run_context(material_t *data, char *context_id
 
 	node_shader_write_vert(kong, "output.pos = float4(tpos, 0.0, 1.0);");
 
+	if (g_context->tool == TOOL_TYPE_BLUR) {
+		node_shader_add_out(kong, "float2 blur_uv");
+		node_shader_write_vert(kong, string_tmp("output.blur_uv = %s;", tuv));
+	}
+
 	if (g_context->select_active && g_context->select_2d) {
 		node_shader_add_out(kong, "float2 select_uv");
 		node_shader_write_vert(kong, string_tmp("output.select_uv = %s;", tuv));
