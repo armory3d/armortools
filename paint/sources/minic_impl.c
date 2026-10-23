@@ -477,6 +477,7 @@ static void script_paint_at(f32 x, f32 y) {
 	g_context->prev_paint_vec_y = prev_y;
 	g_context->pdirty           = 1;
 
+	render_path_paint_commands_symmetry();
 	render_path_paint_commands_paint(false);
 
 	script_paint_first = false;
@@ -794,6 +795,7 @@ void script_layer_update(slot_layer_t *l) {
 	if (l->fill_material != NULL) {
 		script_layer_refill(l);
 	}
+	if (l == g_context->layer) make_material_parse_paint_material(true);
 	make_material_parse_mesh_material();
 	script_gpu_end(current, in_use);
 	g_context->layers_preview_dirty = true;
@@ -1149,6 +1151,22 @@ void script_project_new(void) {
 	g_context->ddirty = 2;
 }
 
+void script_undo(void) {
+	gpu_texture_t *current;
+	bool in_use;
+	script_gpu_begin(&current, &in_use);
+	history_undo();
+	script_gpu_end(current, in_use);
+}
+
+void script_redo(void) {
+	gpu_texture_t *current;
+	bool in_use;
+	script_gpu_begin(&current, &in_use);
+	history_redo();
+	script_gpu_end(current, in_use);
+}
+
 static char *script_resolve_path(char *path) {
 	// iron_file_exists() checks relative paths against the cwd, data_get_blob() against data/
 	if (data_is_abs(path) || data_is_up(path) || starts_with(path, "./")) {
@@ -1202,6 +1220,20 @@ static void script_append_mesh_finish(i32 first) {
 		import_mesh_finish_import(NULL);
 	}
 	import_mesh_append = false;
+}
+
+// Source axes: +X, -X, +Y, -Y, +Z, -Z (0..5); -1/-1 selects automatic.
+void script_import_mesh(char *path, bool append, i32 up, i32 forward) {
+	if (path == NULL || !iron_file_exists(path)) return;
+	path = script_resolve_path(path);
+	gpu_texture_t *current;
+	bool in_use;
+	script_gpu_begin(&current, &in_use);
+	i32 first = g_project->_->paint_objects->length;
+	import_mesh_run_with_axes(path, !append, !append, append, up, forward);
+	if (append) script_append_mesh_finish(first);
+	script_gpu_end(current, in_use);
+	g_context->ddirty = 2;
 }
 
 void script_append_mesh(char *path) {

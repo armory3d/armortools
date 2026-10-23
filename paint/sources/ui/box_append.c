@@ -147,6 +147,7 @@ void box_append_draw() {
 }
 
 static void box_append_show_on_cache_cloud_done(char *abs) {
+	if (abs == NULL) return;
 	box_append_show(string_copy(abs));
 }
 

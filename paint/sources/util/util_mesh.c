@@ -137,7 +137,7 @@ bool util_mesh_link_parse(char *name, i32 *source_index, char **object_name) {
 
 static i32 _util_mesh_atlas_stride_for(i32 count) {
 	i32 stride = 1;
-	while (stride * stride < count && stride < ATLAS_MAX_STRIDE) {
+	while (stride * stride < count) {
 		stride++;
 	}
 	return stride;
@@ -147,6 +147,15 @@ static i32  util_mesh_atlas_stride_merged = 1;
 static i32  util_mesh_udim_tiles[ATLAS_MAX_SLOTS]; // Sorted tile ids, one atlas slot per tile
 static i32  util_mesh_udim_tile_count  = 0;
 static bool util_mesh_udim_tiles_spent = false;
+static i32  util_mesh_material_tile_count = 0;
+static i32  util_mesh_udim_slots[ATLAS_MAX_SLOTS];
+
+void util_mesh_reset_atlas() {
+	util_mesh_atlas_stride_merged = 1;
+	util_mesh_udim_tile_count     = 0;
+	util_mesh_material_tile_count = 0;
+	util_mesh_udim_tiles_spent    = false;
+}
 
 // Tile id from the ".1001" name suffix given by udim import, -1 if none
 i32 util_mesh_udim_tile(char *name) {
@@ -197,20 +206,28 @@ static void _util_mesh_udim_build_tiles() {
 
 // Shared layers of a mesh split by udim tile keep every tile in its own atlas slot
 bool util_mesh_udim_active() {
-	return util_mesh_udim_tile_count > 1;
+	return util_mesh_udim_tile_count > 1 || util_mesh_material_tile_count > 1;
+}
+
+bool util_mesh_material_uvs() {
+	return util_mesh_material_tile_count > 0;
+}
+
+mesh_data_t *util_mesh_paint_data() {
+	return g_context->merged_object != NULL ? g_context->merged_object->data : g_context->paint_object->data;
 }
 
 i32 util_mesh_udim_slot(i32 tile) {
 	for (i32 i = 0; i < util_mesh_udim_tile_count; ++i) {
 		if (util_mesh_udim_tiles[i] == tile) {
-			return i;
+			return util_mesh_udim_slots[i];
 		}
 	}
 	return util_mesh_udim_tiles_spent ? ATLAS_MAX_SLOTS - 1 : 0;
 }
 
 bool util_mesh_udim_layer(slot_layer_t *l) {
-	if (!util_mesh_udim_active() || l == NULL || l->uv_map == 1) {
+	if (!util_mesh_udim_active() || l == NULL || (l->uv_map == 1 && !util_mesh_material_uvs())) {
 		return false;
 	}
 	i32 mask = slot_layer_get_object_mask(l);
@@ -218,6 +235,8 @@ bool util_mesh_udim_layer(slot_layer_t *l) {
 }
 
 static i32 _util_mesh_atlas_slot_for_object(mesh_object_t *o) {
+	if (o->data->paint_uvs->tile > 0)
+		return o->data->paint_uvs->tile - 1;
 	if (util_mesh_udim_active()) {
 		return util_mesh_udim_slot(util_mesh_udim_tile(o->base->name));
 	}
@@ -226,7 +245,28 @@ static i32 _util_mesh_atlas_slot_for_object(mesh_object_t *o) {
 
 static void _util_mesh_atlas_build_slots() {
 	_util_mesh_udim_build_tiles();
-	util_mesh_atlas_stride_merged = util_mesh_udim_active() ? _util_mesh_atlas_stride_for(util_mesh_udim_tile_count) : 1;
+	util_mesh_material_tile_count = 0;
+	bool plain                    = false;
+	for (i32 i = 0; i < g_project->_->paint_objects->length; ++i) {
+		mesh_object_t *o              = g_project->_->paint_objects->buffer[i];
+		util_mesh_material_tile_count = math_max(util_mesh_material_tile_count, o->data->paint_uvs->count);
+		if (o->data->index_array->length > 0 && o->data->paint_uvs->tile == 0 && util_mesh_udim_tile(o->base->name) < 0)
+			plain = true;
+	}
+	i32 count = math_max(1, util_mesh_material_tile_count), slot = 0;
+	for (i32 i = 0; i < util_mesh_udim_tile_count; ++i) {
+		for (;;) {
+			bool used = plain && slot == 0 && util_mesh_material_tile_count > 0;
+			for (i32 j = 0; j < g_project->_->paint_objects->length; ++j)
+				used |= g_project->_->paint_objects->buffer[j]->data->paint_uvs->tile == slot + 1;
+			if (!used)
+				break;
+			slot++;
+		}
+		util_mesh_udim_slots[i] = slot++;
+		count                   = math_max(count, slot);
+	}
+	util_mesh_atlas_stride_merged = _util_mesh_atlas_stride_for(count);
 }
 
 i32 util_mesh_atlas_stride() {
@@ -278,6 +318,7 @@ mesh_data_t *util_mesh_data_duplicate(mesh_data_t *source) {
 	raw->name        = string_copy(source->name);
 	raw->scale_pos   = source->scale_pos;
 	raw->scale_tex   = source->scale_tex;
+	raw->paint_uvs_data = source->paint_uvs_data;
 
 	raw->vertex_arrays = (vertex_array_t_array_t *)any_array_create_from_raw((void *[]){}, 0);
 	for (i32 i = 0; i < source->vertex_arrays->length; ++i) {
@@ -376,10 +417,15 @@ static mesh_data_t *util_mesh_build_merged_data(mesh_object_t_array_t *paint_obj
 	i16_array_t *va0    = i16_array_create(vlen * 4);
 	i16_array_t *va1    = i16_array_create(vlen * 2);
 	i16_array_t *va2    = i16_array_create(vlen * 2);
-	i16_array_t *vatex1 = mesh_data_get_vertex_array(paint_objects->buffer[0]->data, "tex1") != NULL ? i16_array_create(vlen * 2) : NULL;
-	i16_array_t *vacol  = mesh_data_get_vertex_array(paint_objects->buffer[0]->data, "col") != NULL ? i16_array_create(vlen * 4) : NULL;
-	i32          tex1i  = 3;
-	i32          coli   = vatex1 != NULL ? 4 : 3;
+	mesh_data_t *attributes = paint_objects->buffer[0]->data;
+	for (i32 i = 0; i < paint_objects->length; ++i) {
+		if (paint_objects->buffer[i]->data->index_array->length > 0) {
+			attributes = paint_objects->buffer[i]->data;
+			break;
+		}
+	}
+	i16_array_t *vatex1 = mesh_data_get_vertex_array(attributes, "tex1") != NULL ? i16_array_create(vlen * 2) : NULL;
+	i16_array_t *vacol  = mesh_data_get_vertex_array(attributes, "col") != NULL ? i16_array_create(vlen * 4) : NULL;
 	u32_array_t *ia     = u32_array_create(ilen);
 
 	_util_mesh_atlas_build_slots();
@@ -404,15 +450,18 @@ static mesh_data_t *util_mesh_build_merged_data(mesh_object_t_array_t *paint_obj
 			va2->buffer[j * 2 + 1 + voff * 2] = vas->buffer[2]->values->buffer[j * 2 + 1] / (float)atlas_stride + tile_y;
 		}
 		// Tex1
-		if (vatex1 != NULL) {
-			for (i32 j = 0; j < vas->buffer[tex1i]->values->length; ++j) {
-				vatex1->buffer[j + voff * 2] = vas->buffer[tex1i]->values->buffer[j];
+		vertex_array_t *uv1 = mesh_data_get_vertex_array(paint_objects->buffer[i]->data, "tex1");
+		if (vatex1 != NULL && uv1 != NULL) {
+			for (i32 j = 0; j < uv1->values->length; ++j) {
+				vatex1->buffer[j + voff * 2] =
+				    util_mesh_material_uvs() ? uv1->values->buffer[j] / (float)atlas_stride + (j % 2 == 0 ? tile_x : tile_y) : uv1->values->buffer[j];
 			}
 		}
 		// Col
-		if (vacol != NULL) {
-			for (i32 j = 0; j < vas->buffer[coli]->values->length; ++j) {
-				vacol->buffer[j + voff * 4] = vas->buffer[coli]->values->buffer[j];
+		vertex_array_t *col = mesh_data_get_vertex_array(paint_objects->buffer[i]->data, "col");
+		if (vacol != NULL && col != NULL) {
+			for (i32 j = 0; j < col->values->length; ++j) {
+				vacol->buffer[j + voff * 4] = col->values->buffer[j];
 			}
 		}
 		// Indices
@@ -462,7 +511,52 @@ static void util_mesh_merged_toggled() {
 	render_path_raytrace_ready = false;
 }
 
+static void util_mesh_align_paint_attributes() {
+	bool uv1 = false, color = false;
+	for (i32 i = 0; i < g_project->_->paint_objects->length; ++i) {
+		mesh_data_t *data = g_project->_->paint_objects->buffer[i]->data;
+		uv1 |= mesh_data_get_vertex_array(data, "tex1") != NULL;
+		color |= mesh_data_get_vertex_array(data, "col") != NULL;
+	}
+	if (!uv1 && !color)
+		return;
+	// All paint objects share a shader layout. Missing optional attributes use
+	// UV0 and white; existing UV channels and vertex colors retain their values.
+	for (i32 i = 0; i < g_project->_->paint_objects->length; ++i) {
+		mesh_data_t    *data     = g_project->_->paint_objects->buffer[i]->data;
+		i32             vertices = data->vertex_arrays->buffer[0]->values->length / 4;
+		vertex_array_t *tex1     = mesh_data_get_vertex_array(data, "tex1");
+		vertex_array_t *col      = mesh_data_get_vertex_array(data, "col");
+		bool            changed  = false;
+		if (uv1 && tex1 == NULL) {
+			tex1 = ALLOC_INIT(vertex_array_t,
+			                  {.attrib = "tex1", .data = "short2norm", .values = i16_array_create_from_array(data->vertex_arrays->buffer[2]->values)});
+			any_array_push(data->vertex_arrays, tex1);
+			changed = true;
+		}
+		if (color && col == NULL) {
+			col = ALLOC_INIT(vertex_array_t, {.attrib = "col", .data = "short4norm", .values = i16_array_create(vertices * 4)});
+			for (i32 j = 0; j < col->values->length; ++j)
+				col->values->buffer[j] = 32767;
+			any_array_push(data->vertex_arrays, col);
+			changed = true;
+		}
+		if (uv1 && color && data->vertex_arrays->buffer[3] != tex1) {
+			data->vertex_arrays->buffer[3] = tex1;
+			data->vertex_arrays->buffer[4] = col;
+			changed                        = true;
+		}
+		if (changed) {
+			gpu_delete_buffer(data->_->vertex_buffer);
+			data->_->structure     = mesh_data_get_vertex_struct(data->vertex_arrays);
+			data->_->vertex_buffer = gpu_create_vertex_buffer(vertices, &data->_->structure);
+			mesh_data_build_vertices(data->_->vertex_buffer, data->vertex_arrays);
+		}
+	}
+}
+
 static void _util_mesh_merge(mesh_object_t_array_t *paint_objects, bool paintable_only) {
+	util_mesh_align_paint_attributes();
 	if (paint_objects == NULL) {
 		paint_objects = g_project->_->paint_objects;
 	}
@@ -1829,6 +1923,7 @@ static void _util_mesh_decimate(mesh_object_t *o, f32 ratio) {
 	                                            .scale_pos   = o->data->scale_pos,
 	                                            .scale_tex   = 1.0});
 
+	raw->paint_uvs_data      = o->data->paint_uvs_data;
 	mesh_data_t *new_data    = mesh_data_create(raw);
 	new_data->_->owns_arrays = true;
 	if (!util_mesh_data_is_shared(o->data)) {
@@ -2563,6 +2658,7 @@ static void _util_mesh_bevel(mesh_object_t *o, f32 amount) {
 	                                                    .index_array = new_inda,
 	                                                    .scale_pos   = o->data->scale_pos,
 	                                                    .scale_tex   = 1.0});
+	raw->paint_uvs_data      = o->data->paint_uvs_data;
 	mesh_data_t *new_data    = mesh_data_create(raw);
 	new_data->_->owns_arrays = true;
 	if (!util_mesh_data_is_shared(o->data)) {
@@ -2686,6 +2782,7 @@ static void _util_mesh_subdivide(mesh_object_t *o) {
 	                                                     .index_array = new_inda,
 	                                                     .scale_pos   = o->data->scale_pos,
 	                                                     .scale_tex   = o->data->scale_tex});
+	raw->paint_uvs_data       = o->data->paint_uvs_data;
 	mesh_data_t *new_data2    = mesh_data_create(raw);
 	new_data2->_->owns_arrays = true;
 	if (!util_mesh_data_is_shared(o->data)) {
@@ -2897,6 +2994,7 @@ void util_mesh_split(mesh_object_t *o) {
 		mesh_data_t *raw   = calloc(1, sizeof(mesh_data_t));
 		raw->scale_pos     = g->scale_pos;
 		raw->scale_tex     = g->scale_tex;
+		raw->paint_uvs_data = g->paint_uvs_data;
 		raw->vertex_arrays = (vertex_array_t_array_t *)any_array_create_from_raw((void *[]){}, 0);
 		for (i32 k = 0; k < vas->length; ++k) {
 			vertex_array_t *src    = vas->buffer[k];

@@ -37,7 +37,7 @@ static mesh_data_t_array_t *import_arm_get_mesh_datas(project_t *project, string
 			string_array_push(mesh_names, object_name);
 		}
 		else {
-			mesh_data_t *md   = mesh_data_create(raw);
+			mesh_data_t *md   = mesh_data_create_packed(raw);
 			md->_->skin_blob  = import_arm_get_mesh_skin(project, i);
 			md->_->skin_frame = -1;
 			any_array_push(mesh_datas, md);
@@ -60,7 +60,7 @@ static mesh_data_t_array_t *import_arm_get_mesh_datas(project_t *project, string
 void import_arm_run_mesh(project_t *raw) {
 	g_project->_->paint_objects = any_array_create_from_raw((void *[]){}, 0);
 	for (i32 i = 0; i < raw->mesh_datas->length; ++i) {
-		mesh_data_t   *md     = mesh_data_create(raw->mesh_datas->buffer[i]);
+		mesh_data_t   *md     = mesh_data_create_packed(raw->mesh_datas->buffer[i]);
 		mesh_object_t *object = NULL;
 		if (i == 0) {
 			mesh_object_set_data(g_context->paint_object, md);
@@ -749,7 +749,7 @@ void import_arm_run_project(char *path) {
 	g_context->layer_filter         = 0;
 	import_arm_progress(0.1);
 
-	i32 progress_assets = project->assets->length + (project->sound_assets != NULL ? project->sound_assets->length : 0);
+	i32 progress_assets = (project->assets != NULL ? project->assets->length : 0) + (project->sound_assets != NULL ? project->sound_assets->length : 0);
 	i32 progress_loaded = 0;
 	i32 progress_bytes  = 1;
 	if (project->packed_assets != NULL) {
@@ -1351,6 +1351,6 @@ void import_arm_run_swatches(char *path, bool replace_existing) {
 }
 
 bool import_arm_has_version(buffer_t *b) {
-	bool has_version = b->buffer[10] == 118; // 'v';
+	bool has_version = b != NULL && b->length > 10 && b->buffer[10] == 118; // 'v';
 	return has_version;
 }

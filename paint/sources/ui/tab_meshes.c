@@ -1235,7 +1235,7 @@ mesh_object_t *tab_meshes_append_shape(char *mesh_name) {
 	}
 	buffer_t *b         = iron_load_blob(string("%smeshes/%s.arm", data_path(), mesh_name));
 	scene_t  *scene_raw = armpack_decode(b);
-	return tab_meshes_append_data(mesh_data_create(scene_raw->mesh_datas->buffer[0]));
+	return tab_meshes_append_data(mesh_data_create_packed(scene_raw->mesh_datas->buffer[0]));
 }
 
 mesh_object_t *tab_meshes_append_data(mesh_data_t *md) {

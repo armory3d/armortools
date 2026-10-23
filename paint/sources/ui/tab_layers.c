@@ -775,7 +775,7 @@ void tab_layers_draw_layer_context_menu_draw() {
 		        "uv0",
 		    },
 		    1);
-		if (mesh_data_get_vertex_array(g_context->paint_object->data, "tex1") != NULL) {
+		if (mesh_data_get_vertex_array(util_mesh_paint_data(), "tex1") != NULL) {
 			any_array_push(aruv, "uv1");
 		}
 		ui_combo(&l->uv_map, aruv, tr("UV Map"), true, UI_ALIGN_LEFT, true);

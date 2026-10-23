@@ -70,8 +70,8 @@ static void try_process_queue() {
 
 static void finish_request(async_context_t *async_ctx, char *response) {
 	if (async_ctx->fp) {
-		fflush(async_ctx->fp);
-		fclose(async_ctx->fp);
+		if (fflush(async_ctx->fp) != 0) async_ctx->status = 0;
+		if (fclose(async_ctx->fp) != 0) async_ctx->status = 0;
 	}
 	if (async_ctx->ssl) {
 		SSL_shutdown(async_ctx->ssl);
@@ -236,18 +236,28 @@ static int do_request(async_context_t *async_ctx) {
 		int   is_chunked = strcasestr(header_buf, "transfer-encoding: chunked") != NULL;
 		// Stop at the end of the body
 		char *content_length_header = strcasestr(header_buf, "\r\ncontent-length:");
-		int   content_length        = content_length_header != NULL && content_length_header < headers_end ? atoi(content_length_header + 17) : -1;
+		int64_t content_length      = content_length_header != NULL && content_length_header < headers_end ? strtoll(content_length_header + 17, NULL, 10) : -1;
 
 		if (async_ctx->fp) {
-			// No chunked support for fp yet
+			// Do not publish chunk framing as a corrupt asset; this backend does not decode it for files yet.
+			if (is_chunked) {
+				async_ctx->status = 0;
+				free(header_buf);
+				finish_request(async_ctx, NULL);
+				return 1;
+			}
+			int64_t received = body_len;
+			bool write_ok = true;
 			if (body_len > 0) {
-				fwrite(body_start, 1, body_len, async_ctx->fp);
+				write_ok = fwrite(body_start, 1, body_len, async_ctx->fp) == (size_t)body_len;
 				iron_net_bytes_downloaded += body_len;
 			}
-			while ((n = SSL_read(ssl, async_ctx->buf, 64 * 1024)) > 0) {
-				fwrite(async_ctx->buf, 1, n, async_ctx->fp);
+			while (write_ok && (content_length < 0 || received < content_length) && (n = SSL_read(ssl, async_ctx->buf, 64 * 1024)) > 0) {
+				write_ok = fwrite(async_ctx->buf, 1, n, async_ctx->fp) == (size_t)n;
+				received += n;
 				iron_net_bytes_downloaded += n;
 			}
+			if (!write_ok || (content_length >= 0 ? received != content_length : n < 0)) async_ctx->status = 0;
 			free(header_buf);
 			finish_request(async_ctx, NULL);
 			return 1;
@@ -310,6 +320,7 @@ static void *download_thread(void *arg) {
 		setvbuf(async_ctx->fp, NULL, _IOFBF, 256 * 1024);
 	}
 	if (!do_request(async_ctx)) {
+		async_ctx->status = 0;
 		finish_request(async_ctx, NULL);
 	}
 	return NULL;

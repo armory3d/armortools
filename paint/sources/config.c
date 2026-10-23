@@ -222,14 +222,14 @@ void config_init() {
 		g_config->camera_pan_speed      = 0.5;
 		g_config->camera_rotation_speed = 0.5;
 #else
-		g_config->camera_zoom_speed     = 1.0;
-		g_config->camera_pan_speed      = 1.0;
-		g_config->camera_rotation_speed = 1.0;
+		g_config->camera_zoom_speed     = 0.60;
+		g_config->camera_pan_speed      = 0.57;
+		g_config->camera_rotation_speed = 0.63;
 #endif
 		g_config->camera_upside_down = false;
 		g_config->zoom_direction     = ZOOM_DIRECTION_VERTICAL;
 		g_config->wrap_mouse         = false;
-		g_config->camera_pivot       = CAMERA_PIVOT_CENTER;
+		g_config->camera_pivot       = CAMERA_PIVOT_CURSOR;
 		g_config->camera_controls    = CAMERA_CONTROLS_ORBIT;
 		g_config->layer_res          = TEXTURE_RES_RES2048;
 #if defined(IRON_ANDROID) || defined(IRON_IOS)

@@ -88,6 +88,7 @@ WINBASEAPI DWORD WINAPI  GetFileAttributesA(LPCSTR lpFileName);
 WINBASEAPI BOOL WINAPI   ReadFile(HANDLE hFile, LPVOID lpBuffer, DWORD nNumberOfBytesToRead, LPDWORD lpNumberOfBytesRead, LPOVERLAPPED lpOverlapped);
 WINBASEAPI DWORD WINAPI  SetFilePointer(HANDLE hFile, LONG lDistanceToMove, PLONG lpDistanceToMoveHigh, DWORD dwMoveMethod);
 WINBASEAPI BOOL WINAPI   CloseHandle(HANDLE hObject);
+WINBASEAPI BOOL WINAPI   MoveFileExW(LPCWSTR lpExistingFileName, LPCWSTR lpNewFileName, DWORD dwFlags);
 WINBASEAPI BOOL WINAPI   WriteFile(HANDLE hFile, LPCVOID lpBuffer, DWORD nNumberOfBytesToWrite, LPDWORD lpNumberOfBytesWritten, LPOVERLAPPED lpOverlapped);
 int WINAPI               MessageBoxW(HWND hWnd, LPCWSTR lpText, LPCWSTR lpCaption, UINT uType);
 

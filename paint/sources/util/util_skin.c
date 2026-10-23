@@ -90,6 +90,39 @@ i32 util_skin_frame_count(buffer_t *blob) {
 	return util_skin_view(blob, &v) ? (i32)v.h->frame_count : 0;
 }
 
+// Rotate the evaluated world-space pose, including every animation frame.
+// Rest vertices and bone endpoints stay local to the matrices.
+void util_skin_remap_axes(buffer_t *blob, i32 *src, i32 *sign) {
+	util_skin_view_t v;
+	if (!util_skin_view(blob, &v))
+		return;
+	for (size_t j = 0; j < (size_t)v.h->frame_count * v.h->joint_count; ++j) {
+		f32 *m = &v.mats[j * 12];
+		f32  old[12];
+		memcpy(old, m, sizeof(old));
+		for (i32 r = 0; r < 3; ++r) {
+			for (i32 c = 0; c < 4; ++c)
+				m[r * 4 + c] = sign[r] * old[src[r] * 4 + c];
+		}
+	}
+	for (u32 i = 0; i < v.h->vertex_count; ++i) {
+		f32 sum = 0.0f;
+		for (i32 k = 0; k < 4; ++k) {
+			if (v.joints[i * 4 + k] < v.h->joint_count)
+				sum += v.weights[i * 4 + k];
+		}
+		if (sum != 0.0f)
+			continue;
+		f32 p[3], n[3];
+		memcpy(p, &v.pos[i * 3], sizeof(p));
+		memcpy(n, &v.nor[i * 3], sizeof(n));
+		for (i32 r = 0; r < 3; ++r) {
+			v.pos[i * 3 + r] = sign[r] * p[src[r]];
+			v.nor[i * 3 + r] = sign[r] * n[src[r]];
+		}
+	}
+}
+
 static void util_skin_vertex(util_skin_view_t *v, i32 frame, i32 i, f32 *op, f32 *on) {
 	f32 *p   = &v->pos[i * 3];
 	f32 *n   = &v->nor[i * 3];

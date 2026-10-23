@@ -37,6 +37,25 @@ void slot_layer_alloc_textures(slot_layer_t *raw) {
 	}
 }
 
+// Undo slots retain their small previews and allocate full-size textures again on demand.
+void slot_layer_release_paint_textures(slot_layer_t *raw) {
+	gpu_texture_t **textures[] = {&raw->texpaint, &raw->texpaint_nor, &raw->texpaint_pack};
+	char *names[] = {"texpaint", "texpaint_nor", "texpaint_pack"};
+	for (i32 i = 0; i < 3; ++i) {
+		if (*textures[i] == NULL) continue;
+		gpu_delete_texture(*textures[i]);
+		*textures[i] = NULL;
+		char *key = string_tmp("%s%s", names[i], raw->ext);
+		render_target_t *rt = any_map_get(render_path_render_targets, key);
+		map_delete(render_path_render_targets, key);
+		if (rt != NULL) {
+			free(rt->name);
+			free(rt->format);
+			free(rt);
+		}
+	}
+}
+
 static bool slot_layer_is_unique_name(slot_layer_t *self, char *name) {
 	for (i32 i = 0; i < g_project->_->layers->length; ++i) {
 		slot_layer_t *l = g_project->_->layers->buffer[i];
@@ -187,6 +206,18 @@ void slot_layer_delete(slot_layer_t *raw) {
 }
 
 void slot_layer_unload(slot_layer_t *raw) {
+	// Sculpt data is independent of the paint textures, including in deferred undo slots.
+	if (raw->texpaint_sculpt != NULL) {
+		gpu_delete_texture(raw->texpaint_sculpt);
+		raw->texpaint_sculpt = NULL;
+		char *key = string_tmp("texpaint_sculpt%s", raw->ext);
+		render_target_t *rt = any_map_get(render_path_render_targets, key);
+		map_delete(render_path_render_targets, key);
+		if (rt != NULL) {
+			free(rt->name);
+			free(rt);
+		}
+	}
 	if (slot_layer_is_group(raw)) {
 		if (raw->texpaint_preview != NULL) {
 			gpu_delete_texture(raw->texpaint_preview);

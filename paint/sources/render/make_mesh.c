@@ -112,12 +112,11 @@ node_shader_context_t *make_mesh_run(material_t *data, i32 layer_pass) {
 	                                                                  .depth_attachment = "D32"});
 	node_shader_context_t *con_mesh   = node_shader_context_create(data, props);
 
-	if (mesh_data_get_vertex_array(g_context->paint_object->data, "col") != NULL) {
-		node_shader_context_add_elem(con_mesh, "col", "short4norm");
-	}
-
-	if (mesh_data_get_vertex_array(g_context->paint_object->data, "tex1") != NULL) {
+	if (mesh_data_get_vertex_array(util_mesh_paint_data(), "tex1") != NULL) {
 		node_shader_context_add_elem(con_mesh, "tex1", "short2norm");
+	}
+	if (mesh_data_get_vertex_array(util_mesh_paint_data(), "col") != NULL) {
+		node_shader_context_add_elem(con_mesh, "col", "short4norm");
 	}
 
 	node_shader_t *kong = node_shader_context_make_kong(con_mesh);
@@ -133,7 +132,7 @@ node_shader_context_t *make_mesh_run(material_t *data, i32 layer_pass) {
 	node_shader_write_vert(kong, "output.tex_coord = input.tex;");
 	node_shader_write_attrib_frag(kong, "float2 tex_coord = input.tex_coord;");
 
-	if (mesh_data_get_vertex_array(g_context->paint_object->data, "tex1") != NULL) {
+	if (mesh_data_get_vertex_array(util_mesh_paint_data(), "tex1") != NULL) {
 		node_shader_add_out(kong, "float2 tex_coord1");
 		node_shader_write_vert(kong, "output.tex_coord1 = input.tex1;");
 		node_shader_write_attrib_frag(kong, "float2 tex_coord1 = input.tex_coord1;");
@@ -145,8 +144,16 @@ node_shader_context_t *make_mesh_run(material_t *data, i32 layer_pass) {
 		node_shader_add_constant(kong, "float3 atlas_transform", "_atlas_transform");
 		node_shader_write_vert(kong, "output.tex_coord_atlas = input.tex * constants.atlas_transform.z + constants.atlas_transform.xy;");
 		node_shader_write_attrib_frag(kong, "float2 tex_coord_atlas = input.tex_coord_atlas;");
+		if (util_mesh_material_uvs() && mesh_data_get_vertex_array(util_mesh_paint_data(), "tex1") != NULL) {
+			node_shader_add_out(kong, "float2 tex_coord1_atlas");
+			node_shader_write_vert(kong, "output.tex_coord1_atlas = input.tex1 * constants.atlas_transform.z + constants.atlas_transform.xy;");
+			node_shader_write_attrib_frag(kong, "float2 tex_coord1_atlas = input.tex_coord1_atlas;");
+		}
 	}
-	char *tex_coord_layer = util_mesh_udim_layer(g_context->layer) ? "tex_coord_atlas" : "tex_coord";
+	bool  has_uv1         = mesh_data_get_vertex_array(util_mesh_paint_data(), "tex1") != NULL;
+	char *tex_coord_layer = g_context->layer->uv_map == 1 && has_uv1 ? (util_mesh_udim_layer(g_context->layer) ? "tex_coord1_atlas" : "tex_coord1")
+	                        : util_mesh_udim_layer(g_context->layer) ? "tex_coord_atlas"
+	                                                                 : "tex_coord";
 
 	kong->frag_out = "float4[3]";
 	kong->frag_n   = true;
@@ -316,7 +323,9 @@ node_shader_context_t *make_mesh_run(material_t *data, i32 layer_pass) {
 				}
 			}
 
-			char *tex_coord = l->uv_map == 1 ? "tex_coord1" : util_mesh_udim_layer(l) ? "tex_coord_atlas" : "tex_coord";
+			char *tex_coord = l->uv_map == 1 && has_uv1 ? (util_mesh_udim_layer(l) ? "tex_coord1_atlas" : "tex_coord1")
+			                  : util_mesh_udim_layer(l) ? "tex_coord_atlas"
+			                                            : "tex_coord";
 			node_shader_add_texture(kong, string_tmp("texpaint%s", i32_to_string(l->id)), NULL);
 			node_shader_write_frag(kong, string_tmp("texpaint_sample = sample_lod(texpaint%s, sampler_linear, %s, 0.0);", i32_to_string(l->id), tex_coord));
 			node_shader_write_frag(kong, "texpaint_opac = texpaint_sample.a;");

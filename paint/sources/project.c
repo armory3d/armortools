@@ -29,8 +29,16 @@ void project_open() {
 }
 
 void project_save_on_next_frame(void *_) {
-	export_arm_run_project(g_project->_->filepath);
-	if (_project_save_and_quit) {
+	bool quit = _project_save_and_quit;
+	_project_save_and_quit = false;
+	if (!export_arm_run_project(g_project->_->filepath)) {
+		return;
+	}
+#if defined(IRON_WINDOWS) || defined(IRON_LINUX) || defined(IRON_MACOS) || defined(IRON_WASM)
+	char *filename = substring(g_project->_->filepath, string_last_index_of(g_project->_->filepath, PATH_SEP) + 1, string_length(g_project->_->filepath) - 4);
+	sys_title_set(string("%s - %s", filename, manifest_title));
+#endif
+	if (quit) {
 		iron_stop();
 	}
 }
@@ -62,7 +70,7 @@ void project_save(bool save_and_quit) {
 
 #if defined(IRON_WINDOWS) || defined(IRON_LINUX) || defined(IRON_MACOS) || defined(IRON_WASM)
 	char *filename = substring(g_project->_->filepath, string_last_index_of(g_project->_->filepath, PATH_SEP) + 1, string_length(g_project->_->filepath) - 4);
-	sys_title_set(string("%s - %s", filename, manifest_title));
+	sys_title_set(string("%s* - %s", filename, manifest_title));
 #endif
 
 	_project_save_and_quit = save_and_quit;
@@ -160,7 +168,7 @@ void project_new(bool reset_layers) {
 	else {
 		buffer_t *b         = data_get_blob(string("meshes/%s.arm", mesh_name));
 		scene_t  *scene_raw = armpack_decode(b);
-		md                  = mesh_data_create(scene_raw->mesh_datas->buffer[0]);
+		md                  = mesh_data_create_packed(scene_raw->mesh_datas->buffer[0]);
 	}
 
 	gpu_texture_t *current = _draw_current;
@@ -183,6 +191,7 @@ void project_new(bool reset_layers) {
 	    },
 	    1);
 	g_context->paint_object = context_main_object();
+	util_mesh_reset_atlas();
 	context_select_paint_object(context_main_object());
 
 	g_context->paint_object->base->transform->scale = (vec4_t){1, 1, 1, 1.0};

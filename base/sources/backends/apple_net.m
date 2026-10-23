@@ -24,8 +24,11 @@ static NSURLSession *download_session          = nil;
 		NSError *error   = nil;
 		NSURL   *destURL = [NSURL fileURLWithPath:dstPath];
 		[[NSFileManager defaultManager] moveItemAtURL:location toURL:destURL error:&error];
+		if (error != nil) objc_setAssociatedObject(downloadTask, @"file_error", @YES, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 		// todo
-		if ([dstPath hasSuffix:@"iris"] || [dstPath hasSuffix:@"llama_metal"]) {
+		NSString *filename = [dstPath lastPathComponent];
+		if ([filename isEqualToString:@"iris"] || [filename isEqualToString:@"llama_metal"] ||
+		    [filename hasPrefix:@"iris."] || [filename hasPrefix:@"llama_metal."]) {
 			NSDictionary *attrs      = @{NSFilePosixPermissions : @0755};
 			NSError      *chmodError = nil;
 			[[NSFileManager defaultManager] setAttributes:attrs ofItemAtPath:dstPath error:&chmodError];
@@ -47,6 +50,7 @@ static NSURLSession *download_session          = nil;
 	iron_https_callback_t     callback     = cbVal ? [cbVal pointerValue] : NULL;
 	void                     *callbackdata = dataVal ? [dataVal pointerValue] : NULL;
 	int status = error == nil && [task.response isKindOfClass:[NSHTTPURLResponse class]] ? (int)((NSHTTPURLResponse *)task.response).statusCode : 0;
+	if (objc_getAssociatedObject(task, @"file_error") != nil) status = 0;
 	dispatch_async(dispatch_get_main_queue(), ^{
 		if (dstPath) {
 			callback(status, NULL, callbackdata);

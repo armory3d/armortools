@@ -134,8 +134,12 @@ static void neural_node_chmod_x(char *url, char *bin_name) {
 }
 #endif
 
-void neural_node_download_done(char *url) {
+void neural_node_download_done(char *url, bool success) {
 	neural_node_downloading--;
+	if (!success) {
+		console_error(string("%s %s", tr("Could not download"), url));
+		return;
+	}
 	console_log(string("%s %s", tr("Downloaded file from"), url));
 
 #ifdef IRON_LINUX

@@ -353,6 +353,7 @@ void history_undo() {
 			tab_stages_add_layer(l->name);
 		}
 		else if (step->action == HISTORY_ACTION_CLEAR_LAYER) {
+			context_set_layer(g_project->_->layers->buffer[step->layer]);
 			history_undo_i    = history_undo_i - 1 < 0 ? g_config->undo_steps - 1 : history_undo_i - 1;
 			slot_layer_t *lay = history_undo_slot(history_undo_i);
 			slot_layer_swap(g_context->layer, lay);
@@ -721,7 +722,7 @@ void history_redo() {
 		else if (step->action == HISTORY_ACTION_CLEAR_LAYER) {
 			g_context->layer = g_project->_->layers->buffer[step->layer];
 			history_swap_active();
-			slot_layer_clear(g_context->layer, 0x00000000, NULL, 1.0, layers_default_rough, 0.0);
+			slot_layer_clear(g_context->layer, slot_layer_is_mask(g_context->layer) ? 0xffffffff : 0x00000000, NULL, 1.0, layers_default_rough, 0.0);
 			g_context->layer_preview_dirty = true;
 		}
 		else if (step->action == HISTORY_ACTION_DUPLICATE_LAYER) {
@@ -874,6 +875,10 @@ void history_redo() {
 }
 
 void history_reset() {
+	// No snapshot remains reachable after reset; do not retain its GPU allocation.
+	for (i32 i = 0; history_undo_layers != NULL && i < history_undo_layers->length; ++i) {
+		slot_layer_release_paint_textures(history_undo_layers->buffer[i]);
+	}
 	if (history_steps != NULL) {
 		for (i32 i = 0; i < history_steps->length; ++i) {
 			free(history_steps->buffer[i]);

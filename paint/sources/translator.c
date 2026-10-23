@@ -106,8 +106,8 @@ void translator_extended_glyphs() {
 	}
 }
 
-void translator_load_translations_on_cjk_downloaded(char *url) {
-	if (!iron_file_exists(_translator_load_translations_cjk_font_disk_path)) {
+void translator_load_translations_on_cjk_downloaded(char *url, bool success) {
+	if (!success) {
 		// Fall back to English
 		g_config->locale = "en";
 		translator_extended_glyphs();

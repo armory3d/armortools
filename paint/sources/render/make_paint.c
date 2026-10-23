@@ -124,12 +124,11 @@ node_shader_context_t *make_paint_run_context(material_t *data, char *context_id
 	node_shader_context_t *con_paint = node_shader_context_create(data, props);
 
 	if (!is_atlas) {
-		if (mesh_data_get_vertex_array(g_context->paint_object->data, "col") != NULL) {
-			node_shader_context_add_elem(con_paint, "col", "short4norm");
-		}
-
-		if (mesh_data_get_vertex_array(g_context->paint_object->data, "tex1") != NULL) {
+		if (mesh_data_get_vertex_array(util_mesh_paint_data(), "tex1") != NULL) {
 			node_shader_context_add_elem(con_paint, "tex1", "short2norm");
+		}
+		if (mesh_data_get_vertex_array(util_mesh_paint_data(), "col") != NULL) {
+			node_shader_context_add_elem(con_paint, "col", "short4norm");
 		}
 	}
 
@@ -165,7 +164,7 @@ node_shader_context_t *make_paint_run_context(material_t *data, char *context_id
 	        true,
 	    },
 	    4);
-	con_paint->allow_vcols = !is_atlas && mesh_data_get_vertex_array(g_context->paint_object->data, "col") != NULL;
+	con_paint->allow_vcols = !is_atlas && mesh_data_get_vertex_array(util_mesh_paint_data(), "col") != NULL;
 
 	node_shader_t *kong = node_shader_context_make_kong(con_paint);
 
@@ -203,7 +202,7 @@ node_shader_context_t *make_paint_run_context(material_t *data, char *context_id
 	char *tex_nor_link  = accum ? "_texpaint_nor_ref" : "_texpaint_nor_undo";
 	char *tex_pack_link = accum ? "_texpaint_pack_ref" : "_texpaint_pack_undo";
 
-	char *tuv  = g_context->layer->uv_map == 1 ? "input.tex1" : "input.tex";
+	char *tuv  = g_context->layer->uv_map == 1 && mesh_data_get_vertex_array(util_mesh_paint_data(), "tex1") != NULL ? "input.tex1" : "input.tex";
 	bool  udim = !is_atlas && util_mesh_udim_layer(g_context->layer);
 	if (is_atlas || udim) {
 		node_shader_add_constant(kong, "float3 atlas_transform", "_atlas_transform");
