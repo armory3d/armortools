@@ -286,6 +286,11 @@ typedef enum {
 } blur_type_t;
 
 typedef enum {
+	CLONE_LAYERS_SELECTED = 0,
+	CLONE_LAYERS_VISIBLE  = 1,
+} clone_layers_t;
+
+typedef enum {
 	TAB_AREA_SIDEBAR0 = 0,
 	TAB_AREA_SIDEBAR1 = 1,
 	TAB_AREA_STATUS   = 2,

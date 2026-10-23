@@ -174,7 +174,7 @@ slot_material_t       *slot_material_create(shader_data_t *m, ui_node_canvas_t *
 char                  *slot_material_unique_name(ui_node_canvas_t *self, char *name);
 void                   slot_material_unload(slot_material_t *raw);
 void                   slot_material_delete(slot_material_t *raw);
-void                   make_clone_run(node_shader_t *kong);
+void                   make_clone_run(node_shader_t *kong, char *tex_src, char *tex_nor_src, char *tex_pack_src);
 void                   tab_brushes_draw(i32 *htab);
 void                   pipes_init();
 i32                    pipes_get_constant_location(char *type);

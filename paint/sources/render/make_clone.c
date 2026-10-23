@@ -1,7 +1,7 @@
 
 #include "../global.h"
 
-void make_clone_run(node_shader_t *kong) {
+void make_clone_run(node_shader_t *kong, char *tex_src, char *tex_nor_src, char *tex_pack_src) {
 	node_shader_add_constant(kong, "float2 clone_delta", "_clone_delta");
 	// Screen pixels are coarser than texels, extend the source texcoord across the pixel with its screen derivative
 	// Pick the one-sided difference with the smaller step so uv seams and background do not leak in
@@ -27,9 +27,9 @@ void make_clone_run(node_shader_t *kong) {
 	node_shader_write_frag(kong, "if (length(clone_dyl) < length(clone_dyh)) { clone_dy = clone_dyl; }");
 	node_shader_write_frag(kong, "tex_coord_inp += clone_dx * clone_f.x + clone_dy * clone_f.y;");
 
-	node_shader_write_frag(kong, "float4 texpaint_undo_sample = sample_lod(texpaint_undo, sampler_linear, tex_coord_inp, 0.0);");
-	node_shader_write_frag(kong, "float4 texpaint_pack_undo_sample = sample_lod(texpaint_pack_undo, sampler_linear, tex_coord_inp, 0.0);");
-	node_shader_write_frag(kong, "float4 texpaint_nor_undo_sample = sample_lod(texpaint_nor_undo, sampler_linear, tex_coord_inp, 0.0);");
+	node_shader_write_frag(kong, string_tmp("float4 texpaint_undo_sample = sample_lod(%s, sampler_linear, tex_coord_inp, 0.0);", tex_src));
+	node_shader_write_frag(kong, string_tmp("float4 texpaint_pack_undo_sample = sample_lod(%s, sampler_linear, tex_coord_inp, 0.0);", tex_pack_src));
+	node_shader_write_frag(kong, string_tmp("float4 texpaint_nor_undo_sample = sample_lod(%s, sampler_linear, tex_coord_inp, 0.0);", tex_nor_src));
 	node_shader_write_frag(kong, "float clone_src_alpha = texpaint_undo_sample.a;");
 	node_shader_write_frag(kong, "float3 basecol = texpaint_undo_sample.rgb;");
 	node_shader_write_frag(kong, "float roughness = texpaint_pack_undo_sample.g;");

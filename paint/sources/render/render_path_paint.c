@@ -230,6 +230,27 @@ static void render_path_paint_ref_snapshot(i32 tid, bool is_mask) {
 	render_path_draw_shader(string_tmp("Scene/copy_mrt3_pass/%s", pipe));
 }
 
+// Clone source for the visible layers mode
+static void render_path_paint_clone_snapshot() {
+	layers_flatten(false, NULL);
+	char *format = base_bits == TEXTURE_BITS_BITS8 ? "RGBA32" : base_bits == TEXTURE_BITS_BITS16 ? "RGBA64" : "RGBA128";
+	render_path_paint_ref_target("texpaint_ref", format);
+	render_path_paint_ref_target("texpaint_nor_ref", format);
+	render_path_paint_ref_target("texpaint_pack_ref", format);
+	string_array_t *additional = any_array_create_from_raw_tmp(
+	    (void *[]){
+	        "texpaint_nor_ref",
+	        "texpaint_pack_ref",
+	    },
+	    2);
+	render_path_set_target("texpaint_ref", additional, NULL, GPU_CLEAR_NONE, 0, 0.0);
+	render_path_bind_target("expa", "tex0");
+	render_path_bind_target("expb", "tex1");
+	render_path_bind_target("expc", "tex2");
+	char *pipe = string_equals(format, "RGBA32") ? "copy_mrt3_pass" : string_equals(format, "RGBA64") ? "copy_mrt3RGBA64_pass" : "copy_mrt3RGBA128_pass";
+	render_path_draw_shader(string_tmp("Scene/copy_mrt3_pass/%s", pipe));
+}
+
 void render_path_paint_commands_paint(bool dilation) {
 	i32 tid = g_context->layer->id;
 
@@ -890,6 +911,9 @@ void render_path_paint_begin() {
 
 	if (history_push_undo && history_undo_layers != NULL) {
 		history_paint();
+		if (g_context->tool == TOOL_TYPE_CLONE && g_context->clone_layers == CLONE_LAYERS_VISIBLE) {
+			render_path_paint_clone_snapshot();
+		}
 	}
 
 	if (g_context->paint2d) {

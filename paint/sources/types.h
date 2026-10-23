@@ -292,6 +292,7 @@ typedef struct context {
 	f32                         clone_delta_x;
 	f32                         clone_delta_y;
 	bool                        clone_set_source;
+	i32                         clone_layers;
 	f32                         grab_start_x;
 	f32                         grab_start_y;
 	bool                        show_compass;

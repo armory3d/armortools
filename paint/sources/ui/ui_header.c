@@ -422,6 +422,16 @@ void ui_header_draw_tool_properties() {
 		}
 
 		if (g_context->tool == TOOL_TYPE_CLONE) {
+			string_array_t *clone_layers_combo = any_array_create_from_raw_tmp(
+			    (void *[]){
+			        tr("Selected"),
+			        tr("Visible"),
+			    },
+			    2);
+			ui_combo(&g_context->clone_layers, clone_layers_combo, tr("Layers"), false, UI_ALIGN_LEFT, true);
+			if (ui_item_changed()) {
+				make_material_parse_paint_material(true);
+			}
 			if (ui_button(g_context->clone_set_source ? tr("Setting Source") : tr("Set Source"), UI_ALIGN_CENTER, "")) {
 				g_context->clone_set_source = !g_context->clone_set_source;
 			}
