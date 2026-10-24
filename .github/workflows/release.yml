@@ -1,4 +1,4 @@
- Three ways it fires:
+# Three ways it fires:
 #   1. Push a version tag  ->  proper versioned release (git tag v1.0.0 && git push origin v1.0.0)
 #   2. Weekly schedule    ->  automatic "nightly-YYYY-MM-DD" release (Mondays 05:00 UTC)
 #   3. "Run workflow"     ->  on-demand nightly release, same naming
