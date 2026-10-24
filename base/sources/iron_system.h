@@ -107,6 +107,10 @@ extern volatile int iron_exec_async_done;
 extern char        *iron_exec_async_output_file;
 
 void iron_copy_to_clipboard(const char *text);
+#ifdef IRON_WINDOWS
+// Modal desktop picker. Keeps the alpha channel and leaves color unchanged on cancellation.
+bool iron_pick_screen_color(uint32_t *color);
+#endif
 void iron_set_update_callback(void (*callback)(void));
 void iron_set_foreground_callback(void (*callback)(void *), void *data);
 void iron_set_resume_callback(void (*callback)(void *), void *data);
