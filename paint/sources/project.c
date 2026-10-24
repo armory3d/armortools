@@ -9,7 +9,7 @@ bool     _project_import_swatches_replace_existing;
 asset_t *_project_reimport_texture_asset;
 
 void project_open_on_file_picked(char *path) {
-	if (!ends_with(path, ".arm")) {
+	if (!path_has_ext(path, "arm")) {
 		console_error(strings_arm_file_expected());
 		return;
 	}
@@ -281,7 +281,7 @@ void project_set_default_envmap() {
 }
 
 void project_import_material_on_file_picked(char *path) {
-	if (ends_with(path, ".json")) {
+	if (path_has_ext(path, "json")) {
 		import_json_material_run(path);
 	}
 	else {

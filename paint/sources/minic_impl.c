@@ -2062,7 +2062,7 @@ static any_map_t      *custom_text_importers    = NULL;
 static string_array_t *custom_text_formats      = NULL;
 
 gpu_texture_t *script_import_custom_texture(char *path) {
-	char       *format  = substring(path, string_last_index_of(path, ".") + 1, string_length(path));
+	char       *format  = path_ext(path);
 	void       *fn      = any_map_get(custom_texture_importers, format);
 	minic_val_t args[1] = {minic_val_ptr(path)};
 	minic_val_t r       = minic_call_fn(fn, args, 1);
@@ -2070,7 +2070,7 @@ gpu_texture_t *script_import_custom_texture(char *path) {
 }
 
 raw_mesh_t *script_import_custom_mesh(char *path) {
-	char       *format  = substring(path, string_last_index_of(path, ".") + 1, string_length(path));
+	char       *format  = path_ext(path);
 	void       *fn      = any_map_get(custom_mesh_importers, format);
 	minic_val_t args[1] = {minic_val_ptr(path)};
 	minic_val_t r       = minic_call_fn(fn, args, 1);
@@ -2078,7 +2078,7 @@ raw_mesh_t *script_import_custom_mesh(char *path) {
 }
 
 void script_import_custom_text(char *path) {
-	char       *format  = substring(path, string_last_index_of(path, ".") + 1, string_length(path));
+	char       *format  = path_ext(path);
 	void       *fn      = any_map_get(custom_text_importers, format);
 	minic_val_t args[1] = {minic_val_ptr(path)};
 	minic_call_fn(fn, args, 1);

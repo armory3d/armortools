@@ -389,7 +389,7 @@ void import_arm_unpack_sound(project_t *project, char *abs, char *file, bool cop
 		return;
 	}
 	import_arm_progress_unpacked += ((buffer_t *)pa->bytes)->length;
-	sound_t *sound = iron_load_sound_from_bytes(pa->bytes, ends_with(pa->name, ".wav") ? ".wav" : ".ogg");
+	sound_t *sound = iron_load_sound_from_bytes(pa->bytes, path_has_ext(pa->name, "wav") ? ".wav" : ".ogg");
 	if (data_cached_sounds == NULL) {
 		data_cached_sounds = any_map_create();
 	}
@@ -416,11 +416,10 @@ typedef struct import_arm_decode {
 #define IMPORT_ARM_DECODE_THREADS 16
 
 static bool import_arm_is_decodable(char *abs) {
-	char *ext = substring(abs, string_last_index_of(abs, ".") + 1, string_length(abs));
+	char *ext = path_ext(abs);
 	if (any_map_get(import_texture_importers, ext) != NULL) {
 		return false;
 	}
-	ext = to_lower_case(ext);
 	return string_equals(ext, "jpg") || string_equals(ext, "jpeg") || string_equals(ext, "png") || string_equals(ext, "hdr");
 }
 
@@ -882,7 +881,7 @@ void import_arm_run_project(char *path) {
 		if (any_map_get(data_cached_textures, abs) == NULL && !iron_file_exists(abs)) {
 			import_arm_make_pink(abs);
 		}
-		bool hdr_as_envmap = ends_with(abs, ".hdr") && g_project->envmap != NULL && string_equals(g_project->envmap, path_normalize(abs));
+		bool hdr_as_envmap = path_has_ext(abs, "hdr") && g_project->envmap != NULL && string_equals(g_project->envmap, path_normalize(abs));
 		import_texture_run(abs, hdr_as_envmap);
 		progress_loaded++;
 		import_arm_progress(0.1 + 0.7 * (0.8 * import_arm_progress_unpacked / (f32)progress_bytes + 0.2 * progress_loaded / (f32)progress_assets));

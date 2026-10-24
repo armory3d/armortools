@@ -291,7 +291,7 @@ void base_update(void *_) {
 				ui_nodes_accept_asset_drop(array_index_of(g_project->_->assets, base_drag_asset));
 			}
 			else if (context_in_3d_view()) {
-				if (ends_with(to_lower_case(base_drag_asset->file), ".hdr")) {
+				if (path_has_ext(base_drag_asset->file, "hdr")) {
 					gpu_texture_t *image = project_get_image(base_drag_asset);
 					import_envmap_run(base_drag_asset->file, image);
 				}

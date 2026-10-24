@@ -534,7 +534,7 @@ bool context_enable_import_plugin(char *file) {
 	if (box_preferences_files_plugin == NULL) {
 		box_preferences_fetch_plugins();
 	}
-	char *ext = substring(file, string_last_index_of(file, ".") + 1, string_length(file));
+	char *ext = path_ext(file);
 	for (i32 i = 0; i < box_preferences_files_plugin->length; ++i) {
 		char *f = box_preferences_files_plugin->buffer[i];
 		if (starts_with(f, "import_") && string_index_of(f, ext) >= 0) {

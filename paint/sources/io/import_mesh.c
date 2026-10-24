@@ -24,20 +24,20 @@ void import_mesh_run(char *path, bool _clear_layers, bool replace_existing, bool
 	import_mesh_appended     = NULL;
 	g_context->layer_filter  = 0;
 
-	char *p        = to_lower_case(path);
-	bool  is_obj   = ends_with(p, ".obj");
-	bool  is_blend = ends_with(p, ".blend");
-	free(p);
-
-	if (is_obj) {
+	if (path_has_ext(path, "obj")) {
 		import_obj_run(path, replace_existing);
 	}
-	else if (is_blend) {
+	else if (path_has_ext(path, "blend")) {
 		import_blend_mesh_run(path, replace_existing);
 	}
 	else {
-		char *ext                           = string_tmp("%s", path + string_last_index_of(path, ".") + 1);
+		char *ext                           = path_ext(path);
 		raw_mesh_t *(*importer)(char *path) = any_map_get(import_mesh_importers, ext);
+		free(ext);
+		if (importer == NULL) {
+			console_error(strings_unknown_asset_format());
+			return;
+		}
 
 		raw_mesh_t *mesh = importer(path);
 		if (mesh == NULL) {

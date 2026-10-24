@@ -649,7 +649,7 @@ void export_arm_pack_assets(project_t *raw, asset_t_array_t *assets) {
 		if (project_packed_asset_exists(raw->packed_assets, file)) {
 			continue;
 		}
-		char     *ext = substring(file, string_last_index_of(file, ".") + 1, string_length(file));
+		char     *ext = path_ext(file);
 		buffer_t *bytes;
 		if (any_map_get(import_texture_importers, ext) != NULL) { // Script importer format, store as png
 			gpu_texture_t *image = project_get_image(assets->buffer[i]);

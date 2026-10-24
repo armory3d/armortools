@@ -79,7 +79,7 @@ draw_cloud_icon_data_t *make_draw_cloud_icon_data(char *f, gpu_texture_t *image)
 
 void ui_files_file_browser_on_cache_cloud_done_on_next_frame(draw_cloud_icon_data_t *data) {
 	gpu_texture_t *icon = gpu_create_render_target(data->image->width, data->image->height, GPU_TEXTURE_FORMAT_RGBA32);
-	if (ends_with(data->f, ".arm")) { // Used for material sphere alpha cutout
+	if (path_has_ext(data->f, "arm")) { // Used for material sphere alpha cutout
 		draw_begin(icon, false, 0);
 		draw_image(g_project->_->materials->buffer[0]->image, 0, 0);
 	}
@@ -363,7 +363,7 @@ char *ui_files_file_browser(char **path, bool drag_files, char *search, bool ref
 				}
 			}
 
-			if (!is_folder && ends_with(f, ".arm") && !is_cloud) {
+			if (!is_folder && path_has_ext(f, "arm") && !is_cloud) {
 				if (ui_files_icon_map == NULL) {
 					ui_files_icon_map = any_map_create();
 				}

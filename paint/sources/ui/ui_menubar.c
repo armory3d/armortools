@@ -136,7 +136,7 @@ void ui_menubar_capture_screenshot(void *_) {
 }
 
 void ui_menubar_import_envmap(char *path) {
-	if (!ends_with(path, ".hdr")) {
+	if (!path_has_ext(path, "hdr")) {
 		console_error(tr("Error: .hdr file expected"));
 		return;
 	}
