@@ -3,14 +3,18 @@
 # on Fedora desktops with zero compat concerns.
 # Compile step mirrors upstream's linux_vulkan.yml (Vulkan backend):
 # https://github.com/armory3d/armorpaint/tree/main/.github/workflows
+#
+# REUSABLE: release.yml calls this workflow (workflow_call) instead of
+# duplicating the build steps. Fix build problems HERE, once.
 
 name: Build ArmorPaint (Linux x64 - Fedora)
 
 on:
+  workflow_call:       # allows release.yml to call this workflow as a job
   workflow_dispatch:
-  #push:
-  #  branches:
-  #   - main
+  push:
+    branches:
+      - main
 
 permissions:
   contents: read
