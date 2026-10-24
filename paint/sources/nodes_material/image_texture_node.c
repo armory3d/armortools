@@ -8,8 +8,8 @@ bind_tex_t *parser_material_make_texture(ui_node_t *image_node, char *tex_name) 
 	if (i < 0 || i >= g_project->_->assets->length) { // 9999 - Texture deleted, use pink now
 		return NULL;
 	}
-	char *filepath = parser_material_enum_data(base_combo_enum_texts(image_node->type)->buffer[i]);
-	if (string_equals(filepath, "") || string_index_of(filepath, ".") == -1) {
+	char *filepath = g_project->_->assets->buffer[i]->file;
+	if (string_index_of(filepath, ".") == -1) {
 		return NULL;
 	}
 	return parser_material_make_bind_tex(tex_name, filepath);

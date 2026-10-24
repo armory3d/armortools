@@ -81,17 +81,7 @@ gpu_texture_t *ui_nodes_get_node_preview_image(ui_node_t *n) {
 	         (n->inputs->length == 0 || ui_nodes_canvas_type == CANVAS_TYPE_MESH || parser_material_get_input_link(n->inputs->buffer[0]) == NULL)) {
 		i32 i = n->buttons->buffer[0]->default_value->buffer[0];
 		if (i >= 0 && i < g_project->_->assets->length) { // 9999 - Texture deleted
-			char *filepath    = parser_material_enum_data(base_combo_enum_texts(n->type)->buffer[i]);
-			i32   asset_index = -1;
-			for (i32 i = 0; i < g_project->_->assets->length; ++i) {
-				if (string_equals(g_project->_->assets->buffer[i]->file, filepath)) {
-					asset_index = i;
-					break;
-				}
-			}
-			if (asset_index > -1) {
-				img = project_get_image(g_project->_->assets->buffer[asset_index]);
-			}
+			img = project_get_image(g_project->_->assets->buffer[i]);
 		}
 	}
 	else if (string_equals(n->type, "TEX_BAKE")) {

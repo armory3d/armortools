@@ -45,7 +45,7 @@ void brush_output_node_parse_inputs() {
 		g_context->brush_nodes_opacity       = 1.0;
 		i32 index                            = -1;
 		for (i32 i = 0; i < g_project->_->assets->length; ++i) {
-			if (string_equals(g_project->_->assets->buffer[i]->name, opac->_str)) {
+			if (string_equals(g_project->_->assets->buffer[i]->file, opac->_str)) {
 				index = i;
 				break;
 			}
@@ -71,7 +71,7 @@ void brush_output_node_parse_inputs() {
 		stencil->_str                           = string_tmp("%.*s", string_last_index_of(stencil->_str, "."), stencil->_str);
 		i32 index                               = -1;
 		for (i32 i = 0; i < g_project->_->assets->length; ++i) {
-			if (string_equals(g_project->_->assets->buffer[i]->name, stencil->_str)) {
+			if (string_equals(g_project->_->assets->buffer[i]->file, stencil->_str)) {
 				index = i;
 				break;
 			}

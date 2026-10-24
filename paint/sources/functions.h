@@ -775,7 +775,6 @@ char                  *parser_material_vec3(f32_array_t *v);
 char                  *parser_material_to_vec3(char *s);
 ui_node_t             *parser_material_node_by_type(ui_node_t_array_t *nodes, char *ntype);
 char                  *parser_material_node_name(ui_node_t *node, ui_node_t_array_t *_parents);
-char                  *parser_material_enum_data(char *s);
 bind_tex_t            *parser_material_make_bind_tex(char *tex_name, char *file);
 char                  *u8_array_string_at(u8_array_t *a, i32 i);
 void                   args_mcp();
