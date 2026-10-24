@@ -4,14 +4,17 @@
 #   - Runs daily (06:00 UTC) + manually via workflow_dispatch
 #   - Fetches upstream main, merges into your fork's main, pushes
 #   - If nothing new upstream, it exits green without committing
-#   - The push automatically triggers Windows + Fedora build workflows
+#   - The push automatically triggers your Windows + Fedora build workflows
 #
 # Notes:
 #   - No third-party action needed — plain git, zero dependencies.
 #   - If upstream ever touches the same files as your fork's changes,
 #     the merge fails loudly (red run) → resolve manually once, done.
-#   - If upstream commits modify .github/workflows, GitHub requires
-#     the extra 'workflows' permission to push them (included below).
+#   - GITHUB_TOKEN cannot push commits that modify .github/workflows
+#     (by design — that needs a token with 'workflow' scope). If that
+#     ever blocks a sync, either fix it manually once, or create a
+#     fine-grained PAT with Contents + Workflows (read/write), save it
+#     as the SYNC_PAT secret, and the checkout below picks it up.
 
 name: Sync fork with upstream
 
@@ -22,7 +25,6 @@ on:
 
 permissions:
   contents: write   # push the merge commit
-  workflows: write  # allowed IF upstream commits touch workflow files
 
 concurrency:
   group: sync-upstream
@@ -37,6 +39,10 @@ jobs:
         with:
           ref: main
           fetch-depth: 0
+          # Optional: set the SYNC_PAT secret (PAT with Contents +
+          # Workflows scope) to allow pushes that touch workflow files.
+          # Unset → falls back to GITHUB_TOKEN, fine for normal syncs.
+          token: ${{ secrets.SYNC_PAT }}
 
       - name: Add upstream remote
         run: |
