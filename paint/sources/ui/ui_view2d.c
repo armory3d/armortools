@@ -1,11 +1,12 @@
 
 #include "../global.h"
 
-bool                 ui_view2d_text_input_hover = false;
-bool                 ui_view2d_uvmap_show       = false;
-paint_tex_t          ui_view2d_tex_type         = PAINT_TEX_BASE;
-view_2d_layer_mode_t ui_view2d_layer_mode       = VIEW_2D_LAYER_MODE_SELECTED;
-bool                 ui_view2d_controls_down    = false;
+bool                 ui_view2d_text_input_hover     = false;
+bool                 ui_view2d_uvmap_show           = false;
+static bool          ui_view2d_tile_boundaries_show = false;
+paint_tex_t          ui_view2d_tex_type             = PAINT_TEX_BASE;
+view_2d_layer_mode_t ui_view2d_layer_mode           = VIEW_2D_LAYER_MODE_SELECTED;
+bool                 ui_view2d_controls_down        = false;
 gpu_texture_t       *_ui_view2d_render_tex;
 f32                  _ui_view2d_render_x;
 f32                  _ui_view2d_render_y;
@@ -141,6 +142,17 @@ void ui_view2d_draw_edit() {
 		}
 	}
 
+	if (ui_view2d_type == VIEW_2D_TYPE_LAYER || ui_view2d_type == VIEW_2D_TYPE_UVMAP) {
+		ui_check(&ui_view2d_tile_boundaries_show, tr("Tile Boundaries"), "");
+		if (ui_item_changed()) {
+			ui_view2d_hwnd->redraws = 2;
+			ui_menu_keep_open       = true;
+		}
+		if (g_ui->is_hovered) {
+			ui_tooltip(tr("Show UDIM and material tile borders and labels"));
+		}
+	}
+
 	if (ui_view2d_type != VIEW_2D_TYPE_SOUND) {
 		ui_check(&ui_view2d_tiled_show, tr("Tiled"), "");
 		if (ui_item_changed()) {
@@ -238,6 +250,66 @@ void ui_view2d_draw_image(gpu_texture_t *image, f32 dx, f32 dy, f32 dw, f32 dh, 
 		gpu_set_int(ui_view2d_channel_loc, channel);
 	}
 	draw_scaled_image(image, dx, dy, dw, dh);
+}
+
+static void ui_view2d_draw_tile(f32 x, f32 y, f32 w, f32 h, char *label) {
+	f32 scale = UI_SCALE();
+	draw_set_color(0xcc000000);
+	draw_rect(x, y, w, h, 3 * scale);
+	draw_set_color(0xffffc966);
+	draw_rect(x, y, w, h, scale);
+	draw_set_font(g_font, g_ui->font_size);
+	f32 pad = 4 * scale;
+	f32 lh = draw_font_height(g_font, g_ui->font_size) + 2 * pad;
+	f32 lw = draw_string_width(g_font, g_ui->font_size, label) + 2 * pad;
+	// Keep labels within the tile, including when zoomed out.
+	if (lw + 2 * pad <= w && lh + 2 * pad <= h) {
+		draw_set_color(0xcc000000);
+		draw_filled_rect(x + pad, y + pad, lw, lh);
+		draw_set_color(0xffffc966);
+		draw_string(label, x + 2 * pad, y + 2 * pad);
+	}
+	draw_set_color(0xffffffff);
+}
+
+static void ui_view2d_draw_tile_boundaries(f32 tx, f32 ty, f32 tw, f32 th) {
+	if (!ui_view2d_tile_boundaries_show || (ui_view2d_type != VIEW_2D_TYPE_LAYER && ui_view2d_type != VIEW_2D_TYPE_UVMAP)) {
+		return;
+	}
+	slot_layer_t *layer     = g_context->layer;
+	bool          flattened = ui_view2d_layer_mode == VIEW_2D_LAYER_MODE_VISIBLE || slot_layer_is_group(layer);
+	// A separate second UV set has no UDIM layout. Flattened textures use atlas space.
+	if (!flattened && layer->uv_map == 1 && !util_mesh_material_uvs()) {
+		return;
+	}
+	bool                   atlas    = util_mesh_udim_active() && (flattened || util_mesh_udim_layer(layer));
+	i32                    stride   = atlas ? util_mesh_atlas_stride() : 1;
+	i32                    mask     = slot_layer_get_object_mask(layer);
+	mesh_object_t_array_t *objects  = g_project->_->paint_objects;
+	mesh_object_t         *selected = mask > 0 && mask <= objects->length ? objects->buffer[mask - 1] : g_context->paint_object;
+	i32_array_t           *drawn    = i32_array_create(0);
+	for (i32 i = 0; i < objects->length; ++i) {
+		mesh_object_t *o = objects->buffer[i];
+		if (o->data->index_array->length == 0 || (!atlas && o != selected)) {
+			continue;
+		}
+		i32               tile = util_mesh_udim_tile(o->base->name);
+		mesh_paint_uvs_t *uvs  = o->data->paint_uvs;
+		if (!atlas && tile < 0 && uvs->tile <= 0) {
+			continue;
+		}
+		i32 slot = atlas ? util_mesh_atlas_slot(o->base) : 0;
+		if (slot < 0 || slot >= stride * stride || i32_array_index_of(drawn, slot) >= 0) {
+			continue;
+		}
+		i32_array_push(drawn, slot);
+		char *label = tile >= 0 ? string_tmp("%d", tile) : uvs->material != NULL && !string_equals(uvs->material, "") ? uvs->material : o->base->name;
+		f32   w     = tw / stride;
+		f32   h     = th / stride;
+		ui_view2d_draw_tile(tx + (slot % stride) * w, ty + (slot / stride) * h, w, h, label);
+	}
+	array_free(drawn);
+	free(drawn);
 }
 
 void ui_view2d_render_color_pick(void *_) {
@@ -750,6 +822,8 @@ void ui_view2d_update(void *_) {
 			}
 			draw_set_color(0xffffffff);
 		}
+
+		ui_view2d_draw_tile_boundaries(tx, ty, tw, th);
 
 		// Menu
 		if (ui_base_show) {

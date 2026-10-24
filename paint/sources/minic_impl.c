@@ -884,7 +884,9 @@ void script_layer_set_object(slot_layer_t *l, object_t *object) {
 	}
 	else {
 		layers_set_object_mask();
+		make_material_parse_paint_material(false);
 	}
+	ui_view2d_hwnd->redraws = 2;
 	script_gpu_end(current, in_use);
 	g_context->rtdirty = 1;
 	g_context->ddirty  = 2;

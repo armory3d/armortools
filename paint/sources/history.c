@@ -145,7 +145,9 @@ void history_swap_layer_props(history_step_t *step) {
 		}
 		else {
 			layers_set_object_mask();
+			make_material_parse_paint_material(false);
 		}
+		ui_view2d_hwnd->redraws = 2;
 	}
 	else if (step->action == HISTORY_ACTION_LAYER_SCALE) {
 		f32 t             = l->scale;

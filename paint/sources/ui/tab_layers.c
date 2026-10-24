@@ -307,7 +307,10 @@ bool tab_layers_combo_object(slot_layer_t *l, bool label) {
 		}
 		else {
 			layers_set_object_mask();
+			// Shared layers use atlas UVs, object layers use local UVs.
+			make_material_parse_paint_material(false);
 		}
+		ui_view2d_hwnd->redraws = 2;
 	}
 	return changed;
 }
