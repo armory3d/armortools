@@ -9,9 +9,9 @@ name: Build ArmorPaint (Windows x64)
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
+  #push:
+  #  branches:
+  #    - main
 
 permissions:
   contents: read
