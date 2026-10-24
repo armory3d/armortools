@@ -1,7 +1,13 @@
-# Three ways it fires:
+# SINGLE SOURCE OF TRUTH: this workflow contains ZERO compile steps.
+# It calls the reusable build workflows as jobs:
+#   - build-windows.yml  (triggers on push too, for CI)
+#   - build-linux.yml    (triggers on push too, for CI)
+# A build breaks? Fix it once in the build workflow, release follows.
+#
+# Three ways this fires:
 #   1. Push a version tag  ->  proper versioned release (git tag v1.0.0 && git push origin v1.0.0)
-#   2. Weekly schedule    ->  automatic "nightly-YYYY-MM-DD" release (Mondays 05:00 UTC)
-#   3. "Run workflow"     ->  on-demand nightly release, same naming
+#   2. Weekly schedule     ->  automatic "nightly-YYYY-MM-DD" release (Mondays 05:00 UTC)
+#   3. "Run workflow"      ->  on-demand nightly release, same naming
 
 name: Release ArmorPaint (Windows + Fedora)
 
@@ -18,89 +24,12 @@ permissions:
 
 jobs:
   build-windows:
-    runs-on: windows-latest
-    timeout-minutes: 60
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Compile (Direct3D12)
-        shell: pwsh
-        run: |
-          Set-Location paint
-          ..\base\make.bat --compile
-
-      - name: Stage portable build
-        shell: pwsh
-        run: |
-          $exes = Get-ChildItem -Recurse -Filter ArmorPaint.exe -File
-          if (-not $exes) { throw 'ArmorPaint.exe not found - did the compile step fail?' }
-          $stage = ($exes | Where-Object { Test-Path (Join-Path $_.DirectoryName 'data') } |
-                    Select-Object -First 1).DirectoryName
-          if (-not $stage) {
-            $dataDir = Get-ChildItem -Path paint\build -Recurse -Directory -Filter data -ErrorAction SilentlyContinue |
-                       Select-Object -First 1
-            if ($dataDir) {
-              $stage = $dataDir.Parent.FullName
-              Copy-Item $exes[0].FullName -Destination $stage -Force
-            } else {
-              $stage = $exes[0].DirectoryName
-            }
-          }
-          Write-Host "Staging from: $stage"
-          Compress-Archive -Path "$stage\*" -DestinationPath ArmorPaint-windows-x64.zip -Force
-
-      - name: Pass to release job
-        uses: actions/upload-artifact@v4
-        with:
-          name: release-windows
-          path: ArmorPaint-windows-x64.zip
-          retention-days: 1
-          if-no-files-found: error
+    # Reusable workflow call - no duplication, builds exactly like CI
+    uses: ./.github/workflows/build-windows.yml
 
   build-linux:
-    runs-on: ubuntu-latest
-    container:
-      image: fedora:latest
-    timeout-minutes: 60
-    steps:
-      - name: Install build dependencies
-        run: |
-          dnf install -y git clang make gcc gcc-c++ \
-            gtk3-devel alsa-lib-devel \
-            vulkan-loader-devel vulkan-headers
-
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Compile (Vulkan)
-        run: |
-          cd paint
-          ../base/make --compile
-
-      - name: Stage portable build
-        run: |
-          set -euo pipefail
-          EXE=$(find . -type f -name ArmorPaint ! -path "./.git/*" | head -n 1)
-          if [ -z "$EXE" ]; then echo "ArmorPaint binary not found" >&2; exit 1; fi
-          STAGE=$(dirname "$EXE")
-          if [ ! -d "$STAGE/data" ]; then
-            DATA=$(find paint/build -type d -name data | head -n 1)
-            if [ -n "$DATA" ]; then
-              STAGE=$(dirname "$DATA")
-              cp "$EXE" "$STAGE/"
-            fi
-          fi
-          chmod +x "$STAGE/ArmorPaint" 2>/dev/null || true
-          tar -czf armorpaint-linux-x64-fedora.tar.gz -C "$STAGE" .
-
-      - name: Pass to release job
-        uses: actions/upload-artifact@v4
-        with:
-          name: release-linux
-          path: armorpaint-linux-x64-fedora.tar.gz
-          retention-days: 1
-          if-no-files-found: error
+    # Reusable workflow call - gets the openssl-devel fix for free
+    uses: ./.github/workflows/build-linux.yml
 
   release:
     needs: [build-windows, build-linux]
@@ -111,7 +40,7 @@ jobs:
       - name: Collect builds
         uses: actions/download-artifact@v4
         with:
-          pattern: release-*
+          pattern: ArmorPaint-*
           merge-multiple: true
           path: dist
 
