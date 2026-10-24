@@ -2040,6 +2040,30 @@ void script_mouse_click(i32 x, i32 y, i32 button) {
 	sys_notify_on_next_frame(script_mouse_click_down, c);
 }
 
+static void script_key_press_up(void *data) {
+	iron_internal_keyboard_trigger_key_up((i32)(intptr_t)data);
+}
+
+static void script_key_press_down(void *data) {
+	i32 code = (i32)(intptr_t)data;
+	iron_internal_keyboard_trigger_key_down(code);
+	char *name = keyboard_key_code(code);
+	if (strlen(name) == 1) {
+		iron_internal_keyboard_trigger_key_press(name[0]);
+	}
+	sys_notify_on_next_frame(script_key_press_up, data);
+}
+
+// Press key next frame and release the frame after
+void script_key_press(char *key) {
+	for (i32 code = 1; code < 256; ++code) {
+		if (string_equals(keyboard_key_code(code), key)) {
+			sys_notify_on_next_frame(script_key_press_down, (void *)(intptr_t)code);
+			return;
+		}
+	}
+}
+
 // The paint objects as mesh_object_t, the scenes meshes
 any_array_t *script_get_mesh_objects() {
 	return (any_array_t *)g_project->_->paint_objects;

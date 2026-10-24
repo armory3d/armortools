@@ -680,6 +680,7 @@ void                   script_physics_set_rotation(object_t *o, quat_t rot);
 object_t              *script_pick_object();
 vec4_t                 script_pick_terrain();
 void                   script_mouse_click(i32 x, i32 y, i32 button);
+void                   script_key_press(char *key);
 any_array_t           *script_get_mesh_objects();
 void                   script_call(void *fn);
 void                   script_show_message(char *text, f32 seconds);
