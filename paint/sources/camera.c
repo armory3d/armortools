@@ -259,9 +259,23 @@ i32 camera_index() {
 	return g_context->view_index_last > 0 ? 1 : 0;
 }
 
+// Shared bindings for the main viewport and secondary 3D previews.
+bool camera_rotate_down() {
+	bool modif = keyboard_down("alt") || keyboard_down("shift") || keyboard_down("control") || string_equals(any_map_get(g_keymap, "action_rotate"), "middle");
+	bool ruler = keyboard_down(any_map_get(g_keymap, "brush_ruler"));
+	return keymap_shortcut(any_map_get(g_keymap, "action_rotate"), SHORTCUT_TYPE_DOWN) ||
+	       (mouse_down("right") && (!modif || ruler) && string_equals(g_config->keymap, "default.json"));
+}
+
+bool camera_pan_down() {
+	bool modif = keyboard_down("alt") || keyboard_down("shift") || keyboard_down("control") || string_equals(any_map_get(g_keymap, "action_rotate"), "middle");
+	return keymap_shortcut(any_map_get(g_keymap, "action_pan"), SHORTCUT_TYPE_DOWN) ||
+	       (mouse_down("middle") && !modif && string_equals(g_config->keymap, "default.json"));
+}
+
 void camera_pan_action(bool modif, bool default_keymap) {
 	camera_object_t *camera = scene_camera;
-	if (keymap_shortcut(any_map_get(g_keymap, "action_pan"), SHORTCUT_TYPE_DOWN) || (mouse_down("middle") && !modif && default_keymap)) {
+	if (camera_pan_down()) {
 		camera_redraws                 = 2;
 		f32    f                       = 150 * (1.0 / (float)(camera_distance() / 4.0));
 		vec4_t look                    = vec4_mult(transform_look(camera->base->transform), mouse_movement_y / (float)f * g_config->camera_pan_speed);
@@ -327,8 +341,7 @@ void camera_update(void *_) {
 
 	camera_controls_t controls = g_context->camera_controls;
 
-	bool rotate_down =
-	    keymap_shortcut(any_map_get(g_keymap, "action_rotate"), SHORTCUT_TYPE_DOWN) || (mouse_down("right") && (!modif || ruler) && default_keymap);
+	bool rotate_down = camera_rotate_down();
 
 	if (controls == CAMERA_CONTROLS_ORBIT && rotate_down) {
 		camera_orbit_action(modif, default_keymap, ruler);

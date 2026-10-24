@@ -88,6 +88,7 @@ void project_save_as(bool save_and_quit) {
 }
 
 void project_cleanup() {
+	box_bake_normal_shutdown();
 	render_path_raytrace_bake_lightmap_cancel();
 	util_mesh_remove_merged();
 	nodes_mesh_reset();

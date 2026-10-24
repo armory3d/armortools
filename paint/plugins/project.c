@@ -12,6 +12,7 @@ project_t *main() {
 	
 	add_define(project, "UFBX_MINIMAL");
 	add_define(project, "UFBX_ENABLE_TRIANGULATION");
+	add_define(project, "UFBX_ENABLE_FORMAT_OBJ");
 	add_define(project, "UFBX_ENABLE_SCENE_EVALUATION");
 
 	return project;

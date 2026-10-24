@@ -8,6 +8,35 @@
 #include "iron_ui.h"
 #include "types.h"
 
+bool camera_rotate_down();
+bool camera_pan_down();
+f32 camera_get_zoom_delta();
+f32 camera_get_zoom_speed();
+void box_bake_normal_show();
+void box_bake_normal_shutdown();
+bool bake_normal_select_low(mesh_object_t *object, i32 uv);
+bool bake_normal_select_high(mesh_object_t *object);
+bool bake_normal_load(char *path);
+i32 bake_normal_source_count();
+char *bake_normal_source_name(i32 index);
+bool bake_normal_select_source(i32 index);
+bool bake_normal_set_type(i32 type, i32 rays, f32 radius, f32 strength);
+bool bake_normal_set_maps(i32 mask);
+bool bake_normal_select_result(i32 type);
+i32 bake_normal_result_mask();
+bool bake_normal_apply_all(bool add_layer);
+bool bake_normal_analyze(f32 outer, f32 inner, bool backfaces);
+bool bake_normal_configure_blender(char *executable, char *object_name, bool selected_only);
+bool bake_normal_start(i32 size, f32 outer, f32 inner, i32 padding, bool directx, bool backfaces, i32 samples);
+i32 bake_normal_status();
+i32 bake_normal_progress();
+char *bake_normal_error();
+i32 bake_normal_triangle_count(bool high);
+bool bake_normal_apply(bool add_layer);
+void bake_normal_cancel();
+void bake_normal_close();
+void bake_normal_shutdown();
+
 f32                   ui_MENUBAR_H(ui_t *ui);
 f32                   ui_nodes_INPUT_Y(ui_node_canvas_t *canvas, ui_node_t *node, i32 pos);
 ui_t                 *ui_create(ui_options_t *ops);

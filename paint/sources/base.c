@@ -13,6 +13,7 @@ bool    base_start_arm_found    = false;
 i32     _base_material_count;
 
 void base_on_shutdown() {
+	box_bake_normal_shutdown();
 #if defined(IRON_ANDROID) || defined(IRON_IOS)
 	project_save(false);
 #endif

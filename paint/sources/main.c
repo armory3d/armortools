@@ -166,6 +166,8 @@
 #include "slots/slot_material.c"
 #include "slots/slot_sound.c"
 
+#include "util/util_bake_normal.c"
+#include "ui/box_bake_normal.c"
 #include "ui/box_append.c"
 #include "ui/box_export.c"
 #include "ui/box_import_mesh.c"
