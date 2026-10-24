@@ -41,8 +41,8 @@ jobs:
           fetch-depth: 0
           # Optional: set the SYNC_PAT secret (PAT with Contents +
           # Workflows scope) to allow pushes that touch workflow files.
-          # Unset → falls back to GITHUB_TOKEN, fine for normal syncs.
-          token: ${{ secrets.SYNC_PAT }}
+          # Unset → falls back to the default GITHUB_TOKEN.
+          token: ${{ secrets.SYNC_PAT || github.token }}
 
       - name: Add upstream remote
         run: |
