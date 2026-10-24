@@ -1,0 +1,67 @@
+# The job runs inside a fedora:latest container, so the produced binary is
+# linked against Fedora's own glibc and system libraries — it runs natively
+# on Fedora desktops with zero compat concerns.
+# Compile step mirrors upstream's linux_vulkan.yml (Vulkan backend):
+# https://github.com/armory3d/armorpaint/tree/main/.github/workflows
+
+name: Build ArmorPaint (Linux x64 - Fedora)
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: fedora:latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Install build dependencies
+        run: |
+          dnf install -y git clang make gcc gcc-c++ \
+            gtk3-devel alsa-lib-devel \
+            vulkan-loader-devel vulkan-headers
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Compile (Vulkan)
+        run: |
+          cd paint
+          ../base/make --compile
+
+      - name: Stage portable build
+        run: |
+          set -euo pipefail
+          EXE=$(find . -type f -name ArmorPaint ! -path "./.git/*" | head -n 1)
+          if [ -z "$EXE" ]; then echo "ArmorPaint binary not found - did the compile step fail?" >&2; exit 1; fi
+          echo "Binary at: $EXE"
+
+          # Prefer a folder already containing exe + data/
+          STAGE=$(dirname "$EXE")
+          if [ ! -d "$STAGE/data" ]; then
+            DATA=$(find paint/build -type d -name data | head -n 1)
+            if [ -n "$DATA" ]; then
+              STAGE=$(dirname "$DATA")
+              cp "$EXE" "$STAGE/"
+            fi
+          fi
+          chmod +x "$STAGE/ArmorPaint" 2>/dev/null || true
+          echo "Staging from: $STAGE"
+          # tar.gz (not zip) so the executable bit survives the trip
+          tar -czf armorpaint-linux-x64-fedora.tar.gz -C "$STAGE" .
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ArmorPaint-linux-x64-fedora
+          path: armorpaint-linux-x64-fedora.tar.gz
+          retention-days: 14
+          if-no-files-found: error
