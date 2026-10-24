@@ -81,6 +81,19 @@ typedef struct vertex_array {
 	i16_array_t *values;
 } vertex_array_t;
 
+typedef struct mesh_paint_uvs {
+	char *source_object;
+	char *material;
+	i32   tile;
+	i32   count;
+} mesh_paint_uvs_t;
+
+typedef struct mesh_paint_uvs_t_array {
+	mesh_paint_uvs_t **buffer;
+	int                length;
+	int                capacity;
+} mesh_paint_uvs_t_array_t;
+
 typedef struct mesh_data_runtime {
 	char                  *handle;
 	gpu_buffer_t          *vertex_buffer;
@@ -91,6 +104,8 @@ typedef struct mesh_data_runtime {
 	i32                    skin_pending_frame; // Frame to pose at once back in view
 	bool                   skin_pending;
 	bool                   owns_arrays;
+	mesh_paint_uvs_t         paint_uvs;
+	mesh_paint_uvs_t_array_t paint_uvs_data;
 } mesh_data_runtime_t;
 
 typedef struct mesh_data {
@@ -99,7 +114,9 @@ typedef struct mesh_data {
 	float                   scale_tex;
 	vertex_array_t_array_t *vertex_arrays;
 	u32_array_t            *index_array;
+	mesh_paint_uvs_t_array_t *paint_uvs_data;
 	mesh_data_runtime_t    *_;
+	mesh_paint_uvs_t         *paint_uvs;
 } mesh_data_t;
 
 typedef struct camera_data {
@@ -437,6 +454,7 @@ void                 shader_context_add_tex(shader_context_t *raw, i32 i);
 mesh_data_t           *mesh_data_parse(char *name, char *id);
 mesh_data_t           *mesh_data_get_raw_by_name(any_array_t *datas, char *name);
 mesh_data_t           *mesh_data_create(mesh_data_t *raw);
+mesh_data_t           *mesh_data_create_packed(mesh_data_t *raw);
 gpu_vertex_structure_t mesh_data_get_vertex_struct(any_array_t *vertex_arrays);
 gpu_vertex_data_t      mesh_data_get_vertex_data(char *data);
 i32                    mesh_data_get_vertex_size(char *vertex_data);

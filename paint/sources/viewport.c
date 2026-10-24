@@ -3,21 +3,41 @@
 
 void viewport_scale_to_bounds(f32 bounds) {
 	mesh_object_t *po = context_main_object();
-	for (i32 i = 0; i < po->base->children->length; ++i) {
-		object_t *c       = po->base->children->buffer[i];
-		c->transform->loc = (vec4_t){0, 0, 0, 1.0};
-		transform_build_matrix(c->transform);
-	}
 	if (g_context->merged_object != NULL) {
 		util_mesh_transform_changed();
 	}
 
-	mesh_data_t *md            = g_context->merged_object == NULL ? po->data : g_context->merged_object->data;
-	vec4_t       aabb          = mesh_data_calculate_aabb(md);
-	f32          r             = math_sqrt(aabb.x * aabb.x + aabb.y * aabb.y + aabb.z * aabb.z);
-	po->base->transform->scale = (vec4_t){bounds / (float)r, bounds / (float)r, bounds / (float)r, 1.0};
-	po->base->transform->loc   = (vec4_t){0, 0, 0, 1.0};
-	transform_build_matrix(po->base->transform);
+	// Frame the actual geometry, not the distance from the file's origin. The
+	// engine's culling bounds deliberately include that origin, so do not use them here.
+	mesh_data_t    *md        = g_context->merged_object == NULL ? po->data : g_context->merged_object->data;
+	vertex_array_t *positions = mesh_data_get_vertex_array(md, "pos");
+	if (positions == NULL || md->index_array == NULL || md->index_array->length == 0) {
+		return;
+	}
+	i16_array_t *pa    = positions->values;
+	i32          first = md->index_array->buffer[0] * 4;
+	vec4_t       min   = (vec4_t){pa->buffer[first], pa->buffer[first + 1], pa->buffer[first + 2], 0.0};
+	vec4_t       max   = min;
+	for (i32 i = 1; i < md->index_array->length; ++i) {
+		i32 v = md->index_array->buffer[i] * 4;
+		min.x = math_min(min.x, pa->buffer[v]);
+		min.y = math_min(min.y, pa->buffer[v + 1]);
+		min.z = math_min(min.z, pa->buffer[v + 2]);
+		max.x = math_max(max.x, pa->buffer[v]);
+		max.y = math_max(max.y, pa->buffer[v + 1]);
+		max.z = math_max(max.z, pa->buffer[v + 2]);
+	}
+	f32    unpack   = md->scale_pos / 32767.0;
+	vec4_t size     = vec4_mult(vec4_sub(max, min), unpack);
+	f32    diagonal = vec4_len(size);
+	// A point-sized mesh has no extent to divide by, but can still be centered.
+	f32          scale  = diagonal > 0.0 ? bounds / diagonal : 1.0;
+	transform_t *t      = po->base->transform;
+	vec4_t       center = vec4_mult(vec4_add(min, max), unpack * 0.5);
+	center              = vec4_apply_quat(center, t->rot);
+	t->scale            = (vec4_t){scale, scale, scale, 1.0};
+	t->loc              = (vec4_t){-center.x * scale, -center.y * scale, -center.z * scale, 1.0};
+	transform_build_matrix(t);
 }
 
 void viewport_reset() {

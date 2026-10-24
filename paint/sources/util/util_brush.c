@@ -34,6 +34,10 @@ void util_brush_update() {
 		down = false;
 	}
 
+	bool reading = g_context->tool == TOOL_TYPE_PICKER || g_context->tool == TOOL_TYPE_COLORID || g_context->tool == TOOL_TYPE_MATERIAL;
+	if (slot_layer_is_locked(g_context->layer) && !reading)
+		down = false;
+
 	if (down) {
 		i32 mx = mouse_x - base_paint_view_x();
 		i32 my = mouse_y - base_paint_view_y();

@@ -16,6 +16,10 @@ typedef struct {
 	char                 *file_buffer;
 	DWORD                 file_buffer_size;
 	DWORD                 status;
+	LONG                  finished;
+	uint64_t              bytes_received;
+	uint64_t              content_length;
+	BOOL                  has_content_length;
 	iron_https_callback_t callback;
 	void                 *callbackdata;
 } async_context_t;
@@ -37,7 +41,10 @@ static request_t       *pending_tail = NULL;
 static CRITICAL_SECTION cs;
 
 static void finish_request(async_context_t *ctx, BOOL success) {
+	if (InterlockedCompareExchange(&ctx->finished, 1, 0) != 0) return;
+	if (success && ctx->has_content_length && ctx->bytes_received != ctx->content_length) success = FALSE;
 	if (ctx->hfile != INVALID_HANDLE_VALUE) {
+		if (success && !FlushFileBuffers(ctx->hfile)) success = FALSE;
 		CloseHandle(ctx->hfile);
 		ctx->hfile = INVALID_HANDLE_VALUE;
 	}
@@ -71,17 +78,25 @@ static void finish_request(async_context_t *ctx, BOOL success) {
 static void CALLBACK iron_winhttp_callback(HINTERNET hInternet, DWORD_PTR dwContext, DWORD dwInternetStatus, LPVOID lpvStatusInformation,
                                            DWORD dwStatusInformationLength) {
 	async_context_t *ctx = (async_context_t *)dwContext;
+	if (ctx == NULL) return;
+	if (ctx->finished && dwInternetStatus != WINHTTP_CALLBACK_STATUS_HANDLE_CLOSING) return;
 
 	switch (dwInternetStatus) {
 	case WINHTTP_CALLBACK_STATUS_SENDREQUEST_COMPLETE:
-		WinHttpReceiveResponse(ctx->hrequest, NULL);
+		if (!WinHttpReceiveResponse(ctx->hrequest, NULL) && GetLastError() != ERROR_IO_PENDING) finish_request(ctx, FALSE);
 		break;
 
 	case WINHTTP_CALLBACK_STATUS_HEADERS_AVAILABLE: {
 		DWORD size = sizeof(ctx->status);
 		WinHttpQueryHeaders(ctx->hrequest, WINHTTP_QUERY_STATUS_CODE | WINHTTP_QUERY_FLAG_NUMBER, WINHTTP_HEADER_NAME_BY_INDEX, &ctx->status, &size,
 		                    WINHTTP_NO_HEADER_INDEX);
-		WinHttpQueryDataAvailable(ctx->hrequest, NULL);
+		wchar_t length[32];
+		size = sizeof(length);
+		if (WinHttpQueryHeaders(ctx->hrequest, WINHTTP_QUERY_CONTENT_LENGTH, WINHTTP_HEADER_NAME_BY_INDEX, length, &size, WINHTTP_NO_HEADER_INDEX)) {
+			ctx->has_content_length = TRUE;
+			ctx->content_length = _wcstoui64(length, NULL, 10);
+		}
+		if (!WinHttpQueryDataAvailable(ctx->hrequest, NULL) && GetLastError() != ERROR_IO_PENDING) finish_request(ctx, FALSE);
 		break;
 	}
 
@@ -96,31 +111,35 @@ static void CALLBACK iron_winhttp_callback(HINTERNET hInternet, DWORD_PTR dwCont
 					ctx->file_buffer      = realloc(ctx->file_buffer, dwSize);
 					ctx->file_buffer_size = dwSize;
 				}
-				WinHttpReadData(ctx->hrequest, ctx->file_buffer, dwSize, NULL);
+				if (!WinHttpReadData(ctx->hrequest, ctx->file_buffer, dwSize, NULL) && GetLastError() != ERROR_IO_PENDING) finish_request(ctx, FALSE);
 			}
 			else {
 				if (ctx->return_data_index + (int)dwSize + 1 > ctx->return_data_size) {
 					ctx->return_data_size = (ctx->return_data_index + (int)dwSize + 1) * 2;
 					ctx->return_data      = realloc(ctx->return_data, ctx->return_data_size);
 				}
-				WinHttpReadData(ctx->hrequest, ctx->return_data + ctx->return_data_index, dwSize, NULL);
+				if (!WinHttpReadData(ctx->hrequest, ctx->return_data + ctx->return_data_index, dwSize, NULL) && GetLastError() != ERROR_IO_PENDING) finish_request(ctx, FALSE);
 			}
 		}
 		break;
 	}
 
 	case WINHTTP_CALLBACK_STATUS_READ_COMPLETE:
+		ctx->bytes_received += dwStatusInformationLength;
 		if (dwStatusInformationLength != 0) {
 			if (ctx->hfile != INVALID_HANDLE_VALUE) {
 				DWORD written;
-				WriteFile(ctx->hfile, ctx->file_buffer, dwStatusInformationLength, &written, NULL);
+				if (!WriteFile(ctx->hfile, ctx->file_buffer, dwStatusInformationLength, &written, NULL) || written != dwStatusInformationLength) {
+					finish_request(ctx, FALSE);
+					break;
+				}
 				InterlockedAdd64((LONG64 volatile *)&iron_net_bytes_downloaded, dwStatusInformationLength);
 			}
 			else {
 				ctx->return_data_index += dwStatusInformationLength;
 			}
 		}
-		WinHttpQueryDataAvailable(ctx->hrequest, NULL);
+		if (!WinHttpQueryDataAvailable(ctx->hrequest, NULL) && GetLastError() != ERROR_IO_PENDING) finish_request(ctx, FALSE);
 		break;
 
 	case WINHTTP_CALLBACK_STATUS_REQUEST_ERROR:
@@ -203,9 +222,8 @@ void iron_net_request(const char *url_base, const char *url_path, const char *da
 	}
 	DWORD data_len = data ? (DWORD)strlen(data) : 0;
 	if (!WinHttpSendRequest(ctx->hrequest, headers ? wheaders : WINHTTP_NO_ADDITIONAL_HEADERS, headers ? (DWORD)-1L : 0, (LPVOID)data, data_len, data_len,
-	                        (DWORD_PTR)ctx)) {
-		WinHttpCloseHandle(ctx->hsession);
-		callback(0, NULL, callbackdata);
+	                        (DWORD_PTR)ctx) && GetLastError() != ERROR_IO_PENDING) {
+		finish_request(ctx, FALSE);
 	}
 }
 

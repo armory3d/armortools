@@ -27,7 +27,7 @@ static uint32_t io_gltf_read_index(cgltf_primitive *prim, cgltf_size i) {
 	return prim->indices != NULL ? (uint32_t)cgltf_accessor_read_index(prim->indices, i) : (uint32_t)i;
 }
 
-void io_gltf_parse_mesh(raw_mesh_t *raw, cgltf_mesh *mesh, float *to_world, float *scale) {
+void io_gltf_parse_mesh(raw_mesh_t *raw, cgltf_mesh *mesh, float *to_world) {
 	cgltf_primitive *prim        = NULL;
 	uint32_t        *inda        = NULL;
 	cgltf_size       index_total = 0;
@@ -82,28 +82,30 @@ void io_gltf_parse_mesh(raw_mesh_t *raw, cgltf_mesh *mesh, float *to_world, floa
 
 	float *m = to_world;
 	for (int i = 0; i < vertex_count; ++i) {
-		// float x           = posa32[i * 3 + 0];
-		// float y           = posa32[i * 3 + 1];
-		// float z           = posa32[i * 3 + 2];
+		// Node matrices are in glTF coordinates. Convert axes after the world transform.
 		float x           = posa32[i * 3 + 0];
-		float y           = -posa32[i * 3 + 2];
-		float z           = posa32[i * 3 + 1];
+		float y           = posa32[i * 3 + 1];
+		float z           = posa32[i * 3 + 2];
 		posa32[i * 3 + 0] = m[0] * x + m[4] * y + m[8] * z + m[12];
-		posa32[i * 3 + 1] = m[1] * x + m[5] * y + m[9] * z + m[13];
-		posa32[i * 3 + 2] = m[2] * x + m[6] * y + m[10] * z + m[14];
+		posa32[i * 3 + 1] = -(m[2] * x + m[6] * y + m[10] * z + m[14]);
+		posa32[i * 3 + 2] = m[1] * x + m[5] * y + m[9] * z + m[13];
 	}
 
 	if (nora32 != NULL) {
+		// Inverse transpose of the world matrix also handles parent and non-uniform scales.
+		float nm[9] = {
+		    m[5] * m[10] - m[9] * m[6], m[9] * m[2] - m[1] * m[10], m[1] * m[6] - m[5] * m[2],
+		    m[8] * m[6] - m[4] * m[10], m[0] * m[10] - m[8] * m[2], m[4] * m[2] - m[0] * m[6],
+		    m[4] * m[9] - m[8] * m[5], m[8] * m[1] - m[0] * m[9], m[0] * m[5] - m[4] * m[1],
+		};
+		float det_sign = m[0] * nm[0] + m[4] * nm[1] + m[8] * nm[2] < 0.0f ? -1.0f : 1.0f;
 		for (int i = 0; i < vertex_count; ++i) {
-			// float x   = nora32[i * 3 + 0] / scale[0];
-			// float y   = nora32[i * 3 + 1] / scale[1];
-			// float z   = nora32[i * 3 + 2] / scale[2];
-			float x   = nora32[i * 3 + 0] / scale[0];
-			float y   = -nora32[i * 3 + 2] / scale[2];
-			float z   = nora32[i * 3 + 1] / scale[1];
-			float tx  = m[0] * x + m[4] * y + m[8] * z;
-			float ty  = m[1] * x + m[5] * y + m[9] * z;
-			float tz  = m[2] * x + m[6] * y + m[10] * z;
+			float x   = nora32[i * 3 + 0];
+			float y   = nora32[i * 3 + 1];
+			float z   = nora32[i * 3 + 2];
+			float tx  = det_sign * (nm[0] * x + nm[1] * y + nm[2] * z);
+			float ty  = -det_sign * (nm[6] * x + nm[7] * y + nm[8] * z);
+			float tz  = det_sign * (nm[3] * x + nm[4] * y + nm[5] * z);
 			float len = sqrtf(tx * tx + ty * ty + tz * tz);
 			if (len > 1e-6f) {
 				tx /= len;
@@ -247,13 +249,7 @@ void *io_gltf_parse(char *buf, size_t size, const char *path) {
 			strcpy(raw->name, node_name);
 			float m[16];
 			cgltf_node_transform_world(n, m);
-			float scale[3] = {1.0f, 1.0f, 1.0f};
-			if (n->has_scale) {
-				scale[0] = n->scale[0];
-				scale[1] = n->scale[1];
-				scale[2] = n->scale[2];
-			}
-			io_gltf_parse_mesh(raw, n->mesh, m, scale);
+			io_gltf_parse_mesh(raw, n->mesh, m);
 			break;
 		}
 	}

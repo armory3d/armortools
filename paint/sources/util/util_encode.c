@@ -7,6 +7,9 @@ i32 util_encode_mesh_data_size(mesh_data_t_array_t *datas) {
 	}
 	i32 size = 0;
 	for (i32 i = 0; i < datas->length; ++i) {
+		mesh_paint_uvs_t *uvs = datas->buffer[i]->paint_uvs;
+		if (uvs != NULL)
+			size += 128 + (uvs->source_object != NULL ? strlen(uvs->source_object) : 0) + (uvs->material != NULL ? strlen(uvs->material) : 0);
 		for (i32 j = 0; j < datas->buffer[i]->vertex_arrays->length; ++j) {
 			size += datas->buffer[i]->vertex_arrays->buffer[j]->values->length * 2;
 		}
@@ -24,7 +27,7 @@ void util_encode_mesh_datas(mesh_data_t_array_t *datas) {
 
 	armpack_encode_array(datas->length);
 	for (i32 i = 0; i < datas->length; ++i) {
-		armpack_encode_map(5);
+		armpack_encode_map(6);
 		armpack_encode_string("name");
 		armpack_encode_string(datas->buffer[i]->name);
 		armpack_encode_string("scale_pos");
@@ -44,6 +47,23 @@ void util_encode_mesh_datas(mesh_data_t_array_t *datas) {
 		}
 		armpack_encode_string("index_array");
 		armpack_encode_array_i32(datas->buffer[i]->index_array);
+		armpack_encode_string("paint_uvs_data");
+		mesh_paint_uvs_t *uvs = datas->buffer[i]->paint_uvs;
+		if (uvs == NULL || uvs->tile == 0)
+			armpack_encode_null();
+		else {
+			// Packed maps are inline; an array supplies the metadata pointer.
+			armpack_encode_array(1);
+			armpack_encode_map(4);
+			armpack_encode_string("source_object");
+			armpack_encode_string(uvs->source_object);
+			armpack_encode_string("material");
+			armpack_encode_string(uvs->material);
+			armpack_encode_string("tile");
+			armpack_encode_i32(uvs->tile);
+			armpack_encode_string("count");
+			armpack_encode_i32(uvs->count);
+		}
 	}
 }
 
@@ -373,7 +393,7 @@ buffer_t *util_encode_project(project_t *raw) {
 	if (raw->layer_datas != NULL) {
 		armpack_encode_array(raw->layer_datas->length);
 		for (i32 i = 0; i < raw->layer_datas->length; ++i) {
-			armpack_encode_map(37);
+			armpack_encode_map(38);
 			armpack_encode_string("name");
 			armpack_encode_string(raw->layer_datas->buffer[i]->name);
 			armpack_encode_string("res");
@@ -402,6 +422,8 @@ buffer_t *util_encode_project(project_t *raw) {
 			armpack_encode_i32(raw->layer_datas->buffer[i]->parent);
 			armpack_encode_string("visible");
 			armpack_encode_bool(raw->layer_datas->buffer[i]->visible);
+			armpack_encode_string("locked");
+			armpack_encode_bool(raw->layer_datas->buffer[i]->locked);
 			armpack_encode_string("texpaint_nor");
 			armpack_encode_array_u8(raw->layer_datas->buffer[i]->texpaint_nor);
 			armpack_encode_string("texpaint_pack");

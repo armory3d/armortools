@@ -208,6 +208,18 @@ static mesh_geo_t *_shape_tool_make_capsule(f32 size_x, f32 size_y, f32 size_z, 
 	return g;
 }
 
+static mesh_data_t *_shape_tool_raw_data(raw_mesh_t *mesh) {
+	mesh_data_t              *md  = import_mesh_raw_mesh(mesh);
+	mesh_paint_uvs_t_array_t *uvs = md->paint_uvs_data;
+	mesh_data_create(md);
+	// Procedural arrays belong to this mesh, unlike arrays inside decoded assets.
+	md->_->owns_arrays = true;
+	free(uvs->buffer[0]);
+	array_delete(uvs);
+	free(mesh);
+	return md;
+}
+
 static mesh_data_t *_shape_tool_geo_data(mesh_geo_t *g, char *name) {
 	mesh_data_t *md = nodes_mesh_geo_to_data(g, name);
 	util_geo_free(g);
@@ -217,13 +229,13 @@ static mesh_data_t *_shape_tool_geo_data(mesh_geo_t *g, char *name) {
 // Shape of an object tool
 static mesh_data_t *_shape_tool_make_data(i32 tool, i32 segments) {
 	if (tool == TOOL_TYPE_PLANE) {
-		return mesh_data_create(import_mesh_raw_mesh(geom_make_plane(1, 1, segments + 1, segments + 1, 1.0)));
+		return _shape_tool_raw_data(geom_make_plane(1, 1, segments + 1, segments + 1, 1.0));
 	}
 	if (tool == TOOL_TYPE_CUBE) {
 		return _shape_tool_geo_data(nodes_mesh_shape(0, (f32[]){2.0, 2.0, 2.0}, 0), "Cube");
 	}
 	if (tool == TOOL_TYPE_SPHERE) {
-		return mesh_data_create(import_mesh_raw_mesh(geom_make_uv_sphere(1, segments, math_max(segments / 2, 2), true, 1.0)));
+		return _shape_tool_raw_data(geom_make_uv_sphere(1, segments, math_max(segments / 2, 2), true, 1.0));
 	}
 	if (tool == TOOL_TYPE_CONE) {
 		return _shape_tool_geo_data(nodes_mesh_shape(3, (f32[]){1.0, 1.0, 1.0}, segments), "Cone");
@@ -251,15 +263,13 @@ mesh_data_t *util_shape_make_data(char *name) {
 		                                             .inda      = u32_array_create(0),
 		                                             .scale_pos = 1.0,
 		                                             .scale_tex = 1.0});
-		mesh_data_t *md    = mesh_data_create(import_mesh_raw_mesh(mesh));
-		md->_->owns_arrays = true;
-		return md;
+		return _shape_tool_raw_data(mesh);
 	}
 	if (string_equals(name, "plane_2048")) {
-		return mesh_data_create(import_mesh_raw_mesh(geom_make_plane(1, 1, 2048, 2048, 1.0)));
+		return _shape_tool_raw_data(geom_make_plane(1, 1, 2048, 2048, 1.0));
 	}
 	if (string_equals(name, "sphere_2048")) {
-		return mesh_data_create(import_mesh_raw_mesh(geom_make_uv_sphere(1, 4096, 2048, true, 1.0)));
+		return _shape_tool_raw_data(geom_make_uv_sphere(1, 4096, 2048, true, 1.0));
 	}
 	for (i32 tool = TOOL_TYPE_PLANE; tool <= TOOL_TYPE_TORUS; ++tool) {
 		if (string_equals(name, _shape_tool_names[tool - TOOL_TYPE_EMPTY])) {

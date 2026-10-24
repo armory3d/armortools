@@ -15,15 +15,19 @@
 #include "backends/ios_file_dialog.h"
 #endif
 #include <stdio.h>
+#include <errno.h>
 #include <stdlib.h>
 #include <string.h>
 #ifdef IRON_WINDOWS
 #include "backends/windows_mini.h"
 #include <malloc.h>
 #include <memory.h>
+#include <io.h>
+#include <process.h>
 #elif defined(IRON_WASM)
 #else
 #include <sys/stat.h>
+#include <unistd.h>
 #endif
 
 i32         iron_sys_command(char *cmd);
@@ -164,7 +168,8 @@ bool iron_internal_file_reader_open(iron_file_reader_t *reader, const char *file
 
 #ifdef IRON_WINDOWS
 	// Drive letter or network
-	bool is_abs = (filename[1] == ':' && filename[2] == '\\') || (filename[0] == '\\' && filename[1] == '\\');
+	bool is_abs = (strlen(filename) >= 3 && filename[1] == ':' && (filename[2] == '\\' || filename[2] == '/')) ||
+	              (filename[0] == '\\' && filename[1] == '\\');
 #else
 	bool is_abs = filename[0] == '/';
 #endif
@@ -415,49 +420,193 @@ void iron_delete_file(char *path) {
 #endif
 }
 
-void iron_file_save_bytes(char *path, buffer_t *bytes, u64 length) {
+// Keep replacements on the same filesystem. Failed writes must never truncate the destination.
+#ifdef IRON_WINDOWS
+static wchar_t *file_wide_path(const char *path) {
+	size_t size = strlen(path) + 1;
+	wchar_t *wide = malloc(size * sizeof(wchar_t));
+	if (MultiByteToWideChar(CP_UTF8, 0, path, -1, wide, (int)size) == 0) {
+		free(wide);
+		return NULL;
+	}
+	return wide;
+}
+#endif
+
+static FILE *file_open(const char *path, const char *mode) {
+#ifdef IRON_WINDOWS
+	wchar_t *wide = file_wide_path(path);
+	if (wide == NULL) return NULL;
+	wchar_t wmode[8];
+	MultiByteToWideChar(CP_UTF8, 0, mode, -1, wmode, 8);
+	FILE *file = _wfopen(wide, wmode);
+	free(wide);
+	return file;
+#else
+	return fopen(path, mode);
+#endif
+}
+
+static void file_remove_temp(const char *path) {
+#ifdef IRON_WINDOWS
+	wchar_t *wide = file_wide_path(path);
+	if (wide != NULL) _wremove(wide);
+	free(wide);
+#elif defined(IRON_WASM)
+	js_delete_file(path);
+#else
+	remove(path);
+#endif
+}
+
+static bool file_replace(const char *from, const char *to) {
+#ifdef IRON_WINDOWS
+	wchar_t *wfrom = file_wide_path(from);
+	wchar_t *wto = file_wide_path(to);
+	// MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH
+	bool ok = wfrom != NULL && wto != NULL && MoveFileExW(wfrom, wto, 0x1 | 0x8);
+	free(wfrom);
+	free(wto);
+	return ok;
+#else
+	return rename(from, to) == 0;
+#endif
+}
+
+#ifndef IRON_WASM
+static FILE *file_create_temp(const char *path, char **temp_path) {
+	static unsigned int serial = 0;
+#ifdef IRON_WINDOWS
+	int pid = _getpid();
+#else
+	int pid = getpid();
+#endif
+	for (int attempt = 0; attempt < 100; ++attempt) {
+		char *temp = string("%s.%d.%u.tmp", path, pid, ++serial);
+		FILE *file = file_open(temp, "wbx");
+		if (file != NULL) {
+			*temp_path = temp;
+			return file;
+		}
+		free(temp);
+		if (errno != EEXIST) break;
+	}
+	return NULL;
+}
+#endif
+
+bool iron_file_save_bytes(char *path, buffer_t *bytes, u64 length) {
+	if (path == NULL || bytes == NULL || (bytes->length > 0 && bytes->buffer == NULL)) return false;
 	u64 byte_length = length > 0 ? length : (u64)bytes->length;
 	if (byte_length > (u64)bytes->length) {
 		byte_length = (u64)bytes->length;
 	}
 
-#ifdef IRON_WINDOWS
-	MultiByteToWideChar(CP_UTF8, 0, path, -1, temp_wstring, 1024);
-	FILE *file = _wfopen(temp_wstring, L"wb");
+#ifdef IRON_WASM
+	// The browser bridge dispatches the original path to its save picker/cloud handler.
+	FILE *file = file_open(path, "wb");
+	if (file == NULL) return false;
+	bool ok = byte_length == 0 || fwrite(bytes->buffer, 1, byte_length, file) == byte_length;
+	if (fclose(file) != 0) ok = false;
+	return ok;
 #else
-	FILE *file = fopen(path, "wb");
+	char *temp = NULL;
+	FILE *file = file_create_temp(path, &temp);
+	if (file == NULL) return false;
+	bool ok = byte_length == 0 || fwrite(bytes->buffer, 1, byte_length, file) == byte_length;
+	if (fflush(file) != 0) ok = false;
+#ifdef IRON_WINDOWS
+	if (ok && _commit(_fileno(file)) != 0) ok = false;
+#elif !defined(IRON_WASM)
+	if (ok && fsync(fileno(file)) != 0) ok = false;
 #endif
-	if (file == NULL) {
-		return;
-	}
-	fwrite(bytes->buffer, 1, byte_length, file);
-	fclose(file);
+	if (fclose(file) != 0) ok = false;
+	if (ok) ok = file_replace(temp, path);
+	if (!ok) file_remove_temp(temp);
+	free(temp);
+	return ok;
+#endif
 }
 
 typedef struct _callback_data {
 	int32_t size;
-	char    url[512];
+	char   *url;
+	char   *dst_path;
+	char   *temp_path;
 	void (*func)(char *, buffer_t *);
+	void (*done)(char *, bool);
 } _callback_data_t;
 
 void _https_callback(int status, const char *body, void *callback_data) {
 	_callback_data_t *cbd    = (_callback_data_t *)callback_data;
 	buffer_t         *buffer = NULL;
-	if (body != NULL && status < 400) {
+	bool success = status >= 200 && status < 300;
+	if (cbd->dst_path != NULL) {
+		FILE *file = success ? file_open(cbd->temp_path, "rb") : NULL;
+		if (file == NULL) success = false;
+		else {
+			// Model downloads may be larger than 2 GiB; the expected size is optional.
+#ifdef IRON_WINDOWS
+			_fseeki64(file, 0, SEEK_END);
+			int64_t size = _ftelli64(file);
+#elif defined(IRON_WASM)
+			fseek(file, 0, SEEK_END);
+			int64_t size = ftell(file);
+#else
+			fseeko(file, 0, SEEK_END);
+			int64_t size = ftello(file);
+#endif
+			success = size > 0 && (cbd->size <= 0 || size == cbd->size);
+			fclose(file);
+		}
+		if (success) success = file_replace(cbd->temp_path, cbd->dst_path);
+		if (!success) file_remove_temp(cbd->temp_path);
+	}
+	else if (body != NULL && success) {
 		buffer         = malloc(sizeof(buffer_t));
 		buffer->length = cbd->size > 0 ? cbd->size : strlen(body);
 		buffer->buffer = malloc(buffer->length);
 		memcpy(buffer->buffer, body, buffer->length);
 	}
-	cbd->func(cbd->url, buffer);
+	if (cbd->done != NULL) cbd->done(cbd->url, success);
+	else if (cbd->func != NULL) cbd->func(cbd->url, buffer);
+	free(cbd->url);
+	free(cbd->dst_path);
+	free(cbd->temp_path);
 	free(cbd);
 }
 
-void iron_file_download(char *url, void (*callback)(char *, buffer_t *), i32 size, char *dst_path) {
-	_callback_data_t *cbd = malloc(sizeof(_callback_data_t));
+static void file_download_start(char *url, void (*callback)(char *, buffer_t *), void (*done)(char *, bool), i32 size, char *dst_path) {
+	_callback_data_t *cbd = calloc(1, sizeof(_callback_data_t));
 	cbd->size             = size;
-	strcpy(cbd->url, url);
+	cbd->url              = string_copy(url);
 	cbd->func = callback;
+	cbd->done = done;
+	if (dst_path != NULL) {
+		cbd->dst_path = string_copy(dst_path);
+#ifdef IRON_WASM
+		static unsigned int serial = 0;
+		cbd->temp_path = string("%s.download-%u.tmp", dst_path, ++serial);
+#else
+		FILE *temp = file_create_temp(dst_path, &cbd->temp_path);
+		if (temp == NULL) {
+			// No temporary file exists yet.
+			if (done != NULL) done(url, false);
+			else if (callback != NULL) callback(url, NULL);
+			free(cbd->url);
+			free(cbd->dst_path);
+			free(cbd);
+			return;
+		}
+		fclose(temp);
+		// Apple downloads move their own temporary file to this unique destination.
+		file_remove_temp(cbd->temp_path);
+#endif
+	}
+	if (!starts_with(url, "https://") || strlen(url) < 9 || strlen(url) >= 512) {
+		_https_callback(0, NULL, cbd);
+		return;
+	}
 
 	char url_base[512];
 	char url_path[512];
@@ -481,7 +630,11 @@ void iron_file_download(char *url, void (*callback)(char *, buffer_t *), i32 siz
 	}
 	url_path[j] = 0;
 
-	iron_net_request(url_base, url_path, NULL, 443, IRON_HTTPS_GET, NULL, &_https_callback, cbd, dst_path);
+	iron_net_request(url_base, url_path, NULL, 443, IRON_HTTPS_GET, NULL, &_https_callback, cbd, cbd->temp_path);
+}
+
+void iron_file_download(char *url, void (*callback)(char *, buffer_t *), i32 size, char *dst_path) {
+	file_download_start(url, callback, NULL, size, dst_path);
 }
 
 char     *strings_check_internet_connection(void);
@@ -501,7 +654,6 @@ i32_map_t *file_cloud_sizes = NULL;
 
 static void (*_file_init_cloud_bytes_done)(void) = NULL;
 
-static any_map_t *_file_download_map    = NULL;
 static any_map_t *_file_cache_cloud_map = NULL;
 
 #if defined(IRON_ANDROID) || defined(IRON_WASM)
@@ -592,24 +744,14 @@ void file_start(char *path) {
 #endif
 }
 
-static void _file_download_to_callback(char *url, buffer_t *ab) {
-	file_download_data_t *fdd = any_map_get(_file_download_map, url);
-	fdd->done(url);
+void file_download_to(char *url, char *dst_path, void (*done)(char *url, bool success), i32 size) {
+	file_download_start(url, NULL, done, size, dst_path);
 }
 
-void file_download_to(char *url, char *dst_path, void (*done)(char *url), i32 size) {
-	if (_file_download_map == NULL) {
-		_file_download_map = any_map_create();
-	}
-	file_download_data_t *fdd = malloc(sizeof(file_download_data_t));
-	fdd->done                 = done;
-	any_map_set(_file_download_map, url, fdd);
-	iron_file_download(url, _file_download_to_callback, size, dst_path);
-}
-
-static void _file_cache_cloud_callback(char *url) {
+static void _file_cache_cloud_callback(char *url, bool success) {
 	file_cache_cloud_data_t *fccd = any_map_get(_file_cache_cloud_map, url);
-	if (!iron_file_exists(fccd->dest)) {
+	map_delete(_file_cache_cloud_map, url);
+	if (!success) {
 		console_error(strings_check_internet_connection());
 		fccd->done(NULL);
 		free(fccd);
@@ -649,6 +791,11 @@ void file_cache_cloud(char *path, void (*done)(char *dest), char *server) {
 	path = string_replace_all(path, "\\", "/");
 #endif
 	char *url = string("%s/%s", server, path);
+	// One in-flight cache operation per URL; never overwrite callback state.
+	if (any_map_get(_file_cache_cloud_map, url) != NULL) {
+		done(NULL);
+		return;
+	}
 
 	file_cache_cloud_data_t *fccd = malloc(sizeof(file_cache_cloud_data_t));
 	strcpy(fccd->dest, dest);

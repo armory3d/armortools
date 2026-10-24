@@ -828,7 +828,7 @@ mesh_data_t *mesh_data_parse(char *name, char *id) {
 		iron_log("Mesh data '%s' not found!", id);
 		return NULL;
 	}
-	return mesh_data_create(raw);
+	return mesh_data_create_packed(raw);
 }
 
 mesh_data_t *mesh_data_get_raw_by_name(any_array_t *datas, char *name) {
@@ -844,8 +844,23 @@ mesh_data_t *mesh_data_get_raw_by_name(any_array_t *datas, char *name) {
 	return NULL;
 }
 
+mesh_data_t *mesh_data_create_packed(mesh_data_t *raw) {
+	// Older packed meshes end after index_array with the decoder's null runtime
+	// pointer. That slot is the optional paint_uvs_data field in the extended format.
+	// Copy the serialized prefix into a full-size object before writing runtime data.
+	mesh_data_t *data = calloc(1, sizeof(mesh_data_t));
+	memcpy(data, raw, offsetof(mesh_data_t, _));
+	return mesh_data_create(data);
+}
+
 mesh_data_t *mesh_data_create(mesh_data_t *raw) {
 	raw->_ = calloc(1, sizeof(mesh_data_runtime_t));
+	if (raw->paint_uvs_data != NULL && raw->paint_uvs_data->length > 0) {
+		raw->_->paint_uvs = *raw->paint_uvs_data->buffer[0];
+	}
+	raw->paint_uvs         = &raw->_->paint_uvs;
+	raw->_->paint_uvs_data = (mesh_paint_uvs_t_array_t){.buffer = &raw->paint_uvs, .length = 1};
+	raw->paint_uvs_data    = &raw->_->paint_uvs_data;
 	if (raw->scale_pos == 0.0) {
 		raw->scale_pos = 1.0;
 	}

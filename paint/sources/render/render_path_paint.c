@@ -708,7 +708,11 @@ void render_path_paint_use_live_layer(bool use) {
 void render_path_paint_commands_symmetry() {
 	if (g_context->sym_x || g_context->sym_y || g_context->sym_z) {
 		g_context->ddirty = 2;
-		transform_t *t    = g_context->paint_object->base->transform;
+		mesh_object_t *target = render_path_paint_target();
+		if (target == NULL)
+			return;
+		// Shared layers paint the merged geometry, whose parent defines its axes.
+		transform_t *t    = target == g_context->merged_object ? target->base->parent->transform : target->base->transform;
 		f32          sx   = t->scale.x;
 		f32          sy   = t->scale.y;
 		f32          sz   = t->scale.z;
@@ -901,7 +905,7 @@ void render_path_paint_commands_cursor() {
 
 	bool fill_layer  = g_context->layer->fill_material != NULL;
 	bool group_layer = slot_layer_is_group(g_context->layer);
-	if (!base_ui_enabled || base_is_dragging || fill_layer || group_layer) {
+	if (!base_ui_enabled || base_is_dragging || fill_layer || group_layer || slot_layer_is_locked(g_context->layer)) {
 		return;
 	}
 
@@ -937,6 +941,10 @@ void render_path_paint_commands_cursor() {
 }
 
 bool render_path_paint_paint_enabled() {
+	bool reading = g_context->tool == TOOL_TYPE_PICKER || g_context->tool == TOOL_TYPE_COLORID || g_context->tool == TOOL_TYPE_MATERIAL ||
+	               g_context->tool == TOOL_TYPE_CURSOR;
+	if (slot_layer_is_locked(g_context->layer) && !reading)
+		return false;
 	if (g_context->tool == TOOL_TYPE_BAKE) {
 		return true;
 	}

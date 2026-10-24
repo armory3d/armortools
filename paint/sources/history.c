@@ -53,6 +53,8 @@ char *history_action_to_string(history_action_t action) {
 		return tr("Delete Material");
 	case HISTORY_ACTION_DUPLICATE_MATERIAL:
 		return tr("Duplicate Material");
+	case HISTORY_ACTION_LAYER_LOCKED:
+		return tr("Layer Lock");
 	case HISTORY_ACTION_LAYER_VISIBLE:
 		return tr("Layer Visibility");
 	case HISTORY_ACTION_LAYER_NAME:
@@ -119,7 +121,12 @@ void history_layer_object_clear(slot_layer_t *l) {
 void history_swap_layer_props(history_step_t *step) {
 	slot_layer_t *l = g_project->_->layers->buffer[step->layer];
 
-	if (step->action == HISTORY_ACTION_LAYER_VISIBLE) {
+	if (step->action == HISTORY_ACTION_LAYER_LOCKED) {
+		l->locked = !l->locked;
+		context_set_layer(l);
+		ui_dock_redraw(TAB_AREA_SIDEBAR0);
+	}
+	else if (step->action == HISTORY_ACTION_LAYER_VISIBLE) {
 		context_set_layer(l);
 		l->visible = !l->visible;
 		make_material_parse_mesh_material();
@@ -145,7 +152,9 @@ void history_swap_layer_props(history_step_t *step) {
 		}
 		else {
 			layers_set_object_mask();
+			make_material_parse_paint_material(false);
 		}
+		ui_view2d_hwnd->redraws = 2;
 	}
 	else if (step->action == HISTORY_ACTION_LAYER_SCALE) {
 		f32 t             = l->scale;
@@ -353,6 +362,7 @@ void history_undo() {
 			tab_stages_add_layer(l->name);
 		}
 		else if (step->action == HISTORY_ACTION_CLEAR_LAYER) {
+			context_set_layer(g_project->_->layers->buffer[step->layer]);
 			history_undo_i    = history_undo_i - 1 < 0 ? g_config->undo_steps - 1 : history_undo_i - 1;
 			slot_layer_t *lay = history_undo_slot(history_undo_i);
 			slot_layer_swap(g_context->layer, lay);
@@ -480,8 +490,9 @@ void history_undo() {
 			step->layer_blending       = t;
 			make_material_parse_mesh_material();
 		}
-		else if (step->action == HISTORY_ACTION_LAYER_VISIBLE || step->action == HISTORY_ACTION_LAYER_NAME || step->action == HISTORY_ACTION_LAYER_OBJECT ||
-		         step->action == HISTORY_ACTION_LAYER_SCALE || step->action == HISTORY_ACTION_LAYER_ANGLE || step->action == HISTORY_ACTION_LAYER_UV_TYPE) {
+		else if (step->action == HISTORY_ACTION_LAYER_LOCKED || step->action == HISTORY_ACTION_LAYER_VISIBLE || step->action == HISTORY_ACTION_LAYER_NAME ||
+		         step->action == HISTORY_ACTION_LAYER_OBJECT || step->action == HISTORY_ACTION_LAYER_SCALE || step->action == HISTORY_ACTION_LAYER_ANGLE ||
+		         step->action == HISTORY_ACTION_LAYER_UV_TYPE) {
 			history_swap_layer_props(step);
 		}
 		else if (step->action == HISTORY_ACTION_NEW_BRUSH || step->action == HISTORY_ACTION_DUPLICATE_BRUSH) {
@@ -721,7 +732,7 @@ void history_redo() {
 		else if (step->action == HISTORY_ACTION_CLEAR_LAYER) {
 			g_context->layer = g_project->_->layers->buffer[step->layer];
 			history_swap_active();
-			slot_layer_clear(g_context->layer, 0x00000000, NULL, 1.0, layers_default_rough, 0.0);
+			slot_layer_clear(g_context->layer, slot_layer_is_mask(g_context->layer) ? 0xffffffff : 0x00000000, NULL, 1.0, layers_default_rough, 0.0);
 			g_context->layer_preview_dirty = true;
 		}
 		else if (step->action == HISTORY_ACTION_DUPLICATE_LAYER) {
@@ -796,8 +807,9 @@ void history_redo() {
 			step->layer_blending       = t;
 			make_material_parse_mesh_material();
 		}
-		else if (step->action == HISTORY_ACTION_LAYER_VISIBLE || step->action == HISTORY_ACTION_LAYER_NAME || step->action == HISTORY_ACTION_LAYER_OBJECT ||
-		         step->action == HISTORY_ACTION_LAYER_SCALE || step->action == HISTORY_ACTION_LAYER_ANGLE || step->action == HISTORY_ACTION_LAYER_UV_TYPE) {
+		else if (step->action == HISTORY_ACTION_LAYER_LOCKED || step->action == HISTORY_ACTION_LAYER_VISIBLE || step->action == HISTORY_ACTION_LAYER_NAME ||
+		         step->action == HISTORY_ACTION_LAYER_OBJECT || step->action == HISTORY_ACTION_LAYER_SCALE || step->action == HISTORY_ACTION_LAYER_ANGLE ||
+		         step->action == HISTORY_ACTION_LAYER_UV_TYPE) {
 			history_swap_layer_props(step);
 		}
 		else if (step->action == HISTORY_ACTION_NEW_BRUSH || step->action == HISTORY_ACTION_DUPLICATE_BRUSH) {
@@ -874,6 +886,10 @@ void history_redo() {
 }
 
 void history_reset() {
+	// No snapshot remains reachable after reset; do not retain its GPU allocation.
+	for (i32 i = 0; history_undo_layers != NULL && i < history_undo_layers->length; ++i) {
+		slot_layer_release_paint_textures(history_undo_layers->buffer[i]);
+	}
 	if (history_steps != NULL) {
 		for (i32 i = 0; i < history_steps->length; ++i) {
 			free(history_steps->buffer[i]);
@@ -1185,4 +1201,11 @@ void history_delete_material_group(node_group_t *group) {
 	step->canvas_type    = CANVAS_TYPE_MATERIAL;
 	step->canvas_group   = array_index_of(g_project->_->material_groups, group);
 	step->canvas         = util_clone_canvas(group->canvas);
+}
+
+void history_layer_locked(slot_layer_t *l) {
+	slot_layer_t *previous = g_context->layer;
+	g_context->layer       = l;
+	history_push(HISTORY_ACTION_LAYER_LOCKED);
+	g_context->layer = previous;
 }

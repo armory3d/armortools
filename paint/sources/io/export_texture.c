@@ -279,6 +279,11 @@ static void export_texture_run_layers(char *path, slot_layer_t_array_t *layers, 
 	// Export a single udim tile when the target is one
 	i32 udim_slot = -1;
 	if (util_mesh_udim_active()) {
+		for (i32 i = 0; i < g_project->_->paint_objects->length; ++i) {
+			mesh_object_t *o = g_project->_->paint_objects->buffer[i];
+			if (o->data->paint_uvs->tile > 0 && string_equals(o->base->name, object_name))
+				udim_slot = o->data->paint_uvs->tile - 1;
+		}
 		i32 udim_tile = util_mesh_udim_tile(object_name);
 		if (udim_tile >= 0) {
 			udim_slot = util_mesh_udim_slot(udim_tile);

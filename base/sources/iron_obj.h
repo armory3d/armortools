@@ -17,6 +17,10 @@ typedef struct raw_mesh {
 	float             scale_pos;
 	float             scale_tex;
 	char             *name;
+	char             *source_object;
+	char             *paint_material;
+	int               paint_uv_tile; // One-based material tile, zero for legacy meshes
+	int               paint_uv_count;
 	bool              has_next; // File contains multiple objects
 	uint64_t          pos;
 	struct any_array *udims;   // u32_array_t[] - Indices split per udim tile

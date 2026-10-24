@@ -26,6 +26,8 @@ void tab_layers_repaint_text_layer(slot_layer_t *l) {
 }
 
 void tab_layers_set_drag_layer(slot_layer_t *layer, f32 off_x, f32 off_y) {
+	if (slot_layer_has_locked_content(layer))
+		return;
 	base_drag_off_x      = off_x;
 	base_drag_off_y      = off_y;
 	base_drag_layer      = layer;
@@ -162,11 +164,19 @@ void tab_layers_draw_layer_slot_mini(slot_layer_t *l, i32 i) {
 	f32        uiy   = g_ui->_y;
 	ui_state_t state = tab_layers_draw_layer_icon(l, i, uix, uiy, true);
 	tab_layers_handle_layer_icon_state(l, i, state, uix, uiy);
+	if (slot_layer_is_locked(l)) {
+		rect_t *r = resource_tile50(resource_get("icons.k"), ICON_LOCK);
+		g_ui->_x  = uix;
+		g_ui->_y  = uiy;
+		ui_sub_image(resource_get("icons.k"), g_theme->TEXT_COL, 16 * UI_SCALE(), r->x, r->y, r->w, r->h);
+	}
 	g_ui->_x = uix;
 	g_ui->_y = uiy + g_theme->ELEMENT_H * 2 * UI_SCALE();
 }
 
 void tab_layers_delete_layer(slot_layer_t *l) {
+	if (slot_layer_has_locked_content(l))
+		return;
 	slot_layer_t_array_t *pointers = tab_layers_init_layer_map();
 
 	if (slot_layer_is_layer(l) && slot_layer_has_masks(l, false)) {
@@ -293,6 +303,8 @@ static bool tab_layers_object_combo(i32 *value, char *first, char *label, bool s
 }
 
 bool tab_layers_combo_object(slot_layer_t *l, bool label) {
+	bool enabled          = g_ui->enabled;
+	g_ui->enabled         = enabled && !slot_layer_is_locked(l);
 	i32  prev_object_mask = l->object_mask;
 	bool changed          = tab_layers_object_combo(&l->object_mask, tr("Shared"), tr("Object"), label);
 	if (changed) {
@@ -307,12 +319,18 @@ bool tab_layers_combo_object(slot_layer_t *l, bool label) {
 		}
 		else {
 			layers_set_object_mask();
+			// Shared layers use atlas UVs, object layers use local UVs.
+			make_material_parse_paint_material(false);
 		}
+		ui_view2d_hwnd->redraws = 2;
 	}
+	g_ui->enabled = enabled;
 	return changed;
 }
 
 bool tab_layers_combo_blending(slot_layer_t *l, bool label) {
+	bool enabled                   = g_ui->enabled;
+	g_ui->enabled                  = enabled && !slot_layer_is_locked(l);
 	string_array_t *blending_combo = any_array_create_from_raw_tmp(
 	    (void *[]){
 	        tr("Mix"),
@@ -345,7 +363,24 @@ bool tab_layers_combo_blending(slot_layer_t *l, bool label) {
 		l->blending = blending;
 		make_material_parse_mesh_material();
 	}
+	g_ui->enabled = enabled;
 	return changed;
+}
+
+void tab_layers_layer_toggle_locked(slot_layer_t *l) {
+	if (l == NULL || array_index_of(g_project->_->layers, l) < 0 || slot_layer_is_locked(l->parent))
+		return;
+	slot_layer_t *previous = g_context->layer;
+	g_context->layer       = l;
+	history_layer_locked(l);
+	l->locked             = !l->locked;
+	g_context->layer      = previous;
+	g_context->brush_time = 0;
+	g_context->pdirty     = 0;
+	history_push_undo     = false;
+	g_context->ddirty     = 2;
+	ui_dock_redraw(TAB_AREA_SIDEBAR0);
+	ui_view2d_hwnd->redraws = 2;
 }
 
 void tab_layers_layer_toggle_visible(slot_layer_t *l) {
@@ -356,6 +391,8 @@ void tab_layers_layer_toggle_visible(slot_layer_t *l) {
 }
 
 bool tab_layers_can_delete(slot_layer_t *l) {
+	if (slot_layer_has_locked_content(l))
+		return false;
 	i32 num_layers = 0;
 
 	if (slot_layer_is_mask(l)) {
@@ -379,6 +416,8 @@ bool tab_layers_can_delete(slot_layer_t *l) {
 }
 
 void tab_layers_draw_layer_context_menu_duplicate(void *_) {
+	if (slot_layer_is_locked(tab_layers_l->parent))
+		return;
 	slot_layer_t *l = tab_layers_l;
 	context_set_layer(l);
 	history_duplicate_layer();
@@ -409,7 +448,7 @@ void tab_layers_draw_layer_slot_full(slot_layer_t *l, i32 i) {
 	gpu_texture_t *icons = resource_get("icons.k");
 	rect_t        *r     = resource_tile18(icons, l->visible ? ICON18_EYE_ON : ICON18_EYE_OFF);
 	g_ui->_x             = uix + 4;
-	g_ui->_y             = uiy + 3 + center;
+	g_ui->_y             = uiy + 3;
 	i32  col             = g_theme->HOVER_COL + 0x00282828;
 	bool parent_hidden   = l->parent != NULL && (!l->parent->visible || (l->parent->parent != NULL && !l->parent->parent->visible));
 	if (parent_hidden) {
@@ -418,6 +457,20 @@ void tab_layers_draw_layer_slot_full(slot_layer_t *l, i32 i) {
 	if (ui_sub_image(icons, col, 18 * UI_SCALE(), r->x, r->y, r->w, r->h) == UI_STATE_RELEASED) {
 		tab_layers_layer_toggle_visible(l);
 	}
+
+	// Locked parents protect their children; unlock the parent first.
+	r                         = resource_tile50(icons, ICON_LOCK);
+	g_ui->_x                  = uix + 4;
+	g_ui->_y                  = uiy + center * 2 + 2;
+	g_ui->_w                  = uiw * 0.08;
+	bool       inherited_lock = slot_layer_is_locked(l->parent);
+	bool       locked         = slot_layer_is_locked(l);
+	ui_state_t lock_state =
+	    ui_sub_image(icons, locked ? g_theme->TEXT_COL : base_darker(g_theme->TEXT_COL, 0x00505050), 18 * UI_SCALE(), r->x, r->y, r->w, r->h);
+	if (g_ui->is_hovered)
+		ui_tooltip(inherited_lock ? tr("Locked by parent") : locked ? tr("Unlock Layer") : tr("Lock Layer"));
+	if (lock_state == UI_STATE_RELEASED && !inherited_lock)
+		tab_layers_layer_toggle_locked(l);
 
 	// Nested offset
 	f32 offx = 0.0;
@@ -443,7 +496,7 @@ void tab_layers_draw_layer_slot_full(slot_layer_t *l, i32 i) {
 	g_ui->_x          = name_x;
 	g_ui->_y          = uiy + center;
 	g_ui->_w          = name_right - name_x;
-	if (tab_layers_layer_name_edit == l->id) {
+	if (tab_layers_layer_name_edit == l->id && !slot_layer_is_locked(l)) {
 		tab_layers_layer_name = string_copy(l->name);
 		char *new_name        = string_copy(ui_text_input(&tab_layers_layer_name, "", UI_ALIGN_LEFT, true, false));
 		bool  commit          = g_ui->text_selected_id != ui_widget_id(&tab_layers_layer_name, UI_ID_TEXT);
@@ -479,7 +532,7 @@ void tab_layers_draw_layer_slot_full(slot_layer_t *l, i32 i) {
 
 		ui_state_t state = ui_text(l->name, UI_ALIGN_LEFT, 0x00000000);
 		if (state == UI_STATE_RELEASED) {
-			if (sys_time() - g_context->select_time < 0.2) {
+			if (sys_time() - g_context->select_time < 0.2 && !slot_layer_is_locked(l)) {
 				tab_layers_layer_name_edit = l->id;
 				tab_layers_layer_name_prev = string_copy(l->name);
 				tab_layers_layer_name      = string_copy(l->name);
@@ -564,6 +617,8 @@ void tab_layers_draw_layer_context_menu_delete(void *_) {
 }
 
 void tab_layers_draw_layer_context_menu_to_paint_layer(void *_) {
+	if (slot_layer_has_locked_content(tab_layers_l))
+		return;
 	slot_layer_t *l = tab_layers_l;
 
 	if (slot_layer_is_filter(l)) {
@@ -578,13 +633,31 @@ void tab_layers_draw_layer_context_menu_to_paint_layer(void *_) {
 }
 
 void tab_layers_draw_layer_context_menu_to_fill_layer(void *_) {
+	if (slot_layer_has_locked_content(tab_layers_l))
+		return;
 	slot_layer_t *l = tab_layers_l;
 	slot_layer_is_layer(l) ? history_to_fill_layer() : history_to_fill_mask();
 	slot_layer_to_fill_layer(l);
 }
 
 bool tab_layers_can_merge_down(slot_layer_t *l) {
+	if (slot_layer_has_locked_content(l))
+		return false;
 	i32 index = array_index_of(g_project->_->layers, l);
+	for (i32 below = index - 1; below >= 0; --below) {
+		slot_layer_t *target = g_project->_->layers->buffer[below];
+		bool          child  = false;
+		for (slot_layer_t *parent = target->parent; parent != NULL; parent = parent->parent) {
+			if (parent == l)
+				child = true;
+		}
+		if (child)
+			continue;
+		if (slot_layer_has_locked_content(target))
+			return false;
+		break;
+	}
+
 	// Lowest layer
 	if (index == 0) {
 		return false;
@@ -614,6 +687,8 @@ void tab_layers_draw_layer_context_menu_set_bits(void *_) {
 }
 
 void tab_layers_draw_layer_context_menu_merge_down(void *_) {
+	if (!tab_layers_can_merge_down(tab_layers_l))
+		return;
 	slot_layer_t *l = tab_layers_l;
 	context_set_layer(l);
 	history_merge_layers();
@@ -623,11 +698,15 @@ void tab_layers_draw_layer_context_menu_merge_down(void *_) {
 }
 
 void tab_layers_draw_layer_context_menu_merge_group(void *_) {
+	if (slot_layer_has_locked_content(tab_layers_l))
+		return;
 	slot_layer_t *l = tab_layers_l;
 	layers_merge_group(l);
 }
 
 void tab_layers_draw_layer_context_menu_apply(void *_) {
+	if (slot_layer_has_locked_content(tab_layers_l))
+		return;
 	slot_layer_t *l  = tab_layers_l;
 	g_context->layer = l;
 	history_apply_mask();
@@ -638,12 +717,16 @@ void tab_layers_draw_layer_context_menu_apply(void *_) {
 }
 
 void tab_layers_draw_layer_context_menu_apply_sculpt(void *_) {
+	if (slot_layer_has_locked_content(tab_layers_l))
+		return;
 	slot_layer_t *l  = tab_layers_l;
 	g_context->layer = l;
 	slot_layer_apply_sculpt(l);
 }
 
 void tab_layers_draw_layer_context_menu_invert(void *_) {
+	if (slot_layer_has_locked_content(tab_layers_l))
+		return;
 	slot_layer_t *l = tab_layers_l;
 	context_set_layer(l);
 	history_invert_mask();
@@ -651,6 +734,8 @@ void tab_layers_draw_layer_context_menu_invert(void *_) {
 }
 
 void tab_layers_draw_layer_context_menu_clear(void *_) {
+	if (slot_layer_has_locked_content(tab_layers_l))
+		return;
 	slot_layer_t *l = tab_layers_l;
 	if (!slot_layer_is_group(l)) {
 		history_clear_layer();
@@ -706,6 +791,15 @@ void tab_layers_draw_layer_context_menu_draw() {
 			g_context->layers_export = EXPORT_MODE_SELECTED;
 			box_export_show_textures();
 		}
+	}
+
+	if (!slot_layer_is_locked(l->parent) && ui_menu_button(l->locked ? tr("Unlock Layer") : tr("Lock Layer"), "", ICON_LOCK)) {
+		tab_layers_layer_toggle_locked(l);
+		ui_menu_keep_open = true;
+	}
+	if (slot_layer_has_locked_content(l)) {
+		ui_menu_label(slot_layer_is_locked(l) ? tr("Layer is locked") : tr("Contains locked layers"), NULL);
+		return;
 	}
 
 	if (!slot_layer_is_group(l)) {
@@ -775,7 +869,7 @@ void tab_layers_draw_layer_context_menu_draw() {
 		        "uv0",
 		    },
 		    1);
-		if (mesh_data_get_vertex_array(g_context->paint_object->data, "tex1") != NULL) {
+		if (mesh_data_get_vertex_array(util_mesh_paint_data(), "tex1") != NULL) {
 			any_array_push(aruv, "uv1");
 		}
 		ui_combo(&l->uv_map, aruv, tr("UV Map"), true, UI_ALIGN_LEFT, true);
@@ -1040,6 +1134,7 @@ void tab_layers_button_new_menu() {
 		layers_new_path_layer(true);
 		history_new_layer();
 	}
+	g_ui->enabled = !slot_layer_is_locked(l);
 	if (ui_menu_button(tr("Black Mask"), "", ICON_MASK)) {
 		if (slot_layer_is_mask(l) || slot_layer_is_filter(l)) {
 			context_set_layer(l->parent);
@@ -1088,7 +1183,7 @@ void tab_layers_button_new_menu() {
 		}
 		layers_create_filter();
 	}
-	g_ui->enabled = !slot_layer_is_group(g_context->layer) && !slot_layer_is_in_group(g_context->layer);
+	g_ui->enabled = !slot_layer_has_locked_content(l) && !slot_layer_is_group(g_context->layer) && !slot_layer_is_in_group(g_context->layer);
 	if (ui_menu_button(tr("Group"), "", ICON_FOLDER)) {
 		if (slot_layer_is_group(l) || slot_layer_is_in_group(l)) {
 			return;
@@ -1363,6 +1458,8 @@ void tab_layers_draw(i32 *htab) {
 }
 
 bool tab_layers_can_drop_new_layer(i32 position) {
+	if (position > 0 && position <= g_project->_->layers->length && slot_layer_is_locked(g_project->_->layers->buffer[position - 1]->parent))
+		return false;
 	if (position > 0 && position < g_project->_->layers->length && slot_layer_is_mask(g_project->_->layers->buffer[position - 1])) {
 		// 1. The layer to insert is inserted in the middle
 		// 2. The layer below is a mask, i.e. the layer would have to be a (group) mask, too.

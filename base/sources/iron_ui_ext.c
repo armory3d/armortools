@@ -383,7 +383,36 @@ int ui_color_wheel(uint32_t *value, ui_color_state_t *state, bool alpha, float w
 	(*value) = ui_color(round(state->red * 255.0), round(state->green * 255.0), round(state->blue * 255.0), round(a * 255.0));
 
 	if (color_preview) {
+#ifdef IRON_WINDOWS
+		ui_row2();
+#endif
 		ui_text("", UI_ALIGN_RIGHT, (*value));
+#ifdef IRON_WINDOWS
+		bool screen_picker = ui_button("Screen", UI_ALIGN_CENTER, "");
+		ui_tooltip("Pick a color anywhere on the screen. Escape or right-click cancels.");
+		if (screen_picker) {
+			bool picked      = iron_pick_screen_color(value);
+			current->changed = picked;
+			wheel_changed |= picked;
+			if (picked) {
+				// Also synchronize differences smaller than the wheel's usual refresh threshold.
+				state->red   = ui_color_r(*value) / 255.0f;
+				state->green = ui_color_g(*value) / 255.0f;
+				state->blue  = ui_color_b(*value) / 255.0f;
+				float hsv[3];
+				ui_rgb_to_hsv(state->red, state->green, state->blue, hsv);
+				if (hsv[1] > 0) {
+					state->hue = hsv[0];
+				}
+				state->sat = hsv[1];
+				state->val = hsv[2];
+			}
+			ui_pop_id();
+			current->item_changed = wheel_changed;
+			ui_record_change();
+			return (*value);
+		}
+#endif
 	}
 
 	char          *strings[] = {"RGB", "HSV", "Hex"};

@@ -41,9 +41,10 @@ void iron_net_request(const char *url_base, const char *url_path, const char *da
 		if (dst_path != NULL) {
 			FILE *file = fopen(dst_path, "wb");
 			if (file != NULL) {
-				fwrite((char *)elements, 1, num_bytes, file);
-				fclose(file);
+				if (fwrite((char *)elements, 1, num_bytes, file) != (size_t)num_bytes) status = 0;
+				if (fclose(file) != 0) status = 0;
 			}
+			else status = 0;
 			callback(status, NULL, callbackdata);
 		}
 		else {

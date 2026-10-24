@@ -37,6 +37,25 @@ void slot_layer_alloc_textures(slot_layer_t *raw) {
 	}
 }
 
+// Undo slots retain their small previews and allocate full-size textures again on demand.
+void slot_layer_release_paint_textures(slot_layer_t *raw) {
+	gpu_texture_t **textures[] = {&raw->texpaint, &raw->texpaint_nor, &raw->texpaint_pack};
+	char *names[] = {"texpaint", "texpaint_nor", "texpaint_pack"};
+	for (i32 i = 0; i < 3; ++i) {
+		if (*textures[i] == NULL) continue;
+		gpu_delete_texture(*textures[i]);
+		*textures[i] = NULL;
+		char *key = string_tmp("%s%s", names[i], raw->ext);
+		render_target_t *rt = any_map_get(render_path_render_targets, key);
+		map_delete(render_path_render_targets, key);
+		if (rt != NULL) {
+			free(rt->name);
+			free(rt->format);
+			free(rt);
+		}
+	}
+}
+
 static bool slot_layer_is_unique_name(slot_layer_t *self, char *name) {
 	for (i32 i = 0; i < g_project->_->layers->length; ++i) {
 		slot_layer_t *l = g_project->_->layers->buffer[i];
@@ -187,6 +206,18 @@ void slot_layer_delete(slot_layer_t *raw) {
 }
 
 void slot_layer_unload(slot_layer_t *raw) {
+	// Sculpt data is independent of the paint textures, including in deferred undo slots.
+	if (raw->texpaint_sculpt != NULL) {
+		gpu_delete_texture(raw->texpaint_sculpt);
+		raw->texpaint_sculpt = NULL;
+		char *key = string_tmp("texpaint_sculpt%s", raw->ext);
+		render_target_t *rt = any_map_get(render_path_render_targets, key);
+		map_delete(render_path_render_targets, key);
+		if (rt != NULL) {
+			free(rt->name);
+			free(rt);
+		}
+	}
 	if (slot_layer_is_group(raw)) {
 		if (raw->texpaint_preview != NULL) {
 			gpu_delete_texture(raw->texpaint_preview);
@@ -398,6 +429,7 @@ slot_layer_t *slot_layer_duplicate(slot_layer_t *raw) {
 	}
 
 	l->visible            = raw->visible;
+	l->locked             = raw->locked;
 	l->mask_opacity       = raw->mask_opacity;
 	l->fill_material      = raw->fill_material;
 	l->object_mask        = raw->object_mask;
@@ -557,6 +589,30 @@ void slot_layer_to_paint_layer(slot_layer_t *raw) {
 	make_material_parse_paint_material(true);
 	g_context->layer_preview_dirty = true;
 	ui_dock_redraw(TAB_AREA_SIDEBAR0);
+}
+
+bool slot_layer_is_locked(slot_layer_t *layer) {
+	for (; layer != NULL; layer = layer->parent) {
+		if (layer->locked)
+			return true;
+	}
+	return false;
+}
+
+// Destructive operations on a group/layer also affect its children.
+bool slot_layer_has_locked_content(slot_layer_t *layer) {
+	if (slot_layer_is_locked(layer))
+		return true;
+	for (i32 i = 0; i < g_project->_->layers->length; ++i) {
+		slot_layer_t *child = g_project->_->layers->buffer[i];
+		if (!child->locked)
+			continue;
+		for (slot_layer_t *parent = child->parent; parent != NULL; parent = parent->parent) {
+			if (parent == layer)
+				return true;
+		}
+	}
+	return false;
 }
 
 bool slot_layer_is_visible(slot_layer_t *raw) {
@@ -772,6 +828,8 @@ bool slot_layer_is_in_group(slot_layer_t *raw) {
 }
 
 bool slot_layer_can_move(slot_layer_t *raw, i32 to) {
+	if (slot_layer_has_locked_content(raw))
+		return false;
 	i32 old_index = array_index_of(g_project->_->layers, raw);
 
 	i32 delta = to - old_index; // If delta > 0 the layer is moved up, otherwise down
@@ -794,6 +852,12 @@ bool slot_layer_can_move(slot_layer_t *raw, i32 to) {
 	}
 
 	slot_layer_t *new_lower_layer = delta > 0 ? g_project->_->layers->buffer[to] : (to > 0 ? g_project->_->layers->buffer[to - 1] : NULL);
+
+	if (new_upper_layer != NULL &&
+	    ((slot_layer_is_group(new_upper_layer) && new_upper_layer->show_panel && slot_layer_is_locked(new_upper_layer)) ||
+	     slot_layer_is_locked(new_upper_layer->parent) || ((slot_layer_is_mask(raw) || slot_layer_is_filter(raw)) && slot_layer_is_locked(new_upper_layer)))) {
+		return false;
+	}
 
 	if (slot_layer_is_mask(raw)) {
 		// Masks can not be on top

@@ -4,6 +4,12 @@
 i32 _tab_materials_draw_slots;
 i32 tab_materials_drag_pos = -1;
 
+static slot_material_t *tab_materials_rename          = NULL;
+static char            *tab_materials_rename_text     = NULL;
+static slot_material_t *tab_materials_last_click      = NULL;
+static f64              tab_materials_last_click_time = 0;
+static bool             tab_materials_last_click_name = false;
+
 void tab_materials_button_nodes() {
 	if (ui_button(tr("Nodes"), UI_ALIGN_CENTER, "")) {
 		ui_base_show_material_nodes();
@@ -240,172 +246,240 @@ void tab_materials_draw_slots_menu() {
 	}
 }
 
-void tab_materials_draw_slots(bool mini) {
-	i32 slotw = math_floor(51 * UI_SCALE() + g_config->window_scale * 2);
-	i32 num   = math_floor(g_ui->_window_w / (float)slotw);
-	if (num == 0) {
-		return;
+static void tab_materials_slot_events(i32 i, ui_state_t state, f32 uix, f32 uiy, gpu_texture_t *img_full, bool name) {
+	// Select material
+	if (state == UI_STATE_STARTED && g_ui->input_y > g_ui->_window_y) {
+		if (g_context->material != g_project->_->materials->buffer[i]) {
+			context_select_material(i);
+			if (g_context->tool == TOOL_TYPE_MATERIAL) {
+				sys_notify_on_next_frame(&tab_materials_draw_slots_update_fill_layers, NULL);
+			}
+		}
+		base_drag_off_x    = -(mouse_x - uix - g_ui->_window_x - 3);
+		base_drag_off_y    = -(mouse_y - uiy - g_ui->_window_y + 1);
+		base_drag_material = g_context->material;
+	}
+	if (state == UI_STATE_RELEASED && !base_is_dragging) {
+		slot_material_t *material = g_project->_->materials->buffer[i];
+		if (tab_materials_last_click == material && tab_materials_last_click_name == name && sys_time() - tab_materials_last_click_time < 0.3) {
+			base_drag_material = NULL;
+			base_is_dragging   = false;
+			if (name) {
+				tab_materials_rename      = material;
+				tab_materials_rename_text = string_copy(material->canvas->name);
+				ui_start_text_edit(&tab_materials_rename_text, UI_ALIGN_LEFT);
+			}
+			else {
+				ui_base_show_material_nodes();
+			}
+			tab_materials_last_click = NULL;
+		}
+		else {
+			tab_materials_last_click      = material;
+			tab_materials_last_click_name = name;
+			tab_materials_last_click_time = sys_time();
+		}
 	}
 
+	// Context menu
+	if (g_ui->is_hovered && g_ui->input_released_r) {
+		context_select_material(i);
+		_tab_materials_draw_slots = i;
+		ui_menu_draw(&tab_materials_draw_slots_menu, -1, -1);
+	}
+	if (g_ui->is_hovered) {
+		ui_tooltip_image(img_full, 0);
+		if (i < 9) {
+			i32 i1 = i + 1;
+			ui_tooltip(string_tmp("%s - (%s %d)", g_project->_->materials->buffer[i]->canvas->name, (char *)any_map_get(g_keymap, "select_material"), i1));
+		}
+		else {
+			ui_tooltip(g_project->_->materials->buffer[i]->canvas->name);
+		}
+	}
+}
+
+static void tab_materials_draw_list() {
 	bool drag_pos_set = false;
-	f32  uix          = 0.0;
-	f32  uiy          = 0.0;
-	i32  imgw_val     = math_floor(50 * UI_SCALE());
-
-	for (i32 row = 0; row < math_floor(math_ceil(g_project->_->materials->length / (float)num)); ++row) {
-		i32          mult = g_config->show_asset_names ? 2 : 1;
-		f32_array_t *ar   = f32_array_create_from_raw_tmp(NULL, num * mult);
-		for (i32 i = 0; i < num * mult; ++i) {
-			ar->buffer[i] = 1 / (float)num;
+	for (i32 i = 0; i < g_project->_->materials->length; ++i) {
+		slot_material_t *material = g_project->_->materials->buffer[i];
+		f32              x = g_ui->_x, y = g_ui->_y, w = g_ui->_w;
+		f32              h = UI_ELEMENT_H();
+		if (material == g_context->material) {
+			ui_fill(0, 0, w / UI_SCALE(), h / UI_SCALE(), g_theme->HIGHLIGHT_COL);
 		}
-		ui_row(ar);
-
-		g_ui->_x += 2;
-		f32 off = g_config->show_asset_names ? UI_ELEMENT_OFFSET() * 10.0 : 6;
-		if (row > 0) {
-			g_ui->_y += off;
-		}
-
-		for (i32 j = 0; j < num; ++j) {
-			i32 imgw = math_floor(50 * UI_SCALE());
-			i32 i    = j + row * num;
-			if (i >= g_project->_->materials->length) {
-				ui_end_element_of_size(imgw);
-				if (g_config->show_asset_names) {
-					ui_end_element_of_size(0);
+		ui_row(f32_array_create_from_raw_tmp((f32[]){-32, 1}, 2));
+		gpu_texture_t *image = UI_SCALE() > 1 ? material->image : material->image_icon;
+		ui_state_t     state = material->preview_ready ? ui_image(image, 0xffffffff, h) : ui_text("", UI_ALIGN_LEFT, 0);
+		tab_materials_slot_events(i, state, x, y, material->image, false);
+		bool hovered = g_ui->is_hovered;
+		if (tab_materials_rename == material) {
+			bool cancel = g_ui->is_escape_down;
+			ui_text_input(&tab_materials_rename_text, "", UI_ALIGN_LEFT, true, false);
+			if (cancel || g_ui->text_selected_id != ui_widget_id(&tab_materials_rename_text, UI_ID_TEXT)) {
+				if (!cancel && !string_equals(tab_materials_rename_text, "")) {
+					material->canvas->name = string_copy(slot_material_unique_name(material->canvas, tab_materials_rename_text));
+					ui_nodes_hwnd->redraws = 2;
+					ui_dock_redraw(TAB_AREA_SIDEBAR0);
 				}
-				continue;
-			}
-			gpu_texture_t *img      = UI_SCALE() > 1 ? g_project->_->materials->buffer[i]->image : g_project->_->materials->buffer[i]->image_icon;
-			gpu_texture_t *img_full = g_project->_->materials->buffer[i]->image;
-
-			// Highligh selected
-			if (g_context->material == g_project->_->materials->buffer[i]) {
-				if (mini) {
-					f32 w = g_ui->_w / (float)UI_SCALE();
-					ui_rect_round(0, -2, w - 2, w - 4, g_theme->HIGHLIGHT_COL, 3);
-				}
-				else {
-					i32 w = 50 + math_floor(g_config->window_scale * 2);
-					ui_rect_round(0, -1, w + 2, w + 2, g_theme->HIGHLIGHT_COL, 2 * UI_SCALE());
-				}
-			}
-
-			// Draw material icon
-			uix      = g_ui->_x;
-			uiy      = g_ui->_y;
-			i32 tile = UI_SCALE() > 1 ? 100 : 50;
-			f32 imgh = mini ? ui_sidebar_default_w_mini * 0.85 * UI_SCALE() : 50 * UI_SCALE();
-
-			if (base_drag_material != NULL && tab_materials_drag_pos == i) {
-				ui_fill(-1, -2, 2, imgw_val + 4, g_theme->HIGHLIGHT_COL);
-			}
-
-			ui_state_t state = g_project->_->materials->buffer[i]->preview_ready
-			                       ? ui_image(img, 0xffffffff, imgh)
-			                       : ui_sub_image(resource_get("icons.k"), 0xffffffff, -1.0, tile, tile, tile, tile);
-
-			if (state == UI_STATE_HOVERED && base_drag_material != NULL) {
-				tab_materials_drag_pos = (mouse_x > uix + g_ui->_window_x + imgw_val / 2.0) ? i + 1 : i;
-				drag_pos_set           = true;
-			}
-
-			// Draw material numbers when selecting a material via keyboard shortcut
-			bool is_typing = g_ui->is_typing;
-			if (!is_typing) {
-				if (i < 9 && keymap_shortcut(any_map_get(g_keymap, "select_material"), SHORTCUT_TYPE_DOWN)) {
-					char *number = i32_to_string(i + 1);
-					i32   width  = draw_string_width(g_font, g_ui->font_size, number) + 10;
-					i32   height = draw_font_height(g_font, g_ui->font_size);
-					draw_set_color(g_theme->TEXT_COL);
-					draw_filled_rect(uix, uiy, width, height);
-					draw_set_color(g_theme->BUTTON_COL);
-					draw_string(number, uix + 5, uiy);
-				}
-			}
-
-			// Select material
-			if (state == UI_STATE_STARTED && g_ui->input_y > g_ui->_window_y) {
-				if (g_context->material != g_project->_->materials->buffer[i]) {
-					context_select_material(i);
-					if (g_context->tool == TOOL_TYPE_MATERIAL) {
-						sys_notify_on_next_frame(&tab_materials_draw_slots_update_fill_layers, NULL);
-					}
-				}
-				base_drag_off_x    = -(mouse_x - uix - g_ui->_window_x - 3);
-				base_drag_off_y    = -(mouse_y - uiy - g_ui->_window_y + 1);
-				base_drag_material = g_context->material;
-				// Double click to show nodes
-				if (sys_time() - g_context->select_time < 0.2) {
-					ui_base_show_material_nodes();
-					base_drag_material = NULL;
-					base_is_dragging   = false;
-				}
-				g_context->select_time = sys_time();
-			}
-
-			// Context menu
-			if (g_ui->is_hovered && g_ui->input_released_r) {
-				context_select_material(i);
-				_tab_materials_draw_slots = i;
-				ui_menu_draw(&tab_materials_draw_slots_menu, -1, -1);
-			}
-			if (g_ui->is_hovered) {
-				ui_tooltip_image(img_full, 0);
-				if (i < 9) {
-					i32 i1 = i + 1;
-					ui_tooltip(
-					    string_tmp("%s - (%s %d)", g_project->_->materials->buffer[i]->canvas->name, (char *)any_map_get(g_keymap, "select_material"), i1));
-				}
-				else {
-					ui_tooltip(g_project->_->materials->buffer[i]->canvas->name);
-				}
-			}
-			if (g_config->show_asset_names) {
-				g_ui->_x = uix;
-				g_ui->_y += slotw * 0.9;
-				ui_text(g_project->_->materials->buffer[i]->canvas->name, UI_ALIGN_CENTER, 0x00000000);
-				if (g_ui->is_hovered) {
-					if (i < 9) {
-						i32 i1 = i + 1;
-						ui_tooltip(
-						    string_tmp("%s - (%s %d)", g_project->_->materials->buffer[i]->canvas->name, (char *)any_map_get(g_keymap, "select_material"), i1));
-					}
-					else {
-						ui_tooltip(g_project->_->materials->buffer[i]->canvas->name);
-					}
-				}
-				g_ui->_y -= slotw * 0.9;
-				if (i == g_project->_->materials->length - 1) {
-					g_ui->_y += j == num - 1 ? imgw : imgw + UI_ELEMENT_H() + UI_ELEMENT_OFFSET();
-				}
+				tab_materials_rename = NULL;
 			}
 		}
-
-		g_ui->_y += mini ? 0 : 6;
+		else {
+			state = ui_text(material->canvas->name, UI_ALIGN_LEFT, 0);
+			tab_materials_slot_events(i, state, x, y, material->image, true);
+		}
+		hovered |= g_ui->is_hovered;
+		if (hovered && base_drag_material != NULL) {
+			tab_materials_drag_pos = mouse_y > g_ui->_window_y + y + h / 2 ? i + 1 : i;
+			drag_pos_set           = true;
+		}
+		if (base_drag_material != NULL && (tab_materials_drag_pos == i || (i == g_project->_->materials->length - 1 && tab_materials_drag_pos == i + 1))) {
+			f32 end_y = g_ui->_y;
+			g_ui->_y  = y + (tab_materials_drag_pos == i ? 0 : h);
+			ui_fill(0, 0, w / UI_SCALE(), 2, g_theme->HIGHLIGHT_COL);
+			g_ui->_y = end_y;
+		}
 	}
-
-	if (base_drag_material != NULL && tab_materials_drag_pos == g_project->_->materials->length) {
-		g_ui->_x = uix;
-		g_ui->_y = uiy;
-		ui_fill(imgw_val + 1, -2, 2, imgw_val + 4, g_theme->HIGHLIGHT_COL);
-	}
-
 	if (!drag_pos_set) {
 		tab_materials_drag_pos = -1;
 	}
+}
 
+void tab_materials_draw_slots(bool mini) {
+	if (g_config->material_list && !mini) {
+		tab_materials_draw_list();
+	}
+	else {
+		i32 slotw = math_floor(51 * UI_SCALE() + g_config->window_scale * 2);
+		i32 num   = math_floor(g_ui->_window_w / (float)slotw);
+		if (num == 0) {
+			return;
+		}
+
+		bool drag_pos_set = false;
+		f32  uix          = 0.0;
+		f32  uiy          = 0.0;
+		i32  imgw_val     = math_floor(50 * UI_SCALE());
+
+		for (i32 row = 0; row < math_floor(math_ceil(g_project->_->materials->length / (float)num)); ++row) {
+			i32          mult = g_config->show_asset_names ? 2 : 1;
+			f32_array_t *ar   = f32_array_create_from_raw_tmp(NULL, num * mult);
+			for (i32 i = 0; i < num * mult; ++i) {
+				ar->buffer[i] = 1 / (float)num;
+			}
+			ui_row(ar);
+
+			g_ui->_x += 2;
+			f32 off = g_config->show_asset_names ? UI_ELEMENT_OFFSET() * 10.0 : 6;
+			if (row > 0) {
+				g_ui->_y += off;
+			}
+
+			for (i32 j = 0; j < num; ++j) {
+				i32 imgw = math_floor(50 * UI_SCALE());
+				i32 i    = j + row * num;
+				if (i >= g_project->_->materials->length) {
+					ui_end_element_of_size(imgw);
+					if (g_config->show_asset_names) {
+						ui_end_element_of_size(0);
+					}
+					continue;
+				}
+				gpu_texture_t *img      = UI_SCALE() > 1 ? g_project->_->materials->buffer[i]->image : g_project->_->materials->buffer[i]->image_icon;
+				gpu_texture_t *img_full = g_project->_->materials->buffer[i]->image;
+
+				// Highligh selected
+				if (g_context->material == g_project->_->materials->buffer[i]) {
+					if (mini) {
+						f32 w = g_ui->_w / (float)UI_SCALE();
+						ui_rect_round(0, -2, w - 2, w - 4, g_theme->HIGHLIGHT_COL, 3);
+					}
+					else {
+						i32 w = 50 + math_floor(g_config->window_scale * 2);
+						ui_rect_round(0, -1, w + 2, w + 2, g_theme->HIGHLIGHT_COL, 2 * UI_SCALE());
+					}
+				}
+
+				// Draw material icon
+				uix      = g_ui->_x;
+				uiy      = g_ui->_y;
+				i32 tile = UI_SCALE() > 1 ? 100 : 50;
+				f32 imgh = mini ? ui_sidebar_default_w_mini * 0.85 * UI_SCALE() : 50 * UI_SCALE();
+
+				if (base_drag_material != NULL && tab_materials_drag_pos == i) {
+					ui_fill(-1, -2, 2, imgw_val + 4, g_theme->HIGHLIGHT_COL);
+				}
+
+				ui_state_t state = g_project->_->materials->buffer[i]->preview_ready
+				                       ? ui_image(img, 0xffffffff, imgh)
+				                       : ui_sub_image(resource_get("icons.k"), 0xffffffff, -1.0, tile, tile, tile, tile);
+
+				if (state == UI_STATE_HOVERED && base_drag_material != NULL) {
+					tab_materials_drag_pos = (mouse_x > uix + g_ui->_window_x + imgw_val / 2.0) ? i + 1 : i;
+					drag_pos_set           = true;
+				}
+
+				// Draw material numbers when selecting a material via keyboard shortcut
+				bool is_typing = g_ui->is_typing;
+				if (!is_typing) {
+					if (i < 9 && keymap_shortcut(any_map_get(g_keymap, "select_material"), SHORTCUT_TYPE_DOWN)) {
+						char *number = i32_to_string(i + 1);
+						i32   width  = draw_string_width(g_font, g_ui->font_size, number) + 10;
+						i32   height = draw_font_height(g_font, g_ui->font_size);
+						draw_set_color(g_theme->TEXT_COL);
+						draw_filled_rect(uix, uiy, width, height);
+						draw_set_color(g_theme->BUTTON_COL);
+						draw_string(number, uix + 5, uiy);
+					}
+				}
+
+				tab_materials_slot_events(i, state, uix, uiy, img_full, false);
+				if (g_config->show_asset_names) {
+					g_ui->_x = uix;
+					g_ui->_y += slotw * 0.9;
+					ui_text(g_project->_->materials->buffer[i]->canvas->name, UI_ALIGN_CENTER, 0x00000000);
+					if (g_ui->is_hovered) {
+						if (i < 9) {
+							i32 i1 = i + 1;
+							ui_tooltip(string_tmp("%s - (%s %d)", g_project->_->materials->buffer[i]->canvas->name,
+							                      (char *)any_map_get(g_keymap, "select_material"), i1));
+						}
+						else {
+							ui_tooltip(g_project->_->materials->buffer[i]->canvas->name);
+						}
+					}
+					g_ui->_y -= slotw * 0.9;
+					if (i == g_project->_->materials->length - 1) {
+						g_ui->_y += j == num - 1 ? imgw : imgw + UI_ELEMENT_H() + UI_ELEMENT_OFFSET();
+					}
+				}
+			}
+
+			g_ui->_y += mini ? 0 : 6;
+		}
+
+		if (base_drag_material != NULL && tab_materials_drag_pos == g_project->_->materials->length) {
+			g_ui->_x = uix;
+			g_ui->_y = uiy;
+			ui_fill(imgw_val + 1, -2, 2, imgw_val + 4, g_theme->HIGHLIGHT_COL);
+		}
+
+		if (!drag_pos_set) {
+			tab_materials_drag_pos = -1;
+		}
+	}
 	bool in_focus = g_ui->input_x > g_ui->_window_x && g_ui->input_x < g_ui->_window_x + g_ui->_window_w && g_ui->input_y > g_ui->_window_y &&
 	                g_ui->input_y < g_ui->_window_y + g_ui->_window_h;
-	if (in_focus && g_ui->is_delete_down && g_project->_->materials->length > 1) {
+	if (in_focus && !g_ui->is_typing && g_ui->is_delete_down && g_project->_->materials->length > 1) {
 		g_ui->is_delete_down = false;
 		tab_materials_delete_material(g_context->material);
 	}
-	if (in_focus && g_ui->is_ctrl_down && g_ui->is_key_pressed && g_ui->key_code == KEY_CODE_D) {
+	if (in_focus && !g_ui->is_typing && g_ui->is_ctrl_down && g_ui->is_key_pressed && g_ui->key_code == KEY_CODE_D) {
 		_tab_materials_draw_slots = array_index_of(g_project->_->materials, g_context->material);
 		sys_notify_on_next_frame(&tab_materials_draw_slots_duplicate, NULL);
 	}
-	if (in_focus) {
+	if (in_focus && !g_ui->is_typing) {
 		i32 i = array_index_of(g_project->_->materials, g_context->material);
 		if (g_ui->is_key_pressed && g_ui->key_code == KEY_CODE_UP) {
 			if (i > 0) {
@@ -528,8 +602,9 @@ void tab_materials_draw_full(i32 *htab) {
 		        -64,
 		        -64,
 		        -64,
+		        -64,
 		    },
-		    3);
+		    4);
 		ui_row(row);
 
 		tab_materials_button_new(tr("New"));
@@ -538,6 +613,15 @@ void tab_materials_draw_full(i32 *htab) {
 			ui_menu_draw(&tab_materials_draw_edit, -1, -1);
 		}
 
+		if (ui_button(g_config->material_list ? tr("Grid") : tr("List"), UI_ALIGN_CENTER, "")) {
+			tab_materials_rename                = NULL;
+			tab_materials_last_click            = NULL;
+			g_config->material_list             = !g_config->material_list;
+			g_ui->current_window->scroll_offset = 0;
+			g_ui->current_window->redraws       = 2;
+			config_save();
+		}
+		ui_tooltip(g_config->material_list ? tr("Show material previews") : tr("Show material names in a list"));
 		ui_end_sticky();
 		ui_separator(3, false);
 		tab_materials_draw_slots(false);

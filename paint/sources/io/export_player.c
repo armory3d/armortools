@@ -106,7 +106,9 @@ static char *export_player_index = "\
 </html>\n\
 ";
 
-static void export_player_run_on_download(char *url, buffer_t *ab) {}
+static void export_player_run_on_download(char *url, bool success) {
+	if (!success) console_error(string("%s %s", tr("Could not download"), url));
+}
 
 void export_player_run(char *path) {
 #ifndef NDEBUG
@@ -118,8 +120,9 @@ void export_player_run(char *path) {
 
 	bool _pack_assets_on_save      = g_context->pack_assets_on_save;
 	g_context->pack_assets_on_save = true;
-	export_arm_run_project(string("%s/%s", path_base, "start.arm"));
+	bool saved = export_arm_run_project(string("%s/%s", path_base, "start.arm"));
 	g_context->pack_assets_on_save = _pack_assets_on_save;
+	if (!saved) return;
 
 	if (box_export_player_target == PLAYER_TARGET_WEB) {
 		char *files[] = {"start.js", "start.wasm", "worker.js", "audio_worklet.js"};
@@ -133,7 +136,7 @@ void export_player_run(char *path) {
 			}
 			iron_file_save_bytes(dst, b, 0);
 #else
-			iron_file_download(string("https://app.armorpaint.org/play/%s", files[i]), &export_player_run_on_download, 0, dst);
+			file_download_to(string("https://app.armorpaint.org/play/%s", files[i]), dst, &export_player_run_on_download, 0);
 #endif
 		}
 

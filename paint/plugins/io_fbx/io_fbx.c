@@ -19,6 +19,81 @@ static raw_mesh_t **mat_split_meshes  = NULL;
 static int          mat_split_count   = 0;
 static int          mat_split_idx     = 0;
 extern int          plugins_split_by;
+bool                io_fbx_auto_axes    = true;
+bool                io_fbx_material_uvs = true;
+static int          current_material    = 0;
+static int         *material_tiles      = NULL;
+static int          material_tile_count = 0;
+static bool         separate_materials  = false;
+
+static bool fbx_material_used(ufbx_mesh *mesh, int material) {
+	for (size_t i = 0; i < mesh->faces.count; ++i) {
+		int m = mesh->face_material.count > i ? (int)mesh->face_material.data[i] : 0;
+		if (m == material && mesh->faces.data[i].num_indices >= 3)
+			return true;
+	}
+	return false;
+}
+
+static void fbx_materials_init(ufbx_scene *scene) {
+	free(material_tiles);
+	material_tiles      = calloc(scene->materials.count + 1, sizeof(int));
+	material_tile_count = 0;
+	current_material    = 0;
+	for (size_t i = 0; i < scene->nodes.count; ++i) {
+		ufbx_node *n = scene->nodes.data[i];
+		if (n->mesh == NULL)
+			continue;
+		for (size_t m = 0; m < (n->materials.count ? n->materials.count : 1); ++m) {
+			if (!fbx_material_used(n->mesh, m))
+				continue;
+			size_t id = m < n->materials.count ? n->materials.data[m]->typed_id : scene->materials.count;
+			if (material_tiles[id] == 0)
+				material_tiles[id] = ++material_tile_count;
+		}
+	}
+	separate_materials = io_fbx_material_uvs && plugins_split_by == 0 && material_tile_count > 1;
+}
+
+// Keep each source object (including LODs) separate while iterating its used materials.
+static ufbx_node *fbx_next_part(ufbx_scene *scene, int *material, bool advance) {
+	int node = current_node, mat = current_material;
+	while (node < (int)scene->nodes.count) {
+		ufbx_node *n = scene->nodes.data[node];
+		if (n->mesh != NULL && n->mesh->num_triangles > 0) {
+			int count = separate_materials && n->materials.count > 0 ? (int)n->materials.count : 1;
+			while (mat < count) {
+				int m = mat++;
+				if (separate_materials && !fbx_material_used(n->mesh, m))
+					continue;
+				*material = separate_materials ? m : -1;
+				if (advance) {
+					current_node     = node;
+					current_material = mat;
+				}
+				return n;
+			}
+		}
+		node++;
+		mat = 0;
+	}
+	return NULL;
+}
+
+static void fbx_material_metadata(raw_mesh_t *raw, ufbx_scene *scene, ufbx_node *node, int material) {
+	if (!separate_materials || node == NULL)
+		return;
+	ufbx_material *m    = material >= 0 && material < (int)node->materials.count ? node->materials.data[material] : NULL;
+	const char    *name = m != NULL && m->name.length > 0 ? m->name.data : "Material";
+	raw->source_object  = strdup(node->name.data);
+	raw->paint_material = strdup(name);
+	raw->paint_uv_tile  = material_tiles[m != NULL ? m->typed_id : scene->materials.count];
+	raw->paint_uv_count = material_tile_count;
+	free(raw->name);
+	size_t len = node->name.length + strlen(name) + 32;
+	raw->name  = malloc(len);
+	snprintf(raw->name, len, "%s - %s", node->name.data, name);
+}
 
 static bool valid_mesh(ufbx_node *n) {
 	return n->mesh != NULL && n->mesh->num_triangles > 0;
@@ -312,7 +387,7 @@ static void build_udim_split(ufbx_scene *scene) {
 	}
 }
 
-void io_fbx_parse_mesh(raw_mesh_t *raw, ufbx_mesh *mesh, ufbx_matrix *to_world, ufbx_matrix *to_world_unscaled, bool force_tex, bool force_col) {
+void io_fbx_parse_mesh(raw_mesh_t *raw, ufbx_mesh *mesh, ufbx_matrix *to_world, ufbx_matrix *to_world_unscaled, bool force_tex, bool force_col, int material) {
 	uint32_t  indices_size = mesh->max_face_triangles * 3;
 	uint32_t *indices      = (uint32_t *)malloc(sizeof(uint32_t) * indices_size);
 
@@ -320,7 +395,16 @@ void io_fbx_parse_mesh(raw_mesh_t *raw, ufbx_mesh *mesh, ufbx_matrix *to_world, 
 	bool has_tex1 = active_tex1 && mesh->uv_sets.count > 1;
 	bool has_col  = mesh->vertex_color.exists;
 
-	int    numtri  = mesh->num_triangles;
+	size_t numtri = mesh->num_triangles;
+	if (material >= 0) {
+		// Allocate only the faces emitted for this material, not the entire source mesh.
+		numtri = 0;
+		for (size_t j = 0; j < mesh->faces.count; ++j) {
+			if ((mesh->face_material.count > j ? mesh->face_material.data[j] : 0) == material && mesh->faces.data[j].num_indices >= 3) {
+				numtri += mesh->faces.data[j].num_indices - 2;
+			}
+		}
+	}
 	float *posa32  = (float *)malloc(sizeof(float) * numtri * 3 * 3);
 	float *nora32  = (float *)malloc(sizeof(float) * numtri * 3 * 3);
 	float *texa32  = (has_tex || force_tex) ? (float *)malloc(sizeof(float) * numtri * 3 * 2) : NULL;
@@ -333,6 +417,8 @@ void io_fbx_parse_mesh(raw_mesh_t *raw, ufbx_mesh *mesh, ufbx_matrix *to_world, 
 	int    ci      = 0;
 
 	for (int j = 0; j < (int)mesh->faces.count; ++j) {
+		if (material >= 0 && (mesh->face_material.count > j ? mesh->face_material.data[j] : 0) != material)
+			continue;
 		ufbx_face face          = mesh->faces.data[j];
 		uint32_t  num_triangles = ufbx_triangulate_face(indices, indices_size, mesh, face);
 		for (uint32_t v_ix = 0; v_ix < num_triangles * 3; v_ix++) {
@@ -502,12 +588,17 @@ void io_fbx_parse_mesh(raw_mesh_t *raw, ufbx_mesh *mesh, ufbx_matrix *to_world, 
 void *io_fbx_parse(char *buf, size_t size) {
 	if (active_base_scene == NULL) {
 		ufbx_load_opts opts = {.generate_missing_normals = true};
+		if (io_fbx_auto_axes)
+			opts.target_axes = ufbx_axes_right_handed_y_up;
 		active_base_scene = active_eval_scene = ufbx_load_memory(buf, size, &opts, NULL);
-		active_tex1                           = true;
+		if (active_base_scene == NULL)
+			return NULL;
+		fbx_materials_init(active_base_scene);
+		active_tex1 = false;
 		for (size_t i = 0; i < active_eval_scene->nodes.count; ++i) {
 			ufbx_node *n = active_eval_scene->nodes.data[i];
-			if (valid_mesh(n) && n->mesh->uv_sets.count < 2) {
-				active_tex1 = false;
+			if (valid_mesh(n) && n->mesh->uv_sets.count > 1) {
+				active_tex1 = true;
 				break;
 			}
 		}
@@ -543,26 +634,15 @@ void *io_fbx_parse(char *buf, size_t size) {
 	bool force_tex = mixed_uvs(active_eval_scene);
 	bool force_col = mixed_cols(active_eval_scene);
 
-	for (; current_node < (int)active_eval_scene->nodes.count; ++current_node) {
-		ufbx_node *n = active_eval_scene->nodes.data[current_node];
-		if (valid_mesh(n)) {
-			raw->name = malloc(strlen(n->name.data) + 1);
-			strcpy(raw->name, n->name.data);
-			ufbx_matrix normal_mat = ufbx_get_compatible_matrix_for_normals(n);
-			io_fbx_parse_mesh(raw, n->mesh, &n->geometry_to_world, &normal_mat, force_tex, force_col);
-			break;
-		}
+	int        material = -1;
+	ufbx_node *n        = fbx_next_part(active_eval_scene, &material, true);
+	if (n != NULL) {
+		raw->name              = strdup(n->name.data);
+		ufbx_matrix normal_mat = ufbx_get_compatible_matrix_for_normals(n);
+		io_fbx_parse_mesh(raw, n->mesh, &n->geometry_to_world, &normal_mat, force_tex, force_col, material);
+		fbx_material_metadata(raw, active_eval_scene, n, material);
 	}
-	current_node++;
-
-	has_next = false;
-	for (int i = current_node; i < (int)active_eval_scene->nodes.count; ++i) {
-		ufbx_node *n = active_eval_scene->nodes.data[i];
-		if (valid_mesh(n)) {
-			has_next = true;
-			break;
-		}
-	}
+	has_next = fbx_next_part(active_eval_scene, &material, false) != NULL;
 
 	if (!has_next) {
 		ufbx_free_scene(active_base_scene);
@@ -570,6 +650,7 @@ void *io_fbx_parse(char *buf, size_t size) {
 		active_eval_scene = NULL;
 		current_node      = 0;
 		active_tex1       = false;
+		current_material  = 0;
 	}
 
 	raw->has_next = has_next;
@@ -593,29 +674,19 @@ static void fbx_skin_mat(ufbx_matrix *m, float *out) {
 void *io_fbx_parse_skinned(char *buf, size_t size) {
 	if (active_base_scene == NULL) {
 		ufbx_load_opts load_opts = {.generate_missing_normals = true};
+		if (io_fbx_auto_axes)
+			load_opts.target_axes = ufbx_axes_right_handed_y_up;
 		active_base_scene        = ufbx_load_memory(buf, size, &load_opts, NULL);
 		if (active_base_scene == NULL)
 			return NULL;
 		current_node = 0;
+		fbx_materials_init(active_base_scene);
 	}
 	ufbx_scene *scene = active_base_scene;
 
-	ufbx_node *mesh_node = NULL;
-	for (; current_node < (int)scene->nodes.count; ++current_node) {
-		if (valid_mesh(scene->nodes.data[current_node])) {
-			mesh_node = scene->nodes.data[current_node];
-			break;
-		}
-	}
-	current_node++;
-
-	has_next = false;
-	for (int i = current_node; i < (int)scene->nodes.count; ++i) {
-		if (valid_mesh(scene->nodes.data[i])) {
-			has_next = true;
-			break;
-		}
-	}
+	int        material  = -1, next_material;
+	ufbx_node *mesh_node = fbx_next_part(scene, &material, true);
+	has_next             = fbx_next_part(scene, &next_material, false) != NULL;
 
 	raw_mesh_t *raw = NULL;
 	if (mesh_node != NULL) {
@@ -629,14 +700,25 @@ void *io_fbx_parse_skinned(char *buf, size_t size) {
 		uint32_t  indices_size = mesh->max_face_triangles * 3;
 		uint32_t *indices      = malloc(sizeof(uint32_t) * indices_size);
 		int       vc           = (int)mesh->num_triangles * 3;
+		if (material >= 0) {
+			vc = 0;
+			for (size_t j = 0; j < mesh->faces.count; ++j) {
+				if ((mesh->face_material.count > j ? mesh->face_material.data[j] : 0) == material)
+					vc += ufbx_triangulate_face(indices, indices_size, mesh, mesh->faces.data[j]) * 3;
+			}
+		}
 		float    *pos          = malloc(sizeof(float) * vc * 3);
 		float    *nor          = malloc(sizeof(float) * vc * 3);
 		float    *tex          = calloc(vc * 2, sizeof(float));
+		i16_array_t *tex1         = mesh->uv_sets.count > 1 ? i16_array_create(vc * 2) : NULL;
+		i16_array_t *col          = mesh->vertex_color.exists ? i16_array_create(vc * 4) : NULL;
 		uint16_t *joints       = calloc(vc * 4, sizeof(uint16_t));
 		float    *weights      = calloc(vc * 4, sizeof(float));
 		uint32_t *ind          = malloc(sizeof(uint32_t) * vc);
 		int       o            = 0;
 		for (size_t j = 0; j < mesh->faces.count; ++j) {
+			if (material >= 0 && (mesh->face_material.count > j ? mesh->face_material.data[j] : 0) != material)
+				continue;
 			uint32_t num_triangles = ufbx_triangulate_face(indices, indices_size, mesh, mesh->faces.data[j]);
 			for (uint32_t k = 0; k < num_triangles * 3; ++k, ++o) {
 				uint32_t  a    = indices[k];
@@ -654,6 +736,18 @@ void *io_fbx_parse_skinned(char *buf, size_t size) {
 					tex[o * 2 + 1] = 1.0f - (float)uv.y;
 				}
 				ind[o] = o;
+				if (tex1 != NULL) {
+					ufbx_vec2 uv            = ufbx_get_vertex_vec2(&mesh->uv_sets.data[1].vertex_uv, a);
+					tex1->buffer[o * 2]     = uv.x * 32767;
+					tex1->buffer[o * 2 + 1] = (1.0 - uv.y) * 32767;
+				}
+				if (col != NULL) {
+					ufbx_vec4 c            = ufbx_get_vertex_vec4(&mesh->vertex_color, a);
+					col->buffer[o * 4]     = c.x * 32767;
+					col->buffer[o * 4 + 1] = c.y * 32767;
+					col->buffer[o * 4 + 2] = c.z * 32767;
+					col->buffer[o * 4 + 3] = c.w * 32767;
+				}
 
 				// Up to 4 strongest weights (ufbx sorts them), normalized
 				ufbx_skin_vertex sv  = {0};
@@ -710,6 +804,9 @@ void *io_fbx_parse_skinned(char *buf, size_t size) {
 
 		buffer_t *blob = util_skin_blob_create(mesh_node->name.data, vc, pos, nor, tex, vc, ind, joints, weights, jc, fc, mats, NULL, NULL, NULL);
 		raw            = util_skin_raw_mesh(blob);
+		raw->texa1     = tex1;
+		raw->cola      = col;
+		fbx_material_metadata(raw, scene, mesh_node, material);
 		free(pos);
 		free(nor);
 		free(tex);

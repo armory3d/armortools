@@ -249,6 +249,7 @@ buffer_t *export_arm_encode_project(char *path) {
 		                              .blending           = l->blending,
 		                              .parent             = l->parent != NULL ? array_index_of(g_project->_->layers, l->parent) : -1,
 		                              .visible            = l->visible,
+		                              .locked             = l->locked,
 		                              .texpaint_nor       = l->texpaint_nor != NULL ? lz4_encode(gpu_get_texture_pixels(l->texpaint_nor)) : NULL,
 		                              .texpaint_pack      = l->texpaint_pack != NULL ? lz4_encode(gpu_get_texture_pixels(l->texpaint_pack)) : NULL,
 		                              .texpaint_sculpt    = l->texpaint_sculpt != NULL ? lz4_encode(gpu_get_texture_pixels(l->texpaint_sculpt)) : NULL,
@@ -409,11 +410,15 @@ buffer_t *export_arm_encode_project(char *path) {
 	return buffer;
 }
 
-void export_arm_run_project(char *path) {
+bool export_arm_run_project(char *path) {
 	buffer_t *buffer = export_arm_encode_project(path);
-	iron_file_save_bytes(path, buffer, buffer->length + 1);
+	bool saved = iron_file_save_bytes(path, buffer, buffer->length);
 	array_free(buffer);
 	free(buffer);
+	if (!saved) {
+		console_error(string("Could not save project: %s", path));
+		return false;
+	}
 
 #if defined(IRON_ANDROID) || defined(IRON_IOS) || defined(IRON_WASM)
 #ifdef IRON_WASM
@@ -440,7 +445,7 @@ void export_arm_run_project(char *path) {
 #endif
 
 	if (!string_equals(path, g_project->_->filepath)) {
-		return;
+		return true;
 	}
 
 	// Save to recent
@@ -459,6 +464,7 @@ void export_arm_run_project(char *path) {
 	config_save();
 
 	console_info(tr("Project saved"));
+	return true;
 }
 
 packed_asset_t_array_t *export_arm_get_packed_assets(char *project_path, string_array_t *texture_files) {

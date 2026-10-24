@@ -12,6 +12,153 @@
 #include <shlobj.h>
 #include <stdio.h>
 
+typedef struct {
+	HDC      snapshot;
+	COLORREF color;
+	bool     done, picked, pressed;
+} screen_picker_t;
+
+static LRESULT CALLBACK screen_picker_proc(HWND window, UINT message, WPARAM wparam, LPARAM lparam) {
+	screen_picker_t *picker = (screen_picker_t *)GetWindowLongPtrW(window, GWLP_USERDATA);
+	if (message == WM_NCCREATE) {
+		picker = (screen_picker_t *)((CREATESTRUCTW *)lparam)->lpCreateParams;
+		SetWindowLongPtrW(window, GWLP_USERDATA, (LONG_PTR)picker);
+	}
+	if (picker == NULL) {
+		return DefWindowProcW(window, message, wparam, lparam);
+	}
+	switch (message) {
+	case WM_PAINT: {
+		PAINTSTRUCT paint;
+		HDC         dc = BeginPaint(window, &paint);
+		RECT        r  = paint.rcPaint;
+		BitBlt(dc, r.left, r.top, r.right - r.left, r.bottom - r.top, picker->snapshot, r.left, r.top, SRCCOPY);
+		EndPaint(window, &paint);
+		return 0;
+	}
+	case WM_ERASEBKGND:
+		return 1;
+	case WM_LBUTTONDOWN:
+		picker->pressed = true;
+		return 0;
+	case WM_LBUTTONUP:
+		if (picker->pressed) {
+			POINT point = {GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam)};
+			ClientToScreen(window, &point);
+			// The virtual desktop can contain gaps between monitors.
+			if (MonitorFromPoint(point, MONITOR_DEFAULTTONULL) != NULL) {
+				picker->color  = GetPixel(picker->snapshot, GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam));
+				picker->picked = picker->color != CLR_INVALID;
+				picker->done   = true;
+			}
+			picker->pressed = false;
+		}
+		return 0;
+	case WM_KEYDOWN:
+		if (wparam == VK_ESCAPE) {
+			picker->done = true;
+		}
+		return 0;
+	case WM_RBUTTONUP:
+	case WM_CLOSE:
+	case WM_DISPLAYCHANGE:
+	case WM_DESTROY:
+		picker->done = true;
+		return 0;
+	case WM_ACTIVATE:
+		if (LOWORD(wparam) == WA_INACTIVE) {
+			picker->done = true;
+		}
+		return 0;
+	}
+	return DefWindowProcW(window, message, wparam, lparam);
+}
+
+bool iron_pick_screen_color(uint32_t *color) {
+	static bool active = false;
+	if (active || color == NULL) {
+		return false;
+	}
+	active                        = true;
+	screen_picker_t picker        = {0};
+	HWND            owner         = iron_windows_window_handle();
+	HWND            window        = NULL;
+	bool            owner_enabled = IsWindowEnabled(owner);
+	int             x             = GetSystemMetrics(SM_XVIRTUALSCREEN);
+	int             y             = GetSystemMetrics(SM_YVIRTUALSCREEN);
+	int             width         = GetSystemMetrics(SM_CXVIRTUALSCREEN);
+	int             height        = GetSystemMetrics(SM_CYVIRTUALSCREEN);
+	HDC             screen        = GetDC(NULL);
+	HBITMAP         bitmap        = NULL;
+	HGDIOBJ         previous      = NULL;
+	if (screen == NULL) {
+		goto cleanup;
+	}
+	picker.snapshot = CreateCompatibleDC(screen);
+	bitmap          = CreateCompatibleBitmap(screen, width, height);
+	if (picker.snapshot == NULL || bitmap == NULL) {
+		goto cleanup;
+	}
+	previous = SelectObject(picker.snapshot, bitmap);
+	if (previous == NULL || previous == HGDI_ERROR || !BitBlt(picker.snapshot, 0, 0, width, height, screen, x, y, SRCCOPY | CAPTUREBLT)) {
+		goto cleanup;
+	}
+	WNDCLASSW window_class     = {0};
+	window_class.lpfnWndProc   = screen_picker_proc;
+	window_class.hInstance     = GetModuleHandleW(NULL);
+	window_class.hCursor       = LoadCursor(NULL, IDC_CROSS);
+	window_class.lpszClassName = L"IronScreenColorPicker";
+	if (!RegisterClassW(&window_class) && GetLastError() != ERROR_CLASS_ALREADY_EXISTS) {
+		goto cleanup;
+	}
+	window = CreateWindowExW(WS_EX_TOPMOST | WS_EX_TOOLWINDOW, window_class.lpszClassName, L"Screen Color Picker", WS_POPUP, x, y, width, height, owner, NULL,
+	                         window_class.hInstance, &picker);
+	if (window == NULL) {
+		goto cleanup;
+	}
+	EnableWindow(owner, FALSE);
+	ShowWindow(window, SW_SHOW);
+	SetForegroundWindow(window);
+	UpdateWindow(window);
+	// The snapshot stays in memory only. The overlay consumes clicks so other apps are not activated.
+	while (!picker.done) {
+		MSG message;
+		int result = GetMessageW(&message, NULL, 0, 0);
+		if (result <= 0) {
+			if (result == 0) {
+				PostQuitMessage((int)message.wParam);
+			}
+			break;
+		}
+		TranslateMessage(&message);
+		DispatchMessageW(&message);
+	}
+	bool restore_focus = GetForegroundWindow() == window;
+	EnableWindow(owner, owner_enabled);
+	DestroyWindow(window);
+	if (restore_focus && owner_enabled) {
+		SetForegroundWindow(owner);
+	}
+	if (picker.picked) {
+		*color = (*color & 0xff000000u) | ((uint32_t)GetRValue(picker.color) << 16) | ((uint32_t)GetGValue(picker.color) << 8) | GetBValue(picker.color);
+	}
+cleanup:
+	if (previous != NULL && previous != HGDI_ERROR) {
+		SelectObject(picker.snapshot, previous);
+	}
+	if (bitmap != NULL) {
+		DeleteObject(bitmap);
+	}
+	if (picker.snapshot != NULL) {
+		DeleteDC(picker.snapshot);
+	}
+	if (screen != NULL) {
+		ReleaseDC(NULL, screen);
+	}
+	active = false;
+	return picker.picked;
+}
+
 void iron_microsoft_format(const char *format, va_list args, wchar_t *buffer) {
 	char cbuffer[4096];
 	vsprintf(cbuffer, format, args);

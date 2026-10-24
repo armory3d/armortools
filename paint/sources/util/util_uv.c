@@ -4,7 +4,24 @@
 buffer_t       *util_uv_dilate_bytes = NULL;
 gpu_pipeline_t *util_uv_pipe_dilate  = NULL;
 
+static i32 util_uv_cached_channel = -1;
+
+static vertex_array_t *util_uv_active_array(mesh_data_t *mesh) {
+	i32             channel = g_context->layer != NULL ? g_context->layer->uv_map : 0;
+	vertex_array_t *uv      = mesh_data_get_vertex_array(mesh, channel == 1 ? "tex1" : "tex");
+	return uv != NULL ? uv : mesh_data_get_vertex_array(mesh, "tex");
+}
+
+static void util_uv_check_channel() {
+	i32 channel = g_context->layer != NULL ? g_context->layer->uv_map : 0;
+	if (channel == util_uv_cached_channel)
+		return;
+	util_uv_cached_channel = channel;
+	util_uv_uvmap_cached = util_uv_trianglemap_cached = util_uv_dilatemap_cached = false;
+}
+
 void util_uv_cache_uv_map() {
+	util_uv_check_channel();
 	if (util_uv_uvmap != NULL && (util_uv_uvmap->width != config_get_texture_res_x() || util_uv_uvmap->height != config_get_texture_res_y())) {
 		gpu_delete_texture(util_uv_uvmap);
 		util_uv_uvmap        = NULL;
@@ -28,7 +45,7 @@ void util_uv_cache_uv_map() {
 	bool         use_merged = merged != NULL && (g_context->layer_filter == 0 || util_mesh_udim_layer(g_context->layer));
 	mesh_data_t *mesh       = use_merged ? merged->data : g_context->paint_object->data;
 
-	i16_array_t *texa = mesh->vertex_arrays->buffer[2]->values;
+	i16_array_t *texa = util_uv_active_array(mesh)->values;
 	u32_array_t *inda = mesh->index_array;
 	draw_begin(util_uv_uvmap, true, 0x00000000);
 	draw_set_color(0xffffffff);
@@ -49,6 +66,7 @@ void util_uv_cache_uv_map() {
 }
 
 void util_uv_cache_triangle_map() {
+	util_uv_check_channel();
 	if (util_uv_trianglemap != NULL &&
 	    (util_uv_trianglemap->width != config_get_texture_res_x() || util_uv_trianglemap->height != config_get_texture_res_y())) {
 		gpu_delete_texture(util_uv_trianglemap);
@@ -67,7 +85,7 @@ void util_uv_cache_triangle_map() {
 	util_uv_trianglemap_cached = true;
 	mesh_data_t *merged        = g_context->merged_object != NULL ? g_context->merged_object->data : g_context->paint_object->data;
 	mesh_data_t *mesh          = merged;
-	i16_array_t *texa          = mesh->vertex_arrays->buffer[2]->values;
+	i16_array_t *texa          = util_uv_active_array(mesh)->values;
 	u32_array_t *inda          = mesh->index_array;
 	draw_begin(util_uv_trianglemap, true, 0xff000000);
 	f32 f     = (1 / 32767.0) * util_uv_trianglemap->width;
@@ -89,6 +107,7 @@ void util_uv_cache_triangle_map() {
 }
 
 void util_uv_cache_dilate_map() {
+	util_uv_check_channel();
 	if (util_uv_dilatemap != NULL && (util_uv_dilatemap->width != config_get_texture_res_x() || util_uv_dilatemap->height != config_get_texture_res_y())) {
 		gpu_delete_texture(util_uv_dilatemap);
 		util_uv_dilatemap        = NULL;
@@ -124,12 +143,20 @@ void util_uv_cache_dilate_map() {
 	}
 	bool         use_merged = g_context->merged_object != NULL && (mask == 0 || util_mesh_udim_layer(g_context->layer));
 	mesh_data_t *geom       = use_merged ? g_context->merged_object->data : g_context->paint_object->data;
+	// The mask shader has a fixed pos/nor/tex layout. Pack the active UV channel
+	// explicitly so extra UV/color attributes cannot change its vertex stride.
+	void                  *arrays[]   = {mesh_data_get_vertex_array(geom, "pos"), mesh_data_get_vertex_array(geom, "nor"), util_uv_active_array(geom)};
+	any_array_t            attributes = {.buffer = arrays, .length = 3};
+	gpu_vertex_structure_t structure  = mesh_data_get_vertex_struct(&attributes);
+	gpu_buffer_t          *vertices   = gpu_create_vertex_buffer(geom->vertex_arrays->buffer[0]->values->length / 4, &structure);
+	mesh_data_build_vertices(vertices, &attributes);
 	_gpu_begin(util_uv_dilatemap, NULL, NULL, GPU_CLEAR_COLOR, 0x00000000, 0.0);
 	gpu_set_pipeline(util_uv_pipe_dilate);
-	gpu_set_vertex_buffer(geom->_->vertex_buffer);
+	gpu_set_vertex_buffer(vertices);
 	gpu_set_index_buffer(geom->_->index_buffer);
 	gpu_draw();
 	gpu_end();
+	gpu_delete_buffer(vertices);
 	util_uv_dilatemap_cached = true;
 	util_uv_dilate_bytes     = NULL;
 }

@@ -509,6 +509,44 @@ void layers_update_linked_layers() {
 	}
 }
 
+// Appending material tiles changes their normalized coordinates, not the source UVs.
+static void layers_resize_atlas_texture(gpu_texture_t *tex, i32 old_stride, i32 new_stride, u32 clear) {
+	if (tex == NULL)
+		return;
+	gpu_texture_t *copy = gpu_create_render_target(tex->width, tex->height, tex->format);
+	draw_begin(copy, true, clear);
+	draw_set_pipeline(pipes_copy);
+	f32 sw = tex->width / (f32)old_stride, sh = tex->height / (f32)old_stride;
+	f32 dw = tex->width / (f32)new_stride, dh = tex->height / (f32)new_stride;
+	for (i32 i = 0; i < old_stride * old_stride; ++i) {
+		draw_scaled_sub_image(tex, (i % old_stride) * sw, (i / old_stride) * sh, sw, sh, (i % new_stride) * dw, (i / new_stride) * dh, dw, dh);
+	}
+	draw_end();
+	draw_begin(tex, false, 0);
+	draw_image(copy, 0, 0);
+	draw_end();
+	draw_set_pipeline(NULL);
+	gpu_delete_texture(copy);
+}
+
+void layers_resize_atlas(i32 old_stride, i32 new_stride) {
+	if (old_stride == new_stride)
+		return;
+	for (i32 i = 0; i < g_project->_->layers->length; ++i) {
+		slot_layer_t *l    = g_project->_->layers->buffer[i];
+		i32           mask = slot_layer_get_object_mask(l);
+		if ((l->uv_map == 1 && !util_mesh_material_uvs()) || (mask > 0 && mask <= g_project->_->paint_objects->length))
+			continue;
+		layers_resize_atlas_texture(l->texpaint, old_stride, new_stride, 0x00000000);
+		layers_resize_atlas_texture(l->texpaint_nor, old_stride, new_stride, 0x008080ff);
+		layers_resize_atlas_texture(l->texpaint_pack, old_stride, new_stride, 0x000000ff);
+	}
+	// Old undo snapshots refer to the previous mesh and atlas layout.
+	history_reset();
+	g_context->brush_blend_dirty   = true;
+	g_context->layer_preview_dirty = true;
+}
+
 void layers_set_object_mask() {
 	string_array_t *ar = any_array_create_from_raw(
 	    (void *[]){
@@ -543,8 +581,9 @@ void layers_set_object_mask() {
 		i32 atlas_mask = g_context->layer_filter > g_project->_->paint_objects->length ? g_context->layer_filter : slot_layer_get_object_mask(g_context->layer);
 		bool is_atlas  = atlas_mask > g_project->_->paint_objects->length;
 		if (g_context->merged_object == NULL || is_atlas || g_context->merged_object_is_atlas) {
-			mesh_object_t_array_t *visibles = is_atlas ? project_get_atlas_objects(atlas_mask) : NULL;
+			mesh_object_t_array_t *visibles = is_atlas ? project_get_atlas_objects(atlas_mask) : util_mesh_get_visible();
 			util_mesh_merge(visibles);
+			array_delete(visibles);
 		}
 		context_select_paint_object(context_main_object());
 		if (g_context->merged_object != NULL) {
@@ -623,6 +662,16 @@ slot_layer_t *layers_new_layer(bool clear, i32 position, slot_layer_t *parent) {
 				g_context->layer->parent = below->parent;
 			}
 		}
+	}
+
+	if (slot_layer_is_layer(l) && slot_layer_is_locked(l->parent)) {
+		// A new layer remains editable and is inserted outside the protected group.
+		slot_layer_t *group = l->parent;
+		while (group->parent != NULL)
+			group = group->parent;
+		array_remove(g_project->_->layers, l);
+		array_insert(g_project->_->layers, array_index_of(g_project->_->layers, group) + 1, l);
+		l->parent = NULL;
 	}
 
 	if (clear) {
@@ -743,7 +792,7 @@ void layers_create_fill_layer(uv_type_t uv_type, mat4_t decal_mat, i32 position)
 void tab_materials_button_new_on_next_frame(void *_);
 
 void layers_create_filter_on_next_frame(void *_) {
-	if (slot_layer_get_filters(g_context->layer, true) != NULL) {
+	if (slot_layer_is_locked(g_context->layer) || slot_layer_get_filters(g_context->layer, true) != NULL) {
 		return;
 	}
 
@@ -796,7 +845,7 @@ void layers_create_filter() {
 
 void layers_create_image_mask(asset_t *asset) {
 	slot_layer_t *l = g_context->layer;
-	if (slot_layer_is_mask(l) || slot_layer_is_group(l)) {
+	if (slot_layer_is_mask(l) || slot_layer_is_group(l) || slot_layer_is_locked(l)) {
 		return;
 	}
 
@@ -1151,11 +1200,12 @@ slot_layer_t *layers_udim_remap(slot_layer_t *l, gpu_texture_t **mask, i32 slot,
 // Atlas slot of a layer assigned to a single udim tile object, -1 otherwise
 i32 layers_udim_tile_slot(slot_layer_t *l) {
 	i32 mask = slot_layer_get_object_mask(l);
-	if (!util_mesh_udim_active() || l->uv_map == 1 || mask <= 0 || mask > g_project->_->paint_objects->length) {
+	if (!util_mesh_udim_active() || (l->uv_map == 1 && !util_mesh_material_uvs()) || mask <= 0 || mask > g_project->_->paint_objects->length) {
 		return -1;
 	}
-	i32 tile = util_mesh_udim_tile(g_project->_->paint_objects->buffer[mask - 1]->base->name);
-	return tile < 0 ? -1 : util_mesh_udim_slot(tile);
+	mesh_object_t *o    = g_project->_->paint_objects->buffer[mask - 1];
+	i32            tile = util_mesh_udim_tile(o->base->name);
+	return o->data->paint_uvs->tile > 0 ? o->data->paint_uvs->tile - 1 : tile < 0 ? -1 : util_mesh_udim_slot(tile);
 }
 
 static gpu_texture_t *layers_move_a    = NULL;

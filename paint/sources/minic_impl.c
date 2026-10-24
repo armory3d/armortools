@@ -417,8 +417,8 @@ static bool script_paint_allowed(void) {
 	if (slot_layer_is_group(g_context->layer)) {
 		return false;
 	}
-	if (g_context->layer->fill_material != NULL && g_context->tool != TOOL_TYPE_PICKER && g_context->tool != TOOL_TYPE_MATERIAL &&
-	    g_context->tool != TOOL_TYPE_COLORID) {
+	if ((g_context->layer->fill_material != NULL || slot_layer_is_locked(g_context->layer)) && g_context->tool != TOOL_TYPE_PICKER &&
+	    g_context->tool != TOOL_TYPE_MATERIAL && g_context->tool != TOOL_TYPE_COLORID) {
 		return false;
 	}
 	return true;
@@ -477,6 +477,7 @@ static void script_paint_at(f32 x, f32 y) {
 	g_context->prev_paint_vec_y = prev_y;
 	g_context->pdirty           = 1;
 
+	render_path_paint_commands_symmetry();
 	render_path_paint_commands_paint(false);
 
 	script_paint_first = false;
@@ -535,7 +536,7 @@ void script_fill_layer(void) {
 	if (g_context == NULL || g_context->layer == NULL || g_context->material == NULL) {
 		return;
 	}
-	if (slot_layer_is_group(g_context->layer)) {
+	if (slot_layer_is_group(g_context->layer) || slot_layer_is_locked(g_context->layer)) {
 		return;
 	}
 
@@ -696,7 +697,7 @@ i32 script_layer_index(slot_layer_t *l) {
 
 slot_layer_t *script_layer_new_mask(slot_layer_t *l, i32 type) {
 	// type: 0 black, 1 white, 2 fill with the current material
-	if (!script_layer_valid(l) || type < 0 || type > 2) {
+	if (!script_layer_valid(l) || slot_layer_is_locked(l) || type < 0 || type > 2) {
 		return NULL;
 	}
 	if (type == 2 && g_context->material == NULL) {
@@ -737,7 +738,7 @@ slot_layer_t *script_layer_new_mask(slot_layer_t *l, i32 type) {
 }
 
 slot_layer_t *script_layer_new_group(slot_layer_t *l) {
-	if (!script_layer_valid(l)) {
+	if (!script_layer_valid(l) || slot_layer_has_locked_content(l)) {
 		return NULL;
 	}
 	if (slot_layer_is_mask(l) || slot_layer_is_filter(l)) {
@@ -775,7 +776,7 @@ static void script_layer_refill(slot_layer_t *l) {
 }
 
 void script_layer_set_name(slot_layer_t *l, char *name) {
-	if (!script_layer_valid(l) || name == NULL || name[0] == '\0') {
+	if (!script_layer_valid(l) || slot_layer_is_locked(l) || name == NULL || name[0] == '\0') {
 		return;
 	}
 	char *old_name = l->name;
@@ -794,6 +795,7 @@ void script_layer_update(slot_layer_t *l) {
 	if (l->fill_material != NULL) {
 		script_layer_refill(l);
 	}
+	if (l == g_context->layer) make_material_parse_paint_material(true);
 	make_material_parse_mesh_material();
 	script_gpu_end(current, in_use);
 	g_context->layers_preview_dirty = true;
@@ -819,7 +821,7 @@ bool script_layer_move(slot_layer_t *l, i32 to) {
 }
 
 bool script_layer_set_group(slot_layer_t *l, slot_layer_t *group) {
-	if (!script_layer_valid(l) || !slot_layer_is_layer(l) || slot_layer_is_filter(l)) {
+	if (!script_layer_valid(l) || slot_layer_has_locked_content(l) || slot_layer_is_locked(group) || !slot_layer_is_layer(l) || slot_layer_is_filter(l)) {
 		return false;
 	}
 	if (group == NULL) {
@@ -849,7 +851,7 @@ bool script_layer_set_group(slot_layer_t *l, slot_layer_t *group) {
 }
 
 void script_layer_set_object(slot_layer_t *l, object_t *object) {
-	if (!script_layer_valid(l)) {
+	if (!script_layer_valid(l) || slot_layer_is_locked(l)) {
 		return;
 	}
 	if (slot_layer_is_mask(l) || slot_layer_is_filter(l)) {
@@ -882,7 +884,9 @@ void script_layer_set_object(slot_layer_t *l, object_t *object) {
 	}
 	else {
 		layers_set_object_mask();
+		make_material_parse_paint_material(false);
 	}
+	ui_view2d_hwnd->redraws = 2;
 	script_gpu_end(current, in_use);
 	g_context->rtdirty = 1;
 	g_context->ddirty  = 2;
@@ -900,7 +904,7 @@ static void script_layer_op_end(gpu_texture_t *current, bool in_use) {
 }
 
 slot_layer_t *script_layer_duplicate(slot_layer_t *l) {
-	if (!script_layer_valid(l)) {
+	if (!script_layer_valid(l) || slot_layer_is_locked(l->parent)) {
 		return NULL;
 	}
 	gpu_texture_t *current;
@@ -933,7 +937,7 @@ slot_layer_t *script_layer_merge_down(slot_layer_t *l) {
 }
 
 slot_layer_t *script_layer_merge_group(slot_layer_t *group) {
-	if (!script_layer_valid(group) || !slot_layer_is_group(group) || slot_layer_get_children(group) == NULL) {
+	if (!script_layer_valid(group) || slot_layer_has_locked_content(group) || !slot_layer_is_group(group) || slot_layer_get_children(group) == NULL) {
 		return NULL;
 	}
 	gpu_texture_t *current;
@@ -947,7 +951,7 @@ slot_layer_t *script_layer_merge_group(slot_layer_t *group) {
 }
 
 void script_layer_clear(slot_layer_t *l) {
-	if (!script_layer_valid(l) || l->fill_material != NULL) {
+	if (!script_layer_valid(l) || slot_layer_has_locked_content(l) || l->fill_material != NULL) {
 		return;
 	}
 	gpu_texture_t *current;
@@ -974,7 +978,7 @@ void script_layer_clear(slot_layer_t *l) {
 }
 
 bool script_layer_invert_mask(slot_layer_t *m) {
-	if (!script_layer_valid(m) || !slot_layer_is_mask(m) || m->fill_material != NULL) {
+	if (!script_layer_valid(m) || slot_layer_is_locked(m) || !slot_layer_is_mask(m) || m->fill_material != NULL) {
 		return false;
 	}
 	gpu_texture_t *current;
@@ -989,7 +993,7 @@ bool script_layer_invert_mask(slot_layer_t *m) {
 }
 
 slot_layer_t *script_layer_apply_mask(slot_layer_t *m) {
-	if (!script_layer_valid(m) || !slot_layer_is_mask(m)) {
+	if (!script_layer_valid(m) || slot_layer_is_locked(m) || !slot_layer_is_mask(m)) {
 		return NULL;
 	}
 	gpu_texture_t *current;
@@ -1007,7 +1011,8 @@ slot_layer_t *script_layer_apply_mask(slot_layer_t *m) {
 
 bool script_layer_to_fill(slot_layer_t *l) {
 	// Fills with the current material
-	if (!script_layer_valid(l) || slot_layer_is_group(l) || l->fill_material != NULL || l->path_material != NULL || g_context->material == NULL) {
+	if (!script_layer_valid(l) || slot_layer_is_locked(l) || slot_layer_is_group(l) || l->fill_material != NULL || l->path_material != NULL ||
+	    g_context->material == NULL) {
 		return false;
 	}
 	gpu_texture_t *current;
@@ -1022,7 +1027,7 @@ bool script_layer_to_fill(slot_layer_t *l) {
 }
 
 bool script_layer_to_paint(slot_layer_t *l) {
-	if (!script_layer_valid(l) || slot_layer_is_group(l) || (l->fill_material == NULL && l->path_material == NULL)) {
+	if (!script_layer_valid(l) || slot_layer_has_locked_content(l) || slot_layer_is_group(l) || (l->fill_material == NULL && l->path_material == NULL)) {
 		return false;
 	}
 	gpu_texture_t *current;
@@ -1080,7 +1085,7 @@ slot_layer_t *script_layer_new_text(char *text) {
 
 bool script_layer_add_path_point(slot_layer_t *l, f32 x, f32 y) {
 	// x, y in 0..1 viewport space like script_paint(), a curve takes anchor, control, anchor, control, ...
-	if (!script_layer_valid(l) || !slot_layer_is_path(l)) {
+	if (!script_layer_valid(l) || slot_layer_is_locked(l) || !slot_layer_is_path(l)) {
 		return false;
 	}
 	gpu_texture_t *current;
@@ -1149,6 +1154,22 @@ void script_project_new(void) {
 	g_context->ddirty = 2;
 }
 
+void script_undo(void) {
+	gpu_texture_t *current;
+	bool in_use;
+	script_gpu_begin(&current, &in_use);
+	history_undo();
+	script_gpu_end(current, in_use);
+}
+
+void script_redo(void) {
+	gpu_texture_t *current;
+	bool in_use;
+	script_gpu_begin(&current, &in_use);
+	history_redo();
+	script_gpu_end(current, in_use);
+}
+
 static char *script_resolve_path(char *path) {
 	// iron_file_exists() checks relative paths against the cwd, data_get_blob() against data/
 	if (data_is_abs(path) || data_is_up(path) || starts_with(path, "./")) {
@@ -1202,6 +1223,20 @@ static void script_append_mesh_finish(i32 first) {
 		import_mesh_finish_import(NULL);
 	}
 	import_mesh_append = false;
+}
+
+// Source axes: +X, -X, +Y, -Y, +Z, -Z (0..5); -1/-1 selects automatic.
+void script_import_mesh(char *path, bool append, i32 up, i32 forward) {
+	if (path == NULL || !iron_file_exists(path)) return;
+	path = script_resolve_path(path);
+	gpu_texture_t *current;
+	bool in_use;
+	script_gpu_begin(&current, &in_use);
+	i32 first = g_project->_->paint_objects->length;
+	import_mesh_run_with_axes(path, !append, !append, append, up, forward);
+	if (append) script_append_mesh_finish(first);
+	script_gpu_end(current, in_use);
+	g_context->ddirty = 2;
 }
 
 void script_append_mesh(char *path) {

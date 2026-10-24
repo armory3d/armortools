@@ -1230,11 +1230,11 @@ async function init() {
 			        fetch(url, options).then(response => response.arrayBuffer().then(buffer => {
 				        virtual_fs.set(dst_path, buffer);
 				        call_wasm(instance.exports.wasm_net_callback, callback_id, response.status, 0);
-			        }), () => { call_wasm(instance.exports.wasm_net_callback, callback_id, 0, 0); });
+			        })).catch(() => { call_wasm(instance.exports.wasm_net_callback, callback_id, 0, 0); });
 		        }
 		        else {
-			        fetch(url, options).then(response => response.text().then(text => { call_wasm(net_callback_with_text, callback_id, response.status, text); }),
-			                                 () => { call_wasm(net_callback_with_text, callback_id, 0, null); });
+			        fetch(url, options).then(response => response.text().then(text => { call_wasm(net_callback_with_text, callback_id, response.status, text); }))
+			                                 .catch(() => { call_wasm(net_callback_with_text, callback_id, 0, null); });
 		        }
 			},
 		}
