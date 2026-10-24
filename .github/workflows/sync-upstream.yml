@@ -1,0 +1,68 @@
+# Sync your fork with armory3d/armorpaint, automatically.
+#
+# What it does:
+#   - Runs daily (06:00 UTC) + manually via workflow_dispatch
+#   - Fetches upstream main, merges into your fork's main, pushes
+#   - If nothing new upstream, it exits green without committing
+#   - The push automatically triggers Windows + Fedora build workflows
+#
+# Notes:
+#   - No third-party action needed — plain git, zero dependencies.
+#   - If upstream ever touches the same files as your fork's changes,
+#     the merge fails loudly (red run) → resolve manually once, done.
+#   - If upstream commits modify .github/workflows, GitHub requires
+#     the extra 'workflows' permission to push them (included below).
+
+name: Sync fork with upstream
+
+on:
+  schedule:
+    - cron: '0 6 * * *'   # daily at 06:00 UTC
+  workflow_dispatch:       # manual "Run workflow" button
+
+permissions:
+  contents: write   # push the merge commit
+  workflows: write  # allowed IF upstream commits touch workflow files
+
+concurrency:
+  group: sync-upstream
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout fork (full history)
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Add upstream remote
+        run: |
+          git remote add upstream https://github.com/armory3d/armorpaint.git
+          git fetch upstream main
+
+      - name: Check if upstream has new commits
+        id: check
+        run: |
+          LOCAL=$(git rev-parse origin/main)
+          UPSTREAM=$(git rev-parse upstream/main)
+          if git merge-base --is-ancestor "$LOCAL" "$UPSTREAM"; then
+            echo "Behind upstream: yes"
+            echo "needs_sync=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Behind upstream: no (up to date or diverged oddly)"
+            echo "needs_sync=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Merge upstream into main
+        if: steps.check.outputs.needs_sync == 'true'
+        run: |
+          git config user.name  "fork-sync-bot"
+          git config user.email "actions@github.com"
+          git merge upstream/main --no-edit
+
+      - name: Push to fork
+        if: steps.check.outputs.needs_sync == 'true'
+        run: git push origin main
