@@ -8,9 +8,9 @@ name: Build ArmorPaint (Linux x64 - Fedora)
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
+  #push:
+  #  branches:
+  #   - main
 
 permissions:
   contents: read
@@ -27,7 +27,8 @@ jobs:
         run: |
           dnf install -y git clang make gcc gcc-c++ \
             gtk3-devel alsa-lib-devel \
-            vulkan-loader-devel vulkan-headers
+            vulkan-loader-devel vulkan-headers \
+            openssl-devel
 
       - name: Checkout
         uses: actions/checkout@v4
