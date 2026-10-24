@@ -731,6 +731,13 @@ void step_shapes() {
 	script_physics_set_velocity(o, 0.0, 0.0, 0.0);
 	script_physics_sync_transform(o);
 	check(1, "physics body");
+
+	o->transform->dim.z    = 0.7; // Box size comes from the transform dim
+	o->transform->has_dim  = true;
+	o->transform->measured = false;
+	script_physics_set_shape(o, PHYSICS_SHAPE_BOX);
+	physics_body_t *body = script_physics_get_body(o);
+	check(body != NULL && fabs(body->dimz - 0.7 * o->transform->scale.z) < 0.001, "physics dim");
 }
 
 // 23 - Every shape, rename, transform, parent, clone and remove
@@ -2444,7 +2451,7 @@ void run_step(int s) {
 }
 
 int step_count      = 82;
-int expected_checks = 220;
+int expected_checks = 221;
 
 void next_frame() {
 	if (sub == 0) {
