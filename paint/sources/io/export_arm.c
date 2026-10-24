@@ -249,6 +249,7 @@ buffer_t *export_arm_encode_project(char *path) {
 		                              .blending           = l->blending,
 		                              .parent             = l->parent != NULL ? array_index_of(g_project->_->layers, l->parent) : -1,
 		                              .visible            = l->visible,
+		                              .locked             = l->locked,
 		                              .texpaint_nor       = l->texpaint_nor != NULL ? lz4_encode(gpu_get_texture_pixels(l->texpaint_nor)) : NULL,
 		                              .texpaint_pack      = l->texpaint_pack != NULL ? lz4_encode(gpu_get_texture_pixels(l->texpaint_pack)) : NULL,
 		                              .texpaint_sculpt    = l->texpaint_sculpt != NULL ? lz4_encode(gpu_get_texture_pixels(l->texpaint_sculpt)) : NULL,

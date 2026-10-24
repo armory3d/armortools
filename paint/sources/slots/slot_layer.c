@@ -429,6 +429,7 @@ slot_layer_t *slot_layer_duplicate(slot_layer_t *raw) {
 	}
 
 	l->visible            = raw->visible;
+	l->locked             = raw->locked;
 	l->mask_opacity       = raw->mask_opacity;
 	l->fill_material      = raw->fill_material;
 	l->object_mask        = raw->object_mask;
@@ -588,6 +589,30 @@ void slot_layer_to_paint_layer(slot_layer_t *raw) {
 	make_material_parse_paint_material(true);
 	g_context->layer_preview_dirty = true;
 	ui_dock_redraw(TAB_AREA_SIDEBAR0);
+}
+
+bool slot_layer_is_locked(slot_layer_t *layer) {
+	for (; layer != NULL; layer = layer->parent) {
+		if (layer->locked)
+			return true;
+	}
+	return false;
+}
+
+// Destructive operations on a group/layer also affect its children.
+bool slot_layer_has_locked_content(slot_layer_t *layer) {
+	if (slot_layer_is_locked(layer))
+		return true;
+	for (i32 i = 0; i < g_project->_->layers->length; ++i) {
+		slot_layer_t *child = g_project->_->layers->buffer[i];
+		if (!child->locked)
+			continue;
+		for (slot_layer_t *parent = child->parent; parent != NULL; parent = parent->parent) {
+			if (parent == layer)
+				return true;
+		}
+	}
+	return false;
 }
 
 bool slot_layer_is_visible(slot_layer_t *raw) {
@@ -803,6 +828,8 @@ bool slot_layer_is_in_group(slot_layer_t *raw) {
 }
 
 bool slot_layer_can_move(slot_layer_t *raw, i32 to) {
+	if (slot_layer_has_locked_content(raw))
+		return false;
 	i32 old_index = array_index_of(g_project->_->layers, raw);
 
 	i32 delta = to - old_index; // If delta > 0 the layer is moved up, otherwise down
@@ -825,6 +852,12 @@ bool slot_layer_can_move(slot_layer_t *raw, i32 to) {
 	}
 
 	slot_layer_t *new_lower_layer = delta > 0 ? g_project->_->layers->buffer[to] : (to > 0 ? g_project->_->layers->buffer[to - 1] : NULL);
+
+	if (new_upper_layer != NULL &&
+	    ((slot_layer_is_group(new_upper_layer) && new_upper_layer->show_panel && slot_layer_is_locked(new_upper_layer)) ||
+	     slot_layer_is_locked(new_upper_layer->parent) || ((slot_layer_is_mask(raw) || slot_layer_is_filter(raw)) && slot_layer_is_locked(new_upper_layer)))) {
+		return false;
+	}
 
 	if (slot_layer_is_mask(raw)) {
 		// Masks can not be on top

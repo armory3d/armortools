@@ -1006,6 +1006,7 @@ void import_arm_run_project(char *path) {
 			l->name = string_copy(ld->name);
 		}
 		l->visible = ld->visible;
+		l->locked  = ld->locked;
 		any_array_push(g_project->_->layers, l);
 		if (!is_group) {
 			gpu_texture_t *_texpaint      = NULL;

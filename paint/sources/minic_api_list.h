@@ -791,3 +791,6 @@ X0(armpack_size_f32, "i()", i)
 X0(armpack_size_bool, "i()", i)
 X2(armpack_map_get_f32, "f(p:any_map_t map,p:char key)", f, p, p)
 X2(armpack_map_get_i32, "i(p:any_map_t map,p:char key)", i, p, p)
+
+X1(slot_layer_is_locked, "b(p:slot_layer_t layer)", b, p)
+X1(tab_layers_layer_toggle_locked, "v(p:slot_layer_t layer)", v, p)

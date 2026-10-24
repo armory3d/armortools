@@ -366,7 +366,7 @@ static bool          _ui_view2d_moving     = false;
 static bool          _ui_view2d_move_apply = false;
 
 static bool ui_view2d_layer_movable(slot_layer_t *l) {
-	return (slot_layer_is_layer(l) || slot_layer_is_mask(l)) && l->fill_material == NULL && l->texpaint_sculpt == NULL;
+	return !slot_layer_is_locked(l) && (slot_layer_is_layer(l) || slot_layer_is_mask(l)) && l->fill_material == NULL && l->texpaint_sculpt == NULL;
 }
 
 // Shift the texture contents, pixels moved out of the texture are discarded
@@ -393,7 +393,7 @@ static void ui_view2d_layer_move_apply_on_next_frame(void *_) {
 	_ui_view2d_move_x     = 0.0;
 	_ui_view2d_move_y     = 0.0;
 	_ui_view2d_move_apply = false;
-	if (l == NULL || (dx == 0 && dy == 0) || array_index_of((any_array_t *)g_project->_->layers, l) == -1) {
+	if (l == NULL || slot_layer_is_locked(l) || (dx == 0 && dy == 0) || array_index_of((any_array_t *)g_project->_->layers, l) == -1) {
 		return;
 	}
 
@@ -900,7 +900,7 @@ void ui_view2d_update(void *_) {
 				else if (ui_view2d_type == VIEW_2D_TYPE_LAYER) {
 					ui_id_t name_id     = ui_widget_id(&l->name, UI_ID_TEXT);
 					bool    was_editing = g_ui->text_selected_id == name_id;
-					ui_text_input(&l->name, "", UI_ALIGN_LEFT, true, false);
+					ui_text_input(&l->name, "", UI_ALIGN_LEFT, !slot_layer_is_locked(l), false);
 					name_changed               = ui_item_changed();
 					ui_view2d_text_input_hover = g_ui->is_hovered;
 

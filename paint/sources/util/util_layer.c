@@ -657,6 +657,16 @@ slot_layer_t *layers_new_layer(bool clear, i32 position, slot_layer_t *parent) {
 		}
 	}
 
+	if (slot_layer_is_layer(l) && slot_layer_is_locked(l->parent)) {
+		// A new layer remains editable and is inserted outside the protected group.
+		slot_layer_t *group = l->parent;
+		while (group->parent != NULL)
+			group = group->parent;
+		array_remove(g_project->_->layers, l);
+		array_insert(g_project->_->layers, array_index_of(g_project->_->layers, group) + 1, l);
+		l->parent = NULL;
+	}
+
 	if (clear) {
 		sys_notify_on_next_frame(&layers_new_layer_clear, l);
 	}
@@ -775,7 +785,7 @@ void layers_create_fill_layer(uv_type_t uv_type, mat4_t decal_mat, i32 position)
 void tab_materials_button_new_on_next_frame(void *_);
 
 void layers_create_filter_on_next_frame(void *_) {
-	if (slot_layer_get_filters(g_context->layer, true) != NULL) {
+	if (slot_layer_is_locked(g_context->layer) || slot_layer_get_filters(g_context->layer, true) != NULL) {
 		return;
 	}
 
@@ -828,7 +838,7 @@ void layers_create_filter() {
 
 void layers_create_image_mask(asset_t *asset) {
 	slot_layer_t *l = g_context->layer;
-	if (slot_layer_is_mask(l) || slot_layer_is_group(l)) {
+	if (slot_layer_is_mask(l) || slot_layer_is_group(l) || slot_layer_is_locked(l)) {
 		return;
 	}
 

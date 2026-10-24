@@ -1421,3 +1421,9 @@ void              mesh_math_node_init();
 void              mesh_vector_node_init();
 void              mesh_output_node_init();
 void              edit_uvmap_update();
+
+bool slot_layer_is_locked(slot_layer_t *layer);
+bool slot_layer_has_locked_content(slot_layer_t *layer);
+void tab_layers_layer_toggle_locked(slot_layer_t *layer);
+
+void history_layer_locked(slot_layer_t *layer);

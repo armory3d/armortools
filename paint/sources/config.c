@@ -94,6 +94,7 @@ void config_save() {
 	json_encode_i32("zoom_direction", g_config->zoom_direction);
 	json_encode_bool("wrap_mouse", g_config->wrap_mouse);
 	json_encode_bool("show_asset_names", g_config->show_asset_names);
+	json_encode_bool("material_list", g_config->material_list);
 	json_encode_bool("touch_ui", g_config->touch_ui);
 	json_encode_bool("splash_screen", g_config->splash_screen);
 	json_encode_bool("header_pinned", g_config->header_pinned);

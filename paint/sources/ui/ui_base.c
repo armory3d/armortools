@@ -133,7 +133,9 @@ void ui_base_update_next_frame(void *_) {
 }
 
 void ui_base_update_ui_on_next_frame(void *_) {
-	layers_update_fill_layer(true);
+	if (!slot_layer_is_locked(g_context->layer)) {
+		layers_update_fill_layer(true);
+	}
 	make_material_parse_paint_material(false);
 }
 

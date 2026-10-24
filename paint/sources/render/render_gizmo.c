@@ -321,7 +321,7 @@ void render_gizmo_draw() {
 
 void render_gizmo_update() {
 	bool is_object = g_context->tool == TOOL_TYPE_CURSOR;
-	bool is_decal  = base_is_decal_layer();
+	bool is_decal  = base_is_decal_layer() && !slot_layer_is_locked(g_context->layer);
 
 	object_t *gizmo = g_context->gizmo;
 	bool      hide  = keymap_shortcut(any_map_get(g_keymap, "stencil_hide"), SHORTCUT_TYPE_DOWN);

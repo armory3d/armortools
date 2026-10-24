@@ -393,7 +393,7 @@ buffer_t *util_encode_project(project_t *raw) {
 	if (raw->layer_datas != NULL) {
 		armpack_encode_array(raw->layer_datas->length);
 		for (i32 i = 0; i < raw->layer_datas->length; ++i) {
-			armpack_encode_map(37);
+			armpack_encode_map(38);
 			armpack_encode_string("name");
 			armpack_encode_string(raw->layer_datas->buffer[i]->name);
 			armpack_encode_string("res");
@@ -422,6 +422,8 @@ buffer_t *util_encode_project(project_t *raw) {
 			armpack_encode_i32(raw->layer_datas->buffer[i]->parent);
 			armpack_encode_string("visible");
 			armpack_encode_bool(raw->layer_datas->buffer[i]->visible);
+			armpack_encode_string("locked");
+			armpack_encode_bool(raw->layer_datas->buffer[i]->locked);
 			armpack_encode_string("texpaint_nor");
 			armpack_encode_array_u8(raw->layer_datas->buffer[i]->texpaint_nor);
 			armpack_encode_string("texpaint_pack");

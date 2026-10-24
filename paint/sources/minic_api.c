@@ -669,6 +669,7 @@ void minic_register_builtins() {
 	MINIC_END();
 
 	MINIC_STRUCT(slot_layer_t);
+	MINIC_B(locked);
 	MINIC_I(id);
 	MINIC_S(name);
 	MINIC_B(visible);
@@ -912,6 +913,7 @@ void minic_register_builtins() {
 	MINIC_I(material_live);
 	MINIC_I(tools);
 	MINIC_I(materials);
+	MINIC_B(material_list);
 	MINIC_END();
 
 	MINIC_STRUCT(context_t);

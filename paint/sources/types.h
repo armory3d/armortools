@@ -49,6 +49,7 @@ typedef struct slot_layer {
 	char                 *name;
 	char                 *ext;
 	bool                  visible;
+	bool                  locked;
 	struct slot_layer    *parent;   // Group (for layers) or layer (for masks and filters)
 	struct gpu_texture   *texpaint; // Base or mask
 	struct gpu_texture   *texpaint_nor;
@@ -147,6 +148,7 @@ typedef struct config {
 	i32                  zoom_direction;
 	bool                 wrap_mouse;
 	bool                 show_asset_names;
+	bool                 material_list;
 	bool                 touch_ui;
 	bool                 splash_screen;
 	bool                 header_pinned;   // Tool properties in the header, floating toolbar otherwise
@@ -702,6 +704,7 @@ typedef struct layer_data {
 	i32               blending;
 	i32               parent;
 	bool              visible;
+	bool              locked;
 	struct buffer    *texpaint_nor;
 	struct buffer    *texpaint_pack;
 	struct buffer    *texpaint_sculpt;

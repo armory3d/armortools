@@ -660,6 +660,8 @@ static void path_array_remove_i32(i32_array_t *ar, i32 start, i32 count) {
 }
 
 void util_layer_remove_path_point(slot_layer_t *l) {
+	if (slot_layer_is_locked(l))
+		return;
 	if (!slot_layer_is_path(l)) {
 		return;
 	}
@@ -731,6 +733,8 @@ void util_layer_remove_path_point(slot_layer_t *l) {
 }
 
 void util_layer_add_path_point(slot_layer_t *l, f32 screen_x, f32 screen_y) {
+	if (slot_layer_is_locked(l))
+		return;
 	if (l->path_tool == -1) {
 		l->path_tool = g_context->tool;
 	}
@@ -857,7 +861,7 @@ void util_layer_check_path_grab() {
 	}
 
 	slot_layer_t *l = g_context->layer;
-	if (!slot_layer_is_path(l) || !slot_layer_is_visible(l)) {
+	if (!slot_layer_is_path(l) || !slot_layer_is_visible(l) || slot_layer_is_locked(l)) {
 		return;
 	}
 
@@ -900,7 +904,7 @@ void util_layer_update_path() {
 	}
 
 	slot_layer_t *l       = g_context->layer;
-	bool          is_path = slot_layer_is_path(l) && slot_layer_is_visible(l);
+	bool          is_path = slot_layer_is_path(l) && slot_layer_is_visible(l) && !slot_layer_is_locked(l);
 
 	// Clear spheres when switching away from path layer
 	if (path_layer_current != l || !is_path) {
