@@ -1359,6 +1359,15 @@ static minic_sym_t *minic_sym_find(minic_comp_t *c, const char *name) {
 static minic_sym_t *minic_declare(minic_comp_t *c, const char *name, minic_ctype_t type, bool array) {
 	minic_sym_t *sym;
 	if (c->fn == &c->ctx->init || (c->in_main && c->depth == 1)) {
+		// Included scripts share one scope, a repeated top-level name would silently rebind every use
+		if (c->fn == &c->ctx->init) {
+			for (int i = 0; i < c->global_count; ++i) {
+				if (strcmp(c->globals[i].name, name) == 0) {
+					minic_error(c, "redefinition of global '%s'", name);
+					return NULL;
+				}
+			}
+		}
 		if (c->global_count >= MINIC_MAX_GLOBAL_VARS) {
 			minic_error(c, "too many global variables (max %d), cannot declare '%s'", MINIC_MAX_GLOBAL_VARS, name);
 			return NULL;
