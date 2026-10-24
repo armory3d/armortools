@@ -327,11 +327,26 @@ static gpu_texture_t *import_arm_texture_from_lz4(buffer_t *b, i32 res, u32 size
 	return texture;
 }
 
+// Image nodes are saved by asset name, the saved index only picks between assets sharing a name
+static i32 import_arm_image_asset_index(ui_node_button_t *but) {
+	char *name  = u8_array_to_string(but->data);
+	i32   saved = but->default_value->buffer[0];
+	if (saved >= 0 && saved < g_project->_->assets->length && string_equals(g_project->_->assets->buffer[saved]->name, name)) {
+		return saved;
+	}
+	for (i32 i = 0; i < g_project->_->assets->length; ++i) {
+		if (string_equals(g_project->_->assets->buffer[i]->name, name)) {
+			return i;
+		}
+	}
+	return 9999; // Texture deleted, use pink now
+}
+
 void import_arm_init_nodes(ui_node_t_array_t *nodes) {
 	for (i32 i = 0; i < nodes->length; ++i) {
 		ui_node_t *node = nodes->buffer[i];
 		if (string_equals(node->type, "TEX_IMAGE")) {
-			node->buttons->buffer[0]->default_value = f32_array_create_x(base_get_asset_index(u8_array_to_string(node->buttons->buffer[0]->data)));
+			node->buttons->buffer[0]->default_value = f32_array_create_x(import_arm_image_asset_index(node->buttons->buffer[0]));
 			node->buttons->buffer[0]->data          = u8_array_create_from_string("");
 		}
 	}
@@ -1128,8 +1143,9 @@ void import_arm_run_project(char *path) {
 	g_project->_->material_groups = any_array_create_from_raw((void *[]){}, 0);
 	if (g_project->material_groups != NULL) {
 		for (i32 i = 0; i < g_project->material_groups->length; ++i) {
-			ui_node_canvas_t *g  = g_project->material_groups->buffer[i];
-			node_group_t     *ng = ALLOC_INIT(node_group_t, {.canvas = g, .nodes = ui_nodes_create()});
+			ui_node_canvas_t *g = g_project->material_groups->buffer[i];
+			import_arm_init_nodes(g->nodes);
+			node_group_t *ng = ALLOC_INIT(node_group_t, {.canvas = g, .nodes = ui_nodes_create()});
 			any_array_push(g_project->_->material_groups, ng);
 		}
 	}
