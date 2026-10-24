@@ -1,17 +1,18 @@
-# Save this file as .github/workflows/build-windows.yml in your fork
-# of armory3d/armorpaint, then run it from the Actions tab.
-#
 # The compile step mirrors the upstream CI workflow used by the ArmorPaint
 # project itself (windows_direct3d12.yml), so runner compatibility is proven:
 # https://github.com/armory3d/armorpaint/tree/main/.github/workflows
+#
+# REUSABLE: release.yml calls this workflow (workflow_call) instead of
+# duplicating the build steps. Fix build problems HERE, once.
 
 name: Build ArmorPaint (Windows x64)
 
 on:
+  workflow_call:       # allows release.yml to call this workflow as a job
   workflow_dispatch:
-  #push:
-  #  branches:
-  #    - main
+  push:
+    branches:
+      - main
 
 permissions:
   contents: read
