@@ -771,7 +771,7 @@ bool iron_decode_image(buffer_t *data, char *format, iron_image_pixels_t *out) {
 	int                  width;
 	int                  height;
 
-	if (ends_with(format, "k")) {
+	if (path_has_ext(format, "k")) {
 		width  = iron_read_s32le(data->buffer);
 		height = iron_read_s32le(data->buffer + 4);
 		char fourcc[5];
@@ -794,7 +794,7 @@ bool iron_decode_image(buffer_t *data, char *format, iron_image_pixels_t *out) {
 			texture_format = GPU_TEXTURE_FORMAT_RGBA64;
 		}
 	}
-	else if (ends_with(format, "hdr")) {
+	else if (path_has_ext(format, "hdr")) {
 		int comp;
 		texture_data = (unsigned char *)stbi_loadf_from_memory(data->buffer, data->length, &width, &height, &comp, 4);
 		if (texture_data == NULL) {
