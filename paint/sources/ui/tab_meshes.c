@@ -1197,6 +1197,10 @@ void tab_meshes_draw_context_menu() {
 }
 
 void tab_meshes_draw_edit() {
+	if (ui_menu_button(tr("Bake Mesh Maps..."), "", ICON_BAKE)) {
+		box_bake_normal_show();
+	}
+
 	if (ui_menu_button(tr("UV Unwrap"), "", ICON_NONE)) {
 		util_mesh_uv_unwrap(NULL);
 	}

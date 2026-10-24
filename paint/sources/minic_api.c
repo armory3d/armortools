@@ -676,6 +676,7 @@ void minic_register_builtins() {
 	MINIC_F(mask_opacity);
 	MINIC_O(fill_material, slot_material_t);
 	MINIC_I(object_mask);
+	MINIC_I(uv_map);
 	MINIC_F(scale);
 	MINIC_F(angle);
 	MINIC_I(blending);
@@ -683,6 +684,9 @@ void minic_register_builtins() {
 	MINIC_B(path_curved);
 	MINIC_B(path_text);
 	MINIC_O(path_material, slot_material_t);
+	MINIC_O(texpaint, gpu_texture_t);
+	MINIC_O(texpaint_nor, gpu_texture_t);
+	MINIC_O(texpaint_pack, gpu_texture_t);
 	MINIC_O(texpaint_sculpt, gpu_texture_t);
 	MINIC_END();
 
